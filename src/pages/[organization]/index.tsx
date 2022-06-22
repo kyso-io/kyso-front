@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 
-import AdminLayout from '@/layouts/AdminLayout';
+import BrandSidebarWithLightHeader from '@/layouts/BrandSidebarWithLightHeader';
 
 const Index = () => {
   const router = useRouter();
@@ -9,6 +9,6 @@ const Index = () => {
   return <div>{organization}</div>;
 };
 
-Index.layout = AdminLayout;
+Index.layout = BrandSidebarWithLightHeader;
 
 export default Index;
