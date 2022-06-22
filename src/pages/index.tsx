@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 
-import AdminLayout from '@/layouts/AdminLayout';
+import MainLayout from '@/layouts/MainLayout';
 import { Meta } from '@/layouts/Meta';
 import { Main } from '@/templates/Main';
 
@@ -184,6 +184,6 @@ const Index = () => {
   );
 };
 
-Index.layout = AdminLayout;
+Index.layout = MainLayout;
 
 export default Index;

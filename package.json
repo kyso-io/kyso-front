@@ -15,6 +15,8 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@headlessui/react": "^1.6.5",
+    "@heroicons/react": "^1.0.6",
     "@kyso-io/kyso-model": "^1.0.59",
     "@kyso-io/kyso-store": "^1.0.62",
     "next": "^12.1.6",
@@ -59,9 +61,10 @@
     "lint-staged": "^12.5.0",
     "npm-run-all": "^4.1.5",
     "postcss": "^8.4.14",
+    "postcss-preset-env": "^7.7.1",
     "prettier": "^2.6.2",
     "rimraf": "^3.0.2",
-    "tailwindcss": "^3.0.24",
+    "tailwindcss": "^3.1.4",
     "typescript": "^4.7.2"
   },
   "author": "Ixartz (https://github.com/ixartz)"
