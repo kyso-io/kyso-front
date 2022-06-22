@@ -8,6 +8,11 @@ const Index = (data: any) => {
   return <div>{data.organization}</div>;
 };
 
+// This function gets called at build time
+export async function getStaticPaths() {
+  return { paths: ['pepito'], fallback: false };
+}
+
 // This also gets called at build time
 export async function getStaticProps(params: RouteParams) {
   // params contains the post `id`.
