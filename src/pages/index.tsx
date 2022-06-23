@@ -1,14 +1,14 @@
 import { useRouter } from 'next/router';
 
-import MainLayout from '@/layouts/MainLayout';
+import KysoTopBar from '@/layouts/KysoTopBar';
 import { Meta } from '@/layouts/Meta';
-import { Main } from '@/templates/Main';
+import { LeftSideBar } from '@/templates/LeftSideBar';
 
 const Index = () => {
   const router = useRouter();
 
   return (
-    <Main
+    <LeftSideBar
       meta={
         <Meta
           title="Next.js Boilerplate Presentation"
@@ -180,10 +180,10 @@ const Index = () => {
         </a>{' '}
         on our website to support this project.
       </p>
-    </Main>
+    </LeftSideBar>
   );
 };
 
-Index.layout = MainLayout;
+Index.layout = KysoTopBar;
 
 export default Index;
