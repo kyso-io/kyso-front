@@ -1,11 +1,4 @@
-import {
-  CalendarIcon,
-  ChartBarIcon,
-  FolderIcon,
-  HomeIcon,
-  InboxIcon,
-  UsersIcon,
-} from '@heroicons/react/outline';
+import { HashtagIcon } from '@heroicons/react/outline';
 import type { ReactNode } from 'react';
 
 type ILeftSideBarProps = {
@@ -14,12 +7,28 @@ type ILeftSideBarProps = {
 };
 
 const navigation = [
-  { name: 'Dashboard', icon: HomeIcon, href: '#', current: true },
-  { name: 'Team', icon: UsersIcon, href: '#', count: 3, current: false },
-  { name: 'Projects', icon: FolderIcon, href: '#', count: 4, current: false },
-  { name: 'Calendar', icon: CalendarIcon, href: '#', current: false },
-  { name: 'Documents', icon: InboxIcon, href: '#', count: 12, current: false },
-  { name: 'Reports', icon: ChartBarIcon, href: '#', current: false },
+  {
+    name: 'engineering',
+    icon: HashtagIcon,
+    count: 12,
+    href: '#',
+    current: true,
+  },
+  {
+    name: 'marketing',
+    icon: HashtagIcon,
+    count: 55,
+    href: '#',
+    current: false,
+  },
+  { name: 'pharma', icon: HashtagIcon, count: 4, href: '#', current: false },
+  {
+    name: 'protected-team',
+    icon: HashtagIcon,
+    count: 7,
+    href: '#',
+    current: false,
+  },
 ];
 
 function classNames(...classes: string[]) {
@@ -33,6 +42,7 @@ const LeftSideBar = (props: ILeftSideBarProps) => (
       <div className="md:fixed md:flex md:w-64 md:flex-col">
         {/* Sidebar component, swap this element with another sidebar if you like */}
         <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-white">
+          <span>PUT HERE ORG SELECTOR</span>
           <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
             <nav
               className="mt-5 flex-1 space-y-1 bg-white px-2"
