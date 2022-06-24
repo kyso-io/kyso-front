@@ -31,17 +31,17 @@ const Index = () => {
       null);
 
     const resultLoginAction: AppDispatch = await dispatch(loginAction(loginData as any));
-    
+
     const token: string = unwrapResult(resultLoginAction);
-    
+
     if (!token || token.length === 0) {
       return;
     }
-    
+
     localStorage.setItem('jwt', token);
-    
+
     router.push('/')
-    
+
   };
 
 
