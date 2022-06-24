@@ -1,14 +1,41 @@
 import { useRouter } from 'next/router';
-
 import KysoTopBar from '@/layouts/KysoTopBar';
 import { Meta } from '@/layouts/Meta';
 import { LeftSideBar } from '@/templates/LeftSideBar';
+import { HashtagIcon } from '@heroicons/react/outline';
+import { LeftMenuItem } from '@/model/left-menu-item.model';
 
 const Index = () => {
   const router = useRouter();
 
+  const navigation: LeftMenuItem[] = [
+    {
+      name: 'engineering',
+      icon: HashtagIcon,
+      count: 12,
+      href: '#',
+      current: true,
+    },
+    {
+      name: 'marketing',
+      icon: HashtagIcon,
+      count: 55,
+      href: '#',
+      current: false,
+    },
+    { name: 'pharma', icon: HashtagIcon, count: 4, href: '#', current: false },
+    {
+      name: 'protected-team',
+      icon: HashtagIcon,
+      count: 7,
+      href: '#',
+      current: false,
+    },
+  ];
+
   return (
     <LeftSideBar
+      navigation={navigation}
       meta={
         <Meta
           title="Next.js Boilerplate Presentation"

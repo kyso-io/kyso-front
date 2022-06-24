@@ -7,6 +7,17 @@ module.exports = withBundleAnalyzer({
   eslint: {
     dirs: ['.'],
   },
+  // This one is to avoid Module not found: Can't resolve 'fs' in Next.js application
+  // https://stackoverflow.com/questions/64926174/module-not-found-cant-resolve-fs-in-next-js-application
+  webpack(config) {
+    config.resolve.fallback = {
+      ...config.resolve.fallback, // if you miss it, all the other options in fallback, specified
+        // by next.js will be dropped. Doesn't make much sense, but how it is
+      fs: false, // the solution
+    };
+
+    return config;
+  },
   poweredByHeader: false,
   trailingSlash: true,
   basePath: '',

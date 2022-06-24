@@ -2,5 +2,6 @@
 export const useRouter = () => {
   return {
     basePath: '.',
+    push: (href: string) => { console.log(href)}
   };
 };

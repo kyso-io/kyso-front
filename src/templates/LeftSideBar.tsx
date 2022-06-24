@@ -1,35 +1,11 @@
-import { HashtagIcon } from '@heroicons/react/outline';
+import { LeftMenuItem } from '@/model/left-menu-item.model';
 import type { ReactNode } from 'react';
 
 type ILeftSideBarProps = {
   meta: ReactNode;
   children: ReactNode;
+  navigation: LeftMenuItem[];
 };
-
-const navigation = [
-  {
-    name: 'engineering',
-    icon: HashtagIcon,
-    count: 12,
-    href: '#',
-    current: true,
-  },
-  {
-    name: 'marketing',
-    icon: HashtagIcon,
-    count: 55,
-    href: '#',
-    current: false,
-  },
-  { name: 'pharma', icon: HashtagIcon, count: 4, href: '#', current: false },
-  {
-    name: 'protected-team',
-    icon: HashtagIcon,
-    count: 7,
-    href: '#',
-    current: false,
-  },
-];
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -48,7 +24,7 @@ const LeftSideBar = (props: ILeftSideBarProps) => (
               className="mt-5 flex-1 space-y-1 bg-white px-2"
               aria-label="Sidebar"
             >
-              {navigation.map((item) => (
+              {props.navigation.map((item) => (
                 <a
                   key={item.name}
                   href={item.href}
