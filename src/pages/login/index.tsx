@@ -1,16 +1,15 @@
 import { useAuth } from '@/hooks/auth';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import NoLayout from '@/layouts/NoLayout';
-import { Login, LoginProviderEnum, User } from '@kyso-io/kyso-model';
-import { AppDispatch, loginAction, selectUser } from '@kyso-io/kyso-store';
-import { useRouter } from 'next/router'
+import { Login, LoginProviderEnum, type User } from '@kyso-io/kyso-model';
+import { type AppDispatch, loginAction, selectUser } from '@kyso-io/kyso-store';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { unwrapResult } from '@reduxjs/toolkit';
 
-
 const Index = () => {
   useAuth();
-  const router = useRouter()
+  const router = useRouter();
   const dispatch = useAppDispatch();
   const user: User = useAppSelector(selectUser);
   const [email, setUsername] = useState<string>('lo+rey@dev.kyso.io');
@@ -18,14 +17,19 @@ const Index = () => {
 
   useEffect(() => {
     if (user) {
-      router.push('/')
+      router.push('/');
     }
   }, [user]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, null)
-    
+
+    const loginData: Login = new Login(
+      password,
+      LoginProviderEnum.KYSO,
+      email,
+      null);
+
     const resultLoginAction: AppDispatch = await dispatch(loginAction(loginData as any));
     
     const token: string = unwrapResult(resultLoginAction);
