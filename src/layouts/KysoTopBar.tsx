@@ -1,4 +1,4 @@
-import { Disclosure, Menu, Transition } from '@headlessui/react';
+import { Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   BellIcon,
   CalendarIcon,
@@ -9,49 +9,49 @@ import {
   MenuIcon,
   UsersIcon,
   XIcon,
-} from '@heroicons/react/outline';
-import { Fragment } from 'react';
+} from "@heroicons/react/outline";
+import { Fragment } from "react";
 
-import type { LayoutProps } from '@/types/pageWithLayout';
+import type { LayoutProps } from "@/types/pageWithLayout";
 
-import { Footer } from './components/Footer';
-import { Meta } from './Meta';
+import { Footer } from "./components/Footer";
+import { Meta } from "./Meta";
 
 const KysoTopBar: LayoutProps = ({ children }: any) => {
   const user = {
-    name: 'Tom Cook',
-    email: 'tom@example.com',
+    name: "Tom Cook",
+    email: "tom@example.com",
     imageUrl:
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: HomeIcon, current: true },
+    { name: "Dashboard", href: "/", icon: HomeIcon, current: true },
     {
-      name: 'Profile',
-      href: '/profile/fjbarrena',
+      name: "Profile",
+      href: "/profile/fjbarrena",
       icon: UsersIcon,
       current: false,
     },
-    { name: '404', href: '/404', icon: FolderIcon, current: false },
-    { name: '500', href: '/500', icon: CalendarIcon, current: false },
-    { name: 'About', href: '/about', icon: InboxIcon, current: false },
+    { name: "404", href: "/404", icon: FolderIcon, current: false },
+    { name: "500", href: "/500", icon: CalendarIcon, current: false },
+    { name: "About", href: "/about", icon: InboxIcon, current: false },
     {
-      name: 'Query Params',
-      href: '/lightside',
+      name: "Query Params",
+      href: "/lightside",
       icon: ChartBarIcon,
       current: false,
     },
   ];
 
   const userNavigation = [
-    { name: 'Your Profile', href: '#' },
-    { name: 'Settings', href: '#' },
-    { name: 'Sign out', href: '#' },
+    { name: "Your Profile", href: "#" },
+    { name: "Settings", href: "#" },
+    { name: "Sign out", href: "#" },
   ];
 
   function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(' ');
+    return classes.filter(Boolean).join(" ");
   }
 
   return (
@@ -82,11 +82,11 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                             href={item.href}
                             className={classNames(
                               item.current
-                                ? 'bg-indigo-700 text-white'
-                                : 'text-white hover:bg-indigo-500 hover:bg-opacity-75',
-                              'px-3 py-2 rounded-md text-sm font-medium'
+                                ? "bg-indigo-700 text-white"
+                                : "text-white hover:bg-indigo-500/75",
+                              "px-3 py-2 rounded-md text-sm font-medium"
                             )}
-                            aria-current={item.current ? 'page' : undefined}
+                            aria-current={item.current ? "page" : undefined}
                           >
                             {item.name}
                           </a>
@@ -125,15 +125,15 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                           leaveFrom="transform opacity-100 scale-100"
                           leaveTo="transform opacity-0 scale-95"
                         >
-                          <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                          <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
                             {userNavigation.map((item) => (
                               <Menu.Item key={item.name}>
                                 {({ active }) => (
                                   <a
                                     href={item.href}
                                     className={classNames(
-                                      active ? 'bg-gray-100' : '',
-                                      'block px-4 py-2 text-sm text-gray-700'
+                                      active ? "bg-gray-100" : "",
+                                      "block px-4 py-2 text-sm text-gray-700"
                                     )}
                                   >
                                     {item.name}
@@ -148,7 +148,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                   </div>
                   <div className="-mr-2 flex md:hidden">
                     {/* Mobile menu button */}
-                    <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-indigo-600 p-2 text-indigo-200 hover:bg-indigo-500 hover:bg-opacity-75 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600">
+                    <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-indigo-600 p-2 text-indigo-200 hover:bg-indigo-500/75 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600">
                       <span className="sr-only">Open main menu</span>
                       {open ? (
                         <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -172,11 +172,11 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                       href={item.href}
                       className={classNames(
                         item.current
-                          ? 'bg-indigo-700 text-white'
-                          : 'text-white hover:bg-indigo-500 hover:bg-opacity-75',
-                        'block px-3 py-2 rounded-md text-base font-medium'
+                          ? "bg-indigo-700 text-white"
+                          : "text-white hover:bg-indigo-500/75",
+                        "block px-3 py-2 rounded-md text-base font-medium"
                       )}
-                      aria-current={item.current ? 'page' : undefined}
+                      aria-current={item.current ? "page" : undefined}
                     >
                       {item.name}
                     </Disclosure.Button>
@@ -213,7 +213,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                         key={item.name}
                         as="a"
                         href={item.href}
-                        className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-indigo-500 hover:bg-opacity-75"
+                        className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-indigo-500/75"
                       >
                         {item.name}
                       </Disclosure.Button>

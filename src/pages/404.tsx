@@ -1,4 +1,4 @@
-import NoLayout from '@/layouts/NoLayout';
+import NoLayout from "@/layouts/NoLayout";
 
 const Index = () => {
   return (

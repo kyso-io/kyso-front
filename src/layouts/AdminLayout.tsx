@@ -1,6 +1,6 @@
-import type { LayoutProps } from '@/types/pageWithLayout';
+import type { LayoutProps } from "@/types/pageWithLayout";
 
-import { Meta } from './Meta';
+import { Meta } from "./Meta";
 
 const AdminLayout: LayoutProps = ({ children }: any) => {
   return (

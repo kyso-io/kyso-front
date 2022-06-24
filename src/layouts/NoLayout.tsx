@@ -1,6 +1,6 @@
-import type { LayoutProps } from '@/types/pageWithLayout';
+import type { LayoutProps } from "@/types/pageWithLayout";
 
-import { Meta } from './Meta';
+import { Meta } from "./Meta";
 
 const NoLayout: LayoutProps = ({ children }: any) => {
   return (

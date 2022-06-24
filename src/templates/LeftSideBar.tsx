@@ -1,5 +1,5 @@
-import { LeftMenuItem } from '@/model/left-menu-item.model';
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
+import { type LeftMenuItem } from "@/model/left-menu-item.model";
 
 type ILeftSideBarProps = {
   meta: ReactNode;
@@ -8,7 +8,7 @@ type ILeftSideBarProps = {
 };
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
+  return classes.filter(Boolean).join(" ");
 }
 
 const LeftSideBar = (props: ILeftSideBarProps) => (
@@ -30,17 +30,17 @@ const LeftSideBar = (props: ILeftSideBarProps) => (
                   href={item.href}
                   className={classNames(
                     item.current
-                      ? 'bg-gray-100 text-gray-900 hover:text-gray-900 hover:bg-gray-100'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50',
-                    'group flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                      ? "bg-gray-100 text-gray-900 hover:text-gray-900 hover:bg-gray-100"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50",
+                    "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                   )}
                 >
                   <item.icon
                     className={classNames(
                       item.current
-                        ? 'text-gray-500'
-                        : 'text-gray-400 group-hover:text-gray-500',
-                      'mr-3 flex-shrink-0 h-6 w-6'
+                        ? "text-gray-500"
+                        : "text-gray-400 group-hover:text-gray-500",
+                      "mr-3 flex-shrink-0 h-6 w-6"
                     )}
                     aria-hidden="true"
                   />
@@ -49,9 +49,9 @@ const LeftSideBar = (props: ILeftSideBarProps) => (
                     <span
                       className={classNames(
                         item.current
-                          ? 'bg-white'
-                          : 'bg-gray-100 group-hover:bg-gray-200',
-                        'ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full'
+                          ? "bg-white"
+                          : "bg-gray-100 group-hover:bg-gray-200",
+                        "ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full"
                       )}
                     >
                       {item.count}

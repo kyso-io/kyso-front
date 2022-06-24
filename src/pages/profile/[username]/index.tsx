@@ -1,4 +1,4 @@
-import { Menu, Popover, Transition } from '@headlessui/react';
+import { Menu, Popover, Transition } from "@headlessui/react";
 import {
   AcademicCapIcon,
   BadgeCheckIcon,
@@ -9,137 +9,137 @@ import {
   ReceiptRefundIcon,
   UsersIcon,
   XIcon,
-} from '@heroicons/react/outline';
-import { SearchIcon } from '@heroicons/react/solid';
-import { Fragment } from 'react';
+} from "@heroicons/react/outline";
+import { SearchIcon } from "@heroicons/react/solid";
+import { Fragment } from "react";
 
-import NoLayout from '@/layouts/NoLayout';
+import NoLayout from "@/layouts/NoLayout";
 
 const Index = () => {
   const user = {
-    name: 'Chelsea Hagon',
-    email: 'chelseahagon@example.com',
-    role: 'Human Resources Manager',
+    name: "Chelsea Hagon",
+    email: "chelseahagon@example.com",
+    role: "Human Resources Manager",
     imageUrl:
-      'https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      "https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
   };
   const navigation = [
-    { name: 'Home', href: '#', current: true },
-    { name: 'Profile', href: '#', current: false },
-    { name: 'Resources', href: '#', current: false },
-    { name: 'Company Directory', href: '#', current: false },
-    { name: 'Openings', href: '#', current: false },
+    { name: "Home", href: "#", current: true },
+    { name: "Profile", href: "#", current: false },
+    { name: "Resources", href: "#", current: false },
+    { name: "Company Directory", href: "#", current: false },
+    { name: "Openings", href: "#", current: false },
   ];
   const userNavigation = [
-    { name: 'Your Profile', href: '#' },
-    { name: 'Settings', href: '#' },
-    { name: 'Sign out', href: '#' },
+    { name: "Your Profile", href: "#" },
+    { name: "Settings", href: "#" },
+    { name: "Sign out", href: "#" },
   ];
   const stats = [
-    { label: 'Vacation days left', value: 12 },
-    { label: 'Sick days left', value: 4 },
-    { label: 'Personal days left', value: 2 },
+    { label: "Vacation days left", value: 12 },
+    { label: "Sick days left", value: 4 },
+    { label: "Personal days left", value: 2 },
   ];
   const actions = [
     {
       icon: ClockIcon,
-      name: 'Request time off',
-      href: '#',
-      iconForeground: 'text-teal-700',
-      iconBackground: 'bg-teal-50',
+      name: "Request time off",
+      href: "#",
+      iconForeground: "text-teal-700",
+      iconBackground: "bg-teal-50",
     },
     {
       icon: BadgeCheckIcon,
-      name: 'Benefits',
-      href: '#',
-      iconForeground: 'text-purple-700',
-      iconBackground: 'bg-purple-50',
+      name: "Benefits",
+      href: "#",
+      iconForeground: "text-purple-700",
+      iconBackground: "bg-purple-50",
     },
     {
       icon: UsersIcon,
-      name: 'Schedule a one-on-one',
-      href: '#',
-      iconForeground: 'text-sky-700',
-      iconBackground: 'bg-sky-50',
+      name: "Schedule a one-on-one",
+      href: "#",
+      iconForeground: "text-sky-700",
+      iconBackground: "bg-sky-50",
     },
     {
       icon: CashIcon,
-      name: 'Payroll',
-      href: '#',
-      iconForeground: 'text-yellow-700',
-      iconBackground: 'bg-yellow-50',
+      name: "Payroll",
+      href: "#",
+      iconForeground: "text-yellow-700",
+      iconBackground: "bg-yellow-50",
     },
     {
       icon: ReceiptRefundIcon,
-      name: 'Submit an expense',
-      href: '#',
-      iconForeground: 'text-rose-700',
-      iconBackground: 'bg-rose-50',
+      name: "Submit an expense",
+      href: "#",
+      iconForeground: "text-rose-700",
+      iconBackground: "bg-rose-50",
     },
     {
       icon: AcademicCapIcon,
-      name: 'Training',
-      href: '#',
-      iconForeground: 'text-indigo-700',
-      iconBackground: 'bg-indigo-50',
+      name: "Training",
+      href: "#",
+      iconForeground: "text-indigo-700",
+      iconBackground: "bg-indigo-50",
     },
   ];
   const recentHires = [
     {
-      name: 'Leonard Krasner',
-      handle: 'leonardkrasner',
+      name: "Leonard Krasner",
+      handle: "leonardkrasner",
       imageUrl:
-        'https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      href: '#',
+        "https://images.unsplash.com/photo-1519345182560-3f2917c472ef?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      href: "#",
     },
     {
-      name: 'Floyd Miles',
-      handle: 'floydmiles',
+      name: "Floyd Miles",
+      handle: "floydmiles",
       imageUrl:
-        'https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      href: '#',
+        "https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      href: "#",
     },
     {
-      name: 'Emily Selman',
-      handle: 'emilyselman',
+      name: "Emily Selman",
+      handle: "emilyselman",
       imageUrl:
-        'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      href: '#',
+        "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      href: "#",
     },
     {
-      name: 'Kristin Watson',
-      handle: 'kristinwatson',
+      name: "Kristin Watson",
+      handle: "kristinwatson",
       imageUrl:
-        'https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      href: '#',
+        "https://images.unsplash.com/photo-1500917293891-ef795e70e1f6?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+      href: "#",
     },
   ];
   const announcements = [
     {
       id: 1,
-      title: 'Office closed on July 2nd',
-      href: '#',
+      title: "Office closed on July 2nd",
+      href: "#",
       preview:
-        'Cum qui rem deleniti. Suscipit in dolor veritatis sequi aut. Vero ut earum quis deleniti. Ut a sunt eum cum ut repudiandae possimus. Nihil ex tempora neque cum consectetur dolores.',
+        "Cum qui rem deleniti. Suscipit in dolor veritatis sequi aut. Vero ut earum quis deleniti. Ut a sunt eum cum ut repudiandae possimus. Nihil ex tempora neque cum consectetur dolores.",
     },
     {
       id: 2,
-      title: 'New password policy',
-      href: '#',
+      title: "New password policy",
+      href: "#",
       preview:
-        'Alias inventore ut autem optio voluptas et repellendus. Facere totam quaerat quam quo laudantium cumque eaque excepturi vel. Accusamus maxime ipsam reprehenderit rerum id repellendus rerum. Culpa cum vel natus. Est sit autem mollitia.',
+        "Alias inventore ut autem optio voluptas et repellendus. Facere totam quaerat quam quo laudantium cumque eaque excepturi vel. Accusamus maxime ipsam reprehenderit rerum id repellendus rerum. Culpa cum vel natus. Est sit autem mollitia.",
     },
     {
       id: 3,
-      title: 'Office closed on July 2nd',
-      href: '#',
+      title: "Office closed on July 2nd",
+      href: "#",
       preview:
-        'Tenetur libero voluptatem rerum occaecati qui est molestiae exercitationem. Voluptate quisquam iure assumenda consequatur ex et recusandae. Alias consectetur voluptatibus. Accusamus a ab dicta et. Consequatur quis dignissimos voluptatem nisi.',
+        "Tenetur libero voluptatem rerum occaecati qui est molestiae exercitationem. Voluptate quisquam iure assumenda consequatur ex et recusandae. Alias consectetur voluptatibus. Accusamus a ab dicta et. Consequatur quis dignissimos voluptatem nisi.",
     },
   ];
 
   function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(' ');
+    return classes.filter(Boolean).join(" ");
   }
 
   return (
@@ -183,7 +183,7 @@ const Index = () => {
                   <div className="hidden lg:ml-4 lg:flex lg:items-center lg:py-5 lg:pr-0.5">
                     <button
                       type="button"
-                      className="shrink-0 rounded-full p-1 text-cyan-200 hover:bg-white hover:bg-opacity-10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"
+                      className="shrink-0 rounded-full p-1 text-cyan-200 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white"
                     >
                       <span className="sr-only">View notifications</span>
                       <BellIcon className="h-6 w-6" aria-hidden="true" />
@@ -192,7 +192,7 @@ const Index = () => {
                     {/* Profile dropdown */}
                     <Menu as="div" className="relative ml-4 shrink-0">
                       <div>
-                        <Menu.Button className="flex rounded-full bg-white text-sm ring-2 ring-white ring-opacity-20 focus:outline-none focus:ring-opacity-100">
+                        <Menu.Button className="flex rounded-full bg-white text-sm ring-2 ring-white/20 focus:outline-none focus:ring-white/100">
                           <span className="sr-only">Open user menu</span>
                           <img
                             className="h-8 w-8 rounded-full"
@@ -207,15 +207,15 @@ const Index = () => {
                         leaveFrom="transform opacity-100 scale-100"
                         leaveTo="transform opacity-0 scale-95"
                       >
-                        <Menu.Items className="absolute -right-2 z-40 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                        <Menu.Items className="absolute -right-2 z-40 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
                           {userNavigation.map((item) => (
                             <Menu.Item key={item.name}>
                               {({ active }) => (
                                 <a
                                   href={item.href}
                                   className={classNames(
-                                    active ? 'bg-gray-100' : '',
-                                    'block px-4 py-2 text-sm text-gray-700'
+                                    active ? "bg-gray-100" : "",
+                                    "block px-4 py-2 text-sm text-gray-700"
                                   )}
                                 >
                                   {item.name}
@@ -228,7 +228,7 @@ const Index = () => {
                     </Menu>
                   </div>
 
-                  <div className="w-full py-5 lg:border-t lg:border-white lg:border-opacity-20">
+                  <div className="w-full py-5 lg:border-t lg:border-white/20">
                     <div className="lg:grid lg:grid-cols-3 lg:items-center lg:gap-8">
                       {/* Left nav */}
                       <div className="hidden lg:col-span-2 lg:block">
@@ -238,10 +238,10 @@ const Index = () => {
                               key={item.name}
                               href={item.href}
                               className={classNames(
-                                item.current ? 'text-white' : 'text-cyan-100',
-                                'text-sm font-medium rounded-md bg-white bg-opacity-0 px-3 py-2 hover:bg-opacity-10'
+                                item.current ? "text-white" : "text-cyan-100",
+                                "text-sm font-medium rounded-md bg-white/0 px-3 py-2 hover:bg-white/10"
                               )}
-                              aria-current={item.current ? 'page' : undefined}
+                              aria-current={item.current ? "page" : undefined}
                             >
                               {item.name}
                             </a>
@@ -263,7 +263,7 @@ const Index = () => {
                             </div>
                             <input
                               id="search"
-                              className="block w-full rounded-md border border-transparent bg-white bg-opacity-20 py-2 pl-10 pr-3 leading-5 text-white placeholder:text-white focus:border-transparent focus:bg-opacity-100 focus:text-gray-900 focus:outline-none focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm"
+                              className="block w-full rounded-md border border-transparent bg-white/20 py-2 pl-10 pr-3 leading-5 text-white placeholder:text-white focus:border-transparent focus:bg-white/100 focus:text-gray-900 focus:outline-none focus:ring-0 focus:placeholder:text-gray-500 sm:text-sm"
                               placeholder="Search"
                               type="search"
                               name="search"
@@ -277,7 +277,7 @@ const Index = () => {
                   {/* Menu button */}
                   <div className="absolute right-0 shrink-0 lg:hidden">
                     {/* Mobile menu button */}
-                    <Popover.Button className="inline-flex items-center justify-center rounded-md bg-transparent p-2 text-cyan-200 hover:bg-white hover:bg-opacity-10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
+                    <Popover.Button className="inline-flex items-center justify-center rounded-md bg-transparent p-2 text-cyan-200 hover:bg-white/10 hover:text-white focus:outline-none focus:ring-2 focus:ring-white">
                       <span className="sr-only">Open main menu</span>
                       {open ? (
                         <XIcon className="block h-6 w-6" aria-hidden="true" />
@@ -303,7 +303,7 @@ const Index = () => {
                     leaveFrom="opacity-100"
                     leaveTo="opacity-0"
                   >
-                    <Popover.Overlay className="fixed inset-0 z-20 bg-black bg-opacity-25" />
+                    <Popover.Overlay className="fixed inset-0 z-20 bg-black/25" />
                   </Transition.Child>
 
                   <Transition.Child
@@ -319,7 +319,7 @@ const Index = () => {
                       focus
                       className="absolute inset-x-0 top-0 z-30 mx-auto w-full max-w-3xl origin-top p-2 transition"
                     >
-                      <div className="divide-y divide-gray-200 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+                      <div className="divide-y divide-gray-200 rounded-lg bg-white shadow-lg ring-1 ring-black/5">
                         <div className="pt-3 pb-2">
                           <div className="flex items-center justify-between px-4">
                             <div>
@@ -449,7 +449,7 @@ const Index = () => {
                           key={stat.label}
                           className="px-6 py-5 text-center text-sm font-medium"
                         >
-                          <span className="text-gray-900">{stat.value}</span>{' '}
+                          <span className="text-gray-900">{stat.value}</span>{" "}
                           <span className="text-gray-600">{stat.label}</span>
                         </div>
                       ))}
@@ -468,16 +468,16 @@ const Index = () => {
                         key={action.name}
                         className={classNames(
                           actionIdx === 0
-                            ? 'rounded-tl-lg rounded-tr-lg sm:rounded-tr-none'
-                            : '',
-                          actionIdx === 1 ? 'sm:rounded-tr-lg' : '',
+                            ? "rounded-tl-lg rounded-tr-lg sm:rounded-tr-none"
+                            : "",
+                          actionIdx === 1 ? "sm:rounded-tr-lg" : "",
                           actionIdx === actions.length - 2
-                            ? 'sm:rounded-bl-lg'
-                            : '',
+                            ? "sm:rounded-bl-lg"
+                            : "",
                           actionIdx === actions.length - 1
-                            ? 'rounded-bl-lg rounded-br-lg sm:rounded-bl-none'
-                            : '',
-                          'relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-cyan-500'
+                            ? "rounded-bl-lg rounded-br-lg sm:rounded-bl-none"
+                            : "",
+                          "relative group bg-white p-6 focus-within:ring-2 focus-within:ring-inset focus-within:ring-cyan-500"
                         )}
                       >
                         <div>
@@ -485,7 +485,7 @@ const Index = () => {
                             className={classNames(
                               action.iconBackground,
                               action.iconForeground,
-                              'rounded-lg inline-flex p-3 ring-4 ring-white'
+                              "rounded-lg inline-flex p-3 ring-4 ring-white"
                             )}
                           >
                             <action.icon
@@ -566,7 +566,7 @@ const Index = () => {
                                     {announcement.title}
                                   </a>
                                 </h3>
-                                <p className="line-clamp-2 mt-1 text-sm text-gray-600">
+                                <p className="mt-1 text-sm text-gray-600 line-clamp-2">
                                   {announcement.preview}
                                 </p>
                               </div>
@@ -652,7 +652,7 @@ const Index = () => {
             <div className="border-t border-gray-200 py-8 text-center text-sm text-gray-500 sm:text-left">
               <span className="block sm:inline">
                 &copy; 2021 Tailwind Labs Inc.
-              </span>{' '}
+              </span>{" "}
               <span className="block sm:inline">All rights reserved.</span>
             </div>
           </div>

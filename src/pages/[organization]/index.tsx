@@ -1,6 +1,6 @@
-import { useRouter } from 'next/router';
+import { useRouter } from "next/router";
 
-import BrandSidebarWithLightHeader from '@/layouts/BrandSidebarWithLightHeader';
+import BrandSidebarWithLightHeader from "@/layouts/BrandSidebarWithLightHeader";
 
 const Index = () => {
   const router = useRouter();

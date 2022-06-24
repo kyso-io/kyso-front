@@ -1,4 +1,4 @@
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition } from "@headlessui/react";
 import {
   CalendarIcon,
   ChartBarIcon,
@@ -8,37 +8,37 @@ import {
   MenuIcon,
   UsersIcon,
   XIcon,
-} from '@heroicons/react/outline';
-import { Fragment, useState } from 'react';
+} from "@heroicons/react/outline";
+import { Fragment, useState } from "react";
 
-import type { LayoutProps } from '@/types/pageWithLayout';
+import type { LayoutProps } from "@/types/pageWithLayout";
 
-import { Footer } from './components/Footer';
-import { Meta } from './Meta';
+import { Footer } from "./components/Footer";
+import { Meta } from "./Meta";
 
 const MainLayout: LayoutProps = ({ children }: any) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigation = [
-    { name: 'Dashboard', href: '/', icon: HomeIcon, current: true },
+    { name: "Dashboard", href: "/", icon: HomeIcon, current: true },
     {
-      name: 'Profile',
-      href: '/profile/fjbarrena',
+      name: "Profile",
+      href: "/profile/fjbarrena",
       icon: UsersIcon,
       current: false,
     },
-    { name: '404', href: '/404', icon: FolderIcon, current: false },
-    { name: '500', href: '/500', icon: CalendarIcon, current: false },
-    { name: 'About', href: '/about', icon: InboxIcon, current: false },
+    { name: "404", href: "/404", icon: FolderIcon, current: false },
+    { name: "500", href: "/500", icon: CalendarIcon, current: false },
+    { name: "About", href: "/about", icon: InboxIcon, current: false },
     {
-      name: 'Query Params',
-      href: '/lightside',
+      name: "Query Params",
+      href: "/lightside",
       icon: ChartBarIcon,
       current: false,
     },
   ];
 
   function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(' ');
+    return classes.filter(Boolean).join(" ");
   }
 
   return (
@@ -120,9 +120,9 @@ const MainLayout: LayoutProps = ({ children }: any) => {
                         href={item.href}
                         className={classNames(
                           item.current
-                            ? 'bg-indigo-800 text-white'
-                            : 'text-white hover:bg-indigo-600 hover:bg-opacity-75',
-                          'group flex items-center px-2 py-2 text-base font-medium rounded-md'
+                            ? "bg-indigo-800 text-white"
+                            : "text-white hover:bg-indigo-600 hover:bg-opacity-75",
+                          "group flex items-center px-2 py-2 text-base font-medium rounded-md"
                         )}
                       >
                         <item.icon
@@ -182,9 +182,9 @@ const MainLayout: LayoutProps = ({ children }: any) => {
                     href={item.href}
                     className={classNames(
                       item.current
-                        ? 'bg-indigo-800 text-white'
-                        : 'text-white hover:bg-indigo-600 hover:bg-opacity-75',
-                      'group flex items-center px-2 py-2 text-sm font-medium rounded-md'
+                        ? "bg-indigo-800 text-white"
+                        : "text-white hover:bg-indigo-600 hover:bg-opacity-75",
+                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
                     )}
                   >
                     <item.icon
