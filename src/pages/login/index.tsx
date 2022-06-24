@@ -32,7 +32,7 @@ const Index = () => {
     );
 
     const resultLoginAction: AppDispatch = await dispatch(
-      loginAction(loginData as any)
+      loginAction(loginData)
     );
 
     const token: string = unwrapResult(resultLoginAction);

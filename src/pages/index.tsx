@@ -4,8 +4,10 @@ import { Meta } from "@/layouts/Meta";
 import { LeftSideBar } from "@/templates/LeftSideBar";
 import { HashtagIcon } from "@heroicons/react/outline";
 import type { LeftMenuItem } from "@/model/left-menu-item.model";
+import { useAuth } from "@/hooks/auth";
 
 const Index = () => {
+  useAuth();
   const router = useRouter();
 
   const navigation: LeftMenuItem[] = [
