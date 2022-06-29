@@ -10,10 +10,14 @@ import type { LayoutProps } from "@/types/pageWithLayout";
 import { useSelector } from "react-redux";
 import { selectUser } from "@kyso-io/kyso-store";
 import type { User } from "@kyso-io/kyso-model";
+import { Sanitizer } from "@/helpers/Sanitizer";
 import { Footer } from "../components/Footer";
 
 const KysoTopBar: LayoutProps = ({ children }: any) => {
-  const user: User = useSelector<User>(selectUser) as User;
+  const user: User = Sanitizer.ifNullReturnDefault(
+    useSelector<User>(selectUser),
+    undefined
+  ) as User;
 
   const navigation: any[] = [
     /*
@@ -109,45 +113,47 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                       </button>
 
                       {/* Profile dropdown */}
-                      <Menu as="div" className="relative ml-3">
-                        <div>
-                          <Menu.Button className="flex max-w-xs items-center rounded-full bg-indigo-600 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600">
-                            <span className="sr-only">Open user menu</span>
-                            <img
-                              className="object-cover h-8 w-8 rounded-full"
-                              src={user.avatar_url}
-                              alt=""
-                            />
-                          </Menu.Button>
-                        </div>
-                        <Transition
-                          as={Fragment}
-                          enter="transition ease-out duration-100"
-                          enterFrom="transform opacity-0 scale-95"
-                          enterTo="transform opacity-100 scale-100"
-                          leave="transition ease-in duration-75"
-                          leaveFrom="transform opacity-100 scale-100"
-                          leaveTo="transform opacity-0 scale-95"
-                        >
-                          <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
-                            {userNavigation.map((item) => (
-                              <Menu.Item key={item.name}>
-                                {({ active }) => (
-                                  <a
-                                    href={item.href}
-                                    className={classNames(
-                                      active ? "bg-gray-100" : "",
-                                      "block px-4 py-2 text-sm text-gray-700"
-                                    )}
-                                  >
-                                    {item.name}
-                                  </a>
-                                )}
-                              </Menu.Item>
-                            ))}
-                          </Menu.Items>
-                        </Transition>
-                      </Menu>
+                      {user && (
+                        <Menu as="div" className="relative ml-3">
+                          <div>
+                            <Menu.Button className="flex max-w-xs items-center rounded-full bg-indigo-600 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600">
+                              <span className="sr-only">Open user menu</span>
+                              <img
+                                className="object-cover h-8 w-8 rounded-full"
+                                src={user.avatar_url}
+                                alt=""
+                              />
+                            </Menu.Button>
+                          </div>
+                          <Transition
+                            as={Fragment}
+                            enter="transition ease-out duration-100"
+                            enterFrom="transform opacity-0 scale-95"
+                            enterTo="transform opacity-100 scale-100"
+                            leave="transition ease-in duration-75"
+                            leaveFrom="transform opacity-100 scale-100"
+                            leaveTo="transform opacity-0 scale-95"
+                          >
+                            <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
+                              {userNavigation.map((item) => (
+                                <Menu.Item key={item.name}>
+                                  {({ active }) => (
+                                    <a
+                                      href={item.href}
+                                      className={classNames(
+                                        active ? "bg-gray-100" : "",
+                                        "block px-4 py-2 text-sm text-gray-700"
+                                      )}
+                                    >
+                                      {item.name}
+                                    </a>
+                                  )}
+                                </Menu.Item>
+                              ))}
+                            </Menu.Items>
+                          </Transition>
+                        </Menu>
+                      )}
                     </div>
                   </div>
                   <div className="-mr-2 flex md:hidden">
@@ -187,30 +193,32 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                   ))}
                 </div>
                 <div className="border-t border-indigo-700 pt-4 pb-3">
-                  <div className="flex items-center px-5">
-                    <div className="shrink-0">
-                      <img
-                        className="object-cover h-10 w-10 rounded-full"
-                        src={user.avatar_url}
-                        alt=""
-                      />
-                    </div>
-                    <div className="ml-3">
-                      <div className="text-base font-medium text-white">
-                        {user.display_name}
+                  {user && (
+                    <div className="flex items-center px-5">
+                      <div className="shrink-0">
+                        <img
+                          className="object-cover h-10 w-10 rounded-full"
+                          src={user.avatar_url}
+                          alt=""
+                        />
                       </div>
-                      <div className="text-sm font-medium text-indigo-300">
-                        {user.email}
+                      <div className="ml-3">
+                        <div className="text-base font-medium text-white">
+                          {user.display_name}
+                        </div>
+                        <div className="text-sm font-medium text-indigo-300">
+                          {user.email}
+                        </div>
                       </div>
+                      <button
+                        type="button"
+                        className="ml-auto shrink-0 rounded-full bg-indigo-600 p-1 text-indigo-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600"
+                      >
+                        <span className="sr-only">View notifications</span>
+                        <BellIcon className="h-6 w-6" aria-hidden="true" />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      className="ml-auto shrink-0 rounded-full bg-indigo-600 p-1 text-indigo-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600"
-                    >
-                      <span className="sr-only">View notifications</span>
-                      <BellIcon className="h-6 w-6" aria-hidden="true" />
-                    </button>
-                  </div>
+                  )}
                   <div className="mt-3 space-y-1 px-2">
                     {userNavigation.map((item) => (
                       <Disclosure.Button
