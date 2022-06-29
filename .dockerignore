@@ -1,0 +1,15 @@
+/bin
+/.build-*
+/build.env
+/Dockerfile
+/.dockerignore
+/.editorconfig
+/.env*
+/.eslintrc.json
+/.git*
+/.next
+/node_modules
+/npm-debug.log
+/.npmrc.*
+/.npmrc-*
+/Readme.md
