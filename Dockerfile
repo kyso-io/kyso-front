@@ -10,4 +10,4 @@ WORKDIR /app
 COPY package.json ./
 # Execute `npm install`
 RUN --mount=type=secret,id=npmrc,target=/app/.npmrc,uid=1000,gid=1000,required\
- npm install --omit=dev
+ npm install husky && npm install --omit=dev
