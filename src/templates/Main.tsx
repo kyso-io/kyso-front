@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AppConfig } from "@/utils/AppConfig";
@@ -23,18 +22,18 @@ const Main = (props: IMainProps) => (
         <div>
           <ul className="flex flex-wrap text-xl">
             <li className="mr-6">
-              <Link href="/">
+              <a href="/">
                 <a className="border-none text-gray-700 hover:text-gray-900">
                   Home
                 </a>
-              </Link>
+              </a>
             </li>
             <li className="mr-6">
-              <Link href="/about/">
+              <a href="/about/">
                 <a className="border-none text-gray-700 hover:text-gray-900">
                   About
                 </a>
-              </Link>
+              </a>
             </li>
             <li className="mr-6">
               <a

@@ -20,7 +20,6 @@ import {
   setError as storeSetError,
 } from "@kyso-io/kyso-store";
 import Head from "next/head";
-import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -342,13 +341,13 @@ const Index = () => {
                         style={{ paddingLeft: "15.3%", paddingBottom: "15px" }}
                       >
                         {/* <h1>Kyso.io</h1> */}
-                        <Link href="/">
+                        <a href="/">
                           <img
                             className="w-24"
                             src={`/assets/images/kyso-logo-and-name-dark.svg`}
                             alt="Kyso"
                           />
-                        </Link>
+                        </a>
                         <p
                           className="py-4"
                           style={{
@@ -361,7 +360,7 @@ const Index = () => {
                         </p>
                         <ul className="list-disc list-inside pl-4 pb-4">
                           <li>
-                            <Link
+                            <a
                               className="login-link"
                               href="https://docs.kyso.io"
                               aria-label="docs"
@@ -369,10 +368,10 @@ const Index = () => {
                               rel="noopener noreferrer"
                             >
                               Read Kyso documentation
-                            </Link>
+                            </a>
                           </li>
                           <li style={{ paddingTop: "5px" }}>
-                            <Link
+                            <a
                               className="login-link"
                               href="https://docs.kyso.io/posting-to-kyso/kyso-command-line-tool/installation"
                               aria-label="cli"
@@ -380,10 +379,10 @@ const Index = () => {
                               rel="noopener noreferrer"
                             >
                               Install Kyso CLI
-                            </Link>
+                            </a>
                           </li>
                           <li style={{ paddingTop: "5px" }}>
-                            <Link
+                            <a
                               className="login-link"
                               href="https://about.kyso.io/about"
                               aria-label="about"
@@ -391,12 +390,12 @@ const Index = () => {
                               rel="noopener noreferrer"
                             >
                               More information about Kyso
-                            </Link>
+                            </a>
                           </li>
                           {/* <li style={{ paddingTo5: '7px'}}>
-                              <Link className="login-link" href="https://about.kyso.io/blog" aria-label="blog" target="_blank" rel="noopener noreferrer">
+                              <a className="login-link" href="https://about.kyso.io/blog" aria-label="blog" target="_blank" rel="noopener noreferrer">
                                 Read our blog
-                              </Link>
+                              </a>
                               </li> */}
                         </ul>
                         <div className="pb-4">
@@ -406,7 +405,7 @@ const Index = () => {
                           </p>
                           <ul className="list-disc list-inside pl-4">
                             <li style={{ paddingTop: "5px" }}>
-                              <Link
+                              <a
                                 className="login-link"
                                 href="https://about.kyso.io/terms"
                                 aria-label="terms"
@@ -414,10 +413,10 @@ const Index = () => {
                                 rel="noopener noreferrer"
                               >
                                 Terms of service
-                              </Link>
+                              </a>
                             </li>
                             <li style={{ paddingTop: "5px" }}>
-                              <Link
+                              <a
                                 className="login-link"
                                 href="https://about.kyso.io/privacy"
                                 aria-label="privacy"
@@ -425,7 +424,7 @@ const Index = () => {
                                 rel="noopener noreferrer"
                               >
                                 Privacy statement
-                              </Link>
+                              </a>
                             </li>
                           </ul>
                         </div>
@@ -497,12 +496,9 @@ const Index = () => {
                               type="button"
                               className="p-4 bg-kyso-secondary hover:bg-kyso-secondary-hover py-2 text-xs font-medium rounded"
                             >
-                              <Link
-                                className="text-black"
-                                href="/reset-password"
-                              >
+                              <a className="text-black" href="/reset-password">
                                 Forgot your password?
-                              </Link>
+                              </a>
                             </button>
                           </div>
                           <div className="w-1/2 h-12 text-right">
@@ -524,7 +520,7 @@ const Index = () => {
                               type="button"
                               className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded no-underline"
                             >
-                              <Link
+                              <a
                                 href={githubUrl}
                                 className="text-black no-underline"
                               >
@@ -535,7 +531,7 @@ const Index = () => {
                                   icon={faGithub}
                                 />
                                 Log in with Github
-                              </Link>
+                              </a>
                             </button>
                           </div>
                         </div>
@@ -549,7 +545,7 @@ const Index = () => {
                                 type="button"
                                 className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded"
                               >
-                                <Link href={bitbucketUrl}>
+                                <a href={bitbucketUrl}>
                                   <FontAwesomeIcon
                                     style={{
                                       marginRight: 8,
@@ -557,7 +553,7 @@ const Index = () => {
                                     icon={faBitbucket}
                                   />
                                   Log in with Bitbucket
-                                </Link>
+                                </a>
                               </button>
                             </div>
                           </div>
@@ -567,7 +563,7 @@ const Index = () => {
                           type="button"
                           className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
-                          <Link href={gitlabUrl}>
+                          <a href={gitlabUrl}>
                             <FontAwesomeIcon
                               style={{
                                 marginRight: 8,
@@ -575,7 +571,7 @@ const Index = () => {
                               icon={faGitlab}
                             />
                             Log in with Gitlab
-                          </Link>
+                          </a>
                         </button>
                       )}
                       {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
@@ -583,7 +579,7 @@ const Index = () => {
                           type="button"
                           className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
-                          <Link href={googleUrl}>
+                          <a href={googleUrl}>
                             <FontAwesomeIcon
                               style={{
                                 marginRight: 8,
@@ -591,7 +587,7 @@ const Index = () => {
                               icon={faGoogle}
                             />
                             Log in with Google
-                          </Link>
+                          </a>
                         </button>
                       )}
 
@@ -600,7 +596,7 @@ const Index = () => {
                           type="button"
                           className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                         >
-                          <Link href={pingUrl}>
+                          <a href={pingUrl}>
                             <img
                               src="/static/images/pingid_logo.jpg"
                               width={12}
@@ -608,7 +604,7 @@ const Index = () => {
                               alt="PingID Login"
                             ></img>
                             Log in with PingId
-                          </Link>
+                          </a>
                         </button>
                       )}
                     </div>

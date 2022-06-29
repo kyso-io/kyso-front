@@ -10,7 +10,6 @@ import type { LayoutProps } from "@/types/pageWithLayout";
 import { useSelector } from "react-redux";
 import { selectUser } from "@kyso-io/kyso-store";
 import type { User } from "@kyso-io/kyso-model";
-import Link from "next/link";
 import { Footer } from "../components/Footer";
 
 const KysoTopBar: LayoutProps = ({ children }: any) => {
@@ -56,13 +55,13 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                 <div className="flex h-16 items-center justify-between">
                   <div className="flex items-center">
                     <div className="shrink-0">
-                      <Link href="/">
+                      <a href="/">
                         <img
                           className="h-8 w-8"
                           src={`/assets/images/kyso-logo-white.svg`}
                           alt="Kyso"
                         />
-                      </Link>
+                      </a>
                     </div>
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
@@ -82,7 +81,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                           </div>
                         </div>
                         {/* navigation.map((item) => (
-                          <Link
+                          <a
                             key={item.name}
                             href={item.href}
                             className={classNames(
@@ -94,7 +93,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                             aria-current={item.current ? "page" : undefined}
                           >
                             {item.name}
-                          </Link>
+                          </a>
                             )) */}
                       </div>
                     </div>
@@ -134,7 +133,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                             {userNavigation.map((item) => (
                               <Menu.Item key={item.name}>
                                 {({ active }) => (
-                                  <Link
+                                  <a
                                     href={item.href}
                                     className={classNames(
                                       active ? "bg-gray-100" : "",
@@ -142,7 +141,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                                     )}
                                   >
                                     {item.name}
-                                  </Link>
+                                  </a>
                                 )}
                               </Menu.Item>
                             ))}
