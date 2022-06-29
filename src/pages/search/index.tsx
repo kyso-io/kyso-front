@@ -1,4 +1,11 @@
 /* eslint no-nested-ternary: "off" */
+import SearchItem from "@/components/search-item";
+import SearchNavigation from "@/components/search-navigation";
+import SearchPagination from "@/components/search-pagination";
+import { useAuth } from "@/hooks/auth";
+import { useAppDispatch } from "@/hooks/redux-hooks";
+import type { FullTextSearchParams } from "@/interfaces/full-text-search-params";
+import type { SearchNavItem } from "@/interfaces/search-nav-item";
 import KysoTopBar from "@/layouts/KysoTopBar";
 import type { FullTextSearchDTO, FullTextSearchResult, FullTextSearchResultType } from "@kyso-io/kyso-model";
 import { ElasticSearchIndex } from "@kyso-io/kyso-model";
@@ -6,12 +13,6 @@ import { fullTextSearchAction } from "@kyso-io/kyso-store";
 import { unwrapResult } from "@reduxjs/toolkit";
 import debounce from "lodash.debounce";
 import React, { useEffect, useMemo, useState } from "react";
-import SearchItem from "../../components/search-item";
-import SearchNavigation from "../../components/search-navigation";
-import SearchPagination from "../../components/search-pagination";
-import { useAppDispatch } from "../../hooks/redux-hooks";
-import type { FullTextSearchParams } from "../../interfaces/full-text-search-params";
-import type { SearchNavItem } from "../../interfaces/search-nav-item";
 
 const fetchData = async (params: FullTextSearchParams, dispatch: any, cb: (fullTextSearchDTO: FullTextSearchDTO | null) => void) => {
   const resultFullTextSearch = await dispatch(fullTextSearchAction(params));
@@ -24,6 +25,7 @@ const debouncedFetchData = debounce((params: FullTextSearchParams, dispatch: any
 }, 750);
 
 const SearchIndex = () => {
+  useAuth(false);
   const dispatch = useAppDispatch();
   const [requesting, setRequesting] = useState<boolean>(false);
   const [fullTextSearchDTO, setFullTextSearchDTO] = useState<FullTextSearchDTO | null>(null);
