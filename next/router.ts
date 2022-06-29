@@ -3,7 +3,13 @@ export const useRouter = () => {
   return {
     basePath: ".",
     push: (href: string) => {
+      /* eslint-disable no-console */
       console.log(href);
     },
+    query: {} as any,
+    isReady: () => {
+      return true
+    },
+    asPath: "."
   };
 };

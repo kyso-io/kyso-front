@@ -1,31 +1,23 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import {
   BellIcon,
-  CalendarIcon,
-  ChartBarIcon,
-  FolderIcon,
-  HomeIcon,
-  InboxIcon,
   MenuIcon,
-  UsersIcon,
+  SearchIcon,
   XIcon,
 } from "@heroicons/react/outline";
 import { Fragment } from "react";
-
 import type { LayoutProps } from "@/types/pageWithLayout";
-
-import { Footer } from "./components/Footer";
-import { Meta } from "./Meta";
+import { useSelector } from "react-redux";
+import { selectUser } from "@kyso-io/kyso-store";
+import type { User } from "@kyso-io/kyso-model";
+import Link from "next/link";
+import { Footer } from "../components/Footer";
 
 const KysoTopBar: LayoutProps = ({ children }: any) => {
-  const user = {
-    name: "Tom Cook",
-    email: "tom@example.com",
-    imageUrl:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  };
+  const user: User = useSelector<User>(selectUser) as User;
 
-  const navigation = [
+  const navigation: any[] = [
+    /*
     { name: "Dashboard", href: "/", icon: HomeIcon, current: true },
     {
       name: "Profile",
@@ -41,7 +33,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
       href: "/lightside",
       icon: ChartBarIcon,
       current: false,
-    },
+    }, */
   ];
 
   const userNavigation = [
@@ -56,28 +48,41 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
 
   return (
     <>
-      <Meta
-        title="Next.js Boilerplate Presentation"
-        description="Next js Boilerplate is the perfect starter code for your project. Build your React application with the Next.js framework."
-      />
       <div className="h-[64px] min-h-full">
-        <Disclosure as="nav" className="fixed z-10 w-screen bg-indigo-600">
+        <Disclosure as="nav" className="fixed z-10 w-screen bg-kyso">
           {({ open }) => (
             <>
-              <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+              <div className="mx-auto px-4 sm:px-6 lg:px-8 text-white">
                 <div className="flex h-16 items-center justify-between">
                   <div className="flex items-center">
                     <div className="shrink-0">
-                      <img
-                        className="h-8 w-8"
-                        src="https://tailwindui.com/img/logos/workflow-mark-indigo-300.svg"
-                        alt="Workflow"
-                      />
+                      <Link href="/">
+                        <img
+                          className="h-8 w-8"
+                          src={`/assets/images/kyso-logo-white.svg`}
+                          alt="Kyso"
+                        />
+                      </Link>
                     </div>
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
-                        {navigation.map((item) => (
-                          <a
+                        <div className="container flex justify-center items-center px-4 sm:px-6 lg:px-8">
+                          <div className="relative">
+                            <input
+                              type="text"
+                              className="h-10 w-96 pr-8 pl-5 rounded z-0 focus:shadow focus:outline-none"
+                              placeholder="Search anything..."
+                            />
+                            <div className="absolute top-3 right-3">
+                              <SearchIcon
+                                className="text-gray-600 h-4 w-4 fill-current"
+                                aria-hidden="true"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        {/* navigation.map((item) => (
+                          <Link
                             key={item.name}
                             href={item.href}
                             className={classNames(
@@ -89,8 +94,8 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                             aria-current={item.current ? "page" : undefined}
                           >
                             {item.name}
-                          </a>
-                        ))}
+                          </Link>
+                            )) */}
                       </div>
                     </div>
                   </div>
@@ -110,8 +115,8 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                           <Menu.Button className="flex max-w-xs items-center rounded-full bg-indigo-600 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600">
                             <span className="sr-only">Open user menu</span>
                             <img
-                              className="h-8 w-8 rounded-full"
-                              src={user.imageUrl}
+                              className="object-cover h-8 w-8 rounded-full"
+                              src={user.avatar_url}
                               alt=""
                             />
                           </Menu.Button>
@@ -129,7 +134,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                             {userNavigation.map((item) => (
                               <Menu.Item key={item.name}>
                                 {({ active }) => (
-                                  <a
+                                  <Link
                                     href={item.href}
                                     className={classNames(
                                       active ? "bg-gray-100" : "",
@@ -137,7 +142,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                                     )}
                                   >
                                     {item.name}
-                                  </a>
+                                  </Link>
                                 )}
                               </Menu.Item>
                             ))}
@@ -186,14 +191,14 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                   <div className="flex items-center px-5">
                     <div className="shrink-0">
                       <img
-                        className="h-10 w-10 rounded-full"
-                        src={user.imageUrl}
+                        className="object-cover h-10 w-10 rounded-full"
+                        src={user.avatar_url}
                         alt=""
                       />
                     </div>
                     <div className="ml-3">
                       <div className="text-base font-medium text-white">
-                        {user.name}
+                        {user.display_name}
                       </div>
                       <div className="text-sm font-medium text-indigo-300">
                         {user.email}

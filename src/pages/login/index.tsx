@@ -1,250 +1,623 @@
-import { useAuth } from "@/hooks/auth";
-import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
+import { Helper } from "@/helpers/Helper";
 import NoLayout from "@/layouts/NoLayout";
-import { Login, LoginProviderEnum, type User } from "@kyso-io/kyso-model";
-import { type AppDispatch, loginAction, selectUser } from "@kyso-io/kyso-store";
+import "@fortawesome/fontawesome-svg-core/styles.css";
+import {
+  faBitbucket,
+  faGithub,
+  faGitlab,
+  faGoogle,
+} from "@fortawesome/free-brands-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  KysoSettingsEnum,
+  Login,
+  LoginProviderEnum,
+} from "@kyso-io/kyso-model";
+import type { AppDispatch } from "@kyso-io/kyso-store";
+import {
+  loginAction,
+  selectUser,
+  setError as storeSetError,
+} from "@kyso-io/kyso-store";
+import Head from "next/head";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { unwrapResult } from "@reduxjs/toolkit";
+import { useDispatch, useSelector } from "react-redux";
+import uuid from "uuid";
+
+const validateEmail = (email: string) => {
+  /* eslint-disable no-useless-escape */
+  const re =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(email);
+};
+
+const githubScopes = [
+  "read:user",
+  "user:email",
+  "read:org",
+  "repo",
+  "admin:repo_hook",
+  "public_repo",
+];
 
 const Index = () => {
-  useAuth();
   const router = useRouter();
-  const dispatch = useAppDispatch();
-  const user: User = useAppSelector(selectUser);
-  const [email, setUsername] = useState<string>("lo+rey@dev.kyso.io");
-  const [password, setPassword] = useState<string>("n0tiene");
+  const { redirect } = router.query;
+
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [password, setPassword] = useState("");
+  const dispatch = useDispatch<AppDispatch>();
+  const [bitbucketUrl, setBitbucketUrl] = useState("");
+  const [githubUrl, setGithubUrl] = useState("");
+  const [gitlabUrl, setGitlabUrl] = useState("");
+  const [googleUrl, setGoogleUrl] = useState("");
+  const [enableGoogleAuth, setEnableGoogleAuth] = useState(true);
+  const [enableGithubAuth, setEnableGithubAuth] = useState(true);
+  const [enableGitlabAuth, setEnableGitlabAuth] = useState(true);
+  const [enableBitbucketAuth, setEnableBitbucketAuth] = useState(true);
+  const [enableKysoAuth, setEnableKysoAuth] = useState(true);
+  const [enablePingSamlAuth, setEnablePingSamlAuth] = useState(true);
+  const [pingUrl, setPingUrl] = useState("");
+
+  const [rightLogo, setRightLogo] = useState(null);
+  const [leftLogo, setLeftLogo] = useState(null);
+
+  /* eslint-disable unused-imports/no-unused-vars */
+  const [globalCss, setglobalCss] = useState(false);
+  const [headerCss, setHeaderCss] = useState(false);
+  const [buttonCss, setButtonCss] = useState(false);
+  const [buttonHoverCss, setButtonHoverCss] = useState(false);
+  const [linkCss, setLinkCss] = useState(false);
+  const [showdivCss, setShowdivCss] = useState(false);
+  const [hiddendivCss, setHiddendivCss] = useState(false);
+
+  // To pass for now the eslint ...
+  console.log(`${globalCss} ${headerCss} ${buttonCss} ${buttonHoverCss} ${linkCss} 
+    ${showdivCss} ${hiddendivCss} ${error}`);
+
+  const user = useSelector(selectUser);
+
+  useEffect(() => {
+    const getOrganizationOptions = async () => {
+      const publicKeys: any[] = await Helper.getKysoPublicSettings();
+
+      if (!publicKeys || publicKeys.length === 0) {
+        // return toaster.danger("An unknown error has occurred");
+        return "";
+      }
+
+      const googleClientId = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.AUTH_GOOGLE_CLIENT_ID
+      ).value;
+      const bitbucketClientId = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.AUTH_BITBUCKET_CLIENT_ID
+      ).value;
+      const githubClientId = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.AUTH_GITHUB_CLIENT_ID
+      ).value;
+      const gitlabClientId = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.AUTH_GITLAB_CLIENT_ID
+      ).value;
+      const gitlabRedirectURI = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.AUTH_GITLAB_REDIRECT_URI
+      ).value;
+      const pingIdSamlSSOUrl = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.AUTH_PINGID_SAML_SSO_URL
+      ).value;
+
+      const tmpEnableGoogleAuth =
+        publicKeys.find(
+          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GOOGLE
+        ).value === "true";
+
+      const tmpEnableGithubAuth =
+        publicKeys.find(
+          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITHUB
+        ).value === "true";
+
+      const tmpEnableGitlabAuth =
+        publicKeys.find(
+          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB
+        ).value === "true";
+
+      const tmpEnableBitbucketAuth =
+        publicKeys.find(
+          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET
+        ).value === "true";
+
+      const tmpEnableKysoAuth =
+        publicKeys.find(
+          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO
+        ).value === "true";
+
+      const tmpEnablePingSamlAuth =
+        publicKeys.find(
+          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML
+        ).value === "true";
+
+      setGoogleUrl(
+        `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&response_type=code&redirect_uri=${encodeURIComponent(
+          `${window.location.origin}/oauth/google/callback`
+        )}&scope=${encodeURIComponent(
+          "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.emails.read"
+        )}`
+      );
+      setBitbucketUrl(
+        `https://bitbucket.org/site/oauth2/authorize?client_id=${bitbucketClientId}&response_type=code`
+      );
+
+      setGithubUrl(
+        `https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(
+          ","
+        )}&state=${uuid ? uuid.v4() : ""}`
+      );
+
+      setGitlabUrl(
+        `https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&redirect_uri=${gitlabRedirectURI}&response_type=code`
+      );
+
+      setPingUrl(pingIdSamlSSOUrl);
+
+      setEnableGoogleAuth(tmpEnableGoogleAuth);
+      setEnableGitlabAuth(tmpEnableGitlabAuth);
+      setEnableGithubAuth(tmpEnableGithubAuth);
+      setEnableBitbucketAuth(tmpEnableBitbucketAuth);
+      setEnableKysoAuth(tmpEnableKysoAuth);
+      setEnablePingSamlAuth(tmpEnablePingSamlAuth);
+
+      const custumizeLeftLogo = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LEFT_LOGO_URL
+      ).value;
+      const custumizeRightLogo = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_RIGHT_LOGO_URL
+      ).value;
+
+      const customizeGlobalCss = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_CSS_STYLES
+      ).value;
+
+      const customizeHeaderCss = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HEADER_CSS_STYLES
+      )?.value;
+
+      const customizeButtonCss = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_CSS_STYLES
+      )?.value;
+      const customizeButtonHoverCss = publicKeys.find(
+        (x) =>
+          x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_HOVER_CSS_STYLES
+      )?.value;
+      const customizeLinkCss = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LINK_CSS_STYLES
+      )?.value;
+      const customizeShowdivCss = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES
+      )?.value;
+      const customizeHiddendivCss = publicKeys.find(
+        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES
+      )?.value;
+
+      setLeftLogo(custumizeLeftLogo);
+      setRightLogo(custumizeRightLogo);
+
+      setglobalCss(customizeGlobalCss);
+      setHeaderCss(customizeHeaderCss);
+      setButtonCss(customizeButtonCss);
+      setButtonHoverCss(customizeButtonHoverCss);
+      setLinkCss(customizeLinkCss);
+      setShowdivCss(customizeShowdivCss);
+      setHiddendivCss(customizeHiddendivCss);
+
+      return "";
+    };
+    getOrganizationOptions();
+  }, []);
+
+  useEffect(() => {
+    if (router.query.error) {
+      setError(router.query.error);
+    }
+  }, [router.query.error]);
 
   useEffect(() => {
     if (user) {
-      router.push("/");
+      // toaster.success("You are now logged in.");
+
+      setTimeout(() => {
+        if (user.show_captcha) {
+          if (redirect) {
+            router.push(`/captcha?redirect=${redirect}`);
+          } else {
+            router.push(`/captcha`);
+          }
+        } else if (redirect) {
+          router.push(redirect);
+        } else {
+          router.push("/");
+        }
+      }, 200);
     }
   }, [user]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+
+    if (!email || email.length === 0) {
+      setError("Email is required.");
+      return;
+    }
+
+    if (!validateEmail(email)) {
+      setError("Email not valid.");
+      return;
+    }
+
+    if (!password || password.length === 0) {
+      setError("Password is required.");
+      return;
+    }
 
     const loginData: Login = new Login(
       password,
       LoginProviderEnum.KYSO,
       email,
-      null
+      {}
     );
 
-    const resultLoginAction: AppDispatch = await dispatch(
-      loginAction(loginData)
-    );
+    const result = await dispatch(loginAction(loginData));
+    if (result?.payload) {
+      localStorage.setItem("jwt", result.payload);
+      setTimeout(() => {
+        if (redirect) {
+          router.push(redirect);
+        } else {
+          router.push("/");
+        }
+      }, 200);
+    }
+  };
 
-    const token: string = unwrapResult(resultLoginAction);
-
-    if (!token || token.length === 0) {
+  /* const responseGoogle = async (response: any) => {
+    if (!response) {
+      // toaster.danger("There was an error authenticating the user with Google.");
+      return;
+    }
+    if (response?.error) {
+      // toaster.danger(response.details || response.error);
       return;
     }
 
-    localStorage.setItem("jwt", token);
-
-    router.push("/");
-  };
+    const result = await dispatch(
+      loginAction({
+        email: "",
+        password: response.tokenId,
+        provider: "google",
+        payload: { ...response },
+      })
+    );
+    if (result?.payload) {
+      localStorage.setItem("jwt", result.payload);
+    } else {
+      // toaster.danger("There was an error authenticating the user with google.");
+    }
+  }; */
 
   return (
     <>
-      <div className="min-h-full flex">
-        <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24">
-          <div className="mx-auto w-full max-w-sm lg:w-96">
-            <div>
-              <img
-                className="h-12 w-auto"
-                src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-                alt="Workflow"
-              />
-              <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-                Sign in to your account
-              </h2>
-              <p className="mt-2 text-sm text-gray-600">
-                Or{" "}
-                <a
-                  href="#"
-                  className="font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  start your 14-day free trial
-                </a>
-              </p>
-            </div>
+      <Head>
+        <title> Kyso | Login </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </Head>
 
-            <div className="mt-8">
-              <div>
-                <div>
-                  <p className="text-sm font-medium text-gray-700">
-                    Sign in with
-                  </p>
+      <div className="min-h-full bg-white pt-2">
+        <div className="pb-4 grid grid-cols-3 gap-4 mb-4 border-b-[1px] border-[#dbdbdb] border-solid">
+          <div className="pl-4">
+            {/* Left logo */}
+            {leftLogo && <img src={leftLogo} alt="logo" />}
+          </div>
+          <div className="pl-[45%]">
+            {/* Center logo */}
+            {rightLogo && <img src={rightLogo} alt="logo" />}
+          </div>
+          <div className="pl-[87%]">
+            {/* Right logo */}
+            {rightLogo && <img src={rightLogo} alt="logo" />}
+          </div>
+        </div>
 
-                  <div className="mt-1 grid grid-cols-3 gap-3">
-                    <div>
-                      <a
-                        href="#"
-                        className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+        <main className="pb-8 pt-24">
+          <div className="mx-10">
+            {/* Main 3 column grid */}
+            <div className="grid grid-cols-1 gap-4 items-start lg:grid-cols-3 lg:gap-8">
+              {/* Left column */}
+              <div className="grid grid-cols-1 gap-4 lg:col-span-2">
+                <section aria-labelledby="section-1-title">
+                  <div className="">
+                    <div className="p-6">
+                      {/* Your content */}
+                      <div
+                        style={{ paddingLeft: "15.3%", paddingBottom: "15px" }}
                       >
-                        <span className="sr-only">Sign in with Facebook</span>
-                        <svg
-                          className="w-5 h-5"
-                          aria-hidden="true"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M20 10c0-5.523-4.477-10-10-10S0 4.477 0 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V10h2.54V7.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V10h2.773l-.443 2.89h-2.33v6.988C16.343 19.128 20 14.991 20 10z"
-                            clipRule="evenodd"
+                        {/* <h1>Kyso.io</h1> */}
+                        <Link href="/">
+                          <img
+                            className="w-24"
+                            src={`/assets/images/kyso-logo-and-name-dark.svg`}
+                            alt="Kyso"
                           />
-                        </svg>
-                      </a>
-                    </div>
-
-                    <div>
-                      <a
-                        href="#"
-                        className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                      >
-                        <span className="sr-only">Sign in with Twitter</span>
-                        <svg
-                          className="w-5 h-5"
-                          aria-hidden="true"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
+                        </Link>
+                        <p
+                          className="py-4"
+                          style={{
+                            WebkitFontSmoothing: "antialiased",
+                            textRendering: "optimizeLegibility",
+                          }}
                         >
-                          <path d="M6.29 18.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0020 3.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.073 4.073 0 01.8 7.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 010 16.407a11.616 11.616 0 006.29 1.84" />
-                        </svg>
-                      </a>
+                          Kyso.io offers free unlimited (private) repositories
+                          and unlimited collaborators.
+                        </p>
+                        <ul className="list-disc list-inside pl-4 pb-4">
+                          <li>
+                            <Link
+                              className="login-link"
+                              href="https://docs.kyso.io"
+                              aria-label="docs"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Read Kyso documentation
+                            </Link>
+                          </li>
+                          <li style={{ paddingTop: "5px" }}>
+                            <Link
+                              className="login-link"
+                              href="https://docs.kyso.io/posting-to-kyso/kyso-command-line-tool/installation"
+                              aria-label="cli"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Install Kyso CLI
+                            </Link>
+                          </li>
+                          <li style={{ paddingTop: "5px" }}>
+                            <Link
+                              className="login-link"
+                              href="https://about.kyso.io/about"
+                              aria-label="about"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              More information about Kyso
+                            </Link>
+                          </li>
+                          {/* <li style={{ paddingTo5: '7px'}}>
+                              <Link className="login-link" href="https://about.kyso.io/blog" aria-label="blog" target="_blank" rel="noopener noreferrer">
+                                Read our blog
+                              </Link>
+                              </li> */}
+                        </ul>
+                        <div className="pb-4">
+                          <p className="pb-4">
+                            By signing up for and by signing in to this service
+                            you accept our:
+                          </p>
+                          <ul className="list-disc list-inside pl-4">
+                            <li style={{ paddingTop: "5px" }}>
+                              <Link
+                                className="login-link"
+                                href="https://about.kyso.io/terms"
+                                aria-label="terms"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Terms of service
+                              </Link>
+                            </li>
+                            <li style={{ paddingTop: "5px" }}>
+                              <Link
+                                className="login-link"
+                                href="https://about.kyso.io/privacy"
+                                aria-label="privacy"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                Privacy statement
+                              </Link>
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
                     </div>
-
-                    <div>
-                      <a
-                        href="#"
-                        className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
-                      >
-                        <span className="sr-only">Sign in with GitHub</span>
-                        <svg
-                          className="w-5 h-5"
-                          aria-hidden="true"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                      </a>
-                    </div>
                   </div>
-                </div>
-
-                <div className="mt-6 relative">
-                  <div
-                    className="absolute inset-0 flex items-center"
-                    aria-hidden="true"
-                  >
-                    <div className="w-full border-t border-gray-300" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">
-                      Or continue with
-                    </span>
-                  </div>
-                </div>
+                </section>
               </div>
 
-              <div className="mt-6">
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Email address
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        value={email}
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={(e: any) => setUsername(e.target.value)}
-                      />
-                    </div>
-                  </div>
+              {/* Right column */}
+              <div className="grid grid-cols-1 gap-4">
+                <section aria-labelledby="section-2-title">
+                  <div className="pt-6 pr-6">
+                    <h6 className="text-bold text-xl font-normal leading-normal mt-0 mb-2 text-pink-800">
+                      Sign in to Kyso
+                    </h6>
 
-                  <div className="space-y-1">
-                    <label
-                      htmlFor="password"
-                      className="block text-sm font-medium text-gray-700"
-                    >
-                      Password
-                    </label>
-                    <div className="mt-1">
-                      <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autoComplete="current-password"
-                        required
-                        value={password}
-                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        onChange={(e: any) => setPassword(e.target.value)}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center">
-                      <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                      />
-                      <label
-                        htmlFor="remember-me"
-                        className="ml-2 block text-sm text-gray-900"
+                    {enableKysoAuth && (
+                      <form
+                        method="post"
+                        action={`/api/login`}
+                        onSubmit={handleSubmit}
                       >
-                        Remember me
-                      </label>
-                    </div>
+                        <label
+                          className="block text-gray-700 text-sm font-bold mb-2"
+                          htmlFor="username"
+                        >
+                          Email
+                        </label>
+                        <input
+                          className="mb-2 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          aria-label="Email"
+                          type="text"
+                          name="email"
+                          value={email}
+                          placeholder="Email"
+                          onChange={(e) => {
+                            setError("");
+                            dispatch(storeSetError(""));
+                            setEmail(e.target.value);
+                          }}
+                        />
 
-                    <div className="text-sm">
-                      <a
-                        href="#"
-                        className="font-medium text-indigo-600 hover:text-indigo-500"
-                      >
-                        Forgot your password?
-                      </a>
+                        <label
+                          className="block text-gray-700 text-sm font-bold mb-2"
+                          htmlFor="username"
+                        >
+                          Password
+                        </label>
+
+                        <input
+                          className="mb-2 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                          // description="Please enter your password."
+                          value={password}
+                          name="password"
+                          type="password"
+                          // placeholder="Password"
+                          autoComplete="off"
+                          onChange={(e) => {
+                            setError("");
+                            dispatch(storeSetError(""));
+                            setPassword(e.target.value);
+                          }}
+                        />
+
+                        <div className="flex my-4">
+                          <div className="w-1/2 h-12">
+                            <button
+                              type="button"
+                              className="p-4 bg-kyso-secondary hover:bg-kyso-secondary-hover py-2 text-xs font-medium rounded"
+                            >
+                              <Link
+                                className="text-black"
+                                href="/reset-password"
+                              >
+                                Forgot your password?
+                              </Link>
+                            </button>
+                          </div>
+                          <div className="w-1/2 h-12 text-right">
+                            <button
+                              type="submit"
+                              className="p-4 bg-kyso-primary hover:bg-kyso-primary-hover text-white py-2 text-xs font-medium rounded"
+                            >
+                              Log in
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+                    )}
+                    <div>
+                      {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
+                        <div className="flex mb-1">
+                          <div className="w-full h-12">
+                            <button
+                              type="button"
+                              className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded no-underline"
+                            >
+                              <Link
+                                href={githubUrl}
+                                className="text-black no-underline"
+                              >
+                                <FontAwesomeIcon
+                                  style={{
+                                    marginRight: 8,
+                                  }}
+                                  icon={faGithub}
+                                />
+                                Log in with Github
+                              </Link>
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      {enableBitbucketAuth &&
+                        bitbucketUrl &&
+                        bitbucketUrl.length > 0 && (
+                          <div className="flex mb-1">
+                            <div className="w-full h-12">
+                              <button
+                                type="button"
+                                className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded"
+                              >
+                                <Link href={bitbucketUrl}>
+                                  <FontAwesomeIcon
+                                    style={{
+                                      marginRight: 8,
+                                    }}
+                                    icon={faBitbucket}
+                                  />
+                                  Log in with Bitbucket
+                                </Link>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      {enableGitlabAuth && gitlabUrl && gitlabUrl.length > 0 && (
+                        <button
+                          type="button"
+                          className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          <Link href={gitlabUrl}>
+                            <FontAwesomeIcon
+                              style={{
+                                marginRight: 8,
+                              }}
+                              icon={faGitlab}
+                            />
+                            Log in with Gitlab
+                          </Link>
+                        </button>
+                      )}
+                      {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
+                        <button
+                          type="button"
+                          className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          <Link href={googleUrl}>
+                            <FontAwesomeIcon
+                              style={{
+                                marginRight: 8,
+                              }}
+                              icon={faGoogle}
+                            />
+                            Log in with Google
+                          </Link>
+                        </button>
+                      )}
+
+                      {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
+                        <button
+                          type="button"
+                          className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          <Link href={pingUrl}>
+                            <img
+                              src="/static/images/pingid_logo.jpg"
+                              width={12}
+                              style={{ marginRight: "8px" }}
+                              alt="PingID Login"
+                            ></img>
+                            Log in with PingId
+                          </Link>
+                        </button>
+                      )}
                     </div>
                   </div>
-
-                  <div>
-                    <button
-                      type="submit"
-                      className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    >
-                      Sign in
-                    </button>
-                  </div>
-                </form>
+                </section>
               </div>
             </div>
           </div>
-        </div>
-        <div className="hidden lg:block relative w-0 flex-1">
-          <img
-            className="absolute inset-0 h-full w-full object-cover"
-            src="https://images.unsplash.com/photo-1505904267569-f02eaeb45a4c?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1908&q=80"
-            alt=""
-          />
-        </div>
+        </main>
       </div>
     </>
   );

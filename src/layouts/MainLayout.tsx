@@ -13,7 +13,7 @@ import { Fragment, useState } from "react";
 
 import type { LayoutProps } from "@/types/pageWithLayout";
 
-import { Footer } from "./components/Footer";
+import { Footer } from "../components/Footer";
 import { Meta } from "./Meta";
 
 const MainLayout: LayoutProps = ({ children }: any) => {
