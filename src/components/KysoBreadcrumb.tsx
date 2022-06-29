@@ -9,7 +9,7 @@ const KysoBreadcrumb = (props: IKysoBreadcrumbProps) => (
   <>
     <nav className="flex" aria-label="Breadcrumb">
       <ol role="list" className="flex items-center space-x-4">
-        <li>
+        <li key="default-home">
           <div>
             <a href="/" className="text-gray-400 hover:text-gray-500">
               <HomeIcon className="shrink-0 h-5 w-5" aria-hidden="true" />
