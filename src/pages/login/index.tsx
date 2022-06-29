@@ -506,7 +506,7 @@ const Index = () => {
                               type="submit"
                               className="p-4 bg-kyso-primary hover:bg-kyso-primary-hover text-white py-2 text-xs font-medium rounded"
                             >
-                              Log in
+                              Log in now
                             </button>
                           </div>
                         </div>
