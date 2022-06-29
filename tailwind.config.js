@@ -13,6 +13,14 @@ module.exports = {
       '5xl': '3rem',
       '6xl': '4rem',
     },
+    colors: {
+      kyso: '#112f49',
+      white: '#FFFFFF',
+      'kyso-primary': '#3366ff',
+      'kyso-primary-hover': '#2952cc',
+      'kyso-secondary': '#ffffff',
+      'kyso-secondary-hover': '#f4f5f9',
+    },
     extend: {
       colors: {
         gray: {
