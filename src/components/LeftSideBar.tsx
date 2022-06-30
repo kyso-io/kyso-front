@@ -19,7 +19,6 @@ const LeftSideBar = (props: ILeftSideBarProps) => (
       <div className="md:fixed md:flex md:w-64 md:flex-col">
         {/* Sidebar component, swap this element with another sidebar if you like */}
         <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-white">
-          <span>PUT HERE ORG SELECTOR</span>
           <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
             <nav
               className="mt-5 flex-1 space-y-1 bg-white px-2"
@@ -67,7 +66,7 @@ const LeftSideBar = (props: ILeftSideBarProps) => (
       <div className="flex flex-1 flex-col md:pl-64">
         <main>
           <div className="py-6">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
+            <div className="max-w-7xl px-2 sm:px-2 md:px-12">
               {/* Replace with your content */}
               {props.children}
               {/* /End replace */}

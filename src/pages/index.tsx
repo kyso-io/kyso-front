@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import KysoTopBar from "@/layouts/KysoTopBar";
 import { Meta } from "@/layouts/Meta";
-import { LeftSideBar } from "@/templates/LeftSideBar";
+import { LeftSideBar } from "@/components/LeftSideBar";
 import { HashtagIcon } from "@heroicons/react/outline";
 import type { LeftMenuItem } from "@/model/left-menu-item.model";
 import { useAuth } from "@/hooks/auth";
