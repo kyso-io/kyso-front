@@ -7,6 +7,7 @@ import type {
 } from "@kyso-io/kyso-model";
 import type { AppDispatch, RootState } from "@kyso-io/kyso-store";
 import {
+  fetchOrganizationAction,
   fetchReportsAction,
   fetchTeamAction,
   setActiveId,
@@ -45,9 +46,11 @@ const CommonDataWrapper = (props: any) => {
       if (!organizationResourcePermissions) {
         return;
       }
-      await dispatch(setOrganizationAuthAction(organizationName as string));
 
-      // const resultOrganizationAction: AppDispatch = await dispatch(fetchOrganizationAction(organizationResourcePermissions.id));
+      await dispatch(setOrganizationAuthAction(organizationName as string));
+      await dispatch(
+        fetchOrganizationAction(organizationResourcePermissions.id)
+      );
 
       if (!teamName) {
         return;
