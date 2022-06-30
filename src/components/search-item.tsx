@@ -14,6 +14,13 @@ const SearchItem = ({ fullTextSearchResult }: Props) => {
     return [];
   }, [fullTextSearchResult]);
 
+  const tags: string[] = useMemo(() => {
+    if (fullTextSearchResult.tags) {
+      return fullTextSearchResult.tags.split(" ");
+    }
+    return [];
+  }, [fullTextSearchResult]);
+
   return (
     <li className="mb-4 relative bg-white py-5 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
       <div className="flex justify-between space-x-3">
@@ -30,6 +37,11 @@ const SearchItem = ({ fullTextSearchResult }: Props) => {
             {people.map((person: string, index: number) => (
               <span key={index} className="bg-purple-100 text-purple-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-purple-200 dark:text-purple-900">
                 {person}
+              </span>
+            ))}
+            {tags.map((tag: string, index: number) => (
+              <span key={index} className="bg-yellow-100 text-yellow-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-200 dark:text-yellow-900">
+                {tag}
               </span>
             ))}
             {/* <p className="text-sm text-gray-500 truncate">Velit placeat sit ducimus non sed</p> */}
