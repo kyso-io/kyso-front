@@ -19,25 +19,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
     undefined
   ) as User;
 
-  const navigation: any[] = [
-    /*
-    { name: "Dashboard", href: "/", icon: HomeIcon, current: true },
-    {
-      name: "Profile",
-      href: "/profile/fjbarrena",
-      icon: UsersIcon,
-      current: false,
-    },
-    { name: "404", href: "/404", icon: FolderIcon, current: false },
-    { name: "500", href: "/500", icon: CalendarIcon, current: false },
-    { name: "About", href: "/about", icon: InboxIcon, current: false },
-    {
-      name: "Query Params",
-      href: "/lightside",
-      icon: ChartBarIcon,
-      current: false,
-    }, */
-  ];
+  const navigation: any[] = [];
 
   const userNavigation = [
     { name: "Your Profile", href: "#" },
