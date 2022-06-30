@@ -44,7 +44,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                       <a href="/">
                         <img
                           className="h-8 w-8"
-                          src={`/assets/images/kyso-logo-white.svg`}
+                          src={`/in/assets/images/kyso-logo-white.svg`}
                           alt="Kyso"
                         />
                       </a>

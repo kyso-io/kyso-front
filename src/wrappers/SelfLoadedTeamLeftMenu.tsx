@@ -50,7 +50,7 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
             x.sluglified_name,
             HashtagIcon,
             0,
-            `/${organizationData.sluglified_name}/${x.sluglified_name}`,
+            `./${organizationData.sluglified_name}/${x.sluglified_name}`,
             x.sluglified_name === teamName
           );
         });
