@@ -14,8 +14,11 @@ WORKDIR /app
 COPY . .
 # Execute `npm ci` with an externally mounted npmrc
 RUN --mount=type=secret,id=npmrc,target=/app/.npmrc,required npm ci
-# Now build and export without .npmrc
-RUN npm run clean && npm run build && npm run export
+# Now do the build
+RUN npm run clean && npm run build
+# Iff we are able to use the exported application we could add the following:
+#   && npm run export
+# and use the out/ dir as the exported application.
 
 ## Production image
 FROM ${SERVICE_IMG}:${SERVICE_TAG} AS service
