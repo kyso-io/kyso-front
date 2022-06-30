@@ -16,14 +16,11 @@ const LeftSideBar = (props: ILeftSideBarProps) => (
     {props.meta}
     <div>
       {/* Static sidebar for desktop */}
-      <div className="md:fixed md:flex md:w-64 md:flex-col">
+      <div className="h-full md:fixed md:flex md:w-64 md:flex-col">
         {/* Sidebar component, swap this element with another sidebar if you like */}
-        <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-white">
+        <div className="flex min-h-0 flex-1 flex-col border-r border-gray-200 bg-kyso-tertiary">
           <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
-            <nav
-              className="mt-5 flex-1 space-y-1 bg-white px-2"
-              aria-label="Sidebar"
-            >
+            <nav className="mt-5 flex-1 space-y-1 px-2" aria-label="Sidebar">
               {props.navigation.map((item) => (
                 <a
                   key={item.name}

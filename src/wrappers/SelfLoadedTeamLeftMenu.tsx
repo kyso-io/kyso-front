@@ -16,10 +16,12 @@ import { HashtagIcon } from "@heroicons/react/solid";
 import { LeftMenuItem } from "@/model/left-menu-item.model";
 import { useDispatch } from "react-redux";
 import { BreadcrumbItem } from "@/model/breadcrum-item.model";
+import { useRouter } from "next/router";
 import CommonDataWrapper from "./CommonDataWrapper";
 
 const SelfLoadedTeamLeftMenu = (props: any) => {
-  // useAuth();
+  const router = useRouter();
+  const { teamName } = router.query;
 
   // This works because we are using CommonDataWrapper
   const organizationData: Organization = useAppSelector(
@@ -48,8 +50,8 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
             x.sluglified_name,
             HashtagIcon,
             0,
-            `./${x.sluglified_name}`,
-            false
+            `/${organizationData.sluglified_name}/${x.sluglified_name}`,
+            x.sluglified_name === teamName
           );
         });
 
@@ -65,7 +67,7 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
       new BreadcrumbItem(
         organizationData.display_name,
         `/${organizationData?.sluglified_name}`,
-        false
+        organizationData && !teamData && !reportData
       )
     );
   }
@@ -75,7 +77,7 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
       new BreadcrumbItem(
         teamData.display_name,
         `/${organizationData?.sluglified_name}/${teamData?.sluglified_name}`,
-        true
+        organizationData && teamData && !reportData
       )
     );
   }
@@ -85,7 +87,7 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
       new BreadcrumbItem(
         reportData?.title,
         `/${organizationData?.sluglified_name}/${teamData?.sluglified_name}/${reportData?.sluglified_name}`,
-        true
+        organizationData && teamData && reportData && true
       )
     );
   }
