@@ -3,6 +3,13 @@ include:
     ref: v0.4.18
     file: '/templates/npm-dockerfile-build.yml'
 
+# testing environment @ before script
+docker-build:
+  before_script:
+  - env
+  - !reference [.docker-config, before_script]
+  - !reference [.npm-config, before_script]
+
 variables:
   DOCKER_BUILDKIT: 1
   KYSO_IGNORE_BRANCH: "true"
