@@ -13,8 +13,9 @@ WORKDIR /app
 # Copy files required to build the application
 COPY . .
 # Execute `npm ci` with an externally mounted npmrc
-RUN --mount=type=secret,id=npmrc,target=/app/.npmrc,required\
- npm ci && npm run clean && npm run build && npm run export
+RUN --mount=type=secret,id=npmrc,target=/app/.npmrc,required npm ci
+# Now build and export without .npmrc
+RUN npm run clean && npm run build && npm run export
 
 ## Production image
 FROM ${SERVICE_IMG}:${SERVICE_TAG} AS service
