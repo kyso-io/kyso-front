@@ -7,9 +7,9 @@ set -e
 RELPATH_TO_WORKDIR=".."
 
 # Variables
-IMAGE_NAME="k3d-registry.lo.kyso.io:5000/kyso"
+IMAGE_NAME="k3d-registry.lo.kyso.io:5000/kyso-front"
 IMAGE_TAG="latest"
-CONTAINER_NAME="kyso"
+CONTAINER_NAME="kyso-front"
 BUILD_ARGS=""
 BUILD_SECRETS=""
 BUILD_TAG="$IMAGE_NAME:$IMAGE_TAG"
