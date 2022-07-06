@@ -11,9 +11,11 @@ import { useSelector } from "react-redux";
 import { selectUser } from "@kyso-io/kyso-store";
 import type { User } from "@kyso-io/kyso-model";
 import { Sanitizer } from "@/helpers/Sanitizer";
+import { useRouter } from "next/router";
 import { Footer } from "../components/Footer";
 
 const KysoTopBar: LayoutProps = ({ children }: any) => {
+  const router = useRouter();
   const user: User = Sanitizer.ifNullReturnDefault(
     useSelector<User>(selectUser),
     undefined
@@ -41,7 +43,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                 <div className="flex h-16 items-center justify-between">
                   <div className="flex items-center">
                     <div className="shrink-0">
-                      <a href="/">
+                      <a href={router.basePath}>
                         <img
                           className="h-8 w-8"
                           src={`/in/assets/images/kyso-logo-white.svg`}

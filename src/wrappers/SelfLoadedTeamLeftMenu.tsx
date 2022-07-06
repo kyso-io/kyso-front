@@ -50,7 +50,7 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
             x.sluglified_name,
             HashtagIcon,
             0,
-            `./${organizationData.sluglified_name}/${x.sluglified_name}`,
+            `${router.basePath}/${organizationData.sluglified_name}/${x.sluglified_name}`,
             x.sluglified_name === teamName
           );
         });
@@ -66,7 +66,7 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
     breadcrumb.push(
       new BreadcrumbItem(
         organizationData.display_name,
-        `/${organizationData?.sluglified_name}`,
+        `${router.basePath}/${organizationData?.sluglified_name}`,
         organizationData && !teamData && !reportData
       )
     );
@@ -76,7 +76,7 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
     breadcrumb.push(
       new BreadcrumbItem(
         teamData.display_name,
-        `/${organizationData?.sluglified_name}/${teamData?.sluglified_name}`,
+        `${router.basePath}/${organizationData?.sluglified_name}/${teamData?.sluglified_name}`,
         organizationData && teamData && !reportData
       )
     );
@@ -86,7 +86,7 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
     breadcrumb.push(
       new BreadcrumbItem(
         reportData?.title,
-        `/${organizationData?.sluglified_name}/${teamData?.sluglified_name}/${reportData?.sluglified_name}`,
+        `${router.basePath}/${organizationData?.sluglified_name}/${teamData?.sluglified_name}/${reportData?.sluglified_name}`,
         organizationData && teamData && reportData && true
       )
     );
