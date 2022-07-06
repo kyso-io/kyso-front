@@ -1,26 +1,11 @@
-import type { FullTextSearchResult } from "@kyso-io/kyso-model";
 import { ElasticSearchIndex } from "@kyso-io/kyso-model";
-import { useMemo } from "react";
+import type { FullTextSearchResult } from "@kyso-io/kyso-model";
 
 interface Props {
   fullTextSearchResult: FullTextSearchResult;
 }
 
 const SearchItem = ({ fullTextSearchResult }: Props) => {
-  const people: string[] = useMemo(() => {
-    if (fullTextSearchResult.people) {
-      return fullTextSearchResult.people.split(" ");
-    }
-    return [];
-  }, [fullTextSearchResult]);
-
-  const tags: string[] = useMemo(() => {
-    if (fullTextSearchResult.tags) {
-      return fullTextSearchResult.tags.split(" ");
-    }
-    return [];
-  }, [fullTextSearchResult]);
-
   return (
     <li className="mb-4 relative bg-white py-5 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
       <div className="flex justify-between space-x-3">
@@ -34,12 +19,12 @@ const SearchItem = ({ fullTextSearchResult }: Props) => {
             {fullTextSearchResult.teamSlug && (
               <span className="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">{fullTextSearchResult.teamSlug}</span>
             )}
-            {people.map((person: string, index: number) => (
+            {fullTextSearchResult.people.map((person: string, index: number) => (
               <span key={index} className="bg-purple-100 text-purple-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-purple-200 dark:text-purple-900">
                 {person}
               </span>
             ))}
-            {tags.map((tag: string, index: number) => (
+            {fullTextSearchResult.tags.map((tag: string, index: number) => (
               <span key={index} className="bg-yellow-100 text-yellow-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-200 dark:text-yellow-900">
                 {tag}
               </span>

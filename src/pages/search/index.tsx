@@ -15,7 +15,7 @@ import debounce from "lodash.debounce";
 import React, { useEffect, useMemo, useState } from "react";
 
 const fetchData = async (params: FullTextSearchParams, dispatch: any, cb: (fullTextSearchDTO: FullTextSearchDTO | null) => void) => {
-  const resultFullTextSearch = await dispatch(fullTextSearchAction(params));
+  const resultFullTextSearch = await dispatch(fullTextSearchAction({ ...params, terms: encodeURIComponent(params.terms) }));
   const fullTextSearchDTO: FullTextSearchDTO | null = unwrapResult(resultFullTextSearch);
   cb(fullTextSearchDTO);
 };
