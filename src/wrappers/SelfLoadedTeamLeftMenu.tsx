@@ -1,11 +1,6 @@
 import type { Organization, Report, Team } from "@kyso-io/kyso-model";
 import type { AppDispatch } from "@kyso-io/kyso-store";
-import {
-  fetchTeamsAction,
-  selectActiveOrganization,
-  selectActiveReport,
-  selectActiveTeam,
-} from "@kyso-io/kyso-store";
+import { fetchTeamsAction, selectActiveOrganization, selectActiveReport, selectActiveTeam } from "@kyso-io/kyso-store";
 import { useEffect, useState } from "react";
 import { useAppSelector } from "@/hooks/redux-hooks";
 import { LeftSideBar } from "@/components/LeftSideBar";
@@ -24,9 +19,7 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
   const { teamName } = router.query;
 
   // This works because we are using CommonDataWrapper
-  const organizationData: Organization = useAppSelector(
-    selectActiveOrganization
-  );
+  const organizationData: Organization = useAppSelector(selectActiveOrganization);
   const teamData: Team = useAppSelector(selectActiveTeam);
   const reportData: Report = useAppSelector(selectActiveReport);
 
@@ -42,17 +35,11 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
               organization_id: organizationData.id,
             },
             sort: "-created_at",
-          })
+          }),
         );
 
         const mappedTeams = teams.payload.map((x: Team) => {
-          return new LeftMenuItem(
-            x.sluglified_name,
-            HashtagIcon,
-            0,
-            `./${organizationData.sluglified_name}/${x.sluglified_name}`,
-            x.sluglified_name === teamName
-          );
+          return new LeftMenuItem(x.sluglified_name, HashtagIcon, 0, `./${organizationData.sluglified_name}/${x.sluglified_name}`, x.sluglified_name === teamName);
         });
 
         setOrganizationTeams(mappedTeams);
@@ -63,32 +50,16 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
   const breadcrumb: BreadcrumbItem[] = [];
 
   if (organizationData) {
-    breadcrumb.push(
-      new BreadcrumbItem(
-        organizationData.display_name,
-        `/${organizationData?.sluglified_name}`,
-        organizationData && !teamData && !reportData
-      )
-    );
+    breadcrumb.push(new BreadcrumbItem(organizationData.display_name, `/${organizationData?.sluglified_name}`, organizationData && !teamData && !reportData));
   }
 
   if (teamData) {
-    breadcrumb.push(
-      new BreadcrumbItem(
-        teamData.display_name,
-        `/${organizationData?.sluglified_name}/${teamData?.sluglified_name}`,
-        organizationData && teamData && !reportData
-      )
-    );
+    breadcrumb.push(new BreadcrumbItem(teamData.display_name, `/${organizationData?.sluglified_name}/${teamData?.sluglified_name}`, organizationData && teamData && !reportData));
   }
 
   if (reportData) {
     breadcrumb.push(
-      new BreadcrumbItem(
-        reportData?.title,
-        `/${organizationData?.sluglified_name}/${teamData?.sluglified_name}/${reportData?.sluglified_name}`,
-        organizationData && teamData && reportData && true
-      )
+      new BreadcrumbItem(reportData?.title, `/${organizationData?.sluglified_name}/${teamData?.sluglified_name}/${reportData?.sluglified_name}`, organizationData && teamData && reportData && true),
     );
   }
 
@@ -97,18 +68,7 @@ const SelfLoadedTeamLeftMenu = (props: any) => {
       <CommonDataWrapper>
         <LeftSideBar
           navigation={organizationTeams}
-          meta={
-            <Meta
-              title={`Kyso - ${Sanitizer.ifNullReturnDefault(
-                organizationData?.display_name,
-                ""
-              )}`}
-              description={`${Sanitizer.ifNullReturnDefault(
-                organizationData?.display_name,
-                ""
-              )}`}
-            />
-          }
+          meta={<Meta title={`Kyso - ${Sanitizer.ifNullReturnDefault(organizationData?.display_name, "")}`} description={`${Sanitizer.ifNullReturnDefault(organizationData?.display_name, "")}`} />}
         >
           <KysoBreadcrumb navigation={breadcrumb}></KysoBreadcrumb>
 

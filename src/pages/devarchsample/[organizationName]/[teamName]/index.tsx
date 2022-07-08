@@ -1,17 +1,12 @@
 import KysoTopBar from "@/layouts/KysoTopBar";
-import {
-  selectActiveOrganization,
-  selectActiveTeam,
-} from "@kyso-io/kyso-store";
+import { selectActiveOrganization, selectActiveTeam } from "@kyso-io/kyso-store";
 import type { Organization, Team } from "@kyso-io/kyso-model";
 import { useAppSelector } from "@/hooks/redux-hooks";
 import SelfLoadedTeamLeftMenu from "@/wrappers/SelfLoadedTeamLeftMenu";
 
 const Index = () => {
   // This works because we are using SelfLoadedTeamLeftMenu, which is using CommonDataWrapper
-  const organizationData: Organization = useAppSelector(
-    selectActiveOrganization
-  );
+  const organizationData: Organization = useAppSelector(selectActiveOrganization);
   const teamData: Team = useAppSelector(selectActiveTeam);
 
   return (

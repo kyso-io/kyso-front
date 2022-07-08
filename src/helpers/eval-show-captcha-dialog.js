@@ -1,7 +1,4 @@
-const showCaptchaDialogHelper = (
-  userShowCaptcha,
-  settingGloballyEnabledCaptcha
-) => {
+const showCaptchaDialogHelper = (userShowCaptcha, settingGloballyEnabledCaptcha) => {
   // Hack to convert to boolean
   /* eslint-disable no-param-reassign */
   settingGloballyEnabledCaptcha = settingGloballyEnabledCaptcha === 'true';

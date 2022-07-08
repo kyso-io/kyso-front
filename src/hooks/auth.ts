@@ -1,35 +1,24 @@
+import { Helper } from "@/helpers/Helper";
+import { KysoSettingsEnum } from "@kyso-io/kyso-model";
 import type { AppDispatch } from "@kyso-io/kyso-store";
-import {
-  fetchRelationsAction,
-  fetchUserPermissions,
-  selectUser,
-  setAuthAction,
-} from "@kyso-io/kyso-store";
+import { fetchRelationsAction, fetchUserPermissions, selectUser, setAuthAction } from "@kyso-io/kyso-store";
 import decode from "jwt-decode";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { KysoSettingsEnum } from "@kyso-io/kyso-model";
-import { Helper } from "@/helpers/Helper";
 
-export const useAuth = () => {
+export const useAuth = (redirectToLogin: boolean = true) => {
   const user = useSelector(selectUser);
   const dispatch = useDispatch<AppDispatch>();
-
   const router = useRouter();
   const { organizationName, teamName, redirect } = router.query;
-  let publicKeys: any;
 
   useEffect(() => {
     (async () => {
-      publicKeys = await Helper.getKysoPublicSettings();
-
-      let unauthorizedRedirectUrl;
+      const publicKeys: any = await Helper.getKysoPublicSettings();
+      let unauthorizedRedirectUrl: string;
       if (publicKeys) {
-        const pValue = publicKeys.find(
-          (x: any) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL
-        );
-
+        const pValue = publicKeys.find((x: any) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
         if (pValue) {
           unauthorizedRedirectUrl = pValue.value;
         } else {
@@ -49,6 +38,13 @@ export const useAuth = () => {
 
       const jwt: string = localStorage.getItem("jwt") as string;
 
+      if (!jwt) {
+        if (redirectToLogin) {
+          router.push("/login");
+        }
+        return;
+      }
+
       if (!jwt && redirect === undefined) {
         let redirectUrl = "?redirect=";
         if (router?.asPath && router.asPath.length > 0) {
@@ -62,8 +58,6 @@ export const useAuth = () => {
           // We are in other place, redirect to login
           router.push(`/login${redirectUrl}`);
         }
-
-        return;
       }
 
       const jwtToken: any = decode(jwt);
@@ -74,6 +68,7 @@ export const useAuth = () => {
         // token is out of date
         localStorage.removeItem("jwt");
         router.push(`/logout?redirect=true`);
+        return;
       }
 
       const jwtUser = jwtToken.payload;
@@ -83,21 +78,17 @@ export const useAuth = () => {
           jwt,
           teamName,
           organizationName,
-        })
+        }),
       );
 
-      const userPermissions = await dispatch(
-        fetchUserPermissions(jwtUser.username)
-      );
+      const userPermissions = await dispatch(fetchUserPermissions(jwtUser.username));
 
       if (userPermissions) {
         dispatch(
           fetchRelationsAction({
             team: Helper.ListToKeyVal(userPermissions.payload.teams),
-            organization: Helper.ListToKeyVal(
-              userPermissions.payload.organizations
-            ),
-          })
+            organization: Helper.ListToKeyVal(userPermissions.payload.organizations),
+          }),
         );
       }
     })();

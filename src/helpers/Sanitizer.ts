@@ -25,8 +25,6 @@ export class Sanitizer {
    * @returns the text passed as parameter, but with the first character in uppercase
    */
   public static transformToUpperCaseFirstLetter(text: string): string {
-    return text && text.length > 0
-      ? text.charAt(0).toUpperCase() + text.slice(1)
-      : "";
+    return text && text.length > 0 ? text.charAt(0).toUpperCase() + text.slice(1) : "";
   }
 }

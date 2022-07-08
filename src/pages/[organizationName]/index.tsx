@@ -6,9 +6,7 @@ import SelfLoadedTeamLeftMenu from "@/wrappers/SelfLoadedTeamLeftMenu";
 
 const Index = () => {
   // This works because we are using SelfLoadedTeamLeftMenu, which is using CommonDataWrapper
-  const organizationData: Organization = useAppSelector(
-    selectActiveOrganization
-  );
+  const organizationData: Organization = useAppSelector(selectActiveOrganization);
 
   return (
     <>
