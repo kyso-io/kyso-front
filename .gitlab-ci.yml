@@ -1,0 +1,33 @@
+include:
+  - project: 'common/gitlab-ci'
+    ref: v0.4.18
+    file: '/templates/npm-dockerfile-build.yml'
+
+# Update docker_build's before_script to update the public/v.html file
+docker-build:
+  before_script:
+  - !reference [.docker-config, before_script]
+  - !reference [.npm-config, before_script]
+  - |
+    BUILD_DATE="$(date -R)"
+    if [ "$CI_COMMIT_TAG" ]; then
+      REF_TYPE="Tag"
+      GIT_REF="$CI_COMMIT_TAG"
+    else
+      REF_TYPE="Branch"
+      GIT_REF="$CI_COMMIT_BRANCH"
+    fi
+    sed -i \
+      -e "s%__BUILD_DATE__%$BUILD_DATE%g" \
+      -e "s%__GIT_SHA__%$CI_COMMIT_SHA%g" \
+      -e "s%__REF_TYPE__%$REF_TYPE%g" \
+      -e "s%__GIT_REF__%$GIT_REF%g" \
+      public/v.html
+
+variables:
+  DOCKER_BUILDKIT: 1
+  # Disable SAST until someone looks at it, for now it is expensive and
+  # worthless
+  SAST_DISABLED: "true"
+  # Setting for ESLint, will evaluate
+  NODE_OPTIONS: '--max-old-space-size=4096'

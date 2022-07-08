@@ -1,19 +1,42 @@
-import type { JwtDecode } from "@/model/jwt-decode.model";
-import type { TokenPermissions, User } from "@kyso-io/kyso-model";
-import { fetchUserPermissions, logoutAction, selectCurrentUserPermissions, setTokenAuthAction } from "@kyso-io/kyso-store";
+import { Helper } from "@/helpers/Helper";
+import { KysoSettingsEnum } from "@kyso-io/kyso-model";
+import type { AppDispatch } from "@kyso-io/kyso-store";
+import { fetchRelationsAction, fetchUserPermissions, selectUser, setAuthAction } from "@kyso-io/kyso-store";
 import decode from "jwt-decode";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "./redux-hooks";
+import { useDispatch, useSelector } from "react-redux";
 
 export const useAuth = (redirectToLogin: boolean = true) => {
-  const dispatch = useAppDispatch();
+  const user = useSelector(selectUser);
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
-  const currentUserPermissions: TokenPermissions | null = useAppSelector(selectCurrentUserPermissions);
+  const { organizationName, teamName, redirect } = router.query;
 
   useEffect(() => {
-    const getData = async () => {
-      const jwt: string | null = localStorage.getItem("jwt");
+    (async () => {
+      const publicKeys: any = await Helper.getKysoPublicSettings();
+      let unauthorizedRedirectUrl: string;
+      if (publicKeys) {
+        const pValue = publicKeys.find((x: any) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
+        if (pValue) {
+          unauthorizedRedirectUrl = pValue.value;
+        } else {
+          unauthorizedRedirectUrl = "/login";
+        }
+      } else {
+        unauthorizedRedirectUrl = "/login";
+      }
+
+      if (!router.isReady) {
+        return;
+      }
+
+      if (user) {
+        return;
+      }
+
+      const jwt: string = localStorage.getItem("jwt") as string;
 
       if (!jwt) {
         if (redirectToLogin) {
@@ -22,21 +45,53 @@ export const useAuth = (redirectToLogin: boolean = true) => {
         return;
       }
 
-      const jwtToken: JwtDecode<User> = decode(jwt);
-      if (new Date(jwtToken.exp * 1000) <= new Date()) {
-        // token is out of date
-        localStorage.removeItem("jwt");
-        dispatch(logoutAction());
-        router.push("/login");
-        return;
+      if (!jwt && redirect === undefined) {
+        let redirectUrl = "?redirect=";
+        if (router?.asPath && router.asPath.length > 0) {
+          redirectUrl += router.asPath;
+        }
+
+        if (window.location.pathname === "/") {
+          // We are at the base of the URL, redirect to unauthorized redirect URL
+          router.push(unauthorizedRedirectUrl);
+        } else {
+          // We are in other place, redirect to login
+          router.push(`/login${redirectUrl}`);
+        }
       }
 
-      await dispatch(setTokenAuthAction(jwt));
-      if (!currentUserPermissions) {
-        await dispatch(fetchUserPermissions(jwtToken.payload.username));
+      const jwtToken: any = decode(jwt);
+
+      const { exp } = jwtToken;
+
+      if (new Date(exp * 1000) <= new Date()) {
+        // token is out of date
+        localStorage.removeItem("jwt");
+        router.push(`/logout?redirect=true`);
       }
-    };
-    getData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+
+      const jwtUser = jwtToken.payload;
+
+      dispatch(
+        setAuthAction({
+          jwt,
+          teamName,
+          organizationName,
+        }),
+      );
+
+      const userPermissions = await dispatch(fetchUserPermissions(jwtUser.username));
+
+      if (userPermissions) {
+        dispatch(
+          fetchRelationsAction({
+            team: Helper.ListToKeyVal(userPermissions.payload.teams),
+            organization: Helper.ListToKeyVal(userPermissions.payload.organizations),
+          }),
+        );
+      }
+    })();
+  }, [user, router, teamName, organizationName, dispatch]);
+
+  return user;
 };
