@@ -68,6 +68,7 @@ export const useAuth = (redirectToLogin: boolean = true) => {
         // token is out of date
         localStorage.removeItem("jwt");
         router.push(`/logout?redirect=true`);
+        return;
       }
 
       const jwtUser = jwtToken.payload;
