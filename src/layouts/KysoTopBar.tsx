@@ -1,10 +1,5 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import {
-  BellIcon,
-  MenuIcon,
-  SearchIcon,
-  XIcon,
-} from "@heroicons/react/outline";
+import { BellIcon, MenuIcon, XIcon } from "@heroicons/react/outline";
 import { Fragment } from "react";
 import type { LayoutProps } from "@/types/pageWithLayout";
 import { useSelector } from "react-redux";
@@ -12,10 +7,12 @@ import { selectUser } from "@kyso-io/kyso-store";
 import type { User } from "@kyso-io/kyso-model";
 import { Sanitizer } from "@/helpers/Sanitizer";
 import { useRouter } from "next/router";
+import { Helper } from "@/helpers/Helper";
 import { Footer } from "../components/Footer";
 
 const KysoTopBar: LayoutProps = ({ children }: any) => {
   const router = useRouter();
+
   const user: User = Sanitizer.ifNullReturnDefault(
     useSelector<User>(selectUser),
     undefined
@@ -23,10 +20,18 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
 
   const navigation: any[] = [];
 
+  let slugifiedName = "";
+  if (user) {
+    slugifiedName = Helper.slugify(user?.display_name);
+  }
+
   const userNavigation = [
-    { name: "Your Profile", href: "#" },
-    { name: "Settings", href: "#" },
-    { name: "Sign out", href: "#" },
+    { name: "Your Profile", href: `${router.basePath}/user/${slugifiedName}` },
+    {
+      name: "Your settings",
+      href: `${router.basePath}/user/${slugifiedName}/settings`,
+    },
+    { name: "Sign out", href: `${router.basePath}/logout` },
   ];
 
   function classNames(...classes: string[]) {
@@ -36,7 +41,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
   return (
     <>
       <div className="h-[64px] min-h-full">
-        <Disclosure as="nav" className="fixed z-10 w-screen bg-kyso">
+        <Disclosure as="div" className="fixed z-10 w-screen bg-neutral-400">
           {({ open }) => (
             <>
               <div className="mx-auto px-4 sm:px-6 lg:px-8 text-white">
@@ -51,51 +56,9 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
                         />
                       </a>
                     </div>
-                    <div className="hidden md:block">
-                      <div className="ml-10 flex items-baseline space-x-4">
-                        <div className="container flex justify-center items-center px-4 sm:px-6 lg:px-8">
-                          <div className="relative">
-                            <input
-                              type="text"
-                              className="h-10 w-96 pr-8 pl-5 rounded z-0 focus:shadow focus:outline-none"
-                              placeholder="Search anything..."
-                            />
-                            <div className="absolute top-3 right-3">
-                              <SearchIcon
-                                className="text-gray-600 h-4 w-4 fill-current"
-                                aria-hidden="true"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        {/* navigation.map((item) => (
-                          <a
-                            key={item.name}
-                            href={item.href}
-                            className={classNames(
-                              item.current
-                                ? "bg-indigo-700 text-white"
-                                : "text-white hover:bg-indigo-500/75",
-                              "px-3 py-2 rounded-md text-sm font-medium"
-                            )}
-                            aria-current={item.current ? "page" : undefined}
-                          >
-                            {item.name}
-                          </a>
-                            )) */}
-                      </div>
-                    </div>
                   </div>
                   <div className="hidden md:block">
                     <div className="ml-4 flex items-center md:ml-6">
-                      <button
-                        type="button"
-                        className="rounded-full bg-indigo-600 p-1 text-indigo-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600"
-                      >
-                        <span className="sr-only">View notifications</span>
-                        <BellIcon className="h-6 w-6" aria-hidden="true" />
-                      </button>
-
                       {/* Profile dropdown */}
                       {user && (
                         <Menu as="div" className="relative ml-3">
