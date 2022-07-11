@@ -12,7 +12,7 @@ const KysoBreadcrumb = (props: IKysoBreadcrumbProps) => {
   return (
     <>
       <nav className="flex" aria-label="Breadcrumb">
-        <ol role="list" className="flex items-center space-x-4">
+        <ol role="list" className="flex items-center space-x-0">
           <li key="default-home">
             <div>
               <a
@@ -40,8 +40,8 @@ const KysoBreadcrumb = (props: IKysoBreadcrumbProps) => {
                   href={page.href}
                   className={
                     page.current
-                      ? "ml-4 text-sm font-medium text-gray-800 hover:text-black"
-                      : "ml-4 text-sm font-medium text-gray-500 hover:text-gray-700"
+                      ? "ml-0 text-sm font-medium text-gray-800 hover:text-black"
+                      : "ml-0 text-sm font-medium text-gray-500 hover:text-gray-700"
                   }
                   aria-current={page.current ? "page" : undefined}
                 >
