@@ -387,11 +387,12 @@ const Index = () => {
                           </div>
                         </div>
                       )}
+
                       {enableBitbucketAuth && bitbucketUrl && bitbucketUrl.length > 0 && (
                         <div className="flex mb-1">
                           <div className="w-full h-12">
                             <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
-                              <a href={bitbucketUrl}>
+                              <a className="text-black no-underline" href={bitbucketUrl}>
                                 <FontAwesomeIcon
                                   style={{
                                     marginRight: 8,
@@ -404,49 +405,63 @@ const Index = () => {
                           </div>
                         </div>
                       )}
+
                       {enableGitlabAuth && gitlabUrl && gitlabUrl.length > 0 && (
-                        <button
-                          type="button"
-                          className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                          <a href={gitlabUrl}>
-                            <FontAwesomeIcon
-                              style={{
-                                marginRight: 8,
-                              }}
-                              icon={faGitlab}
-                            />
-                            Log in with Gitlab
-                          </a>
-                        </button>
+                        <div className="flex mb-1">
+                          <div className="w-full h-12">
+                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
+                              <a className="text-black no-underline" href={gitlabUrl}>
+                                <FontAwesomeIcon
+                                  style={{
+                                    marginRight: 8,
+                                  }}
+                                  icon={faGitlab}
+                                />
+                                Log in with Gitlab
+                              </a>
+                            </button>
+                          </div>
+                        </div>
                       )}
+
                       {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
-                        <button
-                          type="button"
-                          className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                          <a href={googleUrl}>
-                            <FontAwesomeIcon
-                              style={{
-                                marginRight: 8,
-                              }}
-                              icon={faGoogle}
-                            />
-                            Log in with Google
-                          </a>
-                        </button>
+                        <div className="flex mb-1">
+                          <div className="w-full h-12">
+                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
+                              <a className="text-black no-underline" href={googleUrl}>
+                                <FontAwesomeIcon
+                                  style={{
+                                    marginRight: 8,
+                                  }}
+                                  icon={faGoogle}
+                                />
+                                Log in with Google
+                              </a>
+                            </button>
+                          </div>
+                        </div>
                       )}
 
                       {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
-                        <button
-                          type="button"
-                          className="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                          <a href={pingUrl}>
-                            <img src="/static/images/pingid_logo.jpg" width={12} style={{ marginRight: "8px" }} alt="PingID Login"></img>
-                            Log in with PingId
-                          </a>
-                        </button>
+                        <div className="flex mb-1">
+                          <div className="w-full h-12">
+                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
+                              <a className="text-black no-underline" href={pingUrl}>
+                                <img
+                                  src="/static/images/pingid_logo.jpg"
+                                  width={12}
+                                  height={12}
+                                  style={{
+                                    marginRight: "8px",
+                                    display: "inline",
+                                  }}
+                                  alt="PingID Login"
+                                ></img>
+                                Log in with PingId
+                              </a>
+                            </button>
+                          </div>
+                        </div>
                       )}
                     </div>
                   </div>

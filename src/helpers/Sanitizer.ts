@@ -19,7 +19,7 @@ export class Sanitizer {
   }
 
   /**
-   * Transforms firts letter of the provided ${text} to uppercase
+   * Transforms first letter of the provided ${text} to uppercase
    *
    * @param text text to transform
    * @returns the text passed as parameter, but with the first character in uppercase

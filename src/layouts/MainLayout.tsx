@@ -3,26 +3,44 @@ import { CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, MenuIcon, 
 import { Fragment, useState } from "react";
 
 import type { LayoutProps } from "@/types/pageWithLayout";
+import { useRouter } from "next/router";
 
 import { Footer } from "../components/Footer";
 import { Meta } from "./Meta";
 
 const MainLayout: LayoutProps = ({ children }: any) => {
+  const router = useRouter();
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigation = [
-    { name: "Dashboard", href: "/", icon: HomeIcon, current: true },
+    { name: "Dashboard", href: router.basePath, icon: HomeIcon, current: true },
     {
       name: "Profile",
-      href: "/profile/fjbarrena",
+      href: `${router.basePath}/profile/fjbarrena`,
       icon: UsersIcon,
       current: false,
     },
-    { name: "404", href: "/404", icon: FolderIcon, current: false },
-    { name: "500", href: "/500", icon: CalendarIcon, current: false },
-    { name: "About", href: "/about", icon: InboxIcon, current: false },
+    {
+      name: "404",
+      href: `${router.basePath}/404`,
+      icon: FolderIcon,
+      current: false,
+    },
+    {
+      name: "500",
+      href: `${router.basePath}/500`,
+      icon: CalendarIcon,
+      current: false,
+    },
+    {
+      name: "About",
+      href: `${router.basePath}/about`,
+      icon: InboxIcon,
+      current: false,
+    },
     {
       name: "Query Params",
-      href: "/lightside",
+      href: `${router.basePath}/lightside`,
       icon: ChartBarIcon,
       current: false,
     },

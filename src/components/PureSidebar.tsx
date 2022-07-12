@@ -3,7 +3,7 @@ import { type LeftMenuItem } from "@/model/left-menu-item.model";
 import type { OrganizationSelectorItem } from "@/model/organization-selector-item.model";
 import { OrganizationSelector } from "./OrganizationSelector";
 
-type ILeftSideBarProps = {
+type IPureSidebarProps = {
   meta: ReactNode;
   children: ReactNode;
   navigation: LeftMenuItem[];
@@ -14,7 +14,7 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
 
-const LeftSideBar = (props: ILeftSideBarProps) => {
+const PureSidebar = (props: IPureSidebarProps) => {
   return (
     <>
       {props.meta}
@@ -61,4 +61,4 @@ const LeftSideBar = (props: ILeftSideBarProps) => {
   );
 };
 
-export { LeftSideBar };
+export { PureSidebar };

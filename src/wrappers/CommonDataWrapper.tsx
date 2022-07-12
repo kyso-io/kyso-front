@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/auth";
+import { useAuth } from "@/hooks/use-auth";
 import type { ReportDTO, ResourcePermissions, Team, TokenPermissions } from "@kyso-io/kyso-model";
 import type { AppDispatch, RootState } from "@kyso-io/kyso-store";
 import { fetchOrganizationAction, fetchReportsAction, fetchTeamAction, setActiveId, setOrganizationAuthAction, setTeamAuthAction } from "@kyso-io/kyso-store";
@@ -8,12 +8,14 @@ import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
 
 const CommonDataWrapper = (props: any) => {
+  const router = useRouter();
+  const { organizationName, teamName, reportName } = router.query;
+
   useAuth();
   const dispatch = useAppDispatch();
-  const router = useRouter();
+
   const token: string | null = useAppSelector((state: RootState) => state.auth.token);
   const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);
-  const { organizationName, teamName, reportName } = router.query;
 
   useEffect(() => {
     const getData = async () => {
@@ -23,6 +25,7 @@ const CommonDataWrapper = (props: any) => {
       if (!organizationName) {
         return;
       }
+
       const organizationResourcePermissions: ResourcePermissions | undefined = permissions.organizations!.find((org: ResourcePermissions) => org.name === organizationName);
       if (!organizationResourcePermissions) {
         return;
