@@ -41,6 +41,12 @@
             "endOfLine": "auto"
           }
         ],
+        "max-len": [
+          "error",
+          {
+            "code": 200
+          }
+        ],
         "semi": "error",
         "curly": "error",
         "no-extra-semi": "error",
@@ -52,6 +58,7 @@
         "@next/next/no-img-element": "off", // We currently not using next/image because it isn't supported with SSG mode
         "@typescript-eslint/comma-dangle": "off", // Avoid conflict rule between Eslint and Prettier
         "@typescript-eslint/consistent-type-imports": "error", // Ensure `import type` is used when it's necessary
+        "@typescript-eslint/no-explicit-any": "error",
         "import/prefer-default-export": "off", // Named export is easier to refactor automatically
         "tailwindcss/classnames-order": "off", // Follow the same ordering as the official plugin `prettier-plugin-tailwindcss`
         "tailwindcss/no-custom-classname": "off",

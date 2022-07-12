@@ -1,3 +1,4 @@
+import type { ReportDTO } from "@kyso-io/kyso-model";
 import { fetchReportsAction, selectActiveReports } from "@kyso-io/kyso-store";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -6,7 +7,7 @@ import { useAppDispatch, useAppSelector } from "./redux-hooks";
 import { useAuth } from "./use-auth";
 import { useCommonData } from "./use-common-data";
 
-export const useReports = () => {
+export const useReports = (): ReportDTO[] => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
@@ -30,12 +31,14 @@ export const useReports = () => {
     if (router.query.search && router.query.search.length > 0) {
       args.filter.search = router.query.search;
     }
+
     // console.log('calling api to get reports')
     dispatch(fetchReportsAction(args));
   };
 
   const [mounted, setMounted] = useState(false);
   useSWR(mounted ? "use-reports" : null, fetcher);
+
   useEffect(() => {
     if (reports) return;
     if (!activeTeam) return;
@@ -43,5 +46,5 @@ export const useReports = () => {
     setMounted(true);
   }, [user, activeTeam]);
 
-  return reports;
+  return reports || [];
 };

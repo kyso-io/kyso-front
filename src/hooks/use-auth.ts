@@ -3,23 +3,33 @@ import { fetchRelationsAction, fetchUserPermissions, selectUser, setAuthAction }
 import decode from "jwt-decode";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import type { Token, User } from "@kyso-io/kyso-model";
 import { KysoSettingsEnum } from "@kyso-io/kyso-model";
 import { Helper } from "@/helpers/Helper";
+import type { KeyValue } from "@/model/key-value.model";
 import { useAppSelector, useAppDispatch } from "./redux-hooks";
 
-export const useAuth = ({ loginRedirect = true } = {}) => {
+export type DecodedToken = {
+  exp: number;
+  iat: number;
+  iss: string;
+  payload: Token;
+};
+
+// EVERYTHING MUST BE TYPED
+export const useAuth = ({ loginRedirect = true } = {}): User => {
   const user = useAppSelector(selectUser);
   const dispatch = useAppDispatch();
   const router = useRouter();
 
-  let publicKeys: any;
+  let publicKeys: KeyValue[];
 
   const fetcher = async () => {
     publicKeys = await Helper.getKysoPublicSettings();
 
     let unauthorizedRedirectUrl;
     if (publicKeys) {
-      const pValue = publicKeys.find((x: any) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
+      const pValue = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
 
       if (pValue) {
         unauthorizedRedirectUrl = pValue.value;
@@ -49,17 +59,15 @@ export const useAuth = ({ loginRedirect = true } = {}) => {
       return;
     }
 
-    const jwtToken: any = decode(jwt);
+    const jwtToken: DecodedToken = decode<DecodedToken>(jwt);
 
-    const { exp } = jwtToken;
-
-    if (new Date(exp * 1000) <= new Date()) {
+    if (new Date(jwtToken.exp * 1000) <= new Date()) {
       // token is out of date
       localStorage.removeItem("jwt");
       router.push(`/logout?redirect=true`);
     }
 
-    const jwtUser = jwtToken.payload;
+    const tokenData: Token = jwtToken.payload;
 
     await dispatch(
       setAuthAction({
@@ -69,7 +77,7 @@ export const useAuth = ({ loginRedirect = true } = {}) => {
       }),
     );
 
-    const userPermissions = await dispatch(fetchUserPermissions(jwtUser.username));
+    const userPermissions = await dispatch(fetchUserPermissions(tokenData.username));
 
     if (userPermissions) {
       await dispatch(
@@ -95,5 +103,6 @@ export const useAuth = ({ loginRedirect = true } = {}) => {
     setMounted(true);
   }, [router.query, user]);
 
-  return user;
+  // NO ANY
+  return user as User;
 };

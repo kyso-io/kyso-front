@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 import { Fragment } from "react";
 import { Menu, Transition } from "@headlessui/react";
 import { DotsVerticalIcon, StarIcon, CodeIcon, FlagIcon, ThumbUpIcon, ChatAltIcon, EyeIcon, ShareIcon } from "@heroicons/react/solid";
+import type { CommonData } from "@/hooks/use-common-data";
 import { useCommonData } from "@/hooks/use-common-data";
 import { useReports } from "@/hooks/use-reports";
 import UnpureSidebar from "@/wrappers/UnpureSidebar";
@@ -13,10 +14,16 @@ function classNames(...classes: string[]) {
 
 const Index = () => {
   // useAuth();
-  const { organization: activeOrganization, team: activeTeam } = useCommonData();
+  // AVOID THIS
+  // const { organization: activeOrganization, team: activeTeam } = useCommonData();
+  // USE THIS. If we refactor the type, and remove or change the name of a property, is better to use the type instead of the
+  // destructured one
+  const commonData: CommonData = useCommonData();
+
   const router = useRouter();
   const reports = useReports();
   // let reports = []
+
   if (!router.query.teamName && !router.query.organizationName) {
     return <div>404</div>;
   }
@@ -27,11 +34,11 @@ const Index = () => {
         <div className="container mx-auto mt-6 flex">
           <div className="basis-2/">
             <div className="bg-white px-4 py-6 shadow sm:p-6 sm:rounded-lg">
-              <a href={`${router.basePath}/${activeOrganization?.sluglified_name}/${activeTeam?.sluglified_name}/settings`} className="text-indigo-500">
+              <a href={`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/settings`} className="text-indigo-500">
                 Go to channel settings
               </a>
 
-              <h1>Channel Dashboard: {activeTeam?.display_name}</h1>
+              <h1>Channel Dashboard: {commonData.team?.display_name}</h1>
               <p>- [USER IS LOGGED IN AND MEMBER]: show list of all reports for that channel, pinned on top, and show member list component</p>
               <p>- [USER IS LOGGED IN AND NOT A MEMBER]: show list of public reports for that channel, pinned on top, no sidebar</p>
               <p>- [USER IS NOT LOGGED]: show list of public reports for that channel, pinned on top, no sidebar</p>
@@ -80,7 +87,10 @@ const Index = () => {
                                 leaveFrom="transform opacity-100 scale-100"
                                 leaveTo="transform opacity-0 scale-95"
                               >
-                                <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity/5 focus:outline-none">
+                                <Menu.Items
+                                  className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white 
+                                  ring-1 ring-black ring-opacity/5 focus:outline-none"
+                                >
                                   <div className="py-1">
                                     <Menu.Item>
                                       {({ active }) => (

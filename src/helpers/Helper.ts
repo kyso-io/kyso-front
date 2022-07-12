@@ -1,7 +1,9 @@
+import { KeyValue } from "@/model/key-value.model";
 import { fetchPublicKysoSettings, store } from "@kyso-io/kyso-store";
 import slugify from "slugify";
 
 export class Helper {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   public static ListToKeyVal(data: any) {
     return data.reduce((prev: any, curr: any) => {
       /* eslint-disable no-param-reassign */
@@ -10,18 +12,16 @@ export class Helper {
     }, {});
   }
 
-  public static async getKysoPublicSettings(): Promise<any[]> {
+  public static async getKysoPublicSettings(): Promise<KeyValue[]> {
     if (localStorage.getItem("kyso-settings")) {
       return JSON.parse(localStorage.getItem("kyso-settings") as string);
     }
 
+    /* eslint-disable @typescript-eslint/no-explicit-any */
     const publicSettings: any = await store.dispatch(fetchPublicKysoSettings());
 
     const publicKeys = publicSettings.payload.map((x: any) => {
-      return {
-        key: x.key,
-        value: x.value,
-      };
+      return new KeyValue(x.key, x.value);
     });
 
     localStorage.setItem("kyso-settings", JSON.stringify(publicKeys));
