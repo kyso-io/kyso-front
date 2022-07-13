@@ -217,7 +217,7 @@ const Index = () => {
 
   useEffect(() => {
     if (router.query.error) {
-      setError(router.query.error);
+      setError(router.query.error as string);
     }
   }, [router.query.error]);
 
@@ -233,7 +233,7 @@ const Index = () => {
             router.push(`/captcha`);
           }
         } else if (redirect) {
-          router.push(redirect);
+          router.push(redirect as string);
         } else {
           router.push("/");
         }
@@ -271,7 +271,7 @@ const Index = () => {
       localStorage.setItem("jwt", result.payload);
       setTimeout(() => {
         if (redirect) {
-          router.push(redirect);
+          router.push(redirect as string);
         } else {
           router.push("/");
         }

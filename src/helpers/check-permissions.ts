@@ -1,3 +1,5 @@
+import type { Organization, Team } from "@kyso-io/kyso-model";
+
 /**
  *
  * @param {*} activeOrganization const activeOrganization = useSelector((s) => selectOrganizationBySlugifiedName(s, organizationName));
@@ -7,10 +9,10 @@
  * @returns true if user has permissions on that team + org, false if not
  */
 const checkPermissions = (
-  activeOrganization,
-  activeTeam,
-  currentUserPermissions,
-  listOfPermissionsToCheck
+  activeOrganization: Organization,
+  activeTeam: Team,
+  currentUserPermissions: any,
+  listOfPermissionsToCheck: string | string[]
 ) => {
   if (!activeOrganization || !currentUserPermissions) {
     return false;
@@ -29,7 +31,7 @@ const checkPermissions = (
 
   if (activeTeam) {
     permissionsInThatTeam = currentUserPermissions.teams.find(
-      (x) => x.id === activeTeam.id
+      (x: Team) => x.id === activeTeam.id
     );
 
     /*
@@ -43,7 +45,7 @@ const checkPermissions = (
 
   if (activeOrganization) {
     permissionsInThatOrganization = currentUserPermissions.organizations.find(
-      (x) => x.id === activeOrganization.id
+      (x: Organization) => x.id === activeOrganization.id
     );
 
     /* console.log(
