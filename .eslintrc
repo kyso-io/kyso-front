@@ -48,7 +48,7 @@
           }
         ],
         "semi": "error",
-        "curly": "error",
+        "curly": ["error", "all"],
         "no-extra-semi": "error",
         "react/destructuring-assignment": "off", // Vscode doesn't support automatically destructuring, it's a pain to add a new variable
         "jsx-a11y/anchor-is-valid": "off", // Next.js use his own internal link system
