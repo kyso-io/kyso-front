@@ -5,13 +5,14 @@ import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { useAppDispatch, useAppSelector } from "./redux-hooks";
 import { useAuth } from "./use-auth";
+import type { CommonData } from "./use-common-data";
 import { useCommonData } from "./use-common-data";
 
 export const useReports = (): ReportDTO[] => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const { team: activeTeam } = useCommonData();
+  const commonData: CommonData = useCommonData();
   const reports = useAppSelector(selectActiveReports);
 
   const user = useAuth({ loginRedirect: false });
@@ -23,7 +24,7 @@ export const useReports = (): ReportDTO[] => {
 
   const fetcher = async () => {
     const args = {
-      filter: { team_id: activeTeam.id, search: null },
+      filter: { team_id: commonData.team.id, search: null },
       sort: "-created_at",
       page: router.query.page ? parseInt(router.query.page, 10) : 1,
       per_page: reportsPerPage,
@@ -41,10 +42,10 @@ export const useReports = (): ReportDTO[] => {
 
   useEffect(() => {
     if (reports) return;
-    if (!activeTeam) return;
+    if (!commonData.team) return;
 
     setMounted(true);
-  }, [user, activeTeam]);
+  }, [user, commonData.team]);
 
   return reports || [];
 };

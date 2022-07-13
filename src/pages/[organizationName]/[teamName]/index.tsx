@@ -22,7 +22,6 @@ const Index = () => {
 
   const router = useRouter();
   const reports = useReports();
-  // let reports = []
 
   if (!router.query.teamName && !router.query.organizationName) {
     return <div>404</div>;

@@ -1,9 +1,8 @@
 import KysoTopBar from "@/layouts/KysoTopBar";
-import { selectActiveOrganization } from "@kyso-io/kyso-store";
-import type { Organization } from "@kyso-io/kyso-model";
-import { useAppSelector } from "@/hooks/redux-hooks";
-import SelfLoadedTeamLeftMenu from "@/wrappers/SelfLoadedTeamLeftMenu";
 import { useRouter } from "next/router";
+import UnpureSidebar from "@/wrappers/UnpureSidebar";
+import type { CommonData } from "@/hooks/use-common-data";
+import { useCommonData } from "@/hooks/use-common-data";
 
 /**
  * Organisation dashboard
@@ -17,21 +16,20 @@ import { useRouter } from "next/router";
 
 const Index = () => {
   const router = useRouter();
-  // This works because we are using SelfLoadedTeamLeftMenu, which is using CommonDataWrapper
-  const organizationData: Organization = useAppSelector(selectActiveOrganization);
+  const commonData: CommonData = useCommonData();
 
   return (
     <>
-      <SelfLoadedTeamLeftMenu>
+      <UnpureSidebar>
         <div className="mt-8">
-          <h1>Organization Dashboard: {organizationData?.display_name}</h1>
-          <a href={`${router.basePath}/${organizationData?.sluglified_name}`} className="text-indigo-500">
+          <h1>Organization Dashboard: {commonData.organization?.display_name}</h1>
+          <a href={`${router.basePath}/${commonData.organization?.sluglified_name}`} className="text-indigo-500">
             Go to organization dashboard
           </a>
           <p>- [USER IS LOGGED IN AND ADMIN]: show org settings</p>
           <p>- [NONE OF THE ABOVE]: 404</p>
         </div>
-      </SelfLoadedTeamLeftMenu>
+      </UnpureSidebar>
     </>
   );
 };
