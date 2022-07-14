@@ -1,24 +1,11 @@
 import { Helper } from "@/helpers/Helper";
 import NoLayout from "@/layouts/NoLayout";
 import "@fortawesome/fontawesome-svg-core/styles.css";
-import {
-  faBitbucket,
-  faGithub,
-  faGitlab,
-  faGoogle,
-} from "@fortawesome/free-brands-svg-icons";
+import { faBitbucket, faGithub, faGitlab, faGoogle } from "@fortawesome/free-brands-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  KysoSettingsEnum,
-  Login,
-  LoginProviderEnum,
-} from "@kyso-io/kyso-model";
+import { KysoSettingsEnum, Login, LoginProviderEnum } from "@kyso-io/kyso-model";
 import type { AppDispatch } from "@kyso-io/kyso-store";
-import {
-  loginAction,
-  selectUser,
-  setError as storeSetError,
-} from "@kyso-io/kyso-store";
+import { loginAction, selectUser, setError as storeSetError } from "@kyso-io/kyso-store";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -27,19 +14,11 @@ import uuid from "uuid";
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
-  const re =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
 };
 
-const githubScopes = [
-  "read:user",
-  "user:email",
-  "read:org",
-  "repo",
-  "admin:repo_hook",
-  "public_repo",
-];
+const githubScopes = ["read:user", "user:email", "read:org", "repo", "admin:repo_hook", "public_repo"];
 
 const Index = () => {
   const router = useRouter();
@@ -81,6 +60,7 @@ const Index = () => {
 
   useEffect(() => {
     const getOrganizationOptions = async () => {
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       const publicKeys: any[] = await Helper.getKysoPublicSettings();
 
       if (!publicKeys || publicKeys.length === 0) {
@@ -88,75 +68,35 @@ const Index = () => {
         return "";
       }
 
-      const googleClientId = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.AUTH_GOOGLE_CLIENT_ID
-      ).value;
-      const bitbucketClientId = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.AUTH_BITBUCKET_CLIENT_ID
-      ).value;
-      const githubClientId = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.AUTH_GITHUB_CLIENT_ID
-      ).value;
-      const gitlabClientId = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.AUTH_GITLAB_CLIENT_ID
-      ).value;
-      const gitlabRedirectURI = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.AUTH_GITLAB_REDIRECT_URI
-      ).value;
-      const pingIdSamlSSOUrl = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.AUTH_PINGID_SAML_SSO_URL
-      ).value;
+      const googleClientId = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_GOOGLE_CLIENT_ID).value;
+      const bitbucketClientId = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_BITBUCKET_CLIENT_ID).value;
+      const githubClientId = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_GITHUB_CLIENT_ID).value;
+      const gitlabClientId = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_GITLAB_CLIENT_ID).value;
+      const gitlabRedirectURI = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_GITLAB_REDIRECT_URI).value;
+      const pingIdSamlSSOUrl = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_PINGID_SAML_SSO_URL).value;
 
-      const tmpEnableGoogleAuth =
-        publicKeys.find(
-          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GOOGLE
-        ).value === "true";
+      const tmpEnableGoogleAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GOOGLE).value === "true";
 
-      const tmpEnableGithubAuth =
-        publicKeys.find(
-          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITHUB
-        ).value === "true";
+      const tmpEnableGithubAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITHUB).value === "true";
 
-      const tmpEnableGitlabAuth =
-        publicKeys.find(
-          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB
-        ).value === "true";
+      const tmpEnableGitlabAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === "true";
 
-      const tmpEnableBitbucketAuth =
-        publicKeys.find(
-          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET
-        ).value === "true";
+      const tmpEnableBitbucketAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET).value === "true";
 
-      const tmpEnableKysoAuth =
-        publicKeys.find(
-          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO
-        ).value === "true";
+      const tmpEnableKysoAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO).value === "true";
 
-      const tmpEnablePingSamlAuth =
-        publicKeys.find(
-          (x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML
-        ).value === "true";
+      const tmpEnablePingSamlAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML).value === "true";
 
       setGoogleUrl(
         `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&response_type=code&redirect_uri=${encodeURIComponent(
-          `${window.location.origin}/oauth/google/callback`
-        )}&scope=${encodeURIComponent(
-          "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.emails.read"
-        )}`
+          `${window.location.origin}/oauth/google/callback`,
+        )}&scope=${encodeURIComponent("https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.emails.read")}`,
       );
-      setBitbucketUrl(
-        `https://bitbucket.org/site/oauth2/authorize?client_id=${bitbucketClientId}&response_type=code`
-      );
+      setBitbucketUrl(`https://bitbucket.org/site/oauth2/authorize?client_id=${bitbucketClientId}&response_type=code`);
 
-      setGithubUrl(
-        `https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(
-          ","
-        )}&state=${uuid ? uuid.v4() : ""}`
-      );
+      setGithubUrl(`https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(",")}&state=${uuid ? uuid.v4() : ""}`);
 
-      setGitlabUrl(
-        `https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&redirect_uri=${gitlabRedirectURI}&response_type=code`
-      );
+      setGitlabUrl(`https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&redirect_uri=${gitlabRedirectURI}&response_type=code`);
 
       setPingUrl(pingIdSamlSSOUrl);
 
@@ -167,37 +107,18 @@ const Index = () => {
       setEnableKysoAuth(tmpEnableKysoAuth);
       setEnablePingSamlAuth(tmpEnablePingSamlAuth);
 
-      const custumizeLeftLogo = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LEFT_LOGO_URL
-      ).value;
-      const custumizeRightLogo = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_RIGHT_LOGO_URL
-      ).value;
+      const custumizeLeftLogo = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LEFT_LOGO_URL).value;
+      const custumizeRightLogo = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_RIGHT_LOGO_URL).value;
 
-      const customizeGlobalCss = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_CSS_STYLES
-      ).value;
+      const customizeGlobalCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_CSS_STYLES).value;
 
-      const customizeHeaderCss = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HEADER_CSS_STYLES
-      )?.value;
+      const customizeHeaderCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HEADER_CSS_STYLES)?.value;
 
-      const customizeButtonCss = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_CSS_STYLES
-      )?.value;
-      const customizeButtonHoverCss = publicKeys.find(
-        (x) =>
-          x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_HOVER_CSS_STYLES
-      )?.value;
-      const customizeLinkCss = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LINK_CSS_STYLES
-      )?.value;
-      const customizeShowdivCss = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES
-      )?.value;
-      const customizeHiddendivCss = publicKeys.find(
-        (x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES
-      )?.value;
+      const customizeButtonCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_CSS_STYLES)?.value;
+      const customizeButtonHoverCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_HOVER_CSS_STYLES)?.value;
+      const customizeLinkCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LINK_CSS_STYLES)?.value;
+      const customizeShowdivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES)?.value;
+      const customizeHiddendivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES)?.value;
 
       setLeftLogo(custumizeLeftLogo);
       setRightLogo(custumizeRightLogo);
@@ -241,6 +162,7 @@ const Index = () => {
     }
   }, [user]);
 
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
@@ -259,12 +181,7 @@ const Index = () => {
       return;
     }
 
-    const loginData: Login = new Login(
-      password,
-      LoginProviderEnum.KYSO,
-      email,
-      {}
-    );
+    const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
 
     const result = await dispatch(loginAction(loginData));
     if (result?.payload) {
@@ -337,16 +254,10 @@ const Index = () => {
                   <div className="">
                     <div className="p-6">
                       {/* Your content */}
-                      <div
-                        style={{ paddingLeft: "15.3%", paddingBottom: "15px" }}
-                      >
+                      <div style={{ paddingLeft: "15.3%", paddingBottom: "15px" }}>
                         {/* <h1>Kyso.io</h1> */}
                         <a href="/">
-                          <img
-                            className="w-24"
-                            src={`/assets/images/kyso-logo-and-name-dark.svg`}
-                            alt="Kyso"
-                          />
+                          <img className="w-24" src={`/assets/images/kyso-logo-and-name-dark.svg`} alt="Kyso" />
                         </a>
                         <p
                           className="py-4"
@@ -355,40 +266,21 @@ const Index = () => {
                             textRendering: "optimizeLegibility",
                           }}
                         >
-                          Kyso.io offers free unlimited (private) repositories
-                          and unlimited collaborators.
+                          Kyso.io offers free unlimited (private) repositories and unlimited collaborators.
                         </p>
                         <ul className="list-disc list-inside pl-4 pb-4">
                           <li>
-                            <a
-                              className="login-link"
-                              href="https://docs.kyso.io"
-                              aria-label="docs"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
+                            <a className="login-link" href="https://docs.kyso.io" aria-label="docs" target="_blank" rel="noopener noreferrer">
                               Read Kyso documentation
                             </a>
                           </li>
                           <li style={{ paddingTop: "5px" }}>
-                            <a
-                              className="login-link"
-                              href="https://docs.kyso.io/posting-to-kyso/kyso-command-line-tool/installation"
-                              aria-label="cli"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
+                            <a className="login-link" href="https://docs.kyso.io/posting-to-kyso/kyso-command-line-tool/installation" aria-label="cli" target="_blank" rel="noopener noreferrer">
                               Install Kyso CLI
                             </a>
                           </li>
                           <li style={{ paddingTop: "5px" }}>
-                            <a
-                              className="login-link"
-                              href="https://about.kyso.io/about"
-                              aria-label="about"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
+                            <a className="login-link" href="https://about.kyso.io/about" aria-label="about" target="_blank" rel="noopener noreferrer">
                               More information about Kyso
                             </a>
                           </li>
@@ -399,30 +291,15 @@ const Index = () => {
                               </li> */}
                         </ul>
                         <div className="pb-4">
-                          <p className="pb-4">
-                            By signing up for and by signing in to this service
-                            you accept our:
-                          </p>
+                          <p className="pb-4">By signing up for and by signing in to this service you accept our:</p>
                           <ul className="list-disc list-inside pl-4">
                             <li style={{ paddingTop: "5px" }}>
-                              <a
-                                className="login-link"
-                                href="https://about.kyso.io/terms"
-                                aria-label="terms"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
+                              <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
                                 Terms of service
                               </a>
                             </li>
                             <li style={{ paddingTop: "5px" }}>
-                              <a
-                                className="login-link"
-                                href="https://about.kyso.io/privacy"
-                                aria-label="privacy"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
+                              <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
                                 Privacy statement
                               </a>
                             </li>
@@ -438,20 +315,11 @@ const Index = () => {
               <div className="grid grid-cols-1 gap-4">
                 <section aria-labelledby="section-2-title">
                   <div className="pt-6 pr-6">
-                    <h6 className="text-bold text-xl font-normal leading-normal mt-0 mb-2 text-pink-800">
-                      Sign in to Kyso
-                    </h6>
+                    <h6 className="text-bold text-xl font-normal leading-normal mt-0 mb-2 text-pink-800">Sign in to Kyso</h6>
 
                     {enableKysoAuth && (
-                      <form
-                        method="post"
-                        action={`/api/login`}
-                        onSubmit={handleSubmit}
-                      >
-                        <label
-                          className="block text-gray-700 text-sm font-bold mb-2"
-                          htmlFor="username"
-                        >
+                      <form method="post" action={`/api/login`} onSubmit={handleSubmit}>
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
                           Email
                         </label>
                         <input
@@ -468,10 +336,7 @@ const Index = () => {
                           }}
                         />
 
-                        <label
-                          className="block text-gray-700 text-sm font-bold mb-2"
-                          htmlFor="username"
-                        >
+                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
                           Password
                         </label>
 
@@ -492,20 +357,14 @@ const Index = () => {
 
                         <div className="flex my-4">
                           <div className="w-1/2 h-12">
-                            <button
-                              type="button"
-                              className="p-4 bg-kyso-secondary hover:bg-kyso-secondary-hover py-2 text-xs font-medium rounded"
-                            >
+                            <button type="button" className="p-4 bg-kyso-secondary hover:bg-kyso-secondary-hover py-2 text-xs font-medium rounded">
                               <a className="text-black" href="/reset-password">
                                 Forgot your password?
                               </a>
                             </button>
                           </div>
                           <div className="w-1/2 h-12 text-right">
-                            <button
-                              type="submit"
-                              className="p-4 bg-kyso-primary hover:bg-kyso-primary-hover text-white py-2 text-xs font-medium rounded"
-                            >
+                            <button type="submit" className="p-4 bg-kyso-primary hover:bg-kyso-primary-hover text-white py-2 text-xs font-medium rounded">
                               Log in now
                             </button>
                           </div>
@@ -516,14 +375,8 @@ const Index = () => {
                       {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
                         <div className="flex mb-1">
                           <div className="w-full h-12">
-                            <button
-                              type="button"
-                              className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded no-underline"
-                            >
-                              <a
-                                href={githubUrl}
-                                className="text-black no-underline"
-                              >
+                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded no-underline">
+                              <a href={githubUrl} className="text-black no-underline">
                                 <FontAwesomeIcon
                                   style={{
                                     marginRight: 8,
@@ -537,43 +390,29 @@ const Index = () => {
                         </div>
                       )}
 
-                      {enableBitbucketAuth &&
-                        bitbucketUrl &&
-                        bitbucketUrl.length > 0 && (
-                          <div className="flex mb-1">
-                            <div className="w-full h-12">
-                              <button
-                                type="button"
-                                className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded"
-                              >
-                                <a
-                                  className="text-black no-underline"
-                                  href={bitbucketUrl}
-                                >
-                                  <FontAwesomeIcon
-                                    style={{
-                                      marginRight: 8,
-                                    }}
-                                    icon={faBitbucket}
-                                  />
-                                  Log in with Bitbucket
-                                </a>
-                              </button>
-                            </div>
+                      {enableBitbucketAuth && bitbucketUrl && bitbucketUrl.length > 0 && (
+                        <div className="flex mb-1">
+                          <div className="w-full h-12">
+                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
+                              <a className="text-black no-underline" href={bitbucketUrl}>
+                                <FontAwesomeIcon
+                                  style={{
+                                    marginRight: 8,
+                                  }}
+                                  icon={faBitbucket}
+                                />
+                                Log in with Bitbucket
+                              </a>
+                            </button>
                           </div>
-                        )}
+                        </div>
+                      )}
 
                       {enableGitlabAuth && gitlabUrl && gitlabUrl.length > 0 && (
                         <div className="flex mb-1">
                           <div className="w-full h-12">
-                            <button
-                              type="button"
-                              className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded"
-                            >
-                              <a
-                                className="text-black no-underline"
-                                href={gitlabUrl}
-                              >
+                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
+                              <a className="text-black no-underline" href={gitlabUrl}>
                                 <FontAwesomeIcon
                                   style={{
                                     marginRight: 8,
@@ -590,14 +429,8 @@ const Index = () => {
                       {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
                         <div className="flex mb-1">
                           <div className="w-full h-12">
-                            <button
-                              type="button"
-                              className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded"
-                            >
-                              <a
-                                className="text-black no-underline"
-                                href={googleUrl}
-                              >
+                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
+                              <a className="text-black no-underline" href={googleUrl}>
                                 <FontAwesomeIcon
                                   style={{
                                     marginRight: 8,
@@ -614,14 +447,8 @@ const Index = () => {
                       {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
                         <div className="flex mb-1">
                           <div className="w-full h-12">
-                            <button
-                              type="button"
-                              className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded"
-                            >
-                              <a
-                                className="text-black no-underline"
-                                href={pingUrl}
-                              >
+                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
+                              <a className="text-black no-underline" href={pingUrl}>
                                 <img
                                   src="/static/images/pingid_logo.jpg"
                                   width={12}

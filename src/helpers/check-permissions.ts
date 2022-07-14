@@ -11,8 +11,9 @@ import type { Organization, Team } from "@kyso-io/kyso-model";
 const checkPermissions = (
   activeOrganization: Organization,
   activeTeam: Team,
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   currentUserPermissions: any,
-  listOfPermissionsToCheck: string | string[]
+  listOfPermissionsToCheck: string | string[],
 ) => {
   if (!activeOrganization || !currentUserPermissions) {
     return false;
@@ -30,9 +31,7 @@ const checkPermissions = (
   let permissionsInThatOrganization = null;
 
   if (activeTeam) {
-    permissionsInThatTeam = currentUserPermissions.teams.find(
-      (x: Team) => x.id === activeTeam.id
-    );
+    permissionsInThatTeam = currentUserPermissions.teams.find((x: Team) => x.id === activeTeam.id);
 
     /*
     console.log(
@@ -44,9 +43,7 @@ const checkPermissions = (
   }
 
   if (activeOrganization) {
-    permissionsInThatOrganization = currentUserPermissions.organizations.find(
-      (x: Organization) => x.id === activeOrganization.id
-    );
+    permissionsInThatOrganization = currentUserPermissions.organizations.find((x: Organization) => x.id === activeOrganization.id);
 
     /* console.log(
       `Permissions in that organization ${
@@ -57,22 +54,14 @@ const checkPermissions = (
   }
 
   if (permissionsInThatOrganization) {
-    permissionInOrganization =
-      permissionsInThatOrganization.permissions.includes(
-        listOfPermissionsToCheck
-      );
+    permissionInOrganization = permissionsInThatOrganization.permissions.includes(listOfPermissionsToCheck);
   }
 
   if (permissionsInThatTeam && permissionsInThatTeam?.permissions) {
-    permissionInTeam = permissionsInThatTeam.permissions.includes(
-      listOfPermissionsToCheck
-    );
+    permissionInTeam = permissionsInThatTeam.permissions.includes(listOfPermissionsToCheck);
   }
 
-  if (
-    !permissionsInThatTeam ||
-    permissionsInThatTeam?.organization_inherited === true
-  ) {
+  if (!permissionsInThatTeam || permissionsInThatTeam?.organization_inherited === true) {
     // console.log(`[ORG] Has permissions returning ${permissionInOrganization}`);
     return permissionInOrganization;
   }

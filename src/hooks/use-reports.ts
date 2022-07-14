@@ -47,11 +47,15 @@ export const useReports = (props: IUseReports = {}) => {
   const [mounted, setMounted] = useState(false);
   useSWR(mounted ? `use-reports-${router.asPath}` : null, fetcher);
   useEffect(() => {
-    if (reports) return;
-    if (!team) return;
+    if (reports) {
+      return;
+    }
+    if (!team) {
+      return;
+    }
 
     setMounted(true);
   }, [user, team, router.query.sort]);
 
-  return reports;
+  return reports || [];
 };

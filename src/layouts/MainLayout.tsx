@@ -1,14 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import {
-  CalendarIcon,
-  ChartBarIcon,
-  FolderIcon,
-  HomeIcon,
-  InboxIcon,
-  MenuIcon,
-  UsersIcon,
-  XIcon,
-} from "@heroicons/react/outline";
+import { CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, MenuIcon, UsersIcon, XIcon } from "@heroicons/react/outline";
 import { Fragment, useState } from "react";
 
 import type { LayoutProps } from "@/types/pageWithLayout";
@@ -17,6 +8,7 @@ import { useRouter } from "next/router";
 import { Footer } from "../components/Footer";
 import { Meta } from "./Meta";
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const MainLayout: LayoutProps = ({ children }: any) => {
   const router = useRouter();
 
@@ -68,17 +60,10 @@ const MainLayout: LayoutProps = ({ children }: any) => {
         <body class="h-full">
         ```
       */}
-      <Meta
-        title="Next.js Boilerplate Presentation"
-        description="Next js Boilerplate is the perfect starter code for your project. Build your React application with the Next.js framework."
-      />
+      <Meta title="Next.js Boilerplate Presentation" description="Next js Boilerplate is the perfect starter code for your project. Build your React application with the Next.js framework." />
       <div>
         <Transition.Root show={sidebarOpen} as={Fragment}>
-          <Dialog
-            as="div"
-            className="fixed inset-0 z-40 flex md:hidden"
-            onClose={setSidebarOpen}
-          >
+          <Dialog as="div" className="fixed inset-0 z-40 flex md:hidden" onClose={setSidebarOpen}>
             <Transition.Child
               as={Fragment}
               enter="transition-opacity ease-linear duration-300"
@@ -116,20 +101,13 @@ const MainLayout: LayoutProps = ({ children }: any) => {
                       onClick={() => setSidebarOpen(false)}
                     >
                       <span className="sr-only">Close sidebar</span>
-                      <XIcon
-                        className="h-6 w-6 text-white"
-                        aria-hidden="true"
-                      />
+                      <XIcon className="h-6 w-6 text-white" aria-hidden="true" />
                     </button>
                   </div>
                 </Transition.Child>
                 <div className="h-0 flex-1 overflow-y-auto pt-5 pb-4">
                   <div className="flex shrink-0 items-center px-4">
-                    <img
-                      className="h-8 w-auto"
-                      src="https://tailwindui.com/img/logos/workflow-logo-indigo-300-mark-white-text.svg"
-                      alt="Workflow"
-                    />
+                    <img className="h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-logo-indigo-300-mark-white-text.svg" alt="Workflow" />
                   </div>
                   <nav className="mt-5 space-y-1 px-2">
                     {navigation.map((item) => (
@@ -137,16 +115,11 @@ const MainLayout: LayoutProps = ({ children }: any) => {
                         key={item.name}
                         href={item.href}
                         className={classNames(
-                          item.current
-                            ? "bg-indigo-800 text-white"
-                            : "text-white hover:bg-indigo-600 hover:bg-opacity-75",
-                          "group flex items-center px-2 py-2 text-base font-medium rounded-md"
+                          item.current ? "bg-indigo-800 text-white" : "text-white hover:bg-indigo-600 hover:bg-opacity-75",
+                          "group flex items-center px-2 py-2 text-base font-medium rounded-md",
                         )}
                       >
-                        <item.icon
-                          className="mr-4 h-6 w-6 shrink-0 text-indigo-300"
-                          aria-hidden="true"
-                        />
+                        <item.icon className="mr-4 h-6 w-6 shrink-0 text-indigo-300" aria-hidden="true" />
                         {item.name}
                       </a>
                     ))}
@@ -163,12 +136,8 @@ const MainLayout: LayoutProps = ({ children }: any) => {
                         />
                       </div>
                       <div className="ml-3">
-                        <p className="text-base font-medium text-white">
-                          Tom Cook
-                        </p>
-                        <p className="text-sm font-medium text-indigo-200 group-hover:text-white">
-                          View profile
-                        </p>
+                        <p className="text-base font-medium text-white">Tom Cook</p>
+                        <p className="text-sm font-medium text-indigo-200 group-hover:text-white">View profile</p>
                       </div>
                     </div>
                   </a>
@@ -187,11 +156,7 @@ const MainLayout: LayoutProps = ({ children }: any) => {
           <div className="flex min-h-0 flex-1 flex-col bg-indigo-700">
             <div className="flex flex-1 flex-col overflow-y-auto pt-5 pb-4">
               <div className="flex shrink-0 items-center px-4">
-                <img
-                  className="h-8 w-auto"
-                  src="https://tailwindui.com/img/logos/workflow-logo-indigo-300-mark-white-text.svg"
-                  alt="Workflow"
-                />
+                <img className="h-8 w-auto" src="https://tailwindui.com/img/logos/workflow-logo-indigo-300-mark-white-text.svg" alt="Workflow" />
               </div>
               <nav className="mt-5 flex-1 space-y-1 px-2">
                 {navigation.map((item) => (
@@ -199,16 +164,11 @@ const MainLayout: LayoutProps = ({ children }: any) => {
                     key={item.name}
                     href={item.href}
                     className={classNames(
-                      item.current
-                        ? "bg-indigo-800 text-white"
-                        : "text-white hover:bg-indigo-600 hover:bg-opacity-75",
-                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+                      item.current ? "bg-indigo-800 text-white" : "text-white hover:bg-indigo-600 hover:bg-opacity-75",
+                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
                     )}
                   >
-                    <item.icon
-                      className="mr-3 h-6 w-6 shrink-0 text-indigo-300"
-                      aria-hidden="true"
-                    />
+                    <item.icon className="mr-3 h-6 w-6 shrink-0 text-indigo-300" aria-hidden="true" />
                     {item.name}
                   </a>
                 ))}
@@ -226,9 +186,7 @@ const MainLayout: LayoutProps = ({ children }: any) => {
                   </div>
                   <div className="ml-3">
                     <p className="text-sm font-medium text-white">Tom Cook</p>
-                    <p className="text-xs font-medium text-indigo-200 group-hover:text-white">
-                      View profile
-                    </p>
+                    <p className="text-xs font-medium text-indigo-200 group-hover:text-white">View profile</p>
                   </div>
                 </div>
               </a>
@@ -249,9 +207,7 @@ const MainLayout: LayoutProps = ({ children }: any) => {
           <main className="flex-1">
             <div className="py-6">
               <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  Dashboard
-                </h1>
+                <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
               </div>
               <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-8">
                 {/* Replace with your content */}

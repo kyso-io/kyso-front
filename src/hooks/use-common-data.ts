@@ -12,15 +12,7 @@ import {
 } from "@kyso-io/kyso-store";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import type {
-  Organization,
-  Report,
-  ReportDTO,
-  ResourcePermissions,
-  Team,
-  TokenPermissions,
-  User,
-} from "@kyso-io/kyso-model";
+import type { Organization, Report, ReportDTO, ResourcePermissions, Team, TokenPermissions, User } from "@kyso-io/kyso-model";
 import useSWR from "swr";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useAppDispatch, useAppSelector } from "./redux-hooks";
@@ -29,6 +21,7 @@ import { useAuth } from "./use-auth";
 export type CommonData = {
   permissions: TokenPermissions | null;
   token: string | null;
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   organization: any;
   team: Team;
   user: User;
@@ -42,24 +35,15 @@ export const useCommonData = (): CommonData => {
   const { query } = router;
   const user: User = useAuth({ loginRedirect: false });
 
-  const token: string | null = useAppSelector(
-    (state: RootState) => state.auth.token
-  );
-  const permissions: TokenPermissions | null = useAppSelector(
-    (state: RootState) => state.auth.currentUserPermissions
-  );
-  const activeOrganization: Organization = useAppSelector(
-    selectActiveOrganization
-  );
+  const token: string | null = useAppSelector((state: RootState) => state.auth.token);
+  const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);
+  const activeOrganization: Organization = useAppSelector(selectActiveOrganization);
 
   const activeTeam: Team = useAppSelector(selectActiveTeam);
   const activeReport: Report = useAppSelector(selectActiveReport);
 
   const fetcher = async () => {
-    const organizationResourcePermissions: ResourcePermissions | undefined =
-      permissions!.organizations!.find(
-        (org: ResourcePermissions) => org.name === query.organizationName
-      );
+    const organizationResourcePermissions: ResourcePermissions | undefined = permissions!.organizations!.find((org: ResourcePermissions) => org.name === query.organizationName);
 
     if (!organizationResourcePermissions) {
       return;
@@ -73,10 +57,7 @@ export const useCommonData = (): CommonData => {
       return;
     }
 
-    const teamResourcePermissions: ResourcePermissions | undefined =
-      permissions!.teams!.find(
-        (team: ResourcePermissions) => team.name === query.teamName
-      );
+    const teamResourcePermissions: ResourcePermissions | undefined = permissions!.teams!.find((team: ResourcePermissions) => team.name === query.teamName);
 
     if (!teamResourcePermissions) {
       return;
@@ -96,7 +77,7 @@ export const useCommonData = (): CommonData => {
           team_id: teamResourcePermissions.id,
           sluglified_name: query.reportName,
         },
-      })
+      }),
     );
 
     const reports: ReportDTO[] = unwrapResult(resultReportAction);
@@ -121,9 +102,15 @@ export const useCommonData = (): CommonData => {
       return;
     }
 
-    if (activeOrganization) return;
-    if (activeTeam) return;
-    if (activeReport) return;
+    if (activeOrganization) {
+      return;
+    }
+    if (activeTeam) {
+      return;
+    }
+    if (activeReport) {
+      return;
+    }
 
     setMounted(true);
   }, [router.query, user]);

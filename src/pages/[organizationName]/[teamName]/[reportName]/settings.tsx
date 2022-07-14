@@ -1,12 +1,6 @@
 import KysoTopBar from "@/layouts/KysoTopBar";
-import {
-  selectActiveOrganization,
-  selectActiveReport,
-  selectActiveTeam,
-} from "@kyso-io/kyso-store";
-import type { Organization, Report, Team } from "@kyso-io/kyso-model";
-import { useAppSelector } from "@/hooks/redux-hooks";
-import SelfLoadedTeamLeftMenu from "@/wrappers/SelfLoadedTeamLeftMenu";
+import type { CommonData } from "@/hooks/use-common-data";
+import { useCommonData } from "@/hooks/use-common-data";
 
 /**
  * Report page
@@ -19,42 +13,35 @@ import SelfLoadedTeamLeftMenu from "@/wrappers/SelfLoadedTeamLeftMenu";
  */
 
 const Index = () => {
-  // This works because we are using SelfLoadedTeamLeftMenu, which is using CommonDataWrapper
-  const organizationData: Organization = useAppSelector(
-    selectActiveOrganization
-  );
-  const teamData: Team = useAppSelector(selectActiveTeam);
-  const reportData: Report = useAppSelector(selectActiveReport);
+  const commonData: CommonData = useCommonData();
 
   return (
     <>
-      <SelfLoadedTeamLeftMenu>
-        <div className="mt-8">
-          <h1>Display name: {organizationData?.display_name}</h1>
-          <h1>avatar url: {organizationData?.avatar_url}</h1>
-          <h1>link: {organizationData?.link}</h1>
-          <h1>legal name: {organizationData?.legal_name}</h1>
-          <h1>id {organizationData?.id}</h1>
-          <h1>location {organizationData?.location}</h1>
-        </div>
+      <div className="mt-8">
+        <h1>Display name: {commonData.organization?.display_name}</h1>
+        <h1>avatar url: {commonData.organization?.avatar_url}</h1>
+        <h1>link: {commonData.organization?.link}</h1>
+        <h1>legal name: {commonData.organization?.legal_name}</h1>
+        <h1>id {commonData.organization?.id}</h1>
+        <h1>location {commonData.organization?.location}</h1>
+      </div>
 
-        <div className="mt-8">
-          <h1>Display name: {teamData?.display_name}</h1>
-          <h1>avatar url: {teamData?.avatar_url}</h1>
-          <h1>link: {teamData?.link}</h1>
-          <h1>legal name: {teamData?.bio}</h1>
-          <h1>id {teamData?.id}</h1>
-          <h1>location {teamData?.visibility}</h1>
-        </div>
+      <div className="mt-8">
+        <h1>Display name: {commonData.team?.display_name}</h1>
+        <h1>avatar url: {commonData.team?.avatar_url}</h1>
+        <h1>link: {commonData.team?.link}</h1>
+        <h1>legal name: {commonData.team?.bio}</h1>
+        <h1>id {commonData.team?.id}</h1>
+        <h1>location {commonData.team?.visibility}</h1>
+      </div>
 
-        <div className="mt-8">
-          <h1>Display name: {reportData?.title}</h1>
-          <h1>avatar url: {reportData?.preview_picture}</h1>
-          <h1>description: {reportData?.description}</h1>
-          <h1>authors: {reportData?.author_ids}</h1>
-          <h1>id {reportData?.id}</h1>
-        </div>
-      </SelfLoadedTeamLeftMenu>
+      <div className="mt-8">
+        <h1>Display name: {commonData.report?.title}</h1>
+        <h1>avatar url: {commonData.report?.preview_picture}</h1>
+        <h1>description: {commonData.report?.description}</h1>
+        <h1>authors: {commonData.report?.author_ids}</h1>
+        <h1>id {commonData.report?.id}</h1>
+      </div>
     </>
   );
 };

@@ -24,18 +24,11 @@ const OrganizationSelector = (props: IOrganizationSelectorProps) => {
           <span className="flex w-full justify-between items-center">
             <span className="flex min-w-0 items-center justify-between space-x-3">
               <span className="flex-1 flex flex-col min-w-0">
-                <span className="text-gray-900 text-sm font-medium truncate">
-                  {currentOrg ? currentOrg.name : "Select organization"}
-                </span>
-                <span className="text-gray-500 text-sm truncate">
-                  {currentOrg?.href}
-                </span>
+                <span className="text-gray-900 text-sm font-medium truncate">{currentOrg ? currentOrg.name : "Select organization"}</span>
+                <span className="text-gray-500 text-sm truncate">{currentOrg?.href}</span>
               </span>
             </span>
-            <SelectorIcon
-              className="shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-500"
-              aria-hidden="true"
-            />
+            <SelectorIcon className="shrink-0 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
           </span>
         </Menu.Button>
       </div>
@@ -54,9 +47,7 @@ const OrganizationSelector = (props: IOrganizationSelectorProps) => {
             <div>
               <div className="px-4 pt-3">
                 <p className="text-sm">Current organisation</p>
-                <p className="text-sm font-bold text-gray-900 truncate">
-                  {currentOrg && currentOrg.name}
-                </p>
+                <p className="text-sm font-bold text-gray-900 truncate">{currentOrg && currentOrg.name}</p>
               </div>
 
               <div className="px-4 py-2 text-sm font-light truncate text-indigo-500">
@@ -64,20 +55,14 @@ const OrganizationSelector = (props: IOrganizationSelectorProps) => {
               </div>
 
               <div className="px-4 py-2 text-sm font-light truncate text-indigo-500">
-                <a href={`${currentOrg && currentOrg.href}/settings`}>
-                  Go to organization settings
-                </a>
+                <a href={`${currentOrg && currentOrg.href}/settings`}>Go to organization settings</a>
               </div>
             </div>
           )}
 
           <div className="py-1">
             <div className="px-4 py-2">
-              <p className="text-sm text-gray-500 truncate">
-                {currentOrg
-                  ? "Your other organizations:"
-                  : "Select organization:"}
-              </p>
+              <p className="text-sm text-gray-500 truncate">{currentOrg ? "Your other organizations:" : "Select organization:"}</p>
             </div>
 
             {props.organizationSelectorItems &&
@@ -88,15 +73,7 @@ const OrganizationSelector = (props: IOrganizationSelectorProps) => {
                     {({ active }) => (
                       <a
                         href={organizationSelectorItem.href}
-                        className={classNames(
-                          active
-                            ? "bg-gray-100 text-gray-900"
-                            : "text-gray-700",
-                          "block px-4 py-2 text-sm",
-                          organizationSelectorItem.current
-                            ? "font-bold"
-                            : "font-normal"
-                        )}
+                        className={classNames(active ? "bg-gray-100 text-gray-900" : "text-gray-700", "block px-4 py-2 text-sm", organizationSelectorItem.current ? "font-bold" : "font-normal")}
                       >
                         {organizationSelectorItem.name}
                       </a>

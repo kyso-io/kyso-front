@@ -1,10 +1,5 @@
 import useSWR from "swr";
-import {
-  fetchRelationsAction,
-  fetchUserPermissions,
-  selectUser,
-  setAuthAction,
-} from "@kyso-io/kyso-store";
+import { fetchRelationsAction, fetchUserPermissions, selectUser, setAuthAction } from "@kyso-io/kyso-store";
 import decode from "jwt-decode";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -34,9 +29,7 @@ export const useAuth = ({ loginRedirect = true } = {}): User => {
 
     let unauthorizedRedirectUrl;
     if (publicKeys) {
-      const pValue = publicKeys.find(
-        (x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL
-      );
+      const pValue = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
 
       if (pValue) {
         unauthorizedRedirectUrl = pValue.value;
@@ -81,21 +74,17 @@ export const useAuth = ({ loginRedirect = true } = {}): User => {
         jwt,
         teamName: router.query.teamName as string,
         organizationName: router.query.organizationName as string,
-      })
+      }),
     );
 
-    const userPermissions = await dispatch(
-      fetchUserPermissions(tokenData.username)
-    );
+    const userPermissions = await dispatch(fetchUserPermissions(tokenData.username));
 
     if (userPermissions) {
       await dispatch(
         fetchRelationsAction({
           team: Helper.ListToKeyVal(userPermissions.payload.teams),
-          organization: Helper.ListToKeyVal(
-            userPermissions.payload.organizations
-          ),
-        })
+          organization: Helper.ListToKeyVal(userPermissions.payload.organizations),
+        }),
       );
     }
   };

@@ -1,17 +1,7 @@
-import type {
-  KysoPermissions,
-  Organization,
-  Team,
-  TokenPermissions,
-} from "@kyso-io/kyso-model";
+import type { KysoPermissions, Organization, Team, TokenPermissions } from "@kyso-io/kyso-model";
 
 export class SecurityHelper {
-  public static checkPermissions(
-    activeOrganization: Organization,
-    activeTeam: Team,
-    currentUserPermissions: TokenPermissions,
-    listOfPermissionsToCheck: KysoPermissions
-  ) {
+  public static checkPermissions(activeOrganization: Organization, activeTeam: Team, currentUserPermissions: TokenPermissions, listOfPermissionsToCheck: KysoPermissions) {
     if (!activeOrganization || !currentUserPermissions) {
       return false;
     }
@@ -28,9 +18,7 @@ export class SecurityHelper {
     let permissionsInThatOrganization = null;
 
     if (activeTeam) {
-      permissionsInThatTeam = currentUserPermissions.teams?.find(
-        (x) => x.id === activeTeam.id
-      );
+      permissionsInThatTeam = currentUserPermissions.teams?.find((x) => x.id === activeTeam.id);
 
       /*
       console.log(
@@ -42,10 +30,7 @@ export class SecurityHelper {
     }
 
     if (activeOrganization) {
-      permissionsInThatOrganization =
-        currentUserPermissions.organizations?.find(
-          (x) => x.id === activeOrganization.id
-        );
+      permissionsInThatOrganization = currentUserPermissions.organizations?.find((x) => x.id === activeOrganization.id);
 
       /* console.log(
         `Permissions in that organization ${
@@ -56,10 +41,7 @@ export class SecurityHelper {
     }
 
     if (permissionsInThatOrganization) {
-      const hasPermissions =
-        permissionsInThatOrganization.permissions?.includes(
-          listOfPermissionsToCheck
-        );
+      const hasPermissions = permissionsInThatOrganization.permissions?.includes(listOfPermissionsToCheck);
 
       if (hasPermissions) {
         permissionInOrganization = hasPermissions;
@@ -70,15 +52,10 @@ export class SecurityHelper {
     }
 
     if (permissionsInThatTeam && permissionsInThatTeam?.permissions) {
-      permissionInTeam = permissionsInThatTeam.permissions.includes(
-        listOfPermissionsToCheck
-      );
+      permissionInTeam = permissionsInThatTeam.permissions.includes(listOfPermissionsToCheck);
     }
 
-    if (
-      !permissionsInThatTeam ||
-      permissionsInThatTeam?.organization_inherited === true
-    ) {
+    if (!permissionsInThatTeam || permissionsInThatTeam?.organization_inherited === true) {
       // console.log(`[ORG] Has permissions returning ${permissionInOrganization}`);
       return permissionInOrganization;
     }

@@ -1,10 +1,5 @@
 import KysoTopBar from '@/layouts/KysoTopBar.tsx';
-import {
-  addUserAccountAction,
-  loginAction,
-  selectUser,
-  setTokenAuthAction,
-} from '@kyso-io/kyso-store';
+import { addUserAccountAction, loginAction, selectUser, setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -43,16 +38,12 @@ const Page = () => {
           password: code,
           provider,
           payload: `${window.location.origin}/oauth/${provider}/callback`,
-        })
+        }),
       );
       if (result?.payload) {
         localStorage.setItem('jwt', result.payload);
       } else {
-        router.replace(
-          `/login?error=${encodeURIComponent(
-            'There was an error authenticating the user with google'
-          )}`
-        );
+        router.replace(`/login?error=${encodeURIComponent('There was an error authenticating the user with google')}`);
       }
     };
     const addUserAccount = async () => {
@@ -62,7 +53,7 @@ const Page = () => {
         addUserAccountAction({
           code,
           provider,
-        })
+        }),
       );
       const redirect = sessionStorage.getItem('userAccount');
       sessionStorage.removeItem('userAccount');
@@ -78,9 +69,7 @@ const Page = () => {
 
   return (
     <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-      <div className="bg-slate-50 border py-8 px-4 shadow sm:rounded-lg sm:px-10">
-        loading...
-      </div>
+      <div className="bg-slate-50 border py-8 px-4 shadow sm:rounded-lg sm:px-10">loading...</div>
     </div>
   );
 };

@@ -7,6 +7,8 @@ export class Sanitizer {
    * @param {*} defaultValue The default value you want to return if ${data} is null or undefined
    * @returns ${data} is is not null nor undefined or ${defaultValue} otherwise
    */
+
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   public static ifNullReturnDefault(data: any, defaultValue: any): any {
     try {
       if (data) {
@@ -25,8 +27,6 @@ export class Sanitizer {
    * @returns the text passed as parameter, but with the first character in uppercase
    */
   public static transformToUpperCaseFirstLetter(text: string): string {
-    return text && text.length > 0
-      ? text.charAt(0).toUpperCase() + text.slice(1)
-      : "";
+    return text && text.length > 0 ? text.charAt(0).toUpperCase() + text.slice(1) : "";
   }
 }
