@@ -8,6 +8,7 @@ import type { LayoutProps } from "@/types/pageWithLayout";
 import { Footer } from "../components/Footer";
 import { Meta } from "./Meta";
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const BrandSidebarWithLightHeader: LayoutProps = ({ children }: any) => {
   const navigation = [
     { name: "Dashboard", href: "/", icon: HomeIcon, current: true },

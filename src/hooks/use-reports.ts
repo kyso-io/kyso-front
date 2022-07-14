@@ -1,51 +1,61 @@
-import type { ReportDTO } from "@kyso-io/kyso-model";
 import { fetchReportsAction, selectActiveReports } from "@kyso-io/kyso-store";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { useAppDispatch, useAppSelector } from "./redux-hooks";
 import { useAuth } from "./use-auth";
-import type { CommonData } from "./use-common-data";
 import { useCommonData } from "./use-common-data";
 
-export const useReports = (): ReportDTO[] => {
-  const router = useRouter();
-  const dispatch = useAppDispatch();
+type IUseReports = {
+  perPage?: string;
+  page?: string;
+  search?: string | null;
+  sort?: string;
+  tags?: string[];
+};
 
-  const commonData: CommonData = useCommonData();
+type Filter = {
+  team_id: String;
+  search: String | null;
+};
+
+export const useReports = (props: IUseReports = {}) => {
+  const { perPage = 20, page = 1, search = null, sort = "-created_at" } = props;
+
+  const router = useRouter();
+
+  const { team } = useCommonData();
+
+  const dispatch = useAppDispatch();
   const reports = useAppSelector(selectActiveReports);
 
   const user = useAuth({ loginRedirect: false });
 
-  let reportsPerPage = 20;
-  if (router.query.per_page && router.query.per_page.length > 0) {
-    reportsPerPage = parseInt(router.query.per_page, 10);
-  }
-
   const fetcher = async () => {
     const args = {
-      filter: { team_id: commonData.team.id, search: null },
-      sort: "-created_at",
-      page: router.query.page ? parseInt(router.query.page, 10) : 1,
-      per_page: reportsPerPage,
+      filter: { team_id: team.id, search: null } as Filter,
+      sort,
+      page,
+      per_page: perPage,
     };
-    if (router.query.search && router.query.search.length > 0) {
-      args.filter.search = router.query.search;
+    if (search && search.length > 0) {
+      args.filter.search = search!;
     }
-
-    // console.log('calling api to get reports')
-    dispatch(fetchReportsAction(args));
+    dispatch(fetchReportsAction(args as object));
   };
 
   const [mounted, setMounted] = useState(false);
-  useSWR(mounted ? "use-reports" : null, fetcher);
-
+  useSWR(mounted ? `use-reports-${router.asPath}` : null, fetcher);
   useEffect(() => {
-    if (reports) return;
-    if (!commonData.team) return;
+    if (reports) {
+      return;
+    }
+    if (!team) {
+      return;
+    }
 
     setMounted(true);
-  }, [user, commonData.team]);
+  }, [user, team, router.query.sort]);
 
   return reports || [];
 };

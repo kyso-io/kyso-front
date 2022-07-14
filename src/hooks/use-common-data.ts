@@ -21,7 +21,8 @@ import { useAuth } from "./use-auth";
 export type CommonData = {
   permissions: TokenPermissions | null;
   token: string | null;
-  organization: Organization;
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  organization: any;
   team: Team;
   user: User;
   report: Report | null;
@@ -37,6 +38,7 @@ export const useCommonData = (): CommonData => {
   const token: string | null = useAppSelector((state: RootState) => state.auth.token);
   const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);
   const activeOrganization: Organization = useAppSelector(selectActiveOrganization);
+
   const activeTeam: Team = useAppSelector(selectActiveTeam);
   const activeReport: Report = useAppSelector(selectActiveReport);
 
@@ -100,9 +102,15 @@ export const useCommonData = (): CommonData => {
       return;
     }
 
-    if (activeOrganization) return;
-    if (activeTeam) return;
-    if (activeReport) return;
+    if (activeOrganization) {
+      return;
+    }
+    if (activeTeam) {
+      return;
+    }
+    if (activeReport) {
+      return;
+    }
 
     setMounted(true);
   }, [router.query, user]);

@@ -37,8 +37,8 @@ const PureSidebar = (props: IPureSidebarProps) => {
                       href={item.href}
                       className={classNames(
                         "group flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md",
-                        "hover:text-gray-900 hover:bg-white",
-                        item.current ? "font-bold" : "font-normal",
+                        "hover:text-gray-900",
+                        item.current ? "font-bold bg-neutral-200" : "font-normal hover:bg-neutral-50",
                       )}
                     >
                       <item.icon className={classNames(item.current ? "text-gray-500" : "text-gray-400 group-hover:text-gray-500", "flex-shrink-0 -ml-1 mr-2 h-5 w-5")} aria-hidden="true" />
@@ -51,11 +51,7 @@ const PureSidebar = (props: IPureSidebarProps) => {
           </div>
         </div>
 
-        <div className="md:pl-64 flex flex-col flex-1 bg-neutral-50">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">{props.children}</div>
-          </div>
-        </div>
+        {props.children}
       </div>
     </>
   );

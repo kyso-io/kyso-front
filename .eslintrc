@@ -41,12 +41,12 @@
             "endOfLine": "auto"
           }
         ],
-        "max-len": [
-          "error",
-          {
-            "code": 200
-          }
-        ],
+        // "max-len": [
+        //   "error",
+        //   {
+        //     "code": 200
+        //   }
+        // ],
         "semi": "error",
         "curly": ["error", "all"],
         "no-extra-semi": "error",

@@ -60,6 +60,7 @@ const Index = () => {
 
   useEffect(() => {
     const getOrganizationOptions = async () => {
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       const publicKeys: any[] = await Helper.getKysoPublicSettings();
 
       if (!publicKeys || publicKeys.length === 0) {
@@ -137,7 +138,7 @@ const Index = () => {
 
   useEffect(() => {
     if (router.query.error) {
-      setError(router.query.error);
+      setError(router.query.error as string);
     }
   }, [router.query.error]);
 
@@ -153,7 +154,7 @@ const Index = () => {
             router.push(`/captcha`);
           }
         } else if (redirect) {
-          router.push(redirect);
+          router.push(redirect as string);
         } else {
           router.push("/");
         }
@@ -161,6 +162,7 @@ const Index = () => {
     }
   }, [user]);
 
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   const handleSubmit = async (e: any) => {
     e.preventDefault();
 
@@ -186,7 +188,7 @@ const Index = () => {
       localStorage.setItem("jwt", result.payload);
       setTimeout(() => {
         if (redirect) {
-          router.push(redirect);
+          router.push(redirect as string);
         } else {
           router.push("/");
         }

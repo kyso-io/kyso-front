@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { Footer } from "../components/Footer";
 import { Meta } from "./Meta";
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const MainLayout: LayoutProps = ({ children }: any) => {
   const router = useRouter();
 

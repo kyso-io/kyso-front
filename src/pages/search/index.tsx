@@ -2,8 +2,8 @@
 import SearchItem from "@/components/search-item";
 import SearchNavigation from "@/components/search-navigation";
 import SearchPagination from "@/components/search-pagination";
-import { useAuth } from "@/hooks/auth";
 import { useAppDispatch } from "@/hooks/redux-hooks";
+import { useAuth } from "@/hooks/use-auth";
 import type { FullTextSearchParams } from "@/interfaces/full-text-search-params";
 import type { SearchNavItem } from "@/interfaces/search-nav-item";
 import KysoTopBar from "@/layouts/KysoTopBar";
@@ -14,18 +14,20 @@ import { unwrapResult } from "@reduxjs/toolkit";
 import debounce from "lodash.debounce";
 import React, { useEffect, useMemo, useState } from "react";
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const fetchData = async (params: FullTextSearchParams, dispatch: any, cb: (fullTextSearchDTO: FullTextSearchDTO | null) => void) => {
   const resultFullTextSearch = await dispatch(fullTextSearchAction({ ...params, terms: encodeURIComponent(params.terms) }));
   const fullTextSearchDTO: FullTextSearchDTO | null = unwrapResult(resultFullTextSearch);
   cb(fullTextSearchDTO);
 };
 
+/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const debouncedFetchData = debounce((params: FullTextSearchParams, dispatch: any, cb: (result: any) => void) => {
   fetchData(params, dispatch, cb);
 }, 750);
 
 const SearchIndex = () => {
-  useAuth(false);
+  useAuth({ loginRedirect: false });
   const dispatch = useAppDispatch();
   const [requesting, setRequesting] = useState<boolean>(false);
   const [fullTextSearchDTO, setFullTextSearchDTO] = useState<FullTextSearchDTO | null>(null);
@@ -94,6 +96,7 @@ const SearchIndex = () => {
             placeholder="Search Kyso"
             value={fullTextSearchParams.terms}
             className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             onChange={(e: any) => setFullTextSearchParams({ ...fullTextSearchParams, terms: e.target.value, page: 1 })}
           />
         </div>

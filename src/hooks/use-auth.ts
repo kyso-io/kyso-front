@@ -72,8 +72,8 @@ export const useAuth = ({ loginRedirect = true } = {}): User => {
     await dispatch(
       setAuthAction({
         jwt,
-        teamName: router.query.teamName,
-        organizationName: router.query.organizationName,
+        teamName: router.query.teamName as string,
+        organizationName: router.query.organizationName as string,
       }),
     );
 
