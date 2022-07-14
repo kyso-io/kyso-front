@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import { useAppDispatch, useAppSelector } from "./redux-hooks";
-import { useAuth } from "./use-auth";
+import { useUser } from "./use-user";
 import { useCommonData } from "./use-common-data";
 
 type IUseReports = {
@@ -29,7 +29,7 @@ export const useReports = (props: IUseReports = {}) => {
   const dispatch = useAppDispatch();
   const reports = useAppSelector(selectActiveReports);
 
-  const user = useAuth({ loginRedirect: false });
+  const user = useUser();
 
   const fetcher = async () => {
     const args = {

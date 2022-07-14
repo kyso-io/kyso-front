@@ -1,13 +1,18 @@
 import type { LayoutProps } from "@/types/pageWithLayout";
 import { useRouter } from "next/router";
 import { Helper } from "@/helpers/Helper";
-import { useAuth } from "@/hooks/use-auth";
+import { useUser } from "@/hooks/use-user";
 
 import PureKysoTopBar from "@/components/PureKysoTopBar";
+import type { ReactElement } from "react";
 
-const KysoTopBar: LayoutProps = ({ children }: any) => {
+type IUnpureKysoTopBarProps = {
+  children: ReactElement;
+};
+
+const KysoTopBar: LayoutProps = ({ children }: IUnpureKysoTopBarProps) => {
   const router = useRouter();
-  const user = useAuth({ loginRedirect: true });
+  const user = useUser();
 
   let slugifiedName = "";
   if (user && user.display_name) {
@@ -24,11 +29,7 @@ const KysoTopBar: LayoutProps = ({ children }: any) => {
   ];
 
   return (
-    <PureKysoTopBar
-      user={user}
-      basePath={router.basePath}
-      userNavigation={userNavigation}
-    >
+    <PureKysoTopBar user={user} basePath={router.basePath} userNavigation={userNavigation}>
       {children}
     </PureKysoTopBar>
   );

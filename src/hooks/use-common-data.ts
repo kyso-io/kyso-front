@@ -16,7 +16,7 @@ import type { Organization, Report, ReportDTO, ResourcePermissions, Team, TokenP
 import useSWR from "swr";
 import { unwrapResult } from "@reduxjs/toolkit";
 import { useAppDispatch, useAppSelector } from "./redux-hooks";
-import { useAuth } from "./use-auth";
+import { useUser } from "./use-user";
 
 export type CommonData = {
   permissions: TokenPermissions | null;
@@ -33,7 +33,7 @@ export const useCommonData = (): CommonData => {
   const dispatch = useAppDispatch();
 
   const { query } = router;
-  const user: User = useAuth({ loginRedirect: false });
+  const user: User = useUser();
 
   const token: string | null = useAppSelector((state: RootState) => state.auth.token);
   const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);

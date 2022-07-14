@@ -1,12 +1,12 @@
 import KysoTopBar from "@/layouts/KysoTopBar";
-import { useAuth } from "@/hooks/use-auth";
+import { useUser } from "@/hooks/use-user";
 import { useRouter } from "next/router";
 import { Helper } from "@/helpers/Helper";
 import type { CommonData } from "@/hooks/use-common-data";
 import { useCommonData } from "@/hooks/use-common-data";
 
 const Index = () => {
-  useAuth({ loginRedirect: false });
+  useUser();
   const router = useRouter();
   const commonData: CommonData = useCommonData();
 
