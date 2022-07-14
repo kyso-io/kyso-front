@@ -1,45 +1,52 @@
 import KysoTopBar from "@/layouts/KysoTopBar";
-import { selectActiveOrganization } from "@kyso-io/kyso-store";
-import type { Organization } from "@kyso-io/kyso-model";
-import { useAppSelector } from "@/hooks/redux-hooks";
-import SelfLoadedTeamLeftMenu from "@/wrappers/SelfLoadedTeamLeftMenu";
-import { useAuth } from "@/hooks/use-auth";
-import { useRouter } from "next/router";
+import UnpureSidebar from "@/wrappers/UnpureSidebar";
+import type { CommonData } from "@/hooks/use-common-data";
+import { useCommonData } from "@/hooks/use-common-data";
 
 const Index = () => {
-  useAuth({ loginRedirect: false });
-  const router = useRouter();
-  // This works because we are using SelfLoadedTeamLeftMenu, which is using CommonDataWrapper
-  const organizationData: Organization = useAppSelector(
-    selectActiveOrganization
-  );
+  const commonData: CommonData = useCommonData();
 
   return (
     <>
-      <SelfLoadedTeamLeftMenu>
-        <div className="mt-8">
-          <h1>Organization Dashboard: {organizationData?.display_name}</h1>
-          <a
-            href={`${router.basePath}/${organizationData?.sluglified_name}/settings`}
-            className="text-indigo-500"
-          >
-            Go to organization settings
-          </a>
-          <p>
-            - [USER IS LOGGED IN AND MEMBER]: show list of all reports for that
-            org, pinned on top, and show member list component
-          </p>
-          <p>
-            - [USER IS LOGGED IN AND NOT A MEMBER]: show list of public reports
-            for that org, pinned on top, no sidebar
-          </p>
-          <p>
-            - [USER IS NOT LOGGED]: show list of public reports for that org,
-            pinned on top, no sidebar
-          </p>
-          <p>- [NONE OF THE ABOVE]: 404</p>
+      <UnpureSidebar>
+        <div className="container mx-auto flex">
+          <div className="basis-3/4">
+            <main className="py-10">
+              <div className="max-w-3xl mx-auto px-4 sm:px-6 md:flex md:items-center md:justify-between md:space-x-5 lg:max-w-7xl lg:px-8">
+                <div className="flex items-center space-x-5">
+                  <div className="shrink-0">
+                    <div className="relative">
+                      <img
+                        className="h-16 w-16 rounded-full"
+                        src={commonData.organization?.avatar_url}
+                        alt=""
+                      />
+                      <span
+                        className="absolute inset-0 shadow-inner rounded-full"
+                        aria-hidden="true"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">
+                      {commonData.organization?.display_name}
+                    </h1>
+                    <p className="text-sm font-medium text-gray-500">
+                      {commonData.organization?.bio}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </main>
+
+            <div className="max-w-3xl mx-auto p-4 md:flex md:items-center md:justify-between md:space-x-5 lg:max-w-7xl lg:px-8 bg-white rounded shadow">
+              <pre className="text-xs font-light">
+                {JSON.stringify(commonData.organization, null, 2)}
+              </pre>
+            </div>
+          </div>
         </div>
-      </SelfLoadedTeamLeftMenu>
+      </UnpureSidebar>
     </>
   );
 };

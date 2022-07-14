@@ -7,11 +7,11 @@ import PureKysoTopBar from "@/components/PureKysoTopBar";
 
 const KysoTopBar: LayoutProps = ({ children }: any) => {
   const router = useRouter();
-  const user = useAuth();
+  const user = useAuth({ loginRedirect: true });
 
   let slugifiedName = "";
-  if (user) {
-    slugifiedName = Helper.slugify(user?.display_name);
+  if (user && user.display_name) {
+    slugifiedName = Helper.slugify(user.display_name);
   }
 
   const userNavigation = [

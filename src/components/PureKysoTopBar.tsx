@@ -9,7 +9,7 @@ import type { ReactElement } from "react";
 import { Fragment } from "react";
 // import type { LayoutProps } from "@/types/pageWithLayout";
 import type { User } from "@kyso-io/kyso-model";
-import { Footer } from "./Footer";
+// import { Footer } from "./Footer";
 
 type IPureKysoTopBarProps = {
   children: ReactElement;
@@ -180,7 +180,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
         </Disclosure>
       </div>
       {children}
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 };

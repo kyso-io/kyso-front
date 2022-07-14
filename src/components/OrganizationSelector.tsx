@@ -51,31 +51,39 @@ const OrganizationSelector = (props: IOrganizationSelectorProps) => {
       >
         <Menu.Items className="origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
           {currentOrg && (
-            <div className="px-4 py-3">
-              <p className="text-sm">Current organisation</p>
-              <p className="text-sm font-medium text-gray-900 truncate">
-                {currentOrg && currentOrg.name}
-              </p>
-              <p className="text-sm truncate text-indigo-500 mt-4">
+            <div>
+              <div className="px-4 pt-3">
+                <p className="text-sm">Current organisation</p>
+                <p className="text-sm font-bold text-gray-900 truncate">
+                  {currentOrg && currentOrg.name}
+                </p>
+              </div>
+
+              <div className="px-4 py-2 text-sm font-light truncate text-indigo-500">
                 <a href={`${currentOrg && currentOrg.href}`}>Go to dashboard</a>
-              </p>
-              <p className="text-sm truncate text-indigo-500 mt-4">
+              </div>
+
+              <div className="px-4 py-2 text-sm font-light truncate text-indigo-500">
                 <a href={`${currentOrg && currentOrg.href}/settings`}>
                   Go to organization settings
                 </a>
-              </p>
+              </div>
             </div>
           )}
+
           <div className="py-1">
-            <div className="px-4 py-3">
-              <p className="text-sm font-medium text-gray-900 truncate">
-                Select organization
+            <div className="px-4 py-2">
+              <p className="text-sm text-gray-500 truncate">
+                {currentOrg
+                  ? "Your other organizations:"
+                  : "Select organization:"}
               </p>
             </div>
 
             {props.organizationSelectorItems &&
-              props.organizationSelectorItems.map(
-                (organizationSelectorItem) => (
+              props.organizationSelectorItems
+                .filter((o) => !o.current)
+                .map((organizationSelectorItem) => (
                   <Menu.Item key={organizationSelectorItem.href}>
                     {({ active }) => (
                       <a
@@ -94,8 +102,7 @@ const OrganizationSelector = (props: IOrganizationSelectorProps) => {
                       </a>
                     )}
                   </Menu.Item>
-                )
-              )}
+                ))}
           </div>
         </Menu.Items>
       </Transition>

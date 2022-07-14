@@ -73,6 +73,36 @@ const Index = () => {
     else activeFilters.push(router.query.tags);
   }
 
+  let currentPage = 1;
+  if (router.query.page && router.query.page.length > 0) {
+    currentPage = parseInt(router.query.page as string, 10);
+  }
+
+  let reportsPerPage = 20;
+  if (router.query.per_page && router.query.per_page.length > 0) {
+    reportsPerPage = parseInt(router.query.per_page as string, 10);
+  }
+
+  let enabledNextPage = false;
+  if (reports && reports.length === reportsPerPage) {
+    enabledNextPage = true;
+  }
+
+  let extraParamsUrl = "";
+  if (router.query.search && router.query.search.length > 0) {
+    extraParamsUrl += `&search=${router.query.search}`;
+  }
+  if (router.query.sort && router.query.sort.length > 0) {
+    extraParamsUrl += `&sort=${router.query.sort}`;
+  }
+  if (router.query.tags && router.query.tags.length > 0) {
+    extraParamsUrl += `&tags=${router.query.tags}`;
+  }
+
+  if (router.query.per_page && router.query.per_page.length > 0) {
+    extraParamsUrl += `&per_page=${router.query.per_page}`;
+  }
+
   return (
     <>
       <UnpureSidebar>
@@ -100,6 +130,40 @@ const Index = () => {
                   <UnpureReportBadge id={report.id} key={report.id} />
                 ))}
               </ul>
+            </div>
+
+            <div className="flex-1 flex mt-4 justify-center">
+              {!(currentPage - 1 < 1) && (
+                <a
+                  href={
+                    currentPage - 1 < 1
+                      ? "#"
+                      : `?page=${currentPage - 1}${extraParamsUrl}`
+                  }
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Previous
+                </a>
+              )}
+
+              {enabledNextPage && (
+                <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">
+                  Page {currentPage}
+                </p>
+              )}
+
+              {enabledNextPage && (
+                <a
+                  href={
+                    enabledNextPage
+                      ? `?page=${currentPage + 1}${extraParamsUrl}`
+                      : "#"
+                  }
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                >
+                  Next
+                </a>
+              )}
             </div>
           </div>
         </div>

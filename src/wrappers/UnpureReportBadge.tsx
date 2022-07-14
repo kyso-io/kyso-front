@@ -7,7 +7,7 @@ import { Helper } from "@/helpers/Helper";
 import { Sanitizer } from "@/helpers/Sanitizer";
 import { useRouter } from "next/router";
 import PureReportBadge from "@/components/PureReportBadge";
-import type { User } from "@kyso-io/kyso-model";
+import type { UserDTO } from "@kyso-io/kyso-model";
 import {
   getOrgAndTeamGivenSluglifiedOrgAndTeam,
   selectCurrentUserPermissions,
@@ -33,7 +33,7 @@ const UnpureReportBadge = (props: any) => {
       (id: string) => state.user.entities[id]
     );
     if (report.author_ids.indexOf(report.user_id) === -1) {
-      tempOwners.push(state.user.entities[report.user_id] as User);
+      tempOwners.push(state.user.entities[report.user_id] as UserDTO);
     }
     return tempOwners;
   }, [report, state.user?.entities]);
