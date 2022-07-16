@@ -35,13 +35,13 @@ const Index = () => {
         <h1>location {commonData.team?.visibility}</h1>
       </div>
 
-      <div className="mt-8">
+      {/* <div className="mt-8">
         <h1>Display name: {commonData.report?.title}</h1>
         <h1>avatar url: {commonData.report?.preview_picture}</h1>
         <h1>description: {commonData.report?.description}</h1>
         <h1>authors: {commonData.report?.author_ids}</h1>
         <h1>id {commonData.report?.id}</h1>
-      </div>
+      </div> */}
     </>
   );
 };

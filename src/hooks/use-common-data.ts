@@ -1,20 +1,9 @@
 import type { RootState } from "@kyso-io/kyso-store";
-import {
-  fetchReportsAction,
-  selectActiveReport,
-  setActiveId,
-  fetchOrganizationAction,
-  fetchTeamAction,
-  selectActiveOrganization,
-  selectActiveTeam,
-  setOrganizationAuthAction,
-  setTeamAuthAction,
-} from "@kyso-io/kyso-store";
+import { fetchOrganizationAction, fetchTeamAction } from "@kyso-io/kyso-store";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import type { Organization, Report, ReportDTO, ResourcePermissions, Team, TokenPermissions, User } from "@kyso-io/kyso-model";
+import type { ActionWithPayload, Organization, ResourcePermissions, Team, TokenPermissions, User } from "@kyso-io/kyso-model";
 import useSWR from "swr";
-import { unwrapResult } from "@reduxjs/toolkit";
 import { useAppDispatch, useAppSelector } from "./redux-hooks";
 import { useUser } from "./use-user";
 
@@ -25,7 +14,6 @@ export type CommonData = {
   organization: any;
   team: Team;
   user: User;
-  report: Report | null;
 };
 
 export const useCommonData = (): CommonData => {
@@ -37,57 +25,28 @@ export const useCommonData = (): CommonData => {
 
   const token: string | null = useAppSelector((state: RootState) => state.auth.token);
   const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);
-  const activeOrganization: Organization = useAppSelector(selectActiveOrganization);
-
-  const activeTeam: Team = useAppSelector(selectActiveTeam);
-  const activeReport: Report = useAppSelector(selectActiveReport);
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [team, setTeam] = useState<Team | null>(null);
 
   const fetcher = async () => {
     const organizationResourcePermissions: ResourcePermissions | undefined = permissions!.organizations!.find((org: ResourcePermissions) => org.name === query.organizationName);
-
     if (!organizationResourcePermissions) {
       return;
     }
 
-    // Get the organization data
-    await dispatch(setOrganizationAuthAction(query.organizationName as string));
-    await dispatch(fetchOrganizationAction(organizationResourcePermissions.id));
+    const fetchOrganizationRequest: ActionWithPayload<Organization> = await dispatch(fetchOrganizationAction(organizationResourcePermissions.id));
+    setOrganization(fetchOrganizationRequest.payload);
 
     if (!query.teamName) {
       return;
     }
-
-    const teamResourcePermissions: ResourcePermissions | undefined = permissions!.teams!.find((team: ResourcePermissions) => team.name === query.teamName);
-
+    const teamResourcePermissions: ResourcePermissions | undefined = permissions!.teams!.find((t: ResourcePermissions) => t.name === query.tName);
     if (!teamResourcePermissions) {
       return;
     }
 
-    // Get the team data
-    await dispatch(setTeamAuthAction(query.teamName as string));
-    await dispatch(fetchTeamAction(teamResourcePermissions.id));
-
-    if (!query.reportName) {
-      return;
-    }
-
-    const resultReportAction = await dispatch(
-      fetchReportsAction({
-        filter: {
-          team_id: teamResourcePermissions.id,
-          sluglified_name: query.reportName,
-        },
-      }),
-    );
-
-    const reports: ReportDTO[] = unwrapResult(resultReportAction);
-
-    if (reports.length === 0) {
-      return;
-    }
-
-    const report: ReportDTO = reports[0] as ReportDTO;
-    await dispatch(setActiveId(report.id as string));
+    const fetchTeamRequest: ActionWithPayload<Team> = await dispatch(fetchTeamAction(teamResourcePermissions.id));
+    setTeam(fetchTeamRequest.payload);
   };
 
   const [mounted, setMounted] = useState(false);
@@ -101,26 +60,14 @@ export const useCommonData = (): CommonData => {
     if (!query.organizationName) {
       return;
     }
-
-    if (activeOrganization) {
-      return;
-    }
-    if (activeTeam) {
-      return;
-    }
-    if (activeReport) {
-      return;
-    }
-
     setMounted(true);
-  }, [router.query, user]);
+  }, [permissions]);
 
   return {
     permissions,
     token,
-    organization: activeOrganization,
-    team: activeTeam,
+    organization,
+    team,
     user,
-    report: activeReport,
   } as CommonData;
 };
