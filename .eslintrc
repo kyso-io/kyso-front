@@ -9,8 +9,8 @@
     "prettier/prettier": [
       "error",
       {
-        "singleQuote": true,
-        "endOfLine": "auto"
+        // "singleQuote": true,
+        // "endOfLine": "auto"
       }
     ]
   },
@@ -37,8 +37,8 @@
         "prettier/prettier": [
           "error",
           {
-            "singleQuote": false,
-            "endOfLine": "auto"
+            // "singleQuote": false,
+            // "endOfLine": "auto"
           }
         ],
         // "max-len": [

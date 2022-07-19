@@ -1,12 +1,12 @@
-import format from "date-fns/format";
-import { ChatAltIcon, CodeIcon, DotsVerticalIcon, EyeIcon, FlagIcon, ShareIcon, StarIcon, ThumbUpIcon } from "@heroicons/react/solid";
-import { Menu, Transition } from "@headlessui/react";
-import { Fragment } from "react";
-import { toSvg } from "jdenticon";
-import type { ReportDTO, UserDTO } from "@kyso-io/kyso-model";
+import format from 'date-fns/format';
+import { ChatAltIcon, CodeIcon, DotsVerticalIcon, EyeIcon, FlagIcon, ShareIcon, StarIcon, ThumbUpIcon } from '@heroicons/react/solid';
+import { Menu, Transition } from '@headlessui/react';
+import { Fragment } from 'react';
+import { toSvg } from 'jdenticon';
+import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
 type IPureReportBadgeProps = {
@@ -38,7 +38,7 @@ const PureReportBadge = (props: IPureReportBadgeProps) => {
 
   return (
     <>
-      <li key={report.id} className={classNames("bg-white shadow rounded", isPinned ? "border" : "")}>
+      <li key={report.id} className={classNames('bg-white shadow rounded', isPinned ? 'border' : '')}>
         <article aria-labelledby={`report-title-${report.id}`}>
           <div className="flex">
             <div className="h-48 w-48 p-4 border-r">
@@ -68,7 +68,7 @@ const PureReportBadge = (props: IPureReportBadgeProps) => {
                         onClickUpvote();
                       }}
                     >
-                      <ThumbUpIcon className={classNames("h-5 w-5", report.mark_as_star_by_user ? "text-indigo-500" : "")} aria-hidden="true" />
+                      <ThumbUpIcon className={classNames('h-5 w-5', report.mark_as_star_by_user ? 'text-indigo-500' : '')} aria-hidden="true" />
                       <span className="text-gray-900">{report.stars}</span>
                       <span className="sr-only">upvotes</span>
                     </button>
@@ -94,7 +94,7 @@ const PureReportBadge = (props: IPureReportBadgeProps) => {
                         <div className="py-1">
                           <Menu.Item>
                             {({ active }) => (
-                              <a href="#" className={classNames(active ? "bg-gray-100 text-gray-900" : "text-gray-700", "flex px-4 py-2 text-sm")} onClick={onClickPin}>
+                              <a href="#" className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex px-4 py-2 text-sm')} onClick={onClickPin}>
                                 <StarIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
                                 <span>Pin report</span>
                               </a>
@@ -102,7 +102,7 @@ const PureReportBadge = (props: IPureReportBadgeProps) => {
                           </Menu.Item>
                           <Menu.Item>
                             {({ active }) => (
-                              <a href="#" className={classNames(active ? "bg-gray-100 text-gray-900" : "text-gray-700", "flex px-4 py-2 text-sm")}>
+                              <a href="#" className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex px-4 py-2 text-sm')}>
                                 <CodeIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
                                 <span>Embed</span>
                               </a>
@@ -110,7 +110,7 @@ const PureReportBadge = (props: IPureReportBadgeProps) => {
                           </Menu.Item>
                           <Menu.Item>
                             {({ active }) => (
-                              <a href="#" className={classNames(active ? "bg-gray-100 text-gray-900" : "text-gray-700", "flex px-4 py-2 text-sm")}>
+                              <a href="#" className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex px-4 py-2 text-sm')}>
                                 <FlagIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
                                 <span>Report content</span>
                               </a>
@@ -143,7 +143,7 @@ const PureReportBadge = (props: IPureReportBadgeProps) => {
 
               <div className="mt-3 flex justify-between space-x-8">
                 <div className="flex space-x-6">
-                  <span className="inline-flex items-center text-sm text-gray-600 font-light">{format(new Date(report.created_at!), "MMM dd, yyyy")}</span>
+                  <span className="inline-flex items-center text-sm text-gray-600 font-light">{format(new Date(report.created_at!), 'MMM dd, yyyy')}</span>
                   <span className="inline-flex items-center text-sm">
                     <button type="button" className="inline-flex space-x-2 text-gray-400 hover:text-gray-500">
                       <ChatAltIcon className="h-5 w-5" aria-hidden="true" />

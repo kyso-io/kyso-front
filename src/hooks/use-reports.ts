@@ -1,10 +1,10 @@
-import { fetchReportsAction } from "@kyso-io/kyso-store";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import useSWR from "swr";
-import type { ActionWithPayload, Report } from "@kyso-io/kyso-model";
-import { useAppDispatch } from "./redux-hooks";
-import { useUser } from "./use-user";
+import { fetchReportsAction } from '@kyso-io/kyso-store';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import useSWR from 'swr';
+import type { ActionWithPayload, Report } from '@kyso-io/kyso-model';
+import { useAppDispatch } from './redux-hooks';
+import { useUser } from './use-user';
 
 type IUseReports = {
   teamId?: string;
@@ -21,7 +21,7 @@ type Filter = {
 };
 
 export const useReports = (props: IUseReports = {}): Report[] | null | undefined => {
-  const { teamId, perPage = 20, page = 1, search = null, sort = "-created_at" } = props;
+  const { teamId, perPage = 20, page = 1, search = null, sort = '-created_at' } = props;
   const router = useRouter();
   const dispatch = useAppDispatch();
   const user = useUser();

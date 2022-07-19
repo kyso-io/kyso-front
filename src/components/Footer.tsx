@@ -1,17 +1,17 @@
 const Footer = () => {
   const navigation = {
     main: [
-      { name: "About", href: "#" },
-      { name: "Blog", href: "#" },
-      { name: "Jobs", href: "#" },
-      { name: "Press", href: "#" },
-      { name: "Accessibility", href: "#" },
-      { name: "Partners", href: "#" },
+      { name: 'About', href: '#' },
+      { name: 'Blog', href: '#' },
+      { name: 'Jobs', href: '#' },
+      { name: 'Press', href: '#' },
+      { name: 'Accessibility', href: '#' },
+      { name: 'Partners', href: '#' },
     ],
     social: [
       {
-        name: "Facebook",
-        href: "#",
+        name: 'Facebook',
+        href: '#',
         icon: (
           props: any, // eslint-disable-line
         ) => (
@@ -25,8 +25,8 @@ const Footer = () => {
         ),
       },
       {
-        name: "Instagram",
-        href: "#",
+        name: 'Instagram',
+        href: '#',
         icon: (
           props: any, // eslint-disable-line
         ) => (
@@ -40,8 +40,8 @@ const Footer = () => {
         ),
       },
       {
-        name: "Twitter",
-        href: "#",
+        name: 'Twitter',
+        href: '#',
         icon: (
           props: any, // eslint-disable-line
         ) => (
@@ -51,8 +51,8 @@ const Footer = () => {
         ),
       },
       {
-        name: "GitHub",
-        href: "#",
+        name: 'GitHub',
+        href: '#',
         icon: (
           props: any, // eslint-disable-line
         ) => (
@@ -66,8 +66,8 @@ const Footer = () => {
         ),
       },
       {
-        name: "Dribbble",
-        href: "#",
+        name: 'Dribbble',
+        href: '#',
         icon: (
           props: any, // eslint-disable-line
         ) => (

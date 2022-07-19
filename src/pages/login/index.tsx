@@ -1,16 +1,16 @@
-import { Helper } from "@/helpers/Helper";
-import NoLayout from "@/layouts/NoLayout";
-import "@fortawesome/fontawesome-svg-core/styles.css";
-import { faBitbucket, faGithub, faGitlab, faGoogle } from "@fortawesome/free-brands-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { KysoSettingsEnum, Login, LoginProviderEnum } from "@kyso-io/kyso-model";
-import type { AppDispatch } from "@kyso-io/kyso-store";
-import { loginAction, selectUser, setError as storeSetError } from "@kyso-io/kyso-store";
-import Head from "next/head";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import uuid from "uuid";
+import { Helper } from '@/helpers/Helper';
+import NoLayout from '@/layouts/NoLayout';
+import '@fortawesome/fontawesome-svg-core/styles.css';
+import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
+import type { AppDispatch } from '@kyso-io/kyso-store';
+import { loginAction, selectUser, setError as storeSetError } from '@kyso-io/kyso-store';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import uuid from 'uuid';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -18,27 +18,27 @@ const validateEmail = (email: string) => {
   return re.test(email);
 };
 
-const githubScopes = ["read:user", "user:email", "read:org", "repo", "admin:repo_hook", "public_repo"];
+const githubScopes = ['read:user', 'user:email', 'read:org', 'repo', 'admin:repo_hook', 'public_repo'];
 
 const Index = () => {
   const router = useRouter();
   const { redirect } = router.query;
 
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [error, setError] = useState('');
+  const [password, setPassword] = useState('');
   const dispatch = useDispatch<AppDispatch>();
-  const [bitbucketUrl, setBitbucketUrl] = useState("");
-  const [githubUrl, setGithubUrl] = useState("");
-  const [gitlabUrl, setGitlabUrl] = useState("");
-  const [googleUrl, setGoogleUrl] = useState("");
+  const [bitbucketUrl, setBitbucketUrl] = useState('');
+  const [githubUrl, setGithubUrl] = useState('');
+  const [gitlabUrl, setGitlabUrl] = useState('');
+  const [googleUrl, setGoogleUrl] = useState('');
   const [enableGoogleAuth, setEnableGoogleAuth] = useState(true);
   const [enableGithubAuth, setEnableGithubAuth] = useState(true);
   const [enableGitlabAuth, setEnableGitlabAuth] = useState(true);
   const [enableBitbucketAuth, setEnableBitbucketAuth] = useState(true);
   const [enableKysoAuth, setEnableKysoAuth] = useState(true);
   const [enablePingSamlAuth, setEnablePingSamlAuth] = useState(true);
-  const [pingUrl, setPingUrl] = useState("");
+  const [pingUrl, setPingUrl] = useState('');
 
   const [rightLogo, setRightLogo] = useState(null);
   const [leftLogo, setLeftLogo] = useState(null);
@@ -65,7 +65,7 @@ const Index = () => {
 
       if (!publicKeys || publicKeys.length === 0) {
         // return toaster.danger("An unknown error has occurred");
-        return "";
+        return '';
       }
 
       const googleClientId = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_GOOGLE_CLIENT_ID).value;
@@ -75,26 +75,26 @@ const Index = () => {
       const gitlabRedirectURI = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_GITLAB_REDIRECT_URI).value;
       const pingIdSamlSSOUrl = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_PINGID_SAML_SSO_URL).value;
 
-      const tmpEnableGoogleAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GOOGLE).value === "true";
+      const tmpEnableGoogleAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GOOGLE).value === 'true';
 
-      const tmpEnableGithubAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITHUB).value === "true";
+      const tmpEnableGithubAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITHUB).value === 'true';
 
-      const tmpEnableGitlabAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === "true";
+      const tmpEnableGitlabAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
 
-      const tmpEnableBitbucketAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET).value === "true";
+      const tmpEnableBitbucketAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET).value === 'true';
 
-      const tmpEnableKysoAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO).value === "true";
+      const tmpEnableKysoAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO).value === 'true';
 
-      const tmpEnablePingSamlAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML).value === "true";
+      const tmpEnablePingSamlAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML).value === 'true';
 
       setGoogleUrl(
         `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&response_type=code&redirect_uri=${encodeURIComponent(
           `${window.location.origin}/oauth/google/callback`,
-        )}&scope=${encodeURIComponent("https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.emails.read")}`,
+        )}&scope=${encodeURIComponent('https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.emails.read')}`,
       );
       setBitbucketUrl(`https://bitbucket.org/site/oauth2/authorize?client_id=${bitbucketClientId}&response_type=code`);
 
-      setGithubUrl(`https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(",")}&state=${uuid ? uuid.v4() : ""}`);
+      setGithubUrl(`https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(',')}&state=${uuid ? uuid.v4() : ''}`);
 
       setGitlabUrl(`https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&redirect_uri=${gitlabRedirectURI}&response_type=code`);
 
@@ -131,7 +131,7 @@ const Index = () => {
       setShowdivCss(customizeShowdivCss);
       setHiddendivCss(customizeHiddendivCss);
 
-      return "";
+      return '';
     };
     getOrganizationOptions();
   }, []);
@@ -156,7 +156,7 @@ const Index = () => {
         } else if (redirect) {
           router.push(redirect as string);
         } else {
-          router.push("/");
+          router.push('/');
         }
       }, 200);
     }
@@ -167,17 +167,17 @@ const Index = () => {
     e.preventDefault();
 
     if (!email || email.length === 0) {
-      setError("Email is required.");
+      setError('Email is required.');
       return;
     }
 
     if (!validateEmail(email)) {
-      setError("Email not valid.");
+      setError('Email not valid.');
       return;
     }
 
     if (!password || password.length === 0) {
-      setError("Password is required.");
+      setError('Password is required.');
       return;
     }
 
@@ -185,12 +185,12 @@ const Index = () => {
 
     const result = await dispatch(loginAction(loginData));
     if (result?.payload) {
-      localStorage.setItem("jwt", result.payload);
+      localStorage.setItem('jwt', result.payload);
       setTimeout(() => {
         if (redirect) {
           router.push(redirect as string);
         } else {
-          router.push("/");
+          router.push('/');
         }
       }, 200);
     }
@@ -254,7 +254,7 @@ const Index = () => {
                   <div className="">
                     <div className="p-6">
                       {/* Your content */}
-                      <div style={{ paddingLeft: "15.3%", paddingBottom: "15px" }}>
+                      <div style={{ paddingLeft: '15.3%', paddingBottom: '15px' }}>
                         {/* <h1>Kyso.io</h1> */}
                         <a href="/">
                           <img className="w-24" src={`/assets/images/kyso-logo-and-name-dark.svg`} alt="Kyso" />
@@ -262,8 +262,8 @@ const Index = () => {
                         <p
                           className="py-4"
                           style={{
-                            WebkitFontSmoothing: "antialiased",
-                            textRendering: "optimizeLegibility",
+                            WebkitFontSmoothing: 'antialiased',
+                            textRendering: 'optimizeLegibility',
                           }}
                         >
                           Kyso.io offers free unlimited (private) repositories and unlimited collaborators.
@@ -274,12 +274,12 @@ const Index = () => {
                               Read Kyso documentation
                             </a>
                           </li>
-                          <li style={{ paddingTop: "5px" }}>
+                          <li style={{ paddingTop: '5px' }}>
                             <a className="login-link" href="https://docs.kyso.io/posting-to-kyso/kyso-command-line-tool/installation" aria-label="cli" target="_blank" rel="noopener noreferrer">
                               Install Kyso CLI
                             </a>
                           </li>
-                          <li style={{ paddingTop: "5px" }}>
+                          <li style={{ paddingTop: '5px' }}>
                             <a className="login-link" href="https://about.kyso.io/about" aria-label="about" target="_blank" rel="noopener noreferrer">
                               More information about Kyso
                             </a>
@@ -293,12 +293,12 @@ const Index = () => {
                         <div className="pb-4">
                           <p className="pb-4">By signing up for and by signing in to this service you accept our:</p>
                           <ul className="list-disc list-inside pl-4">
-                            <li style={{ paddingTop: "5px" }}>
+                            <li style={{ paddingTop: '5px' }}>
                               <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
                                 Terms of service
                               </a>
                             </li>
-                            <li style={{ paddingTop: "5px" }}>
+                            <li style={{ paddingTop: '5px' }}>
                               <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
                                 Privacy statement
                               </a>
@@ -330,8 +330,8 @@ const Index = () => {
                           value={email}
                           placeholder="Email"
                           onChange={(e) => {
-                            setError("");
-                            dispatch(storeSetError(""));
+                            setError('');
+                            dispatch(storeSetError(''));
                             setEmail(e.target.value);
                           }}
                         />
@@ -349,8 +349,8 @@ const Index = () => {
                           // placeholder="Password"
                           autoComplete="off"
                           onChange={(e) => {
-                            setError("");
-                            dispatch(storeSetError(""));
+                            setError('');
+                            dispatch(storeSetError(''));
                             setPassword(e.target.value);
                           }}
                         />
@@ -454,8 +454,8 @@ const Index = () => {
                                   width={12}
                                   height={12}
                                   style={{
-                                    marginRight: "8px",
-                                    display: "inline",
+                                    marginRight: '8px',
+                                    display: 'inline',
                                   }}
                                   alt="PingID Login"
                                 ></img>

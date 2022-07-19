@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
-import { type LeftMenuItem } from "@/model/left-menu-item.model";
-import type { OrganizationSelectorItem } from "@/model/organization-selector-item.model";
-import { OrganizationSelector } from "./OrganizationSelector";
+import type { ReactNode } from 'react';
+import { type LeftMenuItem } from '@/model/left-menu-item.model';
+import type { OrganizationSelectorItem } from '@/model/organization-selector-item.model';
+import { OrganizationSelector } from './OrganizationSelector';
 
 type ILeftSideBarProps = {
   meta: ReactNode;
@@ -11,7 +11,7 @@ type ILeftSideBarProps = {
 };
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
 const LeftSideBar = (props: ILeftSideBarProps) => {
@@ -36,12 +36,12 @@ const LeftSideBar = (props: ILeftSideBarProps) => {
                       key={item.name}
                       href={item.href}
                       className={classNames(
-                        "group flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md",
-                        "hover:text-gray-900 hover:bg-white",
-                        item.current ? "font-bold" : "font-normal",
+                        'group flex items-center px-3 py-2 text-sm font-medium text-gray-600 rounded-md',
+                        'hover:text-gray-900 hover:bg-white',
+                        item.current ? 'font-bold' : 'font-normal',
                       )}
                     >
-                      <item.icon className={classNames(item.current ? "text-gray-500" : "text-gray-400 group-hover:text-gray-500", "flex-shrink-0 -ml-1 mr-2 h-5 w-5")} aria-hidden="true" />
+                      <item.icon className={classNames(item.current ? 'text-gray-500' : 'text-gray-400 group-hover:text-gray-500', 'flex-shrink-0 -ml-1 mr-2 h-5 w-5')} aria-hidden="true" />
                       <span className="truncate">{item.name}</span>
                     </a>
                   ))}

@@ -1,4 +1,4 @@
-import type { KysoPermissions, Organization, Team, TokenPermissions } from "@kyso-io/kyso-model";
+import type { KysoPermissions, Organization, Team, TokenPermissions } from '@kyso-io/kyso-model';
 
 export class SecurityHelper {
   public static checkPermissions(activeOrganization: Organization, activeTeam: Team, currentUserPermissions: TokenPermissions, listOfPermissionsToCheck: KysoPermissions) {

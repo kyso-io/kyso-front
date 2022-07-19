@@ -1,9 +1,9 @@
-import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { BellIcon, ChevronDownIcon, MenuIcon, XIcon } from "@heroicons/react/solid";
-import type { ReactElement } from "react";
-import { Fragment } from "react";
+import { Disclosure, Menu, Transition } from '@headlessui/react';
+import { BellIcon, ChevronDownIcon, MenuIcon, XIcon } from '@heroicons/react/solid';
+import type { ReactElement } from 'react';
+import { Fragment } from 'react';
 // import type { LayoutProps } from "@/types/pageWithLayout";
-import type { User } from "@kyso-io/kyso-model";
+import type { User } from '@kyso-io/kyso-model';
 // import { Footer } from "./Footer";
 
 type IPureKysoTopBarProps = {
@@ -19,7 +19,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
   const navigation: any[] = [];
 
   function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(" ");
+    return classes.filter(Boolean).join(' ');
   }
 
   return (
@@ -62,7 +62,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                               {userNavigation.map((item) => (
                                 <Menu.Item key={item.name}>
                                   {({ active }) => (
-                                    <a href={item.href} className={classNames(active ? "bg-gray-100" : "", "block px-4 py-2 text-sm text-gray-700")}>
+                                    <a href={item.href} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
                                       {item.name}
                                     </a>
                                   )}
@@ -91,8 +91,8 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                       key={item.name}
                       as="a"
                       href={item.href}
-                      className={classNames(item.current ? "bg-indigo-700 text-white" : "text-white hover:bg-indigo-500/75", "block px-3 py-2 rounded-md text-base font-medium")}
-                      aria-current={item.current ? "page" : undefined}
+                      className={classNames(item.current ? 'bg-indigo-700 text-white' : 'text-white hover:bg-indigo-500/75', 'block px-3 py-2 rounded-md text-base font-medium')}
+                      aria-current={item.current ? 'page' : undefined}
                     >
                       {item.name}
                     </Disclosure.Button>

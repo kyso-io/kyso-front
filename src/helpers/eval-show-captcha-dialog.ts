@@ -2,7 +2,7 @@
 const showCaptchaDialogHelper = (userShowCaptcha: boolean, settingGloballyEnabledCaptcha: any) => {
   // Hack to convert to boolean
   /* eslint-disable no-param-reassign */
-  settingGloballyEnabledCaptcha = settingGloballyEnabledCaptcha === "true";
+  settingGloballyEnabledCaptcha = settingGloballyEnabledCaptcha === 'true';
 
   if (!settingGloballyEnabledCaptcha) {
     return false;

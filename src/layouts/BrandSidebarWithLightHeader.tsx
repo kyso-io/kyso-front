@@ -1,42 +1,42 @@
-import { Dialog, Menu, Transition } from "@headlessui/react";
-import { BellIcon, CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, MenuAlt2Icon, UsersIcon, XIcon } from "@heroicons/react/outline";
-import { SearchIcon } from "@heroicons/react/solid";
-import { Fragment, useState } from "react";
+import { Dialog, Menu, Transition } from '@headlessui/react';
+import { BellIcon, CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, MenuAlt2Icon, UsersIcon, XIcon } from '@heroicons/react/outline';
+import { SearchIcon } from '@heroicons/react/solid';
+import { Fragment, useState } from 'react';
 
-import type { LayoutProps } from "@/types/pageWithLayout";
+import type { LayoutProps } from '@/types/pageWithLayout';
 
-import { Footer } from "../components/Footer";
-import { Meta } from "./Meta";
+import { Footer } from '../components/Footer';
+import { Meta } from './Meta';
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const BrandSidebarWithLightHeader: LayoutProps = ({ children }: any) => {
   const navigation = [
-    { name: "Dashboard", href: "/", icon: HomeIcon, current: true },
+    { name: 'Dashboard', href: '/', icon: HomeIcon, current: true },
     {
-      name: "Profile",
-      href: "/profile/fjbarrena",
+      name: 'Profile',
+      href: '/profile/fjbarrena',
       icon: UsersIcon,
       current: false,
     },
-    { name: "404", href: "/404", icon: FolderIcon, current: false },
-    { name: "500", href: "/500", icon: CalendarIcon, current: false },
-    { name: "About", href: "/about", icon: InboxIcon, current: false },
+    { name: '404', href: '/404', icon: FolderIcon, current: false },
+    { name: '500', href: '/500', icon: CalendarIcon, current: false },
+    { name: 'About', href: '/about', icon: InboxIcon, current: false },
     {
-      name: "Query Params",
-      href: "/lightside",
+      name: 'Query Params',
+      href: '/lightside',
       icon: ChartBarIcon,
       current: false,
     },
   ];
 
   const userNavigation = [
-    { name: "Your Profile", href: "#" },
-    { name: "Settings", href: "#" },
-    { name: "Sign out", href: "#" },
+    { name: 'Your Profile', href: '#' },
+    { name: 'Settings', href: '#' },
+    { name: 'Sign out', href: '#' },
   ];
 
   function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(" ");
+    return classes.filter(Boolean).join(' ');
   }
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -97,7 +97,7 @@ const BrandSidebarWithLightHeader: LayoutProps = ({ children }: any) => {
                       <a
                         key={item.name}
                         href={item.href}
-                        className={classNames(item.current ? "bg-indigo-800 text-white" : "text-indigo-100 hover:bg-indigo-600", "group flex items-center px-2 py-2 text-base font-medium rounded-md")}
+                        className={classNames(item.current ? 'bg-indigo-800 text-white' : 'text-indigo-100 hover:bg-indigo-600', 'group flex items-center px-2 py-2 text-base font-medium rounded-md')}
                       >
                         <item.icon className="mr-4 h-6 w-6 shrink-0 text-indigo-300" aria-hidden="true" />
                         {item.name}
@@ -126,7 +126,7 @@ const BrandSidebarWithLightHeader: LayoutProps = ({ children }: any) => {
                   <a
                     key={item.name}
                     href={item.href}
-                    className={classNames(item.current ? "bg-indigo-800 text-white" : "text-indigo-100 hover:bg-indigo-600", "group flex items-center px-2 py-2 text-sm font-medium rounded-md")}
+                    className={classNames(item.current ? 'bg-indigo-800 text-white' : 'text-indigo-100 hover:bg-indigo-600', 'group flex items-center px-2 py-2 text-sm font-medium rounded-md')}
                   >
                     <item.icon className="mr-3 h-6 w-6 shrink-0 text-indigo-300" aria-hidden="true" />
                     {item.name}
@@ -197,7 +197,7 @@ const BrandSidebarWithLightHeader: LayoutProps = ({ children }: any) => {
                       {userNavigation.map((item) => (
                         <Menu.Item key={item.name}>
                           {({ active }) => (
-                            <a href={item.href} className={classNames(active ? "bg-gray-100" : "", "block px-4 py-2 text-sm text-gray-700")}>
+                            <a href={item.href} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
                               {item.name}
                             </a>
                           )}

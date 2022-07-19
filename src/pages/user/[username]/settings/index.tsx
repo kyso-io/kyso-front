@@ -1,16 +1,16 @@
-import KysoTopBar from "@/layouts/KysoTopBar";
-import { useUser } from "@/hooks/use-user";
-import { useRouter } from "next/router";
-import { Helper } from "@/helpers/Helper";
-import type { CommonData } from "@/hooks/use-common-data";
-import { useCommonData } from "@/hooks/use-common-data";
+import KysoTopBar from '@/layouts/KysoTopBar';
+import { useUser } from '@/hooks/use-user';
+import { useRouter } from 'next/router';
+import { Helper } from '@/helpers/Helper';
+import type { CommonData } from '@/hooks/use-common-data';
+import { useCommonData } from '@/hooks/use-common-data';
 
 const Index = () => {
   useUser();
   const router = useRouter();
   const commonData: CommonData = useCommonData();
 
-  let sluglifiedName = "";
+  let sluglifiedName = '';
 
   if (commonData.user) {
     sluglifiedName = Helper.slugify(commonData.user?.display_name);

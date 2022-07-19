@@ -1,15 +1,15 @@
-import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
-import { useMemo, useState } from "react";
-import checkPermissions from "@/helpers/check-permissions";
-import { useUser } from "@/hooks/use-user";
-import slugify from "slugify";
-import { Helper } from "@/helpers/Helper";
-import { Sanitizer } from "@/helpers/Sanitizer";
-import { useRouter } from "next/router";
-import PureReportBadge from "@/components/PureReportBadge";
-import type { UserDTO } from "@kyso-io/kyso-model";
-import { getOrgAndTeamGivenSluglifiedOrgAndTeam, selectCurrentUserPermissions, toggleGlobalPinReportAction, toggleUserPinReportAction, toggleUserStarReportAction } from "@kyso-io/kyso-store";
-import { useSelector } from "react-redux";
+import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import { useMemo, useState } from 'react';
+import checkPermissions from '@/helpers/check-permissions';
+import { useUser } from '@/hooks/use-user';
+import slugify from 'slugify';
+import { Helper } from '@/helpers/Helper';
+import { Sanitizer } from '@/helpers/Sanitizer';
+import { useRouter } from 'next/router';
+import PureReportBadge from '@/components/PureReportBadge';
+import type { UserDTO } from '@kyso-io/kyso-model';
+import { getOrgAndTeamGivenSluglifiedOrgAndTeam, selectCurrentUserPermissions, toggleGlobalPinReportAction, toggleUserPinReportAction, toggleUserStarReportAction } from '@kyso-io/kyso-store';
+import { useSelector } from 'react-redux';
 
 type IUnpureReportBadge = {
   id: string;
@@ -51,7 +51,7 @@ const UnpureReportBadge = (props: IUnpureReportBadge) => {
   const currentUserPermissions = useSelector(selectCurrentUserPermissions);
 
   const hasPermissionGlobalPinReport = useMemo(() => {
-    return checkPermissions(activeOrganization!, activeTeam!, currentUserPermissions, "KYSO_IO_REPORT_GLOBAL_PIN");
+    return checkPermissions(activeOrganization!, activeTeam!, currentUserPermissions, 'KYSO_IO_REPORT_GLOBAL_PIN');
   }, [activeOrganization, activeTeam, currentUserPermissions]);
 
   const togglePinReportGlobally = async () => {
@@ -107,8 +107,8 @@ const UnpureReportBadge = (props: IUnpureReportBadge) => {
     setUpvoteBusy(false);
   };
 
-  const href = `${router.basePath}/${Helper.slugify(Sanitizer.ifNullReturnDefault(organizationName, ""))}/${slugify(Sanitizer.ifNullReturnDefault(teamName, ""))}/${slugify(
-    Sanitizer.ifNullReturnDefault(report.name, ""),
+  const href = `${router.basePath}/${Helper.slugify(Sanitizer.ifNullReturnDefault(organizationName, ''))}/${slugify(Sanitizer.ifNullReturnDefault(teamName, ''))}/${slugify(
+    Sanitizer.ifNullReturnDefault(report.name, ''),
   )}`;
 
   return (

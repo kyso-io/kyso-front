@@ -1,14 +1,14 @@
-import { iframeResizer } from "iframe-resizer";
-import React, { useEffect } from "react";
-import TurndownService from "turndown";
-import { v4 } from "uuid";
+import { iframeResizer } from 'iframe-resizer';
+import React, { useEffect } from 'react';
+import TurndownService from 'turndown';
+import { v4 } from 'uuid';
 
-const turndownPluginGfm = require("joplin-turndown-plugin-gfm");
+const turndownPluginGfm = require('joplin-turndown-plugin-gfm');
 
 const turndownService = new TurndownService();
 turndownService.use(turndownPluginGfm.gfm);
-turndownService.remove("div");
-turndownService.remove("style");
+turndownService.remove('div');
+turndownService.remove('style');
 
 type IPureIFrameRendererProps = {
   file: {
@@ -33,7 +33,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   });
 
   if (!file || !file.path_scs || file.path_scs.length === 0) {
-    return "Invalid path";
+    return 'Invalid path';
   }
 
   return (
@@ -42,11 +42,11 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
       id={`iframe-${id}`}
       sandbox={`allow-scripts allow-same-origin allow-forms allow-modals allow-popups`}
       style={{
-        border: "none 0px",
-        width: "100%",
-        minHeight: "1000px",
+        border: 'none 0px',
+        width: '100%',
+        minHeight: '1000px',
       }}
-      src={`${"/scs"}${file.path_scs}`}
+      src={`${'/scs'}${file.path_scs}`}
     />
   );
 };

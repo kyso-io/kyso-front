@@ -1,15 +1,15 @@
-import KysoTopBar from "@/layouts/KysoTopBar";
-import type { CommonData } from "@/hooks/use-common-data";
-import { useCommonData } from "@/hooks/use-common-data";
-import UnpureReportRender from "@/wrappers/UnpureReportRender";
-import { KysoBreadcrumb } from "@/components/KysoBreadcrumb";
-import { BreadcrumbItem } from "@/model/breadcrum-item.model";
-import { useRouter } from "next/router";
-import { useCommonReportData } from "@/hooks/use-common-report-data";
-import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
-import { fetchReportsTreeAction } from "@kyso-io/kyso-store";
-import { useEffect } from "react";
-import UnPureTree from "@/wrappers/UnPureTree";
+import KysoTopBar from '@/layouts/KysoTopBar';
+import type { CommonData } from '@/hooks/use-common-data';
+import { useCommonData } from '@/hooks/use-common-data';
+import UnpureReportRender from '@/wrappers/UnpureReportRender';
+import { KysoBreadcrumb } from '@/components/KysoBreadcrumb';
+import { BreadcrumbItem } from '@/model/breadcrum-item.model';
+import { useRouter } from 'next/router';
+import { useCommonReportData } from '@/hooks/use-common-report-data';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import { fetchReportsTreeAction } from '@kyso-io/kyso-store';
+import { useEffect } from 'react';
+import UnPureTree from '@/wrappers/UnPureTree';
 
 const Index = () => {
   const router = useRouter();
@@ -32,7 +32,7 @@ const Index = () => {
 
       const args: ArgType = {
         reportId: report!.id as string,
-        filePath: (router.query.path as string) || "",
+        filePath: (router.query.path as string) || '',
       };
       if (router.query.version && !Number.isNaN(router.query.version)) {
         args.version = parseInt(router.query.version as string, 10);

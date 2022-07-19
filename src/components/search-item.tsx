@@ -1,5 +1,5 @@
-import { ElasticSearchIndex } from "@kyso-io/kyso-model";
-import type { FullTextSearchResult } from "@kyso-io/kyso-model";
+import { ElasticSearchIndex } from '@kyso-io/kyso-model';
+import type { FullTextSearchResult } from '@kyso-io/kyso-model';
 
 interface Props {
   fullTextSearchResult: FullTextSearchResult;
