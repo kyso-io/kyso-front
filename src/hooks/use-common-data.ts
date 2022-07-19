@@ -10,8 +10,7 @@ import { useUser } from "./use-user";
 export type CommonData = {
   permissions: TokenPermissions | null;
   token: string | null;
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  organization: any;
+  organization: Organization;
   team: Team;
   user: User;
 };
@@ -22,52 +21,50 @@ export const useCommonData = (): CommonData => {
 
   const { query } = router;
   const user: User = useUser();
-
   const token: string | null = useAppSelector((state: RootState) => state.auth.token);
   const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);
-  const [organization, setOrganization] = useState<Organization | null>(null);
-  const [team, setTeam] = useState<Team | null>(null);
 
   const fetcher = async () => {
     const organizationResourcePermissions: ResourcePermissions | undefined = permissions!.organizations!.find((org: ResourcePermissions) => org.name === query.organizationName);
-    if (!organizationResourcePermissions) {
-      return;
+
+    let organization: Organization | null = null;
+    let team = null;
+
+    if (query.organizationName) {
+      if (organizationResourcePermissions) {
+        const fetchOrganizationRequest: ActionWithPayload<Organization> = await dispatch(fetchOrganizationAction(organizationResourcePermissions.id));
+        organization = fetchOrganizationRequest.payload;
+      }
     }
 
-    const fetchOrganizationRequest: ActionWithPayload<Organization> = await dispatch(fetchOrganizationAction(organizationResourcePermissions.id));
-    setOrganization(fetchOrganizationRequest.payload);
-
-    if (!query.teamName) {
-      return;
+    if (query.teamName && organization) {
+      const teamResourcePermissions: ResourcePermissions | undefined = permissions!.teams!.find((t: ResourcePermissions) => {
+        return t.name === query.teamName && t.organization_id === organization!.id;
+      });
+      if (teamResourcePermissions) {
+        const fetchTeamRequest: ActionWithPayload<Team> = await dispatch(fetchTeamAction(teamResourcePermissions.id));
+        team = fetchTeamRequest.payload;
+      }
     }
-    const teamResourcePermissions: ResourcePermissions | undefined = permissions!.teams!.find((t: ResourcePermissions) => t.name === query.tName);
-    if (!teamResourcePermissions) {
-      return;
-    }
 
-    const fetchTeamRequest: ActionWithPayload<Team> = await dispatch(fetchTeamAction(teamResourcePermissions.id));
-    setTeam(fetchTeamRequest.payload);
+    return { organization, team, token, permissions };
   };
 
   const [mounted, setMounted] = useState(false);
-  useSWR(mounted ? "use-common-data" : null, fetcher);
+  const { data } = useSWR(mounted ? `use-common-data` : null, fetcher);
 
   useEffect(() => {
     if (!permissions) {
       return;
     }
-
-    if (!query.organizationName) {
-      return;
-    }
     setMounted(true);
-  }, [permissions]);
+  }, [router.query, permissions]);
 
   return {
     permissions,
     token,
-    organization,
-    team,
+    organization: data?.organization,
+    team: data?.team,
     user,
   } as CommonData;
 };

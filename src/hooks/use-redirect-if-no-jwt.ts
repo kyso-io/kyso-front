@@ -16,7 +16,7 @@ export type DecodedToken = {
 
 // export type IUseRedirectProps = {};
 
-export const useRedirect = () => {
+export const useRedirectIfNoJWT = () => {
   const router = useRouter();
 
   let publicKeys: KeyValue[];

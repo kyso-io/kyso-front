@@ -1,9 +1,9 @@
 import KysoTopBar from "@/layouts/KysoTopBar";
 import UnpureSidebar from "@/wrappers/UnpureSidebar";
-import { useRedirect } from "@/hooks/use-redirect";
+import { useRedirectIfNoJWT } from "@/hooks/use-redirect-if-no-jwt";
 
 const Index = () => {
-  useRedirect();
+  useRedirectIfNoJWT();
   // const user = useUser()
 
   return (

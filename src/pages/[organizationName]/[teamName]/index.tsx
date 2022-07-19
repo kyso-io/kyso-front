@@ -5,6 +5,8 @@ import { useReports } from "@/hooks/use-reports";
 import UnpureSidebar from "@/wrappers/UnpureSidebar";
 import UnpureReportBadge from "@/wrappers/UnpureReportBadge";
 import PureReportFilter from "@/components/PureReportFilter";
+import type { CommonData } from "@/hooks/use-common-data";
+import { useCommonData } from "@/hooks/use-common-data";
 
 const tags = ["plotly", "multiqc", "python", "data-science", "rstudio", "genetics", "physics"];
 
@@ -33,8 +35,10 @@ const pushQueryString = (router: NextRouter, newValue: object) => {
 
 const Index = () => {
   const router = useRouter();
+  const commonData: CommonData = useCommonData();
 
   const reports = useReports({
+    teamId: commonData.team?.id,
     perPage: router.query.per_page as string,
     page: router.query.page as string,
     search: router.query.search as string,
@@ -50,18 +54,6 @@ const Index = () => {
   if (!router.query.teamName && !router.query.organizationName) {
     return <div>404</div>;
   }
-
-  const onSetSearch = (search: string) => {
-    pushQueryString(router, { search });
-  };
-
-  const onSetTags = (_tags: string[]) => {
-    pushQueryString(router, { tags: _tags });
-  };
-
-  const onSetSort = (sort: string) => {
-    pushQueryString(router, { sort });
-  };
 
   let activeFilters = [];
   if (router.query.search) {
@@ -115,9 +107,15 @@ const Index = () => {
               sortOptions={sortOptions}
               tags={tags}
               activeFilters={activeFilters}
-              onSetSearch={onSetSearch}
-              onSetTags={onSetTags}
-              onSetSort={onSetSort}
+              onSetSearch={(search: string) => {
+                pushQueryString(router, { search });
+              }}
+              onSetTags={(newTags: string[]) => {
+                pushQueryString(router, { tags: newTags });
+              }}
+              onSetSort={(sort: string) => {
+                pushQueryString(router, { sort });
+              }}
               currentSort={router.query.sort as string}
               onClear={() => {
                 router.push({
