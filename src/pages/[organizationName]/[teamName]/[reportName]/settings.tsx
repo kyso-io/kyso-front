@@ -1,6 +1,6 @@
-import KysoTopBar from "@/layouts/KysoTopBar";
-import type { CommonData } from "@/hooks/use-common-data";
-import { useCommonData } from "@/hooks/use-common-data";
+import KysoTopBar from '@/layouts/KysoTopBar';
+import type { CommonData } from '@/hooks/use-common-data';
+import { useCommonData } from '@/hooks/use-common-data';
 
 /**
  * Report page

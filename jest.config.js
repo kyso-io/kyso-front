@@ -15,12 +15,7 @@ const customJestConfig = {
   setupFilesAfterEnv: ['./jest.setup.js'],
   clearMocks: true,
   collectCoverage: true,
-  collectCoverageFrom: [
-    './src/**/*.{js,jsx,ts,tsx}',
-    '!./src/**/_*.{js,jsx,ts,tsx}',
-    '!**/*.d.ts',
-    '!**/node_modules/**',
-  ],
+  collectCoverageFrom: ['./src/**/*.{js,jsx,ts,tsx}', '!./src/**/_*.{js,jsx,ts,tsx}', '!**/*.d.ts', '!**/node_modules/**'],
   coverageThreshold: {
     global: {
       branches: 80,

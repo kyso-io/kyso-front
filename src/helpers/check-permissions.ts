@@ -1,4 +1,4 @@
-import type { Organization, Team } from "@kyso-io/kyso-model";
+import type { Organization, Team } from '@kyso-io/kyso-model';
 
 /**
  *

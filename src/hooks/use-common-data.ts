@@ -1,11 +1,11 @@
-import type { RootState } from "@kyso-io/kyso-store";
-import { fetchOrganizationAction, fetchTeamAction } from "@kyso-io/kyso-store";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import type { ActionWithPayload, Organization, ResourcePermissions, Team, TokenPermissions, User } from "@kyso-io/kyso-model";
-import useSWR from "swr";
-import { useAppDispatch, useAppSelector } from "./redux-hooks";
-import { useUser } from "./use-user";
+import type { RootState } from '@kyso-io/kyso-store';
+import { fetchOrganizationAction, fetchTeamAction } from '@kyso-io/kyso-store';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import type { ActionWithPayload, Organization, ResourcePermissions, Team, TokenPermissions, User } from '@kyso-io/kyso-model';
+import useSWR from 'swr';
+import { useAppDispatch, useAppSelector } from './redux-hooks';
+import { useUser } from './use-user';
 
 export type CommonData = {
   permissions: TokenPermissions | null;

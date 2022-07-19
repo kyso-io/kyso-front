@@ -1,6 +1,6 @@
-import { KeyValue } from "@/model/key-value.model";
-import { fetchPublicKysoSettings, store } from "@kyso-io/kyso-store";
-import slugify from "slugify";
+import { KeyValue } from '@/model/key-value.model';
+import { fetchPublicKysoSettings, store } from '@kyso-io/kyso-store';
+import slugify from 'slugify';
 
 export class Helper {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -13,8 +13,8 @@ export class Helper {
   }
 
   public static async getKysoPublicSettings(): Promise<KeyValue[]> {
-    if (localStorage.getItem("kyso-settings")) {
-      return JSON.parse(localStorage.getItem("kyso-settings") as string);
+    if (localStorage.getItem('kyso-settings')) {
+      return JSON.parse(localStorage.getItem('kyso-settings') as string);
     }
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -24,14 +24,14 @@ export class Helper {
       return new KeyValue(x.key, x.value);
     });
 
-    localStorage.setItem("kyso-settings", JSON.stringify(publicKeys));
+    localStorage.setItem('kyso-settings', JSON.stringify(publicKeys));
 
     return publicKeys;
   }
 
   public static slugify(text: string): string {
     return slugify(text, {
-      replacement: "-",
+      replacement: '-',
       lower: true,
       strict: true,
       trim: true,

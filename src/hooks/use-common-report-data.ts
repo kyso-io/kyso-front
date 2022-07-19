@@ -1,12 +1,12 @@
-import { fetchReportsAction } from "@kyso-io/kyso-store";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import type { ReportDTO } from "@kyso-io/kyso-model";
-import useSWR from "swr";
-import { unwrapResult } from "@reduxjs/toolkit";
-import { useAppDispatch } from "./redux-hooks";
-import type { CommonData } from "./use-common-data";
-import { useCommonData } from "./use-common-data";
+import { fetchReportsAction } from '@kyso-io/kyso-store';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import type { ReportDTO } from '@kyso-io/kyso-model';
+import useSWR from 'swr';
+import { unwrapResult } from '@reduxjs/toolkit';
+import { useAppDispatch } from './redux-hooks';
+import type { CommonData } from './use-common-data';
+import { useCommonData } from './use-common-data';
 
 export const useCommonReportData = (): ReportDTO => {
   const router = useRouter();

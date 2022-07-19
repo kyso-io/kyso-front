@@ -1,6 +1,6 @@
-import KysoTopBar from "@/layouts/KysoTopBar";
-import UnpureSidebar from "@/wrappers/UnpureSidebar";
-import { useRedirectIfNoJWT } from "@/hooks/use-redirect-if-no-jwt";
+import KysoTopBar from '@/layouts/KysoTopBar';
+import UnpureSidebar from '@/wrappers/UnpureSidebar';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 
 const Index = () => {
   useRedirectIfNoJWT();

@@ -1,11 +1,11 @@
-import useSWR from "swr";
-import decode from "jwt-decode";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import type { Token } from "@kyso-io/kyso-model";
-import { KysoSettingsEnum } from "@kyso-io/kyso-model";
-import { Helper } from "@/helpers/Helper";
-import type { KeyValue } from "@/model/key-value.model";
+import useSWR from 'swr';
+import decode from 'jwt-decode';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import type { Token } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import { Helper } from '@/helpers/Helper';
+import type { KeyValue } from '@/model/key-value.model';
 
 export type DecodedToken = {
   exp: number;
@@ -30,16 +30,16 @@ export const useRedirectIfNoJWT = () => {
       if (settingsUnauthRedirect) {
         unauthorizedRedirectUrl = settingsUnauthRedirect.value;
       } else {
-        unauthorizedRedirectUrl = "/login";
+        unauthorizedRedirectUrl = '/login';
       }
     } else {
-      unauthorizedRedirectUrl = "/login";
+      unauthorizedRedirectUrl = '/login';
     }
 
-    const jwt: string = localStorage.getItem("jwt") as string;
+    const jwt: string = localStorage.getItem('jwt') as string;
 
     if (!jwt && router.query.redirect === undefined) {
-      let redirectUrl = "?redirect=";
+      let redirectUrl = '?redirect=';
       if (router?.asPath && router.asPath.length > 0) {
         redirectUrl += router.asPath;
       }
@@ -59,13 +59,13 @@ export const useRedirectIfNoJWT = () => {
 
     if (new Date(jwtToken.exp * 1000) <= new Date()) {
       // token is out of date
-      localStorage.removeItem("jwt");
+      localStorage.removeItem('jwt');
       router.push(`/logout?redirect=true`);
     }
   };
 
   const [mounted, setMounted] = useState(false);
-  useSWR(mounted ? "use-redirect" : null, fetcher);
+  useSWR(mounted ? 'use-redirect' : null, fetcher);
   useEffect(() => {
     if (!router.isReady) {
       return;

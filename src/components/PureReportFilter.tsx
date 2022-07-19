@@ -1,7 +1,7 @@
-import classNames from "@/helpers/ClassNames";
-import { Listbox, Menu, Transition } from "@headlessui/react";
-import { CheckIcon, ChevronDownIcon, FilterIcon, SearchIcon, SelectorIcon } from "@heroicons/react/solid";
-import { Fragment, useState } from "react";
+import classNames from '@/helpers/ClassNames';
+import { Listbox, Menu, Transition } from '@headlessui/react';
+import { CheckIcon, ChevronDownIcon, FilterIcon, SearchIcon, SelectorIcon } from '@heroicons/react/solid';
+import { Fragment, useState } from 'react';
 
 type IPureReportFilterProps = {
   sortOptions: { name: string; value: string }[];
@@ -21,7 +21,7 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
     tags = [],
     defaultSearch = null,
     activeFilters = [],
-    currentSort = "-created_at",
+    currentSort = '-created_at',
     onSetSort = () => {},
     onSetTags = () => {},
     onSetSearch = () => {},
@@ -36,14 +36,14 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
   const clearAllFilters = () => {
     onClear();
     setSelectedTags([]);
-    setCurrentSearch("");
-    setCurrentSortCopy("-created_at");
+    setCurrentSearch('');
+    setCurrentSortCopy('-created_at');
   };
 
   return (
     <>
       <section aria-labelledby="filter-heading" className="shadow rounded">
-        <div className={classNames("z-10 bg-white py-2 px-4", activeFilters.length > 0 ? "rounded-t border-b" : "rounded")}>
+        <div className={classNames('z-10 bg-white py-2 px-4', activeFilters.length > 0 ? 'rounded-t border-b' : 'rounded')}>
           <div className="max-w-7xl mx-auto items-right items-center flex">
             <form className="w-full flex" action="#" method="GET">
               <label htmlFor="search-field" className="sr-only">
@@ -59,7 +59,7 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
                   name="search"
                   className="block w-full h-full pl-8 py-2 border-transparent text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-0 focus:border-transparent sm:text-sm"
                   placeholder="Filter reports"
-                  value={currentSearch || ""}
+                  value={currentSearch || ''}
                   type="search"
                   onChange={(ev) => {
                     setCurrentSearch(ev.target.value);
@@ -81,9 +81,9 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
                 >
                   {({ open }) => (
                     <>
-                      <div className={classNames("mt-1 relative", selectedTags.length > 0 || open ? "w-52" : "")}>
+                      <div className={classNames('mt-1 relative', selectedTags.length > 0 || open ? 'w-52' : '')}>
                         <Listbox.Button className="bg-white relative w-full border-gray-300 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                          <span className="block truncate">{selectedTags.length > 0 ? selectedTags.join(", ") : "Tags"}</span>
+                          <span className="block truncate">{selectedTags.length > 0 ? selectedTags.join(', ') : 'Tags'}</span>
                           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                             <SelectorIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
                           </span>
@@ -94,17 +94,17 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
                             {tags.map((tag) => (
                               <Listbox.Option
                                 key={tag}
-                                className={({ active }) => classNames(active ? "text-white bg-indigo-600" : "text-gray-900", "cursor-default select-none relative py-2 pl-3 pr-9")}
+                                className={({ active }) => classNames(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'cursor-default select-none relative py-2 pl-3 pr-9')}
                                 value={tag}
                               >
                                 {({ selected, active }) => (
                                   <>
                                     {selected ? (
-                                      <span className={classNames(active ? "text-white" : "text-indigo-600", "absolute inset-y-0 right-0 flex items-center pr-4")}>
+                                      <span className={classNames(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
                                         <CheckIcon className="h-5 w-5" aria-hidden="true" />
                                       </span>
                                     ) : null}
-                                    <span className={classNames(selected ? "font-semibold" : "font-normal", "block truncate")}>{tag}</span>
+                                    <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>{tag}</span>
                                   </>
                                 )}
                               </Listbox.Option>
@@ -146,9 +146,9 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
                               setCurrentSortCopy(option.value);
                             }}
                             className={classNames(
-                              option.value === currentSortCopy ? "font-medium text-gray-900" : "text-gray-500",
-                              active ? "bg-gray-100" : "",
-                              "block px-4 py-2 text-sm w-full text-left",
+                              option.value === currentSortCopy ? 'font-medium text-gray-900' : 'text-gray-500',
+                              active ? 'bg-gray-100' : '',
+                              'block px-4 py-2 text-sm w-full text-left',
                             )}
                           >
                             {option.name}

@@ -1,11 +1,11 @@
-import useSWR from "swr";
-import { fetchRelationsAction, fetchUserPermissions, selectUser, setAuthAction } from "@kyso-io/kyso-store";
-import decode from "jwt-decode";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import type { Token, User } from "@kyso-io/kyso-model";
-import { Helper } from "@/helpers/Helper";
-import { useAppSelector, useAppDispatch } from "./redux-hooks";
+import useSWR from 'swr';
+import { fetchRelationsAction, fetchUserPermissions, selectUser, setAuthAction } from '@kyso-io/kyso-store';
+import decode from 'jwt-decode';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
+import type { Token, User } from '@kyso-io/kyso-model';
+import { Helper } from '@/helpers/Helper';
+import { useAppSelector, useAppDispatch } from './redux-hooks';
 
 export type DecodedToken = {
   exp: number;
@@ -20,7 +20,7 @@ export const useUser = (): User => {
   const router = useRouter();
 
   const fetcher = async () => {
-    const jwt: string = localStorage.getItem("jwt") as string;
+    const jwt: string = localStorage.getItem('jwt') as string;
 
     if (!jwt) {
       return;
@@ -30,7 +30,7 @@ export const useUser = (): User => {
 
     if (new Date(jwtToken.exp * 1000) <= new Date()) {
       // token is out of date
-      localStorage.removeItem("jwt");
+      localStorage.removeItem('jwt');
     }
 
     const tokenData: Token = jwtToken.payload;
@@ -56,7 +56,7 @@ export const useUser = (): User => {
   };
 
   const [mounted, setMounted] = useState(false);
-  useSWR(mounted ? "use-auth" : null, fetcher);
+  useSWR(mounted ? 'use-auth' : null, fetcher);
   useEffect(() => {
     if (!router.isReady) {
       return;

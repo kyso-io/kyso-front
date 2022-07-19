@@ -1,14 +1,14 @@
-import { useAppDispatch, useAppSelector } from "@/hooks/redux-hooks";
-import { useCommonReportData } from "@/hooks/use-common-report-data";
-import { fetchFileContentAction, selectFileToRenderGivenList } from "@kyso-io/kyso-store";
-import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
-import { PureSpinner } from "@/components/PureSpinner";
+import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import { useCommonReportData } from '@/hooks/use-common-report-data';
+import { fetchFileContentAction, selectFileToRenderGivenList } from '@kyso-io/kyso-store';
+import { useRouter } from 'next/router';
+import { useEffect, useMemo, useState } from 'react';
+import { PureSpinner } from '@/components/PureSpinner';
 
 const isImage = (name: string) => {
   return (
     name != null &&
-    (name.toLowerCase().endsWith(".png") || name.toLowerCase().endsWith(".jpg") || name.toLowerCase().endsWith(".jpeg") || name.toLowerCase().endsWith(".gif") || name.toLowerCase().endsWith(".svg"))
+    (name.toLowerCase().endsWith('.png') || name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.jpeg') || name.toLowerCase().endsWith('.gif') || name.toLowerCase().endsWith('.svg'))
   );
 };
 
@@ -46,7 +46,7 @@ const UnpureReportRender = () => {
   const [fileContent, setFileContent] = useState<string | null>(null);
   // const [inlineComments, setInlineComments] = useState([]);
 
-  const fileToRenderDefault = useAppSelector((state) => selectFileToRenderGivenList(state, [router.query.path as string, report?.main_file, "index.html", "index.ipynb", "readme.md"]));
+  const fileToRenderDefault = useAppSelector((state) => selectFileToRenderGivenList(state, [router.query.path as string, report?.main_file, 'index.html', 'index.ipynb', 'readme.md']));
 
   const fileToRender = useMemo(() => {
     if ((!path || path.length === 0) && report?.main_file && report?.main_file.length > 0 && report?.main_file_id && report?.main_file_id.length > 0) {
@@ -64,7 +64,7 @@ const UnpureReportRender = () => {
       if (!fileToRender || !report) {
         return;
       }
-      if (fileToRender.path.endsWith(".html")) {
+      if (fileToRender.path.endsWith('.html')) {
         return;
       }
 
@@ -73,9 +73,9 @@ const UnpureReportRender = () => {
 
       if (result?.payload) {
         if (isImage(fileToRender.path)) {
-          setFileContent(Buffer.from(result.payload).toString("base64"));
+          setFileContent(Buffer.from(result.payload).toString('base64'));
         } else {
-          setFileContent(Buffer.from(result.payload).toString("utf-8"));
+          setFileContent(Buffer.from(result.payload).toString('utf-8'));
         }
       }
       setIsLoading(false);
@@ -175,13 +175,13 @@ const UnpureReportRender = () => {
   let render = null;
 
   if (fileContent !== null) {
-    if (fileToRender.path.endsWith(".md")) {
+    if (fileToRender.path.endsWith('.md')) {
       // render = (
       //     <KysoMarkdownRenderer source={fileContent} />
       // );
     } else if (isImage(fileToRender.path)) {
       render = <img src={`data:image/jpeg;base64,${fileContent}`} />;
-    } else if (fileToRender.path.endsWith(".ipynb")) {
+    } else if (fileToRender.path.endsWith('.ipynb')) {
       // render = (
       //   <KysoJupyterRenderer
       //     user={user}
@@ -196,13 +196,13 @@ const UnpureReportRender = () => {
       //   />
       // );
     } else if (
-      fileToRender.path.endsWith(".txt") ||
-      fileToRender.path.endsWith(".json") ||
-      fileToRender.path.endsWith(".yaml") ||
-      fileToRender.path.endsWith(".yml") ||
-      fileToRender.path.endsWith(".js") ||
-      fileToRender.path.endsWith(".py") ||
-      fileToRender.path.endsWith(".css")
+      fileToRender.path.endsWith('.txt') ||
+      fileToRender.path.endsWith('.json') ||
+      fileToRender.path.endsWith('.yaml') ||
+      fileToRender.path.endsWith('.yml') ||
+      fileToRender.path.endsWith('.js') ||
+      fileToRender.path.endsWith('.py') ||
+      fileToRender.path.endsWith('.css')
     ) {
       // Text based files can be rendered with the Markdown editor as well
       // console.log("nav" + navigator)

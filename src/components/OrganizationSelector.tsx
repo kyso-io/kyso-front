@@ -1,14 +1,14 @@
-import type { OrganizationSelectorItem } from "@/model/organization-selector-item.model";
-import { Fragment } from "react";
-import { Menu, Transition } from "@headlessui/react";
-import { SelectorIcon } from "@heroicons/react/solid";
+import type { OrganizationSelectorItem } from '@/model/organization-selector-item.model';
+import { Fragment } from 'react';
+import { Menu, Transition } from '@headlessui/react';
+import { SelectorIcon } from '@heroicons/react/solid';
 
 type IOrganizationSelectorProps = {
   organizationSelectorItems: OrganizationSelectorItem[];
 };
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ');
 }
 
 const OrganizationSelector = (props: IOrganizationSelectorProps) => {
@@ -24,7 +24,7 @@ const OrganizationSelector = (props: IOrganizationSelectorProps) => {
           <span className="flex w-full justify-between items-center">
             <span className="flex min-w-0 items-center justify-between space-x-3">
               <span className="flex-1 flex flex-col min-w-0">
-                <span className="text-gray-900 text-sm font-medium truncate">{currentOrg ? currentOrg.name : "Select organization"}</span>
+                <span className="text-gray-900 text-sm font-medium truncate">{currentOrg ? currentOrg.name : 'Select organization'}</span>
                 <span className="text-gray-500 text-sm truncate">{currentOrg?.href}</span>
               </span>
             </span>
@@ -62,7 +62,7 @@ const OrganizationSelector = (props: IOrganizationSelectorProps) => {
 
           <div className="py-1">
             <div className="px-4 py-2">
-              <p className="text-sm text-gray-500 truncate">{currentOrg ? "Your other organizations:" : "Select organization:"}</p>
+              <p className="text-sm text-gray-500 truncate">{currentOrg ? 'Your other organizations:' : 'Select organization:'}</p>
             </div>
 
             {props.organizationSelectorItems &&
@@ -73,7 +73,7 @@ const OrganizationSelector = (props: IOrganizationSelectorProps) => {
                     {({ active }) => (
                       <a
                         href={organizationSelectorItem.href}
-                        className={classNames(active ? "bg-gray-100 text-gray-900" : "text-gray-700", "block px-4 py-2 text-sm", organizationSelectorItem.current ? "font-bold" : "font-normal")}
+                        className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm', organizationSelectorItem.current ? 'font-bold' : 'font-normal')}
                       >
                         {organizationSelectorItem.name}
                       </a>

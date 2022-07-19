@@ -1,8 +1,8 @@
-import KysoTopBar from "@/layouts/KysoTopBar";
-import UnpureSidebar from "@/wrappers/UnpureSidebar";
-import type { CommonData } from "@/hooks/use-common-data";
-import { useCommonData } from "@/hooks/use-common-data";
-import { useRedirectIfNoJWT } from "@/hooks/use-redirect-if-no-jwt";
+import KysoTopBar from '@/layouts/KysoTopBar';
+import UnpureSidebar from '@/wrappers/UnpureSidebar';
+import type { CommonData } from '@/hooks/use-common-data';
+import { useCommonData } from '@/hooks/use-common-data';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 
 const Index = () => {
   const commonData: CommonData = useCommonData();

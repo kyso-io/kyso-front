@@ -1,4 +1,4 @@
-import UnpureTreeItem from "./UnpureTreeItem";
+import UnpureTreeItem from './UnpureTreeItem';
 
 type IUnPureTreeProps = {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */

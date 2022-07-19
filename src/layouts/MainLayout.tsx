@@ -1,12 +1,12 @@
-import { Dialog, Transition } from "@headlessui/react";
-import { CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, MenuIcon, UsersIcon, XIcon } from "@heroicons/react/outline";
-import { Fragment, useState } from "react";
+import { Dialog, Transition } from '@headlessui/react';
+import { CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, MenuIcon, UsersIcon, XIcon } from '@heroicons/react/outline';
+import { Fragment, useState } from 'react';
 
-import type { LayoutProps } from "@/types/pageWithLayout";
-import { useRouter } from "next/router";
+import type { LayoutProps } from '@/types/pageWithLayout';
+import { useRouter } from 'next/router';
 
-import { Footer } from "../components/Footer";
-import { Meta } from "./Meta";
+import { Footer } from '../components/Footer';
+import { Meta } from './Meta';
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const MainLayout: LayoutProps = ({ children }: any) => {
@@ -14,33 +14,33 @@ const MainLayout: LayoutProps = ({ children }: any) => {
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigation = [
-    { name: "Dashboard", href: router.basePath, icon: HomeIcon, current: true },
+    { name: 'Dashboard', href: router.basePath, icon: HomeIcon, current: true },
     {
-      name: "Profile",
+      name: 'Profile',
       href: `${router.basePath}/profile/fjbarrena`,
       icon: UsersIcon,
       current: false,
     },
     {
-      name: "404",
+      name: '404',
       href: `${router.basePath}/404`,
       icon: FolderIcon,
       current: false,
     },
     {
-      name: "500",
+      name: '500',
       href: `${router.basePath}/500`,
       icon: CalendarIcon,
       current: false,
     },
     {
-      name: "About",
+      name: 'About',
       href: `${router.basePath}/about`,
       icon: InboxIcon,
       current: false,
     },
     {
-      name: "Query Params",
+      name: 'Query Params',
       href: `${router.basePath}/lightside`,
       icon: ChartBarIcon,
       current: false,
@@ -48,7 +48,7 @@ const MainLayout: LayoutProps = ({ children }: any) => {
   ];
 
   function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(" ");
+    return classes.filter(Boolean).join(' ');
   }
 
   return (
@@ -115,8 +115,8 @@ const MainLayout: LayoutProps = ({ children }: any) => {
                         key={item.name}
                         href={item.href}
                         className={classNames(
-                          item.current ? "bg-indigo-800 text-white" : "text-white hover:bg-indigo-600 hover:bg-opacity-75",
-                          "group flex items-center px-2 py-2 text-base font-medium rounded-md",
+                          item.current ? 'bg-indigo-800 text-white' : 'text-white hover:bg-indigo-600 hover:bg-opacity-75',
+                          'group flex items-center px-2 py-2 text-base font-medium rounded-md',
                         )}
                       >
                         <item.icon className="mr-4 h-6 w-6 shrink-0 text-indigo-300" aria-hidden="true" />
@@ -164,8 +164,8 @@ const MainLayout: LayoutProps = ({ children }: any) => {
                     key={item.name}
                     href={item.href}
                     className={classNames(
-                      item.current ? "bg-indigo-800 text-white" : "text-white hover:bg-indigo-600 hover:bg-opacity-75",
-                      "group flex items-center px-2 py-2 text-sm font-medium rounded-md",
+                      item.current ? 'bg-indigo-800 text-white' : 'text-white hover:bg-indigo-600 hover:bg-opacity-75',
+                      'group flex items-center px-2 py-2 text-sm font-medium rounded-md',
                     )}
                   >
                     <item.icon className="mr-3 h-6 w-6 shrink-0 text-indigo-300" aria-hidden="true" />

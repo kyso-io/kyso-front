@@ -1,16 +1,16 @@
-import { PureSidebar } from "@/components/PureSidebar";
-import { Meta } from "@/layouts/Meta";
-import { Sanitizer } from "@/helpers/Sanitizer";
-import { KysoBreadcrumb } from "@/components/KysoBreadcrumb";
-import { HashtagIcon } from "@heroicons/react/solid";
-import { LeftMenuItem } from "@/model/left-menu-item.model";
-import { BreadcrumbItem } from "@/model/breadcrum-item.model";
-import { useRouter } from "next/router";
-import { OrganizationSelectorItem } from "@/model/organization-selector-item.model";
+import { PureSidebar } from '@/components/PureSidebar';
+import { Meta } from '@/layouts/Meta';
+import { Sanitizer } from '@/helpers/Sanitizer';
+import { KysoBreadcrumb } from '@/components/KysoBreadcrumb';
+import { HashtagIcon } from '@heroicons/react/solid';
+import { LeftMenuItem } from '@/model/left-menu-item.model';
+import { BreadcrumbItem } from '@/model/breadcrum-item.model';
+import { useRouter } from 'next/router';
+import { OrganizationSelectorItem } from '@/model/organization-selector-item.model';
 
-import type { CommonData } from "@/hooks/use-common-data";
-import { useCommonData } from "@/hooks/use-common-data";
-import { Helper } from "@/helpers/Helper";
+import type { CommonData } from '@/hooks/use-common-data';
+import { useCommonData } from '@/hooks/use-common-data';
+import { Helper } from '@/helpers/Helper';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const UnpureSidebar = (props: any) => {
@@ -58,8 +58,8 @@ const UnpureSidebar = (props: any) => {
         organizationSelectorItems={organizationSelectorItems}
         meta={
           <Meta
-            title={`Kyso - ${Sanitizer.ifNullReturnDefault(commonData.organization?.display_name, "")}`}
-            description={`${Sanitizer.ifNullReturnDefault(commonData.organization?.display_name, "")}`}
+            title={`Kyso - ${Sanitizer.ifNullReturnDefault(commonData.organization?.display_name, '')}`}
+            description={`${Sanitizer.ifNullReturnDefault(commonData.organization?.display_name, '')}`}
           />
         }
       >

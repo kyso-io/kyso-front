@@ -1,14 +1,14 @@
-import KysoTopBar from "@/layouts/KysoTopBar";
-import type { NextRouter } from "next/router";
-import { useRouter } from "next/router";
-import { useReports } from "@/hooks/use-reports";
-import UnpureSidebar from "@/wrappers/UnpureSidebar";
-import UnpureReportBadge from "@/wrappers/UnpureReportBadge";
-import PureReportFilter from "@/components/PureReportFilter";
-import type { CommonData } from "@/hooks/use-common-data";
-import { useCommonData } from "@/hooks/use-common-data";
+import KysoTopBar from '@/layouts/KysoTopBar';
+import type { NextRouter } from 'next/router';
+import { useRouter } from 'next/router';
+import { useReports } from '@/hooks/use-reports';
+import UnpureSidebar from '@/wrappers/UnpureSidebar';
+import UnpureReportBadge from '@/wrappers/UnpureReportBadge';
+import PureReportFilter from '@/components/PureReportFilter';
+import type { CommonData } from '@/hooks/use-common-data';
+import { useCommonData } from '@/hooks/use-common-data';
 
-const tags = ["plotly", "multiqc", "python", "data-science", "rstudio", "genetics", "physics"];
+const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
 
 const pushQueryString = (router: NextRouter, newValue: object) => {
   let query: { tags?: string | string[]; search?: string; sort?: string } = {};
@@ -47,8 +47,8 @@ const Index = () => {
   });
 
   const sortOptions = [
-    { name: "Recently published", value: "-created_at" },
-    { name: "Recently updated", value: "-updated_at" },
+    { name: 'Recently published', value: '-created_at' },
+    { name: 'Recently updated', value: '-updated_at' },
   ];
 
   if (!router.query.teamName && !router.query.organizationName) {
@@ -82,7 +82,7 @@ const Index = () => {
     enabledNextPage = true;
   }
 
-  let extraParamsUrl = "";
+  let extraParamsUrl = '';
   if (router.query.search && router.query.search.length > 0) {
     extraParamsUrl += `&search=${router.query.search}`;
   }
@@ -135,7 +135,7 @@ const Index = () => {
             <div className="flex-1 flex mt-4 justify-center">
               {!(currentPage - 1 < 1) && (
                 <a
-                  href={currentPage - 1 < 1 ? "#" : `?page=${currentPage - 1}${extraParamsUrl}`}
+                  href={currentPage - 1 < 1 ? '#' : `?page=${currentPage - 1}${extraParamsUrl}`}
                   className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                 >
                   Previous
@@ -146,7 +146,7 @@ const Index = () => {
 
               {enabledNextPage && (
                 <a
-                  href={enabledNextPage ? `?page=${currentPage + 1}${extraParamsUrl}` : "#"}
+                  href={enabledNextPage ? `?page=${currentPage + 1}${extraParamsUrl}` : '#'}
                   className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
                 >
                   Next

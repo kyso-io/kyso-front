@@ -1,10 +1,10 @@
-import type { LayoutProps } from "@/types/pageWithLayout";
-import { useRouter } from "next/router";
-import { Helper } from "@/helpers/Helper";
-import { useUser } from "@/hooks/use-user";
+import type { LayoutProps } from '@/types/pageWithLayout';
+import { useRouter } from 'next/router';
+import { Helper } from '@/helpers/Helper';
+import { useUser } from '@/hooks/use-user';
 
-import PureKysoTopBar from "@/components/PureKysoTopBar";
-import type { ReactElement } from "react";
+import PureKysoTopBar from '@/components/PureKysoTopBar';
+import type { ReactElement } from 'react';
 
 type IUnpureKysoTopBarProps = {
   children: ReactElement;
@@ -14,18 +14,18 @@ const KysoTopBar: LayoutProps = ({ children }: IUnpureKysoTopBarProps) => {
   const router = useRouter();
   const user = useUser();
 
-  let slugifiedName = "";
+  let slugifiedName = '';
   if (user && user.display_name) {
     slugifiedName = Helper.slugify(user.display_name);
   }
 
   const userNavigation = [
-    { name: "Your Profile", href: `${router.basePath}/user/${slugifiedName}` },
+    { name: 'Your Profile', href: `${router.basePath}/user/${slugifiedName}` },
     {
-      name: "Your settings",
+      name: 'Your settings',
       href: `${router.basePath}/user/${slugifiedName}/settings`,
     },
-    { name: "Sign out", href: `${router.basePath}/logout` },
+    { name: 'Sign out', href: `${router.basePath}/logout` },
   ];
 
   return (
