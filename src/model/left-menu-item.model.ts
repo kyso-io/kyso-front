@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export class LeftMenuItem {
   public name: string;
 
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   public icon: any;
 
   public count: number;
@@ -9,13 +11,8 @@ export class LeftMenuItem {
 
   public current: boolean;
 
-  constructor(
-    name: string,
-    icon: any,
-    count: number,
-    href: string,
-    current: boolean
-  ) {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  constructor(name: string, icon: any, count: number, href: string, current: boolean) {
     this.name = name;
     this.icon = icon;
     this.count = count;

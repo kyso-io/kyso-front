@@ -1,10 +1,5 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import {
-  BellIcon,
-  ChevronDownIcon,
-  MenuIcon,
-  XIcon,
-} from "@heroicons/react/solid";
+import { BellIcon, ChevronDownIcon, MenuIcon, XIcon } from "@heroicons/react/solid";
 import type { ReactElement } from "react";
 import { Fragment } from "react";
 // import type { LayoutProps } from "@/types/pageWithLayout";
@@ -20,6 +15,7 @@ type IPureKysoTopBarProps = {
 
 const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
   const { children, user, basePath, userNavigation } = props;
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   const navigation: any[] = [];
 
   function classNames(...classes: string[]) {
@@ -29,10 +25,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
   return (
     <>
       <div className="h-[64px] min-h-full">
-        <Disclosure
-          as="div"
-          className="fixed z-10 w-screen bg-slate-500 border-b"
-        >
+        <Disclosure as="div" className="fixed z-10 w-screen bg-slate-500 border-b">
           {({ open }) => (
             <>
               <div className="mx-auto px-4 sm:px-6 lg:px-8 text-white">
@@ -40,11 +33,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                   <div className="flex items-center">
                     <div className="shrink-0">
                       <a href={basePath}>
-                        <img
-                          className="h-8 w-8"
-                          src={`/in/assets/images/kyso-logo-white.svg`}
-                          alt="Kyso"
-                        />
+                        <img className="h-8 w-8" src={`/in/assets/images/kyso-logo-white.svg`} alt="Kyso" />
                       </a>
                     </div>
                   </div>
@@ -56,15 +45,8 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                           <div>
                             <Menu.Button className="flex max-w-xs items-center rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600">
                               <span className="sr-only">Open user menu</span>
-                              <img
-                                className="object-cover h-8 w-8 rounded-full"
-                                src={user.avatar_url}
-                                alt=""
-                              />
-                              <ChevronDownIcon
-                                className="shrink-0 -mr-1 ml-1 h-5 w-5 text-white group-hover:text-gray-500"
-                                aria-hidden="true"
-                              />
+                              <img className="object-cover h-8 w-8 rounded-full" src={user.avatar_url} alt="" />
+                              <ChevronDownIcon className="shrink-0 -mr-1 ml-1 h-5 w-5 text-white group-hover:text-gray-500" aria-hidden="true" />
                             </Menu.Button>
                           </div>
                           <Transition
@@ -80,13 +62,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                               {userNavigation.map((item) => (
                                 <Menu.Item key={item.name}>
                                   {({ active }) => (
-                                    <a
-                                      href={item.href}
-                                      className={classNames(
-                                        active ? "bg-gray-100" : "",
-                                        "block px-4 py-2 text-sm text-gray-700"
-                                      )}
-                                    >
+                                    <a href={item.href} className={classNames(active ? "bg-gray-100" : "", "block px-4 py-2 text-sm text-gray-700")}>
                                       {item.name}
                                     </a>
                                   )}
@@ -102,14 +78,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                     {/* Mobile menu button */}
                     <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-indigo-600 p-2 text-indigo-200 hover:bg-indigo-500/75 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600">
                       <span className="sr-only">Open main menu</span>
-                      {open ? (
-                        <XIcon className="block h-6 w-6" aria-hidden="true" />
-                      ) : (
-                        <MenuIcon
-                          className="block h-6 w-6"
-                          aria-hidden="true"
-                        />
-                      )}
+                      {open ? <XIcon className="block h-6 w-6" aria-hidden="true" /> : <MenuIcon className="block h-6 w-6" aria-hidden="true" />}
                     </Disclosure.Button>
                   </div>
                 </div>
@@ -122,12 +91,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                       key={item.name}
                       as="a"
                       href={item.href}
-                      className={classNames(
-                        item.current
-                          ? "bg-indigo-700 text-white"
-                          : "text-white hover:bg-indigo-500/75",
-                        "block px-3 py-2 rounded-md text-base font-medium"
-                      )}
+                      className={classNames(item.current ? "bg-indigo-700 text-white" : "text-white hover:bg-indigo-500/75", "block px-3 py-2 rounded-md text-base font-medium")}
                       aria-current={item.current ? "page" : undefined}
                     >
                       {item.name}
@@ -138,19 +102,11 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                   {user && (
                     <div className="flex items-center px-5">
                       <div className="shrink-0">
-                        <img
-                          className="object-cover h-10 w-10 rounded-full"
-                          src={user.avatar_url}
-                          alt=""
-                        />
+                        <img className="object-cover h-10 w-10 rounded-full" src={user.avatar_url} alt="" />
                       </div>
                       <div className="ml-3">
-                        <div className="text-base font-medium text-white">
-                          {user.display_name}
-                        </div>
-                        <div className="text-sm font-medium text-indigo-300">
-                          {user.email}
-                        </div>
+                        <div className="text-base font-medium text-white">{user.display_name}</div>
+                        <div className="text-sm font-medium text-indigo-300">{user.email}</div>
                       </div>
                       <button
                         type="button"
@@ -163,12 +119,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                   )}
                   <div className="mt-3 space-y-1 px-2">
                     {userNavigation.map((item) => (
-                      <Disclosure.Button
-                        key={item.name}
-                        as="a"
-                        href={item.href}
-                        className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-indigo-500/75"
-                      >
+                      <Disclosure.Button key={item.name} as="a" href={item.href} className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-indigo-500/75">
                         {item.name}
                       </Disclosure.Button>
                     ))}
