@@ -7,11 +7,11 @@ import type { PageWithLayoutType } from "../types/pageWithLayout";
 
 type AppLayoutProps = AppProps & {
   Component: PageWithLayoutType;
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   pageProps: any;
 };
 function MyApp({ Component, pageProps }: AppLayoutProps) {
-  const Layout =
-    Component.layout || ((children: ReactElement) => <>{children}</>);
+  const Layout = Component.layout || ((children: ReactElement) => <>{children}</>);
   return (
     <Provider store={store}>
       <Layout>
