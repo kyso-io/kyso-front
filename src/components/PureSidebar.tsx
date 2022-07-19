@@ -27,8 +27,8 @@ const PureSidebar = (props: IPureSidebarProps) => {
               </div>
 
               <div className="pt-4">
-                <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="communities-headline">
-                  Channels
+                <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center" id="communities-headline">
+                  <span className="truncate">Channels</span>
                 </p>
                 <div className="mt-3 space-y-2" aria-labelledby="communities-headline">
                   {props.navigation.map((item) => (

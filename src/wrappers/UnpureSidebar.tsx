@@ -17,11 +17,7 @@ const UnpureSidebar = (props: any) => {
   const router = useRouter();
   const commonData: CommonData = useCommonData();
 
-  let currentOrgSlug = commonData.organization?.sluglified_name;
-  if (commonData.organization && !commonData.organization.sluglified_name) {
-    // tslint:disable-next-line
-    currentOrgSlug = commonData.organization.name; // we need to do this because organization changes type!!!
-  }
+  const currentOrgSlug = commonData.organization?.sluglified_name;
 
   const organizationSelectorItems: OrganizationSelectorItem[] = [];
   if (commonData.permissions && commonData.permissions.organizations) {
@@ -30,9 +26,9 @@ const UnpureSidebar = (props: any) => {
     });
   }
 
-  let mappedTeams: LeftMenuItem[] = [];
+  let channelList: LeftMenuItem[] = [];
   if (commonData.permissions && commonData.permissions.teams && commonData.organization) {
-    mappedTeams = commonData
+    channelList = commonData
       .permissions!.teams.filter((t) => t.organization_id === commonData.organization.id)
       .map((x) => {
         return new LeftMenuItem(x.name, HashtagIcon, 0, `${router.basePath}/${commonData.organization.sluglified_name}/${Helper.slugify(x.name)}`, Helper.slugify(x.name) === router.query.teamName);
@@ -55,20 +51,10 @@ const UnpureSidebar = (props: any) => {
     );
   }
 
-  // if (reports) {
-  //   breadcrumb.push(
-  //     new BreadcrumbItem(
-  //       reports?.title,
-  //       `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${reports?.sluglified_name}`,
-  //       commonData.organization && commonData.team && reports && true
-  //     )
-  //   );
-  // }
-
   return (
     <>
       <PureSidebar
-        navigation={mappedTeams}
+        navigation={channelList}
         organizationSelectorItems={organizationSelectorItems}
         meta={
           <Meta
@@ -82,33 +68,6 @@ const UnpureSidebar = (props: any) => {
             <div>
               <KysoBreadcrumb navigation={breadcrumb}></KysoBreadcrumb>
             </div>
-
-            {/* <div className="flex -space-x-1 relative z-0 overflow-hidden items-center rounded border p-1">
-                <img
-                  className="relative z-30 inline-block h-6 w-6 rounded-full ring-2 ring-white"
-                  src="https://images.unsplash.com/photo-1491528323818-fdd1faba62cc?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt=""
-                />
-                <img
-                  className="relative z-20 inline-block h-6 w-6 rounded-full ring-2 ring-white"
-                  src="https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt=""
-                />
-                <img
-                  className="relative z-10 inline-block h-6 w-6 rounded-full ring-2 ring-white"
-                  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2.25&w=256&h=256&q=80"
-                  alt=""
-                />
-                <img
-                  className="relative z-0 inline-block h-6 w-6 rounded-full ring-2 ring-white"
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt=""
-                />
-
-                <p className="pl-4 text-sm font-light">
-                  Members and settings
-                </p>
-              </div> */}
           </div>
         </div>
 
