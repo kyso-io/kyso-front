@@ -81,7 +81,7 @@ const UnpureReportRender = () => {
       setIsLoading(false);
     };
     asyncFn();
-  }, [fileToRender?.hash, report?.id]);
+  }, [report?.id]);
 
   // const updateMainFileContent = async () => {
   //   // setRequesting(true);
