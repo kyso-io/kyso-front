@@ -1,9 +1,11 @@
-import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import { useAppDispatch } from '@/hooks/redux-hooks';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
-import { fetchFileContentAction, selectFileToRenderGivenList } from '@kyso-io/kyso-store';
-import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
+import { fetchFileContentAction } from '@kyso-io/kyso-store';
+import { useEffect, useState } from 'react';
 import { PureSpinner } from '@/components/PureSpinner';
+import PureIframeRenderer from '@/components/PureIframeRenderer';
+import { useFileToRender } from '@/hooks/use-file-to-render';
+import dynamic from 'next/dynamic';
 
 const isImage = (name: string) => {
   return (
@@ -22,22 +24,15 @@ const isImage = (name: string) => {
 //   }
 // );
 
-// const KysoMarkdownRenderer = dynamic(
-//   () =>
-//     import("@kyso-io/kyso-webcomponents").then(
-//       (mod) => mod.KysoMarkdownRenderer
-//     ),
-//   {
-//     ssr: false,
-//   }
-// );
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
+  ssr: false,
+});
 
 const UnpureReportRender = () => {
   const report = useCommonReportData();
-  const router = useRouter();
   const dispatch = useAppDispatch();
   // const user = useUser();
-  const { path } = router.query;
   const [isLoading, setIsLoading] = useState(false);
   // const [requesting, setRequesting] = useState(false);
   // const { isShownInput } = useContext(AppStateContext);
@@ -46,18 +41,7 @@ const UnpureReportRender = () => {
   const [fileContent, setFileContent] = useState<string | null>(null);
   // const [inlineComments, setInlineComments] = useState([]);
 
-  const fileToRenderDefault = useAppSelector((state) => selectFileToRenderGivenList(state, [router.query.path as string, report?.main_file, 'index.html', 'index.ipynb', 'readme.md']));
-
-  const fileToRender = useMemo(() => {
-    if ((!path || path.length === 0) && report?.main_file && report?.main_file.length > 0 && report?.main_file_id && report?.main_file_id.length > 0) {
-      return {
-        path: report?.main_file,
-        id: report?.main_file_id,
-        path_scs: report?.main_file_path_scs,
-      };
-    }
-    return fileToRenderDefault;
-  }, [path, report, fileToRenderDefault]);
+  const fileToRender = useFileToRender();
 
   useEffect(() => {
     const asyncFn = async () => {
@@ -176,9 +160,11 @@ const UnpureReportRender = () => {
 
   if (fileContent !== null) {
     if (fileToRender.path.endsWith('.md')) {
-      // render = (
-      //     <KysoMarkdownRenderer source={fileContent} />
-      // );
+      render = (
+        <div className="prose prose-sm p-3">
+          <KysoMarkdownRenderer source={fileContent} />
+        </div>
+      );
     } else if (isImage(fileToRender.path)) {
       render = <img src={`data:image/jpeg;base64,${fileContent}`} />;
     } else if (fileToRender.path.endsWith('.ipynb')) {
@@ -211,23 +197,27 @@ const UnpureReportRender = () => {
       // );
     } else {
       render = (
-        <div>
+        <div className="prose prose-sm p-3">
           Kyso cannot render this type of file. Do you need it? Give us <a href="/feedback">feedback</a> and we will consider it! 🤓
         </div>
       );
     }
   }
 
-  // if (fileToRender.path.endsWith(".html")) {
-  //   render = <PureIframeRenderer file={fileToRender} />;
-  // }
+  if (fileToRender.path.endsWith('.html')) {
+    render = <PureIframeRenderer file={fileToRender} />;
+  }
 
   return (
-    <div>
-      {isLoading && <PureSpinner />}
+    <>
+      {isLoading && (
+        <div className="flex justify-center p-10">
+          <PureSpinner />
+        </div>
+      )}
       {!fileContent && <div />}
-      {render}
-    </div>
+      {!isLoading && render}
+    </>
   );
 };
 
