@@ -27,6 +27,11 @@ const isImage = (name: string) => {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
   ssr: false,
+  loading: () => (
+    <div className="flex justify-center p-7 w-full">
+      <PureSpinner />
+    </div>
+  ),
 });
 
 const UnpureReportRender = () => {
@@ -34,6 +39,7 @@ const UnpureReportRender = () => {
   const dispatch = useAppDispatch();
   // const user = useUser();
   const [isLoading, setIsLoading] = useState(false);
+  // const [requesting, setRequesting] = useState(false);
   // const [requesting, setRequesting] = useState(false);
   // const { isShownInput } = useContext(AppStateContext);
   // const { isShownOutput } = useContext(AppStateContext);
@@ -192,9 +198,13 @@ const UnpureReportRender = () => {
     ) {
       // Text based files can be rendered with the Markdown editor as well
       // console.log("nav" + navigator)
-      // render = (
-      //   <KysoMarkdownRenderer source={fileContent}></KysoMarkdownRenderer>
-      // );
+      render = (
+        <div className="prose prose-sm contents">
+          <pre>
+            <KysoMarkdownRenderer source={fileContent} />
+          </pre>
+        </div>
+      );
     } else {
       render = (
         <div className="prose prose-sm p-3">
@@ -211,7 +221,7 @@ const UnpureReportRender = () => {
   return (
     <>
       {isLoading && (
-        <div className="flex justify-center p-10">
+        <div className="prose prose-sm flex justify-center p-10">
           <PureSpinner />
         </div>
       )}

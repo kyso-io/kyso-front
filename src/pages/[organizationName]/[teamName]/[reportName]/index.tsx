@@ -100,7 +100,7 @@ const Index = () => {
         </div>
 
         <div className="md:pl-64 flex flex-col flex-1 bg-neutral-50 h-screen w-full">
-          <div className="py-4 px-6">
+          <div className="py-4 px-6 w-full">
             <UnPureTree tree={tree} prefix={`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`} />
 
             {fileToRender && (
