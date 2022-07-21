@@ -7,7 +7,7 @@ type IPureSidebarProps = {
   meta: ReactNode;
   children: ReactNode;
   navigation: LeftMenuItem[];
-  organizationSelectorItems: OrganizationSelectorItem[];
+  selectorItems: OrganizationSelectorItem[];
 };
 
 function classNames(...classes: string[]) {
@@ -23,7 +23,7 @@ const PureSidebar = (props: IPureSidebarProps) => {
           <div className="flex-1 flex flex-col min-h-0 border-r border-gray-20">
             <div className="flex-1 flex flex-col p-4 overflow-y-auto">
               <div className="flex items-center shrink-0 mb-4">
-                <OrganizationSelector organizationSelectorItems={props.organizationSelectorItems} />
+                <OrganizationSelector selectorItems={props.selectorItems} />
               </div>
 
               <div className="pt-4">

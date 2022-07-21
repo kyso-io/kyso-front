@@ -1,14 +1,12 @@
 import KysoTopBar from '@/layouts/KysoTopBar';
-import UnpureSidebar from '@/wrappers/UnpureSidebar';
+import UnpureMain from '@/wrappers/UnpureMain';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 
 const Index = () => {
   const commonData: CommonData = useCommonData();
-
   useRedirectIfNoJWT();
-
   // const reports = useReports({
   //   perPage: router.query.per_page as string,
   //   page: router.query.page as string,
@@ -19,7 +17,7 @@ const Index = () => {
 
   return (
     <>
-      <UnpureSidebar>
+      <UnpureMain>
         <div className="container mx-auto flex">
           <div className="basis-3/4">
             <main className="py-10">
@@ -44,7 +42,7 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </UnpureSidebar>
+      </UnpureMain>
     </>
   );
 };
