@@ -17,6 +17,7 @@ import format from 'date-fns/format';
 import UnpureUpvoteButton from '@/wrappers/UnpureUpvoteButton';
 import UnpureShareButton from '@/wrappers/UnpureShareButton';
 import UnpureReportActionDropdown from '@/wrappers/UnpureReportActionDropdown';
+import UnpureComments from '@/wrappers/UnpureComments';
 
 const Index = () => {
   const router = useRouter();
@@ -134,6 +135,8 @@ const Index = () => {
               <UnpureReportRender />
             </div>
           )}
+
+          <UnpureComments />
         </div>
       </UnpureMain>
     </>
