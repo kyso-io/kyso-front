@@ -1,4 +1,6 @@
 import '../styles/globals.css';
+import '@kyso-io/kcomponents/dist/cjs/assets/styles/index.css';
+
 import { store } from '@kyso-io/kyso-store';
 import type { AppProps } from 'next/app';
 import type { ReactElement } from 'react';

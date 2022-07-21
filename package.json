@@ -26,6 +26,7 @@
     "@fortawesome/react-fontawesome": "^0.1.19",
     "@headlessui/react": "^1.6.5",
     "@heroicons/react": "^1.0.6",
+    "@kyso-io/kcomponents": "^0.0.14",
     "@kyso-io/kyso-model": "^1.0.78",
     "@kyso-io/kyso-store": "^1.0.72",
     "@kyso-io/kyso-webcomponents": "^0.0.87",
