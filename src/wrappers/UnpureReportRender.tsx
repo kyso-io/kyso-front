@@ -7,9 +7,28 @@ import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { useFileToRender } from '@/hooks/use-file-to-render';
 import { useUser } from '@/hooks/use-user';
 import { PureCodeVisibilitySelectorDropdown } from '@/components/PureCodeVisibilitySelectorDropdown';
-import { KysoJupyterRenderer } from '@/components/kyso-jupyter-renderer';
-import { KysoMarkdownRenderer } from '@/components/kyso-markdown-renderer';
 import type { InlineCommentDto, User } from '@kyso-io/kyso-model';
+import dynamic from 'next/dynamic';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
+  ssr: false,
+  loading: () => (
+    <div className="flex justify-center p-7 w-full">
+      <PureSpinner />
+    </div>
+  ),
+});
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const KysoJupyterRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoJupyterRenderer), {
+  ssr: false,
+  loading: () => (
+    <div className="flex justify-center p-7 w-full">
+      <PureSpinner />
+    </div>
+  ),
+});
 
 const isImage = (name: string) => {
   return (
@@ -25,7 +44,7 @@ const UnpureReportRender = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isShownInput, setIsShownInput] = useState(false);
   const [isShownOutput, setIsShownOutput] = useState(false);
-  const [inlineCommentsActived] = useState(false);
+  const [inlineCommentsActived] = useState(true);
   const [fileContent, setFileContent] = useState<string | null>(null);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
 
@@ -155,28 +174,30 @@ const UnpureReportRender = () => {
       render = <img src={`data:image/jpeg;base64,${fileContent}`} alt="file image" />;
     } else if (fileToRender.path.endsWith('.ipynb')) {
       render = (
-        <div className="p-3 flex flex-col">
+        <div className="flex flex-col">
           <div className="flex justify-end">
             <PureCodeVisibilitySelectorDropdown inputShown={isShownInput} outputShown={isShownOutput} setInputShow={setIsShownInput} setOutputShow={setIsShownOutput} />
           </div>
-          <div className="prose prose-sm contents">
-            {user && user.id && user.avatar_url && (
-              <KysoJupyterRenderer
-                userId={user.id}
-                avatarUrl={user.avatar_url}
-                jupyterNotebook={JSON.parse(fileContent)}
-                showInputs={isShownInput}
-                showOutputs={isShownOutput}
-                inlineCommentsActived={inlineCommentsActived}
-                enabledCreateInlineComment={inlineCommentsActived}
-                enabledDeleteInlineComment={inlineCommentsActived}
-                enabledEditInlineComment={inlineCommentsActived}
-                inlineComments={inlineComments}
-                createInlineComment={createInlineComment}
-                deleteInlineComment={deleteInlineComment}
-                editInlineComment={editInlineComment}
-              />
-            )}
+          <div className="p-4">
+            <div className="prose prose-sm contents">
+              {user && user.id && user.avatar_url && (
+                <KysoJupyterRenderer
+                  userId={user.id}
+                  avatarUrl={user.avatar_url}
+                  jupyterNotebook={JSON.parse(fileContent)}
+                  showInputs={isShownInput}
+                  showOutputs={isShownOutput}
+                  inlineCommentsActived={inlineCommentsActived}
+                  enabledCreateInlineComment={inlineCommentsActived}
+                  enabledDeleteInlineComment={inlineCommentsActived}
+                  enabledEditInlineComment={inlineCommentsActived}
+                  inlineComments={inlineComments}
+                  createInlineComment={createInlineComment}
+                  deleteInlineComment={deleteInlineComment}
+                  editInlineComment={editInlineComment}
+                />
+              )}
+            </div>
           </div>
         </div>
       );
@@ -189,8 +210,6 @@ const UnpureReportRender = () => {
       fileToRender.path.endsWith('.py') ||
       fileToRender.path.endsWith('.css')
     ) {
-      // Text based files can be rendered with the Markdown editor as well
-      // console.log("nav" + navigator)
       render = (
         <div className="prose prose-sm contents">
           <pre>
