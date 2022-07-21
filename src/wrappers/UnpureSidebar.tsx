@@ -1,7 +1,7 @@
 import { PureSidebar } from '@/components/PureSidebar';
 import { Meta } from '@/layouts/Meta';
 import { Sanitizer } from '@/helpers/Sanitizer';
-import { KysoBreadcrumb } from '@/components/KysoBreadcrumb';
+import { PureKysoBreadcrumb } from '@/components/PureKysoBreadcrumb';
 import { HashtagIcon } from '@heroicons/react/solid';
 import { LeftMenuItem } from '@/model/left-menu-item.model';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
@@ -66,7 +66,7 @@ const UnpureSidebar = (props: any) => {
         <div className="md:pl-64 flex flex-col flex-1 bg-white border-b">
           <div className="p-4 flex items-center justify-between">
             <div>
-              <KysoBreadcrumb navigation={breadcrumb}></KysoBreadcrumb>
+              <PureKysoBreadcrumb breadcrumbs={breadcrumb}></PureKysoBreadcrumb>
             </div>
           </div>
         </div>

@@ -1,8 +1,7 @@
 import KysoTopBar from '@/layouts/KysoTopBar';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
-import UnpureReportRender from '@/wrappers/UnpureReportRender';
-import { KysoBreadcrumb } from '@/components/KysoBreadcrumb';
+import { PureKysoBreadcrumb } from '@/components/PureKysoBreadcrumb';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { useRouter } from 'next/router';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
@@ -10,6 +9,9 @@ import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { fetchReportsTreeAction } from '@kyso-io/kyso-store';
 import { useEffect } from 'react';
 import UnPureTree from '@/wrappers/UnPureTree';
+import UnpureReportRender from '@/wrappers/UnpureReportRender';
+import classNames from '@/helpers/ClassNames';
+import { useFileToRender } from '@/hooks/use-file-to-render';
 
 const Index = () => {
   const router = useRouter();
@@ -17,7 +19,14 @@ const Index = () => {
   const report = useCommonReportData();
   const dispatch = useAppDispatch();
   const breadcrumb: BreadcrumbItem[] = [];
-  const tree = useAppSelector((state) => state.reports.tree);
+  const fileToRender = useFileToRender();
+  let tree = useAppSelector((state) => state.reports.tree);
+
+  if (tree) {
+    tree = [...tree].sort((ta, tb) => {
+      return Number(ta.type > tb.type);
+    });
+  }
 
   useEffect(() => {
     if (!report) {
@@ -70,7 +79,7 @@ const Index = () => {
     <>
       <div className="md:pl-64 flex flex-col flex-1 bg-white border-b">
         <div className="p-4 flex items-center justify-between">
-          <KysoBreadcrumb navigation={breadcrumb}></KysoBreadcrumb>
+          <PureKysoBreadcrumb breadcrumbs={breadcrumb}></PureKysoBreadcrumb>
         </div>
       </div>
       <div>
@@ -84,17 +93,21 @@ const Index = () => {
                   /> */}
                   <span className="truncate">Tree</span>
                 </p>
-                <div className="mt-3 space-y-2" aria-labelledby="communities-headline">
-                  <UnPureTree tree={tree} prefix={`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`} />
-                </div>
+                <div className="mt-3 space-y-2" aria-labelledby="communities-headline"></div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="md:pl-64 flex flex-col flex-1 bg-neutral-50 ">
-          <div className="py-4 px-6">
-            <UnpureReportRender />
+        <div className="md:pl-64 flex flex-col flex-1 bg-neutral-50 h-screen w-full">
+          <div className="py-4 px-6 w-full">
+            <UnPureTree tree={tree} prefix={`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`} />
+
+            {fileToRender && (
+              <div className={classNames('bg-white', 'border-b border-l border-r rounded-b-lg')}>
+                <UnpureReportRender />
+              </div>
+            )}
           </div>
         </div>
       </div>
