@@ -1,7 +1,6 @@
 import KysoTopBar from '@/layouts/KysoTopBar';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
-import { PureKysoBreadcrumb } from '@/components/PureKysoBreadcrumb';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { useRouter } from 'next/router';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
@@ -12,6 +11,7 @@ import UnPureTree from '@/wrappers/UnPureTree';
 import UnpureReportRender from '@/wrappers/UnpureReportRender';
 import classNames from '@/helpers/ClassNames';
 import { useFileToRender } from '@/hooks/use-file-to-render';
+import UnpureMain from '@/wrappers/UnpureMain';
 
 const Index = () => {
   const router = useRouter();
@@ -77,40 +77,17 @@ const Index = () => {
 
   return (
     <>
-      <div className="md:pl-64 flex flex-col flex-1 bg-white border-b">
-        <div className="p-4 flex items-center justify-between">
-          <PureKysoBreadcrumb breadcrumbs={breadcrumb}></PureKysoBreadcrumb>
-        </div>
-      </div>
-      <div>
-        <div className="md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 mt-16 bg-neutral-100">
-          <div className="flex-1 flex flex-col min-h-0 border-r border-gray-20">
-            <div className="flex-1 flex flex-col p-4 overflow-y-auto">
-              <div className="pt-4">
-                <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center" id="communities-headline">
-                  {/* <CollectionIcon 
-                    className={classNames("text-gray-400 group-hover:text-gray-500", "flex-shrink-0 -ml-1 mr-2 h-5 w-5")}
-                  /> */}
-                  <span className="truncate">Tree</span>
-                </p>
-                <div className="mt-3 space-y-2" aria-labelledby="communities-headline"></div>
-              </div>
+      <UnpureMain>
+        <div className="flex flex-col flex-1 bg-neutral-50 h-screen w-full">
+          <UnPureTree tree={tree} prefix={`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`} />
+
+          {fileToRender && (
+            <div className={classNames('bg-white border-b border-l border-r rounded-b-lg')}>
+              <UnpureReportRender />
             </div>
-          </div>
+          )}
         </div>
-
-        <div className="md:pl-64 flex flex-col flex-1 bg-neutral-50 h-screen w-full">
-          <div className="py-4 px-6 w-full">
-            <UnPureTree tree={tree} prefix={`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`} />
-
-            {fileToRender && (
-              <div className={classNames('bg-white', 'border-b border-l border-r rounded-b-lg')}>
-                <UnpureReportRender />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
+      </UnpureMain>
     </>
   );
 };

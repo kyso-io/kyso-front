@@ -172,7 +172,7 @@ const UnpureReportRender = () => {
         </div>
       );
     } else if (isImage(fileToRender.path)) {
-      render = <img src={`data:image/jpeg;base64,${fileContent}`} />;
+      render = <img src={`data:image/jpeg;base64,${fileContent}`} alt="file image" />;
     } else if (fileToRender.path.endsWith('.ipynb')) {
       // render = (
       //   <KysoJupyterRenderer

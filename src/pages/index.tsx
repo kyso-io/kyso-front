@@ -1,5 +1,5 @@
 import KysoTopBar from '@/layouts/KysoTopBar';
-import UnpureSidebar from '@/wrappers/UnpureSidebar';
+import UnpureMain from '@/wrappers/UnpureMain';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 
 const Index = () => {
@@ -8,11 +8,11 @@ const Index = () => {
 
   return (
     <>
-      <UnpureSidebar>
+      <UnpureMain>
         <div className="mt-8">
           <h1>Root</h1>
         </div>
-      </UnpureSidebar>
+      </UnpureMain>
     </>
   );
 };
