@@ -88,7 +88,7 @@ const UnPureTree = (props: IUnPureTreeProps) => {
         <div className="text-xs group h-12 flex pl-3 items-center border text-gray-800 bg-gray-100 rounded-t justify-between">
           <div className="flex items-center space-x-0">
             {breadcrumbs.map((page, index) => (
-              <div key={page.href}>
+              <div key={`${page.href}+${index}`}>
                 <div className="flex items-center">
                   <a href={page.href} className={'hover:underline ml-0 text-sm font-medium'} aria-current={page.current ? 'page' : undefined}>
                     {page.name}
