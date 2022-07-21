@@ -8,8 +8,9 @@ import { Sanitizer } from '@/helpers/Sanitizer';
 import { useRouter } from 'next/router';
 import PureReportBadge from '@/components/PureReportBadge';
 import type { UserDTO } from '@kyso-io/kyso-model';
-import { getOrgAndTeamGivenSluglifiedOrgAndTeam, selectCurrentUserPermissions, toggleGlobalPinReportAction, toggleUserPinReportAction, toggleUserStarReportAction } from '@kyso-io/kyso-store';
+import { getOrgAndTeamGivenSluglifiedOrgAndTeam, selectCurrentUserPermissions, toggleGlobalPinReportAction, toggleUserPinReportAction } from '@kyso-io/kyso-store';
 import { useSelector } from 'react-redux';
+import UnpureUpvoteButton from './UnpureUpvoteButton';
 
 type IUnpureReportBadge = {
   id: string;
@@ -34,17 +35,6 @@ const UnpureReportBadge = (props: IUnpureReportBadge) => {
     return tempOwners;
   }, [report, state.user?.entities]);
 
-  // let _globallyEnabledCaptcha = useSelector(
-  //   (s: RootState) => s.kysoSettings.publicSettings
-  // ).filter((x: { key: string }) => x.key === KysoSettingsEnum.RECAPTCHA2_ENABLED)[0];
-  // _globallyEnabledCaptcha =
-  //   _globallyEnabledCaptcha &&
-  //   _globallyEnabledCaptcha[0] &&
-  //   _globallyEnabledCaptcha[0].value
-  //     ? _globallyEnabledCaptcha[0].value === "true"
-  //     : true;
-
-  const [isUpvoteBusy, setUpvoteBusy] = useState(false);
   const [isPinnedBusy, setIsPinnedBusy] = useState(false);
 
   const { organization: activeOrganization, team: activeTeam } = useSelector((s) => getOrgAndTeamGivenSluglifiedOrgAndTeam(s, organizationName as string, teamName as string));
@@ -55,56 +45,15 @@ const UnpureReportBadge = (props: IUnpureReportBadge) => {
   }, [activeOrganization, activeTeam, currentUserPermissions]);
 
   const togglePinReportGlobally = async () => {
-    if (!user.email_verified) {
-      // setShowEmailNotVerifiedModal(true);
-      return;
-    }
-    // const showCaptchaDialog = showCaptchaDialogHelper(user.show_captcha, globallyEnabledCaptcha);
-    // if (showCaptchaDialog) {
-    //   setShowCaptchaNotSolvedModal(true);
-    //   return;
-    // }
     setIsPinnedBusy(true);
     await dispatch(toggleGlobalPinReportAction(props.id));
     setIsPinnedBusy(false);
   };
 
   const togglePinReportToUser = async () => {
-    if (!user.email_verified) {
-      // setShowEmailNotVerifiedModal(true);
-      return;
-    }
-    // const showCaptchaDialog = showCaptchaDialogHelper(
-    //   user.show_captcha,
-    //   globallyEnabledCaptcha
-    // );
-    // if (showCaptchaDialog) {
-    //   setShowCaptchaNotSolvedModal(true);
-    //   return;
-    // }
     setIsPinnedBusy(true);
     await dispatch(toggleUserPinReportAction(props.id));
     setIsPinnedBusy(false);
-  };
-
-  const upvoteReport = async () => {
-    // if (!user.email_verified) {
-    //   setShowEmailNotVerifiedModal(true);
-    //   return;
-    // }
-    // const showCaptchaDialog = showCaptchaDialogHelper(
-    //   user.show_captcha,
-    //   globallyEnabledCaptcha
-    // );
-
-    // if (showCaptchaDialog) {
-    //   setShowCaptchaNotSolvedModal(true);
-    //   return;
-    // }
-
-    setUpvoteBusy(true);
-    await dispatch(toggleUserStarReportAction(report.id));
-    setUpvoteBusy(false);
   };
 
   const href = `${router.basePath}/${Helper.slugify(Sanitizer.ifNullReturnDefault(organizationName, ''))}/${slugify(Sanitizer.ifNullReturnDefault(teamName, ''))}/${slugify(
@@ -126,10 +75,7 @@ const UnpureReportBadge = (props: IUnpureReportBadge) => {
             togglePinReportToUser();
           }
         }}
-        onClickUpvote={() => {
-          upvoteReport();
-        }}
-        isUpvoteBusy={isUpvoteBusy}
+        UpvoteButton={<UnpureUpvoteButton id={report?.id} />}
       />
     </>
   );
