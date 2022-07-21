@@ -85,16 +85,16 @@ const UnPureTree = (props: IUnPureTreeProps) => {
   return (
     <div className={classNames('bg-white')}>
       <div>
-        <div className="text-xs group h-12 flex pl-3 items-center border text-gray-600 bg-gray-100 rounded-t justify-between">
+        <div className="text-xs group h-12 flex pl-3 items-center border text-gray-800 bg-gray-100 rounded-t justify-between">
           <div className="flex items-center space-x-0">
             {breadcrumbs.map((page, index) => (
               <div key={page.href}>
                 <div className="flex items-center">
-                  <a href={page.href} className={'hover:underline ml-0 text-sm text-slate-500 hover:text-slate-700'} aria-current={page.current ? 'page' : undefined}>
+                  <a href={page.href} className={'hover:underline ml-0 text-sm font-medium'} aria-current={page.current ? 'page' : undefined}>
                     {page.name}
                   </a>
                   {index + 1 !== breadcrumbs.length && (
-                    <svg className="shrink-0 h-5 w-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <svg className="shrink-0 h-3 w-3 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                     </svg>
                   )}
@@ -153,7 +153,7 @@ const UnPureTree = (props: IUnPureTreeProps) => {
 
       {router.query.fbvisible && !isTerminalFile && (
         <div className="divide-y border-b border-x">
-          {breadcrumbs && breadcrumbs.length > 2 && (
+          {breadcrumbs && breadcrumbs.length > 1 && (
             <a href={breadcrumbs?.slice(-2)[0]!.href} className={classNames('font-medium text-blue-700', 'hover:text-gray-900', 'font-normal hover:bg-neutral-50')}>
               <div className="py-2 px-3 text-sm group flex items-center justify-between">..</div>
             </a>

@@ -2,7 +2,7 @@ import KysoTopBar from '@/layouts/KysoTopBar';
 import type { NextRouter } from 'next/router';
 import { useRouter } from 'next/router';
 import { useReports } from '@/hooks/use-reports';
-import UnpureSidebar from '@/wrappers/UnpureSidebar';
+import UnpureMain from '@/wrappers/UnpureMain';
 import UnpureReportBadge from '@/wrappers/UnpureReportBadge';
 import PureReportFilter from '@/components/PureReportFilter';
 import type { CommonData } from '@/hooks/use-common-data';
@@ -99,9 +99,9 @@ const Index = () => {
 
   return (
     <>
-      <UnpureSidebar>
-        <div className="container mx-auto flex">
-          <div className="basis-3/4">
+      <UnpureMain>
+        <div className="">
+          <div className="">
             <PureReportFilter
               defaultSearch={(router.query.search as string) || null}
               sortOptions={sortOptions}
@@ -155,7 +155,7 @@ const Index = () => {
             </div>
           </div>
         </div>
-      </UnpureSidebar>
+      </UnpureMain>
     </>
   );
 };
