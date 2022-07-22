@@ -5,6 +5,7 @@ import { useUser } from '@/hooks/use-user';
 
 import PureKysoTopBar from '@/components/PureKysoTopBar';
 import type { ReactElement } from 'react';
+import type { UserDTO } from '@kyso-io/kyso-model';
 
 type IUnpureKysoTopBarProps = {
   children: ReactElement;
@@ -12,7 +13,7 @@ type IUnpureKysoTopBarProps = {
 
 const KysoTopBar: LayoutProps = ({ children }: IUnpureKysoTopBarProps) => {
   const router = useRouter();
-  const user = useUser();
+  const user: UserDTO = useUser();
 
   let slugifiedName = '';
   if (user && user.display_name) {

@@ -3,12 +3,12 @@ import { BellIcon, ChevronDownIcon, MenuIcon, XIcon } from '@heroicons/react/sol
 import type { ReactElement } from 'react';
 import { Fragment } from 'react';
 // import type { LayoutProps } from "@/types/pageWithLayout";
-import type { User } from '@kyso-io/kyso-model';
+import type { UserDTO } from '@kyso-io/kyso-model';
 // import { Footer } from "./Footer";
 
 type IPureKysoTopBarProps = {
   children: ReactElement;
-  user: User;
+  user: UserDTO;
   basePath: string;
   userNavigation: { name: string; href: string }[];
 };
@@ -43,10 +43,10 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                       {user && (
                         <Menu as="div" className="relative ml-3">
                           <div>
-                            <Menu.Button className="flex max-w-xs items-center rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600">
+                            <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
                               <span className="sr-only">Open user menu</span>
                               <img className="object-cover h-8 w-8 rounded-full" src={user.avatar_url} alt="" />
-                              <ChevronDownIcon className="shrink-0 -mr-1 ml-1 h-5 w-5 text-white group-hover:text-gray-500" aria-hidden="true" />
+                              <ChevronDownIcon className="shrink-0 -mr-1 ml-1 h-5 w-5 " aria-hidden="true" />
                             </Menu.Button>
                           </div>
                           <Transition

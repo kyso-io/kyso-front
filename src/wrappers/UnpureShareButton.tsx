@@ -1,7 +1,7 @@
 import { useAppSelector } from '@/hooks/redux-hooks';
 import { Fragment, useEffect, useState } from 'react';
 
-import classNames from '@/helpers/ClassNames';
+import classNames from '@/helpers/class-names';
 import { ShareIcon } from '@heroicons/react/solid';
 import { Transition, Dialog } from '@headlessui/react';
 import { useCommonData } from '@/hooks/use-common-data';

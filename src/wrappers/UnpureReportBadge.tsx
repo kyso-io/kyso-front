@@ -8,9 +8,9 @@ import { Sanitizer } from '@/helpers/Sanitizer';
 import { useRouter } from 'next/router';
 import PureReportBadge from '@/components/PureReportBadge';
 import type { UserDTO } from '@kyso-io/kyso-model';
-import { getOrgAndTeamGivenSluglifiedOrgAndTeam, selectCurrentUserPermissions, toggleGlobalPinReportAction, toggleUserPinReportAction } from '@kyso-io/kyso-store';
+import { getOrgAndTeamGivenSluglifiedOrgAndTeam, selectCurrentUserPermissions, toggleGlobalPinReportAction, toggleUserPinReportAction, toggleUserStarReportAction } from '@kyso-io/kyso-store';
 import { useSelector } from 'react-redux';
-import UnpureUpvoteButton from './UnpureUpvoteButton';
+import PureUpvoteButton from './PureUpvoteButton';
 
 type IUnpureReportBadge = {
   id: string;
@@ -75,7 +75,14 @@ const UnpureReportBadge = (props: IUnpureReportBadge) => {
             togglePinReportToUser();
           }
         }}
-        UpvoteButton={<UnpureUpvoteButton id={report?.id} />}
+        UpvoteButton={
+          <PureUpvoteButton
+            report={report}
+            upvoteReport={() => {
+              dispatch(toggleUserStarReportAction(report.id as string));
+            }}
+          />
+        }
       />
     </>
   );

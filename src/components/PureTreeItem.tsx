@@ -9,6 +9,8 @@ type IPureTreeItemProps = {
   prefix: string;
   currentPath?: string;
   pathOfMainFile: string;
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+  onClick?: (e: any) => void;
 };
 
 function classNames(...classes: string[]) {
@@ -16,11 +18,10 @@ function classNames(...classes: string[]) {
 }
 
 const PureTreeItem = (props: IPureTreeItemProps) => {
-  const { treeItem, prefix, currentPath, pathOfMainFile } = props;
-
+  const { treeItem, prefix, currentPath, pathOfMainFile, onClick } = props;
   let url = `${prefix}`;
 
-  if (currentPath && currentPath !== treeItem.path) {
+  if (currentPath !== treeItem.path) {
     url += `?path=${currentPath}/${treeItem.path.split('/').reverse()[0]}`;
   } else {
     url += `?path=${treeItem.path}`;
@@ -75,7 +76,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
     <>
       <div className="py-2 px-3 text-sm group flex items-center justify-between">
         <div>
-          <a href={url} className={classNames('group flex items-center font-medium text-slate-700', 'hover:text-gray-900', 'font-normal hover:underline')}>
+          <a href={url} onClick={onClick} className={classNames('group flex items-center font-medium text-slate-700', 'hover:text-gray-900', 'font-normal hover:underline')}>
             <span className="w-6 text-blue-400">
               {extension === 'ipynb' && (
                 <span>

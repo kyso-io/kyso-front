@@ -4,31 +4,34 @@ import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRouter } from 'next/router';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
-import { useEffect } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useFileToRender } from '@/hooks/use-file-to-render';
-import classNames from '@/helpers/ClassNames';
-import { SelectorIcon, StarIcon } from '@heroicons/react/solid';
+import classNames from '@/helpers/class-names';
+import { ArrowsExpandIcon, QuestionMarkCircleIcon, SelectorIcon, StarIcon } from '@heroicons/react/solid';
+import { updateReportAction } from '@kyso-io/kyso-store';
+import { useAppDispatch } from '@/hooks/redux-hooks';
+import type { GithubFileHash, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
+import { useTree } from '@/hooks/use-tree';
+import { Menu, Transition } from '@headlessui/react';
 
 type IUnPureTreeProps = {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  tree: any;
   prefix: string;
 };
 
 const UnPureTree = (props: IUnPureTreeProps) => {
   const router = useRouter();
-  // const dispatch = useAppDispatch()
-  const { tree, prefix } = props;
-  // const [isBusy, setIsBusy] = useState(false)
+  const { prefix } = props;
+  const tree: GithubFileHash[] = useTree();
   const breadcrumbs: BreadcrumbItem[] = [];
-
   const commonData: CommonData = useCommonData();
   const report = useCommonReportData();
-
+  const [isBusy, setIsBusy] = useState(false);
+  const dispatch = useAppDispatch();
   const fileToRender = useFileToRender();
-
   // is it just a file page, not a directory
-  const isTerminalFile = tree && tree.length === 1 && tree[0].path === router.query.path;
+  const isTerminalFile = tree && tree?.length === 1 && tree[0]!.path === router.query.path;
+  const isAtSelf = report?.main_file === fileToRender?.path;
 
   if (report) {
     breadcrumbs.push(new BreadcrumbItem(report?.name, `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`, false));
@@ -66,31 +69,53 @@ const UnPureTree = (props: IUnPureTreeProps) => {
     breadcrumbs.push(new BreadcrumbItem(fileToRender.path, `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`, false));
   }
 
-  // const setMainFile = async () => {
-  //   setIsBusy(true);
-  //   const result = await dispatch(
-  //     updateReportAction({
-  //       reportId: report.id!,
-  //       data: {
-  //         main_file: tree[0].path,
-  //       },
-  //     })
-  //   );
-  //   if (result?.payload) {
-  //     // success
-  //   }
-  //   setIsBusy(false);
-  // };
+  // TODO
+  const setMainFile = async () => {
+    setIsBusy(true);
+    const result = await dispatch(
+      updateReportAction({
+        reportId: report.id!,
+        data: {
+          main_file: tree && tree.length >= 1 && tree[0]!.path,
+        } as UpdateReportRequestDTO,
+      }),
+    );
+    if (result?.payload) {
+      // success
+    }
+    setIsBusy(false);
+  };
+
+  const makeNewPath = (currentPath: null | string, newPage: null | string) => {
+    if (!currentPath) {
+      return `${newPage}`;
+    }
+
+    if (newPage === '..') {
+      return currentPath.split('/').slice(0, -1).join('/');
+    }
+
+    return `${currentPath}/${newPage}`;
+  };
 
   return (
-    <div className={classNames('bg-white')}>
-      <div>
-        <div className="text-xs group h-12 flex pl-3 items-center border text-gray-800 bg-gray-100 rounded-t justify-between">
-          <div className="flex items-center space-x-0">
+    <div>
+      <div className="text-xs border text-gray-800 bg-gray-100 rounded-t ">
+        <div className="flex h-12 items-center justify-between">
+          <div className="flex items-center space-x-0 ml-3">
             {breadcrumbs.map((page, index) => (
               <div key={`${page.href}+${index}`}>
                 <div className="flex items-center">
-                  <a href={page.href} className={'hover:underline ml-0 text-sm font-medium'} aria-current={page.current ? 'page' : undefined}>
+                  <a
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const url = new URL(page.href, 'https://kyso.io');
+                      router.replace({ query: { ...router.query, path: url.searchParams.get('path') } });
+                    }}
+                    href={page.href}
+                    className={'hover:underline ml-0 text-sm font-medium'}
+                    aria-current={page.current ? 'page' : undefined}
+                  >
                     {page.name}
                   </a>
                   {index + 1 !== breadcrumbs.length && (
@@ -102,27 +127,55 @@ const UnPureTree = (props: IUnPureTreeProps) => {
               </div>
             ))}
           </div>
-          <div className="flex items-center space-x-2">
-            {fileToRender && report?.main_file !== fileToRender?.path && (
+          <div className="flex items-center px-2 space-x-2">
+            {fileToRender && !isAtSelf && (
               <button
-                // onClick={setMainFile}
                 type="button"
-                className="inline-flex m-3 w-38 items-center px-3 py-2 border rounded text-xs font-medium text-slate-700 bg-slate-200 hover:bg-slate-300 focus:outline-none"
+                onClick={() => {
+                  setMainFile();
+                }}
+                className="inline-flex w-38 items-center px-3 py-2 border rounded text-xs font-medium text-slate-700 hover:bg-slate-200 focus:outline-none"
               >
                 <StarIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
-                Set as entrypoint file
+                {isBusy ? 'Setting' : 'Set as main file'}
               </button>
             )}
-            {fileToRender && report?.main_file === fileToRender?.path && (
-              <div className="inline-flex m-3 w-38 items-center px-3 py-2 border rounded text-xs font-medium text-slate-500">
-                <StarIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
-                Entrypoint file
+            {fileToRender && isAtSelf && (
+              <div className="inline-flex pr-2 items-center py-2 rounded text-xs font-medium text-slate-500">
+                <Menu as="div" className="relative w-fit inline-block text-left">
+                  <Menu.Button className="hover:bg-gray-100 p-2 text-xs flex items-center w-fit rounded text-left font-normal hover:outline-none">
+                    This is the main file
+                    <QuestionMarkCircleIcon className="shrink-0 ml-1 h-4 w-4 text-gray-400 group-hover:text-gray-100" aria-hidden="true" />
+                  </Menu.Button>
+
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="z-50 origin-center absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
+                      <div className="prose prose-sm p-3 font-normal font-xs">The main file is the first file shown to your readers. Typically a Readme with table of contents.</div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
               </div>
+            )}
+            {fileToRender?.path.endsWith('.html') && fileToRender && (
+              <a href={`${'/scs'}${fileToRender.path_scs}`} className="block" target="_blank" rel="noreferrer">
+                <button className="inline-flex w-38 items-center px-3 py-2 border hover:bg-slate-200  rounded text-xs font-medium text-slate-700">
+                  <ArrowsExpandIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+                  Open in Full screen
+                </button>
+              </a>
             )}
             {!isTerminalFile && (
               <button
                 type="button"
-                className="inline-flex ml-3 w-40 items-center px-3 py-4 border-l rounded-tr text-xs font-medium text-gray-700 bg-gray-200 hover:bg-slate-300 focus:outline-none"
+                className="inline-flex ml-3 w-40 items-center px-3 py-4 border-l rounded-tr text-xs font-medium text-gray-700 hover:underline focus:outline-none"
                 onClick={() => {
                   if (router.query.fbvisible) {
                     const { query } = router;
@@ -153,15 +206,34 @@ const UnPureTree = (props: IUnPureTreeProps) => {
 
       {router.query.fbvisible && !isTerminalFile && (
         <div className="divide-y border-b border-x">
-          {breadcrumbs && breadcrumbs.length > 1 && (
-            <a href={breadcrumbs?.slice(-2)[0]!.href} className={classNames('font-medium text-blue-700', 'hover:text-gray-900', 'font-normal hover:bg-neutral-50')}>
+          {router.query.path && breadcrumbs && breadcrumbs.length > 1 && (
+            <a
+              onClick={(e) => {
+                e.preventDefault();
+                const path = makeNewPath(router.query.path as string, '..');
+                router.replace({ query: { ...router.query, path } });
+              }}
+              href={breadcrumbs?.slice(-2)[0]!.href}
+              className={classNames('font-medium text-blue-700', 'hover:text-gray-900', 'font-normal hover:bg-neutral-50')}
+            >
               <div className="py-2 px-3 text-sm group flex items-center justify-between">..</div>
             </a>
           )}
 
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {tree?.map((item: any) => (
-            <PureTreeItem key={item.path} treeItem={item} prefix={prefix} currentPath={router.query?.path as string} pathOfMainFile={report?.main_file} />
+            <PureTreeItem
+              key={item.path}
+              treeItem={item}
+              prefix={prefix}
+              currentPath={router.query?.path as string}
+              pathOfMainFile={report?.main_file}
+              onClick={(e) => {
+                e.preventDefault();
+                const path = makeNewPath(router.query.path as string, item.path);
+                router.replace({ query: { ...router.query, path } });
+              }}
+            />
           ))}
         </div>
       )}

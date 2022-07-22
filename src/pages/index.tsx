@@ -5,6 +5,7 @@ import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 const Index = () => {
   useRedirectIfNoJWT();
   // const user = useUser()
+  useRedirectIfNoJWT();
 
   return (
     <>

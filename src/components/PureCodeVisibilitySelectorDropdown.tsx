@@ -24,7 +24,7 @@ const PureCodeVisibilitySelectorDropdown = (props: IPureCodeVisibilitySelectorDr
   };
 
   return (
-    <Menu as="div" className="relative inline-block text-left p-2">
+    <Menu as="div" className="inline-block text-left p-2">
       <div>
         <Menu.Button className="inline-flex justify-center items-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-1.5 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none ">
           Code visibility

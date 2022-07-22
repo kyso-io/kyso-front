@@ -1,4 +1,4 @@
-import classNames from '@/helpers/ClassNames';
+import classNames from '@/helpers/class-names';
 import { Listbox, Menu, Transition } from '@headlessui/react';
 import { CheckIcon, ChevronDownIcon, FilterIcon, SearchIcon, SelectorIcon } from '@heroicons/react/solid';
 import { Fragment, useState } from 'react';

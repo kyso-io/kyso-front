@@ -1,6 +1,6 @@
 import KysoTopBar from '@/layouts/KysoTopBar';
 import { useRouter } from 'next/router';
-import UnpureSidebar from '@/wrappers/UnpureSidebar';
+import UnpureMain from '@/wrappers/UnpureMain';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 
@@ -20,7 +20,7 @@ const Index = () => {
 
   return (
     <>
-      <UnpureSidebar>
+      <UnpureMain>
         <div className="mt-8">
           <h1>Organization Dashboard: {commonData.organization?.display_name}</h1>
           <a href={`${router.basePath}/${commonData.organization?.sluglified_name}`} className="text-indigo-500">
@@ -29,7 +29,7 @@ const Index = () => {
           <p>- [USER IS LOGGED IN AND ADMIN]: show org settings</p>
           <p>- [NONE OF THE ABOVE]: 404</p>
         </div>
-      </UnpureSidebar>
+      </UnpureMain>
     </>
   );
 };
