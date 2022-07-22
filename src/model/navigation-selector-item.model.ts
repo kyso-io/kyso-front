@@ -1,4 +1,4 @@
-export class OrganizationSelectorItem {
+export class NavigationSelectorItem {
   public name: string;
 
   public href: string;
