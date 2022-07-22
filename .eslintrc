@@ -47,6 +47,8 @@
         //     "code": 200
         //   }
         // ],
+        "@typescript-eslint/no-use-before-define": "off",
+        "no-empty": "off",
         "semi": "error",
         "curly": ["error", "all"],
         "no-extra-semi": "error",
