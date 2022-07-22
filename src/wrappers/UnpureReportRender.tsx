@@ -1,28 +1,14 @@
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
-import { fetchFileContentAction } from '@kyso-io/kyso-store';
+import { createInlineCommentAction, deleteInlineCommentAction, fetchFileContentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
 import { PureSpinner } from '@/components/PureSpinner';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { useFileToRender } from '@/hooks/use-file-to-render';
+import { useUser } from '@/hooks/use-user';
+import { PureCodeVisibilitySelectorDropdown } from '@/components/PureCodeVisibilitySelectorDropdown';
+import type { InlineCommentDto, User } from '@kyso-io/kyso-model';
 import dynamic from 'next/dynamic';
-
-const isImage = (name: string) => {
-  return (
-    name != null &&
-    (name.toLowerCase().endsWith('.png') || name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.jpeg') || name.toLowerCase().endsWith('.gif') || name.toLowerCase().endsWith('.svg'))
-  );
-};
-
-// const KysoJupyterRenderer = dynamic(
-//   () =>
-//     import("@kyso-io/kyso-webcomponents").then(
-//       (mod) => mod.KysoJupyterRenderer
-//     ),
-//   {
-//     ssr: false,
-//   }
-// );
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
@@ -34,18 +20,33 @@ const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcompone
   ),
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const KysoJupyterRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoJupyterRenderer), {
+  ssr: false,
+  loading: () => (
+    <div className="flex justify-center p-7 w-full">
+      <PureSpinner />
+    </div>
+  ),
+});
+
+const isImage = (name: string) => {
+  return (
+    name != null &&
+    (name.toLowerCase().endsWith('.png') || name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.jpeg') || name.toLowerCase().endsWith('.gif') || name.toLowerCase().endsWith('.svg'))
+  );
+};
+
 const UnpureReportRender = () => {
   const report = useCommonReportData();
   const dispatch = useAppDispatch();
-  // const user = useUser();
+  const user: User = useUser();
   const [isLoading, setIsLoading] = useState(false);
-  // const [requesting, setRequesting] = useState(false);
-  // const [requesting, setRequesting] = useState(false);
-  // const { isShownInput } = useContext(AppStateContext);
-  // const { isShownOutput } = useContext(AppStateContext);
-  // const { inlineCommentsActived } = useContext(AppStateContext);
+  const [isShownInput, setIsShownInput] = useState(false);
+  const [isShownOutput, setIsShownOutput] = useState(false);
+  const [inlineCommentsActived] = useState(true);
   const [fileContent, setFileContent] = useState<string | null>(null);
-  // const [inlineComments, setInlineComments] = useState([]);
+  const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
 
   const fileToRender = useFileToRender();
 
@@ -91,72 +92,70 @@ const UnpureReportRender = () => {
   //   // router.push(`/${organizationName}/${teamName}/${reportName}`);
   // };
 
-  // useEffect(() => {
-  //   if (report?.id) {
-  //     const getReportInlineComments = async () => {
-  //       const data = await dispatch(getInlineCommentsAction(report.id as string));
-  //       if (data?.payload) {
-  //         setInlineComments(data.payload);
-  //       }
-  //     };
-  //     getReportInlineComments();
-  //   }
-  // }, [report?.id]);
+  useEffect(() => {
+    if (report?.id) {
+      const getReportInlineComments = async () => {
+        const data = await dispatch(getInlineCommentsAction(report.id as string));
+        if (data?.payload) {
+          setInlineComments(data.payload);
+        }
+      };
+      getReportInlineComments();
+    }
+  }, [report?.id]);
 
-  // const createInlineComment = async (cell_id, text) => {
-  //   try {
-  //     const data = await dispatch(
-  //       createInlineCommentAction({
-  //         report_id: report.id as string,
-  //         cell_id,
-  //         text,
-  //       })
-  //     );
-  //     if (data?.payload) {
-  //       setInlineComments([...inlineComments, data.payload]);
-  //     }
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
+  const createInlineComment = async (cell_id: string, text: string) => {
+    try {
+      const data = await dispatch(
+        createInlineCommentAction({
+          report_id: report.id as string,
+          cell_id,
+          text,
+        }),
+      );
+      if (data?.payload) {
+        setInlineComments([...inlineComments, data.payload]);
+      }
+    } catch (e) {
+      // console.error(e);
+    }
+  };
 
-  // const editInlineComment = async (id, text) => {
-  //   try {
-  //     const data = await dispatch(
-  //       updateInlineCommentAction({
-  //         inlineCommentId: id,
-  //         updateInlineCommentDto: {
-  //           text,
-  //         },
-  //       })
-  //     );
-  //     if (data?.payload) {
-  //       setInlineComments(
-  //         inlineComments.map((inlineComment) => {
-  //           if (inlineComment.id === id) {
-  //             return data.payload;
-  //           }
-  //           return inlineComment;
-  //         })
-  //       );
-  //     }
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
+  const editInlineComment = async (id: string, text: string) => {
+    try {
+      const data = await dispatch(
+        updateInlineCommentAction({
+          inlineCommentId: id,
+          updateInlineCommentDto: {
+            text,
+          },
+        }),
+      );
+      if (data?.payload) {
+        setInlineComments(
+          inlineComments.map((inlineComment) => {
+            if (inlineComment.id === id) {
+              return data.payload;
+            }
+            return inlineComment;
+          }),
+        );
+      }
+    } catch (e) {
+      // console.error(e);
+    }
+  };
 
-  // const deleteInlineComment = async (id) => {
-  //   try {
-  //     const data = await dispatch(deleteInlineCommentAction(id));
-  //     if (data?.payload) {
-  //       setInlineComments(
-  //         inlineComments.filter((inlineComment) => inlineComment.id !== id)
-  //       );
-  //     }
-  //   } catch (e) {
-  //     console.error(e);
-  //   }
-  // };
+  const deleteInlineComment = async (id: string) => {
+    try {
+      const data = await dispatch(deleteInlineCommentAction(id));
+      if (data?.payload) {
+        setInlineComments(inlineComments.filter((inlineComment) => inlineComment.id !== id));
+      }
+    } catch (e) {
+      // console.error(e);
+    }
+  };
 
   if (!fileToRender) {
     return <div />;
@@ -174,19 +173,34 @@ const UnpureReportRender = () => {
     } else if (isImage(fileToRender.path)) {
       render = <img src={`data:image/jpeg;base64,${fileContent}`} alt="file image" />;
     } else if (fileToRender.path.endsWith('.ipynb')) {
-      // render = (
-      //   <KysoJupyterRenderer
-      //     user={user}
-      //     jupyterNotebook={JSON.parse(fileContent)}
-      //     showInputs={isShownInput}
-      //     showOutputs={isShownOutput}
-      //     inlineCommentsActived={inlineCommentsActived}
-      //     inlineComments={inlineComments}
-      //     createInlineComment={createInlineComment}
-      //     deleteInlineComment={deleteInlineComment}
-      //     editInlineComment={editInlineComment}
-      //   />
-      // );
+      render = (
+        <div className="flex flex-col">
+          <div className="flex justify-end">
+            <PureCodeVisibilitySelectorDropdown inputShown={isShownInput} outputShown={isShownOutput} setInputShow={setIsShownInput} setOutputShow={setIsShownOutput} />
+          </div>
+          <div className="p-4">
+            <div className="prose prose-sm contents">
+              {user && user.id && user.avatar_url && (
+                <KysoJupyterRenderer
+                  userId={user.id}
+                  avatarUrl={user.avatar_url}
+                  jupyterNotebook={JSON.parse(fileContent)}
+                  showInputs={isShownInput}
+                  showOutputs={isShownOutput}
+                  inlineCommentsActived={inlineCommentsActived}
+                  enabledCreateInlineComment={inlineCommentsActived}
+                  enabledDeleteInlineComment={inlineCommentsActived}
+                  enabledEditInlineComment={inlineCommentsActived}
+                  inlineComments={inlineComments}
+                  createInlineComment={createInlineComment}
+                  deleteInlineComment={deleteInlineComment}
+                  editInlineComment={editInlineComment}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      );
     } else if (
       fileToRender.path.endsWith('.txt') ||
       fileToRender.path.endsWith('.json') ||
@@ -196,8 +210,6 @@ const UnpureReportRender = () => {
       fileToRender.path.endsWith('.py') ||
       fileToRender.path.endsWith('.css')
     ) {
-      // Text based files can be rendered with the Markdown editor as well
-      // console.log("nav" + navigator)
       render = (
         <div className="prose prose-sm contents">
           <pre>

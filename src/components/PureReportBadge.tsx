@@ -1,7 +1,8 @@
 import format from 'date-fns/format';
-import { ChatAltIcon, CodeIcon, DotsVerticalIcon, EyeIcon, FlagIcon, ShareIcon, StarIcon, ThumbUpIcon } from '@heroicons/react/solid';
+import { ChatAltIcon, CodeIcon, DotsVerticalIcon, EyeIcon, FlagIcon, ShareIcon, StarIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
+import type { ReactNode } from 'react';
 import { toSvg } from 'jdenticon';
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 
@@ -15,13 +16,12 @@ type IPureReportBadgeProps = {
   reportHref: string;
   isPinned: Boolean;
   onClickPin: () => void;
-  onClickUpvote: () => void;
   isPinnedBusy?: boolean;
-  isUpvoteBusy?: boolean;
+  UpvoteButton?: ReactNode;
 };
 
 const PureReportBadge = (props: IPureReportBadgeProps) => {
-  const { report, owners, reportHref, isPinned = false, onClickPin = () => {}, onClickUpvote = () => {} } = props;
+  const { report, owners, reportHref, isPinned = false, onClickPin = () => {}, UpvoteButton } = props;
 
   const getBackgroundImage = (preview_image: string | null, title: string, size = 400) => {
     if (preview_image) {
@@ -60,19 +60,7 @@ const PureReportBadge = (props: IPureReportBadgeProps) => {
                 </div>
 
                 <div className="shrink-0">
-                  <div className="inline-flex items-center text-sm">
-                    <button
-                      type="button"
-                      className="inline-flex space-x-2 text-gray-400 hover:text-gray-500"
-                      onClick={() => {
-                        onClickUpvote();
-                      }}
-                    >
-                      <ThumbUpIcon className={classNames('h-5 w-5', report.mark_as_star_by_user ? 'text-indigo-500' : '')} aria-hidden="true" />
-                      <span className="text-gray-900">{report.stars}</span>
-                      <span className="sr-only">upvotes</span>
-                    </button>
-                  </div>
+                  <div className="inline-flex items-center text-sm">{UpvoteButton}</div>
                   <Menu as="div" className="relative inline-block text-left ml-4">
                     <div>
                       <Menu.Button className="-m-2 p-2 rounded-full flex items-center text-gray-400 hover:text-gray-600">
