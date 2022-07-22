@@ -33,7 +33,7 @@ export const useTree = (): GithubFileHash[] => {
   };
 
   const [mounted, setMounted] = useState(false);
-  const { data }: SWRResponse<GithubFileHash[]> = useSWR(mounted ? 'use-tree' : null, fetcher);
+  const { data }: SWRResponse<GithubFileHash[]> = useSWR(mounted ? `use-tree-${router.asPath}` : null, fetcher);
   useEffect(() => {
     if (!router.isReady) {
       return;
@@ -44,7 +44,7 @@ export const useTree = (): GithubFileHash[] => {
     }
 
     setMounted(true);
-  }, [router.query, report]);
+  }, [router.query.path, report]);
 
   let tree = null;
   if (data) {

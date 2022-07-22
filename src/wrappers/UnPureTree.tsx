@@ -10,17 +10,18 @@ import classNames from '@/helpers/class-names';
 import { ArrowsExpandIcon, SelectorIcon, StarIcon } from '@heroicons/react/solid';
 import { updateReportAction } from '@kyso-io/kyso-store';
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import type { UpdateReportRequestDTO } from '@kyso-io/kyso-model';
+import type { GithubFileHash, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
+import { useTree } from '@/hooks/use-tree';
 
 type IUnPureTreeProps = {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  tree: any;
   prefix: string;
 };
 
 const UnPureTree = (props: IUnPureTreeProps) => {
   const router = useRouter();
-  const { tree, prefix } = props;
+  const { prefix } = props;
+  const tree: GithubFileHash[] = useTree();
   const breadcrumbs: BreadcrumbItem[] = [];
   const commonData: CommonData = useCommonData();
   const report = useCommonReportData();
@@ -28,7 +29,7 @@ const UnPureTree = (props: IUnPureTreeProps) => {
   const dispatch = useAppDispatch();
   const fileToRender = useFileToRender();
   // is it just a file page, not a directory
-  const isTerminalFile = tree && tree.length === 1 && tree[0].path === router.query.path;
+  const isTerminalFile = tree && tree?.length === 1 && tree[0]!.path === router.query.path;
   const isAtSelf = report?.main_file === fileToRender?.path;
 
   if (report) {
@@ -74,7 +75,7 @@ const UnPureTree = (props: IUnPureTreeProps) => {
       updateReportAction({
         reportId: report.id!,
         data: {
-          main_file: tree[0].path,
+          main_file: tree && tree.length >= 1 && tree[0]!.path,
         } as UpdateReportRequestDTO,
       }),
     );
@@ -82,6 +83,18 @@ const UnPureTree = (props: IUnPureTreeProps) => {
       // success
     }
     setIsBusy(false);
+  };
+
+  const makeNewPath = (currentPath: null | string, newPage: null | string) => {
+    if (!currentPath) {
+      return `${newPage}`;
+    }
+
+    if (newPage === '..') {
+      return currentPath.split('/').slice(0, -1).join('/');
+    }
+
+    return `${currentPath}/${newPage}`;
   };
 
   return (
@@ -92,7 +105,16 @@ const UnPureTree = (props: IUnPureTreeProps) => {
             {breadcrumbs.map((page, index) => (
               <div key={`${page.href}+${index}`}>
                 <div className="flex items-center">
-                  <a href={page.href} className={'hover:underline ml-0 text-sm font-medium'} aria-current={page.current ? 'page' : undefined}>
+                  <a
+                    onClick={(e) => {
+                      e.preventDefault();
+                      const url = new URL(page.href, 'https://kyso.io');
+                      router.replace({ query: { ...router.query, path: url.searchParams.get('path') } });
+                    }}
+                    href={page.href}
+                    className={'hover:underline ml-0 text-sm font-medium'}
+                    aria-current={page.current ? 'page' : undefined}
+                  >
                     {page.name}
                   </a>
                   {index + 1 !== breadcrumbs.length && (
@@ -104,7 +126,7 @@ const UnPureTree = (props: IUnPureTreeProps) => {
               </div>
             ))}
           </div>
-          <div className="flex items-center px-2 space-x-2">
+          <div className="flex items-center px-2 space-x-4">
             {fileToRender && !isAtSelf && (
               <button
                 type="button"
@@ -165,15 +187,34 @@ const UnPureTree = (props: IUnPureTreeProps) => {
 
       {router.query.fbvisible && !isTerminalFile && (
         <div className="divide-y border-b border-x">
-          {breadcrumbs && breadcrumbs.length > 1 && (
-            <a href={breadcrumbs?.slice(-2)[0]!.href} className={classNames('font-medium text-blue-700', 'hover:text-gray-900', 'font-normal hover:bg-neutral-50')}>
+          {router.query.path && breadcrumbs && breadcrumbs.length > 1 && (
+            <a
+              onClick={(e) => {
+                e.preventDefault();
+                const path = makeNewPath(router.query.path as string, '..');
+                router.replace({ query: { ...router.query, path } });
+              }}
+              href={breadcrumbs?.slice(-2)[0]!.href}
+              className={classNames('font-medium text-blue-700', 'hover:text-gray-900', 'font-normal hover:bg-neutral-50')}
+            >
               <div className="py-2 px-3 text-sm group flex items-center justify-between">..</div>
             </a>
           )}
 
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {tree?.map((item: any) => (
-            <PureTreeItem key={item.path} treeItem={item} prefix={prefix} currentPath={router.query?.path as string} pathOfMainFile={report?.main_file} />
+            <PureTreeItem
+              key={item.path}
+              treeItem={item}
+              prefix={prefix}
+              currentPath={router.query?.path as string}
+              pathOfMainFile={report?.main_file}
+              onClick={(e) => {
+                e.preventDefault();
+                const path = makeNewPath(router.query.path as string, item.path);
+                router.replace({ query: { ...router.query, path } });
+              }}
+            />
           ))}
         </div>
       )}

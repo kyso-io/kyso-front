@@ -12,7 +12,6 @@ import PureUpvoteButton from '@/wrappers/PureUpvoteButton';
 import UnpureShareButton from '@/wrappers/UnpureShareButton';
 import UnpureReportActionDropdown from '@/wrappers/UnpureReportActionDropdown';
 import UnpureComments from '@/wrappers/UnpureComments';
-import { useTree } from '@/hooks/use-tree';
 import type { User } from '@kyso-io/kyso-model';
 import PureReportHeader from '@/components/PureReportHeader';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
@@ -27,7 +26,6 @@ const Index = () => {
   const report = useCommonReportData();
   const authors: User[] = useAuthors();
   const fileToRender = useFileToRender();
-  const tree = useTree();
 
   return (
     <>
@@ -51,7 +49,7 @@ const Index = () => {
             </div>
 
             <div>
-              <UnPureTree tree={tree} prefix={`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`} />
+              <UnPureTree prefix={`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`} />
               {fileToRender && (
                 <div className="bg-white border-b rounded-b border-x">
                   <UnpureReportRender />
