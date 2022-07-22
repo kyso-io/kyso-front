@@ -1,11 +1,11 @@
 import useSWR from 'swr';
-import { fetchRelationsAction, fetchUserPermissions, selectUser, setAuthAction } from '@kyso-io/kyso-store';
+import { fetchRelationsAction, fetchUserPermissions, refreshUserAction, setAuthAction } from '@kyso-io/kyso-store';
 import decode from 'jwt-decode';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import type { Token, User } from '@kyso-io/kyso-model';
+import type { ActionWithPayload, Token, UserDTO } from '@kyso-io/kyso-model';
 import { Helper } from '@/helpers/Helper';
-import { useAppSelector, useAppDispatch } from './redux-hooks';
+import { useAppDispatch } from './redux-hooks';
 
 export type DecodedToken = {
   exp: number;
@@ -14,16 +14,15 @@ export type DecodedToken = {
   payload: Token;
 };
 
-export const useUser = (): User => {
-  const user = useAppSelector(selectUser);
+export const useUser = (): UserDTO => {
   const dispatch = useAppDispatch();
   const router = useRouter();
 
-  const fetcher = async () => {
+  const fetcher = async (): Promise<UserDTO | null> => {
     const jwt: string = localStorage.getItem('jwt') as string;
 
     if (!jwt) {
-      return;
+      return null;
     }
 
     const jwtToken: DecodedToken = decode<DecodedToken>(jwt);
@@ -44,6 +43,7 @@ export const useUser = (): User => {
     );
 
     const userPermissions = await dispatch(fetchUserPermissions(tokenData.username));
+    const fetchUserRequest: ActionWithPayload<UserDTO> = await dispatch(refreshUserAction());
 
     if (userPermissions) {
       await dispatch(
@@ -53,22 +53,18 @@ export const useUser = (): User => {
         }),
       );
     }
+
+    return fetchUserRequest.payload as UserDTO;
   };
 
   const [mounted, setMounted] = useState(false);
-  useSWR(mounted ? 'use-auth' : null, fetcher);
+  const { data } = useSWR(mounted ? 'use-user' : null, fetcher);
   useEffect(() => {
-    if (!router.isReady) {
-      return;
+    if (router.isReady) {
+      setMounted(true);
     }
-
-    if (user) {
-      return;
-    }
-
-    setMounted(true);
-  }, [router.query, user]);
+  }, [router.query]);
 
   // NO ANY
-  return user as User;
+  return data as UserDTO;
 };

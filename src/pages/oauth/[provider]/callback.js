@@ -14,7 +14,7 @@ const Page = () => {
   useEffect(() => {
     if (error) {
       setTimeout(() => {
-        window.location = '/login';
+        window.location = `${router.basePath}/login`;
       }, 1000);
     }
   }, [error]);
@@ -22,7 +22,7 @@ const Page = () => {
   useEffect(() => {
     if (user) {
       setTimeout(() => {
-        window.location = user.show_captcha ? '/captcha' : '/';
+        window.location = user.show_captcha ? `${router.basePath}/captcha` : router.basePath;
       }, 200);
     }
   }, [user]);

@@ -1,28 +1,27 @@
-import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import { useAppDispatch } from '@/hooks/redux-hooks';
 import { Fragment, useState } from 'react';
 import { saveAs } from 'file-saver';
-import classNames from '@/helpers/ClassNames';
+import classNames from '@/helpers/class-names';
 import { DotsVerticalIcon, FolderDownloadIcon, XIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
 import { downloadReportAction } from '@kyso-io/kyso-store';
+import { useCommonReportData } from '@/hooks/use-common-report-data';
+import type { ReportDTO } from '@kyso-io/kyso-model';
+import slugify from 'slugify';
 
-type IUnpureReportActionDropdown = {
-  id: string;
-};
-
-const UnpureReportActionDropdown = (props: IUnpureReportActionDropdown) => {
-  const report = useAppSelector((state) => state.reports.entities[props.id]);
+const UnpureReportActionDropdown = () => {
+  const report: ReportDTO = useCommonReportData();
   const dispatch = useAppDispatch();
   const [show, setShow] = useState(false);
   const [downloadText, setDownloadText] = useState('Creating zip, this may take a moment...');
 
   const downloadReport = async () => {
     setShow(true);
-    const result = await dispatch(downloadReportAction(report.id));
+    const result = await dispatch(downloadReportAction(report.id!));
     setDownloadText('Downloading...');
     if (result.payload) {
       const blob = new Blob([result.payload], { type: 'application/zip' });
-      saveAs(blob, `${report.sluglified_name}.zip`);
+      saveAs(blob, `${slugify(report.name)}.zip`);
       setDownloadText('Download fininshed.');
     } else {
       setShow(true);

@@ -7,13 +7,6 @@ import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 const Index = () => {
   const commonData: CommonData = useCommonData();
   useRedirectIfNoJWT();
-  // const reports = useReports({
-  //   perPage: router.query.per_page as string,
-  //   page: router.query.page as string,
-  //   search: router.query.search as string,
-  //   sort: router.query.sort as string,
-  //   tags: router.query.tags as string[],
-  // });
 
   return (
     <>

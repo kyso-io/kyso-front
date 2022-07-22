@@ -13,9 +13,10 @@ import {
 } from '@kyso-io/kyso-store';
 import { useUser } from '@/hooks/use-user';
 import { useState, useMemo, useEffect } from 'react';
-import type { Comment } from '@kyso-io/kyso-model';
+import type { Comment, User } from '@kyso-io/kyso-model';
 import PureCommentInput from '@/components/PureCommentInput';
-import classNames from '@/helpers/ClassNames';
+import classNames from '@/helpers/class-names';
+import { PureSpinner } from '@/components/PureSpinner';
 
 type IUnpureCommentForm = {
   parentId?: string;
@@ -33,10 +34,13 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
   const commonData: CommonData = useCommonData();
 
   let initialValue = '';
-  const comment = useAppSelector((state) => id && selectCommentsById(state, id));
+  const comment: Comment | null = useAppSelector((state) => (id ? selectCommentsById(state, id) : null));
   if (comment) {
     initialValue = comment.text;
   }
+
+  const parentComment: Comment | null = useAppSelector((state) => (parentId ? selectCommentsById(state, parentId) : null));
+  const commentUser: User | null = useAppSelector((state) => (parentComment ? state.user.entities[parentComment.user_id] : null));
 
   const [mentions, setMentions] = useState<string[]>([]);
   const [value, setValue] = useState(initialValue);
@@ -44,7 +48,13 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
   const [isLoading, setIsLoading] = useState(false);
   const report = useAppSelector(selectFirstSearchResult);
   const user = useUser();
+
   const currentUserPermissions = useAppSelector(selectCurrentUserPermissions);
+
+  let isUserAuthor = false;
+  if (user && user.id === comment?.user_id) {
+    isUserAuthor = true;
+  }
 
   const hasPermissionCreateComment = useMemo(() => {
     return checkPermissions(commonData.organization, commonData.team, currentUserPermissions, 'KYSO_IO_CREATE_COMMENT');
@@ -62,7 +72,7 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
             setSuggestions(result.payload);
           }
         } catch (e) {
-          console.log(e);
+          // console.log(e);
         }
       };
       getAssigneess();
@@ -106,30 +116,22 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
   };
 
   let message = 'Write a new comment';
+
   if (id) {
     message = 'Edit comment';
   }
   if (parentId) {
-    message = `Replying`;
+    message = `Replying to ${isUserAuthor ? 'You' : commentUser && commentUser.display_name}`;
   }
 
   return (
-    <div className={classNames('w-full mt-2')}>
-      <div className="bg-gray-100 p-3 rounded-t border flex justify-between text-sm font-light text-gray-500">
-        {message}
-        {(id || parentId) && (
-          <button className="hover:underline text-sm" onClick={onCancel}>
-            Cancel
-          </button>
-        )}
-      </div>
-
-      <div className="bg-white p-3 rounded-b border-x border-b">
+    <div className={classNames(parentId ? 'mt-2' : '')}>
+      <div>
         <div>
           {hasPermissionCreateComment ? (
             <PureCommentInput
               text={value}
-              placeholder="type your comment here"
+              placeholder={message}
               suggestions={suggestions}
               handleInputChange={(newValue, newPlainTextValue, newMentions) => {
                 setValue(newValue);
@@ -138,23 +140,30 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
               }}
             />
           ) : (
-            <div>{user ? 'Sorry, but you don’t have the permission to write a comment' : 'Please, login to write a comment'}</div>
+            <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
           )}
         </div>
 
-        {showPostButton && (
-          <div className="flex justify-end">
-            {hasPermissionCreateComment && (
-              <button
-                className="inline-flex items-center px-2 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                onClick={handleClick}
-                disabled={!hasPermissionCreateComment}
-              >
-                {isLoading ? 'Posting Comment' : 'Post Comment'}
-              </button>
-            )}
-          </div>
-        )}
+        <div className="p-2 flex justify-end text-sm text-gray-500 space-x-4">
+          {(id || parentId) && (
+            <button className="hover:underline text-sm" onClick={onCancel}>
+              Cancel
+            </button>
+          )}
+          {showPostButton && hasPermissionCreateComment && (
+            <button
+              className={classNames(
+                'inline-flex items-center px-2 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-0',
+                value.length === 0 ? 'bg-indigo-400 text-gray-200' : 'bg-indigo-600  hover:bg-indigo-700',
+              )}
+              onClick={handleClick}
+              disabled={!hasPermissionCreateComment || value.length === 0}
+            >
+              {isLoading && <PureSpinner size={5} />}
+              Post Comment
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

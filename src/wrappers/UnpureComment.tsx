@@ -11,7 +11,7 @@ import dynamic from 'next/dynamic';
 import { useMemo, useState } from 'react';
 import { useUser } from '@/hooks/use-user';
 import { formatRelative } from 'date-fns';
-import classNames from '@/helpers/ClassNames';
+import classNames from '@/helpers/class-names';
 import UnpureCommentForm from './UnpureCommentForm';
 import UnpureComments from './UnpureComments';
 
@@ -70,33 +70,35 @@ const UnpureComment = (props: IUnpureComment) => {
       {comment && isEditing ? (
         <UnpureCommentForm id={comment.id} onSubmitted={() => setIsEditing(!isEditing)} onCancel={() => setIsEditing(!isEditing)} showPostButton={showPostButton} />
       ) : (
-        <div className={classNames('w-full mt-2', parentId ? 'ml-4' : '')}>
-          <div className="p-2">
-            <div className="prose prose-sm">
-              <KysoMarkdownRenderer source={comment?.text} />
-            </div>
+        <div className={classNames('flex flex-col space-y-2', parentId ? 'ml-4' : '')}>
+          <div className="">
+            <KysoMarkdownRenderer source={comment?.text} />
           </div>
 
-          <div className="px-2 pt-0 rounded-t flex justify-between text-xs font-medium text-gray-400">
+          <div className="pt-0 rounded-t flex items-center space-x-2 text-sm font-light text-gray-400">
             <div>
+              <img className="m-0 inline-block h-7 w-7 rounded-full" src={commentUser.avatar_url} alt="" />
+            </div>
+            <div className="ml-2">
               {isUserAuthor ? 'You' : commentUser && commentUser.display_name}
               {comment?.created_at ? ` wrote ${formatRelative(new Date(comment.created_at), new Date())}` : ''}
             </div>
+            <div></div>
 
             <div className="space-x-2">
               {isUserAuthor && showPostButton && (
-                <button className="hover:underline " onClick={() => setIsEditing(!isEditing)}>
+                <button className="hover:underline font-medium" onClick={() => setIsEditing(!isEditing)}>
                   Edit
                 </button>
               )}
               {(isUserAuthor || hasPermissionDeleteComment) && (
-                <button className="hover:underline " onClick={() => onDeleteComment()}>
+                <button className="hover:underline font-medium" onClick={() => onDeleteComment()}>
                   Delete
                 </button>
               )}
               {showPostButton && (
                 <button
-                  className="hover:underline "
+                  className="hover:underline font-medium"
                   onClick={() => {
                     if (!hasPermissionCreateComment) {
                       alert('Sorry, but you do not have the permission to reply to comments.');

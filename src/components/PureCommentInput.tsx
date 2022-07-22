@@ -1,38 +1,56 @@
 import { Mention, MentionsInput } from 'react-mentions'; // https://www.npmjs.com/package/react-mentions
 
 const defaultStyle = {
-  // text input background
+  // input: {
+  //   padding: null,
+  //   border: null,
+  //   color: null,
+  //   display: null,
+  //   width: null,
+  //   position: null,
+  //   margin: null,
+  //   top: null,
+  //   left: null,
+  //   boxSizing: null,
+  //   borderColor: null,
+  //   backgroundColor: null,
+  //   fontFamily: null,
+  //   fontSize: null,
+  //   letterSpacing: null,
+  // },
+
   control: {
-    width: '100%',
-    height: '100px',
+    // backgroundColor: '#fff',
+    // fontSize: 14,
+    // fontWeight: 'normal',
   },
-  // text input background
+
   '&multiLine': {
     control: {
-      fontSize: '12px',
-      fontFamily: '"SF UI Text", -apple-system, "system-ui", "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"',
-      minHeight: 64,
+      fontFamily: 'monospace',
+      minHeight: 63,
     },
     highlighter: {
-      border: '1px solid transparent',
+      padding: 9,
+      // border: '1px solid transparent',
     },
     input: {
-      padding: 6,
-      border: '0',
-      color: '#474d66',
+      padding: 9,
+      // border: '1px solid silver',
     },
   },
 
   '&singleLine': {
     display: 'inline-block',
     width: 180,
+
     highlighter: {
       padding: 1,
-      border: '2px inset transparent',
+      // border: '2px inset transparent',
     },
     input: {
       padding: 1,
-      border: '2px inset',
+      // border: '2px inset',
     },
   },
 
@@ -71,18 +89,22 @@ const PureCommentInput = (props: IPureCommentInput) => {
     <>
       <MentionsInput
         style={defaultStyle}
+        className="mentions"
+        classNames={{
+          mentions__input: 'bg-white rounded text-gray-800 w-full outline-none focus:ring-0 focus:outline-none border focus:border-gray-200 border-gray-200 resize-none sm:text-sm',
+        }}
         placeholder={placeholder}
         value={text}
         // displayTransform={(id: string, display: string) => {
         //   return `@${display}`;
         // }}
         onChange={(event, newValue, newPlainTextValue, mentions) => {
-          console.log(event);
           handleInputChange(
             newValue,
             newPlainTextValue,
             mentions.map((m) => m.id),
           );
+          return event;
         }}
       >
         <Mention

@@ -7,6 +7,7 @@ import UnpureReportBadge from '@/wrappers/UnpureReportBadge';
 import PureReportFilter from '@/components/PureReportFilter';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 
 const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
 
@@ -35,6 +36,7 @@ const pushQueryString = (router: NextRouter, newValue: object) => {
 
 const Index = () => {
   const router = useRouter();
+  useRedirectIfNoJWT();
   const commonData: CommonData = useCommonData();
 
   const reports = useReports({

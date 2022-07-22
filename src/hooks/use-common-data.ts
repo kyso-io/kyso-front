@@ -2,7 +2,7 @@ import type { RootState } from '@kyso-io/kyso-store';
 import { fetchOrganizationAction, fetchTeamAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import type { ActionWithPayload, Organization, ResourcePermissions, Team, TokenPermissions, User } from '@kyso-io/kyso-model';
+import type { ActionWithPayload, Organization, ResourcePermissions, Team, TokenPermissions, User, UserDTO } from '@kyso-io/kyso-model';
 import useSWR from 'swr';
 import { useAppDispatch, useAppSelector } from './redux-hooks';
 import { useUser } from './use-user';
@@ -20,7 +20,7 @@ export const useCommonData = (): CommonData => {
   const dispatch = useAppDispatch();
 
   const { query } = router;
-  const user: User = useUser();
+  const user: UserDTO = useUser();
   const token: string | null = useAppSelector((state: RootState) => state.auth.token);
   const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);
 
@@ -28,7 +28,7 @@ export const useCommonData = (): CommonData => {
     const organizationResourcePermissions: ResourcePermissions | undefined = permissions!.organizations!.find((org: ResourcePermissions) => org.name === query.organizationName);
 
     let organization: Organization | null = null;
-    let team = null;
+    let team: Team | null = null;
 
     if (query.organizationName) {
       if (organizationResourcePermissions) {

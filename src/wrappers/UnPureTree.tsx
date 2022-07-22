@@ -4,10 +4,13 @@ import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRouter } from 'next/router';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFileToRender } from '@/hooks/use-file-to-render';
-import classNames from '@/helpers/ClassNames';
-import { SelectorIcon, StarIcon } from '@heroicons/react/solid';
+import classNames from '@/helpers/class-names';
+import { ArrowsExpandIcon, SelectorIcon, StarIcon } from '@heroicons/react/solid';
+import { updateReportAction } from '@kyso-io/kyso-store';
+import { useAppDispatch } from '@/hooks/redux-hooks';
+import type { UpdateReportRequestDTO } from '@kyso-io/kyso-model';
 
 type IUnPureTreeProps = {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -17,18 +20,16 @@ type IUnPureTreeProps = {
 
 const UnPureTree = (props: IUnPureTreeProps) => {
   const router = useRouter();
-  // const dispatch = useAppDispatch()
   const { tree, prefix } = props;
-  // const [isBusy, setIsBusy] = useState(false)
   const breadcrumbs: BreadcrumbItem[] = [];
-
   const commonData: CommonData = useCommonData();
   const report = useCommonReportData();
-
+  const [isBusy, setIsBusy] = useState(false);
+  const dispatch = useAppDispatch();
   const fileToRender = useFileToRender();
-
   // is it just a file page, not a directory
   const isTerminalFile = tree && tree.length === 1 && tree[0].path === router.query.path;
+  const isAtSelf = report?.main_file === fileToRender?.path;
 
   if (report) {
     breadcrumbs.push(new BreadcrumbItem(report?.name, `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`, false));
@@ -66,27 +67,28 @@ const UnPureTree = (props: IUnPureTreeProps) => {
     breadcrumbs.push(new BreadcrumbItem(fileToRender.path, `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`, false));
   }
 
-  // const setMainFile = async () => {
-  //   setIsBusy(true);
-  //   const result = await dispatch(
-  //     updateReportAction({
-  //       reportId: report.id!,
-  //       data: {
-  //         main_file: tree[0].path,
-  //       },
-  //     })
-  //   );
-  //   if (result?.payload) {
-  //     // success
-  //   }
-  //   setIsBusy(false);
-  // };
+  // TODO
+  const setMainFile = async () => {
+    setIsBusy(true);
+    const result = await dispatch(
+      updateReportAction({
+        reportId: report.id!,
+        data: {
+          main_file: tree[0].path,
+        } as UpdateReportRequestDTO,
+      }),
+    );
+    if (result?.payload) {
+      // success
+    }
+    setIsBusy(false);
+  };
 
   return (
-    <div className={classNames('bg-white')}>
-      <div>
-        <div className="text-xs group h-12 flex pl-3 items-center border text-gray-800 bg-gray-100 rounded-t justify-between">
-          <div className="flex items-center space-x-0">
+    <div>
+      <div className="text-xs border text-gray-800 bg-gray-100 rounded-t ">
+        <div className="flex h-12 items-center justify-between">
+          <div className="flex items-center space-x-0 ml-3">
             {breadcrumbs.map((page, index) => (
               <div key={`${page.href}+${index}`}>
                 <div className="flex items-center">
@@ -102,27 +104,37 @@ const UnPureTree = (props: IUnPureTreeProps) => {
               </div>
             ))}
           </div>
-          <div className="flex items-center space-x-2">
-            {fileToRender && report?.main_file !== fileToRender?.path && (
+          <div className="flex items-center px-2 space-x-2">
+            {fileToRender && !isAtSelf && (
               <button
-                // onClick={setMainFile}
                 type="button"
-                className="inline-flex m-3 w-38 items-center px-3 py-2 border rounded text-xs font-medium text-slate-700 bg-slate-200 hover:bg-slate-300 focus:outline-none"
+                onClick={() => {
+                  setMainFile();
+                }}
+                className="inline-flex w-38 items-center px-3 py-2 border rounded text-xs font-medium text-slate-700 hover:bg-slate-200 focus:outline-none"
               >
                 <StarIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
-                Set as entrypoint file
+                {isBusy ? 'Setting' : 'Set as main file'}
               </button>
             )}
-            {fileToRender && report?.main_file === fileToRender?.path && (
-              <div className="inline-flex m-3 w-38 items-center px-3 py-2 border rounded text-xs font-medium text-slate-500">
+            {fileToRender && isAtSelf && (
+              <div className="inline-flex items-center py-2 rounded text-xs font-medium text-slate-700">
                 <StarIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
-                Entrypoint file
+                Main file
               </div>
+            )}
+            {fileToRender?.path.endsWith('.html') && fileToRender && (
+              <a href={`${'/scs'}${fileToRender.path_scs}`} className="block" target="_blank" rel="noreferrer">
+                <button className="inline-flex w-38 items-center px-3 py-2 border hover:bg-slate-200  rounded text-xs font-medium text-slate-700">
+                  <ArrowsExpandIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+                  Open in Full screen
+                </button>
+              </a>
             )}
             {!isTerminalFile && (
               <button
                 type="button"
-                className="inline-flex ml-3 w-40 items-center px-3 py-4 border-l rounded-tr text-xs font-medium text-gray-700 bg-gray-200 hover:bg-slate-300 focus:outline-none"
+                className="inline-flex ml-3 w-40 items-center px-3 py-4 border-l rounded-tr text-xs font-medium text-gray-700 hover:underline focus:outline-none"
                 onClick={() => {
                   if (router.query.fbvisible) {
                     const { query } = router;

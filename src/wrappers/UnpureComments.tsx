@@ -1,5 +1,5 @@
 /* eslint-disable import/no-cycle */
-import classNames from '@/helpers/ClassNames';
+import classNames from '@/helpers/class-names';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
 import { fetchReportCommentsAction, selectCommentsByParent } from '@kyso-io/kyso-store';
@@ -30,10 +30,10 @@ const UnpureComments = (props: IUnpureComments) => {
   }, [report?.id]);
 
   return (
-    <div className={classNames('w-full mt-2', parentId ? 'ml-4' : '')}>
+    <div className={classNames('w-full', parentId ? 'ml-10' : '')}>
       {!parentId && <UnpureCommentForm />}
 
-      <div className="flex flex-col mt-4 space-y-0">{comments && comments.map((comment) => <UnpureComment key={`comment-${comment.id}`} id={comment.id} showPostButton={showPostButton} />)}</div>
+      <div className="flex flex-col space-y-4">{comments && comments.map((comment) => <UnpureComment key={`comment-${comment.id}`} id={comment.id} showPostButton={showPostButton} />)}</div>
     </div>
   );
 };

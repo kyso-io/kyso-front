@@ -7,7 +7,7 @@ import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { useFileToRender } from '@/hooks/use-file-to-render';
 import { useUser } from '@/hooks/use-user';
 import { PureCodeVisibilitySelectorDropdown } from '@/components/PureCodeVisibilitySelectorDropdown';
-import type { InlineCommentDto, User } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, UserDTO } from '@kyso-io/kyso-model';
 import dynamic from 'next/dynamic';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,7 +40,7 @@ const isImage = (name: string) => {
 const UnpureReportRender = () => {
   const report = useCommonReportData();
   const dispatch = useAppDispatch();
-  const user: User = useUser();
+  const user: UserDTO = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [isShownInput, setIsShownInput] = useState(false);
   const [isShownOutput, setIsShownOutput] = useState(false);
@@ -166,7 +166,7 @@ const UnpureReportRender = () => {
   if (fileContent !== null) {
     if (fileToRender.path.endsWith('.md')) {
       render = (
-        <div className="prose prose-sm p-3">
+        <div className="prose p-3">
           <KysoMarkdownRenderer source={fileContent} />
         </div>
       );
@@ -179,7 +179,7 @@ const UnpureReportRender = () => {
             <PureCodeVisibilitySelectorDropdown inputShown={isShownInput} outputShown={isShownOutput} setInputShow={setIsShownInput} setOutputShow={setIsShownOutput} />
           </div>
           <div className="p-4">
-            <div className="prose prose-sm contents">
+            <div className="prose contents">
               {user && user.id && user.avatar_url && (
                 <KysoJupyterRenderer
                   userId={user.id}
@@ -211,7 +211,7 @@ const UnpureReportRender = () => {
       fileToRender.path.endsWith('.css')
     ) {
       render = (
-        <div className="prose prose-sm contents">
+        <div className="prose contents">
           <pre>
             <KysoMarkdownRenderer source={fileContent} />
           </pre>
@@ -219,7 +219,7 @@ const UnpureReportRender = () => {
       );
     } else {
       render = (
-        <div className="prose prose-sm p-3">
+        <div className="prose p-3">
           Kyso cannot render this type of file. Do you need it? Give us <a href="/feedback">feedback</a> and we will consider it! 🤓
         </div>
       );
@@ -233,7 +233,7 @@ const UnpureReportRender = () => {
   return (
     <>
       {isLoading && (
-        <div className="prose prose-sm flex justify-center p-10">
+        <div className="prose flex justify-center p-10">
           <PureSpinner />
         </div>
       )}
