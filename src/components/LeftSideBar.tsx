@@ -1,13 +1,13 @@
 import type { ReactNode } from 'react';
 import { type LeftMenuItem } from '@/model/left-menu-item.model';
-import type { OrganizationSelectorItem } from '@/model/organization-selector-item.model';
-import { OrganizationSelector } from './OrganizationSelector';
+import type { NavigationSelectorItem } from '@/model/navigation-selector-item.model';
+import { NavigationSelector } from './NavigationSelector';
 
 type ILeftSideBarProps = {
   meta: ReactNode;
   children: ReactNode;
   navigation: LeftMenuItem[];
-  organizationSelectorItems: OrganizationSelectorItem[];
+  NavigationSelectorItems: NavigationSelectorItem[];
 };
 
 function classNames(...classes: string[]) {
@@ -23,7 +23,7 @@ const LeftSideBar = (props: ILeftSideBarProps) => {
           <div className="flex-1 flex flex-col min-h-0 border-r border-gray-20">
             <div className="flex-1 flex flex-col p-4 overflow-y-auto">
               <div className="flex items-center shrink-0 mb-4">
-                <OrganizationSelector organizationSelectorItems={props.organizationSelectorItems} />
+                <NavigationSelector selectorItems={props.NavigationSelectorItems} />
               </div>
 
               <div className="pt-4">

@@ -1,8 +1,6 @@
 import KysoTopBar from '@/layouts/KysoTopBar';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
-import UnpureReportRender from '@/wrappers/UnpureReportRender';
-import { KysoBreadcrumb } from '@/components/KysoBreadcrumb';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { useRouter } from 'next/router';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
@@ -10,14 +8,33 @@ import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { fetchReportsTreeAction } from '@kyso-io/kyso-store';
 import { useEffect } from 'react';
 import UnPureTree from '@/wrappers/UnPureTree';
+import UnpureReportRender from '@/wrappers/UnpureReportRender';
+import classNames from '@/helpers/ClassNames';
+import { useFileToRender } from '@/hooks/use-file-to-render';
+import UnpureMain from '@/wrappers/UnpureMain';
+import { useAuthors } from '@/hooks/use-authors';
+import format from 'date-fns/format';
+import UnpureUpvoteButton from '@/wrappers/UnpureUpvoteButton';
+import UnpureShareButton from '@/wrappers/UnpureShareButton';
+import UnpureReportActionDropdown from '@/wrappers/UnpureReportActionDropdown';
+import UnpureComments from '@/wrappers/UnpureComments';
 
 const Index = () => {
   const router = useRouter();
   const commonData: CommonData = useCommonData();
   const report = useCommonReportData();
+  const authors = useAuthors();
+
   const dispatch = useAppDispatch();
   const breadcrumb: BreadcrumbItem[] = [];
-  const tree = useAppSelector((state) => state.reports.tree);
+  const fileToRender = useFileToRender();
+  let tree = useAppSelector((state) => state.reports.tree);
+
+  if (tree) {
+    tree = [...tree].sort((ta, tb) => {
+      return Number(ta.type > tb.type);
+    });
+  }
 
   useEffect(() => {
     if (!report) {
@@ -68,36 +85,60 @@ const Index = () => {
 
   return (
     <>
-      <div className="md:pl-64 flex flex-col flex-1 bg-white border-b">
-        <div className="p-4 flex items-center justify-between">
-          <KysoBreadcrumb navigation={breadcrumb}></KysoBreadcrumb>
-        </div>
-      </div>
-      <div>
-        <div className="md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 mt-16 bg-neutral-100">
-          <div className="flex-1 flex flex-col min-h-0 border-r border-gray-20">
-            <div className="flex-1 flex flex-col p-4 overflow-y-auto">
-              <div className="pt-4">
-                <p className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center" id="communities-headline">
-                  {/* <CollectionIcon 
-                    className={classNames("text-gray-400 group-hover:text-gray-500", "flex-shrink-0 -ml-1 mr-2 h-5 w-5")}
-                  /> */}
-                  <span className="truncate">Tree</span>
-                </p>
-                <div className="mt-3 space-y-2" aria-labelledby="communities-headline">
-                  <UnPureTree tree={tree} prefix={`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`} />
+      <UnpureMain>
+        <div className="flex flex-col bg-neutral-50 h-screen w-full">
+          <div className="flex justify-between p-1">
+            <div className="prose-sm">
+              <h1 className="m-0 mb-2">{report?.title}</h1>
+              {report?.description && <p>{report?.description}</p>}
+              <div className="prose prose-sm flex items-center text-gray-500 font-light space-x-2">
+                <div className="flex">
+                  {authors?.map((author) => (
+                    <div key={author.display_name} className="shrink-0 group block">
+                      <div className="flex items-center">
+                        <div>
+                          <img className="m-0 inline-block h-9 w-9 rounded-full" src={author.avatar_url} alt="" />
+                        </div>
+                        <div className="ml-3">
+                          <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{author.display_name}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
                 </div>
+                <div>
+                  created
+                  <span className="text-gray-800 mx-1 ">{report?.created_at && format(new Date(report.created_at), 'MMM dd, yyyy')}.</span>
+                  Last update on
+                  <span className="text-gray-800 mx-2">{report?.updated_at && format(new Date(report.updated_at), 'MMM dd, yyyy')}.</span>
+                </div>
+                {/* {report?.last_version && (
+                  <p> Version: {report.last_version} </p>
+                )}
+                {report?.tags.map(tag => (
+                  <div>
+                    {tag}
+                  </div>
+                ))} */}
               </div>
             </div>
+            <div className="flex items-center space-x-4">
+              {report?.id && <UnpureUpvoteButton id={report!.id} />}
+              {report?.id && <UnpureShareButton id={report!.id} />}
+              {report?.id && <UnpureReportActionDropdown id={report!.id} />}
+            </div>
           </div>
-        </div>
+          <UnPureTree tree={tree} prefix={`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`} />
 
-        <div className="md:pl-64 flex flex-col flex-1 bg-neutral-50 ">
-          <div className="py-4 px-6">
-            <UnpureReportRender />
-          </div>
+          {fileToRender && (
+            <div className={classNames('bg-white border-b border-l border-r rounded-b-lg')}>
+              <UnpureReportRender />
+            </div>
+          )}
+
+          <UnpureComments />
         </div>
-      </div>
+      </UnpureMain>
     </>
   );
 };

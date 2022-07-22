@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+
 import { store } from '@kyso-io/kyso-store';
 import type { AppProps } from 'next/app';
 import type { ReactElement } from 'react';

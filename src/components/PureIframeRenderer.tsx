@@ -33,7 +33,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   });
 
   if (!file || !file.path_scs || file.path_scs.length === 0) {
-    return 'Invalid path';
+    return <div>Invalid path</div>;
   }
 
   return (

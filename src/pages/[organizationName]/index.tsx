@@ -1,6 +1,6 @@
 /* eslint no-empty: "off" */
 import KysoTopBar from '@/layouts/KysoTopBar';
-import UnpureSidebar from '@/wrappers/UnpureSidebar';
+import UnpureMain from '@/wrappers/UnpureMain';
 import type { NormalizedResponseDTO, OrganizationInfoDto, PaginatedResponseDto, ReportDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import type { NextRouter } from 'next/router';
@@ -104,7 +104,7 @@ const Index = () => {
   };
 
   return (
-    <UnpureSidebar>
+    <UnpureMain>
       <div className="container flex">
         <div className="basis-3/4">
           <main className="py-5">
@@ -144,7 +144,7 @@ const Index = () => {
           <Pagination page={paginatedResponseDto.currentPage} numPages={paginatedResponseDto.totalPages} onPageChange={(page: number) => setPaginationParams({ ...paginationParams, page })} />
         </div>
       )}
-    </UnpureSidebar>
+    </UnpureMain>
   );
 };
 
