@@ -32,7 +32,7 @@ const Index = () => {
       <UnpureMain>
         <div className="flex flex-row space-x-10 ">
           <div className="flex flex-col h-screen w-full space-y-6 pt-6">
-            <div className="flex justify-between">
+            <div className="flex justify-between min-h-[100px]">
               <PureReportHeader report={report} authors={authors} />
               <div className="flex items-center space-x-4">
                 {report?.id && (

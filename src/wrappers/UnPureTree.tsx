@@ -4,14 +4,15 @@ import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRouter } from 'next/router';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useFileToRender } from '@/hooks/use-file-to-render';
 import classNames from '@/helpers/class-names';
-import { ArrowsExpandIcon, SelectorIcon, StarIcon } from '@heroicons/react/solid';
+import { ArrowsExpandIcon, QuestionMarkCircleIcon, SelectorIcon, StarIcon } from '@heroicons/react/solid';
 import { updateReportAction } from '@kyso-io/kyso-store';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { GithubFileHash, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
 import { useTree } from '@/hooks/use-tree';
+import { Menu, Transition } from '@headlessui/react';
 
 type IUnPureTreeProps = {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -126,7 +127,7 @@ const UnPureTree = (props: IUnPureTreeProps) => {
               </div>
             ))}
           </div>
-          <div className="flex items-center px-2 space-x-4">
+          <div className="flex items-center px-2 space-x-2">
             {fileToRender && !isAtSelf && (
               <button
                 type="button"
@@ -140,9 +141,27 @@ const UnPureTree = (props: IUnPureTreeProps) => {
               </button>
             )}
             {fileToRender && isAtSelf && (
-              <div className="inline-flex items-center py-2 rounded text-xs font-medium text-slate-700">
-                <StarIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
-                Main file
+              <div className="inline-flex pr-2 items-center py-2 rounded text-xs font-medium text-slate-500">
+                <Menu as="div" className="relative w-fit inline-block text-left">
+                  <Menu.Button className="hover:bg-gray-100 p-2 text-xs flex items-center w-fit rounded text-left font-normal hover:outline-none">
+                    This is the main file
+                    <QuestionMarkCircleIcon className="shrink-0 ml-1 h-4 w-4 text-gray-400 group-hover:text-gray-100" aria-hidden="true" />
+                  </Menu.Button>
+
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="z-50 origin-center absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
+                      <div className="prose prose-sm p-3 font-normal font-xs">The main file is the first file shown to your readers. Typically a Readme with table of contents.</div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
               </div>
             )}
             {fileToRender?.path.endsWith('.html') && fileToRender && (
