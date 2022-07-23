@@ -33,7 +33,11 @@ type IUnpureComment = {
 };
 
 const UnpureComment = (props: IUnpureComment) => {
-  const { parentId, id, showPostButton = true } = props;
+  const {
+    // parentId,
+    id,
+    showPostButton = true,
+  } = props;
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
   const commonData: CommonData = useCommonData();
@@ -66,50 +70,49 @@ const UnpureComment = (props: IUnpureComment) => {
   }, [commonData.organization, commonData.team, currentUserPermissions]);
 
   return (
-    <>
+    <div className="">
       {comment && isEditing ? (
         <UnpureCommentForm id={comment.id} onSubmitted={() => setIsEditing(!isEditing)} onCancel={() => setIsEditing(!isEditing)} showPostButton={showPostButton} />
       ) : (
-        <div className={classNames('flex flex-col space-y-2', parentId ? 'ml-4' : '')}>
-          <div className="">
-            <KysoMarkdownRenderer source={comment?.text} />
-          </div>
-
+        <div className={classNames('flex py-2 border rounded my-1 px-4 flex-col')}>
           <div className="pt-0 rounded-t flex items-center space-x-2 text-sm font-light text-gray-400">
             <div>
-              <img className="m-0 inline-block h-7 w-7 rounded-full" src={commentUser.avatar_url} alt="" />
+              <img className="m-0 inline-block h-8 w-8 rounded-full" src={commentUser.avatar_url} alt="" />
             </div>
-            <div className="ml-2">
-              {isUserAuthor ? 'You' : commentUser && commentUser.display_name}
-              {comment?.created_at ? ` wrote ${formatRelative(new Date(comment.created_at), new Date())}` : ''}
-            </div>
-            <div></div>
+            <div className="font-medium">{isUserAuthor ? 'You' : commentUser && commentUser.display_name}</div>
 
-            <div className="space-x-2">
-              {isUserAuthor && showPostButton && (
-                <button className="hover:underline font-medium" onClick={() => setIsEditing(!isEditing)}>
-                  Edit
-                </button>
-              )}
-              {(isUserAuthor || hasPermissionDeleteComment) && (
-                <button className="hover:underline font-medium" onClick={() => onDeleteComment()}>
-                  Delete
-                </button>
-              )}
-              {showPostButton && (
-                <button
-                  className="hover:underline font-medium"
-                  onClick={() => {
-                    if (!hasPermissionCreateComment) {
-                      alert('Sorry, but you do not have the permission to reply to comments.');
-                    } else {
-                      setIsReplying(!isReplying);
-                    }
-                  }}
-                >
-                  Reply
-                </button>
-              )}
+            <div>{comment?.created_at ? ` wrote ${formatRelative(new Date(comment.created_at), new Date())}` : ''}</div>
+          </div>
+          <div className="pl-10 text-sm">
+            <KysoMarkdownRenderer source={comment?.text} />
+
+            <div className="rounded-t flex items-center justify-start space-x-2 text-sm font-light text-gray-400">
+              <div className="space-x-2 mt-2">
+                {showPostButton && (
+                  <button
+                    className="hover:underline"
+                    onClick={() => {
+                      if (!hasPermissionCreateComment) {
+                        alert('Sorry, but you do not have the permission to reply to comments.');
+                      } else {
+                        setIsReplying(!isReplying);
+                      }
+                    }}
+                  >
+                    Reply
+                  </button>
+                )}
+                {isUserAuthor && showPostButton && (
+                  <button className="hover:underline" onClick={() => setIsEditing(!isEditing)}>
+                    Edit
+                  </button>
+                )}
+                {(isUserAuthor || hasPermissionDeleteComment) && (
+                  <button className="hover:underline" onClick={() => onDeleteComment()}>
+                    Delete
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -121,7 +124,7 @@ const UnpureComment = (props: IUnpureComment) => {
       )}
 
       {comment && <UnpureComments parentId={comment.id} showPostButton={showPostButton} />}
-    </>
+    </div>
   );
 };
 

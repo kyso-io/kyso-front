@@ -21,6 +21,7 @@ const UnpureMain = (props: any) => {
   }
 
   const channelSelectorItems: BreadcrumbItem[] = [];
+
   if (commonData.permissions && commonData.permissions.teams) {
     commonData
       .permissions!.teams.filter((team) => team.organization_id === commonData.organization?.id)

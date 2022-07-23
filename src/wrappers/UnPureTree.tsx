@@ -7,12 +7,13 @@ import { useCommonReportData } from '@/hooks/use-common-report-data';
 import { Fragment, useEffect, useState } from 'react';
 import { useFileToRender } from '@/hooks/use-file-to-render';
 import classNames from '@/helpers/class-names';
-import { ArrowsExpandIcon, QuestionMarkCircleIcon, SelectorIcon, StarIcon } from '@heroicons/react/solid';
+import { QuestionMarkCircleIcon, SelectorIcon, StarIcon } from '@heroicons/react/solid';
 import { updateReportAction } from '@kyso-io/kyso-store';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { GithubFileHash, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
 import { useTree } from '@/hooks/use-tree';
 import { Menu, Transition } from '@headlessui/react';
+import { ExternalLinkIcon } from '@heroicons/react/outline';
 
 type IUnPureTreeProps = {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -166,9 +167,10 @@ const UnPureTree = (props: IUnPureTreeProps) => {
             )}
             {fileToRender?.path.endsWith('.html') && fileToRender && (
               <a href={`${'/scs'}${fileToRender.path_scs}`} className="block" target="_blank" rel="noreferrer">
-                <button className="inline-flex w-38 items-center px-3 py-2 border hover:bg-slate-200  rounded text-xs font-medium text-slate-700">
-                  <ArrowsExpandIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
+                <button className="inline-flex w-38 items-center px-3 py-2 border hover:bg-slate-200  rounded text-xs font-medium text-slate-500">
+                  {/* <ArrowsExpandIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" /> */}
                   Open in Full screen
+                  <ExternalLinkIcon className="ml-1 h-4 w-4" aria-hidden="true" />
                 </button>
               </a>
             )}
