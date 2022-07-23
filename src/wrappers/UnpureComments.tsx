@@ -30,10 +30,10 @@ const UnpureComments = (props: IUnpureComments) => {
   }, [report?.id]);
 
   return (
-    <div className={classNames('w-full', parentId ? 'ml-10' : '')}>
+    <div className={classNames('w-full', parentId ? 'pl-10' : '')}>
       {!parentId && <UnpureCommentForm />}
 
-      <div className="flex flex-col space-y-4">{comments && comments.map((comment) => <UnpureComment key={`comment-${comment.id}`} id={comment.id} showPostButton={showPostButton} />)}</div>
+      <div className="flex flex-col">{comments && comments.map((comment) => <UnpureComment key={`comment-${comment.id}`} id={comment.id} showPostButton={showPostButton} />)}</div>
     </div>
   );
 };
