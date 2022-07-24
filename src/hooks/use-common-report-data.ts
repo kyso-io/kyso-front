@@ -1,10 +1,10 @@
-import { fetchReportsAction } from '@kyso-io/kyso-store';
+import { fetchReportsAction, selectActiveReport, setActiveId } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import useSWR from 'swr';
 import { unwrapResult } from '@reduxjs/toolkit';
-import { useAppDispatch } from './redux-hooks';
+import { useAppDispatch, useAppSelector } from './redux-hooks';
 import type { CommonData } from './use-common-data';
 import { useCommonData } from './use-common-data';
 
@@ -14,6 +14,8 @@ export const useCommonReportData = (): ReportDTO => {
 
   const { query } = router;
   const commonData: CommonData = useCommonData();
+
+  const report = useAppSelector(selectActiveReport);
 
   const fetcher = async (): Promise<ReportDTO | null> => {
     const resultReportAction = await dispatch(
@@ -31,13 +33,14 @@ export const useCommonReportData = (): ReportDTO => {
       return null;
     }
 
-    const report: ReportDTO = reports[0] as ReportDTO;
+    const tempReport: ReportDTO = reports[0] as ReportDTO;
+    await dispatch(setActiveId(tempReport.id as string));
 
-    return report;
+    return tempReport;
   };
 
   const [mounted, setMounted] = useState(false);
-  const { data } = useSWR(mounted ? `use-common-report-data` : null, fetcher);
+  useSWR(mounted ? `use-common-report-data` : null, fetcher);
 
   useEffect((): void => {
     if (commonData.team) {
@@ -45,5 +48,6 @@ export const useCommonReportData = (): ReportDTO => {
     }
   }, [router.query, commonData.team]);
 
-  return data as ReportDTO;
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  return report as any;
 };

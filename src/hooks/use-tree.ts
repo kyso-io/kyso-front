@@ -1,15 +1,21 @@
 import useSWR from 'swr';
 import type { SWRResponse } from 'swr';
-import { fetchReportsTreeAction } from '@kyso-io/kyso-store';
+import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import type { ActionWithPayload, GithubFileHash } from '@kyso-io/kyso-model';
+import type { GithubFileHash, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 
-import { useAppDispatch } from './redux-hooks';
+import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
 import { useCommonReportData } from './use-common-report-data';
 
-export const useTree = (): GithubFileHash[] => {
-  const dispatch = useAppDispatch();
+interface IUseTree {
+  path: string;
+}
+
+const token: string | null = getLocalStorageItem('jwt');
+
+export const useTree = (props: IUseTree): GithubFileHash[] => {
+  const { path } = props;
   const router = useRouter();
   const report = useCommonReportData();
 
@@ -22,18 +28,22 @@ export const useTree = (): GithubFileHash[] => {
 
     const args: ArgType = {
       reportId: report!.id as string,
-      filePath: (router.query.path as string) || '',
+      filePath: (path as string) || '',
     };
+
     if (router.query.version && !Number.isNaN(router.query.version)) {
       args.version = parseInt(router.query.version as string, 10);
     }
 
-    const fetchTreeRequest: ActionWithPayload<GithubFileHash[]> = await dispatch(fetchReportsTreeAction(args));
-    return fetchTreeRequest.payload as GithubFileHash[];
+    const api: Api = new Api(token);
+    const result: NormalizedResponseDTO<GithubFileHash | GithubFileHash[]> = await api.getReportFileTree(args);
+
+    return result.data as GithubFileHash[];
   };
 
   const [mounted, setMounted] = useState(false);
-  const { data }: SWRResponse<GithubFileHash[]> = useSWR(mounted ? `use-tree-${router.asPath}` : null, fetcher);
+  const { data }: SWRResponse<GithubFileHash[]> = useSWR(mounted ? `use-tree-${path}` : null, fetcher);
+
   useEffect(() => {
     if (!router.isReady) {
       return;
@@ -44,7 +54,7 @@ export const useTree = (): GithubFileHash[] => {
     }
 
     setMounted(true);
-  }, [router.query.path, report]);
+  }, [path, report]);
 
   let tree = null;
   if (data) {
