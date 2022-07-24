@@ -13,6 +13,7 @@ import type { GithubFileHash, UpdateReportRequestDTO } from '@kyso-io/kyso-model
 import { useTree } from '@/hooks/use-tree';
 import { Menu, Transition } from '@headlessui/react';
 import { ExternalLinkIcon } from '@heroicons/react/outline';
+import { PureSpinner } from '@/components/PureSpinner';
 
 const UnureFileHeader = () => {
   const router = useRouter();
@@ -35,8 +36,7 @@ const UnureFileHeader = () => {
     path: currentPath,
   });
 
-  // is it just a file page, not a directory
-  const isAtSelf = report?.main_file === fileToRender?.path;
+  const isMainFile = report?.main_file === fileToRender?.path;
 
   if (report) {
     breadcrumbs.push(new BreadcrumbItem(report?.name, `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`, false));
@@ -71,6 +71,7 @@ const UnureFileHeader = () => {
   // TODO
   const setMainFile = async () => {
     setIsBusy(true);
+    console.log({ main_file: tree && tree.length >= 1 && tree[0]!.path });
     const result = await dispatch(
       updateReportAction({
         reportId: report.id!,
@@ -115,7 +116,7 @@ const UnureFileHeader = () => {
             ))}
           </div>
           <div className="flex items-center px-2 space-x-2">
-            {fileToRender && !isAtSelf && (
+            {fileToRender && !isMainFile && (
               <button
                 type="button"
                 onClick={() => {
@@ -123,11 +124,11 @@ const UnureFileHeader = () => {
                 }}
                 className="inline-flex w-38 items-center px-3 py-2 border rounded text-xs font-medium text-slate-700 hover:bg-slate-200 focus:outline-none"
               >
-                <StarIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />
-                {isBusy ? 'Setting' : 'Set as main file'}
+                {isBusy ? <PureSpinner size={5} /> : <StarIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" />}
+                Set as main file
               </button>
             )}
-            {fileToRender && isAtSelf && (
+            {fileToRender && isMainFile && (
               <div className="inline-flex pr-2 items-center py-2 rounded text-xs font-medium text-slate-500">
                 <Menu as="div" className="relative w-fit inline-block text-left">
                   <Menu.Button className="hover:bg-gray-100 p-2 text-xs flex items-center w-fit rounded text-left font-normal hover:outline-none">

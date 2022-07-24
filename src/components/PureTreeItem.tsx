@@ -106,7 +106,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
           <span className="text-gray-500">{treeItem.path.split('/').reverse()[0]}</span>
           {/* </a> */}
         </div>
-        <div>{isMainFile && <div className="text-sm">main</div>}</div>
+        <div>{isMainFile && <div className="text-sm text-gray-500">main</div>}</div>
       </button>
     </>
   );

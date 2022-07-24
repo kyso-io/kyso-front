@@ -62,7 +62,7 @@ const UnpureShareButton = (props: IUnpureShareButton) => {
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="relative bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transition-all sm:my-8 sm:max-w-sm sm:w-full sm:p-6">
+                <Dialog.Panel className="relative min-w-fit bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transition-all sm:my-8 xl:max-w-xl sm:w-full sm:p-6">
                   <div>
                     <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
                       <ShareIcon className="h-6 w-6 text-blue-600" aria-hidden="true" />
@@ -71,9 +71,9 @@ const UnpureShareButton = (props: IUnpureShareButton) => {
                       <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
                         Share report
                       </Dialog.Title>
-                      <div className="py-3 sm:mt-0 sm:col-span-2 text-sm font-light text-gray-700">Send this url to someone to share this report</div>
-                      <div className="py-3 sm:mt-0 sm:col-span-2">
-                        <input className="block max-w-lg w-full border shadow-sm outline-none sm:text-sm border-gray-300 rounded-md p-2" value={url}></input>
+                      <div className="py-3 sm:col-span-2 text-sm font-light text-gray-700">Send this url to someone to share this report</div>
+                      <div className="py-3 sm:col-span-2">
+                        <input className="p-4 block w-full text-center border shadow-sm outline-none sm:text-sm border-gray-300 rounded-md" value={url}></input>
                       </div>
                     </div>
                   </div>
