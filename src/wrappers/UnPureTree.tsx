@@ -6,8 +6,8 @@ import { useTree } from '@/hooks/use-tree';
 import { extname, dirname } from 'path';
 import { ChevronLeftIcon } from '@heroicons/react/solid';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
-import type { CommonData } from '@kyso-io/kyso-webcomponents';
-import { useCommonData } from '@kyso-io/kyso-webcomponents';
+import type { CommonData } from '@/hooks/use-common-data';
+import { useCommonData } from '@/hooks/use-common-data';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
 
 const UnpureTree = () => {
