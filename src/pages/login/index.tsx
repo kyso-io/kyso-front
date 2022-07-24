@@ -5,11 +5,12 @@ import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-bra
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
-import { loginAction, selectUser, setError as storeSetError } from '@kyso-io/kyso-store';
+import { loginAction, setError as storeSetError } from '@kyso-io/kyso-store';
+import { useUser } from '@/hooks/use-user';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import uuid from 'uuid';
 
 const validateEmail = (email: string) => {
@@ -56,7 +57,8 @@ const Index = () => {
   console.log(`${globalCss} ${headerCss} ${buttonCss} ${buttonHoverCss} ${linkCss} 
     ${showdivCss} ${hiddendivCss} ${error}`);
 
-  const user = useSelector(selectUser);
+  // const user = useSelector(selectUser);
+  const user = useUser();
 
   useEffect(() => {
     const getOrganizationOptions = async () => {

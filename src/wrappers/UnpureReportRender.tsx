@@ -1,6 +1,6 @@
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import { useCommonReportData } from '@/hooks/use-common-report-data';
-import { createInlineCommentAction, deleteInlineCommentAction, fetchFileContentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
+import { createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
 import { PureSpinner } from '@/components/PureSpinner';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
@@ -9,6 +9,7 @@ import { useUser } from '@/hooks/use-user';
 import { PureCodeVisibilitySelectorDropdown } from '@/components/PureCodeVisibilitySelectorDropdown';
 import type { InlineCommentDto, UserDTO } from '@kyso-io/kyso-model';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
@@ -38,41 +39,21 @@ const isImage = (name: string) => {
 };
 
 const UnpureReportRender = () => {
+  const router = useRouter();
   const report = useCommonReportData();
   const dispatch = useAppDispatch();
   const user: UserDTO = useUser();
-  const [isLoading, setIsLoading] = useState(false);
   const [isShownInput, setIsShownInput] = useState(false);
   const [isShownOutput, setIsShownOutput] = useState(false);
   const [inlineCommentsActived] = useState(true);
-  const [fileContent, setFileContent] = useState<string | null>(null);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
 
-  const fileToRender = useFileToRender();
+  let currentPath = '';
+  if (router.query.path) {
+    currentPath = (router.query.path as string) || '';
+  }
 
-  useEffect(() => {
-    const asyncFn = async () => {
-      if (!fileToRender || !report) {
-        return;
-      }
-      if (fileToRender.path.endsWith('.html')) {
-        return;
-      }
-
-      setIsLoading(true);
-      const result = await dispatch(fetchFileContentAction(fileToRender.id));
-
-      if (result?.payload) {
-        if (isImage(fileToRender.path)) {
-          setFileContent(Buffer.from(result.payload).toString('base64'));
-        } else {
-          setFileContent(Buffer.from(result.payload).toString('utf-8'));
-        }
-      }
-      setIsLoading(false);
-    };
-    asyncFn();
-  }, [report?.id]);
+  const fileToRender = useFileToRender({ path: currentPath });
 
   // const updateMainFileContent = async () => {
   //   // setRequesting(true);
@@ -163,15 +144,15 @@ const UnpureReportRender = () => {
 
   let render = null;
 
-  if (fileContent !== null) {
+  if (fileToRender.content !== null) {
     if (fileToRender.path.endsWith('.md')) {
       render = (
         <div className="prose p-3">
-          <KysoMarkdownRenderer source={fileContent} />
+          <KysoMarkdownRenderer source={fileToRender.content} />
         </div>
       );
     } else if (isImage(fileToRender.path)) {
-      render = <img src={`data:image/jpeg;base64,${fileContent}`} alt="file image" />;
+      render = <img src={`data:image/jpeg;base64,${fileToRender.content}`} alt="file image" />;
     } else if (fileToRender.path.endsWith('.ipynb')) {
       render = (
         <div className="flex flex-col">
@@ -184,7 +165,7 @@ const UnpureReportRender = () => {
                 <KysoJupyterRenderer
                   userId={user.id}
                   avatarUrl={user.avatar_url}
-                  jupyterNotebook={JSON.parse(fileContent)}
+                  jupyterNotebook={JSON.parse(fileToRender.content as string)}
                   showInputs={isShownInput}
                   showOutputs={isShownOutput}
                   inlineCommentsActived={inlineCommentsActived}
@@ -213,7 +194,7 @@ const UnpureReportRender = () => {
       render = (
         <div className="prose contents">
           <pre>
-            <KysoMarkdownRenderer source={fileContent} />
+            <KysoMarkdownRenderer source={fileToRender.content} />
           </pre>
         </div>
       );
@@ -232,13 +213,13 @@ const UnpureReportRender = () => {
 
   return (
     <>
-      {isLoading && (
+      {fileToRender.isLoading && (
         <div className="prose flex justify-center p-10">
           <PureSpinner />
         </div>
       )}
-      {!fileContent && <div />}
-      {!isLoading && render}
+      {!fileToRender.content && <div />}
+      {!fileToRender.isLoading && render}
     </>
   );
 };
