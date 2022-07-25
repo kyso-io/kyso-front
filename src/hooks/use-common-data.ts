@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import type { ActionWithPayload, Organization, ResourcePermissions, Team, TokenPermissions, User, UserDTO } from '@kyso-io/kyso-model';
 import useSWR from 'swr';
+import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
 import { useAppDispatch, useAppSelector } from './redux-hooks';
 import { useUser } from './use-user';
 
@@ -34,6 +35,7 @@ export const useCommonData = (): CommonData => {
       if (organizationResourcePermissions) {
         const fetchOrganizationRequest: ActionWithPayload<Organization> = await dispatch(fetchOrganizationAction(organizationResourcePermissions.id));
         organization = fetchOrganizationRequest.payload;
+        setLocalStorageItem('last_organization', organization?.sluglified_name as string);
       }
     }
 

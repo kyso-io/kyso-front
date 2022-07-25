@@ -10,6 +10,10 @@ export const useAuthors = (): User[] => {
       return [];
     }
 
+    if (report.author_ids.length === 0) {
+      return [state.user.entities.hasOwnProperty(report.user_id) ? state.user.entities[report.user_id] : null];
+    }
+
     return report.author_ids
       .filter((authorId) => {
         return authorId in Object.keys(state.user.entities);
