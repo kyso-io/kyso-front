@@ -39,7 +39,7 @@ const Index = () => {
             <UnpureTree />
           </div>
           <div className="flex flex-col h-screen w-full space-y-6 pt-6 ">
-            <div className="flex justify-between min-h-[144px]">
+            <div className="flex justify-between min-h-[164px]">
               <PureReportHeader report={report} authors={authors} />
               <div className="flex items-top pt-3 space-x-4">
                 {report?.id && (

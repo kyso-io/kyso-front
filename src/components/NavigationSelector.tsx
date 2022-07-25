@@ -1,7 +1,7 @@
 import type { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
-import { ChevronDownIcon, SelectorIcon } from '@heroicons/react/solid';
+import { SelectorIcon } from '@heroicons/react/solid';
 
 type INavigationSelectorProps = {
   selectorItems: BreadcrumbItem[];
@@ -22,20 +22,21 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
 
   return (
     <div className="rounded-md flex items-center">
-      {currentOrg && (
+      {/* {currentOrg && (
         <>
           <a href={`${currentOrg!.href}`} className={classNames('text-gray-700', 'block px-0 py-2 text-sm', 'font-medium hover:underline mr-1')}>
             {currentOrg!.name}
           </a>
         </>
-      )}
+      )} */}
       <Menu as="div" className="relative w-fit inline-block text-left">
         <Menu.Button className="hover:bg-gray-100 p-2 flex items-center w-fit rounded text-sm text-left font-medium text-gray-700 hover:outline-none">
-          {/* {currentOrg ? currentOrg.name : '' } */}
+          {currentOrg ? currentOrg.name : ''}
           {!currentOrg ? `Select ${selectorLabel}` : ''}
           <div className={classNames(!currentOrg ? 'pl-2' : '')}>
-            {currentOrg && <ChevronDownIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />}
-            {!currentOrg && <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />}
+            <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
+            {/* {currentOrg && <ChevronDownIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />} */}
+            {/* {!currentOrg && <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />} */}
           </div>
         </Menu.Button>
 
