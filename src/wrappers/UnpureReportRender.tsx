@@ -155,11 +155,9 @@ const UnpureReportRender = () => {
       render = <img src={`data:image/jpeg;base64,${fileToRender.content}`} alt="file image" />;
     } else if (fileToRender.path.endsWith('.ipynb')) {
       render = (
-        <div className="flex flex-col">
-          <div className="flex justify-end">
-            <PureCodeVisibilitySelectorDropdown inputShown={isShownInput} outputShown={isShownOutput} setInputShow={setIsShownInput} setOutputShow={setIsShownOutput} />
-          </div>
-          <div className="p-4">
+        <div className="flex flex-col relative">
+          <PureCodeVisibilitySelectorDropdown inputShown={isShownInput} outputShown={isShownOutput} setInputShow={setIsShownInput} setOutputShow={setIsShownOutput} />
+          <div className="px-4 pb-4">
             <div className="prose contents">
               {user && user.id && user.avatar_url && (
                 <KysoJupyterRenderer

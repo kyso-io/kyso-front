@@ -24,13 +24,11 @@ const PureCodeVisibilitySelectorDropdown = (props: IPureCodeVisibilitySelectorDr
   };
 
   return (
-    <Menu as="div" className="inline-block text-left p-2">
-      <div>
-        <Menu.Button className="inline-flex justify-center items-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-1.5 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none ">
-          Code visibility
-          <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5" aria-hidden="true" />
-        </Menu.Button>
-      </div>
+    <Menu as="div" className="absolute z-50 top-0 right-0">
+      <Menu.Button className=" inline-flex justify-left items-center m-2 float-right rounded-md border border-gray-300 shadow-sm px-4 py-1.5 bg-white text-xs font-medium text-gray-700 hover:bg-gray-50 focus:outline-none ">
+        Code visibility
+        <ChevronDownIcon className="-mr-1 ml-2 h-5 w-5" aria-hidden="true" />
+      </Menu.Button>
 
       <Transition
         as={Fragment}
