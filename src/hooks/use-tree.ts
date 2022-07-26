@@ -4,7 +4,6 @@ import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import type { GithubFileHash, NormalizedResponseDTO } from '@kyso-io/kyso-model';
-
 import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
 import { useCommonReportData } from './use-common-report-data';
 
@@ -36,7 +35,10 @@ export const useTree = (props: IUseTree): GithubFileHash[] => {
     }
 
     const api: Api = new Api(token);
+
+    console.log(args);
     const result: NormalizedResponseDTO<GithubFileHash | GithubFileHash[]> = await api.getReportFileTree(args);
+    console.log(result);
 
     return result.data as GithubFileHash[];
   };

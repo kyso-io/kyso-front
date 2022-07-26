@@ -41,7 +41,7 @@ export const useRedirectIfNoJWT = () => {
     if (!jwt && router.query.redirect === undefined) {
       let redirectUrl = '?redirect=';
       if (router?.asPath && router.asPath.length > 0) {
-        redirectUrl += router.asPath;
+        redirectUrl += `${router.basePath}${router.asPath}`;
       }
 
       if (window.location.pathname === router.basePath) {
