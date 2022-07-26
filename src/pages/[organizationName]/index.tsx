@@ -1,19 +1,24 @@
 /* eslint no-empty: "off" */
 import KysoTopBar from '@/layouts/KysoTopBar';
 import UnpureMain from '@/wrappers/UnpureMain';
-import type { NormalizedResponseDTO, OrganizationInfoDto, PaginatedResponseDto, ReportDTO } from '@kyso-io/kyso-model';
+import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, PaginatedResponseDto, ReportDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import moment from 'moment';
 import type { NextRouter } from 'next/router';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import ActivityFeedComponent from '../../components/ActivityFeed';
 import OrganizationInfo from '../../components/OrganizationActivity';
 import Pagination from '../../components/Pagination';
 import ReportBadget from '../../components/ReportBadge';
 import { getLocalStorageItem } from '../../helpers/get-local-storage-item';
 import type { CommonData } from '../../hooks/use-common-data';
 import { useCommonData } from '../../hooks/use-common-data';
+import { useInterval } from '../../hooks/use-interval';
 
 const token: string | null = getLocalStorageItem('jwt');
+const DAYS_ACTIVITY_FEED: number = 14;
+const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
 
 interface PaginationParams {
   page: number;
@@ -31,6 +36,9 @@ const Index = () => {
     limit: 10,
     sort: '-created_at',
   });
+  const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   const { organizationName } = router.query;
 
   useEffect(() => {
@@ -46,6 +54,55 @@ const Index = () => {
     }
     getOrganizationsInfo();
   }, [commonData?.organization]);
+
+  useEffect(() => {
+    if (!organizationName) {
+      return;
+    }
+    getActivityFeed();
+  }, [token, organizationName, datetimeActivityFeed]);
+
+  const refreshLastActivityFeed = useCallback(async () => {
+    if (!organizationName || !token) {
+      return;
+    }
+    const api: Api = new Api(token);
+    try {
+      const startDatetime: Date = moment(datetimeActivityFeed).add(-1, 'day').toDate();
+      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(organizationName as string, {
+        start_datetime: startDatetime,
+        end_datetime: datetimeActivityFeed,
+      });
+      const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
+      if (result?.data) {
+        result.data.forEach((af: ActivityFeed) => {
+          const index: number = newActivityFeed.data.findIndex((activity: ActivityFeed) => activity.id === af.id);
+          if (index === -1) {
+            newActivityFeed.data.push(af);
+          }
+        });
+      }
+      if (result?.relations) {
+        for (const key in result?.relations) {
+          if (result?.relations[key]) {
+            if (!newActivityFeed.relations![key]) {
+              newActivityFeed.relations![key] = { ...result.relations[key] };
+            } else {
+              for (const key2 in result?.relations[key]) {
+                if (!result.relations[key][key2]) {
+                  newActivityFeed.relations![key][key2] = result.relations[key][key2];
+                }
+              }
+            }
+          }
+        }
+      }
+      setActivityFeed(newActivityFeed);
+      setHasMore(result.data.length > 0);
+    } catch (e) {}
+  }, [token, organizationName]);
+
+  useInterval(refreshLastActivityFeed, ACTIVITY_FEED_POOLING_MS);
 
   const getReports = async () => {
     try {
@@ -103,47 +160,82 @@ const Index = () => {
     } catch (e) {}
   };
 
+  const getActivityFeed = async () => {
+    const api: Api = new Api(token);
+    try {
+      const startDatetime: Date = moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate();
+      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(organizationName as string, {
+        start_datetime: startDatetime,
+        end_datetime: datetimeActivityFeed,
+      });
+      const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
+      if (result?.data) {
+        newActivityFeed.data = [...newActivityFeed.data, ...result.data];
+      }
+      if (result?.relations) {
+        for (const key in result?.relations) {
+          if (result?.relations[key]) {
+            newActivityFeed.relations![key] = { ...newActivityFeed.relations![key], ...result.relations[key] };
+          }
+        }
+      }
+      setActivityFeed(newActivityFeed);
+      setHasMore(result.data.length > 0);
+    } catch (e) {}
+  };
+
+  const getMoreActivityFeed = () => {
+    setDatetimeActivityFeed(moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate());
+  };
+
   return (
     <UnpureMain>
-      <div className="container flex">
-        <div className="basis-3/4">
-          <main className="py-5">
-            <div className="flex items-center space-x-5">
-              <div className="shrink-0">
-                <div className="relative">
-                  <img className="h-16 w-16 rounded-full" src={commonData.organization?.avatar_url} alt="" />
-                  <span className="absolute inset-0 shadow-inner rounded-full" aria-hidden="true" />
+      <div className="flex flex-row">
+        <div className="w-5/6 px-8">
+          <div className="container flex">
+            <div className="basis-3/4">
+              <main className="py-5">
+                <div className="flex items-center space-x-5">
+                  <div className="shrink-0">
+                    <div className="relative">
+                      <img className="h-16 w-16 rounded-full" src={commonData.organization?.avatar_url} alt="" />
+                      <span className="absolute inset-0 shadow-inner rounded-full" aria-hidden="true" />
+                    </div>
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
+                    <p className="text-sm font-medium text-gray-500">{commonData.organization?.bio}</p>
+                  </div>
                 </div>
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
-                <p className="text-sm font-medium text-gray-500">{commonData.organization?.bio}</p>
-              </div>
+              </main>
             </div>
-          </main>
+          </div>
+          {organizationInfo && (
+            <div className="mb-10">
+              <OrganizationInfo organizationInfo={organizationInfo} />
+            </div>
+          )}
+          <div className="grid lg:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1 gap-4">
+            {paginatedResponseDto?.results.map((report: ReportDTO) => (
+              <ReportBadget
+                key={report.id}
+                report={report}
+                toggleUserStarReport={() => toggleUserStarReport(report.id!)}
+                toggleUserPinReport={() => toggleUserPinReport(report.id!)}
+                toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+              />
+            ))}
+          </div>
+          {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
+            <div className="pt-10">
+              <Pagination page={paginatedResponseDto.currentPage} numPages={paginatedResponseDto.totalPages} onPageChange={(page: number) => setPaginationParams({ ...paginationParams, page })} />
+            </div>
+          )}
+        </div>
+        <div className="w-1/6">
+          <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
         </div>
       </div>
-      {organizationInfo && (
-        <div className="mb-10">
-          <OrganizationInfo organizationInfo={organizationInfo} />
-        </div>
-      )}
-      <div className="grid lg:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1 gap-4">
-        {paginatedResponseDto?.results.map((report: ReportDTO) => (
-          <ReportBadget
-            key={report.id}
-            report={report}
-            toggleUserStarReport={() => toggleUserStarReport(report.id!)}
-            toggleUserPinReport={() => toggleUserPinReport(report.id!)}
-            toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
-          />
-        ))}
-      </div>
-      {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
-        <div className="pt-10">
-          <Pagination page={paginatedResponseDto.currentPage} numPages={paginatedResponseDto.totalPages} onPageChange={(page: number) => setPaginationParams({ ...paginationParams, page })} />
-        </div>
-      )}
     </UnpureMain>
   );
 };
