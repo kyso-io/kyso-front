@@ -254,13 +254,13 @@ const Index = () => {
               <div className="grid grid-cols-1 gap-4 lg:col-span-2">
                 <section aria-labelledby="section-1-title">
                   <div className="">
-                    <div className="p-6">
+                    <div className="p-6 prose">
                       {/* Your content */}
-                      <div style={{ paddingLeft: '15.3%', paddingBottom: '15px' }}>
-                        {/* <h1>Kyso.io</h1> */}
-                        <a href="/">
+                      <div>
+                        <h1>Kyso.io</h1>
+                        {/* <a href="/">
                           <img className="w-24" src={`/assets/images/kyso-logo-and-name-dark.svg`} alt="Kyso" />
-                        </a>
+                        </a> */}
                         <p
                           className="py-4"
                           style={{
