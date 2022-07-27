@@ -70,7 +70,11 @@ const Index = () => {
     [router.query],
   );
 
-  const fileToRender: FileToRender | null = useFileToRender({ path: currentPath, tree: selfTree, mainFile: report?.main_file });
+  const fileToRender: FileToRender | null = useFileToRender({
+    path: currentPath,
+    tree: selfTree,
+    mainFile: currentPath === '' ? report?.main_file : undefined,
+  });
 
   const hasPermissionCreateComment = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_COMMENT'), [commonData]);
   const hasPermissionReadComment = useMemo(() => checkPermissions(commonData, 'KYSO_IO_READ_COMMENT'), [commonData]);
