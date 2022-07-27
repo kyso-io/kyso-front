@@ -69,9 +69,7 @@ const UnpureMain = (props: Props) => {
         </div>
       </div>
 
-      <div className="flex flex-col flex-1">
-        <div className="py-4 px-6 md:mx-auto container">{props.children}</div>
-      </div>
+      <div className="py-4 px-6">{props.children}</div>
     </>
   );
 };
