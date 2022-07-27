@@ -2,7 +2,7 @@ import { fetchReportsAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
-import type { ActionWithPayload, Report } from '@kyso-io/kyso-model';
+import type { ActionWithPayload, ReportDTO } from '@kyso-io/kyso-model';
 import { useAppDispatch } from './redux-hooks';
 import { useUser } from './use-user';
 
@@ -20,7 +20,7 @@ type Filter = {
   search: String | null;
 };
 
-export const useReports = (props: IUseReports = {}): Report[] | null | undefined => {
+export const useReports = (props: IUseReports = {}): ReportDTO[] | undefined => {
   const { teamId, perPage = 20, page = 1, search = null, sort = '-created_at' } = props;
   const router = useRouter();
   const dispatch = useAppDispatch();
@@ -40,8 +40,8 @@ export const useReports = (props: IUseReports = {}): Report[] | null | undefined
     if (search && search.length > 0) {
       args.filter.search = search!;
     }
-    const fetchReportRequest: ActionWithPayload<Report[]> = await dispatch(fetchReportsAction(args as object));
-    return fetchReportRequest.payload;
+    const fetchReportRequest: ActionWithPayload<ReportDTO[]> = await dispatch(fetchReportsAction(args as object));
+    return fetchReportRequest.payload as ReportDTO[];
   };
 
   const [mounted, setMounted] = useState(false);

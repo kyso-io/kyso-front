@@ -1,15 +1,12 @@
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import { useCommonReportData } from '@/hooks/use-common-report-data';
 import { createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
 import { PureSpinner } from '@/components/PureSpinner';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
-import { useFileToRender } from '@/hooks/use-file-to-render';
-import { useUser } from '@/hooks/use-user';
+import type { FileToRender } from '@/hooks/use-file-to-render';
 import { PureCodeVisibilitySelectorDropdown } from '@/components/PureCodeVisibilitySelectorDropdown';
 import type { InlineCommentDto, UserDTO } from '@kyso-io/kyso-model';
 import dynamic from 'next/dynamic';
-import { useRouter } from 'next/router';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
@@ -38,29 +35,29 @@ const isImage = (name: string) => {
   );
 };
 
-const UnpureReportRender = () => {
-  const router = useRouter();
-  const report = useCommonReportData();
+interface Props {
+  fileToRender: FileToRender;
+  reportId: string | undefined;
+  user: UserDTO;
+  enabledCreateInlineComment: boolean;
+  enabledEditInlineComment: boolean;
+  enabledDeleteInlineComment: boolean;
+}
+
+const UnpureReportRender = (props: Props) => {
+  const { reportId, fileToRender, user, enabledCreateInlineComment, enabledEditInlineComment, enabledDeleteInlineComment } = props;
   const dispatch = useAppDispatch();
-  const user: UserDTO = useUser();
   const [isShownInput, setIsShownInput] = useState(false);
   const [isShownOutput, setIsShownOutput] = useState(false);
   const [inlineCommentsActived] = useState(true);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
-
-  let currentPath = '';
-  if (router.query.path) {
-    currentPath = (router.query.path as string) || '';
-  }
-
-  const fileToRender = useFileToRender({ path: currentPath });
 
   // const updateMainFileContent = async () => {
   //   // setRequesting(true);
 
   //   const result = await dispatch(
   //     updateMainFileReportAction({
-  //       reportId: report.id as string,
+  //       reportId: reportId as string,
   //       mainContent: fileContent as string,
   //     })
   //   );
@@ -74,22 +71,22 @@ const UnpureReportRender = () => {
   // };
 
   useEffect(() => {
-    if (report?.id) {
+    if (reportId) {
       const getReportInlineComments = async () => {
-        const data = await dispatch(getInlineCommentsAction(report.id as string));
+        const data = await dispatch(getInlineCommentsAction(reportId as string));
         if (data?.payload) {
           setInlineComments(data.payload);
         }
       };
       getReportInlineComments();
     }
-  }, [report?.id]);
+  }, [reportId]);
 
   const createInlineComment = async (cell_id: string, text: string) => {
     try {
       const data = await dispatch(
         createInlineCommentAction({
-          report_id: report.id as string,
+          report_id: reportId as string,
           cell_id,
           text,
         }),
@@ -155,11 +152,9 @@ const UnpureReportRender = () => {
       render = <img src={`data:image/jpeg;base64,${fileToRender.content}`} alt="file image" />;
     } else if (fileToRender.path.endsWith('.ipynb')) {
       render = (
-        <div className="flex flex-col">
-          <div className="flex justify-end">
-            <PureCodeVisibilitySelectorDropdown inputShown={isShownInput} outputShown={isShownOutput} setInputShow={setIsShownInput} setOutputShow={setIsShownOutput} />
-          </div>
-          <div className="p-4">
+        <div className="flex flex-col relative">
+          <PureCodeVisibilitySelectorDropdown inputShown={isShownInput} outputShown={isShownOutput} setInputShow={setIsShownInput} setOutputShow={setIsShownOutput} />
+          <div className="px-4 pb-4">
             <div className="prose contents">
               {user && user.id && user.avatar_url && (
                 <KysoJupyterRenderer
@@ -169,13 +164,13 @@ const UnpureReportRender = () => {
                   showInputs={isShownInput}
                   showOutputs={isShownOutput}
                   inlineCommentsActived={inlineCommentsActived}
-                  enabledCreateInlineComment={inlineCommentsActived}
-                  enabledDeleteInlineComment={inlineCommentsActived}
-                  enabledEditInlineComment={inlineCommentsActived}
                   inlineComments={inlineComments}
                   createInlineComment={createInlineComment}
                   deleteInlineComment={deleteInlineComment}
                   editInlineComment={editInlineComment}
+                  enabledCreateInlineComment={enabledCreateInlineComment}
+                  enabledEditInlineComment={enabledEditInlineComment}
+                  enabledDeleteInlineComment={enabledDeleteInlineComment}
                 />
               )}
             </div>

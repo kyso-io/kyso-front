@@ -4,7 +4,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import type { ReactNode } from 'react';
 import { toSvg } from 'jdenticon';
-import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import type { ReportDTO, User } from '@kyso-io/kyso-model';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -12,7 +12,7 @@ function classNames(...classes: string[]) {
 
 type IPureReportBadgeProps = {
   report: ReportDTO;
-  owners: UserDTO[];
+  authors: User[];
   reportHref: string;
   isPinned: Boolean;
   onClickPin: () => void;
@@ -21,7 +21,7 @@ type IPureReportBadgeProps = {
 };
 
 const PureReportBadge = (props: IPureReportBadgeProps) => {
-  const { report, owners, reportHref, isPinned = false, onClickPin = () => {}, UpvoteButton } = props;
+  const { report, authors, reportHref, isPinned = false, onClickPin = () => {}, UpvoteButton } = props;
 
   const getBackgroundImage = (preview_image: string | null, title: string, size = 400) => {
     if (preview_image) {
@@ -114,8 +114,8 @@ const PureReportBadge = (props: IPureReportBadgeProps) => {
               <div className="space-x-3 mt-3">
                 <div className="shrink-0">
                   <ul role="list" className="-my-4 divide-y divide-gray-200">
-                    {owners &&
-                      owners.map((author) => (
+                    {authors &&
+                      authors.map((author) => (
                         <li key={author.id} className="flex items-center py-4 space-x-3">
                           <div className="shrink-0">
                             <img className="h-8 w-8 rounded-full" src={author.avatar_url} alt="" />

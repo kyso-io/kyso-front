@@ -1,71 +1,64 @@
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
-import { useRouter } from 'next/router';
-import { useCommonReportData } from '@/hooks/use-common-report-data';
+import router from 'next/router';
 import { Fragment, useState } from 'react';
-import { useFileToRender } from '@/hooks/use-file-to-render';
+import type { FileToRender } from '@/hooks/use-file-to-render';
 import classNames from '@/helpers/class-names';
 import { QuestionMarkCircleIcon, StarIcon } from '@heroicons/react/solid';
 import { updateReportAction } from '@kyso-io/kyso-store';
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import type { GithubFileHash, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
-import { useTree } from '@/hooks/use-tree';
+import type { GithubFileHash, ReportDTO, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
 import { Menu, Transition } from '@headlessui/react';
 import { ExternalLinkIcon } from '@heroicons/react/outline';
 import { PureSpinner } from '@/components/PureSpinner';
+import type { CommonData } from '@/hooks/use-common-data';
 
-const UnureFileHeader = () => {
-  const router = useRouter();
+interface Props {
+  tree: GithubFileHash[];
+  report: ReportDTO;
+  fileToRender: FileToRender;
+  commonData: CommonData;
+  basePath: string;
+  path: string;
+  version: string;
+}
 
-  const tree: GithubFileHash[] = useTree({
-    path: router.query.path as string,
-  });
+const UnureFileHeader = (props: Props) => {
+  const { tree, report, fileToRender, basePath, commonData, path, version } = props;
+
   const breadcrumbs: BreadcrumbItem[] = [];
-  const commonData: CommonData = useCommonData();
-  const report = useCommonReportData();
   const [isBusy, setIsBusy] = useState(false);
   const dispatch = useAppDispatch();
-
-  let currentPath = '';
-  if (router.query.path) {
-    currentPath = (router.query.path as string) || '';
-  }
-
-  const fileToRender = useFileToRender({
-    path: currentPath,
-  });
 
   const isMainFile = report?.main_file === fileToRender?.path;
 
   if (report) {
-    breadcrumbs.push(new BreadcrumbItem(report?.name, `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`, false));
+    breadcrumbs.push(new BreadcrumbItem(report?.name, `${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report?.name}`, false));
   }
 
-  if (router.query.path) {
-    const paths = (router.query.path as string).split('/');
-    const littleCrumbs = paths.map((path, index) => {
-      let url = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}?`;
-      if (router.query.version) {
-        url += `version=${router.query.version}&`;
+  if (path) {
+    const paths = (path as string).split('/');
+    const littleCrumbs = paths.map((pathItem, index) => {
+      let url = `${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report?.name}?`;
+      if (version) {
+        url += `version=${version}&`;
       }
 
       url += `path=`;
       if (index === 0) {
-        url += `${path}`;
+        url += `${pathItem}`;
       } else {
-        url += `${paths.slice(0, index).join('/')}/${path}`;
+        url += `${paths.slice(0, index).join('/')}/${pathItem}`;
       }
 
-      return new BreadcrumbItem(path, url, false);
+      return new BreadcrumbItem(pathItem, url, false);
     });
 
     breadcrumbs.push(...littleCrumbs);
   }
 
-  if (fileToRender && !router.query.path) {
+  if (fileToRender && !path) {
     // this means its a readme or other index file
-    breadcrumbs.push(new BreadcrumbItem(fileToRender.path, `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`, false));
+    breadcrumbs.push(new BreadcrumbItem(fileToRender.path, `${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report?.name}`, false));
   }
 
   // TODO

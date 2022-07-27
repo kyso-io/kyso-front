@@ -1,28 +1,25 @@
-import { useAppSelector } from '@/hooks/redux-hooks';
 import { Fragment, useEffect, useState } from 'react';
 
 import classNames from '@/helpers/class-names';
 import { ShareIcon } from '@heroicons/react/solid';
 import { Transition, Dialog } from '@headlessui/react';
-import { useCommonData } from '@/hooks/use-common-data';
 import type { CommonData } from '@/hooks/use-common-data';
-import { useRouter } from 'next/router';
+import type { ReportDTO } from '@kyso-io/kyso-model';
 
-type IUnpureShareButton = {
-  id: string;
+type Props = {
+  commonData: CommonData;
+  report: ReportDTO;
+  basePath: string;
 };
 
-const UnpureShareButton = (props: IUnpureShareButton) => {
-  const router = useRouter();
-  const commonData: CommonData = useCommonData();
-
-  const report = useAppSelector((state) => state.reports.entities[props.id]);
+const PureShareButton = (props: Props) => {
+  const { basePath, commonData, report } = props;
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const [url, setUrl] = useState('');
   useEffect(() => {
-    setUrl(`${window.location.origin}${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`);
+    setUrl(`${window.location.origin}${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}`);
   });
 
   return (
@@ -100,4 +97,4 @@ const UnpureShareButton = (props: IUnpureShareButton) => {
   );
 };
 
-export default UnpureShareButton;
+export default PureShareButton;

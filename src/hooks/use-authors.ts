@@ -1,28 +1,33 @@
 /* eslint-disable no-prototype-builtins */
 import type { ReportDTO, User } from '@kyso-io/kyso-model';
-import { useAppSelector } from './redux-hooks';
-import { useCommonReportData } from './use-common-report-data';
+import { useMemo } from 'react';
+import { useUserEntities } from './use-user-entities';
 
-export const useAuthors = (): User[] => {
-  const report: ReportDTO = useCommonReportData();
-  const authors: User[] = useAppSelector((state) => {
+interface Props {
+  report: ReportDTO;
+}
+
+export const useAuthors = (props: Props): User[] => {
+  const { report } = props;
+
+  const userEntities: User[] = useUserEntities();
+  const authors: User[] | undefined = useMemo<User[] | undefined>(() => {
     if (!report) {
-      return [];
+      return undefined;
     }
-
-    if (report.author_ids.length === 0) {
-      return [state.user.entities.hasOwnProperty(report.user_id) ? state.user.entities[report.user_id] : null];
+    if (!userEntities) {
+      return undefined;
     }
+    let authorIds = [report.user_id];
+    if (report.author_ids) {
+      authorIds = report.author_ids;
+    }
+    const users = userEntities.filter((userEntity: User) => {
+      return authorIds.includes(userEntity.id as string);
+    });
 
-    return report.author_ids
-      .filter((authorId) => {
-        return authorId in Object.keys(state.user.entities);
-      })
-      .map((authorId) => {
-        const user = state.user.entities.hasOwnProperty(authorId) ? state.user.entities[authorId] : null;
-        return user;
-      });
-  });
+    return users as User[];
+  }, [report, userEntities]);
 
-  return authors;
+  return authors || [];
 };
