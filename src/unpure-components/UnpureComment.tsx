@@ -2,16 +2,14 @@
 /* eslint-disable no-restricted-globals */
 
 import { PureSpinner } from '@/components/PureSpinner';
-import checkPermissions from '@/helpers/check-permissions';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
-import { deleteCommentAction, selectCommentsById, selectCurrentUserPermissions } from '@kyso-io/kyso-store';
-import { useCommonData } from '@/hooks/use-common-data';
+import { deleteCommentAction, selectCommentsById } from '@kyso-io/kyso-store';
 import type { CommonData } from '@/hooks/use-common-data';
 import dynamic from 'next/dynamic';
-import { useMemo, useState } from 'react';
-import { useUser } from '@/hooks/use-user';
+import { useState } from 'react';
 import { formatRelative } from 'date-fns';
 import classNames from '@/helpers/class-names';
+import type { ReportDTO } from '@kyso-io/kyso-model';
 import UnpureCommentForm from './UnpureCommentForm';
 import UnpureComments from './UnpureComments';
 
@@ -29,29 +27,25 @@ type IUnpureComment = {
   parentId?: string;
   id?: string;
   onCancel?: () => void;
-  showPostButton?: boolean;
+  hasPermissionCreateComment: boolean;
+  hasPermissionDeleteComment: boolean;
+  commonData: CommonData;
+  report: ReportDTO;
 };
 
 const UnpureComment = (props: IUnpureComment) => {
-  const {
-    // parentId,
-    id,
-    showPostButton = true,
-  } = props;
+  const { id, hasPermissionCreateComment, hasPermissionDeleteComment, commonData, report } = props;
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
-  const commonData: CommonData = useCommonData();
-  const user = useUser();
   const dispatch = useAppDispatch();
 
   const comment = useAppSelector((state) => selectCommentsById(state, id as string));
-  const currentUserPermissions = useAppSelector(selectCurrentUserPermissions);
   const commentUser = useAppSelector((state) => {
     return comment && state.user.entities[comment.user_id];
   });
 
   let isUserAuthor = false;
-  if (user && user.id === comment?.user_id) {
+  if (commonData.user && commonData.user.id === comment?.user_id) {
     isUserAuthor = true;
   }
 
@@ -61,18 +55,16 @@ const UnpureComment = (props: IUnpureComment) => {
     }
   };
 
-  const hasPermissionCreateComment = useMemo(() => {
-    return checkPermissions(commonData.organization, commonData.team, currentUserPermissions, 'KYSO_IO_CREATE_COMMENT');
-  }, [commonData.organization, commonData.team, currentUserPermissions]);
-
-  const hasPermissionDeleteComment = useMemo(() => {
-    return checkPermissions(commonData.organization, commonData.team, currentUserPermissions, 'KYSO_IO_DELETE_COMMENT');
-  }, [commonData.organization, commonData.team, currentUserPermissions]);
-
   return (
     <div className="">
       {comment && isEditing ? (
-        <UnpureCommentForm id={comment.id} onSubmitted={() => setIsEditing(!isEditing)} onCancel={() => setIsEditing(!isEditing)} showPostButton={showPostButton} />
+        <UnpureCommentForm
+          id={comment.id}
+          commonData={commonData}
+          onSubmitted={() => setIsEditing(!isEditing)}
+          onCancel={() => setIsEditing(!isEditing)}
+          hasPermissionCreateComment={hasPermissionCreateComment}
+        />
       ) : (
         <div className={classNames('flex py-2 border rounded my-1 px-4 flex-col')}>
           <div className="pt-0 rounded-t flex items-center space-x-2 text-sm font-light text-gray-400">
@@ -88,7 +80,7 @@ const UnpureComment = (props: IUnpureComment) => {
 
             <div className="rounded-t flex items-center justify-start space-x-2 text-sm font-light text-gray-400">
               <div className="space-x-2 mt-2">
-                {showPostButton && (
+                {hasPermissionCreateComment && (
                   <button
                     className="hover:underline"
                     onClick={() => {
@@ -102,7 +94,7 @@ const UnpureComment = (props: IUnpureComment) => {
                     Reply
                   </button>
                 )}
-                {isUserAuthor && showPostButton && (
+                {isUserAuthor && hasPermissionCreateComment && (
                   <button className="hover:underline" onClick={() => setIsEditing(!isEditing)}>
                     Edit
                   </button>
@@ -119,11 +111,19 @@ const UnpureComment = (props: IUnpureComment) => {
       )}
       {comment && isReplying && (
         <div>
-          <UnpureCommentForm parentId={comment.id} onCancel={() => setIsReplying(!isReplying)} onSubmitted={() => setIsReplying(!isReplying)} showPostButton={showPostButton} />
+          <UnpureCommentForm
+            parentId={comment.id}
+            onCancel={() => setIsReplying(!isReplying)}
+            onSubmitted={() => setIsReplying(!isReplying)}
+            hasPermissionCreateComment={hasPermissionCreateComment}
+            commonData={commonData}
+          />
         </div>
       )}
 
-      {comment && <UnpureComments parentId={comment.id} showPostButton={showPostButton} />}
+      {comment && (
+        <UnpureComments commonData={commonData} report={report} parentId={comment.id} hasPermissionDeleteComment={hasPermissionDeleteComment} hasPermissionCreateComment={hasPermissionCreateComment} />
+      )}
     </div>
   );
 };

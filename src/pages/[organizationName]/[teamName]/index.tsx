@@ -2,12 +2,15 @@ import KysoTopBar from '@/layouts/KysoTopBar';
 import type { NextRouter } from 'next/router';
 import { useRouter } from 'next/router';
 import { useReports } from '@/hooks/use-reports';
-import UnpureMain from '@/wrappers/UnpureMain';
-import UnpureReportBadge from '@/wrappers/UnpureReportBadge';
+import UnpureMain from '@/unpure-components/UnpureMain';
+import UnpureReportBadge from '@/unpure-components/UnpureReportBadge';
 import PureReportFilter from '@/components/PureReportFilter';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import checkPermissions from '@/helpers/check-permissions';
+import { useMemo } from 'react';
+import type { ReportDTO } from '@kyso-io/kyso-model';
 
 const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
 
@@ -37,9 +40,12 @@ const pushQueryString = (router: NextRouter, newValue: object) => {
 const Index = () => {
   const router = useRouter();
   useRedirectIfNoJWT();
-  const commonData: CommonData = useCommonData();
+  const commonData: CommonData = useCommonData({
+    organizationName: router.query.organizationName as string,
+    teamName: router.query.teamName as string,
+  });
 
-  const reports = useReports({
+  const reports: ReportDTO[] | undefined = useReports({
     teamId: commonData.team?.id,
     perPage: router.query.per_page as string,
     page: router.query.page as string,
@@ -48,14 +54,12 @@ const Index = () => {
     tags: router.query.tags as string[],
   });
 
+  const hasPermissionGlobalPinReport = useMemo(() => checkPermissions(commonData, 'KYSO_IO_REPORT_GLOBAL_PIN'), [commonData]);
+
   const sortOptions = [
     { name: 'Recently published', value: '-created_at' },
     { name: 'Recently updated', value: '-updated_at' },
   ];
-
-  if (!router.query.teamName && !router.query.organizationName) {
-    return <div>404</div>;
-  }
 
   let activeFilters = [];
   if (router.query.search) {
@@ -100,7 +104,7 @@ const Index = () => {
   }
 
   return (
-    <UnpureMain>
+    <UnpureMain basePath={router.basePath} commonData={commonData}>
       <PureReportFilter
         defaultSearch={(router.query.search as string) || null}
         sortOptions={sortOptions}
@@ -126,7 +130,7 @@ const Index = () => {
       <div className="mt-8">
         <ul role="list" className="space-y-4">
           {reports?.map((report) => (
-            <UnpureReportBadge id={report.id!} key={report.id} />
+            <UnpureReportBadge key={report.id} report={report} commonData={commonData} hasPermissionGlobalPinReport={hasPermissionGlobalPinReport} />
           ))}
         </ul>
       </div>

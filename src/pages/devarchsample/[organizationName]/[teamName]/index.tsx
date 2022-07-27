@@ -1,9 +1,14 @@
 import KysoTopBar from '@/layouts/KysoTopBar';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
+import { useRouter } from 'next/router';
 
 const Index = () => {
-  const commonData: CommonData = useCommonData();
+  const router = useRouter();
+  const commonData: CommonData = useCommonData({
+    organizationName: router.query.organizationName as string,
+    teamName: router.query.teamName as string,
+  });
 
   return (
     <>

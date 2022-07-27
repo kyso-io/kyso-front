@@ -1,10 +1,9 @@
 /* eslint no-empty: "off" */
 import KysoTopBar from '@/layouts/KysoTopBar';
-import UnpureMain from '@/wrappers/UnpureMain';
+import UnpureMain from '@/unpure-components/UnpureMain';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, PaginatedResponseDto, ReportDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
-import type { NextRouter } from 'next/router';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import ActivityFeedComponent from '../../components/ActivityFeed';
@@ -27,8 +26,12 @@ interface PaginationParams {
 }
 
 const Index = () => {
-  const commonData: CommonData = useCommonData();
-  const router: NextRouter = useRouter();
+  const router = useRouter();
+  const commonData: CommonData = useCommonData({
+    organizationName: router.query.organizationName as string,
+    teamName: router.query.teamName as string,
+  });
+
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
   const [organizationInfo, setOrganizationInfo] = useState<OrganizationInfoDto | null>(null);
   const [paginationParams, setPaginationParams] = useState<PaginationParams>({
@@ -189,7 +192,7 @@ const Index = () => {
   };
 
   return (
-    <UnpureMain>
+    <UnpureMain basePath={router.basePath} commonData={commonData}>
       <div className="flex flex-row">
         <div className="w-5/6 px-8">
           <div className="container flex">

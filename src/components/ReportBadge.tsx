@@ -1,15 +1,14 @@
 import { Menu, Transition } from '@headlessui/react';
 import { BookmarkIcon, ChatIcon } from '@heroicons/react/outline';
 import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ShareIcon, ThumbUpIcon } from '@heroicons/react/solid';
-import type { ReportDTO, TokenPermissions } from '@kyso-io/kyso-model';
+import type { ReportDTO } from '@kyso-io/kyso-model';
 import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
-import type { RootState } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
+import { useRouter } from 'next/router';
 import { Fragment, useMemo } from 'react';
 import checkPermissions from '../helpers/check-permissions';
-import { useAppSelector } from '../hooks/redux-hooks';
 import type { CommonData } from '../hooks/use-common-data';
 import { useCommonData } from '../hooks/use-common-data';
 
@@ -25,10 +24,15 @@ interface Props {
 }
 
 const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
-  const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);
-  const commonData: CommonData = useCommonData();
+  // const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);
+  const router = useRouter();
+  const commonData: CommonData = useCommonData({
+    organizationName: router.query.organizationName as string,
+    teamName: router.query.teamName as string,
+  });
+
   const hasPermissionReportGlobalPin: boolean = useMemo(() => {
-    return checkPermissions(commonData.organization, commonData.team, permissions, ReportPermissionsEnum.GLOBAL_PIN);
+    return checkPermissions(commonData, ReportPermissionsEnum.GLOBAL_PIN);
   }, [commonData.organization, commonData.team, commonData.user]);
   const reportImage: string = useMemo(() => {
     if (report.preview_picture) {

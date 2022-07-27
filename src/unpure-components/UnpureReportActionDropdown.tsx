@@ -2,16 +2,25 @@ import { useAppDispatch } from '@/hooks/redux-hooks';
 import { Fragment, useState } from 'react';
 import { saveAs } from 'file-saver';
 import classNames from '@/helpers/class-names';
-import { DotsVerticalIcon, FolderDownloadIcon, XIcon } from '@heroicons/react/solid';
+import { DotsVerticalIcon, FolderDownloadIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
-import { downloadReportAction } from '@kyso-io/kyso-store';
-import { useCommonReportData } from '@/hooks/use-common-report-data';
+import { deleteReportAction, downloadReportAction } from '@kyso-io/kyso-store';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import slugify from 'slugify';
+import { useRouter } from 'next/router';
+import type { CommonData } from '@/hooks/use-common-data';
 
-const UnpureReportActionDropdown = () => {
-  const report: ReportDTO = useCommonReportData();
+interface Props {
+  report: ReportDTO;
+  commonData: CommonData;
+  hasPermissionDeleteReport: boolean;
+  hasPermissionEditReport: boolean;
+}
+
+const UnpureReportActionDropdown = (props: Props) => {
+  const { report, commonData, hasPermissionDeleteReport, hasPermissionEditReport } = props;
   const dispatch = useAppDispatch();
+  const router = useRouter();
   const [show, setShow] = useState(false);
   const [downloadText, setDownloadText] = useState('Creating zip, this may take a moment...');
 
@@ -27,6 +36,20 @@ const UnpureReportActionDropdown = () => {
       setShow(true);
       setDownloadText('An error occured with the download.');
     }
+  };
+
+  const deleteReport = async () => {
+    if (!hasPermissionDeleteReport) {
+      return;
+    }
+    if (!window.confirm('Are you sure you want to delete this report?')) {
+      return;
+    }
+
+    setDownloadText('Deleting...');
+    await dispatch(deleteReportAction(report.id!));
+    setDownloadText('Deleted.');
+    router.push(`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
   };
 
   return (
@@ -50,11 +73,14 @@ const UnpureReportActionDropdown = () => {
         >
           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none">
             <div className="py-1">
-              <Menu.Item>
-                <a href="settings" className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50')}>
-                  Report settings
-                </a>
-              </Menu.Item>
+              {hasPermissionEditReport && (
+                <Menu.Item>
+                  <a href="settings" className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50')}>
+                    Edit Report
+                  </a>
+                </Menu.Item>
+              )}
+
               <Menu.Item>
                 <a href="versions" className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50')}>
                   Versions
@@ -65,6 +91,14 @@ const UnpureReportActionDropdown = () => {
                   Download project as zip
                 </a>
               </Menu.Item>
+              {hasPermissionDeleteReport && (
+                <Menu.Item>
+                  <a href="#" onClick={() => deleteReport()} className="text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50 group flex items-center">
+                    <TrashIcon className="mr-1 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                    Delete
+                  </a>
+                </Menu.Item>
+              )}
               {/* <Menu.Item>
                 <a
                   href="#"
