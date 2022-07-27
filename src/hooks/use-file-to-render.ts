@@ -67,11 +67,10 @@ export const useFileToRender = (props: Props): FileToRender | null => {
   };
 
   useEffect(() => {
-    if (!validFile) {
-      return;
-    }
     fetcher();
   }, [tree, validFile]);
+
+  console.log(mainFile, fileToRender);
 
   return fileToRender;
 };

@@ -28,7 +28,6 @@ export const useReport = (props: Props): [ReportDTO, KeyedMutator<ReportDTO | nu
   // );
 
   const fetcher = async (): Promise<ReportDTO | null> => {
-    console.log(1);
     const resultReportAction = await dispatch(
       fetchReportsAction({
         filter: {
@@ -43,8 +42,6 @@ export const useReport = (props: Props): [ReportDTO, KeyedMutator<ReportDTO | nu
     if (reports.length === 0) {
       return null;
     }
-
-    console.log(2);
 
     const tempReport: ReportDTO = reports[0] as ReportDTO;
     await dispatch(setActiveId(tempReport.id as string));
