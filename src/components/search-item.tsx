@@ -1,16 +1,20 @@
-import { ElasticSearchIndex } from '@kyso-io/kyso-model';
 import type { FullTextSearchResult } from '@kyso-io/kyso-model';
+import { ElasticSearchIndex } from '@kyso-io/kyso-model';
+import { useRouter } from 'next/router';
 
 interface Props {
   fullTextSearchResult: FullTextSearchResult;
 }
 
 const SearchItem = ({ fullTextSearchResult }: Props) => {
+  const router = useRouter();
+  const { basePath } = router;
+
   return (
     <li className="mb-4 relative bg-white py-5 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
       <div className="flex justify-between space-x-3">
         <div className="min-w-0 flex-1">
-          <a href={fullTextSearchResult.link} className="block focus:outline-none">
+          <a href={`${basePath}${fullTextSearchResult.link}`} className="block focus:outline-none">
             <span className="absolute inset-0" aria-hidden="true"></span>
             {fullTextSearchResult.type !== ElasticSearchIndex.Comment && <p className="text-sm font-medium text-gray-900 truncate">{fullTextSearchResult.title}</p>}
             {fullTextSearchResult.organizationSlug && (
@@ -29,7 +33,6 @@ const SearchItem = ({ fullTextSearchResult }: Props) => {
                 {tag}
               </span>
             ))}
-            {/* <p className="text-sm text-gray-500 truncate">Velit placeat sit ducimus non sed</p> */}
           </a>
         </div>
       </div>

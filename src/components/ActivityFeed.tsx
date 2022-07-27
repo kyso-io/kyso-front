@@ -136,6 +136,8 @@ const ActivityFeedReport = ({ activityFeed, relations }: ActivityFeedProps) => {
           {activityFeed.action === ActionEnum.UNPIN && 'unpinned the report '}
           {activityFeed.action === ActionEnum.PIN_GLOBAL && 'pinned the report '}
           {activityFeed.action === ActionEnum.UNPIN_GLOBAL && 'unpinned the report '}
+          {activityFeed.action === ActionEnum.STAR && 'liked the report '}
+          {activityFeed.action === ActionEnum.UNSTAR && 'unliked the report '}
           {activityFeed.action !== ActionEnum.DELETE ? (
             <a href={`/${activityFeed.organization}/${activityFeed.team}/reports/${report.id}`} className="font-medium text-blue-600 underline">
               {report.title}

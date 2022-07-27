@@ -1,29 +1,29 @@
-import KysoTopBar from '@/layouts/KysoTopBar';
-import { useReport } from '@/hooks/use-report';
-import UnpureReportRender from '@/unpure-components/UnpureReportRender';
-import UnpureMain from '@/unpure-components/UnpureMain';
-import { useAuthors } from '@/hooks/use-authors';
-import PureUpvoteButton from '@/components/PureUpvoteButton';
-import PureShareButton from '@/components/PureShareButton';
-import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDropdown';
-import UnpureComments from '@/unpure-components/UnpureComments';
-import type { GithubFileHash, User, UserDTO } from '@kyso-io/kyso-model';
+import { PurePermissionDenied } from '@/components/PurePermissionDenied';
 import PureReportHeader from '@/components/PureReportHeader';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import { toggleUserStarReportAction } from '@kyso-io/kyso-store';
-import { useAppDispatch } from '@/hooks/redux-hooks';
-import UnpureFileHeader from '@/unpure-components/UnpureFileHeader';
+import PureShareButton from '@/components/PureShareButton';
 import PureTree from '@/components/PureTree';
-import type { FileToRender } from '@/hooks/use-file-to-render';
-import { useFileToRender } from '@/hooks/use-file-to-render';
-import { useRouter } from 'next/router';
+import PureUpvoteButton from '@/components/PureUpvoteButton';
+import checkPermissions from '@/helpers/check-permissions';
+import { useAppDispatch } from '@/hooks/redux-hooks';
+import { useAuthors } from '@/hooks/use-authors';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
+import type { FileToRender } from '@/hooks/use-file-to-render';
+import { useFileToRender } from '@/hooks/use-file-to-render';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import { useReport } from '@/hooks/use-report';
 import { useTree } from '@/hooks/use-tree';
+import KysoTopBar from '@/layouts/KysoTopBar';
+import UnpureComments from '@/unpure-components/UnpureComments';
+import UnpureFileHeader from '@/unpure-components/UnpureFileHeader';
+import UnpureMain from '@/unpure-components/UnpureMain';
+import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDropdown';
+import UnpureReportRender from '@/unpure-components/UnpureReportRender';
+import type { GithubFileHash, User, UserDTO } from '@kyso-io/kyso-model';
+import { toggleUserStarReportAction } from '@kyso-io/kyso-store';
+import { useRouter } from 'next/router';
 import { dirname } from 'path';
-import checkPermissions from '@/helpers/check-permissions';
 import { useMemo } from 'react';
-import { PurePermissionDenied } from '@/components/PurePermissionDenied';
 
 const Index = () => {
   useRedirectIfNoJWT();
@@ -43,7 +43,11 @@ const Index = () => {
 
   let currentPath = '';
   if (router.query.path) {
-    currentPath = ((router.query.path as []).join('/') as string) || '';
+    if (Array.isArray(router.query.path)) {
+      currentPath = (router.query.path as string[]).join('/') || '';
+    } else {
+      currentPath = (router.query.path as string) || '';
+    }
   }
 
   const selfTree: GithubFileHash[] = useTree(

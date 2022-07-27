@@ -116,6 +116,16 @@ const Index = () => {
         paginationParams.limit,
         paginationParams.sort,
       );
+      // Sort by global_pin and user_pin
+      result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
       setPaginatedResponseDto(result.data);
     } catch (e) {}
   };
@@ -148,6 +158,16 @@ const Index = () => {
       const { data: report } = result;
       const { results: reports } = paginatedResponseDto!;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      // Sort by global_pin and user_pin
+      newReports.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
       setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
     } catch (e) {}
   };
@@ -159,6 +179,16 @@ const Index = () => {
       const { data: report } = result;
       const { results: reports } = paginatedResponseDto!;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      // Sort by global_pin and user_pin
+      newReports.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
       setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
     } catch (e) {}
   };
