@@ -38,7 +38,7 @@ const PureReportBadge = (props: IPureReportBadgeProps) => {
 
   return (
     <>
-      <li key={report.id} className={classNames('bg-white shadow rounded', isPinned ? 'border' : '')}>
+      <li key={report.id} className={classNames('bg-white border rounded', isPinned ? 'border' : '')}>
         <article aria-labelledby={`report-title-${report.id}`}>
           <div className="flex">
             <div className="h-48 w-48 p-4 border-r">

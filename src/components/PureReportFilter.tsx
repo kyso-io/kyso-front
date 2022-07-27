@@ -42,7 +42,7 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
 
   return (
     <>
-      <section aria-labelledby="filter-heading" className="shadow rounded">
+      <section aria-labelledby="filter-heading" className="border rounded">
         <div className={classNames('z-10 bg-white py-2 px-4', activeFilters.length > 0 ? 'rounded-t border-b' : 'rounded')}>
           <div className="max-w-7xl mx-auto items-right items-center flex">
             <form className="w-full flex" action="#" method="GET">
@@ -82,7 +82,7 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
                   {({ open }) => (
                     <>
                       <div className={classNames('mt-1 relative', selectedTags.length > 0 || open ? 'w-52' : '')}>
-                        <Listbox.Button className="bg-white relative w-full border-gray-300 rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        <Listbox.Button className="bg-white relative w-full rounded-md pl-3 pr-10 py-2 text-left cursor-default focus:ring-0 sm:text-sm">
                           <span className="block truncate">{selectedTags.length > 0 ? selectedTags.join(', ') : 'Tags'}</span>
                           <span className="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
                             <SelectorIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -90,7 +90,7 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
                         </Listbox.Button>
 
                         <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                          <Listbox.Options className="text-left absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity/5 overflow-auto focus:outline-none sm:text-sm">
+                          <Listbox.Options className="text-left absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-0 border overflow-auto focus:outline-none sm:text-sm">
                             {tags.map((tag) => (
                               <Listbox.Option
                                 key={tag}
@@ -135,7 +135,7 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="origin-top-right absolute -right-4 mt-2 w-44 rounded-md shadow-2xl bg-white ring-1 ring-black ring-opacity/5 focus:outline-none">
+                <Menu.Items className="z-50 origin-top-right absolute -right-4 mt-2 w-44 rounded-md shadow-2xl bg-white border focus:outline-none">
                   <div className="py-1">
                     {sortOptions.map((option) => (
                       <Menu.Item key={option.name}>
@@ -146,9 +146,9 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
                               setCurrentSortCopy(option.value);
                             }}
                             className={classNames(
-                              option.value === currentSortCopy ? 'font-medium text-gray-900' : 'text-gray-500',
+                              option.value === currentSortCopy ? 'font-medium bg-gray-200 text-gray-900' : 'text-gray-500',
                               active ? 'bg-gray-100' : '',
-                              'block px-4 py-2 text-sm w-full text-left',
+                              'block px-2 py-2 text-sm w-full text-left',
                             )}
                           >
                             {option.name}
