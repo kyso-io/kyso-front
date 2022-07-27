@@ -43,7 +43,7 @@ const Index = () => {
 
   let currentPath = '';
   if (router.query.path) {
-    currentPath = (router.query.path as string) || '';
+    currentPath = ((router.query.path as []).join('/') as string) || '';
   }
 
   const selfTree: GithubFileHash[] = useTree(
@@ -84,10 +84,11 @@ const Index = () => {
     if (!newPath) {
       const qs = { ...router.query };
       delete qs.path;
-      return router.replace({ query: qs });
+      return router.replace(`/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}`);
     }
 
-    return router.replace({ query: { ...router.query, path: newPath } });
+    // return router.replace({ query: { ...router.query, path: newPath } });
+    return router.replace(`/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}/${newPath}`);
   };
 
   if (report && commonData && !hasPermissionReadReport) {
@@ -101,7 +102,7 @@ const Index = () => {
           <div className="flex flex-col h-screen w-[450px] space-y-6 truncate">
             {selfTree && report && commonData && (
               <PureTree
-                path={router.query.path as string}
+                path={currentPath}
                 basePath={router.basePath}
                 commonData={commonData}
                 report={report}
@@ -148,7 +149,7 @@ const Index = () => {
                         report={report}
                         fileToRender={fileToRender}
                         basePath={router.basePath}
-                        path={router.query.path as string}
+                        path={currentPath}
                         version={router.query.version as string}
                         commonData={commonData}
                       />
