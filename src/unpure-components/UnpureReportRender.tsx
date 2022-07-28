@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react';
 import { PureSpinner } from '@/components/PureSpinner';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import type { FileToRender } from '@/hooks/use-file-to-render';
-import type { InlineCommentDto, UserDTO } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import dynamic from 'next/dynamic';
+import type { CommonData } from '@/hooks/use-common-data';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
@@ -36,38 +37,38 @@ const isImage = (name: string) => {
 
 interface Props {
   fileToRender: FileToRender;
-  reportId: string | undefined;
-  user: UserDTO;
+  commonData: CommonData;
+  report: ReportDTO;
+  channelMembers: TeamMember[];
   enabledCreateInlineComment: boolean;
   enabledEditInlineComment: boolean;
   enabledDeleteInlineComment: boolean;
 }
 
 const UnpureReportRender = (props: Props) => {
-  const { reportId, fileToRender, user, enabledCreateInlineComment, enabledEditInlineComment, enabledDeleteInlineComment } = props;
+  const { report, fileToRender, commonData, channelMembers, enabledCreateInlineComment, enabledEditInlineComment, enabledDeleteInlineComment } = props;
   const dispatch = useAppDispatch();
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
-  const [inlineCommentsActived] = useState(true);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
 
   useEffect(() => {
-    if (reportId) {
+    if (report.id) {
       const getReportInlineComments = async () => {
-        const data = await dispatch(getInlineCommentsAction(reportId as string));
+        const data = await dispatch(getInlineCommentsAction(report.id as string));
         if (data?.payload) {
           setInlineComments(data.payload);
         }
       };
       getReportInlineComments();
     }
-  }, [reportId]);
+  }, [report.id]);
 
   const createInlineComment = async (cell_id: string, text: string) => {
     try {
       const data = await dispatch(
         createInlineCommentAction({
-          report_id: reportId as string,
+          report_id: report.id as string,
           cell_id,
           text,
         }),
@@ -125,7 +126,7 @@ const UnpureReportRender = (props: Props) => {
   if (fileToRender.content !== null) {
     if (fileToRender.path.endsWith('.md')) {
       render = (
-        <div className="prose p-3">
+        <div className="p-3">
           <KysoMarkdownRenderer source={fileToRender.content} />
         </div>
       );
@@ -134,15 +135,15 @@ const UnpureReportRender = (props: Props) => {
     } else if (fileToRender.path.endsWith('.ipynb')) {
       render = (
         <div className="flex flex-col w-full relative">
-          <div className="prose w-full max-w-full">
-            {user && user.id && user.avatar_url && (
+          <div className="w-full max-w-full">
+            {commonData.user && (
               <KysoJupyterRenderer
-                userId={user.id}
-                avatarUrl={user.avatar_url}
+                commonData={commonData}
+                report={report}
+                channelMembers={channelMembers}
                 jupyterNotebook={JSON.parse(fileToRender.content as string)}
-                showInputs={true}
-                showOutputs={true}
-                inlineCommentsActived={inlineCommentsActived}
+                showInputs={false}
+                showOutputs={false}
                 inlineComments={inlineComments}
                 createInlineComment={createInlineComment}
                 deleteInlineComment={deleteInlineComment}
@@ -165,7 +166,7 @@ const UnpureReportRender = (props: Props) => {
       fileToRender.path.endsWith('.css')
     ) {
       render = (
-        <div className="prose contents">
+        <div>
           <pre>
             <KysoMarkdownRenderer source={fileToRender.content} />
           </pre>

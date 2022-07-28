@@ -161,7 +161,7 @@ const Index = () => {
           </div>
 
           {report && commonData && (
-            <div className="flex flex-col w-full space-y-6 pt-6 ">
+            <div className="flex flex-col w-full space-y-6 pt-6 max-w-[1100px] overflow-x-hidden">
               <div className="flex justify-between">
                 <PureReportHeader report={report} authors={authors} />
                 <div className="flex items-top pt-3 space-x-4">
@@ -199,11 +199,12 @@ const Index = () => {
                         version={router.query.version as string}
                         commonData={commonData}
                       />
-                      <div className="bg-white border-b rounded-b border-x w-full">
+                      <div className="bg-white border-b rounded-b border-x">
                         <UnpureReportRender
-                          user={commonData.user as UserDTO}
                           fileToRender={fileToRender}
-                          reportId={report?.id}
+                          report={report}
+                          channelMembers={channelMembers}
+                          commonData={commonData}
                           enabledCreateInlineComment={hasPermissionCreateInlineComment}
                           enabledEditInlineComment={hasPermissionEditInlineComment}
                           enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
@@ -244,7 +245,6 @@ const Index = () => {
                       filtered.sort((a: Comment, b: Comment) => {
                         return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
                       });
-                      console.log({ parentId, filtered, values });
                       return filtered;
                     }}
                     userSelectorHook={(id?: string): UserDTO | undefined => {
