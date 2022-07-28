@@ -70,7 +70,5 @@ export const useFileToRender = (props: Props): FileToRender | null => {
     fetcher();
   }, [tree, validFile]);
 
-  console.log(mainFile, fileToRender);
-
   return fileToRender;
 };

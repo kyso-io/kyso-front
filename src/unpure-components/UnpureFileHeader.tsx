@@ -64,7 +64,6 @@ const UnureFileHeader = (props: Props) => {
   // TODO
   const setMainFile = async () => {
     setIsBusy(true);
-    console.log({ main_file: tree && tree.length >= 1 && tree[0]!.path });
     const result = await dispatch(
       updateReportAction({
         reportId: report.id!,

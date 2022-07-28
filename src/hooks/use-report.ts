@@ -16,17 +16,6 @@ export const useReport = (props: Props): [ReportDTO, KeyedMutator<ReportDTO | nu
   const { commonData, reportName } = props;
   const dispatch = useAppDispatch();
 
-  // const report = useAppSelector((state: RootState): ReportDTO | null => {
-  //   if (!state.reports.activeId) {
-  //     return null;
-  //   }
-  //   if (Object.keys(state.reports.entities!).length === 0) {
-  //     return null;
-  //   }
-  //   return state.reports.entities![state.reports.activeId];
-  // }
-  // );
-
   const fetcher = async (): Promise<ReportDTO | null> => {
     const resultReportAction = await dispatch(
       fetchReportsAction({
