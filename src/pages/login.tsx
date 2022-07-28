@@ -314,162 +314,119 @@ const Index = () => {
               </div>
 
               {/* Right column */}
-              <div className="grid grid-cols-1 gap-4">
-                <section aria-labelledby="section-2-title">
-                  <div className="pt-6 pr-6">
-                    <h6 className="text-bold text-xl font-normal leading-normal mt-0 mb-2 text-pink-800">Sign in to Kyso</h6>
+              <div className="grid grid-cols-1 gap-4 prose">
+                <h2>Sign in to Kyso</h2>
 
-                    {enableKysoAuth && (
-                      <form method="post" action={`/api/login`} onSubmit={handleSubmit}>
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                          Email
-                        </label>
-                        <input
-                          className="mb-2 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                          aria-label="Email"
-                          type="text"
-                          name="email"
-                          value={email}
-                          placeholder="Email"
-                          onChange={(e) => {
-                            setError('');
-                            dispatch(storeSetError(''));
-                            setEmail(e.target.value);
-                          }}
-                        />
-
-                        <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                          Password
-                        </label>
-
-                        <input
-                          className="mb-2 shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                          // description="Please enter your password."
-                          value={password}
-                          name="password"
-                          type="password"
-                          // placeholder="Password"
-                          autoComplete="off"
-                          onChange={(e) => {
-                            setError('');
-                            dispatch(storeSetError(''));
-                            setPassword(e.target.value);
-                          }}
-                        />
-
-                        <div className="flex my-4">
-                          <div className="w-1/2 h-12">
-                            <button type="button" className="p-4 bg-kyso-secondary hover:bg-kyso-secondary-hover py-2 text-xs font-medium rounded">
-                              <a className="text-black" href="/reset-password">
-                                Forgot your password?
-                              </a>
-                            </button>
-                          </div>
-                          <div className="w-1/2 h-12 text-right">
-                            <button type="submit" className="p-4 bg-kyso-primary hover:bg-kyso-primary-hover text-white py-2 text-xs font-medium rounded">
-                              Log in now
-                            </button>
-                          </div>
-                        </div>
-                      </form>
-                    )}
+                {enableKysoAuth && (
+                  <form className="flex flex-col space-y-4" method="post" action={`/api/login`} onSubmit={handleSubmit}>
                     <div>
-                      {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
-                        <div className="flex mb-1">
-                          <div className="w-full h-12">
-                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded no-underline">
-                              <a href={githubUrl} className="text-black no-underline">
-                                <FontAwesomeIcon
-                                  style={{
-                                    marginRight: 8,
-                                  }}
-                                  icon={faGithub}
-                                />
-                                Log in with Github
-                              </a>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {enableBitbucketAuth && bitbucketUrl && bitbucketUrl.length > 0 && (
-                        <div className="flex mb-1">
-                          <div className="w-full h-12">
-                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
-                              <a className="text-black no-underline" href={bitbucketUrl}>
-                                <FontAwesomeIcon
-                                  style={{
-                                    marginRight: 8,
-                                  }}
-                                  icon={faBitbucket}
-                                />
-                                Log in with Bitbucket
-                              </a>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {enableGitlabAuth && gitlabUrl && gitlabUrl.length > 0 && (
-                        <div className="flex mb-1">
-                          <div className="w-full h-12">
-                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
-                              <a className="text-black no-underline" href={gitlabUrl}>
-                                <FontAwesomeIcon
-                                  style={{
-                                    marginRight: 8,
-                                  }}
-                                  icon={faGitlab}
-                                />
-                                Log in with Gitlab
-                              </a>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
-                        <div className="flex mb-1">
-                          <div className="w-full h-12">
-                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
-                              <a className="text-black no-underline" href={googleUrl}>
-                                <FontAwesomeIcon
-                                  style={{
-                                    marginRight: 8,
-                                  }}
-                                  icon={faGoogle}
-                                />
-                                Log in with Google
-                              </a>
-                            </button>
-                          </div>
-                        </div>
-                      )}
-
-                      {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
-                        <div className="flex mb-1">
-                          <div className="w-full h-12">
-                            <button type="button" className="h-10 w-full px-2.5 py-1.5 border border-transparent text-xs rounded">
-                              <a className="text-black no-underline" href={pingUrl}>
-                                <img
-                                  src="/static/images/pingid_logo.jpg"
-                                  width={12}
-                                  height={12}
-                                  style={{
-                                    marginRight: '8px',
-                                    display: 'inline',
-                                  }}
-                                  alt="PingID Login"
-                                ></img>
-                                Log in with PingId
-                              </a>
-                            </button>
-                          </div>
-                        </div>
-                      )}
+                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                        Email
+                      </label>
+                      <input
+                        className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                        aria-label="Email"
+                        type="text"
+                        name="email"
+                        value={email}
+                        placeholder="Email"
+                        onChange={(e) => {
+                          setError('');
+                          dispatch(storeSetError(''));
+                          setEmail(e.target.value);
+                        }}
+                      />
                     </div>
-                  </div>
-                </section>
+
+                    <div>
+                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                        Password
+                      </label>
+
+                      <input
+                        className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                        // description="Please enter your password."
+                        value={password}
+                        name="password"
+                        type="password"
+                        // placeholder="Password"
+                        autoComplete="off"
+                        onChange={(e) => {
+                          setError('');
+                          dispatch(storeSetError(''));
+                          setPassword(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <a className="text-xs no-underline hover:underline" href="/reset-password">
+                      Forgot your password?
+                    </a>
+                    <button type="submit" className="p-4 bg-kyso-primary hover:bg-kyso-primary-hover text-white py-2 text-xs font-medium rounded">
+                      Log in now
+                    </button>
+                  </form>
+                )}
+                {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
+                  <a href={githubUrl} className="border inline-block rounded p-2.5 text-sm no-underline text-center">
+                    <FontAwesomeIcon
+                      style={{
+                        marginRight: 8,
+                      }}
+                      icon={faGithub}
+                    />
+                    Log in with Github
+                  </a>
+                )}
+
+                {enableBitbucketAuth && bitbucketUrl && bitbucketUrl.length > 0 && (
+                  <a className="border inline-block rounded p-2.5 text-sm no-underline text-center" href={bitbucketUrl}>
+                    <FontAwesomeIcon
+                      style={{
+                        marginRight: 8,
+                      }}
+                      icon={faBitbucket}
+                    />
+                    Log in with Bitbucket
+                  </a>
+                )}
+
+                {enableGitlabAuth && gitlabUrl && gitlabUrl.length > 0 && (
+                  <a className="border inline-block rounded p-2.5 text-sm no-underline text-center" href={gitlabUrl}>
+                    <FontAwesomeIcon
+                      style={{
+                        marginRight: 8,
+                      }}
+                      icon={faGitlab}
+                    />
+                    Log in with Gitlab
+                  </a>
+                )}
+
+                {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
+                  <a className="border inline-block rounded p-2.5 text-sm no-underline text-center" href={googleUrl}>
+                    <FontAwesomeIcon
+                      style={{
+                        marginRight: 8,
+                      }}
+                      icon={faGoogle}
+                    />
+                    Log in with Google
+                  </a>
+                )}
+
+                {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
+                  <a className="border inline-block rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
+                    <img
+                      src="/static/images/pingid_logo.jpg"
+                      width={12}
+                      height={12}
+                      style={{
+                        marginRight: '8px',
+                        display: 'inline',
+                      }}
+                    />
+                  </a>
+                )}
               </div>
             </div>
           </div>
