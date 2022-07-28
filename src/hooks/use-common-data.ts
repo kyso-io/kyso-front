@@ -1,7 +1,7 @@
 import type { RootState } from '@kyso-io/kyso-store';
 import { Api, fetchOrganizationAction, fetchTeamAction } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
-import type { ActionWithPayload, NormalizedResponseDTO, Organization, ResourcePermissions, Team, TokenPermissions, User, UserDTO } from '@kyso-io/kyso-model';
+import type { ActionWithPayload, NormalizedResponseDTO, Organization, ResourcePermissions, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
 import useSWR from 'swr';
 import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
 import { useAppDispatch, useAppSelector } from './redux-hooks';
@@ -12,7 +12,7 @@ export type CommonData = {
   token: string | null;
   organization: Organization;
   team: Team;
-  user: User;
+  user: UserDTO;
 };
 
 interface Props {
@@ -74,7 +74,7 @@ export const useCommonData = (props: Props): CommonData => {
   const { data } = useSWR(mounted ? `use-common-data` : null, fetcher);
 
   useEffect(() => {
-    if (!organizationName) {
+    if (!organizationName || !permissions) {
       return;
     }
     setMounted(true);
