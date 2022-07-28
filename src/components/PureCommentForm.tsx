@@ -1,68 +1,43 @@
-import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
-import type { CommonData } from '@/hooks/use-common-data';
-import { createCommentAction, fetchReportCommentsAction, fetchTeamAssigneesAction, selectCommentsById, selectFirstSearchResult, updateCommentAction } from '@kyso-io/kyso-store';
-import { useUser } from '@/hooks/use-user';
-import { useState, useEffect } from 'react';
-import type { Comment, User } from '@kyso-io/kyso-model';
+import { useState } from 'react';
+import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import PureCommentInput from '@/components/PureCommentInput';
 import classNames from '@/helpers/class-names';
 import { PureSpinner } from '@/components/PureSpinner';
 
-type IUnpureCommentForm = {
-  parentId?: string;
-  id?: string;
+type IPureCommentForm = {
+  comment?: Comment;
+  parentComment?: Comment;
   onCancel?: () => void;
+  report: ReportDTO;
+  user: UserDTO;
   onSubmitted?: () => void;
+  userSelectorHook: (id?: string) => UserDTO | undefined;
   hasPermissionCreateComment?: boolean;
-  commonData: CommonData;
+  channelMembers: TeamMember[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  submitComment: (newComment: any, parentComment?: any) => void;
 };
 
-const UnpureCommentForm = (props: IUnpureCommentForm) => {
-  const { parentId, commonData, id, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true } = props;
-  const dispatch = useAppDispatch();
-  const [suggestions, setSuggestions] = useState([]);
+const PureCommentForm = (props: IPureCommentForm) => {
+  const { parentComment, comment, submitComment, user, report, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true, userSelectorHook } = props;
 
   let initialValue = '';
-  const comment: Comment | null = useAppSelector((state) => (id ? selectCommentsById(state, id) : null));
   if (comment) {
     initialValue = comment.text;
   }
 
-  const parentComment: Comment | null = useAppSelector((state) => (parentId ? selectCommentsById(state, parentId) : null));
-  const commentUser: User | null = useAppSelector((state) => (parentComment ? state.user.entities[parentComment.user_id] : null));
-
+  const commentUser = userSelectorHook(parentComment?.user_id);
   const [mentions, setMentions] = useState<string[]>([]);
   const [value, setValue] = useState(initialValue);
   const [plainText, setPlainText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const report = useAppSelector(selectFirstSearchResult);
-  const user = useUser();
 
   let isUserAuthor = false;
   if (user && user.id === comment?.user_id) {
     isUserAuthor = true;
   }
 
-  useEffect(() => {
-    if (!report) {
-      return;
-    }
-    if (commonData.team?.id) {
-      const getAssigneess = async () => {
-        try {
-          const result = await dispatch(fetchTeamAssigneesAction(commonData.team.id!));
-          if (result.payload) {
-            setSuggestions(result.payload);
-          }
-        } catch (e) {
-          // console.log(e);
-        }
-      };
-      getAssigneess();
-    }
-  }, [report?.id, commonData.team?.id]);
-
-  const handleClick = async () => {
+  const handleSubmit = async () => {
     setIsLoading(true);
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -70,7 +45,7 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
       text: value,
       plain_text: plainText,
       user_id: user.id,
-      comment_id: parentId!,
+      comment_id: parentComment?.id,
       user_ids: mentions,
     };
 
@@ -78,20 +53,7 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
       newCommentDTO.report_id = report.id as string;
     }
 
-    if (id) {
-      await dispatch(updateCommentAction({ commentId: id, comment: newCommentDTO as Comment }));
-    } else {
-      await dispatch(createCommentAction(newCommentDTO as Comment));
-    }
-
-    if (report) {
-      await dispatch(
-        fetchReportCommentsAction({
-          reportId: report.id as string,
-          sort: '-created_at',
-        }),
-      );
-    }
+    await submitComment(newCommentDTO, comment);
 
     setIsLoading(false);
     onSubmitted();
@@ -100,22 +62,22 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
 
   let message = 'Write a new comment';
 
-  if (id) {
+  if (comment?.id) {
     message = 'Edit comment';
   }
-  if (parentId) {
-    message = `Replying to ${isUserAuthor ? 'You' : commentUser && commentUser.display_name}`;
+  if (parentComment?.id) {
+    message = `Replying to ${isUserAuthor ? 'You' : commentUser && commentUser.name}`;
   }
 
   return (
-    <div className={classNames(parentId ? 'mt-2' : '')}>
+    <div className={classNames(parentComment?.id ? 'mt-2' : '')}>
       <div>
         <div>
           {hasPermissionCreateComment ? (
             <PureCommentInput
               text={value}
               placeholder={message}
-              suggestions={suggestions}
+              suggestions={channelMembers}
               handleInputChange={(newValue, newPlainTextValue, newMentions) => {
                 setValue(newValue);
                 setPlainText(newPlainTextValue);
@@ -128,7 +90,7 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
         </div>
 
         <div className="p-2 flex justify-end text-sm text-gray-500 space-x-4">
-          {(id || parentId) && (
+          {(comment?.id || parentComment?.id) && (
             <button className="hover:underline text-sm" onClick={onCancel}>
               Cancel
             </button>
@@ -139,7 +101,7 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
                 'inline-flex items-center px-2 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-0',
                 value.length === 0 ? 'bg-indigo-400 text-gray-200' : 'bg-indigo-600  hover:bg-indigo-700',
               )}
-              onClick={handleClick}
+              onClick={handleSubmit}
               disabled={!hasPermissionCreateComment || value.length === 0}
             >
               {isLoading && <PureSpinner size={5} />}
@@ -152,4 +114,4 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
   );
 };
 
-export default UnpureCommentForm;
+export default PureCommentForm;

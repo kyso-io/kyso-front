@@ -18,13 +18,13 @@ const OrganizationInfo = ({ organizationInfo }: Props) => {
       <div className="flex items-center mr-10">
         <ChatIcon className="h-6 w-6 text-orange-400" />
         <span className="ml-1 text-sm text-gray-500">
-          {organizationInfo.reports} {organizationInfo.reports === 1 ? 'comment' : 'comments'}
+          {organizationInfo.comments} {organizationInfo.comments === 1 ? 'comment' : 'comments'}
         </span>
       </div>
       <div className="flex items-center mr-10">
         <ChatAlt2Icon className="h-6 w-6 text-cyan-300" />
         <span className="ml-1 text-sm text-gray-500">
-          {organizationInfo.reports} {organizationInfo.reports === 1 ? 'discussion' : 'discussions'}
+          {organizationInfo.discussions} {organizationInfo.discussions === 1 ? 'discussion' : 'discussions'}
         </span>
       </div>
       {organizationInfo.lastChange && (

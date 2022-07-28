@@ -162,7 +162,8 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
           )}
         </Disclosure>
       </div>
-      {children}
+      <div className="block">{children}</div>
+
       <Footer />
     </React.Fragment>
   );

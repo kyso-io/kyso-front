@@ -71,10 +71,9 @@ const Index = () => {
     }
     const api: Api = new Api(token);
     try {
-      const startDatetime: Date = moment(datetimeActivityFeed).add(-1, 'day').toDate();
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(organizationName as string, {
-        start_datetime: startDatetime,
-        end_datetime: datetimeActivityFeed,
+        start_datetime: moment().add(-1, 'days').toDate(),
+        end_datetime: moment().toDate(),
       });
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
       if (result?.data) {
@@ -194,6 +193,9 @@ const Index = () => {
   };
 
   const getActivityFeed = async () => {
+    if (!token) {
+      return;
+    }
     const api: Api = new Api(token);
     try {
       const startDatetime: Date = moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate();
@@ -249,15 +251,18 @@ const Index = () => {
             </div>
           )}
           <div className="grid lg:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1 gap-4">
-            {paginatedResponseDto?.results.map((report: ReportDTO) => (
-              <ReportBadget
-                key={report.id}
-                report={report}
-                toggleUserStarReport={() => toggleUserStarReport(report.id!)}
-                toggleUserPinReport={() => toggleUserPinReport(report.id!)}
-                toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
-              />
-            ))}
+            {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
+            {paginatedResponseDto?.results &&
+              paginatedResponseDto.results.length > 0 &&
+              paginatedResponseDto?.results.map((report: ReportDTO) => (
+                <ReportBadget
+                  key={report.id}
+                  report={report}
+                  toggleUserStarReport={() => toggleUserStarReport(report.id!)}
+                  toggleUserPinReport={() => toggleUserPinReport(report.id!)}
+                  toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+                />
+              ))}
           </div>
           {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
             <div className="pt-10">
@@ -265,9 +270,11 @@ const Index = () => {
             </div>
           )}
         </div>
-        <div className="w-1/6">
-          <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
-        </div>
+        {commonData.user && (
+          <div className="w-1/6">
+            <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+          </div>
+        )}
       </div>
     </UnpureMain>
   );

@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { PureSpinner } from '@/components/PureSpinner';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import type { FileToRender } from '@/hooks/use-file-to-render';
-import { PureCodeVisibilitySelectorDropdown } from '@/components/PureCodeVisibilitySelectorDropdown';
 import type { InlineCommentDto, UserDTO } from '@kyso-io/kyso-model';
 import dynamic from 'next/dynamic';
 
@@ -47,28 +46,10 @@ interface Props {
 const UnpureReportRender = (props: Props) => {
   const { reportId, fileToRender, user, enabledCreateInlineComment, enabledEditInlineComment, enabledDeleteInlineComment } = props;
   const dispatch = useAppDispatch();
-  const [isShownInput, setIsShownInput] = useState(false);
-  const [isShownOutput, setIsShownOutput] = useState(false);
+  // const [isShownInput, setIsShownInput] = useState(false);
+  // const [isShownOutput, setIsShownOutput] = useState(false);
   const [inlineCommentsActived] = useState(true);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
-
-  // const updateMainFileContent = async () => {
-  //   // setRequesting(true);
-
-  //   const result = await dispatch(
-  //     updateMainFileReportAction({
-  //       reportId: reportId as string,
-  //       mainContent: fileContent as string,
-  //     })
-  //   );
-  //   if (!result.payload) {
-  //     // setRequesting(false);
-  //     return;
-  //   }
-  //   // toaster.success("Report updated");
-  //   // setRequesting(false);
-  //   // router.push(`/${organizationName}/${teamName}/${reportName}`);
-  // };
 
   useEffect(() => {
     if (reportId) {
@@ -152,28 +133,25 @@ const UnpureReportRender = (props: Props) => {
       render = <img src={`data:image/jpeg;base64,${fileToRender.content}`} alt="file image" />;
     } else if (fileToRender.path.endsWith('.ipynb')) {
       render = (
-        <div className="flex flex-col relative">
-          <PureCodeVisibilitySelectorDropdown inputShown={isShownInput} outputShown={isShownOutput} setInputShow={setIsShownInput} setOutputShow={setIsShownOutput} />
-          <div className="px-4 pb-4">
-            <div className="prose contents">
-              {user && user.id && user.avatar_url && (
-                <KysoJupyterRenderer
-                  userId={user.id}
-                  avatarUrl={user.avatar_url}
-                  jupyterNotebook={JSON.parse(fileToRender.content as string)}
-                  showInputs={isShownInput}
-                  showOutputs={isShownOutput}
-                  inlineCommentsActived={inlineCommentsActived}
-                  inlineComments={inlineComments}
-                  createInlineComment={createInlineComment}
-                  deleteInlineComment={deleteInlineComment}
-                  editInlineComment={editInlineComment}
-                  enabledCreateInlineComment={enabledCreateInlineComment}
-                  enabledEditInlineComment={enabledEditInlineComment}
-                  enabledDeleteInlineComment={enabledDeleteInlineComment}
-                />
-              )}
-            </div>
+        <div className="flex flex-col w-full relative">
+          <div className="prose w-full max-w-full">
+            {user && user.id && user.avatar_url && (
+              <KysoJupyterRenderer
+                userId={user.id}
+                avatarUrl={user.avatar_url}
+                jupyterNotebook={JSON.parse(fileToRender.content as string)}
+                showInputs={true}
+                showOutputs={true}
+                inlineCommentsActived={inlineCommentsActived}
+                inlineComments={inlineComments}
+                createInlineComment={createInlineComment}
+                deleteInlineComment={deleteInlineComment}
+                editInlineComment={editInlineComment}
+                enabledCreateInlineComment={enabledCreateInlineComment}
+                enabledEditInlineComment={enabledEditInlineComment}
+                enabledDeleteInlineComment={enabledDeleteInlineComment}
+              />
+            )}
           </div>
         </div>
       );
