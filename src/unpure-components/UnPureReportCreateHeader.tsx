@@ -10,21 +10,67 @@ type UnPureReportCreateHeaderProps = {
   setDescription: (newDescription: string) => void;
   setStop: (_stopTyping: boolean) => void;
   stopTyping: boolean | false;
-  // suggestions: { id: number; name: string; imageUrl: string }[];
-  // isDraftSaved: string | 'false';
 };
 
 const UnPureReportCreateHeader = (props: UnPureReportCreateHeaderProps) => {
-  const { title = null, description = null, user } = props;
-  // const { title = null, description = null, user, setTitle, setDescription, setStop, stopTyping, isDraftSaved } = props;
+  const { title = null, description = null, user, setTitle, setStop, setDescription } = props;
+
   return (
     <>
       <div className="prose-sm">
-        <h1 className="m-0 mb-2">
-          title{title}
-          <span className="text-sm ml-3 font-medium text-gray-400 group-hover:text-gray-600"> v: 1 </span>
-        </h1>
-        <p>description {description}</p>
+        <div className="mb-2 inline-flex items-center">
+          <input
+            type="text"
+            value={title || ''}
+            onChange={(e) => {
+              // setBusy(false);
+              setTitle(e.target.value);
+            }}
+            onBlur={() => {
+              setStop(true);
+            }}
+            placeholder="Title"
+            className="
+            focus:shadow-sm
+          focus:ring-indigo-500
+          focus:border-indigo-500 
+            block 
+            w-full
+            pr-2
+          border-white
+            border-0
+            rounded-md
+            text-3xl
+            font-medium
+          focus:text-gray-500
+           text-gray-900
+          "
+          />
+          <span className="text-sm w-10 ml-3 font-medium text-gray-400 group-hover:text-gray-600"> v: 1 </span>
+        </div>
+        <input
+          type="text"
+          value={description || ''}
+          placeholder="Description"
+          onChange={(e) => {
+            // setBusy(false);
+            setDescription(e.target.value);
+          }}
+          className="
+          focus:shadow-sm
+        focus:ring-indigo-500
+        focus:border-indigo-500 
+          block 
+          w-full
+          pr-2
+          focus:w-full 
+        border-white
+          border-0
+        text-gray-500
+          sm:text-sm
+          rounded-md
+        "
+        />
         <div className="prose prose-sm flex items-center text-gray-500 font-light space-x-2">
           <div className="flex">
             <div key={user?.display_name} className="shrink-0 group block">
