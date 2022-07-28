@@ -71,10 +71,9 @@ const Index = () => {
     }
     const api: Api = new Api(token);
     try {
-      const startDatetime: Date = moment(datetimeActivityFeed).add(-1, 'day').toDate();
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(organizationName as string, {
-        start_datetime: startDatetime,
-        end_datetime: datetimeActivityFeed,
+        start_datetime: moment().add(-1, 'days').toDate(),
+        end_datetime: moment().toDate(),
       });
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
       if (result?.data) {
@@ -116,6 +115,16 @@ const Index = () => {
         paginationParams.limit,
         paginationParams.sort,
       );
+      // Sort by global_pin and user_pin
+      result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
       setPaginatedResponseDto(result.data);
     } catch (e) {}
   };
@@ -148,6 +157,16 @@ const Index = () => {
       const { data: report } = result;
       const { results: reports } = paginatedResponseDto!;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      // Sort by global_pin and user_pin
+      newReports.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
       setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
     } catch (e) {}
   };
@@ -159,11 +178,24 @@ const Index = () => {
       const { data: report } = result;
       const { results: reports } = paginatedResponseDto!;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      // Sort by global_pin and user_pin
+      newReports.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
       setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
     } catch (e) {}
   };
 
   const getActivityFeed = async () => {
+    if (!token) {
+      return;
+    }
     const api: Api = new Api(token);
     try {
       const startDatetime: Date = moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate();
@@ -219,15 +251,18 @@ const Index = () => {
             </div>
           )}
           <div className="grid lg:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1 gap-4">
-            {paginatedResponseDto?.results.map((report: ReportDTO) => (
-              <ReportBadget
-                key={report.id}
-                report={report}
-                toggleUserStarReport={() => toggleUserStarReport(report.id!)}
-                toggleUserPinReport={() => toggleUserPinReport(report.id!)}
-                toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
-              />
-            ))}
+            {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
+            {paginatedResponseDto?.results &&
+              paginatedResponseDto.results.length > 0 &&
+              paginatedResponseDto?.results.map((report: ReportDTO) => (
+                <ReportBadget
+                  key={report.id}
+                  report={report}
+                  toggleUserStarReport={() => toggleUserStarReport(report.id!)}
+                  toggleUserPinReport={() => toggleUserPinReport(report.id!)}
+                  toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+                />
+              ))}
           </div>
           {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
             <div className="pt-10">
@@ -235,9 +270,11 @@ const Index = () => {
             </div>
           )}
         </div>
-        <div className="w-1/6">
-          <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
-        </div>
+        {commonData.user && (
+          <div className="w-1/6">
+            <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+          </div>
+        )}
       </div>
     </UnpureMain>
   );

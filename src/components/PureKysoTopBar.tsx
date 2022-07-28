@@ -1,10 +1,11 @@
 import { Disclosure, Menu, Transition } from '@headlessui/react';
-import { BellIcon, ChevronDownIcon, MenuIcon, XIcon } from '@heroicons/react/solid';
-import type { ReactElement } from 'react';
-import { Fragment } from 'react';
-// import type { LayoutProps } from "@/types/pageWithLayout";
+import { SearchIcon } from '@heroicons/react/outline';
+import { BellIcon, MenuIcon, ShareIcon, XIcon } from '@heroicons/react/solid';
 import type { UserDTO } from '@kyso-io/kyso-model';
-// import { Footer } from "./Footer";
+import { useRouter } from 'next/router';
+import type { ReactElement } from 'react';
+import React, { Fragment, useState } from 'react';
+import { Footer } from './Footer';
 
 type IPureKysoTopBarProps = {
   children: ReactElement;
@@ -14,7 +15,11 @@ type IPureKysoTopBarProps = {
 };
 
 const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
+  const router = useRouter();
   const { children, user, basePath, userNavigation } = props;
+  const [focusOnSearchInput, setFocusOnSearchInput] = useState<boolean>(false);
+  const [query, setQuery] = useState<string>('');
+
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const navigation: any[] = [];
 
@@ -23,7 +28,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
   }
 
   return (
-    <>
+    <React.Fragment>
       <div className="h-[64px] min-h-full">
         <Disclosure as="div" className="fixed z-10 w-screen bg-slate-500 border-b">
           {({ open }) => (
@@ -37,49 +42,76 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                       </a>
                     </div>
                   </div>
-                  <div className="hidden md:block">
-                    <div className="ml-4 flex items-center md:ml-6">
-                      {/* Profile dropdown */}
-                      {user && (
-                        <Menu as="div" className="relative ml-3">
-                          <div>
-                            <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
-                              <span className="sr-only">Open user menu</span>
-                              <img className="object-cover h-8 w-8 rounded-full" src={user.avatar_url} alt="" />
-                              <ChevronDownIcon className="shrink-0 -mr-1 ml-1 h-5 w-5 " aria-hidden="true" />
-                            </Menu.Button>
-                          </div>
-                          <Transition
-                            as={Fragment}
-                            enter="transition ease-out duration-100"
-                            enterFrom="transform opacity-0 scale-95"
-                            enterTo="transform opacity-100 scale-100"
-                            leave="transition ease-in duration-75"
-                            leaveFrom="transform opacity-100 scale-100"
-                            leaveTo="transform opacity-0 scale-95"
-                          >
-                            <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
-                              {userNavigation.map((item) => (
-                                <Menu.Item key={item.name}>
-                                  {({ active }) => (
-                                    <a href={item.href} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
-                                      {item.name}
-                                    </a>
-                                  )}
-                                </Menu.Item>
-                              ))}
-                            </Menu.Items>
-                          </Transition>
-                        </Menu>
-                      )}
+                  <div className="flex items-center">
+                    {/* Start Search input */}
+                    <div className="mt-1 relative rounded-md shadow-sm">
+                      <input
+                        type="text"
+                        name="name"
+                        id="name"
+                        className="text-gray-600 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 px-4 rounded-full"
+                        style={{ height: 35, width: focusOnSearchInput || query ? '400px' : 'auto' }}
+                        placeholder="Search on Kyso"
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onFocus={() => setFocusOnSearchInput(true)}
+                        onBlur={() => setFocusOnSearchInput(false)}
+                        onKeyUp={(e) => {
+                          if (e.key === 'Enter') {
+                            router.push(query ? `/search?q=${query}` : '/search');
+                            setQuery('');
+                          }
+                        }}
+                      />
+                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <SearchIcon className="w-4 h-4 text-gray-500" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="-mr-2 flex md:hidden">
-                    {/* Mobile menu button */}
-                    <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-indigo-600 p-2 text-indigo-200 hover:bg-indigo-500/75 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600">
-                      <span className="sr-only">Open main menu</span>
-                      {open ? <XIcon className="block h-6 w-6" aria-hidden="true" /> : <MenuIcon className="block h-6 w-6" aria-hidden="true" />}
-                    </Disclosure.Button>
+                    {/* End Search input */}
+                    <div className="hidden md:block">
+                      <div className="flex items-center ml-6">
+                        {/* Profile dropdown */}
+                        {user && (
+                          <Menu as="div" className="relative">
+                            <div>
+                              <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
+                                <span className="sr-only">Open user menu</span>
+                                <img className="object-cover h-8 w-8 rounded-full" src={user.avatar_url} alt="" />
+                              </Menu.Button>
+                            </div>
+                            <Transition
+                              as={Fragment}
+                              enter="transition ease-out duration-100"
+                              enterFrom="transform opacity-0 scale-95"
+                              enterTo="transform opacity-100 scale-100"
+                              leave="transition ease-in duration-75"
+                              leaveFrom="transform opacity-100 scale-100"
+                              leaveTo="transform opacity-0 scale-95"
+                            >
+                              <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
+                                {userNavigation.map((item) => (
+                                  <Menu.Item key={item.name}>
+                                    {({ active }) => (
+                                      <a href={item.href} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
+                                        {item.name}
+                                      </a>
+                                    )}
+                                  </Menu.Item>
+                                ))}
+                              </Menu.Items>
+                            </Transition>
+                          </Menu>
+                        )}
+                      </div>
+                    </div>
+                    <div className="-mr-2 flex md:hidden">
+                      {/* Mobile menu button */}
+                      <Disclosure.Button className="inline-flex items-center justify-center rounded-md bg-indigo-600 p-2 text-indigo-200 hover:bg-indigo-500/75 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600">
+                        <span className="sr-only">Open main menu</span>
+                        {open ? <XIcon className="block h-6 w-6" aria-hidden="true" /> : <MenuIcon className="block h-6 w-6" aria-hidden="true" />}
+                      </Disclosure.Button>
+                    </div>
+                    <ShareIcon className={classNames('h-6 w-6', 'mx-6', 'text-white')} aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -130,9 +162,10 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
           )}
         </Disclosure>
       </div>
-      {children}
-      {/* <Footer /> */}
-    </>
+      <div className="block">{children}</div>
+
+      <Footer />
+    </React.Fragment>
   );
 };
 export default PureKysoTopBar;

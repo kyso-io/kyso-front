@@ -12,6 +12,8 @@ import checkPermissions from '../helpers/check-permissions';
 import type { CommonData } from '../hooks/use-common-data';
 import { useCommonData } from '../hooks/use-common-data';
 
+const MAX_LENGTH_DESCRIPTION: number = 200;
+
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
@@ -24,7 +26,6 @@ interface Props {
 }
 
 const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
-  // const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);
   const router = useRouter();
   const commonData: CommonData = useCommonData({
     organizationName: router.query.organizationName as string,
@@ -49,18 +50,25 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
     toggleUserStarReport();
   };
 
+  const description: string = useMemo(() => {
+    if (report?.description && report.description.length > MAX_LENGTH_DESCRIPTION) {
+      return `${report.description.substring(0, MAX_LENGTH_DESCRIPTION)}...`;
+    }
+    return report?.description ? report.description : '';
+  }, [report.description]);
+
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="bg-white rounded-lg shadow" style={{ height: 262 }}>
       <div className="relative bg-white shadow-sm flex space-x-3">
         <div className="shrink-0">
           <div className="bg-stripes-sky-blue rounded-tl-lg text-center overflow-hidden mx-auto">
-            <img className="object-fill h-56" src={reportImage} />
+            <img className="object-fill h-56" style={{ width: 224, height: 224 }} src={reportImage} />
           </div>
         </div>
         <div className="flex-1 min-w-0 py-3 pr-2 relative">
           <a href="#" className="focus:outline-none">
             <p className="text-sm font-medium text-gray-900 pb-2">{report.title}</p>
-            <p className="text-sm text-gray-500">{report.description}</p>
+            <p className="text-sm text-gray-500">{description}</p>
           </a>
           <div className="absolute bottom-2 right-0">
             {report.report_type && <span className="bg-orange-100 text-orange-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900">{report.report_type}</span>}
@@ -88,8 +96,8 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
                   {hasPermissionReportGlobalPin && (
                     <Menu.Item>
                       {({ active }) => (
-                        <div className={clsx('py-1', { 'bg-gray-100': active })}>
-                          <button onClick={toggleGlobalPinReport} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
+                        <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
+                          <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
                             {report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
                           </button>
                         </div>
@@ -99,8 +107,8 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
                   {!report.pin && (
                     <Menu.Item>
                       {({ active }) => (
-                        <div className={clsx('py-1', { 'bg-gray-100': active })}>
-                          <button onClick={toggleUserPinReport} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
+                        <div onClick={toggleUserPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
+                          <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
                             {report.user_pin ? 'Remove pin from the top' : 'Pin to the top'}
                           </button>
                         </div>
@@ -113,7 +121,7 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
           </div>
         )}
       </div>
-      <div className="-mt-px flex items-center divide-x divide-gray-100 p-2">
+      <div className="-mt-px flex items-center p-2">
         <div className="grow flex flex-row items-center">
           <img className="w-6 h-6 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="Rounded avatar" />
           <span className="text-gray-500 text-sm pl-2 pr-5">{moment(report.created_at).format('MMMM DD, YYYY')}</span>

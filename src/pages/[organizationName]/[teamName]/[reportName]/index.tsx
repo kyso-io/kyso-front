@@ -1,10 +1,12 @@
-import KysoTopBar from '@/layouts/KysoTopBar';
-import { useReport } from '@/hooks/use-report';
-import UnpureReportRender from '@/unpure-components/UnpureReportRender';
-import UnpureMain from '@/unpure-components/UnpureMain';
-import { useAuthors } from '@/hooks/use-authors';
-import PureUpvoteButton from '@/components/PureUpvoteButton';
 import PureShareButton from '@/components/PureShareButton';
+import PureUpvoteButton from '@/components/PureUpvoteButton';
+import { useAuthors } from '@/hooks/use-authors';
+import type { CommonData } from '@/hooks/use-common-data';
+import { useCommonData } from '@/hooks/use-common-data';
+import { useReport } from '@/hooks/use-report';
+import { useTree } from '@/hooks/use-tree';
+import KysoTopBar from '@/layouts/KysoTopBar';
+import UnpureMain from '@/unpure-components/UnpureMain';
 import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDropdown';
 import PureComments from '@/components/PureComments';
 import type { GithubFileHash, Comment, User, UserDTO } from '@kyso-io/kyso-model';
@@ -17,9 +19,6 @@ import PureTree from '@/components/PureTree';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import { useFileToRender } from '@/hooks/use-file-to-render';
 import { useRouter } from 'next/router';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
-import { useTree } from '@/hooks/use-tree';
 import { dirname } from 'path';
 import checkPermissions from '@/helpers/check-permissions';
 import { useEffect, useMemo } from 'react';
@@ -27,6 +26,7 @@ import { PurePermissionDenied } from '@/components/PurePermissionDenied';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import { useUserEntities } from '@/hooks/use-user-entities';
 import moment from 'moment';
+import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 
 const Index = () => {
   useRedirectIfNoJWT();
@@ -49,7 +49,11 @@ const Index = () => {
 
   let currentPath = '';
   if (router.query.path) {
-    currentPath = ((router.query.path as []).join('/') as string) || '';
+    if (Array.isArray(router.query.path)) {
+      currentPath = (router.query.path as string[]).join('/') || '';
+    } else {
+      currentPath = (router.query.path as string) || '';
+    }
   }
 
   const selfTree: GithubFileHash[] = useTree(
@@ -141,7 +145,7 @@ const Index = () => {
     <>
       <UnpureMain basePath={router.basePath} report={report} commonData={commonData}>
         <div className="flex flex-row space-x-10 ">
-          <div className="flex flex-col h-screen w-[450px] space-y-6 truncate">
+          <div className="flex flex-col w-[450px] space-y-6 truncate">
             {selfTree && report && commonData && (
               <PureTree
                 path={currentPath}
@@ -157,7 +161,7 @@ const Index = () => {
           </div>
 
           {report && commonData && (
-            <div className="flex flex-col h-screen w-full space-y-6 pt-6 ">
+            <div className="flex flex-col w-full space-y-6 pt-6 ">
               <div className="flex justify-between">
                 <PureReportHeader report={report} authors={authors} />
                 <div className="flex items-top pt-3 space-x-4">

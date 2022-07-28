@@ -61,8 +61,8 @@ const Index = () => {
         {report && (
           <>
             <div className="flex flex-row space-x-10 ">
-              <div className="flex flex-col h-screen w-[450px] space-y-6 truncate">{/* <UnpureTree /> */}</div>
-              <div className="flex flex-col h-screen w-full space-y-6 pt-6 ">
+              <div className="flex flex-col w-[450px] space-y-6 truncate">{/* <UnpureTree /> */}</div>
+              <div className="flex flex-col w-full space-y-6 pt-6 ">
                 <div className="flex justify-between min-h-[104px]">
                   <PureReportHeader report={report} authors={authors} />
                 </div>
