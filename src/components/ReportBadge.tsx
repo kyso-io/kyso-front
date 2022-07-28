@@ -51,7 +51,7 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
   };
 
   const description: string = useMemo(() => {
-    if (report.description.length > MAX_LENGTH_DESCRIPTION) {
+    if (report.description?.length > MAX_LENGTH_DESCRIPTION) {
       return `${report.description.substring(0, MAX_LENGTH_DESCRIPTION)}...`;
     }
     return report.description;

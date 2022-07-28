@@ -1,8 +1,8 @@
 import format from 'date-fns/format';
 import type { UserDTO } from '@kyso-io/kyso-model';
-import UnPureSuggestContentDropdown from './UnPureSuggestContentDropdown';
+import UnpureSuggestContentDropdown from './UnpureSuggestContentDropdown';
 
-type UnPureReportCreateHeaderProps = {
+type UnpureReportCreateHeaderProps = {
   user: UserDTO;
   title?: string;
   description?: string;
@@ -12,7 +12,7 @@ type UnPureReportCreateHeaderProps = {
   stopTyping: boolean | false;
 };
 
-const UnPureReportCreateHeader = (props: UnPureReportCreateHeaderProps) => {
+const UnpureReportCreateHeader = (props: UnpureReportCreateHeaderProps) => {
   const { title = null, description = null, user, setTitle, setStop, setDescription } = props;
 
   return (
@@ -82,7 +82,7 @@ const UnPureReportCreateHeader = (props: UnPureReportCreateHeaderProps) => {
                   <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{user?.display_name}</p>
                 </div>
 
-                <UnPureSuggestContentDropdown label={'Add authors'} />
+                <UnpureSuggestContentDropdown label={'Add authors'} />
 
                 <div className="ml-5">
                   Created:
@@ -102,7 +102,7 @@ const UnPureReportCreateHeader = (props: UnPureReportCreateHeaderProps) => {
                     </svg>
                   </button>
                 </span>
-                <UnPureSuggestContentDropdown label={'Add tags'} />
+                <UnpureSuggestContentDropdown label={'Add tags'} />
               </div>
             </div>
           </div>
@@ -112,4 +112,4 @@ const UnPureReportCreateHeader = (props: UnPureReportCreateHeaderProps) => {
   );
 };
 
-export default UnPureReportCreateHeader;
+export default UnpureReportCreateHeader;
