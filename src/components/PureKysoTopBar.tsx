@@ -29,7 +29,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
 
   return (
     <React.Fragment>
-      <div className="h-[64px] min-h-full">
+      <div className="h-[64px]">
         <Disclosure as="div" className="fixed z-10 w-screen bg-slate-500 border-b">
           {({ open }) => (
             <>
@@ -162,8 +162,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
           )}
         </Disclosure>
       </div>
-      <div className="block">{children}</div>
-
+      <div className="min-h-screen -mb-[114px]">{children}</div>
       <Footer />
     </React.Fragment>
   );
