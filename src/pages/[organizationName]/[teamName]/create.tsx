@@ -1,15 +1,23 @@
 import KysoTopBar from '@/layouts/KysoTopBar';
-import UnpureMain from '@/wrappers/UnpureMain';
+import type { CommonData } from '@/hooks/use-common-data';
+import { useCommonData } from '@/hooks/use-common-data';
 import Cookies from 'universal-cookie';
-import UnPureReportCreateHeader from '@/wrappers/UnPureReportCreateHeader';
+import UnPureReportCreateHeader from '@/unpure-components/UnPureReportCreateHeader';
 import { useState } from 'react';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { useUser } from '@/hooks/use-user';
 import type { UserDTO } from '@kyso-io/kyso-model';
+import UnpureMain from '@/unpure-components/UnpureMain';
+import router from 'next/router';
 
 const CreateReport = () => {
   useRedirectIfNoJWT();
   const user: UserDTO = useUser();
+  const commonData: CommonData = useCommonData({
+    organizationName: router.query.organizationName as string,
+    teamName: router.query.teamName as string,
+  });
+
   // const router = useRouter();
   // const dispatch = useAppDispatch();
   // const report = useCommonReportData();
@@ -74,7 +82,7 @@ const CreateReport = () => {
 
   return (
     <>
-      <UnpureMain>
+      <UnpureMain basePath={router.basePath} commonData={commonData}>
         <div className="flex flex-row space-x-10 ">
           <div className="flex flex-col h-screen w-[450px] space-y-6 truncate">
             <h2>Files</h2>

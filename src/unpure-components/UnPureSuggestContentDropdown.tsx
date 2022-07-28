@@ -1,7 +1,7 @@
 import { Fragment } from 'react';
 import { PlusIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
-import UnPureSuggestUserCombobox from '@/wrappers/UnPureSuggestUserCombobox';
+import UnPureSuggestUserCombobox from './UnPureSuggestUserCombobox';
 
 type IUnPureSuggestContentDropdown = {
   label: string;

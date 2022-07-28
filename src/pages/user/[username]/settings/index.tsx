@@ -8,7 +8,10 @@ import { useCommonData } from '@/hooks/use-common-data';
 const Index = () => {
   useUser();
   const router = useRouter();
-  const commonData: CommonData = useCommonData();
+  const commonData: CommonData = useCommonData({
+    organizationName: router.query.organizationName as string,
+    teamName: router.query.teamName as string,
+  });
 
   let sluglifiedName = '';
 

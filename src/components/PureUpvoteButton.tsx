@@ -9,16 +9,6 @@ type IPureUpvoteButton = {
 
 const PureUpvoteButton = (props: IPureUpvoteButton) => {
   const { report, upvoteReport } = props;
-  // const report = useAppSelector((state) => state.reports.entities[props.id]);
-
-  // const dispatch = useAppDispatch();
-  // const [isUpvoteBusy, setUpvoteBusy] = useState(false);
-
-  // const upvoteReport = async () => {
-  // setUpvoteBusy(true);
-  // await dispatch(toggleUserStarReportAction(report.id));
-  // setUpvoteBusy(false);
-  // };
 
   return (
     <button

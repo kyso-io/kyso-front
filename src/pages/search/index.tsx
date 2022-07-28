@@ -12,6 +12,7 @@ import { ElasticSearchIndex } from '@kyso-io/kyso-model';
 import { fullTextSearchAction } from '@kyso-io/kyso-store';
 import { unwrapResult } from '@reduxjs/toolkit';
 import debounce from 'lodash.debounce';
+import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -28,6 +29,8 @@ const debouncedFetchData = debounce((params: FullTextSearchParams, dispatch: any
 
 const SearchIndex = () => {
   useUser();
+  const router = useRouter();
+  const { q } = router.query;
   const dispatch = useAppDispatch();
   const [requesting, setRequesting] = useState<boolean>(false);
   const [fullTextSearchDTO, setFullTextSearchDTO] = useState<FullTextSearchDTO | null>(null);
@@ -57,6 +60,18 @@ const SearchIndex = () => {
     }
     return null;
   }, [fullTextSearchDTO]);
+
+  useEffect(() => {
+    if (!router.isReady) {
+      return;
+    }
+    if (!q) {
+      return;
+    }
+    if (fullTextSearchParams.terms !== q) {
+      setFullTextSearchParams({ ...fullTextSearchParams, terms: q as string });
+    }
+  }, [router.isReady, q]);
 
   useEffect(() => {
     setRequesting(true);

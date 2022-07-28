@@ -1,12 +1,9 @@
 import type { GithubFileHash } from '@kyso-io/kyso-model';
 import { fetchFileContentAction } from '@kyso-io/kyso-store';
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useAppDispatch } from './redux-hooks';
-import { useCommonReportData } from './use-common-report-data';
-import { useTree } from './use-tree';
 
-interface IFileToRender {
+export interface FileToRender {
   path: string;
   id: string;
   path_scs: string;
@@ -21,31 +18,27 @@ const isImage = (name: string) => {
   );
 };
 
-interface IUseFileToRender {
+interface Props {
   path: string;
+  tree: GithubFileHash[];
+  mainFile: string | undefined;
 }
 
-export const useFileToRender = (props: IUseFileToRender): IFileToRender | null => {
-  const { path } = props;
-  const router = useRouter();
-  const report = useCommonReportData();
+export const useFileToRender = (props: Props): FileToRender | null => {
+  const { path, tree, mainFile } = props;
 
-  const [fileToRender, setFileToRender] = useState<IFileToRender | null>(null);
+  const [fileToRender, setFileToRender] = useState<FileToRender | null>(null);
   const dispatch = useAppDispatch();
-  const tree = useTree({ path });
-
-  let validFile: GithubFileHash | undefined | null = null;
 
   const validFiles: GithubFileHash[] = tree?.filter((item: GithubFileHash) => item.type === 'file');
+  const allowedPaths = [path, mainFile, 'Readme.md'];
 
-  const allowedPaths = [path, report?.main_file, 'Readme.md'];
-
-  validFile = validFiles?.find((item: GithubFileHash) => {
+  const validFile: GithubFileHash | undefined = validFiles?.find((item: GithubFileHash) => {
     return allowedPaths.includes(item.path);
   });
 
   const fetcher = async () => {
-    let ftr: IFileToRender | null = null;
+    let ftr: FileToRender | null = null;
 
     if (validFile) {
       ftr = {
@@ -74,10 +67,10 @@ export const useFileToRender = (props: IUseFileToRender): IFileToRender | null =
   };
 
   useEffect(() => {
-    if (router.isReady) {
-      fetcher();
-    }
-  }, [router.query.path, validFile]);
+    fetcher();
+  }, [tree, validFile]);
+
+  console.log(mainFile, fileToRender);
 
   return fileToRender;
 };

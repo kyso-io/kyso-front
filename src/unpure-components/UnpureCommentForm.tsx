@@ -1,18 +1,8 @@
-import checkPermissions from '@/helpers/check-permissions';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
-import { useCommonData } from '@/hooks/use-common-data';
 import type { CommonData } from '@/hooks/use-common-data';
-import {
-  createCommentAction,
-  fetchReportCommentsAction,
-  fetchTeamAssigneesAction,
-  selectCommentsById,
-  selectCurrentUserPermissions,
-  selectFirstSearchResult,
-  updateCommentAction,
-} from '@kyso-io/kyso-store';
+import { createCommentAction, fetchReportCommentsAction, fetchTeamAssigneesAction, selectCommentsById, selectFirstSearchResult, updateCommentAction } from '@kyso-io/kyso-store';
 import { useUser } from '@/hooks/use-user';
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { Comment, User } from '@kyso-io/kyso-model';
 import PureCommentInput from '@/components/PureCommentInput';
 import classNames from '@/helpers/class-names';
@@ -23,15 +13,14 @@ type IUnpureCommentForm = {
   id?: string;
   onCancel?: () => void;
   onSubmitted?: () => void;
-  showPostButton?: boolean;
+  hasPermissionCreateComment?: boolean;
+  commonData: CommonData;
 };
 
 const UnpureCommentForm = (props: IUnpureCommentForm) => {
-  const { parentId, id, onCancel = () => {}, onSubmitted = () => {}, showPostButton = true } = props;
+  const { parentId, commonData, id, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true } = props;
   const dispatch = useAppDispatch();
   const [suggestions, setSuggestions] = useState([]);
-
-  const commonData: CommonData = useCommonData();
 
   let initialValue = '';
   const comment: Comment | null = useAppSelector((state) => (id ? selectCommentsById(state, id) : null));
@@ -49,16 +38,10 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
   const report = useAppSelector(selectFirstSearchResult);
   const user = useUser();
 
-  const currentUserPermissions = useAppSelector(selectCurrentUserPermissions);
-
   let isUserAuthor = false;
   if (user && user.id === comment?.user_id) {
     isUserAuthor = true;
   }
-
-  const hasPermissionCreateComment = useMemo(() => {
-    return checkPermissions(commonData.organization, commonData.team, currentUserPermissions, 'KYSO_IO_CREATE_COMMENT');
-  }, [commonData.organization, commonData.team, currentUserPermissions]);
 
   useEffect(() => {
     if (!report) {
@@ -150,7 +133,7 @@ const UnpureCommentForm = (props: IUnpureCommentForm) => {
               Cancel
             </button>
           )}
-          {showPostButton && hasPermissionCreateComment && (
+          {hasPermissionCreateComment && (
             <button
               className={classNames(
                 'inline-flex items-center px-2 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-0',

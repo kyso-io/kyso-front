@@ -1,6 +1,6 @@
 import format from 'date-fns/format';
 import type { UserDTO } from '@kyso-io/kyso-model';
-import UnPureSuggestContentDropdown from '@/wrappers/UnPureSuggestContentDropdown';
+import UnPureSuggestContentDropdown from './UnPureSuggestContentDropdown';
 
 type UnPureReportCreateHeaderProps = {
   user: UserDTO;
