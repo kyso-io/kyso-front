@@ -126,11 +126,11 @@ const UnpureReportRender = (props: Props) => {
   if (fileToRender.content !== null) {
     if (fileToRender.path.endsWith('.md')) {
       render = (
-        <div className="grow flex md:space-x-2 md:space-y-0 space-y-2">
-          <div className="md:w-screen-sm sm:w-full border-x border-b rounded-b p-2">
+        <div className="w-full grow flex lg:flex-row flex-col lg:space-y-0 space-y-2">
+          <div className="lg:max-w-5xl lg:min-w-5xl w-full border-x border-b rounded-b p-2">
             <KysoMarkdownRenderer source={fileToRender.content} />
           </div>
-          <div className="md:w-[400px] sm:w-full"></div>
+          <div className="lg:max-w-xs w-full p-2"></div>
         </div>
       );
     } else if (isImage(fileToRender.path)) {
