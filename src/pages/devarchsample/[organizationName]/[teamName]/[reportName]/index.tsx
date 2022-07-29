@@ -1,4 +1,4 @@
-import KysoTopBar from '@/layouts/KysoTopBar';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRouter } from 'next/router';
@@ -41,6 +41,6 @@ const Index = () => {
   );
 };
 
-Index.layout = KysoTopBar;
+Index.layout = KysoApplicationLayout;
 
 export default Index;

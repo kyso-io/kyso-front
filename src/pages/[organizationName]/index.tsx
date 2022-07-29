@@ -1,6 +1,5 @@
 /* eslint no-empty: "off" */
-import KysoTopBar from '@/layouts/KysoTopBar';
-import UnpureMain from '@/unpure-components/UnpureMain';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, PaginatedResponseDto, ReportDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -224,7 +223,7 @@ const Index = () => {
   };
 
   return (
-    <UnpureMain basePath={router.basePath} commonData={commonData}>
+    <>
       <div className="flex flex-row">
         <div className="w-5/6 px-8">
           <div className="container flex">
@@ -276,10 +275,10 @@ const Index = () => {
           </div>
         )}
       </div>
-    </UnpureMain>
+    </>
   );
 };
 
-Index.layout = KysoTopBar;
+Index.layout = KysoApplicationLayout;
 
 export default Index;

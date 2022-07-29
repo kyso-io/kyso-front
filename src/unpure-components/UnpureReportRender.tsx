@@ -126,35 +126,32 @@ const UnpureReportRender = (props: Props) => {
   if (fileToRender.content !== null) {
     if (fileToRender.path.endsWith('.md')) {
       render = (
-        <div className="p-3">
-          <KysoMarkdownRenderer source={fileToRender.content} />
+        <div className="grow flex md:space-x-2 md:space-y-0 space-y-2">
+          <div className="md:w-screen-sm sm:w-full border-x border-b rounded-b p-2">
+            <KysoMarkdownRenderer source={fileToRender.content} />
+          </div>
+          <div className="md:w-[400px] sm:w-full"></div>
         </div>
       );
     } else if (isImage(fileToRender.path)) {
       render = <img src={`data:image/jpeg;base64,${fileToRender.content}`} alt="file image" />;
     } else if (fileToRender.path.endsWith('.ipynb')) {
       render = (
-        <div className="flex flex-col w-full relative">
-          <div className="w-full max-w-full">
-            {commonData.user && (
-              <KysoJupyterRenderer
-                commonData={commonData}
-                report={report}
-                channelMembers={channelMembers}
-                jupyterNotebook={JSON.parse(fileToRender.content as string)}
-                showInputs={false}
-                showOutputs={false}
-                inlineComments={inlineComments}
-                createInlineComment={createInlineComment}
-                deleteInlineComment={deleteInlineComment}
-                editInlineComment={editInlineComment}
-                enabledCreateInlineComment={enabledCreateInlineComment}
-                enabledEditInlineComment={enabledEditInlineComment}
-                enabledDeleteInlineComment={enabledDeleteInlineComment}
-              />
-            )}
-          </div>
-        </div>
+        <KysoJupyterRenderer
+          commonData={commonData}
+          report={report}
+          channelMembers={channelMembers}
+          jupyterNotebook={JSON.parse(fileToRender.content as string)}
+          showInputs={false}
+          showOutputs={false}
+          inlineComments={inlineComments}
+          createInlineComment={createInlineComment}
+          deleteInlineComment={deleteInlineComment}
+          editInlineComment={editInlineComment}
+          enabledCreateInlineComment={enabledCreateInlineComment}
+          enabledEditInlineComment={enabledEditInlineComment}
+          enabledDeleteInlineComment={enabledDeleteInlineComment}
+        />
       );
     } else if (
       fileToRender.path.endsWith('.txt') ||
@@ -166,10 +163,11 @@ const UnpureReportRender = (props: Props) => {
       fileToRender.path.endsWith('.css')
     ) {
       render = (
-        <div>
-          <pre>
-            <KysoMarkdownRenderer source={fileToRender.content} />
-          </pre>
+        <div className="grow flex md:space-x-2 md:space-y-0 space-y-2">
+          <div className="md:w-screen-sm sm:w-full border-x border-b rounded-b p-2">
+            <KysoMarkdownRenderer source={`\`\`\`${fileToRender.content}\`\`\``} />
+          </div>
+          <div className="md:w-[400px] sm:w-full"></div>
         </div>
       );
     } else {

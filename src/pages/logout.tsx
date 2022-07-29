@@ -1,5 +1,5 @@
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import KysoTopBar from '@/layouts/KysoTopBar';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { logoutAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
@@ -30,6 +30,6 @@ const Page = () => {
   );
 };
 
-Page.layout = KysoTopBar;
+Page.layout = KysoApplicationLayout;
 
 export default Page;

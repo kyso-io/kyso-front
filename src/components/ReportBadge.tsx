@@ -62,7 +62,7 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
       <div className="relative bg-white shadow-sm flex space-x-3">
         <div className="shrink-0">
           <div className="bg-stripes-sky-blue rounded-tl-lg text-center overflow-hidden mx-auto">
-            <img className="object-fill h-56" style={{ width: 224, height: 224 }} src={reportImage} />
+            <img className="object-fill h-56" style={{ width: 224, height: 224 }} src={reportImage} alt="report preview image" />
           </div>
         </div>
         <div className="flex-1 min-w-0 py-3 pr-2 relative">
@@ -92,7 +92,7 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="origin-top-right absolute right-0 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                <Menu.Items className="origin-top-right absolute right-0 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity/5 focus:outline-none">
                   {hasPermissionReportGlobalPin && (
                     <Menu.Item>
                       {({ active }) => (
