@@ -1,5 +1,6 @@
 import format from 'date-fns/format';
 import type { UserDTO } from '@kyso-io/kyso-model';
+import { PureAvatar } from '@/components/PureAvatar';
 import UnpureSuggestContentDropdown from './UnPureSuggestContentDropdown';
 
 type UnpureReportCreateHeaderProps = {
@@ -76,7 +77,7 @@ const UnpureReportCreateHeader = (props: UnpureReportCreateHeaderProps) => {
             <div key={user?.display_name} className="shrink-0 group block">
               <div className="flex items-center">
                 <div>
-                  <img className="m-0 inline-block h-9 w-9 rounded-full" src={user?.avatar_url} alt="" />
+                  <PureAvatar avatarUrl={user?.avatar_url} defaultName={user?.display_name} />
                 </div>
                 <div className="mx-3">
                   <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{user?.display_name}</p>
