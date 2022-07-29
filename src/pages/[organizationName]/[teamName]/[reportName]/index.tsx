@@ -142,8 +142,8 @@ const Index = () => {
 
   return (
     <div className="lg:mx-auto">
-      <div className="grow flex lg:flex-row flex-col lg:space-x-2 lg:space-y-0 space-y-2">
-        <div className="flex-none lg:w-[350px] sm:w-full rounded px-4">
+      <div className="grow flex lg:flex-row flex-col lg:space-y-0 space-y-2">
+        <div className="flex-none lg:w-[350px] w-full rounded px-4">
           {selfTree && report && commonData && (
             <PureTree
               path={currentPath}
@@ -158,11 +158,11 @@ const Index = () => {
           )}
         </div>
 
-        <div className="grow sm:w-full rounded">
+        <div className="grow w-full rounded">
           {report && commonData && (
             <>
-              <div className="grow flex md:space-x-2 md:space-y-0 space-y-2">
-                <div className="md:w-screen-sm sm:w-full flex flex-row justify-between rounded">
+              <div className="grow flex lg:flex-row container flex-col lg:space-y-0 space-y-2">
+                <div className="lg:w-screen-lg w-full flex lg:flex-row flex-col justify-between rounded">
                   <PureReportHeader report={report} authors={authors} />
                   <div className="flex items-top pt-3 space-x-4">
                     {report?.id && (
@@ -185,11 +185,11 @@ const Index = () => {
                     />
                   </div>
                 </div>
-                <div className="md:w-[400px] sm:w-full"></div>
+                <div className="lg:max-w-xs w-full rounded"></div>
               </div>
 
-              <div className="grow flex md:space-x-2 md:space-y-0 space-y-2">
-                <div className="md:w-screen-sm sm:w-full rounded">
+              <div className="grow flex lg:flex-row container flex-col lg:space-y-0 space-y-2">
+                <div className="lg:max-w-5xl lg:min-w-5xl w-full flex lg:flex-row flex-col justify-between rounded">
                   {fileToRender && (
                     <UnpureFileHeader
                       tree={selfTree}
@@ -202,38 +202,34 @@ const Index = () => {
                     />
                   )}
                 </div>
-                <div className="md:w-[400px] sm:w-full"></div>
+                <div className="lg:max-w-xs w-full rounded"></div>
               </div>
 
-              <div className="grow flex md:space-x-2 md:space-y-0 space-y-2">
-                <div className="md:w-screen-sm sm:w-full">
-                  {fileToRender && (
-                    <UnpureReportRender
-                      fileToRender={fileToRender}
-                      report={report}
-                      channelMembers={channelMembers}
-                      commonData={commonData}
-                      enabledCreateInlineComment={hasPermissionCreateInlineComment}
-                      enabledEditInlineComment={hasPermissionEditInlineComment}
-                      enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
-                    />
-                  )}
+              <div className="grow flex lg:flex-col flex-col">
+                {fileToRender && (
+                  <UnpureReportRender
+                    fileToRender={fileToRender}
+                    report={report}
+                    channelMembers={channelMembers}
+                    commonData={commonData}
+                    enabledCreateInlineComment={hasPermissionCreateInlineComment}
+                    enabledEditInlineComment={hasPermissionEditInlineComment}
+                    enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
+                  />
+                )}
 
-                  {!fileToRender && (
-                    <div className="prose prose-sm p-3">
-                      <p>Please choose a file in the filebrowser on the left.</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* <div className="md:w-[400px] bg-red-200 sm:w-full"></div> */}
+                {!fileToRender && (
+                  <div className="prose prose-sm p-3">
+                    <p>Please choose a file in the filebrowser on the left.</p>
+                  </div>
+                )}
               </div>
 
-              <div className="grow flex md:space-x-2 md:space-y-0 space-y-2 ">
-                <div className="md:w-screen-sm sm:w-full rounded">
+              <div className="grow flex lg:flex-row container flex-col lg:space-y-0 space-y-2">
+                <div className="lg:max-w-5xl lg:min-w-5xl w-full flex lg:flex-row flex-col justify-between rounded">
                   {hasPermissionReadComment && (
-                    <div className="block pb-44">
-                      <div className="prose my-4">
+                    <div className="block pb-44 w-full">
+                      <div className="prose my-4 max-w-none ">
                         <h2>Comments</h2>
                       </div>
                       <PureComments
@@ -267,8 +263,7 @@ const Index = () => {
                     </div>
                   )}
                 </div>
-
-                <div className="md:w-[400px] sm:w-full"></div>
+                <div className="lg:max-w-xs w-full rounded"></div>
               </div>
             </>
           )}

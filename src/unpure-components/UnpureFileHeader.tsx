@@ -79,7 +79,7 @@ const UnureFileHeader = (props: Props) => {
   };
 
   return (
-    <div>
+    <div className="w-full">
       <div className="text-xs border text-gray-800 bg-gray-100 rounded-t ">
         <div className="flex h-12 items-center justify-between">
           <div className="flex items-center space-x-0 ml-3">
