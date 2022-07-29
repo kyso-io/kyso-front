@@ -13,7 +13,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
     <div className="prose-sm">
       <h1 className="m-0 mb-2">{report?.title}</h1>
       {report?.description && <p>{report?.description}</p>}
-      <div className="prose prose-sm flex items-center text-gray-500 font-light space-x-2">
+      <div className="prose prose-sm flex flex-col lg:flex-row lg:items-center text-gray-500 font-light space-x-2">
         <div className="flex">
           {authors?.map((author) => (
             <div key={author.display_name} className="shrink-0 group block">
