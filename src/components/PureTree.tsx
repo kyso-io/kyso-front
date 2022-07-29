@@ -119,7 +119,7 @@ const PureTree = (props: IPureTree) => {
   return (
     <div>
       <div className="text-sm rounded">
-        <div className="flex min-h-12 items-center justify-between mt-12">
+        <div className="flex min-h-12 items-center justify-between">
           <div className="flex items-center space-x-0 ml-3 mb-6 h-4">
             <div className={classNames('flex items-center')}>
               {/* <div className={classNames('hover:underline ml-0 text-sm', 'font-normal text-gray-400 mr-1')}>files in</div> */}

@@ -1,4 +1,4 @@
-import KysoTopBar from '@/layouts/KysoTopBar.tsx';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout.tsx';
 import { addUserAccountAction, loginAction, selectUser, setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import React, { useEffect } from 'react';
@@ -74,6 +74,6 @@ const Page = () => {
   );
 };
 
-Page.layout = KysoTopBar;
+Page.layout = KysoApplicationLayout;
 
 export default Page;

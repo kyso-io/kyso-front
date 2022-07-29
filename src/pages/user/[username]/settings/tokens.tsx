@@ -1,4 +1,4 @@
-import KysoTopBar from '@/layouts/KysoTopBar';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { useRouter } from 'next/router';
 
 import { Helper } from '@/helpers/Helper';
@@ -37,6 +37,6 @@ const Index = () => {
   );
 };
 
-Index.layout = KysoTopBar;
+Index.layout = KysoApplicationLayout;
 
 export default Index;

@@ -1,8 +1,8 @@
 import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
-import KysoTopBar from '@/layouts/KysoTopBar';
-import UnpureMain from '@/unpure-components/UnpureMain';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import UnpureMain from '@/components/PureBreadcrumbNavbar';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
@@ -32,6 +32,6 @@ const Index = () => {
   );
 };
 
-Index.layout = KysoTopBar;
+Index.layout = KysoApplicationLayout;
 
 export default Index;

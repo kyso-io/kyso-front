@@ -1,8 +1,7 @@
-import KysoTopBar from '@/layouts/KysoTopBar';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { NextRouter } from 'next/router';
 import { useRouter } from 'next/router';
 import { useReports } from '@/hooks/use-reports';
-import UnpureMain from '@/unpure-components/UnpureMain';
 import UnpureReportBadge from '@/unpure-components/UnpureReportBadge';
 import PureReportFilter from '@/components/PureReportFilter';
 import type { CommonData } from '@/hooks/use-common-data';
@@ -104,64 +103,62 @@ const Index = () => {
   }
 
   return (
-    <UnpureMain basePath={router.basePath} commonData={commonData}>
-      <div className="container mx-auto">
-        <PureReportFilter
-          defaultSearch={(router.query.search as string) || null}
-          sortOptions={sortOptions}
-          tags={tags}
-          activeFilters={activeFilters}
-          onSetSearch={(search: string) => {
-            pushQueryString(router, { search });
-          }}
-          onSetTags={(newTags: string[]) => {
-            pushQueryString(router, { tags: newTags });
-          }}
-          onSetSort={(sort: string) => {
-            pushQueryString(router, { sort });
-          }}
-          currentSort={router.query.sort as string}
-          onClear={() => {
-            router.push({
-              pathname: `/${router.query.organizationName}/${router.query.teamName}`,
-              query: null,
-            });
-          }}
-        />
-        <div className="mt-8">
-          <ul role="list" className="space-y-4">
-            {reports?.map((report) => (
-              <UnpureReportBadge key={report.id} report={report} commonData={commonData} hasPermissionGlobalPinReport={hasPermissionGlobalPinReport} />
-            ))}
-          </ul>
-        </div>
-
-        <div className="flex-1 flex mt-4 justify-center">
-          {!(currentPage - 1 < 1) && (
-            <a
-              href={currentPage - 1 < 1 ? '#' : `?page=${currentPage - 1}${extraParamsUrl}`}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Previous
-            </a>
-          )}
-
-          {enabledNextPage && <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {currentPage}</p>}
-
-          {enabledNextPage && (
-            <a
-              href={enabledNextPage ? `?page=${currentPage + 1}${extraParamsUrl}` : '#'}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Next
-            </a>
-          )}
-        </div>
+    <div className="container mx-auto">
+      <PureReportFilter
+        defaultSearch={(router.query.search as string) || null}
+        sortOptions={sortOptions}
+        tags={tags}
+        activeFilters={activeFilters}
+        onSetSearch={(search: string) => {
+          pushQueryString(router, { search });
+        }}
+        onSetTags={(newTags: string[]) => {
+          pushQueryString(router, { tags: newTags });
+        }}
+        onSetSort={(sort: string) => {
+          pushQueryString(router, { sort });
+        }}
+        currentSort={router.query.sort as string}
+        onClear={() => {
+          router.push({
+            pathname: `/${router.query.organizationName}/${router.query.teamName}`,
+            query: null,
+          });
+        }}
+      />
+      <div className="mt-8">
+        <ul role="list" className="space-y-4">
+          {reports?.map((report) => (
+            <UnpureReportBadge key={report.id} report={report} commonData={commonData} hasPermissionGlobalPinReport={hasPermissionGlobalPinReport} />
+          ))}
+        </ul>
       </div>
-    </UnpureMain>
+
+      <div className="flex-1 flex mt-4 justify-center">
+        {!(currentPage - 1 < 1) && (
+          <a
+            href={currentPage - 1 < 1 ? '#' : `?page=${currentPage - 1}${extraParamsUrl}`}
+            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Previous
+          </a>
+        )}
+
+        {enabledNextPage && <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {currentPage}</p>}
+
+        {enabledNextPage && (
+          <a
+            href={enabledNextPage ? `?page=${currentPage + 1}${extraParamsUrl}` : '#'}
+            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+          >
+            Next
+          </a>
+        )}
+      </div>
+    </div>
   );
 };
 
-Index.layout = KysoTopBar;
+Index.layout = KysoApplicationLayout;
 
 export default Index;
