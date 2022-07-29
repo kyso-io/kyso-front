@@ -36,22 +36,26 @@ const CreateReport = () => {
     <>
       <>
         <div className="flex flex-row space-x-10 ">
-          <div className="flex flex-col h-screen w-[450px] space-y-6 truncate">
+          <div className="flex flex-col w-[450px] space-y-6 truncate"></div>
+
+          <div className="flex flex-col w-full space-y-6 pt-6">
+            <div className="flex justify-between">
+              <UnpureReportCreateHeader title={newTitle} description={newDescription} user={user} setTitle={setTitle} setDescription={setDescription} setStop={setStop} stopTyping={stopTyping} />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-row space-x-10 ">
+          <div className="flex flex-col h-screen w-[450px] space-y-6 pt-12  truncate">
             <div className="text-sm rounded">
-              <div className="flex min-h-12 border-b mr-10">
+              <div className="flex min-h-12 border-b mx-10">
                 <UnpureCreateFile />
               </div>
-              <div className="flex min-h-12 mr-10 mt-2">
+              <div className="flex min-h-12 mx-10 mt-2">
                 <UnpureCreateFileList fileName={'fileName'} />
               </div>
             </div>
           </div>
-
-          <div className="flex flex-col h-screen w-full space-y-6 pt-6 ">
-            <div className="flex justify-between">
-              <UnpureReportCreateHeader title={newTitle} description={newDescription} user={user} setTitle={setTitle} setDescription={setDescription} setStop={setStop} stopTyping={stopTyping} />
-            </div>
-
+          <div className="flex flex-col h-screen w-full space-y-6 pt-6">
             <div className="flex space-x-4">
               <div className="w-full">
                 <PureTopTabs tabs={tabs} onChangeTab={onChangeTab} currentTab={currentTab} />
