@@ -10,6 +10,7 @@ import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import checkPermissions from '@/helpers/check-permissions';
 import { useMemo } from 'react';
 import type { ReportDTO } from '@kyso-io/kyso-model';
+import ChannelList from '@/components/ChannelList';
 
 const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
 
@@ -103,57 +104,62 @@ const Index = () => {
   }
 
   return (
-    <div className="container mx-auto">
-      <PureReportFilter
-        defaultSearch={(router.query.search as string) || null}
-        sortOptions={sortOptions}
-        tags={tags}
-        activeFilters={activeFilters}
-        onSetSearch={(search: string) => {
-          pushQueryString(router, { search });
-        }}
-        onSetTags={(newTags: string[]) => {
-          pushQueryString(router, { tags: newTags });
-        }}
-        onSetSort={(sort: string) => {
-          pushQueryString(router, { sort });
-        }}
-        currentSort={router.query.sort as string}
-        onClear={() => {
-          router.push({
-            pathname: `/${router.query.organizationName}/${router.query.teamName}`,
-            query: null,
-          });
-        }}
-      />
-      <div className="mt-8">
-        <ul role="list" className="space-y-4">
-          {reports?.map((report) => (
-            <UnpureReportBadge key={report.id} report={report} commonData={commonData} hasPermissionGlobalPinReport={hasPermissionGlobalPinReport} />
-          ))}
-        </ul>
+    <div className="flex flex-row space-x-8">
+      <div className="w-2/12">
+        <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
+      <div className="w-8/12">
+        <PureReportFilter
+          defaultSearch={(router.query.search as string) || null}
+          sortOptions={sortOptions}
+          tags={tags}
+          activeFilters={activeFilters}
+          onSetSearch={(search: string) => {
+            pushQueryString(router, { search });
+          }}
+          onSetTags={(newTags: string[]) => {
+            pushQueryString(router, { tags: newTags });
+          }}
+          onSetSort={(sort: string) => {
+            pushQueryString(router, { sort });
+          }}
+          currentSort={router.query.sort as string}
+          onClear={() => {
+            router.push({
+              pathname: `/${router.query.organizationName}/${router.query.teamName}`,
+              query: null,
+            });
+          }}
+        />
+        <div className="mt-8">
+          <ul role="list" className="space-y-4">
+            {reports?.map((report) => (
+              <UnpureReportBadge key={report.id} report={report} commonData={commonData} hasPermissionGlobalPinReport={hasPermissionGlobalPinReport} />
+            ))}
+          </ul>
+        </div>
 
-      <div className="flex-1 flex mt-4 justify-center">
-        {!(currentPage - 1 < 1) && (
-          <a
-            href={currentPage - 1 < 1 ? '#' : `?page=${currentPage - 1}${extraParamsUrl}`}
-            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
-            Previous
-          </a>
-        )}
+        <div className="flex-1 flex mt-4 justify-center">
+          {!(currentPage - 1 < 1) && (
+            <a
+              href={currentPage - 1 < 1 ? '#' : `?page=${currentPage - 1}${extraParamsUrl}`}
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Previous
+            </a>
+          )}
 
-        {enabledNextPage && <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {currentPage}</p>}
+          {enabledNextPage && <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {currentPage}</p>}
 
-        {enabledNextPage && (
-          <a
-            href={enabledNextPage ? `?page=${currentPage + 1}${extraParamsUrl}` : '#'}
-            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-          >
-            Next
-          </a>
-        )}
+          {enabledNextPage && (
+            <a
+              href={enabledNextPage ? `?page=${currentPage + 1}${extraParamsUrl}` : '#'}
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            >
+              Next
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );

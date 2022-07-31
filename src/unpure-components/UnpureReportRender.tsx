@@ -160,24 +160,18 @@ const UnpureReportRender = (props: Props) => {
   if (fileToRender.content !== null) {
     if (fileToRender.path.endsWith('.md')) {
       render = (
-        <div className="w-full grow flex lg:flex-row flex-col lg:space-y-0 space-y-2">
-          <div className="lg:max-w-5xl lg:min-w-5xl w-full border-x border-b rounded-b p-2">
-            <KysoMarkdownRenderer source={fileToRender.content} />
-          </div>
-          <div className="lg:max-w-xs w-full p-2"></div>
+        <div className="w-9/12 p-2 border-x border-b rounded-b">
+          <KysoMarkdownRenderer source={fileToRender.content} />
         </div>
       );
     } else if (isImage(fileToRender.path)) {
       render = (
-        <div className="w-full grow flex lg:flex-row flex-col lg:space-y-0 space-y-2">
-          <div className="lg:max-w-5xl lg:min-w-5xl w-full border-x border-b rounded-b p-2">
-            <img
-              // className="w-full"
-              src={`data:image/jpeg;base64,${fileToRender.content}`}
-              alt="file image"
-            />
-          </div>
-          <div className="lg:max-w-xs w-full p-2"></div>
+        <div className="w-9/12 p-2 border-x border-b rounded-b">
+          <img
+            // className="w-full"
+            src={`data:image/jpeg;base64,${fileToRender.content}`}
+            alt="file image"
+          />
         </div>
       );
     } else if (fileToRender.path.endsWith('.ipynb')) {
@@ -209,11 +203,8 @@ const UnpureReportRender = (props: Props) => {
       fileToRender.path.endsWith('.css')
     ) {
       render = (
-        <div className="w-full grow flex lg:flex-row flex-col lg:space-y-0 space-y-2">
-          <div className="lg:max-w-5xl lg:min-w-5xl w-full border-x border-b rounded-b p-2">
-            <KysoCodeRenderer embedded={false} code={fileToRender.content} />
-          </div>
-          <div className="lg:max-w-xs w-full p-2"></div>
+        <div className="w-9/12 border-x border-b rounded-b p-2">
+          <KysoCodeRenderer embedded={false} code={fileToRender.content} />
         </div>
       );
     } else if (
@@ -226,7 +217,11 @@ const UnpureReportRender = (props: Props) => {
       frontEndUrl
     ) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-      render = <KysoOffice365Renderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
+      render = (
+        <div className="w-9/12 border-x border-b rounded-b">
+          <KysoOffice365Renderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />
+        </div>
+      );
     } else if (
       (fileToRender.path.toLowerCase().endsWith('.rtf') ||
         fileToRender.path.toLowerCase().endsWith('.pdf') ||
@@ -254,22 +249,26 @@ const UnpureReportRender = (props: Props) => {
       frontEndUrl
     ) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-      render = <KysoGoogleDocsRenderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
+      render = (
+        <div className="w-9/12 border-x border-b rounded-b">
+          <KysoGoogleDocsRenderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />
+        </div>
+      );
     } else {
       render = (
-        <div className="w-full grow flex lg:flex-row flex-col lg:space-y-0 space-y-2">
-          <div className="lg:max-w-5xl lg:min-w-5xl w-full border-x border-b rounded-b p-2">
-            <div className="prose p-3">
-              Kyso cannot render this type of file. Do you need it? Give us <a href="/feedback">feedback</a> and we will consider it! 🤓
-            </div>
+        <div className="w-9/12 border-x border-b rounded-b">
+          <div className="prose p-3">
+            Kyso cannot render this type of file. Do you need it? Give us <a href="/feedback">feedback</a> and we will consider it! 🤓
           </div>
         </div>
       );
     }
-  }
-
-  if (fileToRender.path.endsWith('.html')) {
-    render = <PureIframeRenderer file={fileToRender} />;
+  } else if (fileToRender.path.endsWith('.html')) {
+    render = (
+      <div className="w-9/12">
+        <PureIframeRenderer file={fileToRender} />
+      </div>
+    );
   }
 
   return (

@@ -118,11 +118,13 @@ const PureTree = (props: IPureTree) => {
 
   return (
     <div>
+      <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
+        Files
+      </h3>
       <div className="text-sm rounded">
         <div className="flex min-h-12 items-center justify-between">
           <div className="flex items-center space-x-0 ml-3 mb-6 h-4">
             <div className={classNames('flex items-center')}>
-              {/* <div className={classNames('hover:underline ml-0 text-sm', 'font-normal text-gray-400 mr-1')}>files in</div> */}
               {breadcrumbs.map((page, index) => (
                 <div key={`${page.href}+${index}`} className={classNames('flex items-center')}>
                   <a

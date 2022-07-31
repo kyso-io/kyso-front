@@ -1,4 +1,5 @@
 /* eslint no-empty: "off" */
+import ChannelList from '@/components/ChannelList';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, PaginatedResponseDto, ReportDTO } from '@kyso-io/kyso-model';
@@ -225,59 +226,60 @@ const Index = () => {
   };
 
   return (
-    <>
-      <div className="flex flex-row">
-        <div className="w-5/6 px-8">
-          <div className="container flex">
-            <div className="basis-3/4">
-              <main className="py-5">
-                <div className="flex items-center space-x-5">
-                  <div className="shrink-0">
-                    <div className="relative">
-                      <img className="h-16 w-16 rounded-full" src={commonData.organization?.avatar_url} alt="" />
-                      <span className="absolute inset-0 shadow-inner rounded-full" aria-hidden="true" />
-                    </div>
-                  </div>
-                  <div>
-                    <h1 className="text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
-                    <p className="text-sm font-medium text-gray-500">{commonData.organization?.bio}</p>
+    <div className="flex flex-row space-x-8">
+      <div className="w-1/6">
+        <ChannelList basePath={router.basePath} commonData={commonData} />
+      </div>
+      <div className="w-4/6">
+        <div className="container flex">
+          <div className="basis-3/4">
+            <main className="py-5">
+              <div className="flex items-center space-x-5">
+                <div className="shrink-0">
+                  <div className="relative">
+                    <img className="h-16 w-16 rounded-full" src={commonData.organization?.avatar_url} alt="" />
+                    <span className="absolute inset-0 shadow-inner rounded-full" aria-hidden="true" />
                   </div>
                 </div>
-              </main>
-            </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
+                  <p className="text-sm font-medium text-gray-500">{commonData.organization?.bio}</p>
+                </div>
+              </div>
+            </main>
           </div>
-          {organizationInfo && (
-            <div className="mb-10">
-              <OrganizationInfo organizationInfo={organizationInfo} />
-            </div>
-          )}
-          <div className="grid lg:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1 gap-4">
-            {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
-            {paginatedResponseDto?.results &&
-              paginatedResponseDto.results.length > 0 &&
-              paginatedResponseDto?.results.map((report: ReportDTO) => (
-                <ReportBadget
-                  key={report.id}
-                  report={report}
-                  toggleUserStarReport={() => toggleUserStarReport(report.id!)}
-                  toggleUserPinReport={() => toggleUserPinReport(report.id!)}
-                  toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
-                />
-              ))}
-          </div>
-          {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
-            <div className="pt-10">
-              <Pagination page={paginatedResponseDto.currentPage} numPages={paginatedResponseDto.totalPages} onPageChange={(page: number) => setPaginationParams({ ...paginationParams, page })} />
-            </div>
-          )}
         </div>
-        {commonData.user && (
-          <div className="w-1/6">
-            <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+        {organizationInfo && (
+          <div className="mb-10">
+            <OrganizationInfo organizationInfo={organizationInfo} />
+          </div>
+        )}
+        <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
+          {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
+          {paginatedResponseDto?.results &&
+            paginatedResponseDto.results.length > 0 &&
+            paginatedResponseDto?.results.map((report: ReportDTO) => (
+              <ReportBadget
+                key={report.id}
+                report={report}
+                toggleUserStarReport={() => toggleUserStarReport(report.id!)}
+                toggleUserPinReport={() => toggleUserPinReport(report.id!)}
+                toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+              />
+            ))}
+        </div>
+        {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
+          <div className="pt-10">
+            <Pagination page={paginatedResponseDto.currentPage} numPages={paginatedResponseDto.totalPages} onPageChange={(page: number) => setPaginationParams({ ...paginationParams, page })} />
           </div>
         )}
       </div>
-    </>
+      {commonData.user && (
+        <div className="w-1/6">
+          <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+        </div>
+      )}
+    </div>
   );
 };
 
