@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 type IPureTreeItemProps = {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   treeItem: any;
+  href?: string;
   current?: boolean;
   isMainFile: boolean;
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -17,7 +18,7 @@ function classNames(...classes: string[]) {
 }
 
 const PureTreeItem = (props: IPureTreeItemProps) => {
-  const { treeItem, current = false, isMainFile, onClick } = props;
+  const { treeItem, href, current = false, isMainFile, onClick } = props;
   let icon = treeItem.type === 'file' ? faFile : faFolder;
 
   const extension = treeItem.path.split('.').pop();
@@ -63,8 +64,8 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
   return (
     <>
       <a
-        href={`/${treeItem.path}`}
-        className={classNames('py-2 px-3 text-sm w-full group flex items-center justify-between truncate', current ? 'bg-gray-200' : 'hover:bg-gray-100')}
+        href={href || `/${treeItem.path}`}
+        className={classNames('p-2 text-sm w-full group flex items-center justify-between truncate', current ? 'bg-gray-200' : 'hover:bg-gray-100')}
         onClick={onClick}
       >
         <div className={classNames('group flex items-center font-medium text-slate-500', 'hover:text-gray-900', 'font-normal')}>

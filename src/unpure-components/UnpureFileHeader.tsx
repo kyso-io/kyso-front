@@ -1,5 +1,3 @@
-import { BreadcrumbItem } from '@/model/breadcrum-item.model';
-import router from 'next/router';
 import { Fragment, useState } from 'react';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import classNames from '@/helpers/class-names';
@@ -25,41 +23,22 @@ interface Props {
 const UnureFileHeader = (props: Props) => {
   const { tree, report, fileToRender, basePath, commonData, path, version } = props;
 
-  const breadcrumbs: BreadcrumbItem[] = [];
   const [isBusy, setIsBusy] = useState(false);
   const dispatch = useAppDispatch();
 
   const isMainFile = report?.main_file === fileToRender?.path;
 
-  if (report) {
-    breadcrumbs.push(new BreadcrumbItem(report?.name, `${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report?.name}`, false));
-  }
-
-  if (path) {
-    const paths = (path as string).split('/');
-    const littleCrumbs = paths.map((pathItem, index) => {
-      let url = `${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report?.name}?`;
-      if (version) {
-        url += `version=${version}&`;
-      }
-
-      url += `path=`;
-      if (index === 0) {
-        url += `${pathItem}`;
-      } else {
-        url += `${paths.slice(0, index).join('/')}/${pathItem}`;
-      }
-
-      return new BreadcrumbItem(pathItem, url, false);
+  const paths = (path as string).split('/');
+  // // dont show the filename in these breadcrumbs - not enough space
+  // if (currentItem?.type === 'file') {
+  //   paths = paths.slice(0, -1);
+  // }
+  const reportUrl = `${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}`;
+  const crumbs = paths
+    .filter((p) => p !== '')
+    .map((p, index) => {
+      return { path: p, href: `${reportUrl}/${paths.slice(0, index + 1).join('/')}${version ? `?version=${version}` : ``}` };
     });
-
-    breadcrumbs.push(...littleCrumbs);
-  }
-
-  if (fileToRender && !path) {
-    // this means its a readme or other index file
-    breadcrumbs.push(new BreadcrumbItem(fileToRender.path, `${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report?.name}`, false));
-  }
 
   // TODO
   const setMainFile = async () => {
@@ -83,22 +62,13 @@ const UnureFileHeader = (props: Props) => {
       <div className="text-xs border text-gray-800 bg-gray-100 rounded-t ">
         <div className="flex h-12 items-center justify-between">
           <div className="flex items-center space-x-0 ml-3">
-            {breadcrumbs.map((page, index) => (
-              <div key={`${page.href}+${index}`}>
+            {crumbs.map((crumb, index) => (
+              <div key={`${crumb.href}+${index}`}>
                 <div className={classNames('flex items-center')}>
-                  <a
-                    onClick={(e) => {
-                      e.preventDefault();
-                      const url = new URL(page.href, 'https://kyso.io');
-                      router.replace({ query: { ...router.query, path: url.searchParams.get('path') } });
-                    }}
-                    href={page.href}
-                    className={classNames('hover:underline ml-0 text-sm', index + 1 === breadcrumbs.length ? 'font-normal text-gray-500' : 'font-medium text-indigo-500')}
-                    aria-current={page.current ? 'page' : undefined}
-                  >
-                    {page.name}
+                  <a href={crumb.href} className={classNames('hover:underline ml-0 text-sm', index + 1 === crumbs.length ? 'font-normal text-gray-500' : 'font-medium text-indigo-500')}>
+                    {crumb.path}
                   </a>
-                  {index + 1 !== breadcrumbs.length && (
+                  {index + 1 !== crumbs.length && (
                     <svg className="shrink-0 h-3 w-3 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                       <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                     </svg>

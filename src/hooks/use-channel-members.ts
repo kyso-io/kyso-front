@@ -23,7 +23,7 @@ export const useChannelMembers = (props: Props, dependancies: unknown[] = []): T
   const { commonData } = props;
   const [mounted, setMounted] = useState(false);
 
-  const { data } = useSWR<TeamMember[]>(mounted ? `use-channel-members-${commonData.team.id}` : null, () => fetcher(props));
+  const { data } = useSWR<TeamMember[]>(mounted ? `use-channel-members-${commonData.team?.id}` : null, () => fetcher(props));
 
   useEffect(() => {
     if (!commonData.team) {
