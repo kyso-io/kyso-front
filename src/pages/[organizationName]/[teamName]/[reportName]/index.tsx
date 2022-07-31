@@ -139,17 +139,6 @@ const Index = () => {
   const hasPermissionEditInlineComment = useMemo(() => checkPermissions(commonData, 'KYSO_IO_EDIT_INLINE_COMMENT'), [commonData]);
   const hasPermissionDeleteInlineComment = useMemo(() => checkPermissions(commonData, 'KYSO_IO_DELETE_INLINE_COMMENT'), [commonData]);
 
-  const onPushQuery = (newPath: string | null | undefined) => {
-    if (!newPath) {
-      const qs = { ...router.query };
-      delete qs.path;
-      return router.replace(`/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}`);
-    }
-
-    // return router.replace({ query: { ...router.query, path: newPath } });
-    return router.replace(`/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}/${newPath}`);
-  };
-
   if (report && commonData && !hasPermissionReadReport) {
     return <PurePermissionDenied />;
   }
@@ -160,16 +149,7 @@ const Index = () => {
 
       <div className="w-2/12">
         {selfTree && report && commonData && (
-          <PureTree
-            path={currentPath}
-            basePath={router.basePath}
-            commonData={commonData}
-            report={report}
-            version={router.query.version as string}
-            onPushQuery={onPushQuery}
-            selfTree={selfTree}
-            parentTree={parentTree}
-          />
+          <PureTree path={currentPath} basePath={router.basePath} commonData={commonData} report={report} version={router.query.version as string} selfTree={selfTree} parentTree={parentTree} />
         )}
       </div>
 
@@ -222,7 +202,7 @@ const Index = () => {
                     onClick={() => {
                       const qs = { ...router.query };
                       delete qs.cell;
-                      return router.replace({
+                      return router.push({
                         query: { ...qs },
                       });
                     }}
