@@ -43,8 +43,11 @@ const Index = () => {
 
   const authors: User[] = useAuthors({ report });
   const channelMembers = useChannelMembers({ commonData });
+  const allComments = useAppSelector((state) => state.comments.entities);
 
   const userEntities = useUserEntities();
+
+  const onlyVisibleCell = router.query.cell ? (router.query.cell as string) : undefined;
 
   let currentPath = '';
   if (router.query.path) {
@@ -77,6 +80,7 @@ const Index = () => {
 
   const fileToRender: FileToRender | null = useFileToRender({
     path: currentPath,
+    commonData,
     tree: selfTree,
     mainFile: currentPath === '' ? report?.main_file : undefined,
   });
@@ -91,8 +95,6 @@ const Index = () => {
       );
     }
   }, [report?.id]);
-
-  const allComments = useAppSelector((state) => state.comments.entities);
 
   // TODO -> confusion as to whether these are Conmment or CommentDTO
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -143,6 +145,7 @@ const Index = () => {
   return (
     <div className="lg:mx-auto">
       <div className="grow flex lg:flex-row flex-col lg:space-y-0 space-y-2">
+        <div className="hidden divide-x divide-x-1"></div>
         <div className="flex-none lg:w-[350px] w-full rounded px-4">
           {selfTree && report && commonData && (
             <PureTree
@@ -189,7 +192,7 @@ const Index = () => {
               </div>
 
               <div className="grow flex lg:flex-row container flex-col lg:space-y-0 space-y-2">
-                <div className="lg:max-w-5xl lg:min-w-5xl w-full flex lg:flex-row flex-col justify-between rounded">
+                <div className="lg:max-w-5xl lg:min-w-5xl w-full flex flex-col justify-between rounded">
                   {fileToRender && (
                     <UnpureFileHeader
                       tree={selfTree}
@@ -200,6 +203,23 @@ const Index = () => {
                       version={router.query.version as string}
                       commonData={commonData}
                     />
+                  )}
+                  {fileToRender && onlyVisibleCell && (
+                    <div className="w-full border-x border-b flex justify-end p-2 prose prose-sm text-xs max-w-none">
+                      Showing only this cell.
+                      <button
+                        onClick={() => {
+                          const qs = { ...router.query };
+                          delete qs.cell;
+                          return router.replace({
+                            query: { ...qs },
+                          });
+                        }}
+                        className="ml-1 text-blue-500"
+                      >
+                        View entire notebook
+                      </button>
+                    </div>
                   )}
                 </div>
                 <div className="lg:max-w-xs w-full rounded"></div>
@@ -212,6 +232,7 @@ const Index = () => {
                     report={report}
                     channelMembers={channelMembers}
                     commonData={commonData}
+                    onlyVisibleCell={onlyVisibleCell}
                     enabledCreateInlineComment={hasPermissionCreateInlineComment}
                     enabledEditInlineComment={hasPermissionEditInlineComment}
                     enabledDeleteInlineComment={hasPermissionDeleteInlineComment}

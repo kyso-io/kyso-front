@@ -62,8 +62,8 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
 
   return (
     <>
-      <button
-        // href={`?path=${currentPath ? `${currentPath}/` : ''}${treeItem.path}`}
+      <a
+        href={`/${treeItem.path}`}
         className={classNames('py-2 px-3 text-sm w-full group flex items-center justify-between truncate', current ? 'bg-gray-200' : 'hover:bg-gray-100')}
         onClick={onClick}
       >
@@ -107,7 +107,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
           {/* </a> */}
         </div>
         <div>{isMainFile && <div className="text-sm text-gray-500">main</div>}</div>
-      </button>
+      </a>
     </>
   );
 };
