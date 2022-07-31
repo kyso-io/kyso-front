@@ -95,9 +95,6 @@ const PureCommentInput = (props: IPureCommentInput) => {
         }}
         placeholder={placeholder}
         value={text}
-        // displayTransform={(id: string, display: string) => {
-        //   return `@${display}`;
-        // }}
         onChange={(event, newValue, newPlainTextValue, mentions) => {
           handleInputChange(
             newValue,
@@ -109,6 +106,10 @@ const PureCommentInput = (props: IPureCommentInput) => {
       >
         <Mention
           trigger="@"
+          displayTransform={(id: string, display: string) => {
+            console.log(id); // for eslint
+            return `@${display}`;
+          }}
           data={suggestions.map((suggestion) => ({
             id: suggestion.id,
             display: suggestion.nickname,

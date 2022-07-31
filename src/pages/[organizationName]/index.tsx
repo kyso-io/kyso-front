@@ -1,4 +1,5 @@
 /* eslint no-empty: "off" */
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, PaginatedResponseDto, ReportDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -26,6 +27,7 @@ interface PaginationParams {
 
 const Index = () => {
   const router = useRouter();
+  useRedirectIfNoJWT();
   const commonData: CommonData = useCommonData({
     organizationName: router.query.organizationName as string,
     teamName: router.query.teamName as string,
