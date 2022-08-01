@@ -1,12 +1,14 @@
 /* eslint no-empty: "off" */
 import KysoTopBar from '@/layouts/KysoTopBar';
 import UnpureMain from '@/unpure-components/UnpureMain';
-import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, PaginatedResponseDto, ReportDTO } from '@kyso-io/kyso-model';
+import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import { TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import ActivityFeedComponent from '../../components/ActivityFeed';
+import ManageUsers from '../../components/ManageUsers';
 import OrganizationInfo from '../../components/OrganizationActivity';
 import Pagination from '../../components/Pagination';
 import ReportBadget from '../../components/ReportBadge';
@@ -14,6 +16,7 @@ import { getLocalStorageItem } from '../../helpers/get-local-storage-item';
 import type { CommonData } from '../../hooks/use-common-data';
 import { useCommonData } from '../../hooks/use-common-data';
 import { useInterval } from '../../hooks/use-interval';
+import type { Member } from '../../types/member';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 14;
@@ -56,6 +59,7 @@ const Index = () => {
       return;
     }
     getOrganizationsInfo();
+    getOrganizationMembers();
   }, [commonData?.organization]);
 
   useEffect(() => {
@@ -223,6 +227,100 @@ const Index = () => {
     setDatetimeActivityFeed(moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate());
   };
 
+  const [members, setMembers] = useState<Member[]>([]);
+  const getOrganizationMembers = async () => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const result: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
+      const m: Member[] = result.data.map((organizationMember: OrganizationMember) => ({
+        id: organizationMember.id,
+        nickname: organizationMember.nickname,
+        username: organizationMember.username,
+        avatar_url: organizationMember.avatar_url,
+        email: organizationMember.email,
+        organization_roles: organizationMember.organization_roles,
+        team_roles: [],
+        membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
+      }));
+      setMembers(m);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const [users, setUsers] = useState<UserDTO[]>([]);
+  const searchUsers = async (query: string) => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const result: NormalizedResponseDTO<UserDTO[]> = await api.getUsers({
+        userIds: [],
+        page: 1,
+        per_page: 1000,
+        sort: '',
+        search: query,
+      });
+      setUsers(result.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const updateMemberRole = async (userId: string, organizationRole: string, teamRole: string | null) => {
+    let ms: Member[] = [...members];
+    const index: number = ms.findIndex((m: Member) => m.id === userId);
+    if (index === -1) {
+      try {
+        const api: Api = new Api(token, commonData.organization.sluglified_name);
+        const result: NormalizedResponseDTO<OrganizationMember[]> = await api.addUserToOrganization({
+          organizationId: commonData.organization.id!,
+          userId,
+          role: organizationRole,
+        });
+        ms = result.data.map((organizationMember: OrganizationMember) => ({
+          id: organizationMember.id,
+          nickname: organizationMember.nickname,
+          username: organizationMember.username,
+          avatar_url: organizationMember.avatar_url,
+          email: organizationMember.email,
+          organization_roles: organizationMember.organization_roles,
+          team_roles: [],
+          membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
+        }));
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      if (!ms[index]!.organization_roles.includes(organizationRole)) {
+        try {
+          const api: Api = new Api(token, commonData.organization.sluglified_name);
+          const result: NormalizedResponseDTO<OrganizationMember[]> = await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
+            members: [
+              {
+                userId,
+                role: organizationRole,
+              },
+            ],
+          });
+          ms = result.data.map((organizationMember: OrganizationMember) => ({
+            id: organizationMember.id,
+            nickname: organizationMember.nickname,
+            username: organizationMember.username,
+            avatar_url: organizationMember.avatar_url,
+            email: organizationMember.email,
+            organization_roles: organizationMember.organization_roles,
+            team_roles: [],
+            membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
+          }));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (teamRole && !ms[index]!.team_roles.includes(teamRole)) {
+      }
+    }
+    setMembers(ms);
+  };
+
   return (
     <UnpureMain basePath={router.basePath} commonData={commonData}>
       <div className="flex flex-row">
@@ -245,12 +343,15 @@ const Index = () => {
               </main>
             </div>
           </div>
-          {organizationInfo && (
-            <div className="mb-10">
-              <OrganizationInfo organizationInfo={organizationInfo} />
-            </div>
-          )}
-          <div className="grid lg:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1 gap-4">
+          <div className="flex">
+            {organizationInfo && (
+              <div className="mb-10">
+                <OrganizationInfo organizationInfo={organizationInfo} />
+              </div>
+            )}
+            <ManageUsers members={members} onInputChange={(query: string) => searchUsers(query)} users={users} showTeamRoles={false} onUpdateRoleMember={updateMemberRole} />
+          </div>
+          <div className="grid lg:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1 gap-4 z-0">
             {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
             {paginatedResponseDto?.results &&
               paginatedResponseDto.results.length > 0 &&
