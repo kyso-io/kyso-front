@@ -1,33 +1,27 @@
 import { useState } from 'react';
-import { CheckIcon, SelectorIcon } from '@heroicons/react/solid';
 import { Combobox } from '@headlessui/react';
+import { SelectorIcon, CheckIcon } from '@heroicons/react/outline';
 
 type IUnPureSuggestUserCombobox = {
   label: string;
+  suggestions: { id: string; nickname: string; avatar_url: string }[];
+  setSelectedPerson: (_selectedPerson: string[]) => void;
+  selectedPerson: string[];
 };
 
 const UnPureSuggestUserCombobox = (props: IUnPureSuggestUserCombobox) => {
-  const people = [
-    {
-      id: 1,
-      name: 'Leslie Alexander',
-      imageUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-    },
-    // More users...
-  ];
-
   function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ');
   }
-  const { label } = props;
+  const { label, suggestions, setSelectedPerson, selectedPerson } = props;
   const [query, setQuery] = useState('');
-  const [selectedPerson, setSelectedPerson] = useState();
+  // const [selectedPerson, setSelectedPerson] = useState();
 
   const filteredPeople =
     query === ''
-      ? people
-      : people.filter((person) => {
-          return person.name.toLowerCase().includes(query.toLowerCase());
+      ? suggestions
+      : suggestions.filter((person) => {
+          return person.nickname.toLowerCase().includes(query.toLowerCase());
         });
 
   return (
@@ -36,8 +30,10 @@ const UnPureSuggestUserCombobox = (props: IUnPureSuggestUserCombobox) => {
       <div className="relative mt-1">
         <Combobox.Input
           className="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-          onChange={(event) => setQuery(event.target.value)}
-          // displayValue={(person) => person.name}
+          onChange={(event) => {
+            setQuery(event.target.value);
+          }}
+          // displayValue={(person: string[]) => person?.nickname}
         />
         <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
           <SelectorIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
@@ -54,8 +50,8 @@ const UnPureSuggestUserCombobox = (props: IUnPureSuggestUserCombobox) => {
                 {({ active, selected }) => (
                   <>
                     <div className="flex items-center">
-                      <img src={person.imageUrl} alt="" className="h-6 w-6 shrink-0 rounded-full" />
-                      <span className={classNames('ml-3 truncate', selected ? 'font-semibold' : 'font-medium')}>{person.name}</span>
+                      <img src={person.avatar_url} alt="" className="h-6 w-6 shrink-0 rounded-full" />
+                      <span className={classNames('ml-3 truncate', selected ? 'font-semibold' : 'font-medium')}>{person.nickname}</span>
                     </div>
 
                     {selected && (

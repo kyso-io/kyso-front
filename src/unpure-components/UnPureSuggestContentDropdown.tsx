@@ -1,14 +1,18 @@
 import { Fragment } from 'react';
 import { PlusIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
+import type { TeamMember } from '@kyso-io/kyso-model';
 import UnpureSuggestUserCombobox from './UnPureSuggestUserCombobox';
 
 type IUnpureSuggestContentDropdown = {
   label: string;
+  channelMembers: TeamMember[];
+  setSelectedPerson: (selectedPerson: string[]) => void;
+  selectedPerson: string[];
 };
 
 const UnpureSuggestContentDropdown = (props: IUnpureSuggestContentDropdown) => {
-  const { label } = props;
+  const { label, channelMembers, setSelectedPerson, selectedPerson } = props;
 
   return (
     <>
@@ -33,7 +37,7 @@ const UnpureSuggestContentDropdown = (props: IUnpureSuggestContentDropdown) => {
               <div className="px-4 py-5 sm:p-6">
                 <form className="mt-1 sm:items-center">
                   <div className="w-full sm:max-w-s">
-                    <UnpureSuggestUserCombobox label={label} />
+                    <UnpureSuggestUserCombobox label={label} suggestions={channelMembers} selectedPerson={selectedPerson} setSelectedPerson={setSelectedPerson} />
                   </div>
                   <div className="w-full sm:max-w-xs mt-10 text-right">
                     <button

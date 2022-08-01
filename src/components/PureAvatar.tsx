@@ -21,4 +21,4 @@ const PureAvatar = (props: IPureAvatarProps) => {
   );
 };
 
-export { PureAvatar };
+export default PureAvatar;
