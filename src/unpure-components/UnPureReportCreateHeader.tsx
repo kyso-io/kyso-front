@@ -5,16 +5,17 @@ import UnpureSuggestContentDropdown from './UnPureSuggestContentDropdown';
 
 type UnpureReportCreateHeaderProps = {
   user: UserDTO;
-  title?: string;
-  description?: string;
+  title: string | '';
+  description: string | '';
   setTitle: (newTitle: string) => void;
   setDescription: (newDescription: string) => void;
   setStop: (_stopTyping: boolean) => void;
   stopTyping: boolean | false;
+  cacheStatus: string | 'saved';
 };
 
 const UnpureReportCreateHeader = (props: UnpureReportCreateHeaderProps) => {
-  const { title = null, description = null, user, setTitle, setStop, setDescription } = props;
+  const { title = null, description = null, user, setTitle, setStop, setDescription, cacheStatus } = props;
 
   return (
     <>
@@ -24,7 +25,6 @@ const UnpureReportCreateHeader = (props: UnpureReportCreateHeaderProps) => {
             type="text"
             value={title || ''}
             onChange={(e) => {
-              // setBusy(false);
               setTitle(e.target.value);
             }}
             onBlur={() => {
@@ -33,21 +33,22 @@ const UnpureReportCreateHeader = (props: UnpureReportCreateHeaderProps) => {
             placeholder="Title"
             className="
             focus:shadow-sm
-          focus:ring-indigo-500
-          focus:border-indigo-500 
+            focus:ring-indigo-500
+            focus:border-indigo-500 
             block 
             w-full
             pr-2
-          border-white
+            border-white
             border-0
             rounded-md
             text-3xl
             font-medium
-          focus:text-gray-500
-           text-gray-900
+            focus:text-gray-500
+            text-gray-900
           "
           />
           <span className="text-sm w-10 ml-3 font-medium text-gray-400 group-hover:text-gray-600"> v: 1 </span>
+          <h2 className="ml-10">{cacheStatus}</h2>
         </div>
         <input
           type="text"
@@ -69,10 +70,9 @@ const UnpureReportCreateHeader = (props: UnpureReportCreateHeaderProps) => {
           border-0
         text-gray-500
           sm:text-sm
-          rounded-md
-        "
+          rounded-md"
         />
-        <div className="prose prose-sm flex items-center text-gray-500 font-light space-x-2">
+        <div className="prose prose-sm mt-2 ml-2 flex items-center text-gray-500 font-light space-x-2">
           <div className="flex">
             <div key={user?.display_name} className="shrink-0 group block">
               <div className="flex items-center">

@@ -7,7 +7,8 @@ import { useReport } from '@/hooks/use-report';
 import { useTree } from '@/hooks/use-tree';
 import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDropdown';
 import PureComments from '@/components/PureComments';
-import type { GithubFileHash, Comment, User, UserDTO } from '@kyso-io/kyso-model';
+import type { GithubFileHash, Comment, User, UserDTO, KysoSetting } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import PureReportHeader from '@/components/PureReportHeader';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
@@ -43,8 +44,11 @@ const Index = () => {
 
   const authors: User[] = useAuthors({ report });
   const channelMembers = useChannelMembers({ commonData });
+  const allComments = useAppSelector((state) => state.comments.entities);
 
   const userEntities = useUserEntities();
+
+  const onlyVisibleCell = router.query.cell ? (router.query.cell as string) : undefined;
 
   let currentPath = '';
   if (router.query.path) {
@@ -77,6 +81,7 @@ const Index = () => {
 
   const fileToRender: FileToRender | null = useFileToRender({
     path: currentPath,
+    commonData,
     tree: selfTree,
     mainFile: currentPath === '' ? report?.main_file : undefined,
   });
@@ -91,8 +96,6 @@ const Index = () => {
       );
     }
   }, [report?.id]);
-
-  const allComments = useAppSelector((state) => state.comments.entities);
 
   // TODO -> confusion as to whether these are Conmment or CommentDTO
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -112,6 +115,17 @@ const Index = () => {
       );
     }
   };
+
+  let frontEndUrl = useAppSelector((s) => {
+    const settings = s.kysoSettings?.publicSettings?.filter((x: KysoSetting) => x.key === KysoSettingsEnum.BASE_URL);
+    if (settings && settings.length > 0) {
+      return settings[0].value;
+    }
+    return undefined;
+  });
+
+  // for testing
+  frontEndUrl = 'https://dev.kyso.io';
 
   const hasPermissionCreateComment = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_COMMENT'), [commonData]);
   const hasPermissionReadComment = useMemo(() => checkPermissions(commonData, 'KYSO_IO_READ_COMMENT'), [commonData]);
@@ -141,133 +155,146 @@ const Index = () => {
   }
 
   return (
-    <div className="lg:mx-auto">
-      <div className="grow flex lg:flex-row flex-col lg:space-y-0 space-y-2">
-        <div className="flex-none lg:w-[350px] w-full rounded px-4">
-          {selfTree && report && commonData && (
-            <PureTree
-              path={currentPath}
-              basePath={router.basePath}
-              commonData={commonData}
-              report={report}
-              version={router.query.version as string}
-              onPushQuery={onPushQuery}
-              selfTree={selfTree}
-              parentTree={parentTree}
-            />
-          )}
-        </div>
+    <div className="flex flex-row space-x-24">
+      {/* <div className="hidden bg-gray-50 bg-gray-100 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent"></div> */}
 
-        <div className="grow w-full rounded">
-          {report && commonData && (
-            <>
-              <div className="grow flex lg:flex-row container flex-col lg:space-y-0 space-y-2">
-                <div className="lg:w-screen-lg w-full flex lg:flex-row flex-col justify-between rounded">
-                  <PureReportHeader report={report} authors={authors} />
-                  <div className="flex items-top pt-3 space-x-4">
-                    {report?.id && (
-                      <PureUpvoteButton
-                        report={report}
-                        upvoteReport={async () => {
-                          await dispatch(toggleUserStarReportAction(report.id as string));
-                          refreshReport();
-                        }}
-                      />
-                    )}
-                    <PureShareButton report={report} basePath={router.basePath} commonData={commonData} />
-                    <UnpureReportActionDropdown
-                      report={report}
-                      commonData={commonData}
-                      hasPermissionEditReport={
-                        hasPermissionEditReport || ((report.user_id === commonData.user.id || report.author_ids.includes(commonData.user.id as string)) && hasPermissionEditReportOnlyMine)
-                      }
-                      hasPermissionDeleteReport={hasPermissionDeleteReport}
-                    />
-                  </div>
-                </div>
-                <div className="lg:max-w-xs w-full rounded"></div>
-              </div>
+      <div className="w-2/12">
+        {selfTree && report && commonData && (
+          <PureTree
+            path={currentPath}
+            basePath={router.basePath}
+            commonData={commonData}
+            report={report}
+            version={router.query.version as string}
+            onPushQuery={onPushQuery}
+            selfTree={selfTree}
+            parentTree={parentTree}
+          />
+        )}
+      </div>
 
-              <div className="grow flex lg:flex-row container flex-col lg:space-y-0 space-y-2">
-                <div className="lg:max-w-5xl lg:min-w-5xl w-full flex lg:flex-row flex-col justify-between rounded">
-                  {fileToRender && (
-                    <UnpureFileHeader
-                      tree={selfTree}
-                      report={report}
-                      fileToRender={fileToRender}
-                      basePath={router.basePath}
-                      path={currentPath}
-                      version={router.query.version as string}
-                      commonData={commonData}
-                    />
-                  )}
-                </div>
-                <div className="lg:max-w-xs w-full rounded"></div>
-              </div>
-
-              <div className="grow flex lg:flex-col flex-col">
-                {fileToRender && (
-                  <UnpureReportRender
-                    fileToRender={fileToRender}
+      <div className="w-10/12">
+        {report && commonData && (
+          <>
+            <div className="w-9/12 flex lg:flex-row flex-col justify-between rounded">
+              <PureReportHeader report={report} authors={authors} />
+              <div className="flex items-top pt-3 space-x-4">
+                {report?.id && (
+                  <PureUpvoteButton
                     report={report}
-                    channelMembers={channelMembers}
-                    commonData={commonData}
-                    enabledCreateInlineComment={hasPermissionCreateInlineComment}
-                    enabledEditInlineComment={hasPermissionEditInlineComment}
-                    enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
+                    upvoteReport={async () => {
+                      await dispatch(toggleUserStarReportAction(report.id as string));
+                      refreshReport();
+                    }}
                   />
                 )}
+                <PureShareButton report={report} basePath={router.basePath} commonData={commonData} />
+                <UnpureReportActionDropdown
+                  report={report}
+                  commonData={commonData}
+                  hasPermissionEditReport={
+                    hasPermissionEditReport || ((report.user_id === commonData.user.id || report.author_ids.includes(commonData.user.id as string)) && hasPermissionEditReportOnlyMine)
+                  }
+                  hasPermissionDeleteReport={hasPermissionDeleteReport}
+                />
+              </div>
+            </div>
 
-                {!fileToRender && (
-                  <div className="prose prose-sm p-3">
-                    <p>Please choose a file in the filebrowser on the left.</p>
-                  </div>
+            <div className="w-9/12 flex container flex-col lg:space-y-0 space-y-2">
+              <div>
+                {fileToRender && (
+                  <UnpureFileHeader
+                    tree={selfTree}
+                    report={report}
+                    fileToRender={fileToRender}
+                    basePath={router.basePath}
+                    path={currentPath}
+                    version={router.query.version as string}
+                    commonData={commonData}
+                  />
                 )}
               </div>
 
-              <div className="grow flex lg:flex-row container flex-col lg:space-y-0 space-y-2">
-                <div className="lg:max-w-5xl lg:min-w-5xl w-full flex lg:flex-row flex-col justify-between rounded">
-                  {hasPermissionReadComment && (
-                    <div className="block pb-44 w-full">
-                      <div className="prose my-4 max-w-none ">
-                        <h2>Comments</h2>
-                      </div>
-                      <PureComments
-                        report={report}
-                        commonData={commonData}
-                        hasPermissionCreateComment={hasPermissionCreateComment}
-                        hasPermissionDeleteComment={hasPermissionDeleteComment}
-                        channelMembers={channelMembers}
-                        submitComment={submitComment}
-                        userSelectorHook={(id?: string): UserDTO | undefined => {
-                          return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
-                        }}
-                        onDeleteComment={async (id: string) => {
-                          await dispatch(deleteCommentAction(id as string));
-                        }}
-                        commentSelectorHook={(parentId: string | null = null) => {
-                          const values: Comment[] = Object.values(allComments || []);
-                          if (values.length === 0) {
-                            return [];
-                          }
-                          const filtered: Comment[] = values.filter((comment: Comment) => {
-                            return comment!.comment_id === parentId;
-                          });
-                          // Sort comments by created_at desc
-                          filtered.sort((a: Comment, b: Comment) => {
-                            return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
-                          });
-                          return filtered;
-                        }}
-                      />
-                    </div>
-                  )}
+              {fileToRender && onlyVisibleCell && (
+                <div className="w-full border-x border-b flex justify-end p-2 prose prose-sm text-xs max-w-none">
+                  Showing only this cell.
+                  <button
+                    onClick={() => {
+                      const qs = { ...router.query };
+                      delete qs.cell;
+                      return router.replace({
+                        query: { ...qs },
+                      });
+                    }}
+                    className="ml-1 text-blue-500"
+                  >
+                    View entire notebook
+                  </button>
                 </div>
-                <div className="lg:max-w-xs w-full rounded"></div>
-              </div>
-            </>
-          )}
-        </div>
+              )}
+            </div>
+
+            <div className="w-12/12 flex lg:flex-col flex-col">
+              {fileToRender && (
+                <UnpureReportRender
+                  fileToRender={fileToRender}
+                  report={report}
+                  channelMembers={channelMembers}
+                  commonData={commonData}
+                  onlyVisibleCell={onlyVisibleCell}
+                  frontEndUrl={frontEndUrl}
+                  enabledCreateInlineComment={hasPermissionCreateInlineComment}
+                  enabledEditInlineComment={hasPermissionEditInlineComment}
+                  enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
+                />
+              )}
+
+              {!fileToRender && (
+                <div className="prose prose-sm p-3">
+                  <p>Please choose a file in the filebrowser on the left.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="w-9/12 lg:max-w-5xl lg:min-w-5xl flex lg:flex-row flex-col justify-between rounded">
+              {hasPermissionReadComment && (
+                <div className="block pb-44 w-full">
+                  <div className="prose my-4 max-w-none ">
+                    <h2>Comments</h2>
+                  </div>
+                  <PureComments
+                    report={report}
+                    commonData={commonData}
+                    hasPermissionCreateComment={hasPermissionCreateComment}
+                    hasPermissionDeleteComment={hasPermissionDeleteComment}
+                    channelMembers={channelMembers}
+                    submitComment={submitComment}
+                    userSelectorHook={(id?: string): UserDTO | undefined => {
+                      return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
+                    }}
+                    onDeleteComment={async (id: string) => {
+                      await dispatch(deleteCommentAction(id as string));
+                    }}
+                    commentSelectorHook={(parentId: string | null = null) => {
+                      const values: Comment[] = Object.values(allComments || []);
+                      if (values.length === 0) {
+                        return [];
+                      }
+                      const filtered: Comment[] = values.filter((comment: Comment) => {
+                        return comment!.comment_id === parentId;
+                      });
+                      // Sort comments by created_at desc
+                      filtered.sort((a: Comment, b: Comment) => {
+                        return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
+                      });
+                      return filtered;
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

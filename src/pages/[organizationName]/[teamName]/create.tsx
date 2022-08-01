@@ -39,8 +39,17 @@ const CreateReport = () => {
           <div className="flex flex-col w-[450px] space-y-6 truncate"></div>
 
           <div className="flex flex-col w-full space-y-6 pt-6">
-            <div className="flex justify-between">
-              <UnpureReportCreateHeader title={newTitle} description={newDescription} user={user} setTitle={setTitle} setDescription={setDescription} setStop={setStop} stopTyping={stopTyping} />
+            <div className="flex justify-between border">
+              <UnpureReportCreateHeader
+                title={newTitle}
+                description={newDescription}
+                user={user}
+                setTitle={setTitle}
+                setDescription={setDescription}
+                setStop={setStop}
+                stopTyping={stopTyping}
+                cacheStatus={'cacheStatus'}
+              />
             </div>
           </div>
         </div>
@@ -57,7 +66,7 @@ const CreateReport = () => {
           </div>
           <div className="flex flex-col h-screen w-full space-y-6 pt-6">
             <div className="flex space-x-4">
-              <div className="w-full">
+              <div className="w-full ml-2">
                 <PureTopTabs tabs={tabs} onChangeTab={onChangeTab} currentTab={currentTab} />
                 <div className="mt-10">
                   <UnpureMarkdownEditor />
