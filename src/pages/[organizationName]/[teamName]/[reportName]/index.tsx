@@ -27,6 +27,7 @@ import { useUserEntities } from '@/hooks/use-user-entities';
 import moment from 'moment';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import classNames from '@/helpers/class-names';
 
 const Index = () => {
   useRedirectIfNoJWT();
@@ -36,6 +37,8 @@ const Index = () => {
     organizationName: router.query.organizationName as string,
     teamName: router.query.teamName as string,
   });
+
+  const version = router.query.version ? (router.query.version as string) : undefined;
 
   const [report, refreshReport] = useReport({
     commonData,
@@ -62,7 +65,7 @@ const Index = () => {
   const selfTree: GithubFileHash[] = useTree(
     {
       path: currentPath,
-      version: router.query.version as string,
+      version,
       report,
       commonData,
     },
@@ -72,7 +75,7 @@ const Index = () => {
   const parentTree: GithubFileHash[] = useTree(
     {
       path: dirname(currentPath),
-      version: router.query.version as string,
+      version,
       report,
       commonData,
     },
@@ -158,7 +161,10 @@ const Index = () => {
           <>
             <div className="w-9/12 flex lg:flex-row flex-col justify-between rounded">
               <PureReportHeader report={report} authors={authors} />
-              <div className="flex items-top pt-3 space-x-4">
+              <div className="flex flex-row items-start space-x-2">
+                <a href="versions" className={classNames('text-gray-700', 'block text-sm hover:bg-gray-50')}>
+                  {version ? `Version: #${version}` : 'Versions'}
+                </a>
                 {report?.id && (
                   <PureUpvoteButton
                     report={report}

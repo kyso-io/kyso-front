@@ -110,7 +110,7 @@ const PureCommentInput = (props: IPureCommentInput) => {
             console.log(id); // for eslint
             return `@${display}`;
           }}
-          data={suggestions.map((suggestion) => ({
+          data={suggestions?.map((suggestion) => ({
             id: suggestion.id,
             display: suggestion.nickname,
           }))}
