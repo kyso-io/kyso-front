@@ -11,7 +11,6 @@ type IPureTree = {
   commonData: CommonData;
   report: ReportDTO;
   version: string;
-  onPushQuery: (newPath?: string | null | undefined) => void;
   selfTree: GithubFileHash[];
   parentTree: GithubFileHash[];
 };
@@ -60,14 +59,12 @@ const PureTree = (props: IPureTree) => {
     if (!item) {
       // only inside one folder going to top level, lets remove path from query
       if (currentPath.split('/').length === 1) {
-        // return onPushQuery();
         newUrl = reportUrl;
       }
       if (currentPath.split('/').length > 1) {
         // inside deeper folder, remove last folder from path only
         const existingPathIsFile = extname(lastPathSegment!) !== '';
         const sliceIndex = existingPathIsFile ? 2 : 1;
-        // newUrl = onPushQuery(currentPath.split('/').slice(0, -sliceIndex).join('/'));
         newUrl = `${reportUrl}/${currentPath.split('/').slice(0, -sliceIndex).join('/')}`;
       }
     }
@@ -80,12 +77,10 @@ const PureTree = (props: IPureTree) => {
       if (existingPathIsFile) {
         const dirPath = currentPath.split('/').slice(0, -1).join('/');
         const newPath: string | null = `${dirPath ? `${dirPath}/` : ''}${item?.path}`;
-        // newUrl = onPushQuery(newPath);
         newUrl = `${reportUrl}/${newPath}`;
       }
 
       const newPath: string | null = `${currentPath ? `${currentPath}/` : ''}${item?.path}`;
-      // newUrl = onPushQuery(newPath);
       newUrl = `${reportUrl}/${newPath}`;
     }
 
@@ -96,13 +91,11 @@ const PureTree = (props: IPureTree) => {
       } else if (!existingPathIsFile) {
         // its currently on a folder
         const newPath: string | null = `${currentItem ? `${currentPath}/` : ''}${item?.path}`;
-        // newUrl = onPushQuery(newPath);
         newUrl = `${reportUrl}/${newPath}`;
       } else {
         // its currently on a file
         const dirPath = currentPath.split('/').slice(0, -1).join('/');
         const newPath: string | null = `${dirPath ? `${dirPath}/` : ''}${item?.path}`;
-        // newUrl = onPushQuery(newPath);
         newUrl = `${reportUrl}/${newPath}`;
       }
     }

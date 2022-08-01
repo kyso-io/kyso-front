@@ -27,6 +27,7 @@ import { useUserEntities } from '@/hooks/use-user-entities';
 import moment from 'moment';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import classNames from '@/helpers/class-names';
 
 const Index = () => {
   useRedirectIfNoJWT();
@@ -36,6 +37,8 @@ const Index = () => {
     organizationName: router.query.organizationName as string,
     teamName: router.query.teamName as string,
   });
+
+  const version = router.query.version ? (router.query.version as string) : undefined;
 
   const [report, refreshReport] = useReport({
     commonData,
@@ -62,7 +65,7 @@ const Index = () => {
   const selfTree: GithubFileHash[] = useTree(
     {
       path: currentPath,
-      version: router.query.version as string,
+      version,
       report,
       commonData,
     },
@@ -72,7 +75,7 @@ const Index = () => {
   const parentTree: GithubFileHash[] = useTree(
     {
       path: dirname(currentPath),
-      version: router.query.version as string,
+      version,
       report,
       commonData,
     },
@@ -139,17 +142,6 @@ const Index = () => {
   const hasPermissionEditInlineComment = useMemo(() => checkPermissions(commonData, 'KYSO_IO_EDIT_INLINE_COMMENT'), [commonData]);
   const hasPermissionDeleteInlineComment = useMemo(() => checkPermissions(commonData, 'KYSO_IO_DELETE_INLINE_COMMENT'), [commonData]);
 
-  const onPushQuery = (newPath: string | null | undefined) => {
-    if (!newPath) {
-      const qs = { ...router.query };
-      delete qs.path;
-      return router.replace(`/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}`);
-    }
-
-    // return router.replace({ query: { ...router.query, path: newPath } });
-    return router.replace(`/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}/${newPath}`);
-  };
-
   if (report && commonData && !hasPermissionReadReport) {
     return <PurePermissionDenied />;
   }
@@ -160,16 +152,7 @@ const Index = () => {
 
       <div className="w-2/12">
         {selfTree && report && commonData && (
-          <PureTree
-            path={currentPath}
-            basePath={router.basePath}
-            commonData={commonData}
-            report={report}
-            version={router.query.version as string}
-            onPushQuery={onPushQuery}
-            selfTree={selfTree}
-            parentTree={parentTree}
-          />
+          <PureTree path={currentPath} basePath={router.basePath} commonData={commonData} report={report} version={router.query.version as string} selfTree={selfTree} parentTree={parentTree} />
         )}
       </div>
 
@@ -178,7 +161,10 @@ const Index = () => {
           <>
             <div className="w-9/12 flex lg:flex-row flex-col justify-between rounded">
               <PureReportHeader report={report} authors={authors} />
-              <div className="flex items-top pt-3 space-x-4">
+              <div className="flex flex-row items-start space-x-2">
+                <a href="versions" className={classNames('text-gray-700', 'block text-sm hover:bg-gray-50')}>
+                  {version ? `Version: #${version}` : 'Versions'}
+                </a>
                 {report?.id && (
                   <PureUpvoteButton
                     report={report}
@@ -222,7 +208,7 @@ const Index = () => {
                     onClick={() => {
                       const qs = { ...router.query };
                       delete qs.cell;
-                      return router.replace({
+                      return router.push({
                         query: { ...qs },
                       });
                     }}
