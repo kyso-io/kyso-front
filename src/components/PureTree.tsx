@@ -114,9 +114,9 @@ const PureTree = (props: IPureTree) => {
           Files
         </h3>
         {crumbs && crumbs.length > 0 && (
-          <div className={classNames('flex items-center')}>
+          <div className={classNames('flex items-center whitespace-nowrap')}>
             {crumbs.map((crumb, index) => (
-              <div key={`${crumb.href}+${index}`} className={classNames('flex items-center')}>
+              <div key={`${crumb.href}+${index}`} className="flex flex-row items-center">
                 <a
                   key={`${crumb.href}+${index}`}
                   href={crumb.href}

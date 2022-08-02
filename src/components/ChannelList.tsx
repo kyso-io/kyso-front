@@ -37,6 +37,12 @@ const ChannelList = (props: Props) => {
             </a>
           ))}
       </div>
+
+      {/* <a
+        href={`${commonData.organization?.sluglified_name}/team/create`}
+      >
+        Create a new channel
+      </a> */}
     </div>
   );
 };

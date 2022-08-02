@@ -1,11 +1,8 @@
-import PureShareButton from '@/components/PureShareButton';
-import PureUpvoteButton from '@/components/PureUpvoteButton';
 import { useAuthors } from '@/hooks/use-authors';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useReport } from '@/hooks/use-report';
 import { useTree } from '@/hooks/use-tree';
-import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDropdown';
 import PureComments from '@/components/PureComments';
 import type { GithubFileHash, Comment, User, UserDTO, KysoSetting } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
@@ -27,7 +24,7 @@ import { useUserEntities } from '@/hooks/use-user-entities';
 import moment from 'moment';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import classNames from '@/helpers/class-names';
+import { useVersions } from '@/hooks/use-versions';
 
 const Index = () => {
   useRedirectIfNoJWT();
@@ -43,6 +40,11 @@ const Index = () => {
   const [report, refreshReport] = useReport({
     commonData,
     reportName: router.query.reportName as string,
+  });
+
+  const versions = useVersions({
+    report,
+    commonData,
   });
 
   const authors: User[] = useAuthors({ report });
@@ -146,6 +148,8 @@ const Index = () => {
     return <PurePermissionDenied />;
   }
 
+  const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
+
   return (
     <div className="flex flex-row space-x-24">
       {/* <div className="hidden bg-gray-50 bg-gray-100 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent"></div> */}
@@ -158,94 +162,89 @@ const Index = () => {
 
       <div className="w-10/12">
         {report && commonData && (
-          <>
+          <div className="flex flex-col space-y-2">
             <div className="w-9/12 flex lg:flex-row flex-col justify-between rounded">
-              <PureReportHeader report={report} authors={authors} />
-              <div className="flex flex-row items-start space-x-2">
-                <a href="versions" className={classNames('text-gray-700', 'block text-sm hover:bg-gray-50')}>
-                  {version ? `Version: #${version}` : 'Versions'}
-                </a>
-                {report?.id && (
-                  <PureUpvoteButton
-                    report={report}
-                    upvoteReport={async () => {
-                      await dispatch(toggleUserStarReportAction(report.id as string));
-                      refreshReport();
-                    }}
-                  />
-                )}
-                <PureShareButton report={report} basePath={router.basePath} commonData={commonData} />
-                <UnpureReportActionDropdown
-                  report={report}
-                  commonData={commonData}
-                  hasPermissionEditReport={
-                    hasPermissionEditReport || ((report.user_id === commonData.user.id || report.author_ids.includes(commonData.user.id as string)) && hasPermissionEditReportOnlyMine)
-                  }
-                  hasPermissionDeleteReport={hasPermissionDeleteReport}
-                />
-              </div>
+              <PureReportHeader
+                reportUrl={`${reportUrl}`}
+                frontEndUrl={frontEndUrl}
+                versions={versions}
+                report={report}
+                authors={authors}
+                version={version}
+                onUpvoteReport={async () => {
+                  await dispatch(toggleUserStarReportAction(report.id as string));
+                  refreshReport();
+                }}
+                hasPermissionEditReport={
+                  hasPermissionEditReport || ((report.user_id === commonData.user.id || report.author_ids.includes(commonData.user.id as string)) && hasPermissionEditReportOnlyMine)
+                }
+                hasPermissionDeleteReport={hasPermissionDeleteReport}
+                commonData={commonData}
+              />
             </div>
 
-            <div className="w-9/12 flex container flex-col lg:space-y-0 space-y-2">
-              <div>
+            <div>
+              <div className="w-9/12 flex container flex-col lg:space-y-0 space-y-2">
+                <div>
+                  {fileToRender && (
+                    <UnpureFileHeader
+                      tree={selfTree}
+                      report={report}
+                      fileToRender={fileToRender}
+                      basePath={router.basePath}
+                      path={currentPath}
+                      version={router.query.version as string}
+                      commonData={commonData}
+                    />
+                  )}
+                </div>
+
+                {fileToRender && onlyVisibleCell && (
+                  <div className="w-full border-x border-b flex justify-end p-2 prose prose-sm text-xs max-w-none">
+                    Showing only this cell.
+                    <button
+                      onClick={() => {
+                        const qs = { ...router.query };
+                        delete qs.cell;
+                        return router.push({
+                          query: { ...qs },
+                        });
+                      }}
+                      className="ml-1 text-blue-500"
+                    >
+                      View entire notebook
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <div className="w-12/12 flex lg:flex-col flex-col">
                 {fileToRender && (
-                  <UnpureFileHeader
-                    tree={selfTree}
-                    report={report}
+                  <UnpureReportRender
                     fileToRender={fileToRender}
-                    basePath={router.basePath}
-                    path={currentPath}
-                    version={router.query.version as string}
+                    report={report}
+                    channelMembers={channelMembers}
                     commonData={commonData}
+                    onlyVisibleCell={onlyVisibleCell}
+                    frontEndUrl={frontEndUrl}
+                    enabledCreateInlineComment={hasPermissionCreateInlineComment}
+                    enabledEditInlineComment={hasPermissionEditInlineComment}
+                    enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
                   />
                 )}
+
+                {!fileToRender && (
+                  <div className="prose prose-sm p-3">
+                    <p>Please choose a file in the filebrowser on the left.</p>
+                  </div>
+                )}
               </div>
-
-              {fileToRender && onlyVisibleCell && (
-                <div className="w-full border-x border-b flex justify-end p-2 prose prose-sm text-xs max-w-none">
-                  Showing only this cell.
-                  <button
-                    onClick={() => {
-                      const qs = { ...router.query };
-                      delete qs.cell;
-                      return router.push({
-                        query: { ...qs },
-                      });
-                    }}
-                    className="ml-1 text-blue-500"
-                  >
-                    View entire notebook
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div className="w-12/12 flex lg:flex-col flex-col">
-              {fileToRender && (
-                <UnpureReportRender
-                  fileToRender={fileToRender}
-                  report={report}
-                  channelMembers={channelMembers}
-                  commonData={commonData}
-                  onlyVisibleCell={onlyVisibleCell}
-                  frontEndUrl={frontEndUrl}
-                  enabledCreateInlineComment={hasPermissionCreateInlineComment}
-                  enabledEditInlineComment={hasPermissionEditInlineComment}
-                  enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
-                />
-              )}
-
-              {!fileToRender && (
-                <div className="prose prose-sm p-3">
-                  <p>Please choose a file in the filebrowser on the left.</p>
-                </div>
-              )}
             </div>
 
             <div className="w-9/12 lg:max-w-5xl lg:min-w-5xl flex lg:flex-row flex-col justify-between rounded">
               {hasPermissionReadComment && (
                 <div className="block pb-44 w-full">
-                  <div className="prose my-4 max-w-none ">
+                  <div className="prose max-w-none ">
                     <h2>Comments</h2>
                   </div>
                   <PureComments
@@ -279,7 +278,7 @@ const Index = () => {
                 </div>
               )}
             </div>
-          </>
+          </div>
         )}
       </div>
     </div>
