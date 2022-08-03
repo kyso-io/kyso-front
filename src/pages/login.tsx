@@ -361,7 +361,7 @@ const Index = () => {
                     <a className="text-xs no-underline hover:underline" href="/reset-password">
                       Forgot your password?
                     </a>
-                    <button type="submit" className="p-4 bg-kyso-primary hover:bg-kyso-primary-hover text-white py-2 text-xs font-medium rounded">
+                    <button type="submit" className="border inline-block rounded p-2.5 text-sm no-underline text-center text-bold">
                       Log in now
                     </button>
                   </form>
