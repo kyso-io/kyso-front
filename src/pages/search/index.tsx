@@ -6,7 +6,7 @@ import { useAppDispatch } from '@/hooks/redux-hooks';
 import { useUser } from '@/hooks/use-user';
 import type { FullTextSearchParams } from '@/interfaces/full-text-search-params';
 import type { SearchNavItem } from '@/interfaces/search-nav-item';
-import KysoTopBar from '@/layouts/KysoTopBar';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { FullTextSearchDTO, FullTextSearchResult, FullTextSearchResultType } from '@kyso-io/kyso-model';
 import { ElasticSearchIndex } from '@kyso-io/kyso-model';
 import { fullTextSearchAction } from '@kyso-io/kyso-store';
@@ -152,6 +152,6 @@ const SearchIndex = () => {
   );
 };
 
-SearchIndex.layout = KysoTopBar;
+SearchIndex.layout = KysoApplicationLayout;
 
 export default SearchIndex;

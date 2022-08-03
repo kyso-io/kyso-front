@@ -8,6 +8,8 @@ import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-mode
 import dynamic from 'next/dynamic';
 import type { CommonData } from '@/hooks/use-common-data';
 
+// const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
   ssr: false,
@@ -28,6 +30,36 @@ const KysoJupyterRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponen
   ),
 });
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const KysoCodeRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoCodeRenderer), {
+  ssr: false,
+  loading: () => (
+    <div className="flex justify-center p-7 w-full">
+      <PureSpinner />
+    </div>
+  ),
+});
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const KysoOffice365Renderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoOffice365Renderer), {
+  ssr: false,
+  loading: () => (
+    <div className="flex justify-center p-7 w-full">
+      <PureSpinner />
+    </div>
+  ),
+});
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const KysoGoogleDocsRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoGoogleDocsRenderer), {
+  ssr: false,
+  loading: () => (
+    <div className="flex justify-center p-7 w-full">
+      <PureSpinner />
+    </div>
+  ),
+});
+
 const isImage = (name: string) => {
   return (
     name != null &&
@@ -39,6 +71,8 @@ interface Props {
   fileToRender: FileToRender;
   commonData: CommonData;
   report: ReportDTO;
+  frontEndUrl?: string;
+  onlyVisibleCell?: string;
   channelMembers: TeamMember[];
   enabledCreateInlineComment: boolean;
   enabledEditInlineComment: boolean;
@@ -46,7 +80,7 @@ interface Props {
 }
 
 const UnpureReportRender = (props: Props) => {
-  const { report, fileToRender, commonData, channelMembers, enabledCreateInlineComment, enabledEditInlineComment, enabledDeleteInlineComment } = props;
+  const { report, onlyVisibleCell, frontEndUrl, fileToRender, commonData, channelMembers, enabledCreateInlineComment, enabledEditInlineComment, enabledDeleteInlineComment } = props;
   const dispatch = useAppDispatch();
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
@@ -126,35 +160,38 @@ const UnpureReportRender = (props: Props) => {
   if (fileToRender.content !== null) {
     if (fileToRender.path.endsWith('.md')) {
       render = (
-        <div className="p-3">
+        <div className="w-9/12 p-2 border-x border-b rounded-b">
           <KysoMarkdownRenderer source={fileToRender.content} />
         </div>
       );
     } else if (isImage(fileToRender.path)) {
-      render = <img src={`data:image/jpeg;base64,${fileToRender.content}`} alt="file image" />;
+      render = (
+        <div className="w-9/12 p-2 border-x border-b rounded-b">
+          <img
+            // className="w-full"
+            src={`data:image/jpeg;base64,${fileToRender.content}`}
+            alt="file image"
+          />
+        </div>
+      );
     } else if (fileToRender.path.endsWith('.ipynb')) {
       render = (
-        <div className="flex flex-col w-full relative">
-          <div className="w-full max-w-full">
-            {commonData.user && (
-              <KysoJupyterRenderer
-                commonData={commonData}
-                report={report}
-                channelMembers={channelMembers}
-                jupyterNotebook={JSON.parse(fileToRender.content as string)}
-                showInputs={false}
-                showOutputs={false}
-                inlineComments={inlineComments}
-                createInlineComment={createInlineComment}
-                deleteInlineComment={deleteInlineComment}
-                editInlineComment={editInlineComment}
-                enabledCreateInlineComment={enabledCreateInlineComment}
-                enabledEditInlineComment={enabledEditInlineComment}
-                enabledDeleteInlineComment={enabledDeleteInlineComment}
-              />
-            )}
-          </div>
-        </div>
+        <KysoJupyterRenderer
+          commonData={commonData}
+          report={report}
+          onlyVisibleCell={onlyVisibleCell}
+          channelMembers={channelMembers}
+          jupyterNotebook={JSON.parse(fileToRender.content as string)}
+          showInputs={false}
+          showOutputs={false}
+          inlineComments={inlineComments}
+          createInlineComment={createInlineComment}
+          deleteInlineComment={deleteInlineComment}
+          editInlineComment={editInlineComment}
+          enabledCreateInlineComment={enabledCreateInlineComment}
+          enabledEditInlineComment={enabledEditInlineComment}
+          enabledDeleteInlineComment={enabledDeleteInlineComment}
+        />
       );
     } else if (
       fileToRender.path.endsWith('.txt') ||
@@ -166,23 +203,72 @@ const UnpureReportRender = (props: Props) => {
       fileToRender.path.endsWith('.css')
     ) {
       render = (
-        <div>
-          <pre>
-            <KysoMarkdownRenderer source={fileToRender.content} />
-          </pre>
+        <div className="w-9/12 border-x border-b rounded-b p-2">
+          <KysoCodeRenderer embedded={false} code={fileToRender.content} />
+        </div>
+      );
+    } else if (
+      (fileToRender.path.toLowerCase().endsWith('.pptx') ||
+        fileToRender.path.toLowerCase().endsWith('.ppt') ||
+        fileToRender.path.toLowerCase().endsWith('.xlsx') ||
+        fileToRender.path.toLowerCase().endsWith('.xls') ||
+        fileToRender.path.toLowerCase().endsWith('.docx') ||
+        fileToRender.path.toLowerCase().endsWith('.doc')) &&
+      frontEndUrl
+    ) {
+      const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
+      render = (
+        <div className="w-9/12 border-x border-b rounded-b">
+          <KysoOffice365Renderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />
+        </div>
+      );
+    } else if (
+      (fileToRender.path.toLowerCase().endsWith('.rtf') ||
+        fileToRender.path.toLowerCase().endsWith('.pdf') ||
+        fileToRender.path.toLowerCase().endsWith('.txt') ||
+        fileToRender.path.toLowerCase().endsWith('.webm') ||
+        fileToRender.path.toLowerCase().endsWith('.mpeg4') ||
+        fileToRender.path.toLowerCase().endsWith('.3gpp') ||
+        fileToRender.path.toLowerCase().endsWith('.mov') ||
+        fileToRender.path.toLowerCase().endsWith('.avi') ||
+        fileToRender.path.toLowerCase().endsWith('.mpegps') ||
+        fileToRender.path.toLowerCase().endsWith('.wmv') ||
+        fileToRender.path.toLowerCase().endsWith('.flv') ||
+        fileToRender.path.toLowerCase().endsWith('.pages') ||
+        fileToRender.path.toLowerCase().endsWith('.ai') ||
+        fileToRender.path.toLowerCase().endsWith('.psd') ||
+        fileToRender.path.toLowerCase().endsWith('.tiff') ||
+        fileToRender.path.toLowerCase().endsWith('.dxf') ||
+        fileToRender.path.toLowerCase().endsWith('.svg') ||
+        fileToRender.path.toLowerCase().endsWith('.eps') ||
+        fileToRender.path.toLowerCase().endsWith('.ps') ||
+        fileToRender.path.toLowerCase().endsWith('.ttf') ||
+        fileToRender.path.toLowerCase().endsWith('.xps') ||
+        fileToRender.path.toLowerCase().endsWith('.zip') ||
+        fileToRender.path.toLowerCase().endsWith('.rar')) &&
+      frontEndUrl
+    ) {
+      const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
+      render = (
+        <div className="w-9/12 border-x border-b rounded-b">
+          <KysoGoogleDocsRenderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />
         </div>
       );
     } else {
       render = (
-        <div className="prose p-3">
-          Kyso cannot render this type of file. Do you need it? Give us <a href="/feedback">feedback</a> and we will consider it! 🤓
+        <div className="w-9/12 border-x border-b rounded-b">
+          <div className="prose p-3">
+            Kyso cannot render this type of file. Do you need it? Give us <a href="/feedback">feedback</a> and we will consider it! 🤓
+          </div>
         </div>
       );
     }
-  }
-
-  if (fileToRender.path.endsWith('.html')) {
-    render = <PureIframeRenderer file={fileToRender} />;
+  } else if (fileToRender.path.endsWith('.html')) {
+    render = (
+      <div className="w-9/12">
+        <PureIframeRenderer file={fileToRender} />
+      </div>
+    );
   }
 
   return (

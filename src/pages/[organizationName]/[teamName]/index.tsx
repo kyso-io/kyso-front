@@ -4,8 +4,6 @@ import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { useReports } from '@/hooks/use-reports';
-import KysoTopBar from '@/layouts/KysoTopBar';
-import UnpureMain from '@/unpure-components/UnpureMain';
 import UnpureReportBadge from '@/unpure-components/UnpureReportBadge';
 import type { NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
@@ -13,8 +11,11 @@ import { Api } from '@kyso-io/kyso-store';
 import type { NextRouter } from 'next/router';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
+import ChannelList from '../../../components/ChannelList';
 import ManageUsers from '../../../components/ManageUsers';
+import PureNewReportPopover from '../../../components/PureNewReportPopover';
 import { getLocalStorageItem } from '../../../helpers/get-local-storage-item';
+import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
 import type { Member } from '../../../types/member';
 
 const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
@@ -292,18 +293,32 @@ const Index = () => {
   // END TEAM MEMBERS
 
   return (
-    <UnpureMain basePath={router.basePath} commonData={commonData}>
-      <div className="container mx-auto">
-        <div className="flex flex-row-reverse mb-2">
-          <ManageUsers
-            members={members}
-            onInputChange={(query: string) => searchUsers(query)}
-            users={users}
-            showTeamRoles={true}
-            onUpdateRoleMember={updateMemberRole}
-            onInviteNewUser={inviteNewUser}
-          />
-        </div>
+    <div className="flex flex-row space-x-8">
+      <div className="w-2/12">
+        <ChannelList basePath={router.basePath} commonData={commonData} />
+      </div>
+      <div className="w-8/12 flex flex-col space-y-8">
+        {commonData.team && (
+          <div className="flex flex-row w-full justify-between space-x-2">
+            <div className="w-4/6 flex flex-col justify-between">
+              <div className="text-xl font-medium">{commonData.team.display_name}</div>
+              <div className="text-md">{commonData.team.bio}</div>
+              <div className="mt-2">
+                <ManageUsers
+                  members={members}
+                  onInputChange={(query: string) => searchUsers(query)}
+                  users={users}
+                  showTeamRoles={true}
+                  onUpdateRoleMember={updateMemberRole}
+                  onInviteNewUser={inviteNewUser}
+                />
+              </div>
+            </div>
+            <div className="w-2/6 flex flex-row justify-end items-center space-x-2">
+              <PureNewReportPopover commonData={commonData} />
+            </div>
+          </div>
+        )}
 
         <PureReportFilter
           defaultSearch={(router.query.search as string) || null}
@@ -327,7 +342,8 @@ const Index = () => {
             });
           }}
         />
-        <div className="mt-8">
+
+        <div>
           <ul role="list" className="space-y-4">
             {reports?.map((report) => (
               <UnpureReportBadge key={report.id} report={report} commonData={commonData} hasPermissionGlobalPinReport={hasPermissionGlobalPinReport} />
@@ -335,7 +351,7 @@ const Index = () => {
           </ul>
         </div>
 
-        <div className="flex-1 flex mt-4 justify-center">
+        <div className="flex-1 flex justify-center">
           {!(currentPage - 1 < 1) && (
             <a
               href={currentPage - 1 < 1 ? '#' : `?page=${currentPage - 1}${extraParamsUrl}`}
@@ -357,10 +373,10 @@ const Index = () => {
           )}
         </div>
       </div>
-    </UnpureMain>
+    </div>
   );
 };
 
-Index.layout = KysoTopBar;
+Index.layout = KysoApplicationLayout;
 
 export default Index;

@@ -1,22 +1,25 @@
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { BellIcon, MenuIcon, ShareIcon, XIcon } from '@heroicons/react/solid';
-import type { UserDTO } from '@kyso-io/kyso-model';
+import type { ReportDTO } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { Fragment, useState } from 'react';
+import type { CommonData } from '@/hooks/use-common-data';
 import { Footer } from './Footer';
+import BreadcrumbNavbar from './PureBreadcrumbNavbar';
 
-type IPureKysoTopBarProps = {
+type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
-  user: UserDTO;
+  report?: ReportDTO;
   basePath: string;
   userNavigation: { name: string; href: string }[];
+  commonData: CommonData;
 };
 
-const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
+const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): ReactElement => {
   const router = useRouter();
-  const { children, user, basePath, userNavigation } = props;
+  const { children, report, commonData, basePath, userNavigation } = props;
   const [focusOnSearchInput, setFocusOnSearchInput] = useState<boolean>(false);
   const [query, setQuery] = useState<string>('');
 
@@ -28,9 +31,9 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
   }
 
   return (
-    <React.Fragment>
-      <div className="h-[64px]">
-        <Disclosure as="div" className="fixed z-10 w-screen bg-slate-500 border-b">
+    <div className="flex flex-col space-y-6 min-h-screen">
+      <div className="flex flex-col z-10 w-screen border-b">
+        <Disclosure as="div" className="bg-slate-600">
           {({ open }) => (
             <>
               <div className="mx-auto px-4 sm:px-6 lg:px-8 text-white">
@@ -38,7 +41,7 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                   <div className="flex items-center">
                     <div className="shrink-0">
                       <a href={basePath}>
-                        <img className="h-8 w-8" src={`/in/assets/images/kyso-logo-white.svg`} alt="Kyso" />
+                        <img className="h-8 w-8" src={`/assets/images/kyso-logo-white.svg`} alt="Kyso" />
                       </a>
                     </div>
                   </div>
@@ -71,12 +74,12 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                     <div className="hidden md:block">
                       <div className="flex items-center ml-6">
                         {/* Profile dropdown */}
-                        {user && (
+                        {commonData.user && (
                           <Menu as="div" className="relative">
                             <div>
                               <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
                                 <span className="sr-only">Open user menu</span>
-                                <img className="object-cover h-8 w-8 rounded-full" src={user.avatar_url} alt="" />
+                                <img className="object-cover h-8 w-8 rounded-full" src={commonData.user.avatar_url} alt="" />
                               </Menu.Button>
                             </div>
                             <Transition
@@ -131,14 +134,14 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
                   ))}
                 </div>
                 <div className="border-t border-indigo-700 pt-4 pb-3">
-                  {user && (
+                  {commonData.user && (
                     <div className="flex items-center px-5">
                       <div className="shrink-0">
-                        <img className="object-cover h-10 w-10 rounded-full" src={user.avatar_url} alt="" />
+                        <img className="object-cover h-10 w-10 rounded-full" src={commonData.user.avatar_url} alt="" />
                       </div>
                       <div className="ml-3">
-                        <div className="text-base font-medium text-white">{user.display_name}</div>
-                        <div className="text-sm font-medium text-indigo-300">{user.email}</div>
+                        <div className="text-base font-medium text-white">{commonData.user.display_name}</div>
+                        <div className="text-sm font-medium text-indigo-300">{commonData.user.email}</div>
                       </div>
                       <button
                         type="button"
@@ -161,10 +164,16 @@ const PureKysoTopBar = (props: IPureKysoTopBarProps): ReactElement => {
             </>
           )}
         </Disclosure>
+        <div className="p-2">
+          <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
+        </div>
       </div>
-      <div className="min-h-screen -mb-[114px]">{children}</div>
-      <Footer />
-    </React.Fragment>
+
+      <div className="grow p-2 w-full rounded">{children}</div>
+      <div className="flex-none">
+        <Footer />
+      </div>
+    </div>
   );
 };
-export default PureKysoTopBar;
+export default PureKysoApplicationLayout;

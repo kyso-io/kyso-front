@@ -1,37 +1,27 @@
 import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
-import KysoTopBar from '@/layouts/KysoTopBar';
-import UnpureMain from '@/unpure-components/UnpureMain';
-import { useRouter } from 'next/router';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { useEffect } from 'react';
-
-const lastOrganization: string | null = getLocalStorageItem('last_organization');
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import { useRouter } from 'next/router';
 
 const Index = () => {
   const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+  useRedirectIfNoJWT();
 
   useEffect(() => {
-    if (lastOrganization) {
+    const lastOrganization: string | null = getLocalStorageItem('last_organization');
+    if (lastOrganization && lastOrganization !== 'undefined') {
       router.push(`${lastOrganization}`);
     }
   }, []);
 
   return (
-    <>
-      <UnpureMain basePath={router.basePath} commonData={commonData}>
-        <div className="mt-8">
-          <h1>Redirecting you to your last used organization</h1>
-        </div>
-      </UnpureMain>
-    </>
+    <div className="mt-8">
+      <h1>Select an organization from the dropdown above.</h1>
+    </div>
   );
 };
 
-Index.layout = KysoTopBar;
+Index.layout = KysoApplicationLayout;
 
 export default Index;
