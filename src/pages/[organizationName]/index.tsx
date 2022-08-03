@@ -12,7 +12,7 @@ import ActivityFeedComponent from '../../components/ActivityFeed';
 import ManageUsers from '../../components/ManageUsers';
 import OrganizationInfo from '../../components/OrganizationActivity';
 import Pagination from '../../components/Pagination';
-import ReportBadget from '../../components/ReportBadge';
+import ReportBadge from '../../components/ReportBadge';
 import { getLocalStorageItem } from '../../helpers/get-local-storage-item';
 import type { CommonData } from '../../hooks/use-common-data';
 import { useCommonData } from '../../hooks/use-common-data';
@@ -389,7 +389,7 @@ const Index = () => {
           {paginatedResponseDto?.results &&
             paginatedResponseDto.results.length > 0 &&
             paginatedResponseDto?.results.map((report: ReportDTO) => (
-              <ReportBadget
+              <ReportBadge
                 key={report.id}
                 report={report}
                 toggleUserStarReport={() => toggleUserStarReport(report.id!)}

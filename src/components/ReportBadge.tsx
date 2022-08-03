@@ -25,7 +25,7 @@ interface Props {
   toggleGlobalPinReport: () => void;
 }
 
-const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
+const ReportBadge = ({ report, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
   const router = useRouter();
   const commonData: CommonData = useCommonData({
     organizationName: router.query.organizationName as string,
@@ -138,4 +138,4 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
   );
 };
 
-export default ReportBadget;
+export default ReportBadge;
