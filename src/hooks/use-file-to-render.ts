@@ -9,6 +9,7 @@ export interface FileToRender {
   id: string;
   path_scs: string;
   isLoading: boolean;
+  percentLoaded?: number | null;
   content?: Buffer | string | null;
 }
 
@@ -48,6 +49,7 @@ export const useFileToRender = (props: Props): FileToRender | null => {
         path: validFile!.path,
         id: validFile!.id,
         path_scs: validFile!.path_scs,
+        percentLoaded: 0,
         isLoading: false,
         content: null,
       };
@@ -58,7 +60,16 @@ export const useFileToRender = (props: Props): FileToRender | null => {
     if (ftr && !ftr.path.endsWith('.html')) {
       setFileToRender({ ...ftr, isLoading: true });
       const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
-      const data: Buffer = await api.getReportFileContent(ftr.id);
+      const data: Buffer = await api.getReportFileContent(ftr.id, {
+        onDownloadProgress(progressEvent) {
+          if (progressEvent.lengthComputable) {
+            const percentLoaded = progressEvent.loaded / progressEvent.total;
+            setFileToRender({ ...(ftr as FileToRender), percentLoaded });
+          } else {
+            setFileToRender({ ...(ftr as FileToRender), percentLoaded: (fileToRender?.percentLoaded as number) + 1 });
+          }
+        },
+      });
       // const result = await dispatch(fetchFileContentAction(ftr.id));
       let content = null;
       if (data && isImage(ftr.path)) {
@@ -75,5 +86,6 @@ export const useFileToRender = (props: Props): FileToRender | null => {
     fetcher();
   }, [tree, validFile]);
 
+  // console.log(fileToRender?.percentLoaded)
   return fileToRender;
 };

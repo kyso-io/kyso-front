@@ -1,12 +1,10 @@
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import { Fragment, useState } from 'react';
-import { saveAs } from 'file-saver';
 import classNames from '@/helpers/class-names';
 import { DotsVerticalIcon, FolderDownloadIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
-import { deleteReportAction, downloadReportAction } from '@kyso-io/kyso-store';
+import { deleteReportAction } from '@kyso-io/kyso-store';
 import type { ReportDTO } from '@kyso-io/kyso-model';
-import slugify from 'slugify';
 import { useRouter } from 'next/router';
 import type { CommonData } from '@/hooks/use-common-data';
 
@@ -22,21 +20,7 @@ const UnpureReportActionDropdown = (props: Props) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [show, setShow] = useState(false);
-  const [downloadText, setDownloadText] = useState('Creating zip, this may take a moment...');
-
-  const downloadReport = async () => {
-    setShow(true);
-    const result = await dispatch(downloadReportAction(report.id!));
-    setDownloadText('Downloading...');
-    if (result.payload) {
-      const blob = new Blob([result.payload], { type: 'application/zip' });
-      saveAs(blob, `${slugify(report.name)}.zip`);
-      setDownloadText('Download fininshed.');
-    } else {
-      setShow(true);
-      setDownloadText('An error occured with the download.');
-    }
-  };
+  const [alertText, setAlertText] = useState('Creating zip, this may take a moment...');
 
   const deleteReport = async () => {
     if (!hasPermissionDeleteReport) {
@@ -46,21 +30,19 @@ const UnpureReportActionDropdown = (props: Props) => {
       return;
     }
 
-    setDownloadText('Deleting...');
+    setAlertText('Deleting...');
     await dispatch(deleteReportAction(report.id!));
-    setDownloadText('Deleted.');
+    setAlertText('Deleted.');
     router.push(`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
   };
 
   return (
     <>
-      <Menu as="div" className="z-50  relative inline-block text-left">
-        <div>
-          <Menu.Button className="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
-            <span className="sr-only">Open options</span>
-            <DotsVerticalIcon className="h-5 w-5" aria-hidden="true" />
-          </Menu.Button>
-        </div>
+      <Menu as="div" className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm z-50 relative inline-block">
+        <Menu.Button className="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
+          <span className="sr-only">Open options</span>
+          <DotsVerticalIcon className="h-5 w-5" aria-hidden="true" />
+        </Menu.Button>
 
         <Transition
           as={Fragment}
@@ -84,11 +66,6 @@ const UnpureReportActionDropdown = (props: Props) => {
               <Menu.Item>
                 <a href="versions" className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50')}>
                   Versions
-                </a>
-              </Menu.Item>
-              <Menu.Item>
-                <a href="#" onClick={() => downloadReport()} className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50')}>
-                  Download project as zip
                 </a>
               </Menu.Item>
               {hasPermissionDeleteReport && (
@@ -136,7 +113,7 @@ const UnpureReportActionDropdown = (props: Props) => {
                     <FolderDownloadIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
                   </div>
                   <div className="ml-3 w-0 flex-1 pt-0.5">
-                    <p className="text-sm font-medium text-gray-900">{downloadText}</p>
+                    <p className="text-sm font-medium text-gray-900">{alertText}</p>
                   </div>
                   <div className="ml-4 shrink-0 flex">
                     <button

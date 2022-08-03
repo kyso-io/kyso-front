@@ -47,6 +47,8 @@
         //     "code": 200
         //   }
         // ],
+        "no-useless-escape": "off",
+        "no-nested-ternary": "off",
         "no-restricted-syntax": "off",
         "@typescript-eslint/no-use-before-define": "off",
         "no-empty": "off",

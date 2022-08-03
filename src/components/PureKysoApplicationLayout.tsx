@@ -41,7 +41,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                   <div className="flex items-center">
                     <div className="shrink-0">
                       <a href={basePath}>
-                        <img className="h-8 w-8" src={`/in/assets/images/kyso-logo-white.svg`} alt="Kyso" />
+                        <img className="h-8 w-8" src={`/assets/images/kyso-logo-white.svg`} alt="Kyso" />
                       </a>
                     </div>
                   </div>
