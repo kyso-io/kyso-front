@@ -1,10 +1,11 @@
 import Cookies from 'universal-cookie';
 import UnPureReportCreateTitle from '@/unpure-components/UnPureReportCreateTitle';
 import UnPureReportCreateDescription from '@/unpure-components/UnPureReportCreateDescription';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/router';
+
 import type { CommonData } from '@/hooks/use-common-data';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import { useCommonData } from '@/hooks/use-common-data';
@@ -29,54 +30,79 @@ const CreateReport = () => {
   const channelMembers = useChannelMembers({ commonData });
 
   const cookies = new Cookies();
-  let cookieTitle = '';
-  if (cookies.get('editorTitle')) {
-    cookieTitle = cookies.get('editorTitle');
-  }
 
-  let cookieDescription = '';
-  if (cookies.get('editorDescription')) {
-    cookieDescription = cookies.get('editorDescription');
-  }
-
-  const [newTitle, setTitle] = useState(cookieTitle);
-  const [newDescription, setDescription] = useState(cookieDescription);
+  const [newTitle, setTitle] = useState('');
+  const [newDescription, setDescription] = useState('');
   const [draftStatus, setDraftStatus] = useState('');
 
   const tabs = [{ name: 'Write' }, { name: 'Preview' }];
   const [currentTab, onChangeTab] = useState('Write');
 
+  const d: string[] = [];
+  const [selectedTags, setTags] = useState(d);
+  const [selectedPeople, setSelectedPeople] = useState(d);
+  const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
+
+  // const [readmeContent, setReadmeContent] = useState('');
+
   const setTitleDelay = (_newTitle: string) => {
     setTitle(_newTitle);
     setDraftStatus('Saving ...');
-    delayedCallbackTitle(_newTitle);
+    delayedCallback('editorTitle', _newTitle);
   };
-
-  const delayedCallbackTitle = debounce(async (_newTitle) => {
-    cookies.set('editorTitle', _newTitle);
-    setDraftStatus('All changes saved in local storage');
-  }, 1000);
 
   const setDescriptionDelay = (_newDescription: string) => {
     setDescription(_newDescription);
     setDraftStatus('Saving ...');
-    delayedCallbackDescription(_newDescription);
+    delayedCallback('editorDescription', _newDescription);
   };
 
-  const delayedCallbackDescription = debounce(async (_newDescription) => {
-    cookies.set('editorDescription', _newDescription);
+  const setAuthorsDelay = (_newAuthors: string[]) => {
+    setSelectedPeople(_newAuthors);
+    setDraftStatus('Saving ...');
+    delayedCallback('editorAuthors', _newAuthors);
+  };
+
+  const setTagsDelay = (_newTags: string[]) => {
+    setTags(_newTags);
+    setDraftStatus('Saving ...');
+    delayedCallback('editorTags', _newTags);
+  };
+
+  // const setReadmeContentDelay = (_newReadmeContent: string[]) => {
+  //   setReadmeContent(_newReadmeContent);
+  //   setDraftStatus('Saving ...');
+  //   delayedCallback('editorReadme', _newReadmeContent);
+  // };
+
+  const delayedCallback = debounce(async (string, _newAuthors) => {
+    cookies.set(string, _newAuthors);
     setDraftStatus('All changes saved in local storage');
   }, 1000);
 
-  const [selectedPerson, setSelectedPerson] = useState<string[]>([]);
-  console.log('selectedPerson', selectedPerson);
+  useEffect(() => {
+    if (cookies.get('editorTitle')) {
+      setTitle(cookies.get('editorTitle'));
+    }
+    if (cookies.get('editorDescription')) {
+      setDescription(cookies.get('editorDescription'));
+    }
+    if (cookies.get('editorAuthors')) {
+      setSelectedPeople(cookies.get('editorAuthors'));
+    }
+    if (cookies.get('editorTags')) {
+      setTags(cookies.get('editorTags'));
+    }
+    // if (cookies.get('editorReadme')) {
+    //   setReadmeContent(cookies.get('editorReadme'));
+    // }
+  }, []);
+
   return (
     <>
       <>
         <div className="flex flex-row space-x-10 ">
           <div className="basis-1/6"></div>
-          {/* 
-          <div className="flex flex-col w-full space-y-6 pt-6"> */}
           <div className="basis-5/6">
             <div className="mb-4">
               <UnPureReportCreateTitle title={newTitle} setTitle={setTitleDelay} draftStatus={draftStatus} />
@@ -88,8 +114,13 @@ const CreateReport = () => {
               <UnPureReportCreateReportInfo
                 user={user}
                 channelMembers={channelMembers}
-                selectedPerson={selectedPerson}
-                setSelectedPerson={(_selectedPerson: string[]) => setSelectedPerson(_selectedPerson)}
+                selectedPeople={selectedPeople}
+                setSelectedPeople={(_selectedPeople: string[]) => setAuthorsDelay(_selectedPeople)}
+                selectedTags={selectedTags}
+                tags={tags}
+                onSetTags={(newTags: string[]) => {
+                  setTagsDelay(newTags);
+                }}
               />
             </div>
           </div>

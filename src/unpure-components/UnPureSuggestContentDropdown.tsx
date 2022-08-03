@@ -2,23 +2,23 @@ import { Fragment } from 'react';
 import { PlusIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
 import type { TeamMember } from '@kyso-io/kyso-model';
-import UnpureSuggestUserCombobox from './UnPureSuggestUserCombobox';
+import UnPureSuggestUserCombobox from './UnPureSuggestUserCombobox';
 
-type IUnpureSuggestContentDropdown = {
+type IUnPureSuggestContentDropdown = {
   label: string;
   channelMembers: TeamMember[];
-  setSelectedPerson: (selectedPerson: string[]) => void;
-  selectedPerson: string[];
+  setSelectedPeople: (selectedPeople: string[]) => void;
+  selectedPeople: string[];
 };
 
-const UnpureSuggestContentDropdown = (props: IUnpureSuggestContentDropdown) => {
-  const { label, channelMembers, setSelectedPerson, selectedPerson } = props;
+const UnPureSuggestContentDropdown = (props: IUnPureSuggestContentDropdown) => {
+  const { label, channelMembers, setSelectedPeople, selectedPeople = [] } = props;
 
   return (
     <>
       <Menu as="div" className="z-50 relative inline-block text-left">
         <div>
-          <Menu.Button className="inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          <Menu.Button className="mx-3 inline-flex items-center px-2.5 py-1.5 border border-gray-300 shadow-sm text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             <PlusIcon className="h-5 w-5" aria-hidden="true" />
           </Menu.Button>
         </div>
@@ -37,9 +37,9 @@ const UnpureSuggestContentDropdown = (props: IUnpureSuggestContentDropdown) => {
               <div className="px-4 py-5 sm:p-6">
                 <form className="mt-1 sm:items-center">
                   <div className="w-full sm:max-w-s">
-                    <UnpureSuggestUserCombobox label={label} suggestions={channelMembers} selectedPerson={selectedPerson} setSelectedPerson={setSelectedPerson} />
+                    <UnPureSuggestUserCombobox label={label} suggestions={channelMembers} selectedPeople={selectedPeople} setSelectedPeople={setSelectedPeople} />
                   </div>
-                  <div className="w-full sm:max-w-xs mt-10 text-right">
+                  {/* <div className="w-full sm:max-w-xs mt-10 text-right">
                     <button
                       type="reset"
                       className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-900 hover:bg-blue-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -52,7 +52,7 @@ const UnpureSuggestContentDropdown = (props: IUnpureSuggestContentDropdown) => {
                     >
                       Save
                     </button>
-                  </div>
+                  </div> */}
                 </form>
               </div>
             </div>
@@ -64,4 +64,4 @@ const UnpureSuggestContentDropdown = (props: IUnpureSuggestContentDropdown) => {
   );
 };
 
-export default UnpureSuggestContentDropdown;
+export default UnPureSuggestContentDropdown;

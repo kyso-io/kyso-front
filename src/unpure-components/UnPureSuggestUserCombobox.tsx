@@ -5,17 +5,17 @@ import { SelectorIcon, CheckIcon } from '@heroicons/react/outline';
 type IUnPureSuggestUserCombobox = {
   label: string;
   suggestions: { id: string; nickname: string; avatar_url: string }[];
-  setSelectedPerson: (_selectedPerson: string[]) => void;
-  selectedPerson: string[];
+  setSelectedPeople: (_selectedPeople: string[]) => void;
+  selectedPeople: string[];
 };
 
 const UnPureSuggestUserCombobox = (props: IUnPureSuggestUserCombobox) => {
   function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ');
   }
-  const { label, suggestions, setSelectedPerson, selectedPerson } = props;
+  const { label, suggestions, setSelectedPeople, selectedPeople } = props;
   const [query, setQuery] = useState('');
-  // const [selectedPerson, setSelectedPerson] = useState();
+  // const [selectedPeople, setSelectedPeople] = useState();
 
   const filteredPeople =
     query === ''
@@ -25,7 +25,14 @@ const UnPureSuggestUserCombobox = (props: IUnPureSuggestUserCombobox) => {
         });
 
   return (
-    <Combobox as="div" value={selectedPerson} onChange={setSelectedPerson}>
+    <Combobox
+      as="div"
+      value={selectedPeople}
+      onChange={(newlySelectedPeople: string[]) => {
+        setSelectedPeople(newlySelectedPeople);
+      }}
+      multiple
+    >
       <Combobox.Label className="block text-sm font-medium text-gray-700">{label}</Combobox.Label>
       <div className="relative mt-1">
         <Combobox.Input
@@ -35,7 +42,7 @@ const UnPureSuggestUserCombobox = (props: IUnPureSuggestUserCombobox) => {
           }}
           // displayValue={(person: string[]) => person?.nickname}
         />
-        <Combobox.Button className="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+        <Combobox.Button className="mx-3 absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
           <SelectorIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
         </Combobox.Button>
 

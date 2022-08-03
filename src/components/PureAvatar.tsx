@@ -11,10 +11,10 @@ const PureAvatar = (props: IPureAvatarProps) => {
   return (
     <>
       {avatarUrl ? (
-        <img className="inline-block h-9 w-9 rounded-full" src={avatarUrl} alt={defaultName} />
+        <img className="inline-block h-9 w-9 rounded-full ring-2 ring-white" src={avatarUrl} alt={defaultName} />
       ) : (
-        <span className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-gray-500 border border-gray-600">
-          <span className="text-sm font-medium leading-none text-white">{name}</span>
+        <span className="inline-flex items-center justify-center h-9 w-9 rounded-full ring-2 ring-white">
+          <span className="text-sm font-medium leading-none text-gray-500">{name}</span>
         </span>
       )}
     </>
