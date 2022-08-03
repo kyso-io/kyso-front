@@ -1,7 +1,7 @@
 /* eslint no-empty: "off" */
 import KysoTopBar from '@/layouts/KysoTopBar';
 import UnpureMain from '@/unpure-components/UnpureMain';
-import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -46,6 +46,8 @@ const Index = () => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   const { organizationName } = router.query;
+  const [members, setMembers] = useState<Member[]>([]);
+  const [users, setUsers] = useState<UserDTO[]>([]);
 
   useEffect(() => {
     if (!organizationName) {
@@ -227,7 +229,7 @@ const Index = () => {
     setDatetimeActivityFeed(moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate());
   };
 
-  const [members, setMembers] = useState<Member[]>([]);
+  // START ORGANIZATION MEMBERS
   const getOrganizationMembers = async () => {
     try {
       const api: Api = new Api(token, commonData.organization.sluglified_name);
@@ -248,8 +250,7 @@ const Index = () => {
     }
   };
 
-  const [users, setUsers] = useState<UserDTO[]>([]);
-  const searchUsers = async (query: string) => {
+  const searchUsers = async (query: string): Promise<void> => {
     try {
       const api: Api = new Api(token, commonData.organization.sluglified_name);
       const result: NormalizedResponseDTO<UserDTO[]> = await api.getUsers({
@@ -265,7 +266,7 @@ const Index = () => {
     }
   };
 
-  const updateMemberRole = async (userId: string, organizationRole: string, teamRole: string | null) => {
+  const updateMemberRole = async (userId: string, organizationRole: string): Promise<void> => {
     let ms: Member[] = [...members];
     const index: number = ms.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
@@ -289,37 +290,58 @@ const Index = () => {
       } catch (e) {
         console.error(e);
       }
-    } else {
-      if (!ms[index]!.organization_roles.includes(organizationRole)) {
-        try {
-          const api: Api = new Api(token, commonData.organization.sluglified_name);
-          const result: NormalizedResponseDTO<OrganizationMember[]> = await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
-            members: [
-              {
-                userId,
-                role: organizationRole,
-              },
-            ],
-          });
-          ms = result.data.map((organizationMember: OrganizationMember) => ({
-            id: organizationMember.id,
-            nickname: organizationMember.nickname,
-            username: organizationMember.username,
-            avatar_url: organizationMember.avatar_url,
-            email: organizationMember.email,
-            organization_roles: organizationMember.organization_roles,
-            team_roles: [],
-            membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
-          }));
-        } catch (e) {
-          console.error(e);
-        }
-      }
-      if (teamRole && !ms[index]!.team_roles.includes(teamRole)) {
+    } else if (!ms[index]!.organization_roles.includes(organizationRole)) {
+      try {
+        const api: Api = new Api(token, commonData.organization.sluglified_name);
+        const result: NormalizedResponseDTO<OrganizationMember[]> = await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
+          members: [
+            {
+              userId,
+              role: organizationRole,
+            },
+          ],
+        });
+        ms = result.data.map((organizationMember: OrganizationMember) => ({
+          id: organizationMember.id,
+          nickname: organizationMember.nickname,
+          username: organizationMember.username,
+          avatar_url: organizationMember.avatar_url,
+          email: organizationMember.email,
+          organization_roles: organizationMember.organization_roles,
+          team_roles: [],
+          membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
+        }));
+      } catch (e) {
+        console.error(e);
       }
     }
     setMembers(ms);
   };
+
+  const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const result: NormalizedResponseDTO<{ organizationMembers: OrganizationMember[]; teamMembers: TeamMember[] }> = await api.inviteNewUser({
+        email,
+        organizationSlug: commonData.organization.sluglified_name,
+        organizationRole,
+      });
+      const ms: Member[] = result.data.organizationMembers.map((organizationMember: OrganizationMember) => ({
+        id: organizationMember.id,
+        nickname: organizationMember.nickname,
+        username: organizationMember.username,
+        avatar_url: organizationMember.avatar_url,
+        email: organizationMember.email,
+        organization_roles: organizationMember.organization_roles,
+        team_roles: [],
+        membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
+      }));
+      setMembers(ms);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  // END ORGANIZATION MEMBERS
 
   return (
     <UnpureMain basePath={router.basePath} commonData={commonData}>
@@ -349,7 +371,14 @@ const Index = () => {
                 <OrganizationInfo organizationInfo={organizationInfo} />
               </div>
             )}
-            <ManageUsers members={members} onInputChange={(query: string) => searchUsers(query)} users={users} showTeamRoles={false} onUpdateRoleMember={updateMemberRole} />
+            <ManageUsers
+              members={members}
+              onInputChange={(query: string) => searchUsers(query)}
+              users={users}
+              showTeamRoles={false}
+              onUpdateRoleMember={updateMemberRole}
+              onInviteNewUser={inviteNewUser}
+            />
           </div>
           <div className="grid lg:grid-cols-2 sm:grid-cols-1 xs:grid-cols-1 gap-4 z-0">
             {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}

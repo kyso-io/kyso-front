@@ -1,18 +1,24 @@
-import KysoTopBar from '@/layouts/KysoTopBar';
-import type { NextRouter } from 'next/router';
-import { useRouter } from 'next/router';
-import { useReports } from '@/hooks/use-reports';
-import UnpureMain from '@/unpure-components/UnpureMain';
-import UnpureReportBadge from '@/unpure-components/UnpureReportBadge';
 import PureReportFilter from '@/components/PureReportFilter';
+import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import checkPermissions from '@/helpers/check-permissions';
-import { useMemo } from 'react';
-import type { ReportDTO } from '@kyso-io/kyso-model';
+import { useReports } from '@/hooks/use-reports';
+import KysoTopBar from '@/layouts/KysoTopBar';
+import UnpureMain from '@/unpure-components/UnpureMain';
+import UnpureReportBadge from '@/unpure-components/UnpureReportBadge';
+import type { NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import { TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
+import { Api } from '@kyso-io/kyso-store';
+import type { NextRouter } from 'next/router';
+import { useRouter } from 'next/router';
+import { useEffect, useMemo, useState } from 'react';
+import ManageUsers from '../../../components/ManageUsers';
+import { getLocalStorageItem } from '../../../helpers/get-local-storage-item';
+import type { Member } from '../../../types/member';
 
 const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
+const token: string | null = getLocalStorageItem('jwt');
 
 const pushQueryString = (router: NextRouter, newValue: object) => {
   let query: { tags?: string | string[]; search?: string; sort?: string } = {};
@@ -53,8 +59,17 @@ const Index = () => {
     sort: router.query.sort as string,
     tags: router.query.tags as string[],
   });
+  const [members, setMembers] = useState<Member[]>([]);
+  const [users, setUsers] = useState<UserDTO[]>([]);
 
   const hasPermissionGlobalPinReport = useMemo(() => checkPermissions(commonData, 'KYSO_IO_REPORT_GLOBAL_PIN'), [commonData]);
+
+  useEffect(() => {
+    if (!commonData.team) {
+      return;
+    }
+    getTeamMembers();
+  }, [commonData?.team]);
 
   const sortOptions = [
     { name: 'Recently published', value: '-created_at' },
@@ -103,9 +118,193 @@ const Index = () => {
     extraParamsUrl += `&per_page=${router.query.per_page}`;
   }
 
+  // START TEAM MEMBERS
+
+  const getTeamMembers = async () => {
+    let m: Member[] = [];
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const resultOrgMembers: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
+      m = resultOrgMembers.data.map((organizationMember: OrganizationMember) => ({
+        id: organizationMember.id,
+        nickname: organizationMember.nickname,
+        username: organizationMember.username,
+        avatar_url: organizationMember.avatar_url,
+        email: organizationMember.email,
+        organization_roles: organizationMember.organization_roles,
+        team_roles: [],
+        membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
+      }));
+
+      api.setTeamSlug(commonData.team!.sluglified_name);
+      const resultTeamMembers: NormalizedResponseDTO<TeamMember[]> = await api.getTeamMembers(commonData.team!.id!);
+      resultTeamMembers.data.forEach((teamMember: TeamMember) => {
+        const member: Member | undefined = m.find((mem: Member) => mem.id === teamMember.id);
+        if (member) {
+          member.team_roles = teamMember.team_roles;
+          member.membership_origin = TeamMembershipOriginEnum.TEAM;
+        } else {
+          m.push({
+            id: teamMember.id,
+            nickname: teamMember.nickname,
+            username: teamMember.username,
+            avatar_url: teamMember.avatar_url,
+            email: teamMember.email,
+            organization_roles: [],
+            team_roles: teamMember.team_roles,
+            membership_origin: TeamMembershipOriginEnum.TEAM,
+          });
+        }
+      });
+
+      setMembers(m);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const searchUsers = async (query: string): Promise<void> => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const result: NormalizedResponseDTO<UserDTO[]> = await api.getUsers({
+        userIds: [],
+        page: 1,
+        per_page: 1000,
+        sort: '',
+        search: query,
+      });
+      setUsers(result.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const updateMemberRole = async (userId: string, organizationRole: string, teamRole?: string): Promise<void> => {
+    let ms: Member[] = [...members];
+    const index: number = ms.findIndex((m: Member) => m.id === userId);
+    if (index === -1) {
+      try {
+        const api: Api = new Api(token, commonData.organization.sluglified_name);
+        const result: NormalizedResponseDTO<OrganizationMember[]> = await api.addUserToOrganization({
+          organizationId: commonData.organization.id!,
+          userId,
+          role: organizationRole,
+        });
+        ms = result.data.map((organizationMember: OrganizationMember) => ({
+          id: organizationMember.id,
+          nickname: organizationMember.nickname,
+          username: organizationMember.username,
+          avatar_url: organizationMember.avatar_url,
+          email: organizationMember.email,
+          organization_roles: organizationMember.organization_roles,
+          team_roles: [],
+          membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
+        }));
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      if (!ms[index]!.organization_roles.includes(organizationRole)) {
+        try {
+          const api: Api = new Api(token, commonData.organization.sluglified_name);
+          const result: NormalizedResponseDTO<OrganizationMember[]> = await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
+            members: [
+              {
+                userId,
+                role: organizationRole,
+              },
+            ],
+          });
+          ms = result.data.map((organizationMember: OrganizationMember) => ({
+            id: organizationMember.id,
+            nickname: organizationMember.nickname,
+            username: organizationMember.username,
+            avatar_url: organizationMember.avatar_url,
+            email: organizationMember.email,
+            organization_roles: organizationMember.organization_roles,
+            team_roles: [],
+            membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
+          }));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      if (teamRole && !ms[index]!.team_roles.includes(teamRole)) {
+        try {
+          const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+          const result: NormalizedResponseDTO<TeamMember[]> = await api.updateTeamMemberRoles(commonData.team!.id!, {
+            members: [
+              {
+                userId,
+                role: teamRole,
+              },
+            ],
+          });
+          result.data.forEach((teamMember: TeamMember) => {
+            const member: Member | undefined = ms.find((mem: Member) => mem.id === teamMember.id);
+            if (member) {
+              member.team_roles = teamMember.team_roles;
+              member.membership_origin = TeamMembershipOriginEnum.TEAM;
+            } else {
+              ms.push({
+                id: teamMember.id,
+                nickname: teamMember.nickname,
+                username: teamMember.username,
+                avatar_url: teamMember.avatar_url,
+                email: teamMember.email,
+                organization_roles: [],
+                team_roles: teamMember.team_roles,
+                membership_origin: TeamMembershipOriginEnum.TEAM,
+              });
+            }
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    }
+    setMembers(ms);
+  };
+
+  const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const result: NormalizedResponseDTO<{ organizationMembers: OrganizationMember[]; teamMembers: TeamMember[] }> = await api.inviteNewUser({
+        email,
+        organizationSlug: commonData.organization.sluglified_name,
+        organizationRole,
+      });
+      const ms: Member[] = result.data.organizationMembers.map((organizationMember: OrganizationMember) => ({
+        id: organizationMember.id,
+        nickname: organizationMember.nickname,
+        username: organizationMember.username,
+        avatar_url: organizationMember.avatar_url,
+        email: organizationMember.email,
+        organization_roles: organizationMember.organization_roles,
+        team_roles: [],
+        membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
+      }));
+      setMembers(ms);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+  // END TEAM MEMBERS
+
   return (
     <UnpureMain basePath={router.basePath} commonData={commonData}>
       <div className="container mx-auto">
+        <div className="flex flex-row-reverse mb-2">
+          <ManageUsers
+            members={members}
+            onInputChange={(query: string) => searchUsers(query)}
+            users={users}
+            showTeamRoles={true}
+            onUpdateRoleMember={updateMemberRole}
+            onInviteNewUser={inviteNewUser}
+          />
+        </div>
+
         <PureReportFilter
           defaultSearch={(router.query.search as string) || null}
           sortOptions={sortOptions}
