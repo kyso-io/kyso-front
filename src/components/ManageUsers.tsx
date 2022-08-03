@@ -110,9 +110,9 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
         <div>
           <Menu.Button className="flex items-center">
             <div className="flex -space-x-1 relative z-0 overflow-hidden">
-              {members.slice(0, MAX_USERS_TO_SHOW).map((member: Member, index: number) => {
+              {members.slice(0, MAX_USERS_TO_SHOW).map((member: Member) => {
                 if (member.avatar_url) {
-                  return <img key={member.id} className={`relative z-${40 - 10 * index} inline-block h-6 w-6 rounded-full`} src={member.avatar_url} alt="" />;
+                  return <img key={member.id} className={`object-cover inline-block h-6 w-6 rounded-full ring-2 ring-white`} src={member.avatar_url} alt="" />;
                 }
                 const initials: string = getInitials(member.username);
                 return (
@@ -122,7 +122,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                 );
               })}
             </div>
-            {plusMembers && <div className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-200">+{plusMembers}</div>}
+            {plusMembers > 0 && <div className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-200">+{plusMembers}</div>}
             <ChevronDownIcon className="ml-2 h-5 w-5" aria-hidden="true" />
           </Menu.Button>
         </div>
@@ -204,7 +204,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                           <div className="flex items-center space-x-4">
                             <div className="shrink-0">
                               {member.avatar_url ? (
-                                <img className="h-6 w-6 rounded-full" src={member.avatar_url} alt="" />
+                                <img className="object-cover inline-block h-6 w-6 rounded-full ring-2 ring-white" src={member.avatar_url} alt="" />
                               ) : (
                                 <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-500">
                                   <span className="text-xs font-medium leading-none text-white">{initials}</span>
@@ -380,7 +380,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                   <div className="flex items-center space-x-4 mt-4">
                     <div className="shrink-0">
                       {selectedUser.avatar_url ? (
-                        <img className="h-6 w-6 rounded-full" src={selectedUser.avatar_url} alt="" />
+                        <img className="object-cover inline-block h-6 w-6 rounded-full ring-2 ring-white" src={selectedUser.avatar_url} alt="" />
                       ) : (
                         <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-500">
                           <span className="text-xs font-medium leading-none text-white">{selectedUserInitials}</span>

@@ -1,7 +1,7 @@
 import { Menu, Transition } from '@headlessui/react';
 import { BookmarkIcon, ChatIcon } from '@heroicons/react/outline';
 import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ShareIcon, ThumbUpIcon } from '@heroicons/react/solid';
-import type { ReportDTO } from '@kyso-io/kyso-model';
+import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
@@ -20,12 +20,13 @@ function classNames(...classes: string[]) {
 
 interface Props {
   report: ReportDTO;
+  authors: UserDTO[];
   toggleUserStarReport: () => void;
   toggleUserPinReport: () => void;
   toggleGlobalPinReport: () => void;
 }
 
-const ReportBadge = ({ report, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
+const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
   const router = useRouter();
   const commonData: CommonData = useCommonData({
     organizationName: router.query.organizationName as string,
@@ -123,7 +124,13 @@ const ReportBadge = ({ report, toggleUserStarReport, toggleUserPinReport, toggle
       </div>
       <div className="-mt-px flex items-center p-2">
         <div className="grow flex flex-row items-center">
-          <img className="w-6 h-6 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="Rounded avatar" />
+          <div className="flex -space-x-1 overflow-hidden">
+            {authors.map((author: UserDTO) => (
+              <>
+                <img className="object-cover inline-block h-6 w-6 rounded-full ring-2 ring-white" src={author.avatar_url} alt={author.display_name} />
+              </>
+            ))}
+          </div>
           <span className="text-gray-500 text-sm pl-2 pr-5">{moment(report.created_at).format('MMMM DD, YYYY')}</span>
           <EyeIcon className="shrink-0 h-5 w-5" />
           <span className="text-gray-500 text-sm pl-2 pr-5">{report.views}</span>

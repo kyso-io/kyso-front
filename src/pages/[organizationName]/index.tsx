@@ -8,10 +8,10 @@ import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
+import Pagination from '@/components/Pagination';
 import ActivityFeedComponent from '../../components/ActivityFeed';
 import ManageUsers from '../../components/ManageUsers';
 import OrganizationInfo from '../../components/OrganizationActivity';
-import Pagination from '../../components/Pagination';
 import ReportBadge from '../../components/ReportBadge';
 import { getLocalStorageItem } from '../../helpers/get-local-storage-item';
 import type { CommonData } from '../../hooks/use-common-data';
@@ -123,6 +123,7 @@ const Index = () => {
         paginationParams.limit,
         paginationParams.sort,
       );
+
       // Sort by global_pin and user_pin
       result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
         if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
@@ -133,6 +134,27 @@ const Index = () => {
         }
         return 0;
       });
+
+      const dataWithAuthors = [];
+
+      for (const x of result.data.results) {
+        const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
+        const allAuthorsData: UserDTO[] = [];
+
+        for (const authorId of allAuthorsId) {
+          /* eslint-disable no-await-in-loop */
+          const userData: NormalizedResponseDTO<UserDTO> = await api.getUserProfileById(authorId);
+
+          if (userData && userData.data) {
+            allAuthorsData.push(userData.data);
+          }
+        }
+
+        x.authors = allAuthorsData;
+        dataWithAuthors.push(x);
+      }
+
+      result.data.results = dataWithAuthors;
       setPaginatedResponseDto(result.data);
     } catch (e) {}
   };
@@ -392,6 +414,7 @@ const Index = () => {
               <ReportBadge
                 key={report.id}
                 report={report}
+                authors={report.authors ? report.authors : []}
                 toggleUserStarReport={() => toggleUserStarReport(report.id!)}
                 toggleUserPinReport={() => toggleUserPinReport(report.id!)}
                 toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
