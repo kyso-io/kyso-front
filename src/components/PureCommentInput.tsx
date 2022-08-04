@@ -80,7 +80,7 @@ type IPureCommentInput = {
   text: string;
   placeholder: string;
   handleInputChange: (newValue: string, newPlainTextValue: string, _mentions: string[]) => void;
-  suggestions: { id: string; nickname: string }[];
+  suggestions: { id: string; nameSlug: string }[];
 };
 
 const PureCommentInput = (props: IPureCommentInput) => {
@@ -112,7 +112,7 @@ const PureCommentInput = (props: IPureCommentInput) => {
           }}
           data={suggestions?.map((suggestion) => ({
             id: suggestion.id,
-            display: suggestion.nickname,
+            display: suggestion.nameSlug,
           }))}
           markup="@[__display__](__id__)"
           appendSpaceOnAdd={true}
