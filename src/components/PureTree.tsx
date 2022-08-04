@@ -1,7 +1,6 @@
 import PureTreeItem from '@/components/PureTreeItem';
 import classNames from '@/helpers/class-names';
 import type { GithubFileHash, ReportDTO } from '@kyso-io/kyso-model';
-import { extname } from 'path';
 import { ChevronLeftIcon } from '@heroicons/react/solid';
 import type { CommonData } from '@/hooks/use-common-data';
 
@@ -56,24 +55,17 @@ const PureTree = (props: IPureTree) => {
     // if item is undefined it means go up
     let newUrl = ``;
     // lets go up
+    const existingPathIsFile = currentItem?.type === 'file';
     if (!item) {
-      // only inside one folder going to top level, lets remove path from query
-      if (currentPath.split('/').length === 1) {
-        newUrl = reportUrl;
-      }
-      if (currentPath.split('/').length > 1) {
-        // inside deeper folder, remove last folder from path only
-        const existingPathIsFile = extname(lastPathSegment!) !== '';
-        const sliceIndex = existingPathIsFile ? 2 : 1;
-        newUrl = `${reportUrl}/${currentPath.split('/').slice(0, -sliceIndex).join('/')}`;
-      }
+      const sliceIndex = existingPathIsFile ? 2 : 1;
+      newUrl = `${reportUrl}/${currentPath.split('/').slice(0, -sliceIndex).join('/')}`;
+      console.log(newUrl);
     }
 
     // default case normal folder link
     const isFile = item?.type === 'file';
-    const existingPathIsFile = currentItem?.type === 'file';
 
-    if (!isFile) {
+    if (item && !isFile) {
       if (existingPathIsFile) {
         const dirPath = currentPath.split('/').slice(0, -1).join('/');
         const newPath: string | null = `${dirPath ? `${dirPath}/` : ''}${item?.path}`;
@@ -84,7 +76,7 @@ const PureTree = (props: IPureTree) => {
       newUrl = `${reportUrl}/${newPath}`;
     }
 
-    if (isFile) {
+    if (item && isFile) {
       if (item?.path === lastPathSegment) {
         // do nothing since its a re-click
         newUrl = `#`;
@@ -103,6 +95,8 @@ const PureTree = (props: IPureTree) => {
     if (version) {
       newUrl = `${newUrl}?version=${version}`;
     }
+
+    console.log(newUrl);
 
     return newUrl;
   };
