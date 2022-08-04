@@ -80,7 +80,7 @@ const Index = () => {
     const api: Api = new Api(token);
     try {
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(organizationName as string, {
-        start_datetime: moment().add(-1, 'days').toDate(),
+        start_datetime: moment().add(-DAYS_ACTIVITY_FEED, 'days').toDate(),
         end_datetime: moment().toDate(),
       });
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
