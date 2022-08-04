@@ -187,17 +187,17 @@ const Index = () => {
             <div>
               <div className="w-9/12 flex container flex-col lg:space-y-0 space-y-2">
                 <div>
-                  {fileToRender && (
-                    <UnpureFileHeader
-                      tree={selfTree}
-                      report={report}
-                      fileToRender={fileToRender}
-                      basePath={router.basePath}
-                      path={currentPath}
-                      version={router.query.version as string}
-                      commonData={commonData}
-                    />
-                  )}
+                  {/* {fileToRender && ( */}
+                  <UnpureFileHeader
+                    tree={selfTree}
+                    report={report}
+                    fileToRender={fileToRender}
+                    basePath={router.basePath}
+                    path={currentPath}
+                    version={router.query.version as string}
+                    commonData={commonData}
+                  />
+                  {/* )} */}
                 </div>
 
                 {fileToRender && onlyVisibleCell && (
@@ -235,8 +235,8 @@ const Index = () => {
                 )}
 
                 {!fileToRender && (
-                  <div className="prose prose-sm p-3">
-                    <p>Please choose a file in the filebrowser on the left.</p>
+                  <div className="w-9/12 border-x border-b rounded-b">
+                    <div className="prose p-3">Please choose a file in the filebrowser on the left.</div>
                   </div>
                 )}
               </div>
