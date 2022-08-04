@@ -4,6 +4,7 @@ import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { useReports } from '@/hooks/use-reports';
+import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import UnpureReportBadge from '@/unpure-components/UnpureReportBadge';
 import type { NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -63,6 +64,7 @@ const Index = () => {
   const [users, setUsers] = useState<UserDTO[]>([]);
 
   const hasPermissionGlobalPinReport = useMemo(() => checkPermissions(commonData, 'KYSO_IO_REPORT_GLOBAL_PIN'), [commonData]);
+  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_DELETE_TEAM'), [commonData]);
 
   useEffect(() => {
     if (!commonData.team || !commonData.user) {
@@ -283,19 +285,20 @@ const Index = () => {
             <div className="w-4/6 flex flex-col justify-between">
               <div className="text-xl font-medium">{commonData.team.display_name}</div>
               <div className="text-md">{commonData.team.bio}</div>
-              <div className="mt-2">
-                <ManageUsers
-                  members={members}
-                  onInputChange={(query: string) => searchUsers(query)}
-                  users={users}
-                  showTeamRoles={true}
-                  onUpdateRoleMember={updateMemberRole}
-                  onInviteNewUser={inviteNewUser}
-                  onRemoveUser={removeUser}
-                />
-              </div>
             </div>
             <div className="w-2/6 flex flex-row justify-end items-center space-x-2">
+              <ManageUsers
+                members={members}
+                onInputChange={(query: string) => searchUsers(query)}
+                users={users}
+                showTeamRoles={true}
+                onUpdateRoleMember={updateMemberRole}
+                onInviteNewUser={inviteNewUser}
+                onRemoveUser={removeUser}
+              />
+
+              <UnpureDeleteChannelDropdown commonData={commonData} hasPermissionDeleteChannel={hasPermissionDeleteChannel} />
+
               <PureNewReportPopover commonData={commonData} />
             </div>
           </div>

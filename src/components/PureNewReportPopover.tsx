@@ -22,7 +22,7 @@ const PureNewReportPopover = (props: Props) => {
     <>
       <Popover as="div" className="z-50 relative inline-block">
         <Popover.Button className="p-3 font-medium text-white rounded bg-gray-500 hover:bg-gray-600 text-sm flex flex-row items-center focus:ring-0 focus:outline-none">
-          New report
+          Post a report
           <ChevronDownIcon className="w-5 h-5 ml-2" />
         </Popover.Button>
 
