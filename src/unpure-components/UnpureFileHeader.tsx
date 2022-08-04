@@ -13,7 +13,7 @@ import type { CommonData } from '@/hooks/use-common-data';
 interface Props {
   tree: GithubFileHash[];
   report: ReportDTO;
-  fileToRender: FileToRender;
+  fileToRender: FileToRender | null;
   commonData: CommonData;
   basePath: string;
   path: string;
