@@ -21,7 +21,7 @@ import type { Member } from '../../types/member';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 14;
-const MAX_ACTIVITY_FEED_ITEMS: number = 12;
+const MAX_ACTIVITY_FEED_ITEMS: number = 13;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
 
 interface PaginationParams {

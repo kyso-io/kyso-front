@@ -33,7 +33,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     { name: 'Your Profile', href: `${router.basePath}/user/${slugifiedName}` },
     {
       name: 'Your settings',
-      href: `${router.basePath}/user/${slugifiedName}/settings`,
+      href: `${router.basePath}/in/settings`,
     },
     { name: 'Sign out', href: `${router.basePath}/logout` },
   ];
