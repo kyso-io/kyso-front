@@ -139,9 +139,10 @@ const Index = () => {
 
       for (const x of result.data.results) {
         const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
+        const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
         const allAuthorsData: UserDTO[] = [];
 
-        for (const authorId of allAuthorsId) {
+        for (const authorId of uniqueAllAuthorsId) {
           /* eslint-disable no-await-in-loop */
           const userData: NormalizedResponseDTO<UserDTO> = await api.getUserProfileById(authorId);
 
