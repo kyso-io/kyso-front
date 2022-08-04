@@ -407,7 +407,7 @@ const Index = () => {
             onInviteNewUser={inviteNewUser}
           />
         </div>
-        <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
+        <div className="grid lg:grid-cols-2 sm:grid-cols-2 xs:grid-cols-2 gap-4">
           {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
           {paginatedResponseDto?.results &&
             paginatedResponseDto.results.length > 0 &&
