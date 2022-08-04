@@ -21,6 +21,7 @@ import type { Member } from '../../types/member';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 14;
+const MAX_ACTIVITY_FEED_ITEMS: number = 12;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
 
 interface PaginationParams {
@@ -83,6 +84,9 @@ const Index = () => {
         start_datetime: moment().add(-DAYS_ACTIVITY_FEED, 'days').toDate(),
         end_datetime: moment().toDate(),
       });
+
+      result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
+
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
       if (result?.data) {
         result.data.forEach((af: ActivityFeed) => {
@@ -234,6 +238,9 @@ const Index = () => {
         start_datetime: startDatetime,
         end_datetime: datetimeActivityFeed,
       });
+
+      result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
+
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
       if (result?.data) {
         newActivityFeed.data = [...newActivityFeed.data, ...result.data];
