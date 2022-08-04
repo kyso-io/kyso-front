@@ -6,7 +6,6 @@ import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { useReports } from '@/hooks/use-reports';
 import UnpureReportBadge from '@/unpure-components/UnpureReportBadge';
 import type { NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import type { NextRouter } from 'next/router';
 import { useRouter } from 'next/router';
@@ -134,7 +133,6 @@ const Index = () => {
         email: organizationMember.email,
         organization_roles: organizationMember.organization_roles,
         team_roles: [],
-        membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
       }));
 
       api.setTeamSlug(commonData.team!.sluglified_name);
@@ -143,7 +141,7 @@ const Index = () => {
         const member: Member | undefined = m.find((mem: Member) => mem.id === teamMember.id);
         if (member) {
           member.team_roles = teamMember.team_roles;
-          member.membership_origin = TeamMembershipOriginEnum.TEAM;
+          member.membership_origin = teamMember.membership_origin;
         } else {
           m.push({
             id: teamMember.id,
@@ -153,7 +151,7 @@ const Index = () => {
             email: teamMember.email,
             organization_roles: [],
             team_roles: teamMember.team_roles,
-            membership_origin: TeamMembershipOriginEnum.TEAM,
+            membership_origin: teamMember.membership_origin,
           });
         }
       });
@@ -199,7 +197,6 @@ const Index = () => {
           email: organizationMember.email,
           organization_roles: organizationMember.organization_roles,
           team_roles: [],
-          membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
         }));
       } catch (e) {
         console.error(e);
@@ -224,7 +221,6 @@ const Index = () => {
             email: organizationMember.email,
             organization_roles: organizationMember.organization_roles,
             team_roles: [],
-            membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
           }));
         } catch (e) {
           console.error(e);
@@ -245,7 +241,7 @@ const Index = () => {
             const member: Member | undefined = ms.find((mem: Member) => mem.id === teamMember.id);
             if (member) {
               member.team_roles = teamMember.team_roles;
-              member.membership_origin = TeamMembershipOriginEnum.TEAM;
+              member.membership_origin = teamMember.membership_origin;
             } else {
               ms.push({
                 id: teamMember.id,
@@ -255,7 +251,7 @@ const Index = () => {
                 email: teamMember.email,
                 organization_roles: [],
                 team_roles: teamMember.team_roles,
-                membership_origin: TeamMembershipOriginEnum.TEAM,
+                membership_origin: teamMember.membership_origin,
               });
             }
           });
@@ -270,26 +266,27 @@ const Index = () => {
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
     try {
       const api: Api = new Api(token, commonData.organization.sluglified_name);
-      const result: NormalizedResponseDTO<{ organizationMembers: OrganizationMember[]; teamMembers: TeamMember[] }> = await api.inviteNewUser({
+      await api.inviteNewUser({
         email,
         organizationSlug: commonData.organization.sluglified_name,
         organizationRole,
       });
-      const ms: Member[] = result.data.organizationMembers.map((organizationMember: OrganizationMember) => ({
-        id: organizationMember.id,
-        nickname: organizationMember.nickname,
-        username: organizationMember.username,
-        avatar_url: organizationMember.avatar_url,
-        email: organizationMember.email,
-        organization_roles: organizationMember.organization_roles,
-        team_roles: [],
-        membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
-      }));
-      setMembers(ms);
+      getTeamMembers();
     } catch (e) {
       console.error(e);
     }
   };
+
+  const removeUser = async (userId: string): Promise<void> => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      await api.deleteUserFromTeam(commonData.team.id!, userId);
+      getTeamMembers();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   // END TEAM MEMBERS
 
   return (
@@ -311,6 +308,7 @@ const Index = () => {
                   showTeamRoles={true}
                   onUpdateRoleMember={updateMemberRole}
                   onInviteNewUser={inviteNewUser}
+                  onRemoveUser={removeUser}
                 />
               </div>
             </div>

@@ -1,14 +1,13 @@
 /* eslint no-empty: "off" */
 import ChannelList from '@/components/ChannelList';
+import Pagination from '@/components/Pagination';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
-import Pagination from '@/components/Pagination';
 import ActivityFeedComponent from '../../components/ActivityFeed';
 import ManageUsers from '../../components/ManageUsers';
 import OrganizationInfo from '../../components/OrganizationActivity';
@@ -266,7 +265,6 @@ const Index = () => {
         email: organizationMember.email,
         organization_roles: organizationMember.organization_roles,
         team_roles: [],
-        membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
       }));
       setMembers(m);
     } catch (e) {
@@ -309,7 +307,6 @@ const Index = () => {
           email: organizationMember.email,
           organization_roles: organizationMember.organization_roles,
           team_roles: [],
-          membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
         }));
       } catch (e) {
         console.error(e);
@@ -333,7 +330,6 @@ const Index = () => {
           email: organizationMember.email,
           organization_roles: organizationMember.organization_roles,
           team_roles: [],
-          membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
         }));
       } catch (e) {
         console.error(e);
@@ -358,13 +354,32 @@ const Index = () => {
         email: organizationMember.email,
         organization_roles: organizationMember.organization_roles,
         team_roles: [],
-        membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
       }));
       setMembers(ms);
     } catch (e) {
       console.error(e);
     }
   };
+
+  const removeUser = async (userId: string): Promise<void> => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const result: NormalizedResponseDTO<OrganizationMember[]> = await api.removeUserFromOrganization(commonData.organization.id!, userId);
+      const ms: Member[] = result.data.map((organizationMember: OrganizationMember) => ({
+        id: organizationMember.id,
+        nickname: organizationMember.nickname,
+        username: organizationMember.username,
+        avatar_url: organizationMember.avatar_url,
+        email: organizationMember.email,
+        organization_roles: organizationMember.organization_roles,
+        team_roles: [],
+      }));
+      setMembers(ms);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   // END ORGANIZATION MEMBERS
 
   return (
@@ -404,6 +419,7 @@ const Index = () => {
             showTeamRoles={false}
             onUpdateRoleMember={updateMemberRole}
             onInviteNewUser={inviteNewUser}
+            onRemoveUser={removeUser}
           />
         </div>
         <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
