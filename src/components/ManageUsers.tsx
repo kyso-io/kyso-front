@@ -386,6 +386,14 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                       if (!user.avatar_url) {
                         initials = getInitials(user.name);
                       }
+                      const member: Member | undefined = members.find((m: Member) => m.id === user.id);
+                      let roles: string | undefined = '';
+                      if (member) {
+                        roles = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
+                        if (member.team_roles && member.team_roles.length > 0) {
+                          roles += ` / ${organizationRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
+                        }
+                      }
                       return (
                         <li
                           key={user.id}
@@ -395,7 +403,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                               return;
                             }
                             // Check if user is member
-                            const index: number = members.findIndex((member: Member) => member.id === user.id);
+                            const index: number = members.findIndex((m: Member) => m.id === user.id);
                             if (index !== -1) {
                               setSelectedOrgRole(members[index]!.organization_roles[0]!);
                               if (members[index]?.team_roles && members[index]!.team_roles.length > 0) {
@@ -417,7 +425,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                             </div>
                             <div className="flex-1" style={{ marginLeft: 10 }}>
                               <p className="text-xs font-medium text-gray-900 truncate">{user.display_name}</p>
-                              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                              {member ? <p className="text-xs text-gray-500 truncate">{roles}</p> : <p className="text-xs text-gray-500 truncate">{user.email}</p>}
                             </div>
                           </div>
                         </li>

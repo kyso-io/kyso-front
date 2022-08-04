@@ -65,11 +65,11 @@ const Index = () => {
   const hasPermissionGlobalPinReport = useMemo(() => checkPermissions(commonData, 'KYSO_IO_REPORT_GLOBAL_PIN'), [commonData]);
 
   useEffect(() => {
-    if (!commonData.team) {
+    if (!commonData.team || !commonData.user) {
       return;
     }
     getTeamMembers();
-  }, [commonData?.team]);
+  }, [commonData?.team, commonData?.user]);
 
   const sortOptions = [
     { name: 'Recently published', value: '-created_at' },
@@ -121,25 +121,43 @@ const Index = () => {
   // START TEAM MEMBERS
 
   const getTeamMembers = async () => {
-    let m: Member[] = [];
+    const m: Member[] = [];
     try {
       const api: Api = new Api(token, commonData.organization.sluglified_name);
       const resultOrgMembers: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
-      m = resultOrgMembers.data.map((organizationMember: OrganizationMember) => ({
-        id: organizationMember.id,
-        nickname: organizationMember.nickname,
-        username: organizationMember.username,
-        avatar_url: organizationMember.avatar_url,
-        email: organizationMember.email,
-        organization_roles: organizationMember.organization_roles,
-        team_roles: [],
-      }));
+      let userMember: Member | null = null;
+      resultOrgMembers.data.forEach((organizationMember: OrganizationMember) => {
+        if (organizationMember.id === commonData.user.id) {
+          userMember = {
+            id: organizationMember.id,
+            nickname: organizationMember.nickname,
+            username: organizationMember.username,
+            avatar_url: organizationMember.avatar_url,
+            email: organizationMember.email,
+            organization_roles: organizationMember.organization_roles,
+            team_roles: [],
+          };
+        } else {
+          m.push({
+            id: organizationMember.id,
+            nickname: organizationMember.nickname,
+            username: organizationMember.username,
+            avatar_url: organizationMember.avatar_url,
+            email: organizationMember.email,
+            organization_roles: organizationMember.organization_roles,
+            team_roles: [],
+          });
+        }
+      });
 
       api.setTeamSlug(commonData.team!.sluglified_name);
       const resultTeamMembers: NormalizedResponseDTO<TeamMember[]> = await api.getTeamMembers(commonData.team!.id!);
       resultTeamMembers.data.forEach((teamMember: TeamMember) => {
         const member: Member | undefined = m.find((mem: Member) => mem.id === teamMember.id);
-        if (member) {
+        if (userMember && userMember.id === teamMember.id) {
+          userMember.team_roles = teamMember.team_roles;
+          userMember.membership_origin = teamMember.membership_origin;
+        } else if (member) {
           member.team_roles = teamMember.team_roles;
           member.membership_origin = teamMember.membership_origin;
         } else {
@@ -155,7 +173,9 @@ const Index = () => {
           });
         }
       });
-
+      if (userMember) {
+        m.unshift(userMember);
+      }
       setMembers(m);
     } catch (e) {
       console.error(e);
@@ -179,33 +199,23 @@ const Index = () => {
   };
 
   const updateMemberRole = async (userId: string, organizationRole: string, teamRole?: string): Promise<void> => {
-    let ms: Member[] = [...members];
-    const index: number = ms.findIndex((m: Member) => m.id === userId);
+    const index: number = members.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
       try {
         const api: Api = new Api(token, commonData.organization.sluglified_name);
-        const result: NormalizedResponseDTO<OrganizationMember[]> = await api.addUserToOrganization({
+        await api.addUserToOrganization({
           organizationId: commonData.organization.id!,
           userId,
           role: organizationRole,
         });
-        ms = result.data.map((organizationMember: OrganizationMember) => ({
-          id: organizationMember.id,
-          nickname: organizationMember.nickname,
-          username: organizationMember.username,
-          avatar_url: organizationMember.avatar_url,
-          email: organizationMember.email,
-          organization_roles: organizationMember.organization_roles,
-          team_roles: [],
-        }));
       } catch (e) {
         console.error(e);
       }
     } else {
-      if (!ms[index]!.organization_roles.includes(organizationRole)) {
+      if (!members[index]!.organization_roles.includes(organizationRole)) {
         try {
           const api: Api = new Api(token, commonData.organization.sluglified_name);
-          const result: NormalizedResponseDTO<OrganizationMember[]> = await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
+          await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
             members: [
               {
                 userId,
@@ -213,23 +223,14 @@ const Index = () => {
               },
             ],
           });
-          ms = result.data.map((organizationMember: OrganizationMember) => ({
-            id: organizationMember.id,
-            nickname: organizationMember.nickname,
-            username: organizationMember.username,
-            avatar_url: organizationMember.avatar_url,
-            email: organizationMember.email,
-            organization_roles: organizationMember.organization_roles,
-            team_roles: [],
-          }));
         } catch (e) {
           console.error(e);
         }
       }
-      if (teamRole && !ms[index]!.team_roles.includes(teamRole)) {
+      if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
         try {
           const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
-          const result: NormalizedResponseDTO<TeamMember[]> = await api.updateTeamMemberRoles(commonData.team!.id!, {
+          await api.updateTeamMemberRoles(commonData.team!.id!, {
             members: [
               {
                 userId,
@@ -237,30 +238,12 @@ const Index = () => {
               },
             ],
           });
-          result.data.forEach((teamMember: TeamMember) => {
-            const member: Member | undefined = ms.find((mem: Member) => mem.id === teamMember.id);
-            if (member) {
-              member.team_roles = teamMember.team_roles;
-              member.membership_origin = teamMember.membership_origin;
-            } else {
-              ms.push({
-                id: teamMember.id,
-                nickname: teamMember.nickname,
-                username: teamMember.username,
-                avatar_url: teamMember.avatar_url,
-                email: teamMember.email,
-                organization_roles: [],
-                team_roles: teamMember.team_roles,
-                membership_origin: teamMember.membership_origin,
-              });
-            }
-          });
         } catch (e) {
           console.error(e);
         }
       }
     }
-    setMembers(ms);
+    getTeamMembers();
   };
 
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
