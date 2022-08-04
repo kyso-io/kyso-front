@@ -4,7 +4,7 @@ import type { CommonData } from '@/hooks/use-common-data';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import type { ReactNode } from 'react';
-import React from 'react';
+import { ChannelSelector } from './ChannelSelector';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props {
@@ -56,7 +56,7 @@ const BreadcrumbNavbar = (props: Props) => {
               <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
             </svg>
           )}
-          {commonData.organization && <NavigationSelector selectorItems={channelSelectorItems} selectorLabel="channel" />}
+          {commonData.organization && <ChannelSelector basePath={basePath} commonData={commonData} />}
           {commonData.organization && report && (
             <svg className="hidden lg:inline-block shrink-0 h-5 w-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
