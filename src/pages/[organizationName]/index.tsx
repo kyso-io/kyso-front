@@ -9,6 +9,7 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import Pagination from '@/components/Pagination';
+import PureAvatar from '@/components/PureAvatar';
 import ActivityFeedComponent from '../../components/ActivityFeed';
 import ManageUsers from '../../components/ManageUsers';
 import OrganizationInfo from '../../components/OrganizationActivity';
@@ -21,7 +22,7 @@ import type { Member } from '../../types/member';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 14;
-const MAX_ACTIVITY_FEED_ITEMS: number = 13;
+const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
 
 interface PaginationParams {
@@ -387,8 +388,7 @@ const Index = () => {
               <div className="flex items-center space-x-5">
                 <div className="shrink-0">
                   <div className="relative">
-                    <img className="h-16 w-16 rounded-full" src={commonData.organization?.avatar_url} alt="" />
-                    <span className="absolute inset-0 shadow-inner rounded-full" aria-hidden="true" />
+                    <PureAvatar src={commonData.organization?.avatar_url} title={commonData.organization?.display_name} size={16} />
                   </div>
                 </div>
                 <div>
