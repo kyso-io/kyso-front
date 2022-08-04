@@ -385,7 +385,7 @@ const Index = () => {
               <div className="flex items-center space-x-5">
                 <div className="shrink-0">
                   <div className="relative">
-                    <PureAvatar src={commonData.organization?.avatar_url} title={commonData.organization?.display_name} size={16} />
+                    <PureAvatar src={commonData.organization?.avatar_url} title={commonData.organization?.display_name} size={12} />
                   </div>
                 </div>
                 <div>
@@ -412,7 +412,7 @@ const Index = () => {
             onRemoveUser={removeUser}
           />
         </div>
-        <div className="grid lg:grid-cols-2 sm:grid-cols-2 xs:grid-cols-2 gap-4">
+        <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
           {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
           {paginatedResponseDto?.results &&
             paginatedResponseDto.results.length > 0 &&
