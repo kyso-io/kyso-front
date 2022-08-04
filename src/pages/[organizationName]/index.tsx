@@ -20,6 +20,7 @@ import type { Member } from '../../types/member';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 14;
+const MAX_ACTIVITY_FEED_ITEMS: number = 12;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
 
 interface PaginationParams {
@@ -79,9 +80,12 @@ const Index = () => {
     const api: Api = new Api(token);
     try {
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(organizationName as string, {
-        start_datetime: moment().add(-1, 'days').toDate(),
+        start_datetime: moment().add(-DAYS_ACTIVITY_FEED, 'days').toDate(),
         end_datetime: moment().toDate(),
       });
+
+      result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
+
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
       if (result?.data) {
         result.data.forEach((af: ActivityFeed) => {
@@ -138,9 +142,10 @@ const Index = () => {
 
       for (const x of result.data.results) {
         const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
+        const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
         const allAuthorsData: UserDTO[] = [];
 
-        for (const authorId of allAuthorsId) {
+        for (const authorId of uniqueAllAuthorsId) {
           /* eslint-disable no-await-in-loop */
           const userData: NormalizedResponseDTO<UserDTO> = await api.getUserProfileById(authorId);
 
@@ -232,6 +237,9 @@ const Index = () => {
         start_datetime: startDatetime,
         end_datetime: datetimeActivityFeed,
       });
+
+      result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
+
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
       if (result?.data) {
         newActivityFeed.data = [...newActivityFeed.data, ...result.data];
@@ -422,7 +430,7 @@ const Index = () => {
             onRemoveUser={removeUser}
           />
         </div>
-        <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
+        <div className="grid lg:grid-cols-2 sm:grid-cols-2 xs:grid-cols-2 gap-4">
           {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
           {paginatedResponseDto?.results &&
             paginatedResponseDto.results.length > 0 &&
