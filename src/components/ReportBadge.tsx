@@ -1,4 +1,3 @@
-import { Helper } from '@/helpers/Helper';
 import { Menu, Transition } from '@headlessui/react';
 import { BookmarkIcon, ChatIcon } from '@heroicons/react/outline';
 import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ShareIcon, ThumbUpIcon } from '@heroicons/react/solid';
@@ -68,7 +67,7 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
           </div>
         </div>
         <div className="flex-1 min-w-0 py-3 pr-2 relative">
-          <a href={`${report.main_file_path_scs.split('/').slice(0, 3).join('/')}/${Helper.slugify(report.title)}`} className="focus:outline-none">
+          <a href={`${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
             <p className="text-sm font-medium text-gray-900 pb-2">{report.title}</p>
             <p className="text-sm text-gray-500">{description}</p>
           </a>
@@ -127,9 +126,7 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
         <div className="grow flex flex-row items-center">
           <div className="flex -space-x-1 overflow-hidden">
             {authors.map((author: UserDTO) => (
-              <>
-                <img className="object-cover inline-block h-6 w-6 rounded-full ring-2 ring-white" src={author.avatar_url} alt={author.display_name} />
-              </>
+              <img key={author.id} className="object-cover inline-block h-6 w-6 rounded-full ring-2 ring-white" src={author.avatar_url} alt={author.display_name} />
             ))}
           </div>
           <span className="text-gray-500 text-sm pl-2 pr-5">{moment(report.created_at).format('MMMM DD, YYYY')}</span>

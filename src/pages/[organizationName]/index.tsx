@@ -1,14 +1,14 @@
 /* eslint no-empty: "off" */
 import ChannelList from '@/components/ChannelList';
 import Pagination from '@/components/Pagination';
+import PureAvatar from '@/components/PureAvatar';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
-import PureAvatar from '@/components/PureAvatar';
 import ActivityFeedComponent from '../../components/ActivityFeed';
 import ManageUsers from '../../components/ManageUsers';
 import OrganizationInfo from '../../components/OrganizationActivity';
@@ -60,12 +60,12 @@ const Index = () => {
   }, [token, organizationName, paginationParams]);
 
   useEffect(() => {
-    if (!commonData.organization) {
+    if (!commonData.organization || !commonData.user) {
       return;
     }
     getOrganizationsInfo();
     getOrganizationMembers();
-  }, [commonData?.organization]);
+  }, [commonData?.organization, commonData?.user]);
 
   useEffect(() => {
     if (!organizationName) {
@@ -266,15 +266,34 @@ const Index = () => {
     try {
       const api: Api = new Api(token, commonData.organization.sluglified_name);
       const result: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
-      const m: Member[] = result.data.map((organizationMember: OrganizationMember) => ({
-        id: organizationMember.id,
-        nickname: organizationMember.nickname,
-        username: organizationMember.username,
-        avatar_url: organizationMember.avatar_url,
-        email: organizationMember.email,
-        organization_roles: organizationMember.organization_roles,
-        team_roles: [],
-      }));
+      const m: Member[] = [];
+      let userMember: Member | null = null;
+      result.data.forEach((organizationMember: OrganizationMember) => {
+        if (organizationMember.id === commonData.user.id) {
+          userMember = {
+            id: organizationMember.id,
+            nickname: organizationMember.nickname,
+            username: organizationMember.username,
+            avatar_url: organizationMember.avatar_url,
+            email: organizationMember.email,
+            organization_roles: organizationMember.organization_roles,
+            team_roles: [],
+          };
+        } else {
+          m.push({
+            id: organizationMember.id,
+            nickname: organizationMember.nickname,
+            username: organizationMember.username,
+            avatar_url: organizationMember.avatar_url,
+            email: organizationMember.email,
+            organization_roles: organizationMember.organization_roles,
+            team_roles: [],
+          });
+        }
+      });
+      if (userMember) {
+        m.unshift(userMember);
+      }
       setMembers(m);
     } catch (e) {
       console.error(e);
@@ -298,32 +317,22 @@ const Index = () => {
   };
 
   const updateMemberRole = async (userId: string, organizationRole: string): Promise<void> => {
-    let ms: Member[] = [...members];
-    const index: number = ms.findIndex((m: Member) => m.id === userId);
+    const index: number = members.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
       try {
         const api: Api = new Api(token, commonData.organization.sluglified_name);
-        const result: NormalizedResponseDTO<OrganizationMember[]> = await api.addUserToOrganization({
+        await api.addUserToOrganization({
           organizationId: commonData.organization.id!,
           userId,
           role: organizationRole,
         });
-        ms = result.data.map((organizationMember: OrganizationMember) => ({
-          id: organizationMember.id,
-          nickname: organizationMember.nickname,
-          username: organizationMember.username,
-          avatar_url: organizationMember.avatar_url,
-          email: organizationMember.email,
-          organization_roles: organizationMember.organization_roles,
-          team_roles: [],
-        }));
       } catch (e) {
         console.error(e);
       }
-    } else if (!ms[index]!.organization_roles.includes(organizationRole)) {
+    } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
         const api: Api = new Api(token, commonData.organization.sluglified_name);
-        const result: NormalizedResponseDTO<OrganizationMember[]> = await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
+        await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
           members: [
             {
               userId,
@@ -331,40 +340,22 @@ const Index = () => {
             },
           ],
         });
-        ms = result.data.map((organizationMember: OrganizationMember) => ({
-          id: organizationMember.id,
-          nickname: organizationMember.nickname,
-          username: organizationMember.username,
-          avatar_url: organizationMember.avatar_url,
-          email: organizationMember.email,
-          organization_roles: organizationMember.organization_roles,
-          team_roles: [],
-        }));
       } catch (e) {
         console.error(e);
       }
     }
-    setMembers(ms);
+    getOrganizationMembers();
   };
 
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
     try {
       const api: Api = new Api(token, commonData.organization.sluglified_name);
-      const result: NormalizedResponseDTO<{ organizationMembers: OrganizationMember[]; teamMembers: TeamMember[] }> = await api.inviteNewUser({
+      await api.inviteNewUser({
         email,
         organizationSlug: commonData.organization.sluglified_name,
         organizationRole,
       });
-      const ms: Member[] = result.data.organizationMembers.map((organizationMember: OrganizationMember) => ({
-        id: organizationMember.id,
-        nickname: organizationMember.nickname,
-        username: organizationMember.username,
-        avatar_url: organizationMember.avatar_url,
-        email: organizationMember.email,
-        organization_roles: organizationMember.organization_roles,
-        team_roles: [],
-      }));
-      setMembers(ms);
+      getOrganizationMembers();
     } catch (e) {
       console.error(e);
     }
@@ -373,17 +364,8 @@ const Index = () => {
   const removeUser = async (userId: string): Promise<void> => {
     try {
       const api: Api = new Api(token, commonData.organization.sluglified_name);
-      const result: NormalizedResponseDTO<OrganizationMember[]> = await api.removeUserFromOrganization(commonData.organization.id!, userId);
-      const ms: Member[] = result.data.map((organizationMember: OrganizationMember) => ({
-        id: organizationMember.id,
-        nickname: organizationMember.nickname,
-        username: organizationMember.username,
-        avatar_url: organizationMember.avatar_url,
-        email: organizationMember.email,
-        organization_roles: organizationMember.organization_roles,
-        team_roles: [],
-      }));
-      setMembers(ms);
+      await api.removeUserFromOrganization(commonData.organization.id!, userId);
+      getOrganizationMembers();
     } catch (e) {
       console.error(e);
     }
