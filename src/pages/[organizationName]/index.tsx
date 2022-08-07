@@ -4,6 +4,8 @@ import Pagination from '@/components/Pagination';
 import PureAvatar from '@/components/PureAvatar';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -274,6 +276,7 @@ const Index = () => {
             id: organizationMember.id,
             nickname: organizationMember.nickname,
             username: organizationMember.username,
+            display_name: organizationMember.nickname,
             avatar_url: organizationMember.avatar_url,
             email: organizationMember.email,
             organization_roles: organizationMember.organization_roles,
@@ -284,6 +287,7 @@ const Index = () => {
             id: organizationMember.id,
             nickname: organizationMember.nickname,
             username: organizationMember.username,
+            display_name: organizationMember.nickname,
             avatar_url: organizationMember.avatar_url,
             email: organizationMember.email,
             organization_roles: organizationMember.organization_roles,
@@ -385,7 +389,7 @@ const Index = () => {
               <div className="flex items-center space-x-5">
                 <div className="shrink-0">
                   <div className="relative">
-                    <PureAvatar src={commonData.organization?.avatar_url} title={commonData.organization?.display_name} size={12} />
+                    <PureAvatar src={commonData.organization?.avatar_url} title={commonData.organization?.display_name} size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XL} />
                   </div>
                 </div>
                 <div>

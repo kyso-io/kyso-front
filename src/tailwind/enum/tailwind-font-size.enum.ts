@@ -1,0 +1,15 @@
+export enum TailwindFontSizeEnum {
+  XS = 'xs',
+  SM = 'sm',
+  BASE = 'base',
+  LG = 'lg',
+  XL = 'xl',
+  XXL = '2xl',
+  XXXL = '3xl',
+  XXXXL = '4xl',
+  XXXXXL = '5xl',
+  XXXXXXL = '6xl',
+  XXXXXXXL = '7xl',
+  XXXXXXXXL = '8xl',
+  XXXXXXXXXL = '9xl',
+}

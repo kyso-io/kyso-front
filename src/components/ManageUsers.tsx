@@ -13,6 +13,7 @@ import { Helper } from '../helpers/Helper';
 import type { CommonData } from '../hooks/use-common-data';
 import { useCommonData } from '../hooks/use-common-data';
 import type { Member } from '../types/member';
+import PureAvatarGroup from './PureAvatarGroup';
 
 const MAX_USERS_TO_SHOW = 5;
 const REMOVE_USER_VALUE = 'remove';
@@ -158,19 +159,8 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
       <Menu as="div" className="ml-2 relative inline-block text-left">
         <div>
           <Menu.Button className="flex items-center">
-            <div className="flex -space-x-1 relative z-0 overflow-hidden">
-              {members.slice(0, MAX_USERS_TO_SHOW).map((member: Member) => {
-                if (member.avatar_url) {
-                  return <img key={member.id} className={`object-cover inline-block h-6 w-6 rounded-full ring-2 ring-white`} src={member.avatar_url} alt="" />;
-                }
-                const initials: string = getInitials(member.username);
-                return (
-                  <span key={member.id} className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-500">
-                    <span className="text-xs font-medium leading-none text-white">{initials}</span>
-                  </span>
-                );
-              })}
-            </div>
+            <PureAvatarGroup data={members.slice(0, MAX_USERS_TO_SHOW)}></PureAvatarGroup>
+
             {plusMembers > 0 && <div className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-200">+{plusMembers}</div>}
             <ChevronDownIcon className="ml-2 h-5 w-5" aria-hidden="true" />
           </Menu.Button>
