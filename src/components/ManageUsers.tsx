@@ -1,3 +1,5 @@
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { ChevronDownIcon, XIcon } from '@heroicons/react/solid';
@@ -13,6 +15,7 @@ import { Helper } from '../helpers/Helper';
 import type { CommonData } from '../hooks/use-common-data';
 import { useCommonData } from '../hooks/use-common-data';
 import type { Member } from '../types/member';
+import PureAvatar from './PureAvatar';
 import PureAvatarGroup from './PureAvatarGroup';
 
 const MAX_USERS_TO_SHOW = 5;
@@ -223,10 +226,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                       if (member.team_roles && member.team_roles.length > 0) {
                         roles += ` / ${organizationRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
                       }
-                      let initials: string = '';
-                      if (!member.avatar_url) {
-                        initials = getInitials(member.username);
-                      }
+
                       return (
                         <li
                           key={member.id}
@@ -244,13 +244,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                         >
                           <div className="flex items-center space-x-4">
                             <div className="shrink-0">
-                              {member.avatar_url ? (
-                                <img className="object-cover inline-block h-6 w-6 rounded-full ring-2 ring-white" src={member.avatar_url} alt="" />
-                              ) : (
-                                <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-500">
-                                  <span className="text-xs font-medium leading-none text-white">{initials}</span>
-                                </span>
-                              )}
+                              <PureAvatar src={member.avatar_url} title={member.display_name} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
                             </div>
                             <div className="flex-1" style={{ marginLeft: 10 }}>
                               <p className="text-xs font-medium text-gray-900 truncate">{member.username}</p>

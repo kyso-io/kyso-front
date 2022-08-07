@@ -42,7 +42,7 @@ const PureAvatar = (props: Props) => {
             onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
               processLoadingImageError(props.title, e);
             }}
-            className={`object-cover inline-block h-${size} w-${size} rounded-full ring-2 ring-white`}
+            className={`object-cover inline-block h-${size} w-${size} rounded-full ring-2 ring-white hover:scale-150 transition duration-100`}
             src={props.src}
             alt={props.title}
           />
@@ -50,7 +50,7 @@ const PureAvatar = (props: Props) => {
       )}
       {!props.src && (
         // W-SIZE is a super-set of H-SIZE, so no problem there...
-        <span className={`inline-flex items-center justify-center h-${size} w-${size} rounded-full bg-gray-200`}>
+        <span className={`inline-flex items-center justify-center h-${size} w-${size} rounded-full bg-gray-200 hover:scale-150 transition duration-100`}>
           <span className={`text-${textSize} font-medium leading-none text-gray-500`}>{props.title?.toUpperCase().split(' ').join('').slice(0, 2)}</span>
         </span>
       )}
