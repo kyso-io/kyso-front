@@ -1,48 +1,52 @@
-import PureReportFilter from '@/components/PureReportFilter';
 import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { useReports } from '@/hooks/use-reports';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
-import UnpureReportBadge from '@/unpure-components/UnpureReportBadge';
 import type { NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
-import type { NextRouter } from 'next/router';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import ChannelList from '../../../components/ChannelList';
 import ManageUsers from '../../../components/ManageUsers';
 import PureNewReportPopover from '../../../components/PureNewReportPopover';
+import ReportsSearchBar from '../../../components/ReportsSearchBar';
 import { getLocalStorageItem } from '../../../helpers/get-local-storage-item';
 import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
 import type { Member } from '../../../types/member';
+import UnpureReportBadge from '../../../unpure-components/UnpureReportBadge';
 
-const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
+// const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
 const token: string | null = getLocalStorageItem('jwt');
 
-const pushQueryString = (router: NextRouter, newValue: object) => {
-  let query: { tags?: string | string[]; search?: string; sort?: string } = {};
-  if (router.query.tags) {
-    query.tags = router.query.tags;
-  }
-  if (router.query.search) {
-    query.search = router.query.search as string;
-  }
-  if (router.query.sort) {
-    query.sort = router.query.sort as string;
-  }
+// const pushQueryString = (router: NextRouter, newValue: object) => {
+//   let query: { tags?: string | string[]; search?: string; sort?: string } = {};
+//   if (router.query.tags) {
+//     query.tags = router.query.tags;
+//   }
+//   if (router.query.search) {
+//     query.search = router.query.search as string;
+//   }
+//   if (router.query.sort) {
+//     query.sort = router.query.sort as string;
+//   }
 
-  query = {
-    ...query,
-    ...newValue,
-  };
+//   query = {
+//     ...query,
+//     ...newValue,
+//   };
 
-  router.push({
-    pathname: `/${router.query.organizationName}/${router.query.teamName}`,
-    query,
-  });
-};
+//   router.push({
+//     pathname: `/${router.query.organizationName}/${router.query.teamName}`,
+//     query,
+//   });
+// };
+
+// const sortOptions = [
+//   { name: 'Recently published', value: '-created_at' },
+//   { name: 'Recently updated', value: '-updated_at' },
+// ];
 
 const Index = () => {
   const router = useRouter();
@@ -72,11 +76,6 @@ const Index = () => {
     }
     getTeamMembers();
   }, [commonData?.team, commonData?.user]);
-
-  const sortOptions = [
-    { name: 'Recently published', value: '-created_at' },
-    { name: 'Recently updated', value: '-updated_at' },
-  ];
 
   let activeFilters = [];
   if (router.query.search) {
@@ -304,7 +303,9 @@ const Index = () => {
           </div>
         )}
 
-        <PureReportFilter
+        <ReportsSearchBar members={members} onSaveSearch={() => {}} />
+
+        {/* <PureReportFilter
           defaultSearch={(router.query.search as string) || null}
           sortOptions={sortOptions}
           tags={tags}
@@ -325,7 +326,7 @@ const Index = () => {
               query: null,
             });
           }}
-        />
+        /> */}
 
         <div>
           <ul role="list" className="space-y-4">
