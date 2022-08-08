@@ -1,8 +1,10 @@
+import { Mention } from 'primereact/mention';
 import { useState } from 'react';
 import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import PureCommentInput from '@/components/PureCommentInput';
 import classNames from '@/helpers/class-names';
 import { PureSpinner } from '@/components/PureSpinner';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import PureAvatar from './PureAvatar';
 
 type IPureCommentForm = {
   comment?: Comment;
@@ -18,6 +20,22 @@ type IPureCommentForm = {
   submitComment: (newComment: any, parentComment?: any) => void;
 };
 
+const parseMentions = function (str: string) {
+  const re = /\B\@([\w\-]+)/gim;
+  const tokens: string[] = [];
+
+  while (true) {
+    const match = re.exec(str);
+    if (!match) {
+      break;
+    }
+
+    tokens.push(match[1] as string);
+  }
+
+  return tokens;
+};
+
 const PureCommentForm = (props: IPureCommentForm) => {
   const { parentComment, comment, submitComment, user, report, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true, userSelectorHook } = props;
 
@@ -27,9 +45,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
   }
 
   const commentUser = userSelectorHook(parentComment?.user_id);
-  const [mentions, setMentions] = useState<string[]>([]);
-  const [value, setValue] = useState(initialValue);
-  const [plainText, setPlainText] = useState('');
+  const [value, setValue] = useState<string>(initialValue);
   const [isLoading, setIsLoading] = useState(false);
 
   let isUserAuthor = false;
@@ -37,16 +53,24 @@ const PureCommentForm = (props: IPureCommentForm) => {
     isUserAuthor = true;
   }
 
-  const handleSubmit = async () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    const inputValue = e.target.input.value;
+
+    // parse out nameSlugs
+    const mentionedNameSlugs = parseMentions(inputValue);
+    const userIds = channelMembers.filter((mem) => mentionedNameSlugs.includes(mem.nameSlug)).map((m) => m.id);
+
     setIsLoading(true);
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const newCommentDTO: any = {
-      text: value,
-      plain_text: plainText,
+      text: inputValue,
+      plain_text: inputValue,
       user_id: user.id,
       comment_id: parentComment?.id,
-      user_ids: mentions,
+      user_ids: userIds,
     };
 
     if (report) {
@@ -56,8 +80,8 @@ const PureCommentForm = (props: IPureCommentForm) => {
     await submitComment(newCommentDTO, comment);
 
     setIsLoading(false);
-    onSubmitted();
     setValue('');
+    onSubmitted();
   };
 
   let message = 'Write a new comment';
@@ -69,40 +93,79 @@ const PureCommentForm = (props: IPureCommentForm) => {
     message = `Replying to ${isUserAuthor ? 'You' : commentUser && commentUser.name}`;
   }
 
+  const [suggestions, setSuggestions] = useState<TeamMember[]>([]);
+
+  const onSearch = (event: any) => {
+    const { query } = event;
+    let newSuggestions;
+
+    if (!query.trim().length) {
+      newSuggestions = [...channelMembers];
+    } else {
+      newSuggestions = channelMembers.filter((channelMember) => {
+        return channelMember.nameSlug.toLowerCase().startsWith(query.toLowerCase());
+      });
+    }
+
+    setSuggestions(newSuggestions);
+  };
+
+  const itemTemplate = (suggestion: TeamMember) => {
+    return (
+      <div className="flex flex-row items-center space-x-2 text-sm p-2 cursor-pointer hover:bg-blue-200">
+        <PureAvatar src={suggestion.avatar_url} title={suggestion.nameSlug} size={TailwindHeightSizeEnum.H5} />
+        <div>{suggestion.nameSlug}</div>
+      </div>
+    );
+  };
+
   return (
-    <div className={classNames(parentComment?.id ? 'mt-2' : '')}>
-      <div>
+    <form onSubmit={handleSubmit} className="my-2">
+      {hasPermissionCreateComment ? (
+        <>
+          <Mention
+            suggestions={suggestions}
+            className="relative"
+            inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm "
+            panelClassName="absolute bg-white border rounded"
+            autoHighlight
+            onSearch={onSearch}
+            name="input"
+            value={value}
+            onChange={(e) => setValue((e.target as HTMLInputElement).value)}
+            field="nameSlug"
+            placeholder={message}
+            itemTemplate={itemTemplate}
+          />
+          <style jsx global>{`
+            .p-highlight {
+              color: #4338ca;
+              background: #eef2ff;
+            }
+          `}</style>
+        </>
+      ) : (
+        <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
+      )}
+
+      <div className="flex justify-between">
         <div>
-          {hasPermissionCreateComment ? (
-            <PureCommentInput
-              text={value}
-              placeholder={message}
-              suggestions={channelMembers}
-              handleInputChange={(newValue, newPlainTextValue, newMentions) => {
-                setValue(newValue);
-                setPlainText(newPlainTextValue);
-                setMentions(newMentions);
-              }}
-            />
-          ) : (
-            <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
-          )}
+          <p className="text-xs text-gray-500">Use @ to mention people</p>
         </div>
 
-        <div className="p-2 flex justify-end text-sm text-gray-500 space-x-4">
+        <div className="flex flex-row space-x-2">
           {(comment?.id || parentComment?.id) && (
-            <button className="hover:underline text-sm" onClick={onCancel}>
+            <button className="hover:underline text-gray-500 text-sm" onClick={onCancel}>
               Cancel
             </button>
           )}
           {hasPermissionCreateComment && (
             <button
+              type="submit"
               className={classNames(
                 'inline-flex items-center px-2 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-0',
-                value.length === 0 ? 'bg-indigo-400 text-gray-200' : 'bg-indigo-600  hover:bg-indigo-700',
+                'bg-indigo-600  hover:bg-indigo-700',
               )}
-              onClick={handleSubmit}
-              disabled={!hasPermissionCreateComment || value.length === 0}
             >
               {isLoading && <PureSpinner size={5} />}
               Post Comment
@@ -110,7 +173,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
           )}
         </div>
       </div>
-    </div>
+    </form>
   );
 };
 

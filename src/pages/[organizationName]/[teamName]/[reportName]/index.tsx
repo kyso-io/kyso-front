@@ -153,7 +153,7 @@ const Index = () => {
 
   return (
     <div className="flex flex-row space-x-24">
-      {/* <div className="hidden bg-gray-50 bg-gray-100 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent"></div> */}
+      {/* <div className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent"></div> */}
 
       <div className="w-2/12">
         {selfTree && report && commonData && (
