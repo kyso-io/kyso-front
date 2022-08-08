@@ -11,6 +11,7 @@ import { Fragment, useMemo } from 'react';
 import checkPermissions from '../helpers/check-permissions';
 import type { CommonData } from '../hooks/use-common-data';
 import { useCommonData } from '../hooks/use-common-data';
+import PureAvatarGroup from './PureAvatarGroup';
 
 const MAX_LENGTH_DESCRIPTION: number = 200;
 
@@ -124,11 +125,8 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
       </div>
       <div className="-mt-px flex items-center p-2">
         <div className="grow flex flex-row items-center">
-          <div className="flex -space-x-1 overflow-hidden">
-            {authors.map((author: UserDTO) => (
-              <img key={author.id} className="object-cover inline-block h-6 w-6 rounded-full ring-2 ring-white" src={author.avatar_url} alt={author.display_name} />
-            ))}
-          </div>
+          <PureAvatarGroup data={authors}></PureAvatarGroup>
+
           <span className="text-gray-500 text-sm pl-2 pr-5">{moment(report.created_at).format('MMMM DD, YYYY')}</span>
           <EyeIcon className="shrink-0 h-5 w-5" />
           <span className="text-gray-500 text-sm pl-2 pr-5">{report.views}</span>
