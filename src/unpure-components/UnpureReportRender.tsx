@@ -138,7 +138,7 @@ const UnpureReportRender = (props: Props) => {
           inlineCommentId: id,
           updateInlineCommentDto: {
             text,
-            // user_ids,
+            mentions: user_ids,
           },
         }),
       );
