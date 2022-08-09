@@ -4,7 +4,7 @@ import { CheckIcon, XIcon } from '@heroicons/react/solid';
 import clsx from 'clsx';
 import moment from 'moment';
 import { Calendar } from 'primereact/calendar';
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { SaveIcon } from '@heroicons/react/outline';
 import 'primeicons/primeicons.css'; // icons
@@ -12,54 +12,61 @@ import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import { useClickOutside } from '../hooks/use-click-outside';
 import type { Member } from '../types/member';
+import PureAvatar from './PureAvatar';
 
 interface Filter {
   key: string;
   label: string;
   modificable: boolean;
-  type?: 'user' | 'tag' | 'date' | 'author-operator' | 'date-operator';
+  type?: 'user' | 'tag' | 'date' | 'author_ids-operator' | 'date-operator';
   image?: string;
+  isLeaf: boolean;
 }
 
-const SHOW_NEXT_FILTER_MS = 250;
+const SHOW_NEXT_FILTER_MS = 200;
 
 const INITIAL_FILTERS: Filter[] = [
   {
-    key: 'author',
+    key: 'author_ids',
     label: 'Author',
     modificable: false,
+    isLeaf: false,
   },
   {
     key: 'tag',
     label: 'Tag',
     modificable: false,
+    isLeaf: false,
   },
   {
-    key: 'creationDate',
+    key: 'created_at',
     label: 'Creation date',
     modificable: false,
+    isLeaf: false,
   },
   {
-    key: 'lastUpdated',
+    key: 'updated_at',
     label: 'Last updated',
     modificable: false,
+    isLeaf: false,
   },
   {
     key: 'myPinned',
     label: 'My pinned',
     modificable: false,
+    isLeaf: false,
   },
 ];
 
 const AUTHOR_OPERATORS_FILTERS: Filter[] = [
-  { key: '=', label: '=', modificable: true, type: 'author-operator' },
-  { key: '!=', label: '!=', modificable: true, type: 'author-operator' },
+  { key: '=', label: '=', modificable: true, type: 'author_ids-operator', isLeaf: false },
+  { key: '!=', label: '!=', modificable: true, type: 'author_ids-operator', isLeaf: false },
 ];
 
 const DATE_OPERATORS: Filter[] = [
-  { key: '<', label: '<', modificable: true, type: 'date-operator' },
-  { key: '>', label: '>', modificable: true, type: 'date-operator' },
-  { key: '=', label: '=', modificable: true, type: 'date-operator' },
+  { key: '<', label: '<', modificable: true, type: 'date-operator', isLeaf: false },
+  { key: '>', label: '>', modificable: true, type: 'date-operator', isLeaf: false },
+  { key: '=', label: '=', modificable: true, type: 'date-operator', isLeaf: false },
 ];
 
 interface MenuItemsProps {
@@ -77,9 +84,14 @@ const MenuItems = ({ filters, onSelect, onClickOutside }: MenuItemsProps) => {
         {filters.map((filter: Filter, index: number) => (
           <Menu.Item key={index}>
             {({ active }) => (
-              <a href="#" onClick={() => onSelect(filter)} className={clsx(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
-                {filter.label}
-              </a>
+              <div className={clsx(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex flex-row px-4 py-2 text-sm')} onClick={() => onSelect(filter)}>
+                {filter?.image && (
+                  <div className="mr-4">
+                    <PureAvatar src={filter.image} title={filter.label} />
+                  </div>
+                )}
+                <span>{filter.label}</span>
+              </div>
             )}
           </Menu.Item>
         ))}
@@ -163,9 +175,10 @@ const MyCalendar = ({ value, onChange, onClickOutside }: MyCalendarProps) => {
 interface ReportsSearchBarProps {
   onSaveSearch: () => void;
   members: Member[];
+  onFiltersChange: (query: string) => void;
 }
 
-const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
+const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSearchBarProps) => {
   const [selectedFilters, setSelectedFilters] = useState<Filter[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<any | null>(null);
   const [showMenu, setShowMenu] = useState<boolean>(false);
@@ -179,9 +192,29 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
         modificable: true,
         type: 'user',
         image: member.avatar_url,
+        isLeaf: true,
       })),
     [members],
   );
+
+  useEffect(() => {
+    console.log('entra');
+    const numSelectedFilters: number = selectedFilters.length;
+    if (numSelectedFilters === 0) {
+      return;
+    }
+    const lastFilter: Filter = selectedFilters[numSelectedFilters - 1]!;
+    if (lastFilter.isLeaf) {
+      let query: string = '';
+      selectedFilters.forEach((filter: Filter) => {
+        query += filter.key;
+        if (filter.isLeaf) {
+          query += `&`;
+        }
+      });
+      onFiltersChange(query.slice(0, -1));
+    }
+  }, [selectedFilters]);
 
   return (
     <div className="flex flex-row content-center items-center">
@@ -194,7 +227,7 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
               let component = null;
               if (selectedFilters.length) {
                 switch (selectedFilters[selectedFilters.length - 1]?.key) {
-                  case 'author':
+                  case 'author_ids':
                     component = (
                       <MenuItems
                         filters={AUTHOR_OPERATORS_FILTERS}
@@ -216,7 +249,7 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                   case 'tag':
                     component = (
                       <MenuItems
-                        filters={[{ key: '=', label: '=', modificable: false }]}
+                        filters={[{ key: '=', label: '=', modificable: false, isLeaf: false }]}
                         onSelect={(filter: Filter) => {
                           setSelectedFilters([...selectedFilters, filter]);
                           setShowMenu(false);
@@ -232,7 +265,7 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                       />
                     );
                     break;
-                  case 'creationDate':
+                  case 'created_at':
                     component = (
                       <MenuItems
                         filters={DATE_OPERATORS}
@@ -251,7 +284,7 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                       />
                     );
                     break;
-                  case 'lastUpdated':
+                  case 'updated_at':
                     component = (
                       <MenuItems
                         filters={DATE_OPERATORS}
@@ -275,7 +308,7 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                   case '<':
                   case '>':
                     switch (selectedFilters[selectedFilters.length - 2]?.key) {
-                      case 'author':
+                      case 'author_ids':
                         component = (
                           <MenuItems
                             filters={USERS_FILTERS}
@@ -297,7 +330,7 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                             value={''}
                             onSave={(value: string) => {
                               if (value) {
-                                setSelectedFilters([...selectedFilters, { key: value, label: value, modificable: true, type: 'tag' }]);
+                                setSelectedFilters([...selectedFilters, { key: value, label: value, modificable: true, type: 'tag', isLeaf: true }]);
                                 setShowMenu(false);
                                 setSelectedComponent(null);
                               }
@@ -309,7 +342,7 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                           />
                         );
                         break;
-                      case 'creationDate':
+                      case 'created_at':
                         component = (
                           <MyCalendar
                             value={new Date()}
@@ -317,10 +350,11 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                               setSelectedFilters([
                                 ...selectedFilters,
                                 {
-                                  key: '',
+                                  key: moment(date).format('YYYY-MM-DD'),
                                   label: moment(date).format('YYYY-MM-DD'),
                                   modificable: true,
                                   type: 'date',
+                                  isLeaf: true,
                                 },
                               ]);
                               setShowMenu(false);
@@ -334,7 +368,7 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                         );
                         setShowMenu(true);
                         break;
-                      case 'lastUpdated':
+                      case 'updated_at':
                         component = (
                           <MyCalendar
                             value={new Date()}
@@ -342,10 +376,11 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                               setSelectedFilters([
                                 ...selectedFilters,
                                 {
-                                  key: '',
+                                  key: moment(date).format('YYYY-MM-DD'),
                                   label: moment(date).format('YYYY-MM-DD'),
                                   modificable: true,
                                   type: 'date',
+                                  isLeaf: true,
                                 },
                               ]);
                               setShowMenu(false);
@@ -440,7 +475,7 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                             />
                           );
                           break;
-                        case 'author-operator':
+                        case 'author_ids-operator':
                           component = (
                             <MenuItems
                               filters={AUTHOR_OPERATORS_FILTERS}
@@ -503,7 +538,9 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                               value={moment(selectedFilters[index]!.label).toDate()}
                               onChange={(date: Date) => {
                                 const fs: Filter[] = [...selectedFilters];
+                                fs[index]!.key = moment(date).format('YYYY-MM-DD');
                                 fs[index]!.label = moment(date).format('YYYY-MM-DD');
+                                setSelectedFilters(fs);
                                 setShowMenu(false);
                                 setSelectedComponent(null);
                               }}
@@ -549,6 +586,7 @@ const ReportsSearchBar = ({ members, onSaveSearch }: ReportsSearchBarProps) => {
                   onClick={(e) => {
                     e.stopPropagation();
                     setSelectedFilters([]);
+                    onFiltersChange('');
                   }}
                   className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5 cursor-pointer"
                 >
