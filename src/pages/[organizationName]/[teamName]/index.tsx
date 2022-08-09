@@ -1,48 +1,27 @@
-import PureReportFilter from '@/components/PureReportFilter';
 import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import { useReports } from '@/hooks/use-reports';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
-import UnpureReportBadge from '@/unpure-components/UnpureReportBadge';
-import type { NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import type { ActivityFeed, NormalizedResponseDTO, OrganizationMember, PaginatedResponseDto, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
-import type { NextRouter } from 'next/router';
+import moment from 'moment';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import ActivityFeedComponent from '../../../components/ActivityFeed';
 import ChannelList from '../../../components/ChannelList';
 import ManageUsers from '../../../components/ManageUsers';
 import PureNewReportPopover from '../../../components/PureNewReportPopover';
+import ReportBadge from '../../../components/ReportBadge';
+import ReportsSearchBar from '../../../components/ReportsSearchBar';
 import { getLocalStorageItem } from '../../../helpers/get-local-storage-item';
 import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
 import type { Member } from '../../../types/member';
 
-const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
 const token: string | null = getLocalStorageItem('jwt');
-
-const pushQueryString = (router: NextRouter, newValue: object) => {
-  let query: { tags?: string | string[]; search?: string; sort?: string } = {};
-  if (router.query.tags) {
-    query.tags = router.query.tags;
-  }
-  if (router.query.search) {
-    query.search = router.query.search as string;
-  }
-  if (router.query.sort) {
-    query.sort = router.query.sort as string;
-  }
-
-  query = {
-    ...query,
-    ...newValue,
-  };
-
-  router.push({
-    pathname: `/${router.query.organizationName}/${router.query.teamName}`,
-    query,
-  });
-};
+const LIMIT_REPORTS = 10;
+const DAYS_ACTIVITY_FEED: number = 14;
+const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 
 const Index = () => {
   const router = useRouter();
@@ -51,19 +30,16 @@ const Index = () => {
     organizationName: router.query.organizationName as string,
     teamName: router.query.teamName as string,
   });
-
-  const reports: ReportDTO[] | undefined = useReports({
-    teamId: commonData.team?.id,
-    perPage: router.query.per_page as string,
-    page: router.query.page as string,
-    search: router.query.search as string,
-    sort: router.query.sort as string,
-    tags: router.query.tags as string[],
-  });
+  // MEMBERS
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
-
-  const hasPermissionGlobalPinReport = useMemo(() => checkPermissions(commonData, 'KYSO_IO_REPORT_GLOBAL_PIN'), [commonData]);
+  // REPORTS
+  const [reportsResponse, setReportsResponse] = useState<NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null>(null);
+  // ACTIVITY FEED
+  const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
+  // PERMISSIONS
   const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_DELETE_TEAM'), [commonData]);
 
   useEffect(() => {
@@ -73,52 +49,33 @@ const Index = () => {
     getTeamMembers();
   }, [commonData?.team, commonData?.user]);
 
-  const sortOptions = [
-    { name: 'Recently published', value: '-created_at' },
-    { name: 'Recently updated', value: '-updated_at' },
-  ];
-
-  let activeFilters = [];
-  if (router.query.search) {
-    activeFilters.push(`${router.query.search}`);
-  }
-  if (router.query.tags) {
-    if (Array.isArray(router.query.tags)) {
-      activeFilters = activeFilters.concat(router.query.tags);
-    } else {
-      activeFilters.push(router.query.tags);
+  useEffect(() => {
+    if (!commonData.organization || !commonData.team) {
+      return;
     }
-  }
+    getReports(1);
+  }, [commonData?.organization, commonData?.team]);
 
-  let currentPage = 1;
-  if (router.query.page && router.query.page.length > 0) {
-    currentPage = parseInt(router.query.page as string, 10);
-  }
+  useEffect(() => {
+    if (!commonData.organization || !commonData.team) {
+      return;
+    }
+    getActivityFeed();
+  }, [commonData?.organization, commonData?.team, datetimeActivityFeed]);
 
-  let reportsPerPage = 20;
-  if (router.query.per_page && router.query.per_page.length > 0) {
-    reportsPerPage = parseInt(router.query.per_page as string, 10);
-  }
-
-  let enabledNextPage = false;
-  if (reports && reports.length === reportsPerPage) {
-    enabledNextPage = true;
-  }
-
-  let extraParamsUrl = '';
-  if (router.query.search && router.query.search.length > 0) {
-    extraParamsUrl += `&search=${router.query.search}`;
-  }
-  if (router.query.sort && router.query.sort.length > 0) {
-    extraParamsUrl += `&sort=${router.query.sort}`;
-  }
-  if (router.query.tags && router.query.tags.length > 0) {
-    extraParamsUrl += `&tags=${router.query.tags}`;
-  }
-
-  if (router.query.per_page && router.query.per_page.length > 0) {
-    extraParamsUrl += `&per_page=${router.query.per_page}`;
-  }
+  const getReports = async (page: number, queryParams?: string) => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      let query = `team_id=${commonData.team.id}&skip=${(page - 1) * LIMIT_REPORTS}&limit=${LIMIT_REPORTS}`;
+      if (queryParams) {
+        query += `&${queryParams}`;
+      }
+      const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getPaginatedReports(query);
+      setReportsResponse(result);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // START TEAM MEMBERS
 
@@ -277,12 +234,117 @@ const Index = () => {
 
   // END TEAM MEMBERS
 
+  // START REPORT ACTIONS
+
+  const toggleUserStarReport = async (reportId: string) => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportId);
+      const { data: report } = result;
+      const { results: reports } = reportsResponse!.data;
+      const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      // Sort by global_pin and user_pin
+      newReports.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
+      setReportsResponse({ ...reportsResponse!, data: { ...reportsResponse!.data, results: newReports } });
+    } catch (e) {}
+  };
+
+  const toggleUserPinReport = async (reportId: string) => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportId);
+      const { data: report } = result;
+      const { results: reports } = reportsResponse!.data;
+      const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      // Sort by global_pin and user_pin
+      newReports.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
+      setReportsResponse({ ...reportsResponse!, data: { ...reportsResponse!.data, results: newReports } });
+    } catch (e) {}
+  };
+
+  const toggleGlobalPinReport = async (reportId: string) => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportId);
+      const { data: report } = result;
+      const { results: reports } = reportsResponse!.data;
+      const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      // Sort by global_pin and user_pin
+      newReports.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
+      setReportsResponse({ ...reportsResponse!, data: { ...reportsResponse!.data, results: newReports } });
+    } catch (e) {}
+  };
+
+  // END REPORT ACTIONS
+
+  // START ACTIVITY FEED
+
+  const getActivityFeed = async () => {
+    if (!token) {
+      return;
+    }
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const startDatetime: Date = moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate();
+      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getTeamActivityFeed(commonData.organization.sluglified_name, commonData.team.sluglified_name, {
+        start_datetime: startDatetime,
+        end_datetime: datetimeActivityFeed,
+      });
+
+      result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
+
+      const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
+      if (result?.data) {
+        newActivityFeed.data = [...newActivityFeed.data, ...result.data];
+      }
+      if (result?.relations) {
+        for (const key in result?.relations) {
+          if (result?.relations[key]) {
+            newActivityFeed.relations![key] = { ...newActivityFeed.relations![key], ...result.relations[key] };
+          }
+        }
+      }
+      setActivityFeed(newActivityFeed);
+      setHasMore(result.data.length > 0);
+    } catch (e) {}
+  };
+
+  const getMoreActivityFeed = () => {
+    setDatetimeActivityFeed(moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate());
+  };
+
+  // END ACTIVITY FEED
+
   return (
     <div className="flex flex-row space-x-8">
-      <div className="w-2/12">
+      <div className="w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
-      <div className="w-8/12 flex flex-col space-y-8">
+      <div className="w-4/6 flex flex-col space-y-8">
         {commonData.team && (
           <div className="flex flex-row w-full justify-between space-x-2">
             <div className="w-4/6 flex flex-col justify-between">
@@ -307,59 +369,53 @@ const Index = () => {
           </div>
         )}
 
-        <PureReportFilter
-          defaultSearch={(router.query.search as string) || null}
-          sortOptions={sortOptions}
-          tags={tags}
-          activeFilters={activeFilters}
-          onSetSearch={(search: string) => {
-            pushQueryString(router, { search });
-          }}
-          onSetTags={(newTags: string[]) => {
-            pushQueryString(router, { tags: newTags });
-          }}
-          onSetSort={(sort: string) => {
-            pushQueryString(router, { sort });
-          }}
-          currentSort={router.query.sort as string}
-          onClear={() => {
-            router.push({
-              pathname: `/${router.query.organizationName}/${router.query.teamName}`,
-              query: null,
-            });
-          }}
-        />
+        <ReportsSearchBar members={members} onSaveSearch={() => {}} onFiltersChange={(query: string) => getReports(1, query)} />
 
-        <div>
-          <ul role="list" className="space-y-4">
-            {reports?.map((report) => (
-              <UnpureReportBadge key={report.id} report={report} commonData={commonData} hasPermissionGlobalPinReport={hasPermissionGlobalPinReport} />
-            ))}
-          </ul>
-        </div>
-
-        <div className="flex-1 flex justify-center">
-          {!(currentPage - 1 < 1) && (
-            <a
-              href={currentPage - 1 < 1 ? '#' : `?page=${currentPage - 1}${extraParamsUrl}`}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Previous
-            </a>
-          )}
-
-          {enabledNextPage && <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {currentPage}</p>}
-
-          {enabledNextPage && (
-            <a
-              href={enabledNextPage ? `?page=${currentPage + 1}${extraParamsUrl}` : '#'}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-            >
-              Next
-            </a>
-          )}
-        </div>
+        {reportsResponse && reportsResponse.data.results && reportsResponse.data.results.length > 0 ? (
+          <React.Fragment>
+            <div>
+              <ul role="list" className="space-y-4">
+                {reportsResponse.data.results?.map((report: ReportDTO) => (
+                  <ReportBadge
+                    key={report.id}
+                    report={report}
+                    authors={report.authors ? report.authors : []}
+                    toggleUserStarReport={() => toggleUserStarReport(report.id!)}
+                    toggleUserPinReport={() => toggleUserPinReport(report.id!)}
+                    toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+                  />
+                ))}
+              </ul>
+            </div>
+            <div className="flex-1 flex justify-center">
+              {reportsResponse.data.currentPage - 1 >= 1 && (
+                <span
+                  onClick={() => getReports(reportsResponse.data.currentPage - 1)}
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                >
+                  Previous
+                </span>
+              )}
+              <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {reportsResponse.data.currentPage}</p>
+              {reportsResponse.data.currentPage + 1 <= reportsResponse.data.totalPages && (
+                <span
+                  onClick={() => getReports(reportsResponse.data.currentPage + 1)}
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                >
+                  Next
+                </span>
+              )}
+            </div>
+          </React.Fragment>
+        ) : (
+          <p>No reports found</p>
+        )}
       </div>
+      {commonData.user && (
+        <div className="w-1/6">
+          <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+        </div>
+      )}
     </div>
   );
 };

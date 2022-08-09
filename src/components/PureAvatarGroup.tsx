@@ -1,8 +1,7 @@
-import React from 'react';
 import type { Avatar } from '@/model/avatar.model';
-import type { UserDTO } from '@kyso-io/kyso-model';
-import type { Member } from '@/types/member';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { Member } from '@/types/member';
+import type { UserDTO } from '@kyso-io/kyso-model';
 import PureAvatar from './PureAvatar';
 
 interface Props {
@@ -19,15 +18,11 @@ const PureAvatarGroup = (props: Props) => {
   }
 
   return (
-    <>
-      <div className="flex -space-x-1 overflow-hidden">
-        {props.data.map((author: Avatar) => (
-          <>
-            <PureAvatar src={author.avatar_url!} title={author.display_name} size={size} />
-          </>
-        ))}
-      </div>
-    </>
+    <div className="flex -space-x-1 overflow-hidden">
+      {props.data.map((author: Avatar, index: number) => (
+        <PureAvatar key={index} src={author.avatar_url!} title={author.display_name} size={size} />
+      ))}
+    </div>
   );
 };
 
