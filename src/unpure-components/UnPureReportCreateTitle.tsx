@@ -1,11 +1,12 @@
-type UnPureReportCreateTitleProps = {
+type IUnPureReportCreateTitleProps = {
   title: string | '';
   setTitle: (newTitle: string) => void;
+  cleanCookies: () => void;
   draftStatus: string | 'saved';
 };
 
-const UnPureReportCreateTitle = (props: UnPureReportCreateTitleProps) => {
-  const { title = null, setTitle, draftStatus } = props;
+const UnPureReportCreateTitle = (props: IUnPureReportCreateTitleProps) => {
+  const { title = null, setTitle, draftStatus, cleanCookies } = props;
 
   return (
     <>
@@ -16,9 +17,6 @@ const UnPureReportCreateTitle = (props: UnPureReportCreateTitleProps) => {
             onChange={(e) => {
               setTitle(e.target.value);
             }}
-            // onBlur={() => {
-            //   setStop(true);
-            // }}
             placeholder="Title"
             className="
             focus:shadow-sm
@@ -38,7 +36,18 @@ const UnPureReportCreateTitle = (props: UnPureReportCreateTitleProps) => {
           />
           <span className="text-sm w-10 ml-3 font-medium text-gray-400 group-hover:text-gray-600"> v: 1 </span>
         </div>
-        <div className="mt-5 md:mt-0 md:col-span-1">{draftStatus && <h2 className="ml-10 text-gray-500">{draftStatus}</h2>}</div>
+        <div className="mt-5 md:mt-0 md:col-span-1">
+          {draftStatus && <h2 className="ml-10 text-gray-500">{draftStatus}</h2>}
+          {draftStatus === 'All changes saved in local storage' && (
+            <button
+              type="reset"
+              className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-900 hover:bg-blue-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              onClick={cleanCookies}
+            >
+              Clean
+            </button>
+          )}
+        </div>
       </div>
     </>
   );

@@ -1,24 +1,40 @@
 import { Fragment } from 'react';
-import { DotsVerticalIcon, TrashIcon, PencilAltIcon, DocumentAddIcon, FolderAddIcon, UploadIcon } from '@heroicons/react/outline';
+import { DotsVerticalIcon, TrashIcon, PencilAltIcon, DocumentAddIcon, FolderAddIcon, UploadIcon, FolderIcon, DocumentIcon } from '@heroicons/react/outline';
 import { Menu, Transition } from '@headlessui/react';
+import classNames from '@/helpers/class-names';
 
 type IUnpureCreateFileList = {
-  fileName: string;
+  file: { id: string; name: string; type: string; parentId: string | null; text: string | null };
+  onAddNewFile: (temporalFile: string[]) => void;
+  onRemoveFile: (newfile: string[]) => void;
+  // setFileToRender: (file: string[]) => void;
 };
 
 const UnpureCreateFileList = (props: IUnpureCreateFileList) => {
-  const { fileName } = props;
+  const { file, onRemoveFile, onAddNewFile } = props;
+  // const { file, onRemoveFile, onAddNewFile, setFileToRender } = props;
 
-  function classNames(...classes: string[]) {
-    return classes.filter(Boolean).join(' ');
+  const fileParentId = file.id;
+  const fileType = file.type;
+
+  let NewIcon = DocumentIcon;
+  if (fileType === 'folder') {
+    NewIcon = FolderIcon;
   }
 
   return (
     <>
-      <div className="inline-flex items-center w-full">
-        <div className="flex-1">
-          <h2>{fileName}</h2>
-        </div>
+      <div className={classNames('inline-flex items-center w-full', file.parentId ? 'pl-3' : '')}>
+        {/* <div className="inline-flex items-center w-full"> */}
+        <button
+          className="w-full flex-1 inline-flex items-center hover:text-gray-500"
+          // onClick={() => setFileToRender(file)}
+        >
+          <div className="flex-1 inline-flex items-center">
+            <NewIcon className="mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+            <h2>{file.name}</h2>
+          </div>
+        </button>
         <Menu as="div" className="relative inline-block text-left">
           <div>
             <Menu.Button className="inline-flex justify-center w-full rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-indigo-500">
@@ -34,49 +50,63 @@ const UnpureCreateFileList = (props: IUnpureCreateFileList) => {
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 focus:outline-none">
+            <Menu.Items className="z-50 origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ro-5 divide-y divide-gray-100 focus:outline-none">
               <div className="py-1">
+                {fileType === 'folder' && (
+                  <>
+                    <Menu.Item>
+                      <button
+                        className={'group flex items-center px-4 py-2 text-sm'}
+                        onClick={() => {
+                          onAddNewFile({ id: null, name: null, type: 'file', parentId: fileParentId, text: null });
+                        }}
+                      >
+                        <FolderAddIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                        New File
+                      </button>
+                    </Menu.Item>
+                    <Menu.Item>
+                      <button
+                        className={'group flex items-center px-4 py-2 text-sm'}
+                        onClick={() => {
+                          onAddNewFile({ id: null, name: null, type: 'folder', parentId: fileParentId, text: null });
+                        }}
+                      >
+                        <DocumentAddIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                        New Folder
+                      </button>
+                    </Menu.Item>
+                    <Menu.Item>
+                      {({ active }) => (
+                        <a onClick={() => console.log('Upload')} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'group flex items-center px-4 py-2 text-sm')}>
+                          <UploadIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                          Upload
+                        </a>
+                      )}
+                    </Menu.Item>
+                  </>
+                )}
                 <Menu.Item>
-                  {({ active }) => (
-                    <a onClick={() => console.log('New File')} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'group flex items-center px-4 py-2 text-sm')}>
-                      <FolderAddIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
-                      New File
-                    </a>
-                  )}
+                  <button
+                    className={'group flex items-center px-4 py-2 text-sm'}
+                    onClick={() => {
+                      onAddNewFile(file);
+                    }}
+                  >
+                    <PencilAltIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                    Rename
+                  </button>
                 </Menu.Item>
                 <Menu.Item>
-                  {({ active }) => (
-                    <a onClick={() => console.log('New Folder')} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'group flex items-center px-4 py-2 text-sm')}>
-                      <DocumentAddIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
-                      New Folder
-                    </a>
-                  )}
-                </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => (
-                    <a onClick={() => console.log('Upload')} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'group flex items-center px-4 py-2 text-sm')}>
-                      <UploadIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
-                      Upload
-                    </a>
-                  )}
-                </Menu.Item>
-              </div>
-              <div className="py-1">
-                <Menu.Item>
-                  {({ active }) => (
-                    <a onClick={() => console.log('Rename')} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'group flex items-center px-4 py-2 text-sm')}>
-                      <PencilAltIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
-                      Rename
-                    </a>
-                  )}
-                </Menu.Item>
-                <Menu.Item>
-                  {({ active }) => (
-                    <a onClick={() => console.log('Delete')} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'group flex items-center px-4 py-2 text-sm')}>
-                      <TrashIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
-                      Delete
-                    </a>
-                  )}
+                  <button
+                    className={'group flex items-center px-4 py-2 text-sm'}
+                    onClick={() => {
+                      onRemoveFile(file);
+                    }}
+                  >
+                    <TrashIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                    Delete
+                  </button>
                 </Menu.Item>
               </div>
             </Menu.Items>
