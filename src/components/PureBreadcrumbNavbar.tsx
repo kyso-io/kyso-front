@@ -65,7 +65,7 @@ const BreadcrumbNavbar = (props: Props) => {
     <div>
       {selectorItems.length > 0 && (
         <div className="flex lg:flex-row flex-col lg:items-center space-y-2 lg:space-y-0 lg:space-x-2">
-          {<NavigationSelector selectorItems={selectorItems} />}
+          <NavigationSelector selectorItems={selectorItems} />
           {commonData.organization && (
             <svg className="hidden lg:inline-block shrink-0 h-5 w-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
