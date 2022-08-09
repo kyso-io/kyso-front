@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { PureSpinner } from '@/components/PureSpinner';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import type { FileToRender } from '@/hooks/use-file-to-render';
-import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, ReportDTO, TeamMember, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import dynamic from 'next/dynamic';
 import type { CommonData } from '@/hooks/use-common-data';
 
@@ -139,7 +139,7 @@ const UnpureReportRender = (props: Props) => {
           updateInlineCommentDto: {
             text,
             mentions: user_ids,
-          },
+          } as UpdateInlineCommentDto,
         }),
       );
       if (data?.payload) {

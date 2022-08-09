@@ -15,14 +15,16 @@ const Index = () => {
   useRedirectIfNoJWT();
 
   useEffect(() => {
-    const lastOrganization: string | null = getLocalStorageItem('last_organization');
-    const orgs = commonData.permissions?.organizations;
+    setTimeout(() => {
+      const lastOrganization: string | null = getLocalStorageItem('last_organization');
+      const orgs = commonData.permissions?.organizations;
 
-    if (lastOrganization && lastOrganization !== 'undefined') {
-      router.push(`${lastOrganization}`);
-    } else if (orgs && orgs.length > 0) {
-      router.push(`${orgs[0]?.name}`);
-    }
+      if (lastOrganization && lastOrganization !== 'undefined') {
+        router.push(`${lastOrganization}`);
+      } else if (orgs && orgs.length > 0) {
+        router.push(`${orgs[0]?.name}`);
+      }
+    }, 200);
   }, [commonData]);
 
   return (
