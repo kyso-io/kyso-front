@@ -68,7 +68,7 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
           </div>
         </div>
         <div className="flex-1 min-w-0 py-3 pr-2 relative">
-          <a href={`${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
+          <a href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
             <p className="text-sm font-medium text-gray-900 pb-2">{report.title}</p>
             <p className="text-sm text-gray-500">{description}</p>
           </a>

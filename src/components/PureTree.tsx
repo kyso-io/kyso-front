@@ -59,21 +59,21 @@ const PureTree = (props: IPureTree) => {
     if (!item) {
       const sliceIndex = existingPathIsFile ? 2 : 1;
       newUrl = `${reportUrl}/${currentPath.split('/').slice(0, -sliceIndex).join('/')}`;
-      console.log(newUrl);
     }
 
     // default case normal folder link
     const isFile = item?.type === 'file';
 
     if (item && !isFile) {
+      // its a folder
       if (existingPathIsFile) {
         const dirPath = currentPath.split('/').slice(0, -1).join('/');
         const newPath: string | null = `${dirPath ? `${dirPath}/` : ''}${item?.path}`;
         newUrl = `${reportUrl}/${newPath}`;
+      } else {
+        const newPath: string | null = `${currentPath ? `${currentPath}/` : ''}${item?.path}`;
+        newUrl = `${reportUrl}/${newPath}`;
       }
-
-      const newPath: string | null = `${currentPath ? `${currentPath}/` : ''}${item?.path}`;
-      newUrl = `${reportUrl}/${newPath}`;
     }
 
     if (item && isFile) {
@@ -95,8 +95,6 @@ const PureTree = (props: IPureTree) => {
     if (version) {
       newUrl = `${newUrl}?version=${version}`;
     }
-
-    console.log(newUrl);
 
     return newUrl;
   };

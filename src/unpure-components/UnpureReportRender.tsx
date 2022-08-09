@@ -11,6 +11,16 @@ import type { CommonData } from '@/hooks/use-common-data';
 // const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
+const PureComments = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.PureComments), {
+  ssr: false,
+  loading: () => (
+    <div className="flex justify-center p-7 w-full">
+      <PureSpinner />
+    </div>
+  ),
+});
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
   ssr: false,
   loading: () => (
@@ -91,19 +101,24 @@ const UnpureReportRender = (props: Props) => {
       const getReportInlineComments = async () => {
         const data = await dispatch(getInlineCommentsAction(report.id as string));
         if (data?.payload) {
-          setInlineComments(data.payload);
+          if (fileToRender.path.endsWith('.ipynb')) {
+            setInlineComments(data.payload);
+          } else {
+            setInlineComments(data.payload.filter((c: InlineCommentDto) => c.cell_id === fileToRender.id));
+          }
         }
       };
       getReportInlineComments();
     }
   }, [report.id]);
 
-  const createInlineComment = async (cell_id: string, text: string) => {
+  const createInlineComment = async (cell_id: string, user_ids: string[], text: string) => {
     try {
       const data = await dispatch(
         createInlineCommentAction({
           report_id: report.id as string,
           cell_id,
+          mentions: user_ids,
           text,
         }),
       );
@@ -115,13 +130,15 @@ const UnpureReportRender = (props: Props) => {
     }
   };
 
-  const editInlineComment = async (id: string, text: string) => {
+  const editInlineComment = async (id: string, user_ids: string[], text: string) => {
+    console.log(user_ids);
     try {
       const data = await dispatch(
         updateInlineCommentAction({
           inlineCommentId: id,
           updateInlineCommentDto: {
             text,
+            mentions: user_ids,
           },
         }),
       );
@@ -159,20 +176,14 @@ const UnpureReportRender = (props: Props) => {
 
   if (fileToRender.content !== null) {
     if (fileToRender.path.endsWith('.md')) {
-      render = (
-        <div className="w-9/12 p-2 border-x border-b rounded-b">
-          <KysoMarkdownRenderer source={fileToRender.content} />
-        </div>
-      );
+      render = <KysoMarkdownRenderer source={fileToRender.content} />;
     } else if (isImage(fileToRender.path)) {
       render = (
-        <div className="w-9/12 p-2 border-x border-b rounded-b">
-          <img
-            // className="w-full"
-            src={`data:image/jpeg;base64,${fileToRender.content}`}
-            alt="file image"
-          />
-        </div>
+        <img
+          // className="w-full"
+          src={`data:image/jpeg;base64,${fileToRender.content}`}
+          alt="file image"
+        />
       );
     } else if (fileToRender.path.endsWith('.ipynb')) {
       render = (
@@ -202,11 +213,7 @@ const UnpureReportRender = (props: Props) => {
       fileToRender.path.endsWith('.py') ||
       fileToRender.path.endsWith('.css')
     ) {
-      render = (
-        <div className="w-9/12 border-x border-b rounded-b p-2">
-          <KysoCodeRenderer embedded={false} code={fileToRender.content} />
-        </div>
-      );
+      render = <KysoCodeRenderer embedded={false} code={fileToRender.content} />;
     } else if (
       (fileToRender.path.toLowerCase().endsWith('.pptx') ||
         fileToRender.path.toLowerCase().endsWith('.ppt') ||
@@ -217,11 +224,7 @@ const UnpureReportRender = (props: Props) => {
       frontEndUrl
     ) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-      render = (
-        <div className="w-9/12 border-x border-b rounded-b">
-          <KysoOffice365Renderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />
-        </div>
-      );
+      render = <KysoOffice365Renderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
     } else if (
       (fileToRender.path.toLowerCase().endsWith('.rtf') ||
         fileToRender.path.toLowerCase().endsWith('.pdf') ||
@@ -249,26 +252,16 @@ const UnpureReportRender = (props: Props) => {
       frontEndUrl
     ) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-      render = (
-        <div className="w-9/12 border-x border-b rounded-b">
-          <KysoGoogleDocsRenderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />
-        </div>
-      );
+      render = <KysoGoogleDocsRenderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
     } else {
       render = (
-        <div className="w-9/12 border-x border-b rounded-b">
-          <div className="prose p-3">
-            Kyso cannot render this type of file. Do you need it? Give us <a href="/feedback">feedback</a> and we will consider it! 🤓
-          </div>
+        <div className="prose p-3">
+          Kyso cannot render this type of file. Do you need it? Give us <a href="/feedback">feedback</a> and we will consider it! 🤓
         </div>
       );
     }
   } else if (fileToRender.path.endsWith('.html')) {
-    render = (
-      <div className="w-9/12">
-        <PureIframeRenderer file={fileToRender} />
-      </div>
-    );
+    render = <PureIframeRenderer file={fileToRender} />;
   }
 
   return (
@@ -279,7 +272,32 @@ const UnpureReportRender = (props: Props) => {
         </div>
       )}
       {!fileToRender.content && <div />}
-      {!fileToRender.isLoading && render}
+      {!fileToRender.isLoading && fileToRender.path.endsWith('.ipynb') && render}
+      {!fileToRender.isLoading && !fileToRender.path.endsWith('.ipynb') && (
+        <div className="flex flex-row">
+          <div className="w-9/12 border-x border-b rounded-b p-4">{render}</div>
+          <div className="w-3/12 p-2">
+            <PureComments
+              commonData={commonData}
+              report={report}
+              channelMembers={channelMembers}
+              hasPermissionCreateComment={enabledCreateInlineComment}
+              hasPermissionDeleteComment={enabledDeleteInlineComment}
+              comments={inlineComments}
+              onDeleteComment={(commentId: string) => {
+                deleteInlineComment(commentId);
+              }}
+              submitComment={(text: string, user_ids: string[], commentId: string) => {
+                if (!commentId) {
+                  createInlineComment(fileToRender.id, user_ids, text);
+                } else {
+                  editInlineComment(commentId, user_ids, text);
+                }
+              }}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

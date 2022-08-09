@@ -5,11 +5,12 @@ import { PureSpinner } from '@/components/PureSpinner';
 import type { CommonData } from '@/hooks/use-common-data';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
-import { formatRelative } from 'date-fns';
-import classNames from '@/helpers/class-names';
 import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import PureCommentForm from './PureCommentForm';
-import PureComments from './PureComments';
+import PureCommentForm from '@/components/PureCommentForm';
+import PureComments from '@/components/PureComments';
+import { formatDistanceToNow } from 'date-fns';
+import PureAvatar from '@/components/PureAvatar';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
@@ -41,7 +42,7 @@ const PureComment = (props: IPureComment) => {
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
 
-  const commentUser = userSelectorHook(comment?.user_id);
+  const commentUser: UserDTO | undefined = userSelectorHook(comment?.user_id);
 
   let isUserAuthor = false;
   if (commonData.user && commonData.user.id === comment?.user_id) {
@@ -49,7 +50,7 @@ const PureComment = (props: IPureComment) => {
   }
 
   return (
-    <div className="">
+    <div className="flex flex-col space-y-2">
       {comment && isEditing ? (
         <PureCommentForm
           report={report}
@@ -63,34 +64,15 @@ const PureComment = (props: IPureComment) => {
           userSelectorHook={userSelectorHook}
         />
       ) : (
-        <div className={classNames('flex py-2 border rounded my-1 px-4 flex-col')}>
-          <div className="pt-0 rounded-t flex items-center space-x-2 text-sm font-light text-gray-400">
-            <div>
-              <img className="m-0 inline-block h-8 w-8 rounded-full" src={commentUser?.avatar_url} alt="" />
-            </div>
-            <div className="font-medium">{isUserAuthor ? 'You' : commentUser?.display_name}</div>
-
-            <div>{comment?.created_at ? ` wrote ${formatRelative(new Date(comment.created_at), new Date())}` : ''}</div>
-          </div>
-          <div className="pl-10 text-sm">
-            <KysoMarkdownRenderer source={comment?.text} />
-
-            <div className="rounded-t flex items-center justify-start space-x-2 text-sm font-light text-gray-400">
-              <div className="space-x-2 mt-2">
-                {hasPermissionCreateComment && (
-                  <button
-                    className="hover:underline"
-                    onClick={() => {
-                      if (!hasPermissionCreateComment) {
-                        alert('Sorry, but you do not have the permission to reply to comments.');
-                      } else {
-                        setIsReplying(!isReplying);
-                      }
-                    }}
-                  >
-                    Reply
-                  </button>
-                )}
+        <div className="flex flex-row space-x-2">
+          {commentUser && <PureAvatar src={commentUser.avatar_url} title={commentUser.name} size={TailwindHeightSizeEnum.H8} />}
+          <div className="rounded border w-full p-2">
+            <div className="flex flex-row justify-between">
+              <div className="pt-0 rounded-t flex flex-row items-center space-x-1 text-sm font-light text-gray-400">
+                <div className="inline font-medium">{isUserAuthor ? 'You' : commentUser?.display_name}</div>
+                <div>{comment?.created_at ? ` wrote ${formatDistanceToNow(new Date(comment?.created_at))} ago` : ''}</div>
+              </div>
+              <div className="pt-0 rounded-t flex flex-row items-center space-x-2 text-sm font-light text-gray-400">
                 {isUserAuthor && hasPermissionCreateComment && (
                   <button className="hover:underline" onClick={() => setIsEditing(!isEditing)}>
                     Edit
@@ -108,6 +90,29 @@ const PureComment = (props: IPureComment) => {
                     Delete
                   </button>
                 )}
+              </div>
+            </div>
+
+            <div className="text-sm">
+              <KysoMarkdownRenderer source={comment?.text} />
+
+              <div className="rounded-t flex items-center justify-end space-x-2 text-sm text-gray-400">
+                <div className="space-x-2 mt-2">
+                  {hasPermissionCreateComment && (
+                    <button
+                      className="hover:underline font-medium"
+                      onClick={() => {
+                        if (!hasPermissionCreateComment) {
+                          alert('Sorry, but you do not have the permission to reply to comments.');
+                        } else {
+                          setIsReplying(!isReplying);
+                        }
+                      }}
+                    >
+                      Reply
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -129,20 +134,22 @@ const PureComment = (props: IPureComment) => {
         </div>
       )}
 
-      {comment && (
-        <PureComments
-          onDeleteComment={onDeleteComment}
-          report={report}
-          submitComment={submitComment}
-          channelMembers={channelMembers}
-          userSelectorHook={userSelectorHook}
-          commonData={commonData}
-          parentComment={comment}
-          hasPermissionDeleteComment={hasPermissionDeleteComment}
-          hasPermissionCreateComment={hasPermissionCreateComment}
-          commentSelectorHook={commentSelectorHook}
-        />
-      )}
+      <div className="flex flex-col space-y-2">
+        {comment && (
+          <PureComments
+            onDeleteComment={onDeleteComment}
+            report={report}
+            submitComment={submitComment}
+            channelMembers={channelMembers}
+            userSelectorHook={userSelectorHook}
+            commonData={commonData}
+            parentComment={comment}
+            hasPermissionDeleteComment={hasPermissionDeleteComment}
+            hasPermissionCreateComment={hasPermissionCreateComment}
+            commentSelectorHook={commentSelectorHook}
+          />
+        )}
+      </div>
     </div>
   );
 };
