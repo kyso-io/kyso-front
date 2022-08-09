@@ -6,8 +6,11 @@ import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { Fragment, useState } from 'react';
 import type { CommonData } from '@/hooks/use-common-data';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { Footer } from './Footer';
 import BreadcrumbNavbar from './PureBreadcrumbNavbar';
+import PureAvatar from './PureAvatar';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -79,7 +82,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                             <div>
                               <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
                                 <span className="sr-only">Open user menu</span>
-                                <img className="object-cover h-8 w-8 rounded-full" src={commonData.user.avatar_url} alt="" />
+                                <PureAvatar src={commonData.user.avatar_url} title={commonData.user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XL} />
                               </Menu.Button>
                             </div>
                             <Transition

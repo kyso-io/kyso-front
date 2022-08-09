@@ -43,7 +43,7 @@ const Page = () => {
       if (result?.payload) {
         localStorage.setItem('jwt', result.payload);
       } else {
-        router.replace(`/login?error=${encodeURIComponent('There was an error authenticating the user with google')}`);
+        router.replace(`/login?error=${encodeURIComponent('There was an error authenticating the user.')}`);
       }
     };
     const addUserAccount = async () => {

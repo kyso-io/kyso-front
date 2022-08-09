@@ -1,7 +1,9 @@
+import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import type { CommonData } from '@/hooks/use-common-data';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
-import React from 'react';
+import { PlusCircleIcon } from '@heroicons/react/outline';
+import React, { useMemo } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props {
@@ -12,6 +14,9 @@ interface Props {
 const ChannelList = (props: Props) => {
   const { basePath, commonData } = props;
   const channelSelectorItems: BreadcrumbItem[] = [];
+
+  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_TEAM'), [commonData]);
+
   if (commonData.permissions && commonData.permissions.teams) {
     commonData
       .permissions!.teams.filter((team) => team.organization_id === commonData.organization?.id)
@@ -36,13 +41,16 @@ const ChannelList = (props: Props) => {
               {item.name}
             </a>
           ))}
-      </div>
 
-      {/* <a
-        href={`${commonData.organization?.sluglified_name}/team/create`}
-      >
-        Create a new channel
-      </a> */}
+        {hasPermissionCreateChannel && (
+          <a
+            href={`${basePath}/${commonData.organization?.sluglified_name}/create-channel`}
+            className={classNames('text-gray-500 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm  rounded-md')}
+          >
+            <PlusCircleIcon className="w-5 h-5 mr-1" /> New channel
+          </a>
+        )}
+      </div>
     </div>
   );
 };

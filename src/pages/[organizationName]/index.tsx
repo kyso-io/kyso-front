@@ -1,9 +1,12 @@
 /* eslint no-empty: "off" */
 import ChannelList from '@/components/ChannelList';
+import Pagination from '@/components/Pagination';
+import PureAvatar from '@/components/PureAvatar';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -11,8 +14,7 @@ import { useCallback, useEffect, useState } from 'react';
 import ActivityFeedComponent from '../../components/ActivityFeed';
 import ManageUsers from '../../components/ManageUsers';
 import OrganizationInfo from '../../components/OrganizationActivity';
-import Pagination from '../../components/Pagination';
-import ReportBadget from '../../components/ReportBadge';
+import ReportBadge from '../../components/ReportBadge';
 import { getLocalStorageItem } from '../../helpers/get-local-storage-item';
 import type { CommonData } from '../../hooks/use-common-data';
 import { useCommonData } from '../../hooks/use-common-data';
@@ -21,6 +23,7 @@ import type { Member } from '../../types/member';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 14;
+const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
 
 interface PaginationParams {
@@ -59,12 +62,12 @@ const Index = () => {
   }, [token, organizationName, paginationParams]);
 
   useEffect(() => {
-    if (!commonData.organization) {
+    if (!commonData.organization || !commonData.user) {
       return;
     }
     getOrganizationsInfo();
     getOrganizationMembers();
-  }, [commonData?.organization]);
+  }, [commonData?.organization, commonData?.user]);
 
   useEffect(() => {
     if (!organizationName) {
@@ -80,9 +83,12 @@ const Index = () => {
     const api: Api = new Api(token);
     try {
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(organizationName as string, {
-        start_datetime: moment().add(-1, 'days').toDate(),
+        start_datetime: moment().add(-DAYS_ACTIVITY_FEED, 'days').toDate(),
         end_datetime: moment().toDate(),
       });
+
+      result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
+
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
       if (result?.data) {
         result.data.forEach((af: ActivityFeed) => {
@@ -123,6 +129,7 @@ const Index = () => {
         paginationParams.limit,
         paginationParams.sort,
       );
+
       // Sort by global_pin and user_pin
       result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
         if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
@@ -133,6 +140,28 @@ const Index = () => {
         }
         return 0;
       });
+
+      const dataWithAuthors = [];
+
+      for (const x of result.data.results) {
+        const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
+        const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
+        const allAuthorsData: UserDTO[] = [];
+
+        for (const authorId of uniqueAllAuthorsId) {
+          /* eslint-disable no-await-in-loop */
+          const userData: NormalizedResponseDTO<UserDTO> = await api.getUserProfileById(authorId);
+
+          if (userData && userData.data) {
+            allAuthorsData.push(userData.data);
+          }
+        }
+
+        x.authors = allAuthorsData;
+        dataWithAuthors.push(x);
+      }
+
+      result.data.results = dataWithAuthors;
       setPaginatedResponseDto(result.data);
     } catch (e) {}
   };
@@ -154,6 +183,16 @@ const Index = () => {
       const { data: report } = result;
       const { results: reports } = paginatedResponseDto!;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      // Sort by global_pin and user_pin
+      newReports.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
       setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
     } catch (e) {}
   };
@@ -211,6 +250,9 @@ const Index = () => {
         start_datetime: startDatetime,
         end_datetime: datetimeActivityFeed,
       });
+
+      result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
+
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
       if (result?.data) {
         newActivityFeed.data = [...newActivityFeed.data, ...result.data];
@@ -236,16 +278,36 @@ const Index = () => {
     try {
       const api: Api = new Api(token, commonData.organization.sluglified_name);
       const result: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
-      const m: Member[] = result.data.map((organizationMember: OrganizationMember) => ({
-        id: organizationMember.id,
-        nickname: organizationMember.nickname,
-        username: organizationMember.username,
-        avatar_url: organizationMember.avatar_url,
-        email: organizationMember.email,
-        organization_roles: organizationMember.organization_roles,
-        team_roles: [],
-        membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
-      }));
+      const m: Member[] = [];
+      let userMember: Member | null = null;
+      result.data.forEach((organizationMember: OrganizationMember) => {
+        if (organizationMember.id === commonData.user.id) {
+          userMember = {
+            id: organizationMember.id,
+            nickname: organizationMember.nickname,
+            username: organizationMember.username,
+            display_name: organizationMember.nickname,
+            avatar_url: organizationMember.avatar_url,
+            email: organizationMember.email,
+            organization_roles: organizationMember.organization_roles,
+            team_roles: [],
+          };
+        } else {
+          m.push({
+            id: organizationMember.id,
+            nickname: organizationMember.nickname,
+            username: organizationMember.username,
+            display_name: organizationMember.nickname,
+            avatar_url: organizationMember.avatar_url,
+            email: organizationMember.email,
+            organization_roles: organizationMember.organization_roles,
+            team_roles: [],
+          });
+        }
+      });
+      if (userMember) {
+        m.unshift(userMember);
+      }
       setMembers(m);
     } catch (e) {
       console.error(e);
@@ -269,33 +331,22 @@ const Index = () => {
   };
 
   const updateMemberRole = async (userId: string, organizationRole: string): Promise<void> => {
-    let ms: Member[] = [...members];
-    const index: number = ms.findIndex((m: Member) => m.id === userId);
+    const index: number = members.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
       try {
         const api: Api = new Api(token, commonData.organization.sluglified_name);
-        const result: NormalizedResponseDTO<OrganizationMember[]> = await api.addUserToOrganization({
+        await api.addUserToOrganization({
           organizationId: commonData.organization.id!,
           userId,
           role: organizationRole,
         });
-        ms = result.data.map((organizationMember: OrganizationMember) => ({
-          id: organizationMember.id,
-          nickname: organizationMember.nickname,
-          username: organizationMember.username,
-          avatar_url: organizationMember.avatar_url,
-          email: organizationMember.email,
-          organization_roles: organizationMember.organization_roles,
-          team_roles: [],
-          membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
-        }));
       } catch (e) {
         console.error(e);
       }
-    } else if (!ms[index]!.organization_roles.includes(organizationRole)) {
+    } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
         const api: Api = new Api(token, commonData.organization.sluglified_name);
-        const result: NormalizedResponseDTO<OrganizationMember[]> = await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
+        await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
           members: [
             {
               userId,
@@ -303,46 +354,37 @@ const Index = () => {
             },
           ],
         });
-        ms = result.data.map((organizationMember: OrganizationMember) => ({
-          id: organizationMember.id,
-          nickname: organizationMember.nickname,
-          username: organizationMember.username,
-          avatar_url: organizationMember.avatar_url,
-          email: organizationMember.email,
-          organization_roles: organizationMember.organization_roles,
-          team_roles: [],
-          membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
-        }));
       } catch (e) {
         console.error(e);
       }
     }
-    setMembers(ms);
+    getOrganizationMembers();
   };
 
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
     try {
       const api: Api = new Api(token, commonData.organization.sluglified_name);
-      const result: NormalizedResponseDTO<{ organizationMembers: OrganizationMember[]; teamMembers: TeamMember[] }> = await api.inviteNewUser({
+      await api.inviteNewUser({
         email,
         organizationSlug: commonData.organization.sluglified_name,
         organizationRole,
       });
-      const ms: Member[] = result.data.organizationMembers.map((organizationMember: OrganizationMember) => ({
-        id: organizationMember.id,
-        nickname: organizationMember.nickname,
-        username: organizationMember.username,
-        avatar_url: organizationMember.avatar_url,
-        email: organizationMember.email,
-        organization_roles: organizationMember.organization_roles,
-        team_roles: [],
-        membership_origin: TeamMembershipOriginEnum.ORGANIZATION,
-      }));
-      setMembers(ms);
+      getOrganizationMembers();
     } catch (e) {
       console.error(e);
     }
   };
+
+  const removeUser = async (userId: string): Promise<void> => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      await api.removeUserFromOrganization(commonData.organization.id!, userId);
+      getOrganizationMembers();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   // END ORGANIZATION MEMBERS
 
   return (
@@ -357,8 +399,7 @@ const Index = () => {
               <div className="flex items-center space-x-5">
                 <div className="shrink-0">
                   <div className="relative">
-                    <img className="h-16 w-16 rounded-full" src={commonData.organization?.avatar_url} alt="" />
-                    <span className="absolute inset-0 shadow-inner rounded-full" aria-hidden="true" />
+                    <PureAvatar src={commonData.organization?.avatar_url} title={commonData.organization?.display_name} size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XL} />
                   </div>
                 </div>
                 <div>
@@ -382,6 +423,7 @@ const Index = () => {
             showTeamRoles={false}
             onUpdateRoleMember={updateMemberRole}
             onInviteNewUser={inviteNewUser}
+            onRemoveUser={removeUser}
           />
         </div>
         <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
@@ -389,9 +431,10 @@ const Index = () => {
           {paginatedResponseDto?.results &&
             paginatedResponseDto.results.length > 0 &&
             paginatedResponseDto?.results.map((report: ReportDTO) => (
-              <ReportBadget
+              <ReportBadge
                 key={report.id}
                 report={report}
+                authors={report.authors ? report.authors : []}
                 toggleUserStarReport={() => toggleUserStarReport(report.id!)}
                 toggleUserPinReport={() => toggleUserPinReport(report.id!)}
                 toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}

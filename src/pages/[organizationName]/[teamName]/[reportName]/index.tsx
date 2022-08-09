@@ -49,6 +49,7 @@ const Index = () => {
 
   const authors: User[] = useAuthors({ report });
   const channelMembers = useChannelMembers({ commonData });
+
   const allComments = useAppSelector((state) => state.comments.entities);
 
   const userEntities = useUserEntities();
@@ -152,7 +153,7 @@ const Index = () => {
 
   return (
     <div className="flex flex-row space-x-24">
-      {/* <div className="hidden bg-gray-50 bg-gray-100 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent"></div> */}
+      {/* <div className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent"></div> */}
 
       <div className="w-2/12">
         {selfTree && report && commonData && (
@@ -186,17 +187,17 @@ const Index = () => {
             <div>
               <div className="w-9/12 flex container flex-col lg:space-y-0 space-y-2">
                 <div>
-                  {fileToRender && (
-                    <UnpureFileHeader
-                      tree={selfTree}
-                      report={report}
-                      fileToRender={fileToRender}
-                      basePath={router.basePath}
-                      path={currentPath}
-                      version={router.query.version as string}
-                      commonData={commonData}
-                    />
-                  )}
+                  {/* {fileToRender && ( */}
+                  <UnpureFileHeader
+                    tree={selfTree}
+                    report={report}
+                    fileToRender={fileToRender}
+                    basePath={router.basePath}
+                    path={currentPath}
+                    version={router.query.version as string}
+                    commonData={commonData}
+                  />
+                  {/* )} */}
                 </div>
 
                 {fileToRender && onlyVisibleCell && (
@@ -234,8 +235,8 @@ const Index = () => {
                 )}
 
                 {!fileToRender && (
-                  <div className="prose prose-sm p-3">
-                    <p>Please choose a file in the filebrowser on the left.</p>
+                  <div className="w-9/12 border-x border-b rounded-b">
+                    <div className="prose p-3">Please choose a file in the filebrowser on the left.</div>
                   </div>
                 )}
               </div>

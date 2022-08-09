@@ -1,7 +1,7 @@
 import { Menu, Transition } from '@headlessui/react';
 import { BookmarkIcon, ChatIcon } from '@heroicons/react/outline';
 import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ShareIcon, ThumbUpIcon } from '@heroicons/react/solid';
-import type { ReportDTO } from '@kyso-io/kyso-model';
+import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
@@ -11,6 +11,7 @@ import { Fragment, useMemo } from 'react';
 import checkPermissions from '../helpers/check-permissions';
 import type { CommonData } from '../hooks/use-common-data';
 import { useCommonData } from '../hooks/use-common-data';
+import PureAvatarGroup from './PureAvatarGroup';
 
 const MAX_LENGTH_DESCRIPTION: number = 200;
 
@@ -20,12 +21,13 @@ function classNames(...classes: string[]) {
 
 interface Props {
   report: ReportDTO;
+  authors: UserDTO[];
   toggleUserStarReport: () => void;
   toggleUserPinReport: () => void;
   toggleGlobalPinReport: () => void;
 }
 
-const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
+const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
   const router = useRouter();
   const commonData: CommonData = useCommonData({
     organizationName: router.query.organizationName as string,
@@ -62,11 +64,11 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
       <div className="relative bg-white shadow-sm flex space-x-3">
         <div className="shrink-0">
           <div className="bg-stripes-sky-blue rounded-tl-lg text-center overflow-hidden mx-auto">
-            <img className="object-fill h-56" style={{ width: 224, height: 224 }} src={reportImage} alt="report preview image" />
+            <img className="object-cover" style={{ width: 224, height: 224 }} src={reportImage} alt="report preview image" />
           </div>
         </div>
         <div className="flex-1 min-w-0 py-3 pr-2 relative">
-          <a href="#" className="focus:outline-none">
+          <a href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
             <p className="text-sm font-medium text-gray-900 pb-2">{report.title}</p>
             <p className="text-sm text-gray-500">{description}</p>
           </a>
@@ -123,7 +125,8 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
       </div>
       <div className="-mt-px flex items-center p-2">
         <div className="grow flex flex-row items-center">
-          <img className="w-6 h-6 rounded-full" src="https://flowbite.com/docs/images/people/profile-picture-5.jpg" alt="Rounded avatar" />
+          <PureAvatarGroup data={authors}></PureAvatarGroup>
+
           <span className="text-gray-500 text-sm pl-2 pr-5">{moment(report.created_at).format('MMMM DD, YYYY')}</span>
           <EyeIcon className="shrink-0 h-5 w-5" />
           <span className="text-gray-500 text-sm pl-2 pr-5">{report.views}</span>
@@ -138,4 +141,4 @@ const ReportBadget = ({ report, toggleUserStarReport, toggleUserPinReport, toggl
   );
 };
 
-export default ReportBadget;
+export default ReportBadge;
