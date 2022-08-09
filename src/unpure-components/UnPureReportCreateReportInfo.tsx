@@ -21,7 +21,7 @@ const UnPureReportCreateReportInfo = (props: UnPureReportCreateReportInfoProps) 
     <>
       <div className="md:grid md:grid-cols-1 md:gap-6">
         <div className="md:col-span-1 inline-flex items-center">
-          <PureAvatar avatarUrl={user?.avatar_url} defaultName={user?.display_name} />
+          <PureAvatar src={user?.avatar_url} title={user?.display_name} />
           <p className="mx-3 text-sm font-medium text-gray-700 group-hover:text-gray-900">{user?.display_name}</p>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {selectedPeople?.map((person: any) => (

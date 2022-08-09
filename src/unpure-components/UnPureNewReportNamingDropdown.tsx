@@ -1,24 +1,46 @@
 import { useState, Fragment } from 'react';
 import type { ElementType } from 'react';
 import { Menu, Transition } from '@headlessui/react';
+import { CreationReportFileSystemObject } from '@/model/creation-report-file';
+import { v4 } from 'uuid';
 
 type IUnPureNewReportNamingDropdown = {
   label: string;
-  NewIcon: ElementType;
-  onCreate: (newName: string) => void;
+  icon: ElementType;
+  isFolder?: boolean;
+  parent?: CreationReportFileSystemObject;  
+  showLabel?: boolean;
+  onCreate: (newName: CreationReportFileSystemObject) => void;
 };
 
 const UnPureNewReportNamingDropdown = (props: IUnPureNewReportNamingDropdown) => {
-  const { label, NewIcon, onCreate } = props;
-  const [newName, onHanddleName] = useState('');
+  const { label, icon: NewIcon, onCreate, isFolder, parentId, showLabel } = props;
+  const [newName, onHandleName] = useState('');
+  let computedIsFolder = false;
+  
+  if(isFolder) {
+    computedIsFolder = true;
+  }
+  
   return (
     <>
       <Menu as="div" className="z-50 relative inline-block text-left">
         <div>
-          <Menu.Button className="-ml-px relative inline-flex items-center px-3 py-2 rounded mr-1 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
-            <NewIcon className="-m-1 h-5 w-5 text-gray-400" aria-hidden="true" />
-          </Menu.Button>
-        </div>
+          {!showLabel && (<>
+            <Menu.Button className="-ml-px relative inline-flex items-center px-3 py-2 rounded mr-1 border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500">
+              <NewIcon className="-m-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+            </Menu.Button>
+          </>)}
+          
+          {showLabel && (<>
+            <Menu.Button>
+              <div className={'group flex items-center px-4 py-2 text-sm'}>
+                <NewIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                {label}
+              </div>
+            </Menu.Button>
+          </>)}
+         </div> 
 
         <Transition
           as={Fragment}
@@ -38,7 +60,7 @@ const UnPureNewReportNamingDropdown = (props: IUnPureNewReportNamingDropdown) =>
                     <input
                       className="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                       onChange={(event) => {
-                        onHanddleName(event.target.value);
+                        onHandleName(event.target.value);
                       }}
                     />
                   </div>
@@ -56,7 +78,19 @@ const UnPureNewReportNamingDropdown = (props: IUnPureNewReportNamingDropdown) =>
                       if (!newName) {
                         console.log('Error');
                       }
-                      onCreate(newName);
+
+                      const fileType = newName.split(".").length > 1 ? newName.split(".").pop()! : "unknown";
+
+                      const fileObject = new CreationReportFileSystemObject(
+                        v4(),
+                        newName,
+                        newName,
+                        computedIsFolder ? "folder" : fileType,
+                        "", 
+                        parentId
+                      )
+
+                      onCreate(fileObject);
                     }}
                   >
                     Create

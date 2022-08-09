@@ -13,6 +13,15 @@ const UnPureReportCreateTitle = (props: IUnPureReportCreateTitleProps) => {
       <div className="md:grid md:grid-cols-3 md:gap-10">
         <div className="md:col-span-2 inline-flex">
           <textarea
+            style={{
+              height: "55px",
+              border: "none",
+              resize: "none",
+              outline: "none",
+              overflow: "auto",
+              WebkitBoxShadow: "none",
+              boxShadow: "none"
+            }}
             value={title || ''}
             onChange={(e) => {
               setTitle(e.target.value);
@@ -34,10 +43,9 @@ const UnPureReportCreateTitle = (props: IUnPureReportCreateTitleProps) => {
             text-gray-900
           "
           />
-          <span className="text-sm w-10 ml-3 font-medium text-gray-400 group-hover:text-gray-600"> v: 1 </span>
         </div>
         <div className="mt-5 md:mt-0 md:col-span-1">
-          {draftStatus && <h2 className="ml-10 text-gray-500">{draftStatus}</h2>}
+          {draftStatus && <h6 className="ml-10 text-gray-500">{draftStatus}</h6>}
           {draftStatus === 'All changes saved in local storage' && (
             <button
               type="reset"

@@ -29,7 +29,10 @@ const UnpureMarkdownEditor = (props: IUnpureMarkdownEditor) => {
           placeholder="Readme.md content"
           onChange={(e) => {
             onFocus(true);
-            setContent(e.target.value);
+            
+            if(e) {
+              setContent(e.target.value);
+            }
           }}
           onBlur={() => onFocus(false)}
           onClick={() => onFocus(true)}

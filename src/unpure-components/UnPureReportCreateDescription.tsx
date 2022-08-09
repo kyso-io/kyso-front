@@ -11,6 +11,15 @@ const UnPureReportCreateDescription = (props: UnPureReportCreateDescriptionProps
       <div className="md:grid md:grid-cols-4 md:gap-6">
         <div className="md:col-span-3">
           <textarea
+            style={{
+              height: "55px",
+              border: "none",
+              resize: "none",
+              outline: "none",
+              overflow: "auto",
+              WebkitBoxShadow: "none",
+              boxShadow: "none"
+            }}
             value={description || ''}
             placeholder="Description"
             onChange={(e) => {

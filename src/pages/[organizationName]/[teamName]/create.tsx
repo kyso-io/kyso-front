@@ -10,15 +10,15 @@ import { PureSpinner } from '@/components/PureSpinner';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import { useCommonData } from '@/hooks/use-common-data';
-import type { UserDTO } from '@kyso-io/kyso-model';
 import PureTopTabs from '@/components/PureTopTabs';
-import UnpureCreateFile from '@/unpure-components/UnpureCreateFile';
+import UnpureFileSystemToolbar from '@/unpure-components/UnpureCreateFile';
 import UnpureCreateFileList from '@/unpure-components/UnpureCreateFileList';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import UnPureReportCreateReportInfo from '@/unpure-components/UnPureReportCreateReportInfo';
 import debounce from 'lodash.debounce';
-import UnpureCreateTemporalFile from '@/unpure-components/UnpureCreateTemporalFile';
 import UnpureMarkdownEditor from '@/unpure-components/UnpureMardownEditor';
+import { CreationReportFileSystemObject } from '@/model/creation-report-file';
+import Filesystem from '@/components/Filesystem';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
@@ -29,14 +29,6 @@ const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcompone
     </div>
   ),
 });
-
-interface Files {
-  id: string;
-  name: string;
-  type: string;
-  parentId: string;
-  text: string;
-}
 
 const CreateReport = () => {
   useRedirectIfNoJWT();
@@ -58,19 +50,17 @@ const CreateReport = () => {
 
   const tabs = [{ name: 'Write' }, { name: 'Preview' }];
   const [currentTab, onChangeTab] = useState('Write');
-
-  const d: string[] = [];
-  const [selectedTags, setTags] = useState(d);
-  const [selectedPeople, setSelectedPeople] = useState(d);
+  
+  const [selectedTags, setTags] = useState([]);
+  const [selectedPeople, setSelectedPeople] = useState([]);
   const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
-  const mainfile = [{ id: 'Readme.md', name: 'Readme.md', type: 'file', parentId: null, text: null }];
+  
+  const mainfile: CreationReportFileSystemObject[] = [
+    new CreationReportFileSystemObject('Readme.md', 'Readme.md' ,'Readme.md', 'file', '')
+  ];
 
   const [readmeContent, setReadmeContent] = useState('');
-  const [files, setFiles] = useState(mainfile);
-
-  const [temporalFile, setTemporalFiles] = useState(d);
-  const [isShowInput, showInput] = useState(false);
-  // const [fileToRender, setFileToRender] = useState(mainfile);
+  let [files, setFiles] = useState(mainfile);
 
   const setTitleDelay = (_newTitle: string) => {
     setTitle(_newTitle);
@@ -102,42 +92,12 @@ const CreateReport = () => {
     delayedCallback('editorReadme', _newReadmeContent);
   };
 
-  const removeDuplicatesByKey = (myArr: string[], key: string) => myArr.filter((obj, pos, arr) => arr.map((mapObj) => mapObj[key]).indexOf(obj[key]) === pos);
+  const addNewFile = (newFile: CreationReportFileSystemObject ) => {
+    files.push(newFile)
 
-  const setFilesDelay = (_newfiles: string[]) => {
-    let newFiles: string[] = [];
-    if (files) {
-      newFiles = [...newFiles, ..._newfiles];
-    }
-    let noDuplicateFiles: Files[] = [];
-
-    if (files) {
-      noDuplicateFiles = removeDuplicatesByKey(newFiles, 'name').map((x: string) => {
-        return {
-          id: '',
-          name: x,
-          type: '',
-          parentId: '',
-          text: x,
-        };
-      });
-    }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setFiles(noDuplicateFiles as any);
+    setFiles(files);
     setDraftStatus('Saving ...');
-    delayedCallback('editorfile', noDuplicateFiles);
-  };
-
-  const onRemoveFile = (f: string[]) => {
-    if (f) {
-      let newFiles = f;
-      if (files) {
-        newFiles = files.reduce((p, c) => (c.name !== f.name && p.push(c), p), []);
-      }
-      setFiles(newFiles);
-      setDraftStatus('Saving ...');
-      delayedCallback('editorfile', newFiles);
-    }
+    delayedCallback('editorfile', files);
   };
 
   const cleanCookies = () => {
@@ -179,116 +139,127 @@ const CreateReport = () => {
 
   return (
     <>
-      <>
-        <div className="flex flex-row space-x-10 ">
-          <div className="basis-1/6"></div>
-          <div className="basis-5/6">
-            <div className="mb-4">
-              <UnPureReportCreateTitle cleanCookies={cleanCookies} title={newTitle} setTitle={setTitleDelay} draftStatus={draftStatus} />
-            </div>
-            <div className="mb-4">
-              <UnPureReportCreateDescription description={newDescription} setDescription={setDescriptionDelay} />
-            </div>
-            <div className="mb-6">
-              <UnPureReportCreateReportInfo
-                user={user}
-                channelMembers={channelMembers}
-                selectedPeople={selectedPeople}
-                setSelectedPeople={(_selectedPeople: string[]) => setAuthorsDelay(_selectedPeople)}
-                selectedTags={selectedTags}
-                tags={tags}
-                onSetTags={(newTags: string[]) => {
-                  setTagsDelay(newTags);
+      <div className="flex flex-row space-x-10 ">
+        <div className="basis-1/6"></div>
+        <div className="basis-5/6">
+          <UnPureReportCreateTitle cleanCookies={cleanCookies} 
+            title={newTitle} setTitle={setTitleDelay} draftStatus={draftStatus} />
+          
+          <UnPureReportCreateDescription description={newDescription} setDescription={setDescriptionDelay} />
+          
+          <div className="ml-3">
+            <UnPureReportCreateReportInfo
+              user={user}
+              channelMembers={channelMembers}
+              selectedPeople={selectedPeople}
+              setSelectedPeople={(_selectedPeople: string[]) => setAuthorsDelay(_selectedPeople)}
+              selectedTags={selectedTags}
+              tags={tags}
+              onSetTags={(newTags: string[]) => {
+                setTagsDelay(newTags);
+              }}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="flex flex-row space-x-10 ">
+        <div className="basis-1/6">
+          <div className="text-sm rounded mt-6 ">
+            <div className="flex min-h-12 border-b mx-10 ">
+              <UnpureFileSystemToolbar
+                onCreate={(newfile: CreationReportFileSystemObject) => {
+                  addNewFile(newfile);
                 }}
               />
             </div>
-          </div>
-        </div>
-        <div className="flex flex-row space-x-10 ">
-          <div className="basis-1/6">
-            <div className="text-sm rounded mt-6 ">
-              <div className="flex min-h-12 border-b mx-10 ">
-                <UnpureCreateFile
-                  onCreate={(newfile: string[]) => {
-                    setFilesDelay(newfile);
-                  }}
-                />
-              </div>
-              {files.length > 0 &&
-                files.map((file) => (
-                  <>
-                    {temporalFile && file.id !== temporalFile?.id && (
-                      <div key={file.id} className="flex min-h-12 mx-10 mt-2">
-                        <UnpureCreateFileList
-                          file={file}
-                          onAddNewFile={(_temporalFile: string[]) => {
-                            setTemporalFiles(_temporalFile);
-                            showInput(true);
-                          }}
-                          onRemoveFile={(newfile: string[]) => {
-                            onRemoveFile(newfile);
-                          }}
-                          // setFileToRender={(file: string[]) => {
-                          //   setFileToRender(file);
-                          //   setReadmeContent(file?.text);
-                          // }}
-                        />
-                      </div>
-                    )}
+            {files.length > 0 && (
+              <Filesystem 
+                files={files}  
+                onAddNewFile={(newFile: CreationReportFileSystemObject) => {
+                  addNewFile(newFile)
+                }}
+                onRemoveFile={(newFile: CreationReportFileSystemObject) => {
+                  console.log("HOla delete")
+                  console.log(newFile)
+                  const indexToRemove: number = files.findIndex(x => x.id === newFile.id);
 
-                    {temporalFile && file.id === temporalFile?.parentId && (
-                      <div key={file.id}>
-                        {temporalFile && isShowInput && (
-                          <div className="flex min-h-12 ml-10 mt-4 mb-10">
-                            <UnpureCreateTemporalFile
-                              temporalFile={temporalFile}
-                              onCreate={(newFile: string[]) => {
-                                setFilesDelay(newFile);
-                                setTemporalFiles([]);
-                                showInput(false);
-                              }}
-                              makeInputDisappear={() => {
-                                setTemporalFiles([]);
-                                showInput(false);
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </>
-                ))}
-            </div>
-          </div>
-          <div className="basis-4/6">
-            <PureTopTabs tabs={tabs} onChangeTab={onChangeTab} currentTab={currentTab} />
-            <div className="mt-10">
-              {currentTab === 'Write' && <UnpureMarkdownEditor setContent={setReadmeContentDelay} newContent={readmeContent} />}
-              {currentTab === 'Preview' && (
-                <div className="border-gray-400 ring-gray-400 p-3 border rounded-md shadow-sm ">
-                  <KysoMarkdownRenderer source={readmeContent} />
-                </div>
-              )}
-            </div>
-            <div className="mt-5 text-right">
-              <a href={cancelHref}>
-                <button
-                  type="reset"
-                  className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-900 hover:bg-blue-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  Cancel
-                </button>
-              </a>
-              <button
-                type="submit"
-                className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-              >
-                Save
-              </button>
-            </div>
+                  if(indexToRemove != -1) {
+                    files.splice(indexToRemove, 1); 
+                  } else {
+                    console.log("Nothing to remove");
+                  }
+
+                  setFiles(files);
+                  setDraftStatus('Saving ...');
+                  delayedCallback('editorfile', files);
+                }}
+              />
+            )}
+            
+            {files.length > 0 &&
+              files.map((file) => (
+                <>
+                  {file.id && (
+                    <div key={file.id} className="flex min-h-12 mx-10 mt-2">
+                      <UnpureCreateFileList
+                        file={file}
+                        onAddNewFile={(newFile: CreationReportFileSystemObject) => {
+                          addNewFile(newFile)
+                        }}
+                        onRemoveFile={(newFile: CreationReportFileSystemObject) => {
+                          console.log("HOla delete")
+                          console.log(newFile)
+                          const indexToRemove: number = files.findIndex(x => x.id === newFile.id);
+
+                          if(indexToRemove != -1) {
+                            files.splice(indexToRemove, 1); 
+                          } else {
+                            console.log("Nothing to remove");
+                          }
+
+                          setFiles(files);
+                          setDraftStatus('Saving ...');
+                          delayedCallback('editorfile', files);
+                        }}
+                        // setFileToRender={(file: string[]) => {
+                        //   setFileToRender(file);
+                        //   setReadmeContent(file?.text);
+                        // }}
+                      />
+                    </div>
+                  )}
+                </>
+              ))}
           </div>
         </div>
-      </>
+        <div className="basis-4/6">
+          <PureTopTabs tabs={tabs} onChangeTab={onChangeTab} currentTab={currentTab} />
+          <div className="mt-10">
+            {currentTab === 'Write' && <UnpureMarkdownEditor setContent={setReadmeContentDelay} newContent={readmeContent} />}
+            {currentTab === 'Preview' && (
+              <div className="border-gray-400 ring-gray-400 p-3 border rounded-md shadow-sm ">
+                <KysoMarkdownRenderer source={readmeContent} />
+              </div>
+            )}
+          </div>
+          <div className="mt-5 text-right">
+            <a href={cancelHref}>
+              <button
+                type="reset"
+                className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-900 hover:bg-blue-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancel
+              </button>
+            </a>
+            <button
+              type="submit"
+              className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            >
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
     </>
   );
 };
