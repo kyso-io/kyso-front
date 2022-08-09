@@ -2,6 +2,7 @@
 import ChannelList from '@/components/ChannelList';
 import Pagination from '@/components/Pagination';
 import PureAvatar from '@/components/PureAvatar';
+import PureNewReportPopover from '@/components/PureNewReportPopover';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
@@ -383,38 +384,31 @@ const Index = () => {
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
       <div className="w-4/6">
-        <div className="container flex">
-          <div className="basis-3/4">
-            <main className="py-5">
-              <div className="flex items-center space-x-5">
-                <div className="shrink-0">
-                  <div className="relative">
-                    <PureAvatar src={commonData.organization?.avatar_url} title={commonData.organization?.display_name} size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XL} />
-                  </div>
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
-                  <p className="text-sm font-medium text-gray-500">{commonData.organization?.bio}</p>
-                </div>
-              </div>
-            </main>
+        <div className="flex items-center w justify-between p-2">
+          <div className="shrink-0 flex flex-row items-center space-x-2">
+            <PureAvatar src={commonData.organization?.avatar_url} title={commonData.organization?.display_name} size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XL} />
+            <h1 className="text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
+            <p className="text-sm font-medium text-gray-500">{commonData.organization?.bio}</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <ManageUsers
+              members={members}
+              onInputChange={(query: string) => searchUsers(query)}
+              users={users}
+              showTeamRoles={false}
+              onUpdateRoleMember={updateMemberRole}
+              onInviteNewUser={inviteNewUser}
+              onRemoveUser={removeUser}
+            />
+            <PureNewReportPopover commonData={commonData} />
           </div>
         </div>
-        <div className="flex">
+        <div className="flex items-center w justify-between p-2">
           {organizationInfo && (
             <div className="mb-10">
               <OrganizationInfo organizationInfo={organizationInfo} />
             </div>
           )}
-          <ManageUsers
-            members={members}
-            onInputChange={(query: string) => searchUsers(query)}
-            users={users}
-            showTeamRoles={false}
-            onUpdateRoleMember={updateMemberRole}
-            onInviteNewUser={inviteNewUser}
-            onRemoveUser={removeUser}
-          />
         </div>
         <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
           {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
