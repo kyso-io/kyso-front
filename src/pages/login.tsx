@@ -239,7 +239,7 @@ const Index = () => {
             </div>
             <div className="pl-[45%]">
               {/* Center logo */}
-              {rightLogo && <img src={rightLogo} alt="logo" />}
+              {/* {rightLogo && <img src={rightLogo} alt="logo" />} */}
             </div>
             <div className="pl-[87%]">
               {/* Right logo */}
@@ -420,16 +420,9 @@ const Index = () => {
                 )}
 
                 {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
-                  <a className="border inline-block rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
-                    <img
-                      src="/static/images/pingid_logo.jpg"
-                      width={12}
-                      height={12}
-                      style={{
-                        marginRight: '8px',
-                        display: 'inline',
-                      }}
-                    />
+                  <a className="border flex items-center justify-center rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
+                    <img src="/pingid_logo.jpg" className="w-4 h-4 inline m-0 mr-1" />
+                    Log in with PingID
                   </a>
                 )}
               </div>
