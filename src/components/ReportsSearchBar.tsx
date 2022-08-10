@@ -7,71 +7,31 @@ import { Calendar } from 'primereact/calendar';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 import { SaveIcon } from '@heroicons/react/outline';
+import type { SearchUser, UserDTO } from '@kyso-io/kyso-model';
 import 'primeicons/primeicons.css'; // icons
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import { useClickOutside } from '../hooks/use-click-outside';
 import type { Member } from '../types/member';
 import PureAvatar from './PureAvatar';
-
-interface Filter {
-  key: string;
-  label: string;
-  modificable: boolean;
-  type?: 'user' | 'tag' | 'date' | 'author_ids-operator' | 'date-operator';
-  image?: string;
-  isLeaf: boolean;
-}
+import type { ReportsFilter } from '../interfaces/reports-filter';
 
 const SHOW_NEXT_FILTER_MS = 200;
 
-const INITIAL_FILTERS: Filter[] = [
-  {
-    key: 'author_ids',
-    label: 'Author',
-    modificable: false,
-    isLeaf: false,
-  },
-  {
-    key: 'tag',
-    label: 'Tag',
-    modificable: false,
-    isLeaf: false,
-  },
-  {
-    key: 'created_at',
-    label: 'Creation date',
-    modificable: false,
-    isLeaf: false,
-  },
-  {
-    key: 'updated_at',
-    label: 'Last updated',
-    modificable: false,
-    isLeaf: false,
-  },
-  {
-    key: 'myPinned',
-    label: 'My pinned',
-    modificable: false,
-    isLeaf: false,
-  },
-];
-
-const AUTHOR_OPERATORS_FILTERS: Filter[] = [
+const AUTHOR_OPERATORS_FILTERS: ReportsFilter[] = [
   { key: '=', label: '=', modificable: true, type: 'author_ids-operator', isLeaf: false },
   { key: '!=', label: '!=', modificable: true, type: 'author_ids-operator', isLeaf: false },
 ];
 
-const DATE_OPERATORS: Filter[] = [
+const DATE_OPERATORS: ReportsFilter[] = [
   { key: '<', label: '<', modificable: true, type: 'date-operator', isLeaf: false },
   { key: '>', label: '>', modificable: true, type: 'date-operator', isLeaf: false },
   { key: '=', label: '=', modificable: true, type: 'date-operator', isLeaf: false },
 ];
 
 interface MenuItemsProps {
-  filters: Filter[];
-  onSelect: (filter: Filter) => void;
+  filters: ReportsFilter[];
+  onSelect: (filter: ReportsFilter) => void;
   onClickOutside?: () => void;
 }
 
@@ -81,7 +41,7 @@ const MenuItems = ({ filters, onSelect, onClickOutside }: MenuItemsProps) => {
   return (
     <Menu.Items ref={wrapperRef} className="origin-top-right mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity/5 focus:outline-none">
       <div className="py-1">
-        {filters.map((filter: Filter, index: number) => (
+        {filters.map((filter: ReportsFilter, index: number) => (
           <Menu.Item key={index}>
             {({ active }) => (
               <div className={clsx(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex flex-row px-4 py-2 text-sm')} onClick={() => onSelect(filter)}>
@@ -173,18 +133,58 @@ const MyCalendar = ({ value, onChange, onClickOutside }: MyCalendarProps) => {
 };
 
 interface ReportsSearchBarProps {
-  onSaveSearch: () => void;
+  onSaveSearch: (query: string | null, payload: any | null) => void;
   members: Member[];
   onFiltersChange: (query: string) => void;
+  searchUser: SearchUser | null;
+  user: UserDTO | null;
 }
 
-const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSearchBarProps) => {
-  const [selectedFilters, setSelectedFilters] = useState<Filter[]>([]);
+const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, user }: ReportsSearchBarProps) => {
+  const [selectedFilters, setSelectedFilters] = useState<ReportsFilter[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<any | null>(null);
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const buttonRef = useRef(null);
 
-  const USERS_FILTERS: Filter[] = useMemo(
+  const INITIAL_FILTERS: ReportsFilter[] = useMemo(() => {
+    const data: ReportsFilter[] = [
+      {
+        key: 'author_ids',
+        label: 'Author',
+        modificable: false,
+        isLeaf: false,
+      },
+      {
+        key: 'tag',
+        label: 'Tag',
+        modificable: false,
+        isLeaf: false,
+      },
+      {
+        key: 'created_at',
+        label: 'Creation date',
+        modificable: false,
+        isLeaf: false,
+      },
+      {
+        key: 'updated_at',
+        label: 'Last updated',
+        modificable: false,
+        isLeaf: false,
+      },
+    ];
+    if (user) {
+      data.push({
+        key: 'user-pinned',
+        label: 'My pinned',
+        modificable: true,
+        isLeaf: true,
+      });
+    }
+    return data;
+  }, [user]);
+
+  const USERS_FILTERS: ReportsFilter[] = useMemo(
     () =>
       members.map((member: Member) => ({
         key: member.id,
@@ -197,24 +197,42 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
     [members],
   );
 
-  useEffect(() => {
-    console.log('entra');
+  const query: string = useMemo(() => {
     const numSelectedFilters: number = selectedFilters.length;
     if (numSelectedFilters === 0) {
-      return;
+      return '';
     }
-    const lastFilter: Filter = selectedFilters[numSelectedFilters - 1]!;
-    if (lastFilter.isLeaf) {
-      let query: string = '';
-      selectedFilters.forEach((filter: Filter) => {
-        query += filter.key;
-        if (filter.isLeaf) {
-          query += `&`;
-        }
-      });
-      onFiltersChange(query.slice(0, -1));
+    // Get the last index of valid filter
+    let index: number = selectedFilters.length - 1;
+    while (index >= 0) {
+      const filter: ReportsFilter = selectedFilters[index]!;
+      if (filter.isLeaf) {
+        break;
+      }
+      index -= 1;
     }
+    let q = '';
+    for (let i = 0; i <= index; i += 1) {
+      const filter: ReportsFilter = selectedFilters[i]!;
+      q += filter.key;
+      if (filter.isLeaf) {
+        q += `&`;
+      }
+    }
+    return q;
   }, [selectedFilters]);
+
+  useEffect(() => {
+    if (searchUser) {
+      setSelectedFilters(searchUser?.payload ? searchUser.payload : []);
+    }
+  }, [searchUser]);
+
+  useEffect(() => {
+    if (query != null) {
+      onFiltersChange(query);
+    }
+  }, [query]);
 
   return (
     <div className="flex flex-row content-center items-center">
@@ -231,7 +249,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                     component = (
                       <MenuItems
                         filters={AUTHOR_OPERATORS_FILTERS}
-                        onSelect={(filter: Filter) => {
+                        onSelect={(filter: ReportsFilter) => {
                           setSelectedFilters([...selectedFilters, filter]);
                           setShowMenu(false);
                           setSelectedComponent(null);
@@ -250,7 +268,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                     component = (
                       <MenuItems
                         filters={[{ key: '=', label: '=', modificable: false, isLeaf: false }]}
-                        onSelect={(filter: Filter) => {
+                        onSelect={(filter: ReportsFilter) => {
                           setSelectedFilters([...selectedFilters, filter]);
                           setShowMenu(false);
                           setSelectedComponent(null);
@@ -269,7 +287,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                     component = (
                       <MenuItems
                         filters={DATE_OPERATORS}
-                        onSelect={(filter: Filter) => {
+                        onSelect={(filter: ReportsFilter) => {
                           setSelectedFilters([...selectedFilters, filter]);
                           setShowMenu(false);
                           setSelectedComponent(null);
@@ -288,7 +306,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                     component = (
                       <MenuItems
                         filters={DATE_OPERATORS}
-                        onSelect={(filter: Filter) => {
+                        onSelect={(filter: ReportsFilter) => {
                           setSelectedFilters([...selectedFilters, filter]);
                           setShowMenu(false);
                           setSelectedComponent(null);
@@ -312,7 +330,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                         component = (
                           <MenuItems
                             filters={USERS_FILTERS}
-                            onSelect={(filter: Filter) => {
+                            onSelect={(filter: ReportsFilter) => {
                               setSelectedFilters([...selectedFilters, filter]);
                               setShowMenu(false);
                               setSelectedComponent(null);
@@ -401,17 +419,19 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                   default:
                     component = (
                       <MenuItems
-                        filters={INITIAL_FILTERS.filter((filter: Filter) => {
-                          const index: number = selectedFilters.findIndex((sf: Filter) => filter.key === sf.key);
+                        filters={INITIAL_FILTERS.filter((filter: ReportsFilter) => {
+                          const index: number = selectedFilters.findIndex((sf: ReportsFilter) => filter.key === sf.key);
                           return index === -1;
                         })}
-                        onSelect={(filter: Filter) => {
+                        onSelect={(filter: ReportsFilter) => {
                           setSelectedFilters([...selectedFilters, filter]);
                           setShowMenu(false);
                           setSelectedComponent(null);
-                          setTimeout(() => {
-                            (buttonRef.current as any).click();
-                          }, SHOW_NEXT_FILTER_MS);
+                          if (filter.key !== 'user-pinned') {
+                            setTimeout(() => {
+                              (buttonRef.current as any).click();
+                            }, SHOW_NEXT_FILTER_MS);
+                          }
                         }}
                         onClickOutside={() => {
                           setShowMenu(false);
@@ -425,7 +445,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                 component = (
                   <MenuItems
                     filters={INITIAL_FILTERS}
-                    onSelect={(filter: Filter) => {
+                    onSelect={(filter: ReportsFilter) => {
                       setSelectedFilters([...selectedFilters, filter]);
                       setShowMenu(false);
                       setSelectedComponent(null);
@@ -447,7 +467,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
             <div className="mt-1 relative flex items-center content-center w-full">
               <div className="shadow-sm  block w-full pr-12 sm:text-sm border-gray-300 rounded-md" style={{ height: 40 }}></div>
               <div className="absolute inset-y-0 flex py-1.5 pr-1.5">
-                {selectedFilters.map((selectedFilter: Filter, index: number) => (
+                {selectedFilters.map((selectedFilter: ReportsFilter, index: number) => (
                   <kbd
                     key={index}
                     onClick={(e) => {
@@ -461,8 +481,8 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                           component = (
                             <MenuItems
                               filters={USERS_FILTERS}
-                              onSelect={(filter: Filter) => {
-                                const fs: Filter[] = [...selectedFilters];
+                              onSelect={(filter: ReportsFilter) => {
+                                const fs: ReportsFilter[] = [...selectedFilters];
                                 fs[index] = filter;
                                 setSelectedFilters(fs);
                                 setShowMenu(false);
@@ -479,8 +499,8 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                           component = (
                             <MenuItems
                               filters={AUTHOR_OPERATORS_FILTERS}
-                              onSelect={(filter: Filter) => {
-                                const fs: Filter[] = [...selectedFilters];
+                              onSelect={(filter: ReportsFilter) => {
+                                const fs: ReportsFilter[] = [...selectedFilters];
                                 fs[index] = filter;
                                 setSelectedFilters(fs);
                                 setShowMenu(false);
@@ -499,7 +519,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                               value={selectedFilters[index]!.key}
                               onSave={(value: string) => {
                                 if (value) {
-                                  const fs: Filter[] = [...selectedFilters];
+                                  const fs: ReportsFilter[] = [...selectedFilters];
                                   fs[index]!.key = value;
                                   fs[index]!.label = value;
                                   setSelectedFilters(fs);
@@ -518,8 +538,8 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                           component = (
                             <MenuItems
                               filters={DATE_OPERATORS}
-                              onSelect={(filter: Filter) => {
-                                const fs: Filter[] = [...selectedFilters];
+                              onSelect={(filter: ReportsFilter) => {
+                                const fs: ReportsFilter[] = [...selectedFilters];
                                 fs[index] = filter;
                                 setSelectedFilters(fs);
                                 setShowMenu(false);
@@ -537,7 +557,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                             <MyCalendar
                               value={moment(selectedFilters[index]!.label).toDate()}
                               onChange={(date: Date) => {
-                                const fs: Filter[] = [...selectedFilters];
+                                const fs: ReportsFilter[] = [...selectedFilters];
                                 fs[index]!.key = moment(date).format('YYYY-MM-DD');
                                 fs[index]!.label = moment(date).format('YYYY-MM-DD');
                                 setSelectedFilters(fs);
@@ -568,7 +588,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
                         className="text-gray-400 cursor-pointer"
                         onClick={(e) => {
                           e.stopPropagation();
-                          const sfs: Filter[] = [...selectedFilters];
+                          const sfs: ReportsFilter[] = [...selectedFilters];
                           sfs.splice(index, 1);
                           setSelectedFilters(sfs);
                           setShowMenu(false);
@@ -597,7 +617,6 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
           </Menu.Button>
           {selectedComponent !== null && (
             <Transition
-              // show={open || showMenu}
               show={showMenu}
               as={React.Fragment}
               enter="transition ease-out duration-100"
@@ -612,7 +631,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange }: ReportsSea
           )}
         </React.Fragment>
       </Menu>
-      <SaveIcon onClick={onSaveSearch} className="cursor-pointer w-6 h-6 ml-2" />
+      <SaveIcon onClick={() => onSaveSearch(query, selectedFilters)} className={clsx('cursor-pointer w-6 h-6 ml-2')} />
     </div>
   );
 };
