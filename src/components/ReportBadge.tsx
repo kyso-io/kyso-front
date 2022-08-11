@@ -23,8 +23,8 @@ interface Props {
   report: ReportDTO;
   authors: UserDTO[];
   toggleUserStarReport: () => void;
-  toggleUserPinReport: () => void;
-  toggleGlobalPinReport: () => void;
+  toggleUserPinReport?: () => void;
+  toggleGlobalPinReport?: () => void;
 }
 
 const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
@@ -85,40 +85,42 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
           <div className="absolute top-0 right-0">
             <Menu as="div" className="relative inline-block text-left">
               <Menu.Button>{report.pin || report.user_pin ? <BookmarkIconSolid className="h-7 w-7 text-violet-400" /> : <BookmarkIcon className="h-7 w-10 text-violet-400" />}</Menu.Button>
-              <Transition
-                as={Fragment}
-                enter="transition ease-out duration-100"
-                enterFrom="transform opacity-0 scale-95"
-                enterTo="transform opacity-100 scale-100"
-                leave="transition ease-in duration-75"
-                leaveFrom="transform opacity-100 scale-100"
-                leaveTo="transform opacity-0 scale-95"
-              >
-                <Menu.Items className="origin-top-right absolute right-0 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity/5 focus:outline-none">
-                  {hasPermissionReportGlobalPin && (
-                    <Menu.Item>
-                      {({ active }) => (
-                        <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
-                          <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
-                            {report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
-                          </button>
-                        </div>
-                      )}
-                    </Menu.Item>
-                  )}
-                  {!report.pin && (
-                    <Menu.Item>
-                      {({ active }) => (
-                        <div onClick={toggleUserPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
-                          <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
-                            {report.user_pin ? 'Remove pin from the top' : 'Pin to the top'}
-                          </button>
-                        </div>
-                      )}
-                    </Menu.Item>
-                  )}
-                </Menu.Items>
-              </Transition>
+              {toggleUserPinReport && toggleGlobalPinReport && (
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items className="origin-top-right absolute right-0 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity/5 focus:outline-none">
+                    {hasPermissionReportGlobalPin && (
+                      <Menu.Item>
+                        {({ active }) => (
+                          <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
+                            <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
+                              {report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
+                            </button>
+                          </div>
+                        )}
+                      </Menu.Item>
+                    )}
+                    {!report.pin && (
+                      <Menu.Item>
+                        {({ active }) => (
+                          <div onClick={toggleUserPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
+                            <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
+                              {report.user_pin ? 'Remove pin from the top' : 'Pin to the top'}
+                            </button>
+                          </div>
+                        )}
+                      </Menu.Item>
+                    )}
+                  </Menu.Items>
+                </Transition>
+              )}
             </Menu>
           </div>
         )}
