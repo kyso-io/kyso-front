@@ -33,6 +33,11 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
     return classes.filter(Boolean).join(' ');
   }
 
+  let userProfile = false;
+  if (router.query.username) {
+    userProfile = true;
+  }
+
   return (
     <div className="flex flex-col space-y-6 min-h-screen">
       <div className="flex flex-col z-10 w-screen border-b">
@@ -167,9 +172,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
             </>
           )}
         </Disclosure>
-        <div className="p-2">
-          <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
-        </div>
+        <div className="p-2">{!userProfile && <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />}</div>
       </div>
 
       <div className="grow p-2 w-full rounded">{children}</div>
