@@ -12,9 +12,9 @@ import 'primeicons/primeicons.css'; // icons
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import { useClickOutside } from '../hooks/use-click-outside';
+import type { ReportsFilter } from '../interfaces/reports-filter';
 import type { Member } from '../types/member';
 import PureAvatar from './PureAvatar';
-import type { ReportsFilter } from '../interfaces/reports-filter';
 
 const SHOW_NEXT_FILTER_MS = 200;
 
@@ -39,7 +39,7 @@ const MenuItems = ({ filters, onSelect, onClickOutside }: MenuItemsProps) => {
   const wrapperRef = useRef(null);
   useClickOutside(wrapperRef, onClickOutside);
   return (
-    <Menu.Items ref={wrapperRef} className="origin-top-right mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity/5 focus:outline-none">
+    <Menu.Items ref={wrapperRef} className="origin-top-right mt-2 w-56 rounded-md shadow-lg bg-white ring-opacity/5 focus:outline-none">
       <div className="py-1">
         {filters.map((filter: ReportsFilter, index: number) => (
           <Menu.Item key={index}>
@@ -47,7 +47,7 @@ const MenuItems = ({ filters, onSelect, onClickOutside }: MenuItemsProps) => {
               <div className={clsx(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex flex-row px-4 py-2 text-sm')} onClick={() => onSelect(filter)}>
                 {filter?.image && (
                   <div className="mr-4">
-                    <PureAvatar src={filter.image} title={filter.label} />
+                    <PureAvatar src={filter.image as string} title={filter.label as string} />
                   </div>
                 )}
                 <span>{filter.label}</span>
@@ -60,6 +60,80 @@ const MenuItems = ({ filters, onSelect, onClickOutside }: MenuItemsProps) => {
   );
 };
 
+interface MenuMultipleItemsProps {
+  filter: ReportsFilter;
+  options: { image?: string; label: string; value: string }[];
+  onClickOutside: (filter: ReportsFilter | null) => void;
+}
+
+const MenuMultipleItems = ({ filter, options, onClickOutside }: MenuMultipleItemsProps) => {
+  const wrapperRef = useRef(null);
+  const [selected, setSelected] = useState<{ image?: string; label: string; value: string }[]>([]);
+
+  useEffect(() => {
+    const s: { image?: string; label: string; value: string }[] = [];
+    (filter.key as string[]).forEach((key: string, index: number) => {
+      s.push({
+        value: key,
+        label: (filter.label as string[])[index]!,
+        image: filter.image ? (filter.image as string[])[index]! : '',
+      });
+    });
+    setSelected(s);
+  }, []);
+
+  const wrapperOnClickOutside = () => {
+    const data: ReportsFilter = {
+      key: selected.map((s) => s.value),
+      label: selected.map((s) => s.label),
+      image: selected.map((s) => s.image || ''),
+      type: filter.type,
+      isLeaf: filter.isLeaf,
+      modificable: filter.modificable,
+    };
+    onClickOutside(data);
+  };
+
+  useClickOutside(wrapperRef, wrapperOnClickOutside);
+
+  return (
+    <Menu.Items ref={wrapperRef} className="origin-top-right mt-2 w-64 rounded-md shadow-lg bg-white ring-opacity/5 focus:outline-none" style={{ maxHeight: 200, overflowY: 'scroll' }}>
+      <div className="py-1">
+        {options.map((option: { image?: string; label: string; value: string }, index: number) => {
+          const indexChecked: number = selected.findIndex((s: { image?: string; label: string; value: string }) => s.value === option.value);
+          return (
+            <Menu.Item key={index}>
+              {({ active }) => (
+                <div className={clsx(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'relative flex items-start p-4 py-2 text-sm')}>
+                  <div className="min-w-0 flex-1 text-sm">
+                    <div className="flex flex-row">
+                      <div className="mr-4">{option?.image && <PureAvatar src={option.image} title={option.label} />}</div>
+                      <label className="font-medium text-gray-700 select-none">{option.label}</label>
+                    </div>
+                  </div>
+                  <div className="ml-3 flex items-center h-5">
+                    <input
+                      onChange={() => {
+                        if (indexChecked === -1) {
+                          setSelected([...selected, option]);
+                        } else {
+                          setSelected([...selected.slice(0, indexChecked), ...selected.slice(indexChecked + 1)]);
+                        }
+                      }}
+                      type="checkbox"
+                      checked={indexChecked !== -1}
+                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 rounded"
+                    />
+                  </div>
+                </div>
+              )}
+            </Menu.Item>
+          );
+        })}
+      </div>
+    </Menu.Items>
+  );
+};
 interface InputTagProps {
   value: string;
   onSave: (value: string) => void;
@@ -72,8 +146,8 @@ const InputTag = ({ value, onSave, onClickOutside }: InputTagProps) => {
   useClickOutside(wrapperRef, onClickOutside);
 
   return (
-    <div ref={wrapperRef} className="w-80 origin-top-right mt-2 p-4 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity/5 focus:outline-none">
-      <label className="block text-sm font-medium text-gray-700">Tag:</label>
+    <div ref={wrapperRef} className="w-80 origin-top-right mt-2 p-4 rounded-md shadow-lg bg-white ring-opacity/5 focus:outline-none">
+      <label className="block text-sm font-medium text-gray-700">Tags (separated by comma):</label>
       <div className="mt-1 relative flex items-center">
         <input
           type="text"
@@ -86,7 +160,7 @@ const InputTag = ({ value, onSave, onClickOutside }: InputTagProps) => {
               setTag('');
             }
           }}
-          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-12 sm:text-sm border-gray-SHOW_NEXT_FILTER_MS rounded-md"
+          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-12 sm:text-sm border-gray-300 rounded-md"
         />
         <div
           className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5"
@@ -97,8 +171,8 @@ const InputTag = ({ value, onSave, onClickOutside }: InputTagProps) => {
             setTag('');
           }}
         >
-          <kbd className="inline-flex items-center border border-gray-200 rounded px-2 text-sm font-sans font-medium text-gray-400">
-            <CheckIcon className="w-4 h-4 m-1" />
+          <kbd className={clsx('inline-flex items-center border border-gray-200 rounded px-2 text-sm font-sans font-medium text-gray-400', tag ? 'cursor-pointer' : 'cursor-default')}>
+            <CheckIcon className={clsx('w-4 h-4 m-1')} />
           </kbd>
         </div>
       </div>
@@ -146,14 +220,21 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const buttonRef = useRef(null);
 
+  const USERS_FILTERS: ReportsFilter[] = useMemo(
+    () =>
+      members.map((member: Member) => ({
+        key: member.id,
+        label: member.username,
+        modificable: true,
+        type: 'user',
+        image: member.avatar_url,
+        isLeaf: true,
+      })),
+    [members],
+  );
+
   const INITIAL_FILTERS: ReportsFilter[] = useMemo(() => {
     const data: ReportsFilter[] = [
-      {
-        key: 'author_ids',
-        label: 'Author',
-        modificable: false,
-        isLeaf: false,
-      },
       {
         key: 'tag',
         label: 'Tag',
@@ -173,6 +254,14 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
         isLeaf: false,
       },
     ];
+    if (USERS_FILTERS) {
+      data.unshift({
+        key: 'author_ids',
+        label: 'Author',
+        modificable: false,
+        isLeaf: false,
+      });
+    }
     if (user) {
       data.push({
         key: 'user-pinned',
@@ -182,20 +271,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
       });
     }
     return data;
-  }, [user]);
-
-  const USERS_FILTERS: ReportsFilter[] = useMemo(
-    () =>
-      members.map((member: Member) => ({
-        key: member.id,
-        label: member.username,
-        modificable: true,
-        type: 'user',
-        image: member.avatar_url,
-        isLeaf: true,
-      })),
-    [members],
-  );
+  }, [USERS_FILTERS, user]);
 
   const query: string = useMemo(() => {
     const numSelectedFilters: number = selectedFilters.length;
@@ -234,236 +310,360 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
     }
   }, [query]);
 
+  const onClickNewFilter = () => {
+    let component = null;
+    if (selectedFilters.length) {
+      switch (selectedFilters[selectedFilters.length - 1]?.key) {
+        case 'author_ids':
+          component = (
+            <MenuItems
+              filters={AUTHOR_OPERATORS_FILTERS}
+              onSelect={(filter: ReportsFilter) => {
+                setSelectedFilters([...selectedFilters, filter]);
+                setShowMenu(false);
+                setSelectedComponent(null);
+                setTimeout(() => {
+                  (buttonRef.current as any).click();
+                }, SHOW_NEXT_FILTER_MS);
+              }}
+              onClickOutside={() => {
+                setShowMenu(false);
+                setSelectedComponent(null);
+              }}
+            />
+          );
+          break;
+        case 'tag':
+          component = (
+            <MenuItems
+              filters={[{ key: '=', label: '=', modificable: false, isLeaf: false }]}
+              onSelect={(filter: ReportsFilter) => {
+                setSelectedFilters([...selectedFilters, filter]);
+                setShowMenu(false);
+                setSelectedComponent(null);
+                setTimeout(() => {
+                  (buttonRef.current as any).click();
+                }, SHOW_NEXT_FILTER_MS);
+              }}
+              onClickOutside={() => {
+                setShowMenu(false);
+                setSelectedComponent(null);
+              }}
+            />
+          );
+          break;
+        case 'created_at':
+          component = (
+            <MenuItems
+              filters={DATE_OPERATORS}
+              onSelect={(filter: ReportsFilter) => {
+                setSelectedFilters([...selectedFilters, filter]);
+                setShowMenu(false);
+                setSelectedComponent(null);
+                setTimeout(() => {
+                  (buttonRef.current as any).click();
+                }, SHOW_NEXT_FILTER_MS);
+              }}
+              onClickOutside={() => {
+                setShowMenu(false);
+                setSelectedComponent(null);
+              }}
+            />
+          );
+          break;
+        case 'updated_at':
+          component = (
+            <MenuItems
+              filters={DATE_OPERATORS}
+              onSelect={(filter: ReportsFilter) => {
+                setSelectedFilters([...selectedFilters, filter]);
+                setShowMenu(false);
+                setSelectedComponent(null);
+                setTimeout(() => {
+                  (buttonRef.current as any).click();
+                }, SHOW_NEXT_FILTER_MS);
+              }}
+              onClickOutside={() => {
+                setShowMenu(false);
+                setSelectedComponent(null);
+              }}
+            />
+          );
+          break;
+        case '=':
+        case '!=':
+        case '<':
+        case '>':
+          switch (selectedFilters[selectedFilters.length - 2]?.key) {
+            case 'author_ids':
+              component = (
+                <MenuMultipleItems
+                  filter={{
+                    key: [],
+                    label: [],
+                    modificable: true,
+                    type: 'user',
+                    image: [],
+                    isLeaf: true,
+                  }}
+                  options={USERS_FILTERS.map((v: ReportsFilter) => ({
+                    image: v.image as string,
+                    label: v.label as string,
+                    value: v.key as string,
+                  }))}
+                  onClickOutside={(filter: ReportsFilter | null) => {
+                    if (filter && (filter.key as string[]).length > 0) {
+                      setSelectedFilters([...selectedFilters, filter]);
+                    }
+                    setShowMenu(false);
+                    setSelectedComponent(null);
+                  }}
+                />
+              );
+              break;
+            case 'tag':
+              component = (
+                <InputTag
+                  value={''}
+                  onSave={(value: string) => {
+                    if (value) {
+                      setSelectedFilters([...selectedFilters, { key: value, label: value, modificable: true, type: 'tag', isLeaf: true }]);
+                      setShowMenu(false);
+                      setSelectedComponent(null);
+                    }
+                  }}
+                  onClickOutside={() => {
+                    setShowMenu(false);
+                    setSelectedComponent(null);
+                  }}
+                />
+              );
+              break;
+            case 'created_at':
+              component = (
+                <MyCalendar
+                  value={new Date()}
+                  onChange={(date: Date) => {
+                    setSelectedFilters([
+                      ...selectedFilters,
+                      {
+                        key: moment(date).format('YYYY-MM-DD'),
+                        label: moment(date).format('YYYY-MM-DD'),
+                        modificable: true,
+                        type: 'date',
+                        isLeaf: true,
+                      },
+                    ]);
+                    setShowMenu(false);
+                    setSelectedComponent(null);
+                  }}
+                  onClickOutside={() => {
+                    setShowMenu(false);
+                    setSelectedComponent(null);
+                  }}
+                />
+              );
+              setShowMenu(true);
+              break;
+            case 'updated_at':
+              component = (
+                <MyCalendar
+                  value={new Date()}
+                  onChange={(date: Date) => {
+                    setSelectedFilters([
+                      ...selectedFilters,
+                      {
+                        key: moment(date).format('YYYY-MM-DD'),
+                        label: moment(date).format('YYYY-MM-DD'),
+                        modificable: true,
+                        type: 'date',
+                        isLeaf: true,
+                      },
+                    ]);
+                    setShowMenu(false);
+                    setSelectedComponent(null);
+                  }}
+                  onClickOutside={() => {
+                    setShowMenu(false);
+                    setSelectedComponent(null);
+                  }}
+                />
+              );
+              setShowMenu(true);
+              break;
+            default:
+              break;
+          }
+          break;
+        default:
+          component = (
+            <MenuItems
+              filters={INITIAL_FILTERS.filter((filter: ReportsFilter) => {
+                const index: number = selectedFilters.findIndex((sf: ReportsFilter) => filter.key === sf.key);
+                return index === -1;
+              })}
+              onSelect={(filter: ReportsFilter) => {
+                setSelectedFilters([...selectedFilters, filter]);
+                setShowMenu(false);
+                setSelectedComponent(null);
+                if (filter.key !== 'user-pinned') {
+                  setTimeout(() => {
+                    (buttonRef.current as any).click();
+                  }, SHOW_NEXT_FILTER_MS);
+                }
+              }}
+              onClickOutside={() => {
+                setShowMenu(false);
+                setSelectedComponent(null);
+              }}
+            />
+          );
+          break;
+      }
+    } else {
+      component = (
+        <MenuItems
+          filters={INITIAL_FILTERS}
+          onSelect={(filter: ReportsFilter) => {
+            setSelectedFilters([...selectedFilters, filter]);
+            setShowMenu(false);
+            setSelectedComponent(null);
+            setTimeout(() => {
+              (buttonRef.current as any).click();
+            }, SHOW_NEXT_FILTER_MS);
+          }}
+          onClickOutside={() => {
+            setShowMenu(false);
+            setSelectedComponent(null);
+          }}
+        />
+      );
+    }
+    setSelectedComponent(component);
+    setShowMenu(true);
+  };
+
+  const onClickUpdateFilter = (selectedFilter: ReportsFilter, index: number) => {
+    if (!selectedFilter.modificable) {
+      return;
+    }
+    let component = null;
+    switch (selectedFilter.type) {
+      case 'user':
+        component = (
+          <MenuMultipleItems
+            filter={selectedFilter}
+            options={USERS_FILTERS.map((v: ReportsFilter) => ({
+              image: v.image as string,
+              label: v.label as string,
+              value: v.key as string,
+            }))}
+            onClickOutside={(filter: ReportsFilter | null) => {
+              if (filter) {
+                const fs: ReportsFilter[] = [...selectedFilters];
+                if ((filter.key as string[]).length > 0) {
+                  fs[index] = filter;
+                } else {
+                  fs.splice(index, 1);
+                }
+                setSelectedFilters(fs);
+              }
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+          />
+        );
+        break;
+      case 'author_ids-operator':
+        component = (
+          <MenuItems
+            filters={AUTHOR_OPERATORS_FILTERS}
+            onSelect={(filter: ReportsFilter) => {
+              const fs: ReportsFilter[] = [...selectedFilters];
+              fs[index] = filter;
+              setSelectedFilters(fs);
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+            onClickOutside={() => {
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+          />
+        );
+        break;
+      case 'tag':
+        component = (
+          <InputTag
+            value={selectedFilters[index]!.key as string}
+            onSave={(value: string) => {
+              const fs: ReportsFilter[] = [...selectedFilters];
+              if (value) {
+                fs[index]!.key = value;
+                fs[index]!.label = value;
+              } else {
+                fs.splice(index, 1);
+              }
+              setSelectedFilters(fs);
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+            onClickOutside={() => {
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+          />
+        );
+        break;
+      case 'date-operator':
+        component = (
+          <MenuItems
+            filters={DATE_OPERATORS}
+            onSelect={(filter: ReportsFilter) => {
+              const fs: ReportsFilter[] = [...selectedFilters];
+              fs[index] = filter;
+              setSelectedFilters(fs);
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+            onClickOutside={() => {
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+          />
+        );
+        break;
+      case 'date':
+        component = (
+          <MyCalendar
+            value={moment(selectedFilters[index]!.label).toDate()}
+            onChange={(date: Date) => {
+              const fs: ReportsFilter[] = [...selectedFilters];
+              fs[index]!.key = moment(date).format('YYYY-MM-DD');
+              fs[index]!.label = moment(date).format('YYYY-MM-DD');
+              setSelectedFilters(fs);
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+            onClickOutside={() => {
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+          />
+        );
+        break;
+      default:
+        break;
+    }
+    setShowMenu(true);
+    setSelectedComponent(component);
+  };
+
   return (
     <div className="flex flex-row content-center items-center">
       <Menu as="div" className="relative inline-block text-left w-full">
         <React.Fragment>
-          <Menu.Button
-            ref={buttonRef}
-            className="w-full"
-            onClick={() => {
-              let component = null;
-              if (selectedFilters.length) {
-                switch (selectedFilters[selectedFilters.length - 1]?.key) {
-                  case 'author_ids':
-                    component = (
-                      <MenuItems
-                        filters={AUTHOR_OPERATORS_FILTERS}
-                        onSelect={(filter: ReportsFilter) => {
-                          setSelectedFilters([...selectedFilters, filter]);
-                          setShowMenu(false);
-                          setSelectedComponent(null);
-                          setTimeout(() => {
-                            (buttonRef.current as any).click();
-                          }, SHOW_NEXT_FILTER_MS);
-                        }}
-                        onClickOutside={() => {
-                          setShowMenu(false);
-                          setSelectedComponent(null);
-                        }}
-                      />
-                    );
-                    break;
-                  case 'tag':
-                    component = (
-                      <MenuItems
-                        filters={[{ key: '=', label: '=', modificable: false, isLeaf: false }]}
-                        onSelect={(filter: ReportsFilter) => {
-                          setSelectedFilters([...selectedFilters, filter]);
-                          setShowMenu(false);
-                          setSelectedComponent(null);
-                          setTimeout(() => {
-                            (buttonRef.current as any).click();
-                          }, SHOW_NEXT_FILTER_MS);
-                        }}
-                        onClickOutside={() => {
-                          setShowMenu(false);
-                          setSelectedComponent(null);
-                        }}
-                      />
-                    );
-                    break;
-                  case 'created_at':
-                    component = (
-                      <MenuItems
-                        filters={DATE_OPERATORS}
-                        onSelect={(filter: ReportsFilter) => {
-                          setSelectedFilters([...selectedFilters, filter]);
-                          setShowMenu(false);
-                          setSelectedComponent(null);
-                          setTimeout(() => {
-                            (buttonRef.current as any).click();
-                          }, SHOW_NEXT_FILTER_MS);
-                        }}
-                        onClickOutside={() => {
-                          setShowMenu(false);
-                          setSelectedComponent(null);
-                        }}
-                      />
-                    );
-                    break;
-                  case 'updated_at':
-                    component = (
-                      <MenuItems
-                        filters={DATE_OPERATORS}
-                        onSelect={(filter: ReportsFilter) => {
-                          setSelectedFilters([...selectedFilters, filter]);
-                          setShowMenu(false);
-                          setSelectedComponent(null);
-                          setTimeout(() => {
-                            (buttonRef.current as any).click();
-                          }, SHOW_NEXT_FILTER_MS);
-                        }}
-                        onClickOutside={() => {
-                          setShowMenu(false);
-                          setSelectedComponent(null);
-                        }}
-                      />
-                    );
-                    break;
-                  case '=':
-                  case '!=':
-                  case '<':
-                  case '>':
-                    switch (selectedFilters[selectedFilters.length - 2]?.key) {
-                      case 'author_ids':
-                        component = (
-                          <MenuItems
-                            filters={USERS_FILTERS}
-                            onSelect={(filter: ReportsFilter) => {
-                              setSelectedFilters([...selectedFilters, filter]);
-                              setShowMenu(false);
-                              setSelectedComponent(null);
-                            }}
-                            onClickOutside={() => {
-                              setShowMenu(false);
-                              setSelectedComponent(null);
-                            }}
-                          />
-                        );
-                        break;
-                      case 'tag':
-                        component = (
-                          <InputTag
-                            value={''}
-                            onSave={(value: string) => {
-                              if (value) {
-                                setSelectedFilters([...selectedFilters, { key: value, label: value, modificable: true, type: 'tag', isLeaf: true }]);
-                                setShowMenu(false);
-                                setSelectedComponent(null);
-                              }
-                            }}
-                            onClickOutside={() => {
-                              setShowMenu(false);
-                              setSelectedComponent(null);
-                            }}
-                          />
-                        );
-                        break;
-                      case 'created_at':
-                        component = (
-                          <MyCalendar
-                            value={new Date()}
-                            onChange={(date: Date) => {
-                              setSelectedFilters([
-                                ...selectedFilters,
-                                {
-                                  key: moment(date).format('YYYY-MM-DD'),
-                                  label: moment(date).format('YYYY-MM-DD'),
-                                  modificable: true,
-                                  type: 'date',
-                                  isLeaf: true,
-                                },
-                              ]);
-                              setShowMenu(false);
-                              setSelectedComponent(null);
-                            }}
-                            onClickOutside={() => {
-                              setShowMenu(false);
-                              setSelectedComponent(null);
-                            }}
-                          />
-                        );
-                        setShowMenu(true);
-                        break;
-                      case 'updated_at':
-                        component = (
-                          <MyCalendar
-                            value={new Date()}
-                            onChange={(date: Date) => {
-                              setSelectedFilters([
-                                ...selectedFilters,
-                                {
-                                  key: moment(date).format('YYYY-MM-DD'),
-                                  label: moment(date).format('YYYY-MM-DD'),
-                                  modificable: true,
-                                  type: 'date',
-                                  isLeaf: true,
-                                },
-                              ]);
-                              setShowMenu(false);
-                              setSelectedComponent(null);
-                            }}
-                            onClickOutside={() => {
-                              setShowMenu(false);
-                              setSelectedComponent(null);
-                            }}
-                          />
-                        );
-                        setShowMenu(true);
-                        break;
-                      default:
-                        break;
-                    }
-                    break;
-                  default:
-                    component = (
-                      <MenuItems
-                        filters={INITIAL_FILTERS.filter((filter: ReportsFilter) => {
-                          const index: number = selectedFilters.findIndex((sf: ReportsFilter) => filter.key === sf.key);
-                          return index === -1;
-                        })}
-                        onSelect={(filter: ReportsFilter) => {
-                          setSelectedFilters([...selectedFilters, filter]);
-                          setShowMenu(false);
-                          setSelectedComponent(null);
-                          if (filter.key !== 'user-pinned') {
-                            setTimeout(() => {
-                              (buttonRef.current as any).click();
-                            }, SHOW_NEXT_FILTER_MS);
-                          }
-                        }}
-                        onClickOutside={() => {
-                          setShowMenu(false);
-                          setSelectedComponent(null);
-                        }}
-                      />
-                    );
-                    break;
-                }
-              } else {
-                component = (
-                  <MenuItems
-                    filters={INITIAL_FILTERS}
-                    onSelect={(filter: ReportsFilter) => {
-                      setSelectedFilters([...selectedFilters, filter]);
-                      setShowMenu(false);
-                      setSelectedComponent(null);
-                      setTimeout(() => {
-                        (buttonRef.current as any).click();
-                      }, SHOW_NEXT_FILTER_MS);
-                    }}
-                    onClickOutside={() => {
-                      setShowMenu(false);
-                      setSelectedComponent(null);
-                    }}
-                  />
-                );
-              }
-              setSelectedComponent(component);
-              setShowMenu(true);
-            }}
-          >
+          <Menu.Button ref={buttonRef} className="w-full" onClick={onClickNewFilter}>
             <div className="mt-1 relative flex items-center content-center w-full">
               <div className="shadow-sm  block w-full pr-12 sm:text-sm border-gray-300 rounded-md" style={{ height: 40 }}></div>
               <div className="absolute inset-y-0 flex py-1.5 pr-1.5">
@@ -472,117 +672,14 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
                     key={index}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (!selectedFilter.modificable) {
-                        return;
-                      }
-                      let component = null;
-                      switch (selectedFilter.type) {
-                        case 'user':
-                          component = (
-                            <MenuItems
-                              filters={USERS_FILTERS}
-                              onSelect={(filter: ReportsFilter) => {
-                                const fs: ReportsFilter[] = [...selectedFilters];
-                                fs[index] = filter;
-                                setSelectedFilters(fs);
-                                setShowMenu(false);
-                                setSelectedComponent(null);
-                              }}
-                              onClickOutside={() => {
-                                setShowMenu(false);
-                                setSelectedComponent(null);
-                              }}
-                            />
-                          );
-                          break;
-                        case 'author_ids-operator':
-                          component = (
-                            <MenuItems
-                              filters={AUTHOR_OPERATORS_FILTERS}
-                              onSelect={(filter: ReportsFilter) => {
-                                const fs: ReportsFilter[] = [...selectedFilters];
-                                fs[index] = filter;
-                                setSelectedFilters(fs);
-                                setShowMenu(false);
-                                setSelectedComponent(null);
-                              }}
-                              onClickOutside={() => {
-                                setShowMenu(false);
-                                setSelectedComponent(null);
-                              }}
-                            />
-                          );
-                          break;
-                        case 'tag':
-                          component = (
-                            <InputTag
-                              value={selectedFilters[index]!.key}
-                              onSave={(value: string) => {
-                                if (value) {
-                                  const fs: ReportsFilter[] = [...selectedFilters];
-                                  fs[index]!.key = value;
-                                  fs[index]!.label = value;
-                                  setSelectedFilters(fs);
-                                  setShowMenu(false);
-                                  setSelectedComponent(null);
-                                }
-                              }}
-                              onClickOutside={() => {
-                                setShowMenu(false);
-                                setSelectedComponent(null);
-                              }}
-                            />
-                          );
-                          break;
-                        case 'date-operator':
-                          component = (
-                            <MenuItems
-                              filters={DATE_OPERATORS}
-                              onSelect={(filter: ReportsFilter) => {
-                                const fs: ReportsFilter[] = [...selectedFilters];
-                                fs[index] = filter;
-                                setSelectedFilters(fs);
-                                setShowMenu(false);
-                                setSelectedComponent(null);
-                              }}
-                              onClickOutside={() => {
-                                setShowMenu(false);
-                                setSelectedComponent(null);
-                              }}
-                            />
-                          );
-                          break;
-                        case 'date':
-                          component = (
-                            <MyCalendar
-                              value={moment(selectedFilters[index]!.label).toDate()}
-                              onChange={(date: Date) => {
-                                const fs: ReportsFilter[] = [...selectedFilters];
-                                fs[index]!.key = moment(date).format('YYYY-MM-DD');
-                                fs[index]!.label = moment(date).format('YYYY-MM-DD');
-                                setSelectedFilters(fs);
-                                setShowMenu(false);
-                                setSelectedComponent(null);
-                              }}
-                              onClickOutside={() => {
-                                setShowMenu(false);
-                                setSelectedComponent(null);
-                              }}
-                            />
-                          );
-                          break;
-                        default:
-                          break;
-                      }
-                      setShowMenu(true);
-                      setSelectedComponent(component);
+                      onClickUpdateFilter(selectedFilter, index);
                     }}
                     className={clsx(
                       'mx-1 inline-flex items-center border border-gray-200 rounded px-2 text-sm font-sans font-medium text-gray-400',
                       selectedFilter.modificable ? 'cursor-pointer' : 'cursor-default',
                     )}
                   >
-                    {selectedFilter.label}
+                    {Array.isArray(selectedFilter.label) ? selectedFilter.label.join(', ') : selectedFilter.label}
                     {index === selectedFilters.length - 1 && (
                       <span
                         className="text-gray-400 cursor-pointer"
