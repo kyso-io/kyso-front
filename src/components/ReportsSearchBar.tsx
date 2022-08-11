@@ -180,6 +180,52 @@ const InputTag = ({ value, onSave, onClickOutside }: InputTagProps) => {
   );
 };
 
+interface InputTextProps {
+  value: string;
+  onSave: (value: string) => void;
+  onClickOutside?: () => void;
+}
+
+const InputText = ({ value, onSave, onClickOutside }: InputTextProps) => {
+  const wrapperRef = useRef(null);
+  const [text, setText] = useState<string>(value || '');
+  useClickOutside(wrapperRef, onClickOutside);
+
+  return (
+    <div ref={wrapperRef} className="w-80 origin-top-right mt-2 p-4 rounded-md shadow-lg bg-white ring-opacity/5 focus:outline-none">
+      <label className="block text-sm font-medium text-gray-700">Text:</label>
+      <div className="mt-1 relative flex items-center">
+        <input
+          type="text"
+          value={text}
+          autoFocus
+          onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              onSave(text);
+              setText('');
+            }
+          }}
+          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-12 sm:text-sm border-gray-300 rounded-md"
+        />
+        <div
+          className="absolute inset-y-0 right-0 flex py-1.5 pr-1.5"
+          onClick={() => {
+            if (text) {
+              onSave(text);
+            }
+            setText('');
+          }}
+        >
+          <kbd className={clsx('inline-flex items-center border border-gray-200 rounded px-2 text-sm font-sans font-medium text-gray-400', text ? 'cursor-pointer' : 'cursor-default')}>
+            <CheckIcon className={clsx('w-4 h-4 m-1')} />
+          </kbd>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 interface MyCalendarProps {
   value: Date;
   onChange: (date: Date) => void;
@@ -235,6 +281,12 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
 
   const INITIAL_FILTERS: ReportsFilter[] = useMemo(() => {
     const data: ReportsFilter[] = [
+      {
+        key: 'text',
+        label: 'Text',
+        modificable: false,
+        isLeaf: false,
+      },
       {
         key: 'tag',
         label: 'Tag',
@@ -334,6 +386,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
           );
           break;
         case 'tag':
+        case 'text':
           component = (
             <MenuItems
               filters={[{ key: '=', label: '=', modificable: false, isLeaf: false }]}
@@ -428,6 +481,24 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
                   onSave={(value: string) => {
                     if (value) {
                       setSelectedFilters([...selectedFilters, { key: value, label: value, modificable: true, type: 'tag', isLeaf: true }]);
+                      setShowMenu(false);
+                      setSelectedComponent(null);
+                    }
+                  }}
+                  onClickOutside={() => {
+                    setShowMenu(false);
+                    setSelectedComponent(null);
+                  }}
+                />
+              );
+              break;
+            case 'text':
+              component = (
+                <InputText
+                  value={''}
+                  onSave={(value: string) => {
+                    if (value) {
+                      setSelectedFilters([...selectedFilters, { key: value, label: value, modificable: true, type: 'text', isLeaf: true }]);
                       setShowMenu(false);
                       setSelectedComponent(null);
                     }
@@ -595,6 +666,29 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
       case 'tag':
         component = (
           <InputTag
+            value={selectedFilters[index]!.key as string}
+            onSave={(value: string) => {
+              const fs: ReportsFilter[] = [...selectedFilters];
+              if (value) {
+                fs[index]!.key = value;
+                fs[index]!.label = value;
+              } else {
+                fs.splice(index, 1);
+              }
+              setSelectedFilters(fs);
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+            onClickOutside={() => {
+              setShowMenu(false);
+              setSelectedComponent(null);
+            }}
+          />
+        );
+        break;
+      case 'text':
+        component = (
+          <InputText
             value={selectedFilters[index]!.key as string}
             onSave={(value: string) => {
               const fs: ReportsFilter[] = [...selectedFilters];
