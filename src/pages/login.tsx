@@ -41,8 +41,8 @@ const Index = () => {
   const [enablePingSamlAuth, setEnablePingSamlAuth] = useState(true);
   const [pingUrl, setPingUrl] = useState('');
 
-  const [rightLogo, setRightLogo] = useState(null);
-  const [leftLogo, setLeftLogo] = useState(null);
+  const [rightLogo, setRightLogo] = useState('/assets/images/kyso-logo-and-name-dark.svg');
+  const [leftLogo, setLeftLogo] = useState('/assets/images/kyso-logo-and-name-dark.svg');
 
   /* eslint-disable unused-imports/no-unused-vars */
   const [globalCss, setglobalCss] = useState(false);
@@ -122,8 +122,12 @@ const Index = () => {
       const customizeShowdivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES)?.value;
       const customizeHiddendivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES)?.value;
 
-      setLeftLogo(custumizeLeftLogo);
-      setRightLogo(custumizeRightLogo);
+      if (custumizeLeftLogo) {
+        setLeftLogo(custumizeLeftLogo);
+      }
+      if (custumizeRightLogo) {
+        setRightLogo(custumizeRightLogo);
+      }
 
       setglobalCss(customizeGlobalCss);
       setHeaderCss(customizeHeaderCss);
@@ -230,203 +234,162 @@ const Index = () => {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
-      <div className="min-h-full bg-white pt-2">
+      <div className="w-full min-h-full flex flex-col">
         {(leftLogo || rightLogo) && (
-          <div className="pb-4 grid grid-cols-3 gap-4 mb-4 border-b-[1px] border-[#dbdbdb] border-solid">
-            <div className="pl-4">
-              {/* Left logo */}
-              {leftLogo && <img src={leftLogo} alt="logo" />}
-            </div>
-            <div className="pl-[45%]">
-              {/* Center logo */}
-              {/* {rightLogo && <img src={rightLogo} alt="logo" />} */}
-            </div>
-            <div className="pl-[87%]">
-              {/* Right logo */}
-              {rightLogo && <img src={rightLogo} alt="logo" />}
-            </div>
+          <div className="border-b p-4 flex flex-row items-center justify-between">
+            {leftLogo && <img src={leftLogo} className="h-8" alt="logo" />}
+            {rightLogo && <img src={rightLogo} className="h-8" alt="logo" />}
           </div>
         )}
 
-        <main className="pb-8 pt-24">
-          <div className="mx-10">
-            {/* Main 3 column grid */}
-            <div className="grid grid-cols-1 gap-4 items-start lg:grid-cols-3 lg:gap-8">
-              {/* Left column */}
-              <div className="grid grid-cols-1 gap-4 lg:col-span-2">
-                <section aria-labelledby="section-1-title">
-                  <div className="">
-                    <div className="p-6 prose">
-                      {/* Your content */}
-                      <div>
-                        <h1>Kyso.io</h1>
-                        {/* <a href="/">
-                          <img className="w-24" src={`/assets/images/kyso-logo-and-name-dark.svg`} alt="Kyso" />
-                        </a> */}
-                        <p
-                          className="py-4"
-                          style={{
-                            WebkitFontSmoothing: 'antialiased',
-                            textRendering: 'optimizeLegibility',
-                          }}
-                        >
-                          Kyso.io offers free unlimited (private) repositories and unlimited collaborators.
-                        </p>
-                        <ul className="list-disc list-inside pl-4 pb-4">
-                          <li>
-                            <a className="login-link" href="https://docs.kyso.io" aria-label="docs" target="_blank" rel="noopener noreferrer">
-                              Read Kyso documentation
-                            </a>
-                          </li>
-                          <li style={{ paddingTop: '5px' }}>
-                            <a className="login-link" href="https://docs.kyso.io/posting-to-kyso/kyso-command-line-tool/installation" aria-label="cli" target="_blank" rel="noopener noreferrer">
-                              Install Kyso CLI
-                            </a>
-                          </li>
-                          <li style={{ paddingTop: '5px' }}>
-                            <a className="login-link" href="https://about.kyso.io/about" aria-label="about" target="_blank" rel="noopener noreferrer">
-                              More information about Kyso
-                            </a>
-                          </li>
-                          {/* <li style={{ paddingTo5: '7px'}}>
-                              <a className="login-link" href="https://about.kyso.io/blog" aria-label="blog" target="_blank" rel="noopener noreferrer">
-                                Read our blog
-                              </a>
-                              </li> */}
-                        </ul>
-                        <div className="pb-4">
-                          <p className="pb-4">By signing up for and by signing in to this service you accept our:</p>
-                          <ul className="list-disc list-inside pl-4">
-                            <li style={{ paddingTop: '5px' }}>
-                              <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
-                                Terms of service
-                              </a>
-                            </li>
-                            <li style={{ paddingTop: '5px' }}>
-                              <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
-                                Privacy statement
-                              </a>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-              </div>
+        <main className="flex lg:flex-row lg:space-y-0 space-y-6 flex-col grow items-center mx-auto max-w-[1400px] space-x-10">
+          <div className="prose grow max-w-none px-6 m-0">
+            <h1>Kyso.io</h1>
+            <p>Kyso.io offers free unlimited (private) repositories and unlimited collaborators.</p>
+            <ul>
+              <li>
+                <a className="login-link" href="https://docs.kyso.io" aria-label="docs" target="_blank" rel="noopener noreferrer">
+                  Read Kyso documentation
+                </a>
+              </li>
+              <li style={{ paddingTop: '5px' }}>
+                <a className="login-link" href="https://docs.kyso.io/posting-to-kyso/kyso-command-line-tool/installation" aria-label="cli" target="_blank" rel="noopener noreferrer">
+                  Install Kyso CLI
+                </a>
+              </li>
+              <li style={{ paddingTop: '5px' }}>
+                <a className="login-link" href="https://about.kyso.io/about" aria-label="about" target="_blank" rel="noopener noreferrer">
+                  More information about Kyso
+                </a>
+              </li>
+            </ul>
 
-              {/* Right column */}
-              <div className="grid grid-cols-1 gap-4 prose">
-                <h2>Sign in to Kyso</h2>
+            <p>By signing up for and by signing in to this service you accept our:</p>
+            <ul>
+              <li>
+                <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
+                  Terms of service
+                </a>
+              </li>
+              <li>
+                <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
+                  Privacy statement
+                </a>
+              </li>
+            </ul>
+          </div>
 
-                {enableKysoAuth && (
-                  <form className="flex flex-col space-y-4" method="post" action={`/api/login`} onSubmit={handleSubmit}>
-                    <div>
-                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                        Email
-                      </label>
-                      <input
-                        className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
-                        aria-label="Email"
-                        type="text"
-                        name="email"
-                        value={email}
-                        placeholder="Email"
-                        onChange={(e) => {
-                          setError('');
-                          dispatch(storeSetError(''));
-                          setEmail(e.target.value);
-                        }}
-                      />
-                    </div>
+          <div className="prose min-w-[400px] flex flex-col space-y-4 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
+            <h2>Sign in to Kyso</h2>
 
-                    <div>
-                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                        Password
-                      </label>
+            {enableKysoAuth && (
+              <form className="flex flex-col space-y-4" method="post" action={`/api/login`} onSubmit={handleSubmit}>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                    Email
+                  </label>
+                  <input
+                    className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                    aria-label="Email"
+                    type="text"
+                    name="email"
+                    value={email}
+                    placeholder="Email"
+                    onChange={(e) => {
+                      setError('');
+                      dispatch(storeSetError(''));
+                      setEmail(e.target.value);
+                    }}
+                  />
+                </div>
 
-                      <input
-                        className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
-                        // description="Please enter your password."
-                        value={password}
-                        name="password"
-                        type="password"
-                        // placeholder="Password"
-                        autoComplete="off"
-                        onChange={(e) => {
-                          setError('');
-                          dispatch(storeSetError(''));
-                          setPassword(e.target.value);
-                        }}
-                      />
-                    </div>
-                    <a className="text-xs no-underline hover:underline" href="/reset-password">
-                      Forgot your password?
-                    </a>
-                    <button type="submit" className="border inline-block rounded p-2.5 text-sm no-underline text-center text-bold">
-                      Log in now
-                    </button>
-                  </form>
-                )}
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                    Password
+                  </label>
 
-                <div className="my-6 mx-auto w-6/12 border-b" />
+                  <input
+                    className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                    // description="Please enter your password."
+                    value={password}
+                    name="password"
+                    type="password"
+                    // placeholder="Password"
+                    autoComplete="off"
+                    onChange={(e) => {
+                      setError('');
+                      dispatch(storeSetError(''));
+                      setPassword(e.target.value);
+                    }}
+                  />
+                </div>
+                <a className="text-xs no-underline hover:underline" href="/reset-password">
+                  Forgot your password?
+                </a>
+                <button type="submit" className="border bg-white border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center text-bold">
+                  Log in now
+                </button>
+              </form>
+            )}
 
-                {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
-                  <a href={githubUrl} className="border inline-block rounded p-2.5 text-sm no-underline text-center">
-                    <FontAwesomeIcon
-                      style={{
-                        marginRight: 8,
-                      }}
-                      icon={faGithub}
-                    />
-                    Log in with Github
-                  </a>
-                )}
+            <div className="my-6 mx-auto w-6/12 border-b" />
 
-                {enableBitbucketAuth && bitbucketUrl && bitbucketUrl.length > 0 && (
-                  <a className="border inline-block rounded p-2.5 text-sm no-underline text-center" href={bitbucketUrl}>
-                    <FontAwesomeIcon
-                      style={{
-                        marginRight: 8,
-                      }}
-                      icon={faBitbucket}
-                    />
-                    Log in with Bitbucket
-                  </a>
-                )}
+            {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
+              <a href={githubUrl} className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center">
+                <FontAwesomeIcon
+                  style={{
+                    marginRight: 8,
+                  }}
+                  icon={faGithub}
+                />
+                Log in with Github
+              </a>
+            )}
 
-                {enableGitlabAuth && gitlabUrl && gitlabUrl.length > 0 && (
-                  <a className="border inline-block rounded p-2.5 text-sm no-underline text-center" href={gitlabUrl}>
-                    <FontAwesomeIcon
-                      style={{
-                        marginRight: 8,
-                      }}
-                      icon={faGitlab}
-                    />
-                    Log in with Gitlab
-                  </a>
-                )}
+            {enableBitbucketAuth && bitbucketUrl && bitbucketUrl.length > 0 && (
+              <a className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center" href={bitbucketUrl}>
+                <FontAwesomeIcon
+                  style={{
+                    marginRight: 8,
+                  }}
+                  icon={faBitbucket}
+                />
+                Log in with Bitbucket
+              </a>
+            )}
 
-                {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
-                  <a className="border inline-block rounded p-2.5 text-sm no-underline text-center" href={googleUrl}>
-                    <FontAwesomeIcon
-                      style={{
-                        marginRight: 8,
-                      }}
-                      icon={faGoogle}
-                    />
-                    Log in with Google
-                  </a>
-                )}
+            {enableGitlabAuth && gitlabUrl && gitlabUrl.length > 0 && (
+              <a className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center" href={gitlabUrl}>
+                <FontAwesomeIcon
+                  style={{
+                    marginRight: 8,
+                  }}
+                  icon={faGitlab}
+                />
+                Log in with Gitlab
+              </a>
+            )}
 
-                {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
-                  <a className="border flex items-center justify-center rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
-                    <img src="/pingid_logo.jpg" className="w-4 h-4 inline m-0 mr-1" />
-                    Log in with PingID
-                  </a>
-                )}
-              </div>
-            </div>
+            {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
+              <a className="bg-white w-full border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center" href={googleUrl}>
+                <FontAwesomeIcon
+                  style={{
+                    marginRight: 8,
+                  }}
+                  icon={faGoogle}
+                />
+                Log in with Google
+              </a>
+            )}
+
+            {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
+              <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
+                <img src="/pingid_logo.jpg" className="w-4 h-4 inline m-0 mr-1" />
+                Log in with PingID
+              </a>
+            )}
+
+            {error && <div className="text-red-500 p-2">{error}</div>}
           </div>
         </main>
       </div>

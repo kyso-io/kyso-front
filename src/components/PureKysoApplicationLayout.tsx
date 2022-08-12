@@ -167,9 +167,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
             </>
           )}
         </Disclosure>
-        <div className="p-2">
-          <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
-        </div>
+        <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
       </div>
 
       <div className="grow p-2 w-full rounded">{children}</div>
