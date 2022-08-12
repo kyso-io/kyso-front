@@ -7,15 +7,19 @@ import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 
 const Index = () => {
+  useRedirectIfNoJWT();
+
   const router = useRouter();
   const commonData: CommonData = useCommonData({
     organizationName: router.query.organizationName as string,
     teamName: router.query.teamName as string,
   });
-  useRedirectIfNoJWT();
 
   useEffect(() => {
     setTimeout(() => {
+      if (!commonData.user) {
+        return;
+      }
       const lastOrganization: string | null = getLocalStorageItem('last_organization');
       const orgs = commonData.permissions?.organizations;
 
