@@ -1,16 +1,16 @@
+import type { CommonData } from '@/hooks/use-common-data';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { BellIcon, MenuIcon, ShareIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
-import React, { Fragment, useState } from 'react';
-import type { CommonData } from '@/hooks/use-common-data';
-import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { Fragment, useState } from 'react';
 import { Footer } from './Footer';
-import BreadcrumbNavbar from './PureBreadcrumbNavbar';
 import PureAvatar from './PureAvatar';
+import BreadcrumbNavbar from './PureBreadcrumbNavbar';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -172,7 +172,11 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
             </>
           )}
         </Disclosure>
-        <div className="p-2">{!userProfile && <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />}</div>
+        {!userProfile && (
+          <div className="p-2">
+            <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
+          </div>
+        )}
       </div>
 
       <div className="grow p-2 w-full rounded">{children}</div>

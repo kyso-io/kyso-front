@@ -43,7 +43,7 @@ const PureReportFilter = (props: IPureReportFilterProps) => {
   return (
     <>
       <section aria-labelledby="filter-heading" className="border rounded">
-        <div className={classNames('z-10 bg-white py-2 px-4', activeFilters.length > 0 ? 'rounded-t border-b' : 'rounded')}>
+        <div className={classNames('z-50 bg-white py-2 px-4', activeFilters.length > 0 ? 'rounded-t border-b' : 'rounded')}>
           <div className="max-w-7xl mx-auto items-right items-center flex">
             <form className="w-full flex" action="#" method="GET">
               <label htmlFor="search-field" className="sr-only">
