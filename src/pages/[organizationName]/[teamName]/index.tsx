@@ -3,8 +3,9 @@ import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
-import type { ActivityFeed, NormalizedResponseDTO, OrganizationMember, PaginatedResponseDto, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import type { ActivityFeed, NormalizedResponseDTO, Organization, OrganizationMember, PaginatedResponseDto, ReportDTO, SearchUser, SearchUserDto, Team, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -12,9 +13,11 @@ import ActivityFeedComponent from '../../../components/ActivityFeed';
 import ChannelList from '../../../components/ChannelList';
 import ManageUsers from '../../../components/ManageUsers';
 import PureNewReportPopover from '../../../components/PureNewReportPopover';
+import { PureSpinner } from '../../../components/PureSpinner';
 import ReportBadge from '../../../components/ReportBadge';
 import ReportsSearchBar from '../../../components/ReportsSearchBar';
 import { getLocalStorageItem } from '../../../helpers/get-local-storage-item';
+import type { ReportsFilter } from '../../../interfaces/reports-filter';
 import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
 import type { Member } from '../../../types/member';
 
@@ -22,6 +25,23 @@ const token: string | null = getLocalStorageItem('jwt');
 const LIMIT_REPORTS = 10;
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
+
+const debouncedPaginatedReports = debounce(
+  async (tkn: string, organization: Organization, team: Team, page: number, queryParams: string, cb: (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => void) => {
+    try {
+      const api: Api = new Api(tkn, organization.sluglified_name, team.sluglified_name);
+      let query = `team_id=${team.id}&skip=${(page - 1) * LIMIT_REPORTS}&limit=${LIMIT_REPORTS}`;
+      if (queryParams) {
+        query += `&${queryParams}`;
+      }
+      const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getPaginatedReports(query);
+      cb(result);
+    } catch (e) {
+      cb(null);
+    }
+  },
+  500,
+);
 
 const Index = () => {
   const router = useRouter();
@@ -35,12 +55,15 @@ const Index = () => {
   const [users, setUsers] = useState<UserDTO[]>([]);
   // REPORTS
   const [reportsResponse, setReportsResponse] = useState<NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null>(null);
+  const [requestingReports, setRequestingReports] = useState<boolean>(true);
   // ACTIVITY FEED
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   // PERMISSIONS
   const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_DELETE_TEAM'), [commonData]);
+  // SEARCH USER
+  const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
 
   useEffect(() => {
     if (!commonData.team || !commonData.user) {
@@ -50,11 +73,11 @@ const Index = () => {
   }, [commonData?.team, commonData?.user]);
 
   useEffect(() => {
-    if (!commonData.organization || !commonData.team) {
+    if (!commonData.organization || !commonData.team || !commonData.user) {
       return;
     }
-    getReports(1);
-  }, [commonData?.organization, commonData?.team]);
+    getSearchUser();
+  }, [commonData?.organization, commonData?.team, commonData?.user]);
 
   useEffect(() => {
     if (!commonData.organization || !commonData.team) {
@@ -64,17 +87,11 @@ const Index = () => {
   }, [commonData?.organization, commonData?.team, datetimeActivityFeed]);
 
   const getReports = async (page: number, queryParams?: string) => {
-    try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
-      let query = `team_id=${commonData.team.id}&skip=${(page - 1) * LIMIT_REPORTS}&limit=${LIMIT_REPORTS}`;
-      if (queryParams) {
-        query += `&${queryParams}`;
-      }
-      const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getPaginatedReports(query);
-      setReportsResponse(result);
-    } catch (e) {
-      console.error(e);
-    }
+    setRequestingReports(true);
+    debouncedPaginatedReports(token!, commonData.organization, commonData.team, page, queryParams ?? '', (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
+      setReportsResponse(data);
+      setRequestingReports(false);
+    });
   };
 
   // START TEAM MEMBERS
@@ -339,6 +356,40 @@ const Index = () => {
 
   // END ACTIVITY FEED
 
+  // START SEARCH USER
+
+  const getSearchUser = async () => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization.id!, commonData.team.id);
+      setSearchUser(result.data);
+    } catch (e) {}
+  };
+
+  const createSearchUser = async (query: string, payload: ReportsFilter[]) => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const searchUserDto: SearchUserDto = {
+        organization_id: commonData.organization.id!,
+        team_id: commonData.team.id!,
+        query,
+        payload,
+      };
+      const result: NormalizedResponseDTO<SearchUser> = await api.createSearchUser(searchUserDto);
+      setSearchUser(result.data);
+    } catch (e) {}
+  };
+
+  const deleteSearchUser = async () => {
+    try {
+      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      await api.deleteSearchUser(searchUser!.id!);
+      setSearchUser(null);
+    } catch (e) {}
+  };
+
+  // END SEARCH USER
+
   return (
     <div className="flex flex-row space-x-8">
       <div className="w-1/6">
@@ -369,46 +420,67 @@ const Index = () => {
           </div>
         )}
 
-        <ReportsSearchBar members={members} onSaveSearch={() => {}} onFiltersChange={(query: string) => getReports(1, query)} />
-
-        {reportsResponse && reportsResponse.data.results && reportsResponse.data.results.length > 0 ? (
+        {searchUser !== undefined && (
           <React.Fragment>
-            <div>
-              <ul role="list" className="space-y-4">
-                {reportsResponse.data.results?.map((report: ReportDTO) => (
-                  <ReportBadge
-                    key={report.id}
-                    report={report}
-                    authors={report.authors ? report.authors : []}
-                    toggleUserStarReport={() => toggleUserStarReport(report.id!)}
-                    toggleUserPinReport={() => toggleUserPinReport(report.id!)}
-                    toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
-                  />
-                ))}
-              </ul>
-            </div>
-            <div className="flex-1 flex justify-center">
-              {reportsResponse.data.currentPage - 1 >= 1 && (
-                <span
-                  onClick={() => getReports(reportsResponse.data.currentPage - 1)}
-                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                >
-                  Previous
-                </span>
-              )}
-              <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {reportsResponse.data.currentPage}</p>
-              {reportsResponse.data.currentPage + 1 <= reportsResponse.data.totalPages && (
-                <span
-                  onClick={() => getReports(reportsResponse.data.currentPage + 1)}
-                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                >
-                  Next
-                </span>
-              )}
-            </div>
+            <ReportsSearchBar
+              members={members}
+              onSaveSearch={(query: string | null, payload: ReportsFilter[] | null) => {
+                if (query) {
+                  createSearchUser(query, payload!);
+                } else if (searchUser && !query) {
+                  deleteSearchUser();
+                }
+              }}
+              onFiltersChange={(query: string) => getReports(1, query)}
+              searchUser={searchUser}
+              user={commonData.user}
+            />
+            {requestingReports && (
+              <div className="text-center">
+                <PureSpinner size={12} />
+              </div>
+            )}
+            {!requestingReports &&
+              (reportsResponse && reportsResponse.data.results && reportsResponse.data.results.length > 0 ? (
+                <React.Fragment>
+                  <div>
+                    <ul role="list" className="space-y-4">
+                      {reportsResponse.data.results?.map((report: ReportDTO) => (
+                        <ReportBadge
+                          key={report.id}
+                          report={report}
+                          authors={report.authors ? report.authors : []}
+                          toggleUserStarReport={() => toggleUserStarReport(report.id!)}
+                          toggleUserPinReport={() => toggleUserPinReport(report.id!)}
+                          toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+                        />
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="flex-1 flex justify-center">
+                    {reportsResponse.data.currentPage - 1 >= 1 && (
+                      <span
+                        onClick={() => getReports(reportsResponse.data.currentPage - 1)}
+                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                      >
+                        Previous
+                      </span>
+                    )}
+                    <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {reportsResponse.data.currentPage}</p>
+                    {reportsResponse.data.currentPage + 1 <= reportsResponse.data.totalPages && (
+                      <span
+                        onClick={() => getReports(reportsResponse.data.currentPage + 1)}
+                        className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                      >
+                        Next
+                      </span>
+                    )}
+                  </div>
+                </React.Fragment>
+              ) : (
+                <p>No reports found</p>
+              ))}
           </React.Fragment>
-        ) : (
-          <p>No reports found</p>
         )}
       </div>
       {commonData.user && (
