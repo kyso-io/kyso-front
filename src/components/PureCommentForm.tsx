@@ -120,7 +120,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="my-2">
+    <form onSubmit={handleSubmit} className="my-2 flex flex-col space-y-4 mb-8">
       {hasPermissionCreateComment ? (
         <>
           <Mention
@@ -159,6 +159,19 @@ const PureCommentForm = (props: IPureCommentForm) => {
               Cancel
             </button>
           )}
+
+          {!comment?.id && !parentComment?.id && value !== '' && (
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                setValue('');
+              }}
+              className={classNames('inline-flex items-center px-2 py-1 text-xs text-gray-500 hover:underline font-medium focus:outline-none focus:ring-0')}
+            >
+              Cancel
+            </button>
+          )}
+
           {hasPermissionCreateComment && (
             <button
               type="submit"

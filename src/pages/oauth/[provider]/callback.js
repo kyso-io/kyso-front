@@ -14,7 +14,7 @@ const Page = () => {
   useEffect(() => {
     if (error) {
       setTimeout(() => {
-        window.location = `${router.basePath}/login`;
+        router.push(`${router.basePath}/login`);
       }, 1000);
     }
   }, [error]);
@@ -22,7 +22,11 @@ const Page = () => {
   useEffect(() => {
     if (user) {
       setTimeout(() => {
-        window.location = user.show_captcha ? `${router.basePath}/captcha` : router.basePath;
+        if (user.show_captcha) {
+          router.push(`${router.basePath}/captcha`);
+        } else {
+          router.push('/');
+        }
       }, 200);
     }
   }, [user]);
@@ -43,7 +47,7 @@ const Page = () => {
       if (result?.payload) {
         localStorage.setItem('jwt', result.payload);
       } else {
-        router.replace(`/login?error=${encodeURIComponent('There was an error authenticating the user.')}`);
+        router.push(`/login?error=${encodeURIComponent('There was an error authenticating the user.')}`);
       }
     };
     const addUserAccount = async () => {
@@ -57,7 +61,7 @@ const Page = () => {
       );
       const redirect = sessionStorage.getItem('userAccount');
       sessionStorage.removeItem('userAccount');
-      router.replace(redirect);
+      router.push(redirect);
     };
     const redirect = sessionStorage.getItem('userAccount');
     if (redirect && redirect.length > 0) {

@@ -231,20 +231,22 @@ const Index = () => {
       </Head>
 
       <div className="min-h-full bg-white pt-2">
-        <div className="pb-4 grid grid-cols-3 gap-4 mb-4 border-b-[1px] border-[#dbdbdb] border-solid">
-          <div className="pl-4">
-            {/* Left logo */}
-            {leftLogo && <img src={leftLogo} alt="logo" />}
+        {(leftLogo || rightLogo) && (
+          <div className="pb-4 grid grid-cols-3 gap-4 mb-4 border-b-[1px] border-[#dbdbdb] border-solid">
+            <div className="pl-4">
+              {/* Left logo */}
+              {leftLogo && <img src={leftLogo} alt="logo" />}
+            </div>
+            <div className="pl-[45%]">
+              {/* Center logo */}
+              {rightLogo && <img src={rightLogo} alt="logo" />}
+            </div>
+            <div className="pl-[87%]">
+              {/* Right logo */}
+              {rightLogo && <img src={rightLogo} alt="logo" />}
+            </div>
           </div>
-          <div className="pl-[45%]">
-            {/* Center logo */}
-            {rightLogo && <img src={rightLogo} alt="logo" />}
-          </div>
-          <div className="pl-[87%]">
-            {/* Right logo */}
-            {rightLogo && <img src={rightLogo} alt="logo" />}
-          </div>
-        </div>
+        )}
 
         <main className="pb-8 pt-24">
           <div className="mx-10">
@@ -366,6 +368,9 @@ const Index = () => {
                     </button>
                   </form>
                 )}
+
+                <div className="my-6 mx-auto w-6/12 border-b" />
+
                 {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
                   <a href={githubUrl} className="border inline-block rounded p-2.5 text-sm no-underline text-center">
                     <FontAwesomeIcon
