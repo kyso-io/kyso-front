@@ -1,5 +1,6 @@
-import { CreationReportFileSystemObject } from '@/model/creation-report-file';
+import type { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { DocumentAddIcon, FolderAddIcon, UploadIcon } from '@heroicons/react/outline';
+import type { ChangeEvent } from 'react';
 import UnPureNewReportNamingDropdown from './UnPureNewReportNamingDropdown';
 
 type IUnpureCreateFile = {
@@ -16,7 +17,7 @@ const UnpureFileSystemToolbar = (props: IUnpureCreateFile) => {
   //   inputFile.current && inputFile.current.click();
   // };
 
-  const onChangeUploadFile = (e) => {
+  const onChangeUploadFile = (e: ChangeEvent<HTMLInputElement>) => {
     console.log('droppedFiles', e.target.files);
 
     // let noDuplicateFiles = droppedFiles;
@@ -36,7 +37,7 @@ const UnpureFileSystemToolbar = (props: IUnpureCreateFile) => {
         <UnPureNewReportNamingDropdown
           label="Create new file"
           icon={DocumentAddIcon}
-          onCreate={(newFile: CreationReportFileSystemObject ) => {
+          onCreate={(newFile: CreationReportFileSystemObject) => {
             onCreate(newFile);
           }}
         />
@@ -61,14 +62,11 @@ const UnpureFileSystemToolbar = (props: IUnpureCreateFile) => {
               className="-m-1 h-5 w-5 opacity-0 transition cursor-pointer  rounded mr-1 form-control absolute ease-in-out"
               id="formFileLg"
               type="file"
-              directory=""
-              webkitdirectory="webkitDirectory"
               multiple
-              onChange={(e) => onChangeUploadFile(e)}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => onChangeUploadFile(e)}
             />
           </label>
         </div>
-        
       </div>
     </>
   );

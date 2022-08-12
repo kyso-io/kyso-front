@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { DotsVerticalIcon, TrashIcon, PencilAltIcon, DocumentAddIcon, FolderAddIcon, UploadIcon, FolderIcon, DocumentIcon } from '@heroicons/react/outline';
 import { Menu, Transition } from '@headlessui/react';
 import classNames from '@/helpers/class-names';
-import { CreationReportFileSystemObject } from '@/model/creation-report-file';
+import type { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import UnPureNewReportNamingDropdown from './UnPureNewReportNamingDropdown';
 
 type IUnpureCreateFileList = {
@@ -13,7 +13,7 @@ type IUnpureCreateFileList = {
 
 const UnpureCreateFileList = (props: IUnpureCreateFileList) => {
   const { file, onRemoveFile, onAddNewFile } = props;
-  
+
   const fileType = file.type;
 
   let NewIcon = DocumentIcon;
@@ -57,9 +57,8 @@ const UnpureCreateFileList = (props: IUnpureCreateFileList) => {
                       showLabel={true}
                       icon={DocumentAddIcon}
                       parent={file}
-                      onCreate={(newFile: CreationReportFileSystemObject ) => {
-                        debugger;
-                        if(newFile) {
+                      onCreate={(newFile: CreationReportFileSystemObject) => {
+                        if (newFile) {
                           newFile.parentId = file.id;
                           newFile.path = `${file.path}/${newFile.name}`;
 
@@ -67,15 +66,15 @@ const UnpureCreateFileList = (props: IUnpureCreateFileList) => {
                         }
                       }}
                     />
-                    
+
                     <UnPureNewReportNamingDropdown
                       label="New folder"
                       showLabel={true}
                       isFolder={true}
                       icon={FolderAddIcon}
                       parent={file}
-                      onCreate={(newFile: CreationReportFileSystemObject ) => {
-                        if(newFile) {
+                      onCreate={(newFile: CreationReportFileSystemObject) => {
+                        if (newFile) {
                           newFile.parentId = file.id;
                           newFile.path = `${file.path}/${newFile.name}`;
                           onAddNewFile(newFile);
@@ -85,7 +84,7 @@ const UnpureCreateFileList = (props: IUnpureCreateFileList) => {
 
                     <Menu.Item>
                       {({ active }) => (
-                        <a onClick={() => console.log('Upload')} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'group flex items-center px-4 py-2 text-sm')}>
+                        <a className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'group flex items-center px-4 py-2 text-sm')}>
                           <UploadIcon className="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
                           Upload
                         </a>

@@ -1,5 +1,6 @@
 import '../styles/globals.css';
 
+import type { ReactNode } from 'react';
 import { store } from '@kyso-io/kyso-store';
 import type { AppProps } from 'next/app';
 import { Provider } from 'react-redux';
@@ -11,7 +12,7 @@ type AppLayoutProps = AppProps & {
   pageProps: any;
 };
 function MyApp({ Component, pageProps }: AppLayoutProps) {
-  const Layout = Component.layout || ((children: React) => <>{children}</>);
+  const Layout = Component.layout || ((children: ReactNode) => <>{children}</>);
   return (
     <Provider store={store}>
       <Layout>

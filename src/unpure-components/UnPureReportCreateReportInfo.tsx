@@ -26,7 +26,7 @@ const UnPureReportCreateReportInfo = (props: UnPureReportCreateReportInfoProps) 
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {selectedPeople?.map((person: any) => (
             <div key={person.id} className="flex -space-x-1 overflow-hidden">
-              <PureAvatar avatarUrl={person?.avatar_url} defaultName={person.nickname} />
+              <PureAvatar src={person?.avatar_url} title={person.nickname} />
             </div>
           ))}
           <UnPureSuggestContentDropdown label={'Add authors'} channelMembers={channelMembers} selectedPeople={selectedPeople} setSelectedPeople={setSelectedPeople} />

@@ -14,13 +14,13 @@ const UnPureReportCreateTitle = (props: IUnPureReportCreateTitleProps) => {
         <div className="md:col-span-2 inline-flex">
           <textarea
             style={{
-              height: "55px",
-              border: "none",
-              resize: "none",
-              outline: "none",
-              overflow: "auto",
-              WebkitBoxShadow: "none",
-              boxShadow: "none"
+              height: '55px',
+              border: 'none',
+              resize: 'none',
+              outline: 'none',
+              overflow: 'auto',
+              WebkitBoxShadow: 'none',
+              boxShadow: 'none',
             }}
             value={title || ''}
             onChange={(e) => {
