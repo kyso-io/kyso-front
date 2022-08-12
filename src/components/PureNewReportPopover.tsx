@@ -17,7 +17,7 @@ const PureNewReportPopover = (props: Props) => {
   const [copied, setCopied] = useState(false);
 
   const kysoYamlContent = `organization: ${commonData.organization?.sluglified_name}\nteam: ${commonData.team?.sluglified_name}\ntype: markdown\ntitle: "Add your title"\nmain: Readme.md`;
-
+  const createLink = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create`;
   return (
     <>
       <Popover as="div" className="z-50 relative inline-block">
@@ -29,11 +29,13 @@ const PureNewReportPopover = (props: Props) => {
         <Popover.Panel className="min-w-[400px] origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none">
           <div className="flex flex-col ">
             <div className="p-4 border-b">
-              <div className=" flex flex-row items-center space-x-2">
-                <PencilAltIcon className="w-5 h-5" />
-                <div className="text-md font-medium">Create new report in UI</div>
-              </div>
-              <div className="text-sm">Create a report in Kyso{"'s"}s web editor.</div>
+              <a href={createLink} className="hover:text-blue-800">
+                <div className=" flex flex-row items-center space-x-2">
+                  <PencilAltIcon className="w-5 h-5" />
+                  <div className="text-md font-medium">Create new report in UI</div>
+                </div>
+                <div className="text-sm">Create a report in Kyso{"'s"}s web editor.</div>
+              </a>
             </div>
 
             <div className="p-4 flex flex-col space-y-2">

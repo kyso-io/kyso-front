@@ -50,6 +50,7 @@
         "no-useless-escape": "off",
         "no-nested-ternary": "off",
         "no-restricted-syntax": "off",
+        "no-param-reassign": "off",
         "@typescript-eslint/no-use-before-define": "off",
         "no-empty": "off",
         "no-await-in-loop": "warn", // Sometimes is needed man...

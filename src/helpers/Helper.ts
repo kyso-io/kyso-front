@@ -6,7 +6,6 @@ export class Helper {
   /* eslint-disable @typescript-eslint/no-explicit-any */
   public static ListToKeyVal(data: any) {
     return data.reduce((prev: any, curr: any) => {
-      /* eslint-disable no-param-reassign */
       prev[curr.id] = curr;
       return prev;
     }, {});
