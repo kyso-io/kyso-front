@@ -2,10 +2,12 @@ type IPureTopTabsProps = {
   tabs: { name: string }[];
   currentTab: string;
   onChangeTab: (_tag: string) => void;
+  marginTopSmall?: string;
+  marginTopBig?: string;
 };
 
 const PureTopTabs = (props: IPureTopTabsProps) => {
-  const { tabs, currentTab, onChangeTab } = props;
+  const { tabs, currentTab, onChangeTab, marginTopSmall, marginTopBig } = props;
 
   function classNames(...classes: string[]) {
     return classes.filter(Boolean).join(' ');
@@ -13,7 +15,7 @@ const PureTopTabs = (props: IPureTopTabsProps) => {
 
   return (
     <div>
-      <div className="sm:hidden">
+      <div className={`sm:hidden ${marginTopSmall}`}>
         <label htmlFor="tabs" className="sr-only">
           Select a tab
         </label>
@@ -30,7 +32,7 @@ const PureTopTabs = (props: IPureTopTabsProps) => {
         </select>
       </div>
 
-      <div className="hidden sm:block">
+      <div className={`${marginTopBig} hidden sm:block`}>
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
           {tabs.map((tab) => (
             <button
