@@ -1,4 +1,4 @@
-import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import type { GithubFileHash } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';

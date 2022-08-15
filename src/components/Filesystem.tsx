@@ -8,6 +8,7 @@ interface Props {
   onAddNewFile?: (newFile: CreationReportFileSystemObject) => void;
   onRemoveFile?: (newfile: CreationReportFileSystemObject) => void;
   onSelectedFile?: (selectedFile: FilesystemItem) => void;
+  selectedFileId: string;
 }
 
 const Filesystem = (props: Props) => {
@@ -86,6 +87,7 @@ const Filesystem = (props: Props) => {
     <>
       {items.map((item: FilesystemItem) => (
         <FilesystemEntry
+          selectedFileId={props.selectedFileId}
           key={item.file.id}
           item={item}
           onAddNewFile={(newFile: CreationReportFileSystemObject) => {

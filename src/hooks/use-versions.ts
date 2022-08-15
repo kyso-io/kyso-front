@@ -2,7 +2,7 @@ import useSWR from 'swr';
 import { Api } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
 import type { NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
-import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import type { CommonData } from './use-common-data';
 
 interface Props {
