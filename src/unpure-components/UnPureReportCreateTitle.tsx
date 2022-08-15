@@ -6,7 +6,7 @@ type IUnPureReportCreateTitleProps = {
 };
 
 const UnPureReportCreateTitle = (props: IUnPureReportCreateTitleProps) => {
-  const { title = null, setTitle, draftStatus, cleanCookies } = props;
+  const { title = null, setTitle } = props;
 
   return (
     <>
@@ -43,18 +43,6 @@ const UnPureReportCreateTitle = (props: IUnPureReportCreateTitleProps) => {
             text-gray-900
           "
           />
-        </div>
-        <div className="mt-5 md:mt-0 md:col-span-1">
-          {draftStatus && <h6 className="ml-10 text-gray-500">{draftStatus}</h6>}
-          {draftStatus === 'All changes saved in local storage' && (
-            <button
-              type="reset"
-              className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-900 hover:bg-blue-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              onClick={cleanCookies}
-            >
-              Clean
-            </button>
-          )}
         </div>
       </div>
     </>

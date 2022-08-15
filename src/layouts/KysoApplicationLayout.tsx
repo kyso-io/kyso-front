@@ -28,7 +28,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   if (commonData?.user && commonData?.user?.display_name) {
     slugifiedName = Helper.slugify(commonData?.user?.display_name);
   }
-  console.log('slugifiedName', slugifiedName);
+
   const userNavigation = [
     { name: 'Your Profile', href: `${router.basePath}/user/${slugifiedName}` },
     {

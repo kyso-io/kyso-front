@@ -9,7 +9,7 @@ import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import ActivityFeedComponent from '@/components/ActivityFeed';
 import ReportBadge from '@/components/ReportBadge';
-import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useInterval } from '@/hooks/use-interval';

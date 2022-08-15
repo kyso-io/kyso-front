@@ -1,4 +1,5 @@
-import type { CreationReportFileSystemObject } from '@/model/creation-report-file';
+import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
+import { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { DocumentAddIcon, FolderAddIcon, UploadIcon } from '@heroicons/react/outline';
 import type { ChangeEvent } from 'react';
 import UnPureNewReportNamingDropdown from './UnPureNewReportNamingDropdown';
@@ -9,33 +10,23 @@ type IUnpureCreateFile = {
 
 const UnpureFileSystemToolbar = (props: IUnpureCreateFile) => {
   const { onCreate = () => {} } = props;
-  // const { isOpen, onOpen, onClose } = useDisclosure();
-  // const inputFile = useRef<HTMLInputElement>(null);
-
-  // const onButtonClick = () => {
-  //   // `current` points to the mounted file input element
-  //   inputFile.current && inputFile.current.click();
-  // };
 
   const onChangeUploadFile = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log('droppedFiles', e.target.files);
-
-    // let noDuplicateFiles = droppedFiles;
-    // let newFiles = [];
-    // if (files) {
-    //   newFiles = files.concat(droppedFiles);
-    // }
-    // if (files) {
-    //   noDuplicateFiles = removeDuplicatesByKey(newFiles, "name");
-    // }
-    // setFiles(noDuplicateFiles);
+    if (!e.target.files) {
+      return;
+    }
+    const newFiles = Array.from(e.target.files);
+    newFiles.forEach(async (file) => {
+      setLocalStorageItem(file.name, await file.text());
+      onCreate(new CreationReportFileSystemObject(file.name, file.name, file.name, 'file', ''));
+    });
   };
 
   return (
     <>
-      <div className="inline-flex items-center w-full">
+      <div className="inline-flex items-center justify-end w-full">
         <UnPureNewReportNamingDropdown
-          label="Create new file"
+          label="Create new markdown file"
           icon={DocumentAddIcon}
           onCreate={(newFile: CreationReportFileSystemObject) => {
             onCreate(newFile);
@@ -49,17 +40,21 @@ const UnpureFileSystemToolbar = (props: IUnpureCreateFile) => {
             onCreate(n);
           }}
         />
-        <div className="relative inline-block text-left px-3 py-2">
+        <div>
           <label
             htmlFor="formFileLg"
             className=" 
-              inline-flex mb-2 -ml-px  rounded mr-1 bg-white text-sm font-medium
-              form-label relative items-center hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+              text-left p-1 hover:cursor-pointer hover:bg-gray-100
+              rounded text-sm font-medium
+              block
+              
+              form-label relative items-center  
+              focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
           >
-            <UploadIcon className="-m-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+            <UploadIcon className="h-5 w-5 text-gray-600" aria-hidden="true" />
             <input
               style={{ display: 'none' }}
-              className="-m-1 h-5 w-5 opacity-0 transition cursor-pointer  rounded mr-1 form-control absolute ease-in-out"
+              className="p-2 h-5 w-5 opacity-0 transition cursor-pointer rounded mr-1 form-control absolute ease-in-out"
               id="formFileLg"
               type="file"
               multiple

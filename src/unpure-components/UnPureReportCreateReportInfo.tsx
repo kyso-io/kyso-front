@@ -1,6 +1,5 @@
 import PureAvatar from '@/components/PureAvatar';
 import type { UserDTO, TeamMember } from '@kyso-io/kyso-model';
-import { format } from 'date-fns';
 import UnPureSuggestContentDropdown from './UnPureSuggestContentDropdown';
 import UnPureSuggestTagsListbox from './UnPureSuggestTagsListbox';
 
@@ -30,12 +29,12 @@ const UnPureReportCreateReportInfo = (props: UnPureReportCreateReportInfoProps) 
             </div>
           ))}
           <UnPureSuggestContentDropdown label={'Add authors'} channelMembers={channelMembers} selectedPeople={selectedPeople} setSelectedPeople={setSelectedPeople} />
-          <div className="ml-5">
+          {/* <div className="ml-5">
             Created:
             <span className="text-gray-400 ml-1 mr-5">{format(new Date(), 'MMM dd, yyyy')}.</span>
             Last update on:
             <span className="text-gray-400 ml-1 mr-5">{format(new Date(), 'MMM dd, yyyy')}.</span>
-          </div>
+          </div> */}
           {selectedTags.length > 0 &&
             selectedTags.map((tag) => (
               <span key={tag} className="flex items-center px-2.5 py-0.5 rounded-md text-sm font-medium bg-gray-300 text-gray-800 mr-3">

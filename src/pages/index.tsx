@@ -1,4 +1,4 @@
-import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { useEffect } from 'react';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';

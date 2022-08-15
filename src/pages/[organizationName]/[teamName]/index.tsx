@@ -16,7 +16,7 @@ import PureNewReportPopover from '../../../components/PureNewReportPopover';
 import { PureSpinner } from '../../../components/PureSpinner';
 import ReportBadge from '../../../components/ReportBadge';
 import ReportsSearchBar from '../../../components/ReportsSearchBar';
-import { getLocalStorageItem } from '../../../helpers/get-local-storage-item';
+import { getLocalStorageItem } from '../../../helpers/isomorphic-local-storage';
 import type { ReportsFilter } from '../../../interfaces/reports-filter';
 import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
 import type { Member } from '../../../types/member';
