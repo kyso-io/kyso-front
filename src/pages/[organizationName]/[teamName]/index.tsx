@@ -35,6 +35,28 @@ const debouncedPaginatedReports = debounce(
         query += `&${queryParams}`;
       }
       const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getPaginatedReports(query);
+      const dataWithAuthors = [];
+
+      for (const x of result.data.results) {
+        const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
+        const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
+        const allAuthorsData: UserDTO[] = [];
+
+        for (const authorId of uniqueAllAuthorsId) {
+          /* eslint-disable no-await-in-loop */
+          const userData: NormalizedResponseDTO<UserDTO> = await api.getUserProfileById(authorId);
+
+          if (userData && userData.data) {
+            allAuthorsData.push(userData.data);
+          }
+        }
+
+        x.authors = allAuthorsData;
+        dataWithAuthors.push(x);
+      }
+
+      result.data.results = dataWithAuthors;
+
       cb(result);
     } catch (e) {
       cb(null);
