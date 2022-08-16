@@ -210,14 +210,14 @@ const CreateReport = () => {
 
     const zip = new JSZip();
     const kysoConfigFile: KysoConfigFile = {
-      main: '',
+      main: 'Readme.md',
       title,
       description,
       organization: commonData.organization.sluglified_name,
       team: commonData.team.sluglified_name,
       tags,
       type: ReportType.Markdown,
-      authors: selectedPeople,
+      authors: selectedPeople.map((author: UserDTO) => author.email),
     };
 
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
