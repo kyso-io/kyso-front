@@ -41,6 +41,7 @@
     "iframe-resizer": "^4.3.2",
     "jdenticon": "^3.1.1",
     "joplin-turndown-plugin-gfm": "^1.0.12",
+    "jszip": "3.10.1",
     "jwt-decode": "^3.1.2",
     "lodash.debounce": "^4.0.8",
     "mermaid": "^9.1.3",

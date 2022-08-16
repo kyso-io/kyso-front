@@ -17,7 +17,12 @@ const PureNewReportPopover = (props: Props) => {
   const [copied, setCopied] = useState(false);
 
   const kysoYamlContent = `organization: ${commonData.organization?.sluglified_name}\nteam: ${commonData.team?.sluglified_name}\ntype: markdown\ntitle: "Add your title"\nmain: Readme.md`;
-  const createLink = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create`;
+  let createLink = `/${commonData.organization?.sluglified_name}/create-report`;
+
+  if (commonData.team) {
+    createLink = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report`;
+  }
+
   return (
     <>
       <Popover as="div" className="z-50 relative inline-block">

@@ -1,6 +1,6 @@
 import ActivityFeedComponent from '@/components/ActivityFeed';
 import UserProfileInfo from '@/components/UserProfileInfo';
-import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useInterval } from '@/hooks/use-interval';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { ActivityFeed, NormalizedResponseDTO, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
