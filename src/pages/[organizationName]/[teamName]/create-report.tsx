@@ -28,6 +28,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { ArrowRightIcon, SelectorIcon } from '@heroicons/react/solid';
 import MemberFilterSelector from '@/components/MemberFilterSelector';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
+import ErrorNotification from '@/components/ErrorNotification';
 
 // import SimpleMDE from "react-simplemde-editor";
 
@@ -94,7 +95,6 @@ const CreateReport = () => {
     removeLocalStorageItem('formTags');
     removeLocalStorageItem('formFileValues');
     removeLocalStorageItem('formFile');
-    router.reload();
   };
 
   useEffect(() => {
@@ -157,6 +157,7 @@ const CreateReport = () => {
 
   const delayedCallback = debounce(async (key, value) => {
     setLocalStorageItem(key, JSON.stringify(value));
+    setHasAnythingCached(true);
     setDraftStatus('All changes saved in local storage');
   }, 1000);
 
@@ -205,7 +206,7 @@ const CreateReport = () => {
 
     const zip = new JSZip();
     const kysoConfigFile: KysoConfigFile = {
-      main: '',
+      main: 'Readme.md',
       title,
       description,
       organization: commonData.organization.sluglified_name,
@@ -218,7 +219,8 @@ const CreateReport = () => {
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     zip.file('kyso.json', blobKysoConfigFile);
     for (const file of files) {
-      zip.file(file.name, getLocalStorageItem(file.id) as string | Blob);
+      const blob = await (await fetch(getLocalStorageItem(file.id) as string)).blob();
+      zip.file(file.name, blob);
     }
     const blobZip = await zip.generateAsync({ type: 'blob' });
     const formData = new FormData();
@@ -227,9 +229,21 @@ const CreateReport = () => {
     // Necessary to check permissions
     api.setOrganizationSlug(commonData.organization.sluglified_name);
     api.setTeamSlug(commonData.team.sluglified_name);
-    const newReport: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
+    try {
+      const { data: newReport }: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
 
-    console.log(newReport);
+      cleanStorage();
+
+      for (const file of files) {
+        removeLocalStorageItem(file.id);
+      }
+      setBusy(false);
+      router.push(`/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (err: any) {
+      setBusy(false);
+      setError(err.response.data.message);
+    }
   };
 
   return (
@@ -299,7 +313,10 @@ const CreateReport = () => {
                   <button
                     type="reset"
                     className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-900 hover:bg-blue-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    onClick={cleanStorage}
+                    onClick={() => {
+                      cleanStorage();
+                      router.reload();
+                    }}
                   >
                     Clear
                   </button>
@@ -401,7 +418,7 @@ const CreateReport = () => {
             onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)}
           />
           <div className="text-right">
-            {error}
+            {error && <ErrorNotification message={error} />}
             {busy && <PureSpinner size={5} />}
           </div>
         </div>
