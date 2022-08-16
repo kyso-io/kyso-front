@@ -229,6 +229,9 @@ const CreateReport = () => {
     const formData = new FormData();
     formData.append('file', blobZip);
 
+    // Necessary to check permissions
+    api.setOrganizationSlug(commonData.organization.sluglified_name);
+    api.setTeamSlug(commonData.team.sluglified_name);
     const newReport: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
 
     console.log(newReport);
