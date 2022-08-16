@@ -1,12 +1,11 @@
+import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
+import { Helper } from '@/helpers/Helper';
+import type { CommonData } from '@/hooks/use-common-data';
+import { useCommonData } from '@/hooks/use-common-data';
+import { useReport } from '@/hooks/use-report';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import { useRouter } from 'next/router';
-import { Helper } from '@/helpers/Helper';
-
-import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
 import type { ReactElement } from 'react';
-import { useCommonData } from '@/hooks/use-common-data';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useReport } from '@/hooks/use-report';
 
 type IUnpureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -28,7 +27,6 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   if (commonData?.user && commonData?.user?.display_name) {
     slugifiedName = Helper.slugify(commonData?.user?.display_name);
   }
-
   const userNavigation = [
     { name: 'Your Profile', href: `${router.basePath}/user/${slugifiedName}` },
     {

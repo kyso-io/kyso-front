@@ -1,20 +1,14 @@
+import PureTopTabs from '@/components/PureTopTabs';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faPeriod } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import PureTopTabs from '@/components/PureTopTabs';
+import type { UserDTO } from '@kyso-io/kyso-model';
 import moment from 'moment';
 
+const BACKGROUND_IMAGE = 'https://images.unsplash.com/photo-1444628838545-ac4016a5418a?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80';
+
 type IUserProfileInfo = {
-  // user: UserInfoDto;
-  user: {
-    display_name: string;
-    bio: string | '';
-    created_at: string | '';
-    location: string | '';
-    email: string;
-    backgroundImage?: string | '';
-    avatar_url: string | '';
-  };
+  user: UserDTO;
   onChangeTab: (_tag: string) => void;
   currentTab: string;
 };
@@ -27,12 +21,12 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
     <div className="flex flex-row space-x-8">
       <div className="w-1/6"></div>
       <div className="w-4/6 flex flex-col">
-        {user.backgroundImage && (
+        {BACKGROUND_IMAGE && (
           <div>
-            <img className="h-32 w-full object-cover lg:h-80" src={user.backgroundImage} alt="" />
+            <img className="h-32 w-full object-cover lg:h-80" src={BACKGROUND_IMAGE} alt="" />
           </div>
         )}
-        {!user.backgroundImage && <div className="h-20 w-full object-cover" />}
+        {!BACKGROUND_IMAGE && <div className="h-20 w-full object-cover" />}
         <div className="sm:flex sm:items-center sm:justify-between px-10">
           <div className="-mt-12 sm:-mt-16 sm:flex sm:items-end sm:space-x-5">
             <div className="flex">
