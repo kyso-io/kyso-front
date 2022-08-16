@@ -311,13 +311,13 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
         </ul>
       </div>
       {hasMore ? (
-        <div className="flex justify-center items-center mt-4">
+        <div className="flex justify-center items-center mt-6">
           <button onClick={getMore} className="text-sm text-gray-500">
             Load more
           </button>
         </div>
       ) : (
-        <div className="flex justify-center items-center mt-4">
+        <div className="flex justify-center items-center mt-6">
           <span className="text-sm text-gray-500">No more activity</span>
         </div>
       )}

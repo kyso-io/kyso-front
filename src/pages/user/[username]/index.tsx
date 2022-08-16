@@ -1,92 +1,101 @@
+import ActivityFeedComponent from '@/components/ActivityFeed';
 import UserProfileInfo from '@/components/UserProfileInfo';
-/* eslint no-empty: "off" */
-import Pagination from '@/components/Pagination';
+import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
+import { useInterval } from '@/hooks/use-interval';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { ActivityFeed, NormalizedResponseDTO, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import debounce from 'lodash.debounce';
 import moment from 'moment';
-import { useRouter } from 'next/router';
-import { useCallback, useEffect, useState } from 'react';
-import ActivityFeedComponent from '@/components/ActivityFeed';
-import ReportBadge from '@/components/ReportBadge';
-import { getLocalStorageItem } from '@/helpers/get-local-storage-item';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
-import { useInterval } from '@/hooks/use-interval';
+import React, { useCallback, useEffect, useState } from 'react';
+import { PureSpinner } from '../../../components/PureSpinner';
+import ReportBadge from '../../../components/ReportBadge';
+import { useUser } from '../../../hooks/use-user';
 
 const token: string | null = getLocalStorageItem('jwt');
-const DAYS_ACTIVITY_FEED: number = 14;
+const DAYS_ACTIVITY_FEED: number = 60;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
+const LIMIT_REPORTS = 10;
 
-interface PaginationParams {
-  page: number;
-  limit: number;
-  sort: string;
-}
+const debouncedPaginatedReports = debounce(
+  async (tkn: string, userId: string, page: number, queryParams: string, cb: (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => void) => {
+    try {
+      const api: Api = new Api(tkn);
+      let query = `skip=${(page - 1) * LIMIT_REPORTS}&limit=${LIMIT_REPORTS}`;
+      if (queryParams) {
+        query += `&${queryParams}`;
+      }
+      const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getUserReports(userId, query);
+      result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
+      const dataWithAuthors: ReportDTO[] = [];
+      for (const x of result.data.results) {
+        const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
+        const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
+        const allAuthorsData: UserDTO[] = [];
+        for (const authorId of uniqueAllAuthorsId) {
+          /* eslint-disable no-await-in-loop */
+          const userData: NormalizedResponseDTO<UserDTO> = result.relations!.user[authorId];
+          if (userData && userData.data) {
+            allAuthorsData.push(userData.data);
+          }
+        }
+        x.authors = allAuthorsData;
+        dataWithAuthors.push(x);
+      }
+      result.data.results = dataWithAuthors;
+      cb(result);
+    } catch (e) {
+      console.log(e);
+      cb(null);
+    }
+  },
+  500,
+);
 
 const Index = () => {
-  const user = {
-    display_name: 'Sergio Talents-Oliag',
-    bio: 'Master of the Dark Arts in System Engineering',
-    created_at: 'January 9, 2020',
-    location: 'Valencia',
-    email: 'ricardo.cooper@example.com',
-    backgroundImage: 'https://images.unsplash.com/photo-1444628838545-ac4016a5418a?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80',
-    avatar_url: 'https://images.unsplash.com/photo-1463453091185-61582044d556?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=8&w=1024&h=1024&q=80',
-  };
-  const [currentTab, onChangeTab] = useState('Overview');
-
-  const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: 'darkside',
-    teamName: router.query.teamName as string,
-  });
-
-  // const commonData: CommonData = useCommonData({
-  //   userName: router.query.userName as string,
-  // });
-
-  const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
-  const [paginationParams, setPaginationParams] = useState<PaginationParams>({
-    page: 1,
-    limit: 10,
-    sort: '-created_at',
-  });
+  const user: UserDTO = useUser();
+  const [currentTab, onChangeTab] = useState<string>('Overview');
+  // REPORTS
+  const [reportsResponse, setReportsResponse] = useState<NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null>(null);
+  const [requestingReports, setRequestingReports] = useState<boolean>(true);
+  // ACTIVITY FEED
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
-  const organizationName = 'darkside';
-  // const { organizationName } = router.query;
 
   useEffect(() => {
-    if (!organizationName) {
+    if (!user || !token) {
       return;
     }
-    getReports();
-  }, [token, organizationName, paginationParams]);
+    getReports(1);
+  }, [user, token]);
 
   useEffect(() => {
-    if (!commonData.organization || !commonData.user) {
-    }
-  }, [commonData?.organization, commonData?.user]);
-
-  useEffect(() => {
-    if (!organizationName) {
+    if (!user || !token) {
       return;
     }
     getActivityFeed();
-  }, [token, organizationName, datetimeActivityFeed]);
+  }, [user, token, datetimeActivityFeed]);
 
   const refreshLastActivityFeed = useCallback(async () => {
-    if (!organizationName || !token) {
+    if (!user || !token) {
       return;
     }
     const api: Api = new Api(token);
     try {
-      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(organizationName as string, {
+      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getUserActivityFeed({
         start_datetime: moment().add(-DAYS_ACTIVITY_FEED, 'days').toDate(),
         end_datetime: moment().toDate(),
+        user_id: user.id,
       });
 
       result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
@@ -118,54 +127,18 @@ const Index = () => {
       setActivityFeed(newActivityFeed);
       setHasMore(result.data.length > 0);
     } catch (e) {}
-  }, [token, organizationName]);
+  }, [token, user]);
 
   useInterval(refreshLastActivityFeed, ACTIVITY_FEED_POOLING_MS);
 
-  const getReports = async () => {
-    try {
-      const api: Api = new Api(token);
-      const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getOrganizationReports(
-        organizationName as string,
-        paginationParams.page,
-        paginationParams.limit,
-        paginationParams.sort,
-      );
+  // START REPORT ACTIONS
 
-      // Sort by global_pin and user_pin
-      result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
-        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
-          return -1;
-        }
-        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
-          return 1;
-        }
-        return 0;
-      });
-
-      const dataWithAuthors = [];
-
-      for (const x of result.data.results) {
-        const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
-        const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
-        const allAuthorsData: UserDTO[] = [];
-
-        for (const authorId of uniqueAllAuthorsId) {
-          /* eslint-disable no-await-in-loop */
-          const userData: NormalizedResponseDTO<UserDTO> = await api.getUserProfileById(authorId);
-
-          if (userData && userData.data) {
-            allAuthorsData.push(userData.data);
-          }
-        }
-
-        x.authors = allAuthorsData;
-        dataWithAuthors.push(x);
-      }
-
-      result.data.results = dataWithAuthors;
-      setPaginatedResponseDto(result.data);
-    } catch (e) {}
+  const getReports = async (page: number, queryParams?: string) => {
+    setRequestingReports(true);
+    debouncedPaginatedReports(token!, user.id, page, queryParams ?? '', (result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
+      setReportsResponse(result);
+      setRequestingReports(false);
+    });
   };
 
   const toggleUserStarReport = async (reportId: string) => {
@@ -173,8 +146,8 @@ const Index = () => {
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportId);
       const { data: report } = result;
-      const { results: reports } = paginatedResponseDto!;
-      const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      const copyPaginatedReponse: PaginatedResponseDto<ReportDTO> = { ...reportsResponse!.data };
+      const newReports: ReportDTO[] = copyPaginatedReponse.results.map((r: ReportDTO) => (r.id === report.id ? report : r));
       // Sort by global_pin and user_pin
       newReports.sort((a: ReportDTO, b: ReportDTO) => {
         if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
@@ -185,9 +158,73 @@ const Index = () => {
         }
         return 0;
       });
-      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
+      setReportsResponse({
+        ...reportsResponse!,
+        data: {
+          ...copyPaginatedReponse,
+          results: newReports,
+        },
+      });
     } catch (e) {}
   };
+
+  const toggleUserPinReport = async (reportId: string) => {
+    try {
+      const api: Api = new Api(token);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportId);
+      const { data: report } = result;
+      const copyPaginatedReponse: PaginatedResponseDto<ReportDTO> = { ...reportsResponse!.data };
+      const newReports: ReportDTO[] = copyPaginatedReponse.results.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      // Sort by global_pin and user_pin
+      newReports.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
+      setReportsResponse({
+        ...reportsResponse!,
+        data: {
+          ...copyPaginatedReponse,
+          results: newReports,
+        },
+      });
+    } catch (e) {}
+  };
+
+  const toggleGlobalPinReport = async (reportId: string) => {
+    try {
+      const api: Api = new Api(token);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportId);
+      const { data: report } = result;
+      const copyPaginatedReponse: PaginatedResponseDto<ReportDTO> = { ...reportsResponse!.data };
+      const newReports: ReportDTO[] = copyPaginatedReponse.results.map((r: ReportDTO) => (r.id === report.id ? report : r));
+      // Sort by global_pin and user_pin
+      newReports.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
+      setReportsResponse({
+        ...reportsResponse!,
+        data: {
+          ...copyPaginatedReponse,
+          results: newReports,
+        },
+      });
+    } catch (e) {}
+  };
+
+  // END REPORT ACTIONS
+
+  // START ACTIVITY FEED
 
   const getActivityFeed = async () => {
     if (!token) {
@@ -196,13 +233,12 @@ const Index = () => {
     const api: Api = new Api(token);
     try {
       const startDatetime: Date = moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate();
-      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(organizationName as string, {
+      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getUserActivityFeed({
         start_datetime: startDatetime,
         end_datetime: datetimeActivityFeed,
+        user_id: user.id,
       });
-
       result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
-
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
       if (result?.data) {
         newActivityFeed.data = [...newActivityFeed.data, ...result.data];
@@ -223,6 +259,12 @@ const Index = () => {
     setDatetimeActivityFeed(moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate());
   };
 
+  // END ACTIVITY FEED
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <div>
       <UserProfileInfo user={user} onChangeTab={onChangeTab} currentTab={currentTab} />
@@ -230,28 +272,56 @@ const Index = () => {
         <div className="w-1/6" />
         <div className="w-4/6">
           {currentTab === 'Overview' && (
-            <>
-              <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4 pt-10 pb-20">
-                <p className="text-xs font-bold leading-relaxed text-gray-700 pb-5">Most recent</p>
-                {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
-                {paginatedResponseDto?.results &&
-                  paginatedResponseDto.results.length > 0 &&
-                  paginatedResponseDto?.results.map((report: ReportDTO) => (
-                    <ReportBadge key={report.id} report={report} authors={report.authors ? report.authors : []} toggleUserStarReport={() => toggleUserStarReport(report.id!)} />
-                  ))}
-              </div>
-              {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
-                <div className="pt-20">
-                  <Pagination page={paginatedResponseDto.currentPage} numPages={paginatedResponseDto.totalPages} onPageChange={(page: number) => setPaginationParams({ ...paginationParams, page })} />
+            <React.Fragment>
+              {requestingReports ? (
+                <div className="text-center">
+                  <PureSpinner size={12} />
                 </div>
+              ) : reportsResponse && reportsResponse.data.results && reportsResponse.data.results.length > 0 ? (
+                <React.Fragment>
+                  <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4 pt-10 pb-20">
+                    <p className="text-xs font-bold leading-relaxed text-gray-700 pb-5">Most recent</p>
+                    {reportsResponse.data.results?.map((report: ReportDTO) => (
+                      <ReportBadge
+                        key={report.id}
+                        report={report}
+                        authors={report.authors ? report.authors : []}
+                        toggleUserStarReport={() => toggleUserStarReport(report.id!)}
+                        toggleUserPinReport={() => toggleUserPinReport(report.id!)}
+                        toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex-1 flex justify-center">
+                    {reportsResponse.data.currentPage - 1 >= 1 && (
+                      <span
+                        onClick={() => getReports(reportsResponse.data.currentPage - 1)}
+                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                      >
+                        Previous
+                      </span>
+                    )}
+                    <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {reportsResponse.data.currentPage}</p>
+                    {reportsResponse.data.currentPage + 1 <= reportsResponse.data.totalPages && (
+                      <span
+                        onClick={() => getReports(reportsResponse.data.currentPage + 1)}
+                        className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                      >
+                        Next
+                      </span>
+                    )}
+                  </div>
+                </React.Fragment>
+              ) : (
+                <p>The user has no reports</p>
               )}
-            </>
+            </React.Fragment>
           )}
-          {commonData.user && currentTab === 'Activity' && (
-            <div className="w-1/6">
+          {currentTab === 'Activity' && (
+            <React.Fragment>
               <p className="text-xs font-bold leading-relaxed text-gray-700 py-10">Most recent</p>
               <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
-            </div>
+            </React.Fragment>
           )}
         </div>
       </div>
