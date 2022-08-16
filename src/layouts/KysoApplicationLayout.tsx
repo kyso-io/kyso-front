@@ -30,9 +30,9 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   }
 
   const userNavigation = [
-    { name: 'Your Profile', href: `${router.basePath}/user/${slugifiedName}`, newTab: false },
+    { name: 'My profile', href: `${router.basePath}/user/${slugifiedName}`, newTab: false },
     {
-      name: 'Your settings',
+      name: 'Settings',
       href: `${router.basePath}/in/settings`,
       newTab: false,
     },
