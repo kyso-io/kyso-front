@@ -1,10 +1,10 @@
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { useEffect } from 'react';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { useRouter } from 'next/router';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
+import NoLayout from '@/layouts/NoLayout';
 
 const Index = () => {
   useRedirectIfNoJWT();
@@ -31,13 +31,9 @@ const Index = () => {
     }, 200);
   }, [commonData]);
 
-  return (
-    <div className="mt-8">
-      <h1>Select an organization from the dropdown above.</h1>
-    </div>
-  );
+  return <div className="mt-8">{/* <h1>Select an organization from the dropdown above.</h1> */}</div>;
 };
 
-Index.layout = KysoApplicationLayout;
+Index.layout = NoLayout;
 
 export default Index;

@@ -42,7 +42,7 @@ const PureAvatar = (props: Props) => {
             onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
               processLoadingImageError(props.title, e);
             }}
-            className={`object-cover inline-block h-${size} w-${size} rounded-full ring-2 ring-white hover:scale-150 transition duration-100`}
+            className={`object-cover inline-block h-${size} w-${size} rounded-full ring-2 ring-white hover:border transition duration-100`}
             src={props.src}
             alt={props.title}
           />
