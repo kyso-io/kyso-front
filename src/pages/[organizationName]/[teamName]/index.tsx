@@ -56,7 +56,7 @@ const debouncedPaginatedReports = debounce(
       }
 
       result.data.results = dataWithAuthors;
-
+      console.log('result', result.data);
       cb(result);
     } catch (e) {
       cb(null);
