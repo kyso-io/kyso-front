@@ -10,8 +10,7 @@ import router from 'next/router';
 import { ThumbUpIcon } from '@heroicons/react/solid';
 
 import type { Version } from '@/hooks/use-versions';
-import PureAvatar from '@/components/PureAvatar';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import PureAvatarGroup from './PureAvatarGroup';
 
 type IPureReportHeaderProps = {
   report: ReportDTO;
@@ -36,18 +35,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
         {/* {report?.description && <div className="text-md">{report?.description}</div>} */}
         <div className="flex text-sm flex-col lg:flex-row lg:items-center text-gray-500 font-light space-x-2">
           <div className="flex">
-            {authors?.map((author) => (
-              <div key={author.display_name} className="shrink-0 group block">
-                <div className="flex items-center">
-                  <div>
-                    <PureAvatar src={author.avatar_url} title={author.display_name} size={TailwindHeightSizeEnum.H9} />
-                  </div>
-                  <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{author.display_name}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <PureAvatarGroup data={authors}></PureAvatarGroup>
           </div>
           <div>
             created
