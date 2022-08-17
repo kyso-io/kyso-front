@@ -31,6 +31,11 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
         checkOrigin: false,
         inPageLinks: true,
         scrolling: false,
+        id: iframeId,
+        resizedCallback: (data) => {
+          console.log('RESIZED CALLBACK');
+          console.log(data);
+        },
         initCallback: () => {
           console.log('resizer');
         },
