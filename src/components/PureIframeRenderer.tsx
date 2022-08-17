@@ -23,7 +23,6 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const [resizedHeight, setResizedHeight] = useState('65vh');
 
   useEffect(() => {
-    console.log('effect');
     setIframeId(`iframe-${id}`);
 
     iframeResizer(
