@@ -8,6 +8,16 @@ type IUnpureCreateFile = {
   onCreate?: (newFile: CreationReportFileSystemObject) => void;
 };
 
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  return new Promise((resolve) => {
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+  });
+};
+
 const UnpureFileSystemToolbar = (props: IUnpureCreateFile) => {
   const { onCreate = () => {} } = props;
 
@@ -17,7 +27,8 @@ const UnpureFileSystemToolbar = (props: IUnpureCreateFile) => {
     }
     const newFiles = Array.from(e.target.files);
     newFiles.forEach(async (file) => {
-      setLocalStorageItem(file.name, await file.text());
+      const base64 = await blobToBase64(file);
+      setLocalStorageItem(file.name, base64);
       onCreate(new CreationReportFileSystemObject(file.name, file.name, file.name, 'file', ''));
     });
   };

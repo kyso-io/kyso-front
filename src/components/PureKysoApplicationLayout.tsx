@@ -16,7 +16,7 @@ type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
   report?: ReportDTO;
   basePath: string;
-  userNavigation: { name: string; href: string }[];
+  userNavigation: { name: string; href: string; newTab: boolean }[];
   commonData: CommonData;
 };
 
@@ -103,7 +103,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                                 {userNavigation.map((item) => (
                                   <Menu.Item key={item.name}>
                                     {({ active }) => (
-                                      <a href={item.href} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}>
+                                      <a href={item.href} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')} target={classNames(item.newTab ? '_blank' : '')}>
                                         {item.name}
                                       </a>
                                     )}
