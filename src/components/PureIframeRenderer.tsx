@@ -1,5 +1,5 @@
 import { iframeResizer } from 'iframe-resizer';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import TurndownService from 'turndown';
 import { v4 } from 'uuid';
 
@@ -18,20 +18,16 @@ type IPureIFrameRendererProps = {
 
 const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const { file } = props;
-  const id = v4();
-  const [iframeId, setIframeId] = useState('');
+  const id = `iframe-${v4()}`;
 
   useEffect(() => {
-    console.log('effect');
-    setIframeId(`iframe-${id}`);
-
     iframeResizer(
       {
         log: false,
         checkOrigin: false,
         inPageLinks: true,
         scrolling: false,
-        id: iframeId,
+        id,
         resizedCallback: (data) => {
           console.log('RESIZED CALLBACK');
           console.log(data);
@@ -41,7 +37,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
         },
         autoResize: true,
       },
-      `#${iframeId}`,
+      `#${id}`,
     );
   }, []);
 
@@ -52,7 +48,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   return (
     <iframe
       title={id}
-      id={iframeId}
+      id={id}
       sandbox={`allow-scripts allow-same-origin allow-forms allow-modals allow-popups`}
       style={{
         border: 'none 0px',
