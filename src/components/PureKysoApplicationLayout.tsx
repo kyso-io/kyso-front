@@ -48,7 +48,8 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                 <div className="flex h-16 items-center justify-between">
                   <div className="flex items-center">
                     <div className="shrink-0">
-                      <a href={basePath}>
+                      {/* This always must redirect to the homepage */}
+                      <a href="/">
                         <img className="h-8 w-8" src={`/assets/images/kyso-logo-white.svg`} alt="Kyso" />
                       </a>
                     </div>
