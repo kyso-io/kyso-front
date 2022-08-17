@@ -1,6 +1,7 @@
 import type { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { FilesystemItem } from '@/model/filesystem-item.model';
 import React, { useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import FilesystemEntry from './FilesystemEntry';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
   onAddNewFile?: (newFile: CreationReportFileSystemObject) => void;
   onRemoveFile?: (newfile: CreationReportFileSystemObject) => void;
   onSelectedFile?: (selectedFile: FilesystemItem) => void;
+  onUploadFile: (event: ChangeEvent<HTMLInputElement>, parent: FilesystemItem) => void;
   selectedFileId: string;
 }
 
@@ -34,7 +36,7 @@ const Filesystem = (props: Props) => {
           const itemsInLevel: FilesystemItem[] = FilesystemItem.fromArray(props.files).filter((x: FilesystemItem) => x.level === maxLevel);
 
           for (const processingItem of itemsInLevel) {
-            // It's a children
+            // It's a child
 
             // Search its parent
             const parentFolder = allFolders.find((x: FilesystemItem) => x.file.id === processingItem.file.parentId);
@@ -87,6 +89,7 @@ const Filesystem = (props: Props) => {
     <>
       {items.map((item: FilesystemItem) => (
         <FilesystemEntry
+          onUploadFile={props.onUploadFile}
           selectedFileId={props.selectedFileId}
           key={item.file.id}
           item={item}

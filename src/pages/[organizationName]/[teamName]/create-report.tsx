@@ -1,48 +1,49 @@
+import type { ChangeEvent } from 'react';
+import { useState, useEffect, useMemo, Fragment, useCallback } from 'react';
 import type { TeamMember, NormalizedResponseDTO, KysoConfigFile, ReportDTO } from '@kyso-io/kyso-model';
 import { ReportType } from '@kyso-io/kyso-model';
-import { useState, useEffect, useMemo, Fragment } from 'react';
-import dynamic from 'next/dynamic';
+import { FilesystemItem } from '@/model/filesystem-item.model';
+import { CreationReportFileSystemObject } from '@/model/creation-report-file';
+import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import { useRouter } from 'next/router';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import { useCommonData } from '@/hooks/use-common-data';
-import UnpureFileSystemToolbar from '@/unpure-components/UnpureCreateFile';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import debounce from 'lodash.debounce';
-import JSZip from 'jszip';
-import FormData from 'form-data';
-/// import UnpureMarkdownEditor from '@/unpure-components/UnpureMardownEditor';
-import { CreationReportFileSystemObject } from '@/model/creation-report-file';
-import Filesystem from '@/components/Filesystem';
-import { FilesystemItem } from '@/model/filesystem-item.model';
-
-import 'easymde/dist/easymde.min.css';
-import { PureSpinner } from '@/components/PureSpinner';
+import { useRouter } from 'next/router';
 import { Api } from '@kyso-io/kyso-store';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import checkPermissions from '@/helpers/check-permissions';
-import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import classNames from '@/helpers/class-names';
+import dynamic from 'next/dynamic';
+import debounce from 'lodash.debounce';
+import JSZip from 'jszip';
+import FormData from 'form-data';
+
+import Filesystem from '@/components/Filesystem';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import { PureSpinner } from '@/components/PureSpinner';
 import { Menu, Transition } from '@headlessui/react';
-import { ArrowRightIcon, SelectorIcon } from '@heroicons/react/solid';
+import { ArrowRightIcon, DocumentAddIcon, FolderAddIcon, SelectorIcon, UploadIcon } from '@heroicons/react/solid';
 import MemberFilterSelector from '@/components/MemberFilterSelector';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
 import ErrorNotification from '@/components/ErrorNotification';
+import NewReportNamingDropdown from '@/components/NewReportNamingDropdown';
+import 'easymde/dist/easymde.min.css';
+import slugify from '@/helpers/slugify';
 
-// import SimpleMDE from "react-simplemde-editor";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-/* const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
-  ssr: false,
-  loading: () => (
-    <div className="flex justify-center p-7 w-full">
-      <PureSpinner />
-    </div>
-  ),
-}); */
+const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
 const token: string | null = getLocalStorageItem('jwt');
+
+const blobToBase64 = (blob: Blob): Promise<string> => {
+  const reader = new FileReader();
+  reader.readAsDataURL(blob);
+  return new Promise((resolve) => {
+    reader.onloadend = () => {
+      resolve(reader.result as string);
+    };
+  });
+};
 
 const CreateReport = () => {
   useRedirectIfNoJWT();
@@ -95,6 +96,9 @@ const CreateReport = () => {
     removeLocalStorageItem('formTags');
     removeLocalStorageItem('formFileValues');
     removeLocalStorageItem('formFile');
+    for (const file of files) {
+      removeLocalStorageItem(file.id);
+    }
   };
 
   useEffect(() => {
@@ -161,16 +165,6 @@ const CreateReport = () => {
     setDraftStatus('All changes saved in local storage');
   }, 1000);
 
-  const KSimpleMDE = dynamic(() => import('react-simplemde-editor'), { ssr: false });
-
-  const handleEditorChange = (fileId: string, value: string) => {
-    setLocalStorageItem(fileId, value);
-  };
-
-  const retrieveSelectedFileContentFromCookies = (fileId: string): string => {
-    return getLocalStorageItem(fileId) || '';
-  };
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (e: any) => {
     e.preventDefault();
@@ -189,20 +183,24 @@ const CreateReport = () => {
     setBusy(true);
 
     const api: Api = new Api(token);
+    api.setOrganizationSlug(commonData.organization.sluglified_name);
+    api.setTeamSlug(commonData.team.sluglified_name);
 
-    // try {
-    //   const exists: boolean = await api.reportExists(commonData.team.id as string, title);
+    try {
+      const exists: boolean = await api.reportExists(commonData.team.id as string, slugify(title));
 
-    //   if (exists) {
-    //     setError("Report with this name already exists.");
-    //     setBusy(false);
-    //     return;
-    //   }
-    // } catch (er: any) {
-    //   setError(er.message);
-    //   setBusy(false);
-    //   return;
-    // }
+      if (exists) {
+        setError('Report with this name already exists.');
+        setBusy(false);
+        return;
+      }
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } catch (er: any) {
+      setError(er.message);
+      setBusy(false);
+      return;
+    }
 
     const zip = new JSZip();
     const kysoConfigFile: KysoConfigFile = {
@@ -226,9 +224,6 @@ const CreateReport = () => {
     const formData = new FormData();
     formData.append('file', blobZip);
 
-    // Necessary to check permissions
-    api.setOrganizationSlug(commonData.organization.sluglified_name);
-    api.setTeamSlug(commonData.team.sluglified_name);
     try {
       const { data: newReport }: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
 
@@ -245,6 +240,52 @@ const CreateReport = () => {
       setError(err.response.data.message);
     }
   };
+
+  const onUploadFile = async (event: ChangeEvent<HTMLInputElement>, parent?: FilesystemItem) => {
+    if (!event.target.files) {
+      return;
+    }
+    const newFiles = Array.from(event.target.files);
+    newFiles.forEach(async (file) => {
+      try {
+        setError(null);
+        const base64 = await blobToBase64(file);
+        setLocalStorageItem(file.name, base64);
+        const newFile = new CreationReportFileSystemObject(file.name, `${parent ? `${parent.file.path}/` : ''}${file.name}`, file.name, 'file', '', parent ? parent?.file.id : undefined);
+        addNewFile(newFile);
+      } catch (err) {
+        setError('Report exceeds 5mb limit.');
+      }
+    });
+  };
+
+  useEffect(() => {
+    const go = async () => {
+      const base64 = getLocalStorageItem(selectedFile?.file.id);
+      if (!base64) {
+        return setSelectedFileValue('');
+      }
+      const text = await (await fetch(base64)).text();
+      return setSelectedFileValue(text);
+    };
+    go();
+  }, [selectedFile?.file.id]);
+
+  const editorOptions = useMemo(() => {
+    return {
+      autofocus: false,
+      spellChecker: false,
+      hideIcons: ['side-by-side', 'fullscreen'],
+    };
+  }, []);
+
+  const [selectedFileValue, setSelectedFileValue] = useState('initial value');
+  const handleEditorChange = useCallback((fileId: string, value: string) => {
+    setSelectedFileValue(value);
+    setLocalStorageItem(fileId, `data:text/plain;base64,${btoa(value)}`);
+    setHasAnythingCached(true);
+    setDraftStatus('All changes saved in local storage');
+  }, []);
 
   return (
     <div>
@@ -326,12 +367,11 @@ const CreateReport = () => {
                   onClick={handleSubmit}
                   className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                 >
+                  {busy && <PureSpinner size={5} />}
                   Post <ArrowRightIcon className="ml-2 w-4 h-4" />
                 </button>
               </div>
               <div className="flex flex-row justify-end mt-2">{draftStatus && <h6 className="text-gray-500 text-xs">{draftStatus}</h6>}</div>
-              {/* <PureAvatar src={user?.avatar_url} title={user?.display_name} /> */}
-              {/* <p className="mx-3 text-sm font-medium text-gray-700 group-hover:text-gray-900">{user?.display_name}</p> */}
             </div>
           </div>
 
@@ -356,9 +396,10 @@ const CreateReport = () => {
                 placeholder="Title"
                 className="p-0 focus:shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900"
               />
+              {title && slugify(title)}
               <textarea
                 style={{
-                  height: '55px',
+                  height: '38px',
                   border: 'none',
                   resize: 'none',
                   outline: 'none',
@@ -381,21 +422,57 @@ const CreateReport = () => {
         <div className="w-1/6 px-2">
           <div className="text-sm rounded">
             <div className="flex min-h-12 border-b">
-              <UnpureFileSystemToolbar
-                onCreate={(newfile: CreationReportFileSystemObject) => {
-                  addNewFile(newfile);
-                }}
-              />
+              <div className="inline-flex items-center justify-end w-full">
+                <NewReportNamingDropdown
+                  label="Create new markdown file"
+                  icon={DocumentAddIcon}
+                  onCreate={(newFile: CreationReportFileSystemObject) => {
+                    addNewFile(newFile);
+                  }}
+                />
+                <NewReportNamingDropdown
+                  label="Create new folder"
+                  icon={FolderAddIcon}
+                  isFolder={true}
+                  onCreate={(n: CreationReportFileSystemObject) => {
+                    addNewFile(n);
+                  }}
+                />
+                <div>
+                  <label
+                    htmlFor="formFileLg"
+                    className=" 
+                    text-left p-1 hover:cursor-pointer hover:bg-gray-100
+                    rounded text-sm font-medium
+                    block
+                    
+                    form-label relative items-center  
+                    focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                  >
+                    <UploadIcon className="h-5 w-5 text-gray-600" aria-hidden="true" />
+                    <input
+                      style={{ display: 'none' }}
+                      className="p-2 h-5 w-5 opacity-0 transition cursor-pointer rounded mr-1 form-control absolute ease-in-out"
+                      id="formFileLg"
+                      type="file"
+                      multiple
+                      onChange={(e: ChangeEvent<HTMLInputElement>) => onUploadFile(e)}
+                    />
+                  </label>
+                </div>
+              </div>
             </div>
             {files && files.length > 0 && (
               <Filesystem
+                onUploadFile={onUploadFile}
                 files={files}
                 selectedFileId={selectedFile.file.id}
                 onAddNewFile={(newFile: CreationReportFileSystemObject) => {
                   addNewFile(newFile);
                 }}
-                onRemoveFile={(newFile: CreationReportFileSystemObject) => {
-                  const newFiles = files.filter((x) => x.id !== newFile.id && x.parentId !== newFile.id);
+                onRemoveFile={(fileToRemove: CreationReportFileSystemObject) => {
+                  removeLocalStorageItem(fileToRemove.id);
+                  const newFiles = files.filter((x) => x.id !== fileToRemove.id && x.parentId !== fileToRemove.id);
                   setFiles(newFiles);
                   setDraftStatus('Saving ...');
                   delayedCallback('formFile', newFiles);
@@ -408,19 +485,8 @@ const CreateReport = () => {
           </div>
         </div>
         <div className="w-4/6">
-          <KSimpleMDE
-            value={retrieveSelectedFileContentFromCookies(selectedFile?.file.id!)}
-            options={{
-              autofocus: false,
-              spellChecker: false,
-              hideIcons: ['side-by-side', 'fullscreen'],
-            }}
-            onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)}
-          />
-          <div className="text-right">
-            {error && <ErrorNotification message={error} />}
-            {busy && <PureSpinner size={5} />}
-          </div>
+          <SimpleMdeReact key="editor" options={editorOptions} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
+          <div className="text-right">{error && <ErrorNotification message={error} />}</div>
         </div>
       </div>
     </div>

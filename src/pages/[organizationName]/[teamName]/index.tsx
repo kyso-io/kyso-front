@@ -124,54 +124,36 @@ const Index = () => {
       const api: Api = new Api(token, commonData.organization.sluglified_name);
       const resultOrgMembers: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
       let userMember: Member | null = null;
-      resultOrgMembers.data.forEach((organizationMember: OrganizationMember) => {
-        if (organizationMember.id === commonData.user.id) {
-          userMember = {
-            id: organizationMember.id,
-            nickname: organizationMember.nickname,
-            username: organizationMember.username,
-            display_name: organizationMember.nickname,
-            avatar_url: organizationMember.avatar_url,
-            email: organizationMember.email,
-            organization_roles: organizationMember.organization_roles,
-            team_roles: [],
-          };
-        } else {
-          m.push({
-            id: organizationMember.id,
-            nickname: organizationMember.nickname,
-            username: organizationMember.username,
-            display_name: organizationMember.nickname,
-            avatar_url: organizationMember.avatar_url,
-            email: organizationMember.email,
-            organization_roles: organizationMember.organization_roles,
-            team_roles: [],
-          });
-        }
-      });
-
       api.setTeamSlug(commonData.team!.sluglified_name);
       const resultTeamMembers: NormalizedResponseDTO<TeamMember[]> = await api.getTeamMembers(commonData.team!.id!);
       resultTeamMembers.data.forEach((teamMember: TeamMember) => {
-        const member: Member | undefined = m.find((mem: Member) => mem.id === teamMember.id);
-        if (userMember && userMember.id === teamMember.id) {
-          userMember.team_roles = teamMember.team_roles;
-          userMember.membership_origin = teamMember.membership_origin;
-        } else if (member) {
-          member.team_roles = teamMember.team_roles;
-          member.membership_origin = teamMember.membership_origin;
-        } else {
-          m.push({
-            id: teamMember.id,
-            nickname: teamMember.nickname,
-            username: teamMember.username,
-            display_name: teamMember.nickname,
-            avatar_url: teamMember.avatar_url,
-            email: teamMember.email,
-            organization_roles: [],
-            team_roles: teamMember.team_roles,
-            membership_origin: teamMember.membership_origin,
-          });
+        const orgMember: OrganizationMember | undefined = resultOrgMembers.data.find((member: OrganizationMember) => member.id === teamMember.id);
+        if (orgMember) {
+          if (orgMember.id === commonData.user.id) {
+            userMember = {
+              id: orgMember.id,
+              nickname: orgMember.nickname,
+              username: orgMember.username,
+              display_name: orgMember.nickname,
+              avatar_url: orgMember.avatar_url,
+              email: orgMember.email,
+              organization_roles: orgMember.organization_roles,
+              team_roles: teamMember.team_roles,
+              membership_origin: teamMember.membership_origin,
+            };
+          } else {
+            m.push({
+              id: teamMember.id,
+              nickname: teamMember.nickname,
+              username: teamMember.username,
+              display_name: teamMember.nickname,
+              avatar_url: teamMember.avatar_url,
+              email: teamMember.email,
+              organization_roles: orgMember.organization_roles,
+              team_roles: teamMember.team_roles,
+              membership_origin: teamMember.membership_origin,
+            });
+          }
         }
       });
       if (userMember) {
