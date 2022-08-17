@@ -25,6 +25,7 @@ import moment from 'moment';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { useVersions } from '@/hooks/use-versions';
+import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 
 const Index = () => {
   useRedirectIfNoJWT();
@@ -156,9 +157,11 @@ const Index = () => {
       {/* <div 
         className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent inline mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300 w-5 h-5"></div> */}
 
-      <div className="w-2/12">
+      <div className="w-0/12">
         {selfTree && report && commonData && (
-          <PureTree path={currentPath} basePath={router.basePath} commonData={commonData} report={report} version={router.query.version as string} selfTree={selfTree} parentTree={parentTree} />
+          <PureSideOverlayPanel>
+            <PureTree path={currentPath} basePath={router.basePath} commonData={commonData} report={report} version={router.query.version as string} selfTree={selfTree} parentTree={parentTree} />
+          </PureSideOverlayPanel>
         )}
       </div>
 
