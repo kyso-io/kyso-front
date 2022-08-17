@@ -1,5 +1,5 @@
 import { iframeResizer } from 'iframe-resizer';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import TurndownService from 'turndown';
 import { v4 } from 'uuid';
 
@@ -19,18 +19,26 @@ type IPureIFrameRendererProps = {
 const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const { file } = props;
   const id = v4();
+  const [iframeId, setIframeId] = useState('');
 
   useEffect(() => {
+    console.log('effect');
+    setIframeId(`#iframe-${id}`);
+
     iframeResizer(
       {
         log: false,
         checkOrigin: false,
         inPageLinks: true,
         scrolling: false,
+        initCallback: () => {
+          console.log('resizer');
+        },
+        autoResize: true,
       },
-      `#iframe-${id}`,
+      iframeId,
     );
-  });
+  }, []);
 
   if (!file || !file.path_scs || file.path_scs.length === 0) {
     return <div>Invalid path</div>;
@@ -39,12 +47,12 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   return (
     <iframe
       title={id}
-      id={`iframe-${id}`}
+      id={iframeId}
       sandbox={`allow-scripts allow-same-origin allow-forms allow-modals allow-popups`}
       style={{
         border: 'none 0px',
         width: '100%',
-        minHeight: '1000px',
+        minHeight: '65vh',
       }}
       src={`${'/scs'}${file.path_scs}`}
     />
