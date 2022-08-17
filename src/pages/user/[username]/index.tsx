@@ -293,7 +293,7 @@ const Index = () => {
   if (!userProfile) {
     return null;
   }
-
+  console.log('activityFeed', activityFeed);
   return (
     <div>
       <UserProfileInfo userId={user.id} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfile} />
@@ -353,6 +353,11 @@ const Index = () => {
               <p className="text-xs font-bold leading-relaxed text-gray-700 py-10">Most recent</p>
               <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
             </React.Fragment>
+          )}
+          {!activityFeed && (
+            <div className="pt-10 pb-20">
+              <p>The user has no activity</p>
+            </div>
           )}
         </div>
       </div>
