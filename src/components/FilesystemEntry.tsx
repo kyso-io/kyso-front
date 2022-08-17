@@ -1,41 +1,31 @@
-import { CreationReportFileSystemObject } from '@/model/creation-report-file';
+import type { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import type { FilesystemItem } from '@/model/filesystem-item.model';
-import UnPureNewReportNamingDropdown from '@/unpure-components/UnPureNewReportNamingDropdown';
+import NewReportNamingDropdown from '@/components/NewReportNamingDropdown';
 import { Menu, Transition } from '@headlessui/react';
 import { DocumentAddIcon, DocumentIcon, UploadIcon, FolderAddIcon } from '@heroicons/react/outline';
 import { DotsVerticalIcon, FolderIcon, FolderOpenIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
 import type { ChangeEvent } from 'react';
 import React, { Fragment, useState } from 'react';
 import classNames from '@/helpers/class-names';
-import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
 
 interface FilesystemEntryProps {
   item: FilesystemItem;
   onAddNewFile: (newFile: CreationReportFileSystemObject) => void;
   onRemoveFile: (newfile: CreationReportFileSystemObject) => void;
   onSelectedFile?: (selectedFile: FilesystemItem) => void;
+  onUploadFile: (event: ChangeEvent<HTMLInputElement>, parent: FilesystemItem) => void;
   selectedFileId: string;
 }
 
-const blobToBase64 = (blob: Blob): Promise<string> => {
-  const reader = new FileReader();
-  reader.readAsDataURL(blob);
-  return new Promise((resolve) => {
-    reader.onloadend = () => {
-      resolve(reader.result as string);
-    };
-  });
-};
-
 const FilesystemEntry = (props: FilesystemEntryProps) => {
-  const { onRemoveFile, onAddNewFile, onSelectedFile, selectedFileId } = props;
+  const { onRemoveFile, item, onAddNewFile, onUploadFile, onSelectedFile, selectedFileId } = props;
   const [open, setOpen] = useState(false);
 
-  const appliedPadding = props.item.level * 15;
+  const appliedPadding = item.level * 15;
 
-  const hasChildren = props.item.children && props.item.children.length > 0;
+  const hasChildren = item.children && item.children.length > 0;
 
-  const fileType = props.item.file.type;
+  const fileType = item.file.type;
 
   let NewIcon = DocumentIcon;
 
@@ -43,29 +33,13 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
     NewIcon = FolderIcon;
   }
 
-  const onChangeUploadFile = (e: ChangeEvent<HTMLInputElement>) => {
-    if (!e.target.files) {
-      return;
-    }
-    const newFiles = Array.from(e.target.files);
-    newFiles.forEach(async (file) => {
-      const base64 = await blobToBase64(file);
-      console.log({ base64 });
-      setLocalStorageItem(file.name, base64);
-
-      const newFile = new CreationReportFileSystemObject(file.name, `${props.item.file.path}/${file.name}`, file.name, 'file', '', props.item.file.id);
-
-      onAddNewFile(newFile);
-    });
-  };
-
   return (
     <>
-      <div className={classNames('inline-flex items-center w-full hover:bg-gray-50', selectedFileId === props.item.file.id ? 'bg-gray-100' : '')} style={{ paddingLeft: `${appliedPadding}px` }}>
+      <div className={classNames('inline-flex items-center w-full hover:bg-gray-50', selectedFileId === item.file.id ? 'bg-gray-100' : '')} style={{ paddingLeft: `${appliedPadding}px` }}>
         <button
           onClick={() => {
             if (onSelectedFile) {
-              onSelectedFile(props.item);
+              onSelectedFile(item);
             }
           }}
           className={classNames('w-full flex-1 inline-flex items-center ')}
@@ -73,7 +47,7 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
           <div className="flex-1 inline-flex items-center">
             {hasChildren ? <FolderOpenIcon className="mr-1 h-5 w-5 text-gray-400" aria-hidden="true" /> : <NewIcon className="mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />}
 
-            <div>{props.item.file.name}</div>
+            <div>{item.file.name}</div>
           </div>
         </button>
         <Menu as="div" className="relative inline-block text-left">
@@ -95,14 +69,14 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
               <div className="py-1">
                 {fileType === 'folder' && (
                   <>
-                    <UnPureNewReportNamingDropdown
+                    <NewReportNamingDropdown
                       label="New file"
                       showLabel={true}
                       icon={DocumentAddIcon}
-                      parent={props.item.file}
+                      parent={item.file}
                       onCreate={(newFile: CreationReportFileSystemObject) => {
                         if (newFile) {
-                          newFile.path = `${props.item.file.path}/${newFile.name}`;
+                          newFile.path = `${item.file.path}/${newFile.name}`;
 
                           onAddNewFile(newFile);
                           setOpen(false);
@@ -110,15 +84,15 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                       }}
                     />
 
-                    <UnPureNewReportNamingDropdown
+                    <NewReportNamingDropdown
                       label="New folder"
                       showLabel={true}
                       isFolder={true}
                       icon={FolderAddIcon}
-                      parent={props.item.file}
+                      parent={item.file}
                       onCreate={(newFile: CreationReportFileSystemObject) => {
                         if (newFile) {
-                          newFile.path = `${props.item.file.path}/${newFile.name}`;
+                          newFile.path = `${item.file.path}/${newFile.name}`;
 
                           onAddNewFile(newFile);
                           setOpen(false);
@@ -127,7 +101,7 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                     />
 
                     <label
-                      htmlFor={`upload-${props.item.file.id}`}
+                      htmlFor={`upload-${item.file.id}`}
                       className={classNames('hover:cursor-pointer text-gray-700 hover:bg-gray-100', 'group flex items-center px-4 py-2 text-sm text-gray-400 group-hover:text-gray-500')}
                     >
                       <UploadIcon className="h-5 w-5 mr-3 text-gray-600" aria-hidden="true" />
@@ -135,10 +109,10 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                       <input
                         style={{ display: 'none' }}
                         className="p-2 h-5 w-5 opacity-0 transition cursor-pointer rounded mr-1 form-control absolute ease-in-out"
-                        id={`upload-${props.item.file.id}`}
+                        id={`upload-${item.file.id}`}
                         type="file"
                         multiple
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => onChangeUploadFile(e)}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => onUploadFile(e, item)}
                       />
                     </label>
                   </>
@@ -146,7 +120,7 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                 <button
                   className={classNames('w-full hover:cursor-pointer text-gray-700 hover:bg-gray-100', 'group flex items-center px-4 py-2 text-sm text-gray-400 group-hover:text-gray-500')}
                   onClick={() => {
-                    onAddNewFile(props.item.file);
+                    onAddNewFile(item.file);
                   }}
                 >
                   <PencilAltIcon className="mr-3 h-5 w-5" aria-hidden="true" />
@@ -156,7 +130,7 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                 <button
                   className={classNames('w-full hover:cursor-pointer text-gray-700 hover:bg-gray-100', 'group flex items-center px-4 py-2 text-sm text-gray-400 group-hover:text-gray-500')}
                   onClick={() => {
-                    onRemoveFile(props.item.file);
+                    onRemoveFile(item.file);
                   }}
                 >
                   <TrashIcon className="mr-3 h-5 w-5" aria-hidden="true" />
@@ -167,11 +141,12 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
           </Transition>
         </Menu>
       </div>
-      {props.item.children.map((item: FilesystemItem) => (
+      {item.children.map((fsItem: FilesystemItem) => (
         <FilesystemEntry
+          onUploadFile={onUploadFile}
           selectedFileId={selectedFileId}
-          key={item.file.id}
-          item={item}
+          key={fsItem.file.id}
+          item={fsItem}
           onAddNewFile={(newFile: CreationReportFileSystemObject) => {
             props.onAddNewFile!(newFile);
           }}
