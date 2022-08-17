@@ -23,7 +23,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
 
   useEffect(() => {
     console.log('effect');
-    setIframeId(`#iframe-${id}`);
+    setIframeId(`iframe-${id}`);
 
     iframeResizer(
       {
@@ -41,7 +41,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
         },
         autoResize: true,
       },
-      iframeId,
+      `#${iframeId}`,
     );
   }, []);
 
