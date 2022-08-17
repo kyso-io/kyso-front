@@ -19,30 +19,21 @@ type IPureIFrameRendererProps = {
 const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const { file } = props;
   const id = v4();
-  const [iframeId, setIframeId] = useState('');
   const [resizedHeight, setResizedHeight] = useState('65vh');
+  const frameId = `iframe-${id}`;
 
   useEffect(() => {
-    setIframeId(`iframe-${id}`);
-
     iframeResizer(
       {
         log: false,
         checkOrigin: false,
         inPageLinks: true,
         scrolling: false,
-        id: iframeId,
         resizedCallback: (data) => {
-          console.log('RESIZED CALLBACK');
-          console.log(data);
           setResizedHeight(`${data.height} px`);
         },
-        initCallback: () => {
-          console.log('resizer');
-        },
-        autoResize: true,
       },
-      `#${iframeId}`,
+      frameId,
     );
   }, []);
 
@@ -53,7 +44,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   return (
     <iframe
       title={id}
-      id={iframeId}
+      id={frameId}
       sandbox={`allow-scripts allow-same-origin allow-forms allow-modals allow-popups`}
       style={{
         border: 'none 0px',
