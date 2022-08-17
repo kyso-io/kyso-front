@@ -1,5 +1,5 @@
 import { iframeResizer } from 'iframe-resizer';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import TurndownService from 'turndown';
 import { v4 } from 'uuid';
 
@@ -19,23 +19,24 @@ type IPureIFrameRendererProps = {
 const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const { file } = props;
   const id = v4();
-  const [resizedHeight, setResizedHeight] = useState('65vh');
-  const frameId = `iframe-${id}`;
+  // const [resizedHeight, setResizedHeight] = useState('65vh');
+  // const frameId = `iframe-${id}`;
 
-  useEffect(() => {
-    iframeResizer(
-      {
-        log: false,
-        checkOrigin: false,
-        inPageLinks: true,
-        scrolling: false,
-        resizedCallback: (data) => {
+  // useEffect(() => {
+  iframeResizer(
+    {
+      log: false,
+      checkOrigin: false,
+      inPageLinks: true,
+      scrolling: false,
+      /* resizedCallback: (data) => {
+          console.log(data.height);
           setResizedHeight(`${data.height} px`);
-        },
-      },
-      frameId,
-    );
-  }, []);
+        }, */
+    },
+    `#theframe`,
+  );
+  // }, []);
 
   if (!file || !file.path_scs || file.path_scs.length === 0) {
     return <div>Invalid path</div>;
@@ -44,13 +45,14 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   return (
     <iframe
       title={id}
-      id={frameId}
+      id="theframe"
       sandbox={`allow-scripts allow-same-origin allow-forms allow-modals allow-popups`}
       style={{
         border: 'none 0px',
         width: '100%',
-        height: resizedHeight,
+        minHeight: '65vh',
       }}
+      // src={`https://dev.kyso.io${'/scs'}${file.path_scs}`}
       src={`${'/scs'}${file.path_scs}`}
     />
   );
