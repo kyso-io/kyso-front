@@ -3,7 +3,7 @@ import { DotsVerticalIcon, TrashIcon, PencilAltIcon, DocumentAddIcon, FolderAddI
 import { Menu, Transition } from '@headlessui/react';
 import classNames from '@/helpers/class-names';
 import type { CreationReportFileSystemObject } from '@/model/creation-report-file';
-import UnPureNewReportNamingDropdown from './UnPureNewReportNamingDropdown';
+import NewReportNamingDropdown from '../components/NewReportNamingDropdown';
 
 type IUnpureCreateFileList = {
   file: CreationReportFileSystemObject;
@@ -52,7 +52,7 @@ const UnpureCreateFileList = (props: IUnpureCreateFileList) => {
               <div className="py-1">
                 {fileType === 'folder' && (
                   <>
-                    <UnPureNewReportNamingDropdown
+                    <NewReportNamingDropdown
                       label="New file"
                       showLabel={true}
                       icon={DocumentAddIcon}
@@ -67,7 +67,7 @@ const UnpureCreateFileList = (props: IUnpureCreateFileList) => {
                       }}
                     />
 
-                    <UnPureNewReportNamingDropdown
+                    <NewReportNamingDropdown
                       label="New folder"
                       showLabel={true}
                       isFolder={true}
