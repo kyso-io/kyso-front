@@ -1,4 +1,5 @@
 import PureTopTabs from '@/components/PureTopTabs';
+import { useRouter } from 'next/router';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faPeriod } from '@fortawesome/pro-solid-svg-icons';
@@ -17,6 +18,7 @@ type IUserProfileInfo = {
 
 const UserProfileInfo = (props: IUserProfileInfo) => {
   const { user, onChangeTab, currentTab } = props;
+  const router = useRouter();
   const tabs = [{ name: 'Overview' }, { name: 'Activity' }];
 
   return (
@@ -42,7 +44,7 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
               type="button"
               className="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              <a href={`/in/settings`} className="text-indigo-500">
+              <a href={`${router.basePath}/in/settings`} className="text-indigo-500">
                 Edit
               </a>
             </button>
