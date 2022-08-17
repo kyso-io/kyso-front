@@ -20,6 +20,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const { file } = props;
   const id = v4();
   const [iframeId, setIframeId] = useState('');
+  const [resizedHeight, setResizedHeight] = useState('65vh');
 
   useEffect(() => {
     console.log('effect');
@@ -35,6 +36,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
         resizedCallback: (data) => {
           console.log('RESIZED CALLBACK');
           console.log(data);
+          setResizedHeight(`${data.height} px`);
         },
         initCallback: () => {
           console.log('resizer');
@@ -57,7 +59,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
       style={{
         border: 'none 0px',
         width: '100%',
-        minHeight: '65vh',
+        height: resizedHeight,
       }}
       src={`${'/scs'}${file.path_scs}`}
     />
