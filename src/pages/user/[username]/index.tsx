@@ -313,7 +313,9 @@ const Index = () => {
                   </div>
                 </React.Fragment>
               ) : (
-                <p>The user has no reports</p>
+                <div className="pt-10 pb-20">
+                  <p>The user has no reports</p>
+                </div>
               )}
             </React.Fragment>
           )}
