@@ -127,7 +127,7 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
       </div>
       <div className="-mt-px flex items-center p-2">
         <div className="grow flex flex-row items-center">
-          <PureAvatarGroup data={authors}></PureAvatarGroup>
+          {authors && <PureAvatarGroup data={authors}></PureAvatarGroup>}
 
           <span className="text-gray-500 text-sm pl-2 pr-5">{moment(report.created_at).format('MMMM DD, YYYY')}</span>
           <EyeIcon className="shrink-0 h-5 w-5" />
