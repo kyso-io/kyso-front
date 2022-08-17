@@ -1,6 +1,6 @@
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { v4 } from 'uuid';
 
 interface Props {
@@ -16,13 +16,15 @@ const PureAvatar = (props: Props) => {
   let size = TailwindHeightSizeEnum.H6;
   let textSize: TailwindFontSizeEnum = TailwindFontSizeEnum.XS;
 
-  if (props.size) {
-    size = props.size;
-  }
+  useMemo(() => {
+    if (props.size) {
+      size = props.size;
+    }
 
-  if (props.textSize) {
-    textSize = props.textSize;
-  }
+    if (props.textSize) {
+      textSize = props.textSize;
+    }
+  }, [props]);
 
   // Disabled eslint rule and not set to React.SyntheticEvent<HTMLImageElement, Event>
   // because the e.target.src is not present in the type, and we need to use it
