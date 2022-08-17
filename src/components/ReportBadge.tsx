@@ -58,7 +58,7 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
     }
     return report?.description ? report.description : '';
   }, [report.description]);
-
+  // console.log('authors', authors);
   return (
     <div className="bg-white rounded-lg shadow" style={{ height: 262 }}>
       <div className="relative bg-white shadow-sm flex space-x-3">
