@@ -65,7 +65,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
     <>
       <a
         href={href || `/${treeItem.path}`}
-        className={classNames('p-2 text-sm w-full group flex items-center justify-between truncate', current ? 'bg-gray-200' : 'hover:bg-gray-100')}
+        className={classNames('p-2 min-w-[250px] text-sm w-full group flex items-center justify-between truncate', current ? 'bg-gray-200' : 'hover:bg-gray-100')}
         onClick={onClick}
       >
         <div className={classNames('group flex items-center font-medium text-slate-500', 'hover:text-gray-900', 'font-normal')}>
