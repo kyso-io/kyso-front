@@ -2,9 +2,9 @@ import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
 import type { NormalizedResponseDTO, Organization, ResourcePermissions, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
-import { useUser } from './use-user';
 
 export type CommonData = {
   permissions: TokenPermissions | null;
@@ -16,20 +16,23 @@ export type CommonData = {
 
 export const useCommonData = (): CommonData => {
   const router = useRouter();
-  const user: UserDTO | null = useUser();
   const token: string | null = getLocalStorageItem('jwt');
-  // const permissions: TokenPermissions | null = usePermissions();
 
-  const fetcher = async (): Promise<{ permissions: TokenPermissions | null; organization: Organization | null; team: Team | null }> => {
+  const fetcher = async (): Promise<{ user: UserDTO | null; permissions: TokenPermissions | null; organization: Organization | null; team: Team | null }> => {
     const organizationName: string | undefined = router.query.organizationName as string | undefined;
     const teamName: string | undefined = router.query.teamName as string | undefined;
     const api: Api = new Api(token);
-    let permissions: TokenPermissions | null;
+    let user: UserDTO | null = null;
     try {
-      const response: NormalizedResponseDTO<TokenPermissions> = await api.getUserPermissions(user!.username);
-      permissions = response.data;
-    } catch (e) {
-      permissions = null;
+      const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      user = responseUserDto.data;
+    } catch (e) {}
+    let permissions: TokenPermissions | null = null;
+    if (user) {
+      try {
+        const response: NormalizedResponseDTO<TokenPermissions> = await api.getUserPermissions(user!.username);
+        permissions = response.data;
+      } catch (e) {}
     }
     let organizationResourcePermissions: ResourcePermissions | undefined;
     if (permissions) {
@@ -75,19 +78,23 @@ export const useCommonData = (): CommonData => {
         }
       }
     }
-    return { permissions, organization, team };
+    return { user, permissions, organization, team };
   };
 
-  const { data } = useSWR(user != null && router.isReady ? 'use-common-data' : null, fetcher, {
-    revalidateOnFocus: false,
-    revalidateIfStale: false,
-  });
+  const [mounted, setMounted] = useState<boolean>(false);
+  const { data } = useSWR(mounted ? 'use-common-data' : null, fetcher);
+
+  useEffect(() => {
+    if (router.isReady) {
+      setMounted(true);
+    }
+  }, [router.isReady]);
 
   return {
     permissions: data?.permissions ? data.permissions : null,
     token,
     organization: data?.organization ? data.organization : null,
     team: data?.team ? data.team : null,
-    user,
+    user: data?.user ? data.user : null,
   };
 };

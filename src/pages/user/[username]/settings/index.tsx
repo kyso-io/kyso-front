@@ -1,10 +1,8 @@
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 const Index = () => {
-  useUser();
   const router = useRouter();
 
   useEffect(() => {
