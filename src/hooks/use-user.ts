@@ -1,11 +1,7 @@
-import useSWR from 'swr';
-import { fetchRelationsAction, fetchUserPermissions, refreshUserAction, setAuthAction } from '@kyso-io/kyso-store';
+import type { NormalizedResponseDTO, Token, UserDTO } from '@kyso-io/kyso-model';
+import { Api } from '@kyso-io/kyso-store';
 import decode from 'jwt-decode';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import type { ActionWithPayload, Token, UserDTO } from '@kyso-io/kyso-model';
-import { Helper } from '@/helpers/Helper';
-import { useAppDispatch } from './redux-hooks';
+import useSWR from 'swr';
 
 export type DecodedToken = {
   exp: number;
@@ -14,57 +10,29 @@ export type DecodedToken = {
   payload: Token;
 };
 
-export const useUser = (): UserDTO => {
-  const dispatch = useAppDispatch();
-  const router = useRouter();
-
+export const useUser = (): UserDTO | null => {
   const fetcher = async (): Promise<UserDTO | null> => {
-    const jwt: string = localStorage.getItem('jwt') as string;
-
+    const jwt: string | null = localStorage.getItem('jwt') as string;
     if (!jwt) {
       return null;
     }
-
     const jwtToken: DecodedToken = decode<DecodedToken>(jwt);
-
     if (new Date(jwtToken.exp * 1000) <= new Date()) {
       // token is out of date
       localStorage.removeItem('jwt');
+      return null;
     }
-
-    const tokenData: Token = jwtToken.payload;
-
-    await dispatch(
-      setAuthAction({
-        jwt,
-        teamName: router.query.teamName as string,
-        organizationName: router.query.organizationName as string,
-      }),
-    );
-
-    const userPermissions = await dispatch(fetchUserPermissions(tokenData.username));
-    const fetchUserRequest: ActionWithPayload<UserDTO> = await dispatch(refreshUserAction());
-
-    if (userPermissions) {
-      await dispatch(
-        fetchRelationsAction({
-          team: Helper.ListToKeyVal(userPermissions.payload.teams),
-          organization: Helper.ListToKeyVal(userPermissions.payload.organizations),
-        }),
-      );
+    try {
+      const api: Api = new Api(jwt);
+      const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      return responseUserDto.data;
+    } catch (e) {
+      return null;
     }
-
-    return fetchUserRequest.payload as UserDTO;
   };
-
-  const [mounted, setMounted] = useState(false);
-  const { data } = useSWR(mounted ? 'use-user' : null, fetcher);
-  useEffect(() => {
-    if (router.isReady) {
-      setMounted(true);
-    }
-  }, [router.query]);
-
-  // NO ANY
-  return data as UserDTO;
+  const { data } = useSWR('use-user', fetcher, {
+    revalidateOnFocus: false,
+    revalidateIfStale: false,
+  });
+  return data || null;
 };

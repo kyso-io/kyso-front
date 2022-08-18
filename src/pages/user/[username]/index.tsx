@@ -63,7 +63,7 @@ const debouncedPaginatedReports = debounce(
 );
 
 const Index = () => {
-  const user: UserDTO = useUser();
+  const user: UserDTO | null = useUser();
   const router = useRouter();
   const { username } = router.query;
 

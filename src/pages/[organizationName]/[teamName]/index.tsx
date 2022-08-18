@@ -122,7 +122,7 @@ const Index = () => {
       const resultOrgMembers: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
       let userMember: Member | null = null;
       resultOrgMembers.data.forEach((organizationMember: OrganizationMember) => {
-        if (organizationMember.id === commonData.user.id) {
+        if (organizationMember.id === commonData.user?.id) {
           userMember = {
             id: organizationMember.id,
             nickname: organizationMember.nickname,
@@ -440,7 +440,7 @@ const Index = () => {
           </div>
         )}
 
-        {searchUser !== undefined && (
+        {searchUser !== undefined && commonData.user != null && (
           <React.Fragment>
             <ReportsSearchBar
               members={members}
