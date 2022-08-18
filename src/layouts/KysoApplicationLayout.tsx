@@ -13,10 +13,7 @@ type IUnpureKysoApplicationLayoutProps = {
 
 const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplicationLayoutProps) => {
   const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+  const commonData: CommonData = useCommonData();
 
   const [report] = useReport({
     commonData,

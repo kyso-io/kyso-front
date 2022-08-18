@@ -1,29 +1,24 @@
 /* eslint-disable no-restricted-globals */
-import format from 'date-fns/format';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { useRouter } from 'next/router';
+import classNames from '@/helpers/class-names';
+import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import { useEffect, useState } from 'react';
-import { createAccessTokenAction, deleteAccessTokenAction, getAccessTokensAction, revokeAllAccessTokenAction } from '@kyso-io/kyso-store';
-import { useAppDispatch } from '@/hooks/redux-hooks';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TrashIcon } from '@heroicons/react/outline';
-import classNames from '@/helpers/class-names';
 import type { KysoUserAccessToken } from '@kyso-io/kyso-model';
+import { createAccessTokenAction, deleteAccessTokenAction, getAccessTokensAction, revokeAllAccessTokenAction } from '@kyso-io/kyso-store';
+import format from 'date-fns/format';
+import { useEffect, useState } from 'react';
 
 export const ucFirst = (str: string) => {
   return str && str.length > 0 ? str.charAt(0).toUpperCase() + str.slice(1) : '';
 };
 
 const Index = () => {
-  const router = useRouter();
   const dispatch = useAppDispatch();
   useRedirectIfNoJWT();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+  const commonData: CommonData = useCommonData();
 
   const [accessTokens, setAccessTokens] = useState<KysoUserAccessToken[]>([]);
   // const [selectedAccessToken, setSelectedAccessToken] = useState<KysoUserAccessToken | null>(null);

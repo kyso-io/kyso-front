@@ -1,26 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import ChannelList from '@/components/ChannelList';
+import { PureSpinner } from '@/components/PureSpinner';
 import checkPermissions from '@/helpers/check-permissions';
+import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import { ArrowRightIcon } from '@heroicons/react/solid';
 import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { checkTeamNameIsUniqueAction, createTeamAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
-import ChannelList from '@/components/ChannelList';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { ArrowRightIcon } from '@heroicons/react/solid';
-import { useAppDispatch } from '@/hooks/redux-hooks';
-import { PureSpinner } from '@/components/PureSpinner';
 
 const Index = () => {
   const router = useRouter();
   useRedirectIfNoJWT();
   const dispatch = useAppDispatch();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+  const commonData: CommonData = useCommonData();
 
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);

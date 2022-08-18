@@ -1,40 +1,37 @@
+import PureComments from '@/components/PureComments';
+import { PurePermissionDenied } from '@/components/PurePermissionDenied';
+import PureReportHeader from '@/components/PureReportHeader';
+import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
+import PureTree from '@/components/PureTree';
+import checkPermissions from '@/helpers/check-permissions';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useAuthors } from '@/hooks/use-authors';
+import { useChannelMembers } from '@/hooks/use-channel-members';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
-import { useReport } from '@/hooks/use-report';
-import { useTree } from '@/hooks/use-tree';
-import PureComments from '@/components/PureComments';
-import type { GithubFileHash, Comment, User, UserDTO, KysoSetting } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
-import PureReportHeader from '@/components/PureReportHeader';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import { createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
-import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
-import UnpureFileHeader from '@/unpure-components/UnpureFileHeader';
-import PureTree from '@/components/PureTree';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import { useFileToRender } from '@/hooks/use-file-to-render';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import { useReport } from '@/hooks/use-report';
+import { useTree } from '@/hooks/use-tree';
+import { useUserEntities } from '@/hooks/use-user-entities';
+import { useVersions } from '@/hooks/use-versions';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import UnpureFileHeader from '@/unpure-components/UnpureFileHeader';
+import UnpureReportRender from '@/unpure-components/UnpureReportRender';
+import type { Comment, GithubFileHash, KysoSetting, User, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import { createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
+import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
-import checkPermissions from '@/helpers/check-permissions';
 import { useEffect, useMemo } from 'react';
-import { PurePermissionDenied } from '@/components/PurePermissionDenied';
-import { useChannelMembers } from '@/hooks/use-channel-members';
-import { useUserEntities } from '@/hooks/use-user-entities';
-import moment from 'moment';
-import UnpureReportRender from '@/unpure-components/UnpureReportRender';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { useVersions } from '@/hooks/use-versions';
-import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 
 const Index = () => {
   useRedirectIfNoJWT();
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+  const commonData: CommonData = useCommonData();
 
   const version = router.query.version ? (router.query.version as string) : undefined;
 

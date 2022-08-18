@@ -68,10 +68,7 @@ const debouncedPaginatedReports = debounce(
 const Index = () => {
   const router = useRouter();
   useRedirectIfNoJWT();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+  const commonData: CommonData = useCommonData();
   // MEMBERS
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
