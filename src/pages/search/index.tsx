@@ -3,7 +3,6 @@ import SearchItem from '@/components/search-item';
 import SearchNavigation from '@/components/search-navigation';
 import SearchPagination from '@/components/search-pagination';
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import { useUser } from '@/hooks/use-user';
 import type { FullTextSearchParams } from '@/interfaces/full-text-search-params';
 import type { SearchNavItem } from '@/interfaces/search-nav-item';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
@@ -28,7 +27,6 @@ const debouncedFetchData = debounce((params: FullTextSearchParams, dispatch: any
 }, 750);
 
 const SearchIndex = () => {
-  useUser();
   const router = useRouter();
   const { q } = router.query;
   const dispatch = useAppDispatch();

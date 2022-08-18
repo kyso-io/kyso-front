@@ -1,15 +1,15 @@
 import ActivityFeedComponent from '@/components/ActivityFeed';
+import UserProfileInfo from '@/components/UserProfileInfo';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useInterval } from '@/hooks/use-interval';
-import { useRouter } from 'next/router';
+import { useUser } from '@/hooks/use-user';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { ActivityFeed, NormalizedResponseDTO, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
+import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
-import UserProfileInfo from '@/components/UserProfileInfo';
-import { useUser } from '@/hooks/use-user';
 import { PureSpinner } from '../../../components/PureSpinner';
 import ReportBadge from '../../../components/ReportBadge';
 

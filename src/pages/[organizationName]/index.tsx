@@ -17,8 +17,8 @@ import ManageUsers from '../../components/ManageUsers';
 import OrganizationInfo from '../../components/OrganizationActivity';
 import ReportBadge from '../../components/ReportBadge';
 import { getLocalStorageItem } from '../../helpers/isomorphic-local-storage';
-import type { CommonData } from '../../hooks/use-common-data';
 import { useCommonData } from '../../hooks/use-common-data';
+import type { CommonData } from '../../hooks/use-common-data';
 import { useInterval } from '../../hooks/use-interval';
 import type { Member } from '../../types/member';
 
