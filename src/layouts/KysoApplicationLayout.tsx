@@ -24,9 +24,10 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   });
 
   let slugifiedName = '';
-  if (commonData?.user && commonData?.user?.display_name) {
-    slugifiedName = Helper.slugify(commonData?.user?.display_name);
+  if (commonData?.user && commonData?.user?.username) {
+    slugifiedName = Helper.slugify(commonData?.user?.username);
   }
+
   const userNavigation = [
     { name: 'My profile', href: `${router.basePath}/user/${slugifiedName}`, newTab: false },
     {
