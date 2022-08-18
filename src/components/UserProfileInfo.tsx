@@ -5,25 +5,26 @@ import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faPeriod } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { UserDTO } from '@kyso-io/kyso-model';
+import { useUser } from '@/hooks/use-user';
 import moment from 'moment';
 import PureAvatar from './PureAvatar';
 
 const BACKGROUND_IMAGE = 'https://images.unsplash.com/photo-1444628838545-ac4016a5418a?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80';
 
 type IUserProfileInfo = {
-  userId: string;
   onChangeTab: (_tag: string) => void;
   currentTab: string;
   userProfile: UserDTO;
 };
 
 const UserProfileInfo = (props: IUserProfileInfo) => {
-  const { userId, onChangeTab, currentTab, userProfile } = props;
+  const { onChangeTab, currentTab, userProfile } = props;
+  const user: UserDTO = useUser();
   const router = useRouter();
   const tabs = [{ name: 'Overview' }, { name: 'Activity' }];
 
   let isUserAuthor = false;
-  if (userId === userProfile.id) {
+  if (user && user.id === userProfile.id) {
     isUserAuthor = true;
   }
 

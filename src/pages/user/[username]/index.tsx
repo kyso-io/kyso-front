@@ -79,25 +79,25 @@ const Index = () => {
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
 
   useEffect(() => {
-    if (!user || !token || !username) {
+    if (!username) {
       return;
     }
     getUserByUsername();
-  }, [user, token, username]);
+  }, [username]);
 
   useEffect(() => {
-    if (!user || !token || !userProfile) {
+    if (!userProfile) {
       return;
     }
     getReports(1);
-  }, [user, token, userProfile]);
+  }, [userProfile]);
 
   useEffect(() => {
-    if (!user || !token) {
+    if (!username) {
       return;
     }
     getActivityFeed();
-  }, [user, token, datetimeActivityFeed]);
+  }, [datetimeActivityFeed]);
 
   const getUserByUsername = async () => {
     try {
@@ -287,16 +287,13 @@ const Index = () => {
 
   // END ACTIVITY FEED
 
-  if (!user) {
-    return null;
-  }
   if (!userProfile) {
     return null;
   }
 
   return (
     <div>
-      <UserProfileInfo userId={user.id} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfile} />
+      <UserProfileInfo onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfile} />
       <div className="flex flex-row space-x-8">
         <div className="w-1/6" />
         <div className="w-4/6">
@@ -350,14 +347,18 @@ const Index = () => {
           )}
           {currentTab === 'Activity' && (
             <React.Fragment>
-              <p className="text-xs font-bold leading-relaxed text-gray-700 py-10">Most recent</p>
-              <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+              {activityFeed && (
+                <>
+                  <p className="text-xs font-bold leading-relaxed text-gray-700 py-10">Most recent</p>
+                  <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+                </>
+              )}
+              {!activityFeed && (
+                <div className="pt-10 pb-20">
+                  <p>The user has no activity</p>
+                </div>
+              )}
             </React.Fragment>
-          )}
-          {!activityFeed && (
-            <div className="pt-10 pb-20">
-              <p>The user has no activity</p>
-            </div>
           )}
         </div>
       </div>
