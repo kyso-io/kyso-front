@@ -25,7 +25,9 @@ const PureComments = (props: IPureComments) => {
 
   return (
     <div className={classNames('w-full flex flex-col', parentComment?.id ? 'pl-10' : '')}>
-      {!parentComment && <PureCommentForm user={commonData.user} report={report} userSelectorHook={userSelectorHook} submitComment={submitComment} channelMembers={channelMembers} />}
+      {!parentComment && commonData.user != null && (
+        <PureCommentForm user={commonData.user} report={report} userSelectorHook={userSelectorHook} submitComment={submitComment} channelMembers={channelMembers} />
+      )}
 
       <div className="flex flex-col">
         {comments &&

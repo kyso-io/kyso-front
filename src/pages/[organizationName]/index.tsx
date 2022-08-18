@@ -278,7 +278,7 @@ const Index = () => {
       const m: Member[] = [];
       let userMember: Member | null = null;
       result.data.forEach((organizationMember: OrganizationMember) => {
-        if (organizationMember.id === commonData.user.id) {
+        if (organizationMember.id === commonData.user?.id) {
           userMember = {
             id: organizationMember.id,
             nickname: organizationMember.nickname,
