@@ -6,7 +6,6 @@ import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
-import { useRouter } from 'next/router';
 import { Fragment, useMemo } from 'react';
 import checkPermissions from '../helpers/check-permissions';
 import type { CommonData } from '../hooks/use-common-data';
@@ -28,11 +27,7 @@ interface Props {
 }
 
 const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
-  const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+  const commonData: CommonData = useCommonData();
 
   const hasPermissionReportGlobalPin: boolean = useMemo(() => {
     return checkPermissions(commonData, ReportPermissionsEnum.GLOBAL_PIN);
