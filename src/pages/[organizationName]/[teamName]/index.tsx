@@ -35,6 +35,17 @@ const debouncedPaginatedReports = debounce(
         query += `&${queryParams}`;
       }
       const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getPaginatedReports(query);
+      // Sort by global_pin and user_pin
+      result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
+
       const dataWithAuthors = [];
 
       for (const x of result.data.results) {

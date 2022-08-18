@@ -94,8 +94,8 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
                     {hasPermissionReportGlobalPin && (
                       <Menu.Item>
                         {({ active }) => (
-                          <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
-                            <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
+                          <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-100': active })}>
+                            <button className={classNames(active ? 'bg-gray-100 text-gray-500' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
                               {report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
                             </button>
                           </div>
@@ -105,8 +105,8 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
                     {!report.pin && (
                       <Menu.Item>
                         {({ active }) => (
-                          <div onClick={toggleUserPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
-                            <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
+                          <div onClick={toggleUserPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-100': active })}>
+                            <button className={classNames(active ? 'bg-gray-100 text-gray-500' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
                               {report.user_pin ? 'Remove pin from the top' : 'Pin to the top'}
                             </button>
                           </div>
