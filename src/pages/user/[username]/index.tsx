@@ -10,8 +10,8 @@ import moment from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 import UserProfileInfo from '@/components/UserProfileInfo';
 import { useUser } from '@/hooks/use-user';
-import { PureSpinner } from '../../../components/PureSpinner';
-import ReportBadge from '../../../components/ReportBadge';
+import { PureSpinner } from '@/components/PureSpinner';
+import ReportBadge from '@/components/ReportBadge';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 60;
@@ -90,7 +90,7 @@ const Index = () => {
       return;
     }
     getReports(1);
-  }, [user, token]);
+  }, [user, token, userProfile]);
 
   useEffect(() => {
     if (!user || !token) {
@@ -293,7 +293,8 @@ const Index = () => {
   if (!userProfile) {
     return null;
   }
-  console.log('activityFeed', activityFeed);
+  console.log('requestingReports', requestingReports);
+  console.log('userProfile', userProfile);
   return (
     <div>
       <UserProfileInfo userId={user.id} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfile} />
