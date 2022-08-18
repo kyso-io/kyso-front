@@ -293,8 +293,7 @@ const Index = () => {
   if (!userProfile) {
     return null;
   }
-  console.log('requestingReports', requestingReports);
-  console.log('userProfile', userProfile);
+
   return (
     <div>
       <UserProfileInfo userId={user.id} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfile} />
