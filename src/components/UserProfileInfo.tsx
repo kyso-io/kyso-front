@@ -19,7 +19,7 @@ type IUserProfileInfo = {
 
 const UserProfileInfo = (props: IUserProfileInfo) => {
   const { onChangeTab, currentTab, userProfile } = props;
-  const user: UserDTO = useUser();
+  const user: UserDTO | null = useUser();
   const router = useRouter();
   const tabs = [{ name: 'Overview' }, { name: 'Activity' }];
 

@@ -178,7 +178,7 @@ const Index = () => {
                   refreshReport();
                 }}
                 hasPermissionEditReport={
-                  hasPermissionEditReport || ((report.user_id === commonData.user.id || report.author_ids.includes(commonData.user.id as string)) && hasPermissionEditReportOnlyMine)
+                  hasPermissionEditReport || ((report.user_id === commonData.user?.id || report.author_ids.includes(commonData.user?.id as string)) && hasPermissionEditReportOnlyMine)
                 }
                 hasPermissionDeleteReport={hasPermissionDeleteReport}
                 commonData={commonData}
