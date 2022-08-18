@@ -31,7 +31,7 @@ const fetcher = async (props: Props) => {
     args.version = parseInt(version as string, 10);
   }
 
-  const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+  const api: Api = new Api(token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
 
   const result: NormalizedResponseDTO<GithubFileHash | GithubFileHash[]> = await api.getReportFileTree(args);
   let tr = [result.data];

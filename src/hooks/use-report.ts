@@ -20,7 +20,7 @@ export const useReport = (props: Props): [ReportDTO, KeyedMutator<ReportDTO | nu
     const resultReportAction = await dispatch(
       fetchReportsAction({
         filter: {
-          team_id: commonData.team.id,
+          team_id: commonData.team?.id,
           sluglified_name: reportName,
         },
       }),

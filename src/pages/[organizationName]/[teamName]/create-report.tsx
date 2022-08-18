@@ -183,7 +183,7 @@ const CreateReport = () => {
     setBusy(true);
 
     const api: Api = new Api(token);
-    api.setOrganizationSlug(commonData.organization.sluglified_name);
+    api.setOrganizationSlug(commonData.organization!.sluglified_name);
     api.setTeamSlug(commonData.team.sluglified_name);
 
     try {
@@ -207,7 +207,7 @@ const CreateReport = () => {
       main: 'Readme.md',
       title,
       description,
-      organization: commonData.organization.sluglified_name,
+      organization: commonData.organization!.sluglified_name,
       team: commonData.team.sluglified_name,
       tags,
       type: ReportType.Markdown,

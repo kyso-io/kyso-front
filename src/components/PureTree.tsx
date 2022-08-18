@@ -35,7 +35,7 @@ const PureTree = (props: IPureTree) => {
     tree = parentTree;
   }
 
-  const reportUrl = `${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}`;
+  const reportUrl = `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}`;
 
   let paths = (path as string).split('/');
   // dont show the filename in these breadcrumbs - not enough space

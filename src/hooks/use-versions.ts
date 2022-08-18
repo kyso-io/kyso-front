@@ -20,7 +20,7 @@ const token: string | null = getLocalStorageItem('jwt');
 
 const fetcher = async (props: Props) => {
   const { commonData, report } = props;
-  const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+  const api: Api = new Api(token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
   const result: NormalizedResponseDTO<Version[]> = await api.getReportVersions(report!.id as string, '-created_at');
   return result.data as Version[];
 };
