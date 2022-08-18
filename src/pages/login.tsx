@@ -12,6 +12,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import uuid from 'uuid';
+import ErrorNotification from '@/components/ErrorNotification';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -26,7 +27,8 @@ const Index = () => {
   const { redirect } = router.query;
 
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  // const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const dispatch = useDispatch<AppDispatch>();
   const [bitbucketUrl, setBitbucketUrl] = useState('');
@@ -199,6 +201,8 @@ const Index = () => {
           router.push('/');
         }
       }, 200);
+    } else {
+      setError('Invalid credentials');
     }
   };
 
@@ -241,7 +245,7 @@ const Index = () => {
             {rightLogo && <img src={rightLogo} className="h-8" alt="logo" />}
           </div>
         )}
-
+        <div className="text-right">{error && <ErrorNotification message={error} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-6 flex-col grow items-center mx-auto max-w-[1400px] space-x-10">
           <div className="prose grow max-w-none px-6 m-0">
             <h1>Kyso.io</h1>
