@@ -33,7 +33,7 @@ const UnureFileHeader = (props: Props) => {
   // if (currentItem?.type === 'file') {
   //   paths = paths.slice(0, -1);
   // }
-  const reportUrl = `${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}`;
+  const reportUrl = `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}`;
   const crumbs = paths
     .filter((p) => p !== '')
     .map((p, index) => {

@@ -10,8 +10,8 @@ import { useUser } from './use-user';
 export type CommonData = {
   permissions: TokenPermissions | null;
   token: string | null;
-  organization: Organization;
-  team: Team;
+  organization: Organization | null;
+  team: Team | null;
   user: UserDTO;
 };
 

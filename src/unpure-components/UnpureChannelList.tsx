@@ -39,7 +39,7 @@ const ChannelList = (props: Props) => {
       return;
     }
 
-    await dispatch(deleteTeamAction(commonData.team.id!));
+    await dispatch(deleteTeamAction(commonData.team!.id!));
   };
 
   return (
