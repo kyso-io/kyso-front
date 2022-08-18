@@ -1,4 +1,5 @@
 import { Helper } from '@/helpers/Helper';
+import { useUser } from '@/hooks/use-user';
 import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
@@ -6,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
 import { loginAction, setError as storeSetError } from '@kyso-io/kyso-store';
-import { useUser } from '@/hooks/use-user';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -192,13 +192,11 @@ const Index = () => {
     const result = await dispatch(loginAction(loginData));
     if (result?.payload) {
       localStorage.setItem('jwt', result.payload);
-      setTimeout(() => {
-        if (redirect) {
-          router.push(redirect as string);
-        } else {
-          router.push('/');
-        }
-      }, 200);
+      if (redirect) {
+        router.push(redirect as string);
+      } else {
+        router.push('/');
+      }
     }
   };
 

@@ -11,10 +11,7 @@ const Index = () => {
     router.push(`${router.basePath}/in/settings`);
   });
 
-  // const commonData: CommonData = useCommonData({
-  //   organizationName: router.query.organizationName as string,
-  //   teamName: router.query.teamName as string,
-  // });
+  // const commonData: CommonData = useCommonData();
 
   // let sluglifiedName = '';
 

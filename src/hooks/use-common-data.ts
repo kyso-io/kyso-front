@@ -1,9 +1,10 @@
+import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
+import type { ActionWithPayload, NormalizedResponseDTO, Organization, ResourcePermissions, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
 import type { RootState } from '@kyso-io/kyso-store';
 import { Api, fetchOrganizationAction, fetchTeamAction } from '@kyso-io/kyso-store';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import type { ActionWithPayload, NormalizedResponseDTO, Organization, ResourcePermissions, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
-import useSWR from 'swr';
-import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
+import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
 import { useAppDispatch, useAppSelector } from './redux-hooks';
 import { useUser } from './use-user';
 
@@ -15,76 +16,77 @@ export type CommonData = {
   user: UserDTO;
 };
 
-interface Props {
-  organizationName: string;
-  teamName: string;
-}
-
-export const useCommonData = (props: Props): CommonData => {
-  const { organizationName, teamName } = props;
+export const useCommonData = (): CommonData => {
   const dispatch = useAppDispatch();
-
+  const router = useRouter();
   const user: UserDTO = useUser();
   const token: string | null = useAppSelector((state: RootState) => state.auth.token);
   const permissions: TokenPermissions | null = useAppSelector((state: RootState) => state.auth.currentUserPermissions);
-
-  const fetcher = async () => {
-    const api: Api = new Api();
-    let organizationResourcePermissions: ResourcePermissions | undefined;
-    if (permissions) {
-      organizationResourcePermissions = permissions!.organizations!.find((org: ResourcePermissions) => org.name === organizationName);
-    }
-
-    let organization: Organization | null = null;
-    let team: Team | null = null;
-
-    if (organizationName) {
-      if (organizationResourcePermissions) {
-        const fetchOrganizationRequest: ActionWithPayload<Organization> = await dispatch(fetchOrganizationAction(organizationResourcePermissions.id));
-        organization = fetchOrganizationRequest.payload;
-        setLocalStorageItem('last_organization', organization?.sluglified_name as string);
-      } else {
-        try {
-          api.setOrganizationSlug(organizationName);
-          const result: NormalizedResponseDTO<Organization> = await api.getOrganizationBySlug(organizationName);
-          organization = result.data;
-          setLocalStorageItem('last_organization', organization?.sluglified_name as string);
-        } catch (e) {
-          console.error(e);
-        }
-      }
-    }
-
-    if (permissions) {
-      if (teamName && organization) {
-        const teamResourcePermissions: ResourcePermissions | undefined = permissions!.teams!.find((t: ResourcePermissions) => {
-          return t.name === teamName && t.organization_id === organization!.id;
-        });
-        if (teamResourcePermissions) {
-          const fetchTeamRequest: ActionWithPayload<Team> = await dispatch(fetchTeamAction(teamResourcePermissions.id));
-          team = fetchTeamRequest.payload;
-        }
-      }
-    }
-
-    return { organization, team, token, permissions };
-  };
-
-  const [mounted, setMounted] = useState(false);
-  const { data } = useSWR(mounted ? `use-common-data` : null, fetcher);
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [team, setTeam] = useState<Team | null>(null);
 
   useEffect(() => {
-    if (!organizationName || !permissions) {
+    if (!router.isReady) {
       return;
     }
-    setMounted(true);
-  }, [organizationName, teamName, permissions]);
+    const organizationName = router.query.organizationName as string;
+    const teamName = router.query.teamName as string;
+    const getData = async () => {
+      const api: Api = new Api();
+      let organizationResourcePermissions: ResourcePermissions | undefined;
+      if (permissions) {
+        organizationResourcePermissions = permissions!.organizations!.find((org: ResourcePermissions) => org.name === organizationName);
+      }
+      let org: Organization | null = null;
+      let t: Team | null = null;
+      if (organizationName) {
+        if (organizationResourcePermissions) {
+          const fetchOrganizationRequest: ActionWithPayload<Organization> = await dispatch(fetchOrganizationAction(organizationResourcePermissions.id));
+          org = fetchOrganizationRequest.payload;
+          setOrganization(org);
+        } else {
+          try {
+            api.setOrganizationSlug(organizationName);
+            const result: NormalizedResponseDTO<Organization> = await api.getOrganizationBySlug(organizationName);
+            org = result.data;
+            setOrganization(org);
+          } catch (e) {
+            console.error(e);
+          }
+        }
+        let lastOrganizationDict: { [userId: string]: string } = {};
+        if (user && org) {
+          const lastOrganizationStr: string | null = getLocalStorageItem('last_organization');
+          if (lastOrganizationStr) {
+            try {
+              lastOrganizationDict = JSON.parse(lastOrganizationStr);
+            } catch (e) {}
+          }
+          lastOrganizationDict[user.id] = org!.sluglified_name;
+          setLocalStorageItem('last_organization', JSON.stringify(lastOrganizationDict));
+        }
+      }
+      if (permissions) {
+        if (teamName && org) {
+          const teamResourcePermissions: ResourcePermissions | undefined = permissions!.teams!.find((resourcePermission: ResourcePermissions) => {
+            return resourcePermission.name === teamName && resourcePermission.organization_id === org!.id;
+          });
+          if (teamResourcePermissions) {
+            const fetchTeamRequest: ActionWithPayload<Team> = await dispatch(fetchTeamAction(teamResourcePermissions.id));
+            t = fetchTeamRequest.payload;
+            setTeam(t);
+          }
+        }
+      }
+    };
+    getData();
+  }, [router?.isReady]);
 
   return {
     permissions,
     token,
-    organization: data?.organization,
-    team: data?.team,
+    organization,
+    team,
     user,
-  } as CommonData;
+  };
 };

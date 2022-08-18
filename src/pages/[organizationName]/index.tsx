@@ -36,11 +36,7 @@ interface PaginationParams {
 const Index = () => {
   const router = useRouter();
   useRedirectIfNoJWT();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
-
+  const commonData: CommonData = useCommonData();
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
   const [organizationInfo, setOrganizationInfo] = useState<OrganizationInfoDto | null>(null);
   const [paginationParams, setPaginationParams] = useState<PaginationParams>({
