@@ -20,7 +20,7 @@ const ChannelSelector = (props: IChannelSelectorProps) => {
     <div className="rounded-md flex items-center">
       {commonData.team && (
         <a
-          href={`/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}`}
+          href={`/${commonData.organization?.sluglified_name}/${commonData.team.sluglified_name}`}
           className="hover:bg-gray-100 border-y border-l rounded-l p-2 p-x-4 flex items-center w-fit text-sm text-left font-medium text-gray-700"
         >
           <ViewListIcon className="shrink-0 h-5 w-5 text-gray-700 mr-2 group-hover:text-gray-500" aria-hidden="true" />

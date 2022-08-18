@@ -67,7 +67,7 @@ const Index = () => {
         setBusy(false);
         return;
       }
-      router.push(`/${commonData.organization.sluglified_name}/${team.sluglified_name}`);
+      router.push(`/${commonData.organization?.sluglified_name}/${team.sluglified_name}`);
     } catch (er: any) {
       setError(er.message);
       setBusy(false);
@@ -167,7 +167,7 @@ const Index = () => {
                                   }}
                                 />
                                 <label htmlFor="organization-only" className="ml-3 block text-sm  text-gray-700">
-                                  <strong>Organization only:</strong> all members of the <span className="font-medium">{commonData.organization.display_name}</span> organization can access this
+                                  <strong>Organization only:</strong> all members of the <span className="font-medium">{commonData.organization?.display_name}</span> organization can access this
                                   channel.
                                 </label>
                               </div>
