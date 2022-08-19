@@ -178,7 +178,11 @@ const Index = () => {
           router.push('/');
         }
       }
-    } catch (e) {}
+      /* eslint-disable @typescript-eslint/no-explicit-any */
+    } catch (e: any) {
+      const message: string = typeof e.response !== 'undefined' ? e.response.data.message : e.message;
+      setError(message);
+    }
   };
 
   /* const responseGoogle = async (response: any) => {
@@ -368,7 +372,7 @@ const Index = () => {
               </a>
             )}
 
-            {error && <div className="text-red-500 p-2">{error}</div>}
+            {error && <div className="text-red-500 text-center p-2">{error}</div>}
           </div>
         </main>
       </div>
