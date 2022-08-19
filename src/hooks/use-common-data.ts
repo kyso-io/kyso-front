@@ -21,16 +21,20 @@ export const useCommonData = (): CommonData => {
   const fetcher = async (): Promise<{ user: UserDTO | null; permissions: TokenPermissions | null; organization: Organization | null; team: Team | null }> => {
     const organizationName: string | undefined = router.query.organizationName as string | undefined;
     const teamName: string | undefined = router.query.teamName as string | undefined;
-    const api: Api = new Api(token);
+    const api: Api = new Api();
     let user: UserDTO | null = null;
-    try {
-      const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      user = responseUserDto.data;
-    } catch (e) {}
     let permissions: TokenPermissions | null = null;
-    if (user) {
+    if (token) {
+      api.setToken(token);
       try {
+        const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+        user = responseUserDto.data;
         const response: NormalizedResponseDTO<TokenPermissions> = await api.getUserPermissions(user!.username);
+        permissions = response.data;
+      } catch (e) {}
+    } else {
+      try {
+        const response: NormalizedResponseDTO<TokenPermissions> = await api.getPublicPermissions();
         permissions = response.data;
       } catch (e) {}
     }
@@ -43,10 +47,17 @@ export const useCommonData = (): CommonData => {
     if (organizationName) {
       api.setOrganizationSlug(organizationName);
       if (organizationResourcePermissions) {
-        try {
-          const fetchOrganizationRequest: NormalizedResponseDTO<Organization> = await api.getOrganization(organizationResourcePermissions.id);
-          organization = fetchOrganizationRequest.data;
-        } catch (e) {}
+        if (token) {
+          try {
+            const fetchOrganizationRequest: NormalizedResponseDTO<Organization> = await api.getOrganization(organizationResourcePermissions.id);
+            organization = fetchOrganizationRequest.data;
+          } catch (e) {}
+        } else {
+          try {
+            const result: NormalizedResponseDTO<Organization> = await api.getOrganizationBySlug(organizationName);
+            organization = result.data;
+          } catch (e) {}
+        }
       } else {
         try {
           const result: NormalizedResponseDTO<Organization> = await api.getOrganizationBySlug(organizationName);

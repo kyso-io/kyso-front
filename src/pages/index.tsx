@@ -1,18 +1,20 @@
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import NoLayout from '@/layouts/NoLayout';
 import type { NormalizedResponseDTO, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import ChannelList from '../components/ChannelList';
+import type { CommonData } from '../hooks/use-common-data';
+import { useCommonData } from '../hooks/use-common-data';
+import KysoApplicationLayout from '../layouts/KysoApplicationLayout';
 
 const Index = () => {
-  useRedirectIfNoJWT();
   const router = useRouter();
   const token: string | null = getLocalStorageItem('jwt');
+  const commonData: CommonData = useCommonData();
 
   useEffect(() => {
-    const getData = async () => {
+    const redirectUserToOrganization = async () => {
       if (!token) {
         return;
       }
@@ -48,12 +50,18 @@ const Index = () => {
         }
       }
     };
-    getData();
+    redirectUserToOrganization();
   }, []);
 
-  return <div className="mt-8">{/* <h1>Select an organization from the dropdown above.</h1> */}</div>;
+  return (
+    <div className="flex flex-row space-x-8">
+      <div className="w-1/6">
+        <ChannelList basePath={router.basePath} commonData={commonData} />
+      </div>
+    </div>
+  );
 };
 
-Index.layout = NoLayout;
+Index.layout = KysoApplicationLayout;
 
 export default Index;

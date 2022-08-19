@@ -7,7 +7,7 @@ import type { CommonData } from './use-common-data';
 
 interface Props {
   path: string;
-  report: ReportDTO;
+  report: ReportDTO | null | undefined;
   version?: string;
   commonData: CommonData;
 }
@@ -23,7 +23,7 @@ const fetcher = async (props: Props) => {
   }
 
   const args: ArgType = {
-    reportId: report.id as string,
+    reportId: report!.id as string,
     filePath: (path as string) || '',
   };
 

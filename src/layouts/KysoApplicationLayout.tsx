@@ -15,7 +15,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   const router = useRouter();
   const commonData: CommonData = useCommonData();
 
-  const [report] = useReport({
+  const { report } = useReport({
     commonData,
     reportName: router.query.reportName as string,
   });

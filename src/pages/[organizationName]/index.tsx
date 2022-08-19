@@ -3,7 +3,6 @@ import ChannelList from '@/components/ChannelList';
 import Pagination from '@/components/Pagination';
 import PureAvatar from '@/components/PureAvatar';
 import PureNewReportPopover from '@/components/PureNewReportPopover';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
@@ -17,8 +16,8 @@ import ManageUsers from '../../components/ManageUsers';
 import OrganizationInfo from '../../components/OrganizationActivity';
 import ReportBadge from '../../components/ReportBadge';
 import { getLocalStorageItem } from '../../helpers/isomorphic-local-storage';
-import { useCommonData } from '../../hooks/use-common-data';
 import type { CommonData } from '../../hooks/use-common-data';
+import { useCommonData } from '../../hooks/use-common-data';
 import { useInterval } from '../../hooks/use-interval';
 import type { Member } from '../../types/member';
 
@@ -35,7 +34,6 @@ interface PaginationParams {
 
 const Index = () => {
   const router = useRouter();
-  useRedirectIfNoJWT();
   const commonData: CommonData = useCommonData();
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
   const [organizationInfo, setOrganizationInfo] = useState<OrganizationInfoDto | null>(null);
@@ -59,7 +57,7 @@ const Index = () => {
   }, [token, organizationName, paginationParams]);
 
   useEffect(() => {
-    if (!commonData.organization || !commonData.user) {
+    if (!commonData.organization) {
       return;
     }
     getOrganizationsInfo();
@@ -144,20 +142,15 @@ const Index = () => {
         const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
         const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
         const allAuthorsData: UserDTO[] = [];
-
         for (const authorId of uniqueAllAuthorsId) {
           /* eslint-disable no-await-in-loop */
-          const userData: NormalizedResponseDTO<UserDTO> = await api.getUserProfileById(authorId);
-
-          if (userData && userData.data) {
-            allAuthorsData.push(userData.data);
+          if (result.relations?.user[authorId]) {
+            allAuthorsData.push(result.relations.user[authorId]);
           }
         }
-
         x.authors = allAuthorsData;
         dataWithAuthors.push(x);
       }
-
       result.data.results = dataWithAuthors;
       setPaginatedResponseDto(result.data);
     } catch (e) {}
@@ -407,7 +400,7 @@ const Index = () => {
               onInviteNewUser={inviteNewUser}
               onRemoveUser={removeUser}
             />
-            <PureNewReportPopover commonData={commonData} />
+            {commonData?.user && <PureNewReportPopover commonData={commonData} />}
           </div>
         </div>
         <div className="flex items-center w justify-between p-2">

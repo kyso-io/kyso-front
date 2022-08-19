@@ -4,13 +4,14 @@ import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
+import React from 'react';
 import { ChannelSelector } from './ChannelSelector';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props {
   basePath: string;
   children?: ReactNode;
-  report?: ReportDTO;
+  report: ReportDTO | null | undefined;
   commonData: CommonData;
 }
 
@@ -81,9 +82,9 @@ const BreadcrumbNavbar = (props: Props) => {
           )}
 
           {commonData.organization &&
-            breadcrumb.map((page, index) => (
-              <>
-                <div key={page.href} className="flex items-center">
+            breadcrumb.map((page: BreadcrumbItem, index: number) => (
+              <React.Fragment key={page.href}>
+                <div className="flex items-center">
                   <a
                     href={page.href}
                     className={page.current ? 'text-sm hover:underline font-medium text-gray-800 hover:text-black' : 'text-sm hover:underline  font-medium text-gray-500 hover:text-gray-700'}
@@ -97,7 +98,7 @@ const BreadcrumbNavbar = (props: Props) => {
                     <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                   </svg>
                 )}
-              </>
+              </React.Fragment>
             ))}
         </div>
       )}

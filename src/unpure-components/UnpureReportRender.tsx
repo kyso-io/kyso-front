@@ -131,7 +131,6 @@ const UnpureReportRender = (props: Props) => {
   };
 
   const editInlineComment = async (id: string, user_ids: string[], text: string) => {
-    console.log(user_ids);
     try {
       const data = await dispatch(
         updateInlineCommentAction({

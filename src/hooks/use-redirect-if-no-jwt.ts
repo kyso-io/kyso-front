@@ -1,11 +1,11 @@
-import useSWR from 'swr';
+import { Helper } from '@/helpers/Helper';
+import type { KeyValue } from '@/model/key-value.model';
+import type { Token } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import decode from 'jwt-decode';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import type { Token } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
-import { Helper } from '@/helpers/Helper';
-import type { KeyValue } from '@/model/key-value.model';
+import useSWR from 'swr';
 
 export type DecodedToken = {
   exp: number;
@@ -13,8 +13,6 @@ export type DecodedToken = {
   iss: string;
   payload: Token;
 };
-
-// export type IUseRedirectProps = {};
 
 export const useRedirectIfNoJWT = () => {
   const router = useRouter();
