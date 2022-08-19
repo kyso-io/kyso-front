@@ -2,6 +2,7 @@ import { faChrome, faJediOrder, faJs, faLinux, faMarkdown, faPython } from '@for
 import { faFolder } from '@fortawesome/pro-solid-svg-icons';
 import { faFile, faFileCsv, faFileImage, faFilePdf, faText } from '@fortawesome/pro-light-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import Link from 'next/link';
 
 type IPureTreeItemProps = {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
@@ -9,8 +10,7 @@ type IPureTreeItemProps = {
   href?: string;
   current?: boolean;
   isMainFile: boolean;
-  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  onClick?: (e: any) => void;
+  onNavigation?: (e: React.MouseEvent<HTMLElement>) => void;
 };
 
 function classNames(...classes: string[]) {
@@ -18,7 +18,7 @@ function classNames(...classes: string[]) {
 }
 
 const PureTreeItem = (props: IPureTreeItemProps) => {
-  const { treeItem, href, current = false, isMainFile, onClick } = props;
+  const { treeItem, href, current = false, isMainFile, onNavigation } = props;
   let icon = treeItem.type === 'file' ? faFile : faFolder;
 
   const extension = treeItem.path.split('.').pop();
@@ -62,11 +62,10 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
   }
 
   return (
-    <>
+    <Link href={href || `/${treeItem.path}`}>
       <a
-        href={href || `/${treeItem.path}`}
-        className={classNames('p-2 min-w-[250px] text-sm w-full group flex items-center justify-between truncate', current ? 'bg-gray-200' : 'hover:bg-gray-100')}
-        onClick={onClick}
+        className={classNames('p-2 min-w-[250px] max-w-[250px] text-sm w-full group flex items-center justify-between truncate', current ? 'bg-gray-200' : 'hover:bg-gray-100')}
+        onClick={onNavigation}
       >
         <div className={classNames('group flex items-center font-medium text-slate-500', 'hover:text-gray-900', 'font-normal')}>
           <span className="w-6 text-blue-400">
@@ -109,7 +108,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
         </div>
         <div>{isMainFile && <div className="text-sm text-gray-500">main</div>}</div>
       </a>
-    </>
+    </Link>
   );
 };
 

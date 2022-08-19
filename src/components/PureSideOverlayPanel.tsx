@@ -3,16 +3,17 @@ import type { ReactElement } from 'react';
 import { useState, useRef } from 'react';
 import { useEventListener } from 'usehooks-ts';
 import classNames from '@/helpers/class-names';
-import { getLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 
 type IPureSideOverlayPanel = {
-  key?: string;
+  cacheKey?: string;
   children: ReactElement;
 };
 
 const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
-  const { key = 'overlay-panel-state', children } = props;
-  const [open, setOpen] = useState(JSON.parse(getLocalStorageItem(key) || 'true'));
+  const { cacheKey = 'overlay-panel-state', children } = props;
+  // const [open, setOpen] = useState(JSON.parse(getLocalStorageItem(cacheKey) || 'true'));
+  const [open, setOpen] = useState(true);
 
   const hoverRef = useRef(null);
   const tooltipRef = useRef(null);
@@ -33,7 +34,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
   useEventListener('mouseleave', () => setShowTooltip(false), tooltipRef);
 
   const setOpenAndCache = () => {
-    setLocalStorageItem(key, !open);
+    setLocalStorageItem(cacheKey, !open);
     setOpen(!open);
 
     setIsHover(false);
@@ -41,7 +42,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
   };
 
   return (
-    <div ref={hoverRef} className={classNames(open ? 'border-r bg-gray-50' : '')}>
+    <div ref={hoverRef} className={classNames('relative', open ? 'border-r bg-gray-50' : '')}>
       <div className="relative items-center flex flex-row w-full justify-end">
         <button ref={tooltipRef} type="button" className="m-4 p-2 border h-fit rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-0" onClick={() => setOpenAndCache()}>
           <span className="sr-only">Close panel</span>
@@ -63,7 +64,9 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
         )}
       </div>
 
-      {(open || isHover) && <div className={classNames('bg-white px-2 py-16', isHover && !open ? 'fixed z-50 shadow-lg border rounded-r' : '', open ? 'bg-gray-50' : '')}>{children}</div>}
+      {(open || isHover) && (
+        <div className={classNames('bg-white px-2 py-2 min-h-[400px]', isHover && !open ? 'absolute z-50 shadow-lg border rounded-r' : '', open ? 'bg-gray-50' : '')}>{children}</div>
+      )}
     </div>
   );
 };

@@ -288,7 +288,7 @@ const CreateReport = () => {
   }, []);
 
   return (
-    <div>
+    <div className="p-2">
       <div className="flex flex-row items-center">
         <div className="w-1/6"></div>
         <div className="w-4/6">

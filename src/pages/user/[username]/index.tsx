@@ -266,7 +266,7 @@ const Index = () => {
   }
 
   return (
-    <div>
+    <div className="p-2">
       <UserProfileInfo user={user} onChangeTab={onChangeTab} currentTab={currentTab} />
       <div className="flex flex-row space-x-8">
         <div className="w-1/6" />

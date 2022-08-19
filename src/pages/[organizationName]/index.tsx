@@ -389,7 +389,7 @@ const Index = () => {
   // END ORGANIZATION MEMBERS
 
   return (
-    <div className="flex flex-row space-x-8">
+    <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>

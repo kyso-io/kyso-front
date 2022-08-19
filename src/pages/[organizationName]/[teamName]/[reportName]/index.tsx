@@ -155,120 +155,133 @@ const Index = () => {
   return (
     <div>
       {/* <div className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent inline mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300 w-5 h-5"></div> */}
-
-      {report && commonData && (
-        <div className="flex flex-row">
-          {selfTree && report && commonData && (
-            <PureSideOverlayPanel key={router.asPath}>
-              <PureTree path={currentPath} basePath={router.basePath} commonData={commonData} report={report} version={router.query.version as string} selfTree={selfTree} parentTree={parentTree} />
-            </PureSideOverlayPanel>
-          )}
-
-          <div className="w-full p-4 flex lg:flex-col flex-col justify-between rounded">
-            <PureReportHeader
-              reportUrl={`${reportUrl}`}
-              frontEndUrl={frontEndUrl}
-              versions={versions}
-              report={report}
-              authors={authors}
-              version={version}
-              onUpvoteReport={async () => {
-                await dispatch(toggleUserStarReportAction(report.id as string));
-                refreshReport();
-              }}
-              hasPermissionEditReport={
-                hasPermissionEditReport || ((report.user_id === commonData.user.id || report.author_ids.includes(commonData.user.id as string)) && hasPermissionEditReportOnlyMine)
-              }
-              hasPermissionDeleteReport={hasPermissionDeleteReport}
-              commonData={commonData}
-            />
-
-            <UnpureFileHeader
-              tree={selfTree}
-              report={report}
-              fileToRender={fileToRender}
-              basePath={router.basePath}
+      <div className="flex flex-row">
+        <PureSideOverlayPanel key={report?.name} cacheKey={report?.name}>
+          {report && commonData && (
+            <PureTree
               path={currentPath}
-              version={router.query.version as string}
+              basePath={router.basePath}
               commonData={commonData}
+              report={report}
+              version={router.query.version as string}
+              selfTree={selfTree}
+              parentTree={parentTree}
+              // onNavigation={(e) => {
+              //   e.preventDefault()
+              //   router.push(e.currentTarget.href)
+              // }}
             />
+          )}
+        </PureSideOverlayPanel>
 
-            {fileToRender && onlyVisibleCell && (
-              <div className="w-full border-x border-b flex justify-end p-2 prose prose-sm text-xs max-w-none">
-                Showing only this cell.
-                <button
-                  onClick={() => {
-                    const qs = { ...router.query };
-                    delete qs.cell;
-                    return router.push({
-                      query: { ...qs },
-                    });
-                  }}
-                  className="ml-1 text-blue-500"
-                >
-                  View entire notebook
-                </button>
-              </div>
-            )}
-
-            {fileToRender && (
-              <UnpureReportRender
-                fileToRender={fileToRender}
-                report={report}
-                channelMembers={channelMembers}
-                commonData={commonData}
-                onlyVisibleCell={onlyVisibleCell}
+        {selfTree && report && commonData && (
+          <>
+            <div className="w-full p-4 flex lg:flex-col flex-col justify-between rounded">
+              <PureReportHeader
+                reportUrl={`${reportUrl}`}
                 frontEndUrl={frontEndUrl}
-                enabledCreateInlineComment={hasPermissionCreateInlineComment}
-                enabledEditInlineComment={hasPermissionEditInlineComment}
-                enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
+                versions={versions}
+                report={report}
+                authors={authors}
+                version={version}
+                onUpvoteReport={async () => {
+                  await dispatch(toggleUserStarReportAction(report.id as string));
+                  refreshReport();
+                }}
+                hasPermissionEditReport={
+                  hasPermissionEditReport || ((report.user_id === commonData.user.id || report.author_ids.includes(commonData.user.id as string)) && hasPermissionEditReportOnlyMine)
+                }
+                hasPermissionDeleteReport={hasPermissionDeleteReport}
+                commonData={commonData}
               />
-            )}
 
-            {!fileToRender && (
-              <div className="border-x border-b rounded-b">
-                <div className="prose p-3">Please choose a file in the filebrowser on the left.</div>
-              </div>
-            )}
+              <UnpureFileHeader
+                tree={selfTree}
+                report={report}
+                fileToRender={fileToRender}
+                basePath={router.basePath}
+                path={currentPath}
+                version={router.query.version as string}
+                commonData={commonData}
+              />
 
-            {hasPermissionReadComment && (
-              <div className="block pb-44 w-full">
-                <div className="prose max-w-none ">
-                  <h2>Comments</h2>
+              {fileToRender && onlyVisibleCell && (
+                <div className="w-full border-x border-b flex justify-end p-2 prose prose-sm text-xs max-w-none">
+                  Showing only this cell.
+                  <button
+                    onClick={() => {
+                      const qs = { ...router.query };
+                      delete qs.cell;
+                      return router.push({
+                        query: { ...qs },
+                      });
+                    }}
+                    className="ml-1 text-blue-500"
+                  >
+                    View entire notebook
+                  </button>
                 </div>
-                <PureComments
+              )}
+
+              {fileToRender && (
+                <UnpureReportRender
+                  fileToRender={fileToRender}
                   report={report}
-                  commonData={commonData}
-                  hasPermissionCreateComment={hasPermissionCreateComment}
-                  hasPermissionDeleteComment={hasPermissionDeleteComment}
                   channelMembers={channelMembers}
-                  submitComment={submitComment}
-                  userSelectorHook={(id?: string): UserDTO | undefined => {
-                    return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
-                  }}
-                  onDeleteComment={async (id: string) => {
-                    await dispatch(deleteCommentAction(id as string));
-                  }}
-                  commentSelectorHook={(parentId: string | null = null) => {
-                    const values: Comment[] = Object.values(allComments || []);
-                    if (values.length === 0) {
-                      return [];
-                    }
-                    const filtered: Comment[] = values.filter((comment: Comment) => {
-                      return comment!.comment_id === parentId;
-                    });
-                    // Sort comments by created_at desc
-                    filtered.sort((a: Comment, b: Comment) => {
-                      return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
-                    });
-                    return filtered;
-                  }}
+                  commonData={commonData}
+                  onlyVisibleCell={onlyVisibleCell}
+                  frontEndUrl={frontEndUrl}
+                  enabledCreateInlineComment={hasPermissionCreateInlineComment}
+                  enabledEditInlineComment={hasPermissionEditInlineComment}
+                  enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
                 />
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+              )}
+
+              {!fileToRender && (
+                <div className="border-x border-b rounded-b">
+                  <div className="prose p-3">Please choose a file in the filebrowser on the left.</div>
+                </div>
+              )}
+
+              {hasPermissionReadComment && (
+                <div className="block pb-44 w-full">
+                  <div className="prose max-w-none ">
+                    <h2>Comments</h2>
+                  </div>
+                  <PureComments
+                    report={report}
+                    commonData={commonData}
+                    hasPermissionCreateComment={hasPermissionCreateComment}
+                    hasPermissionDeleteComment={hasPermissionDeleteComment}
+                    channelMembers={channelMembers}
+                    submitComment={submitComment}
+                    userSelectorHook={(id?: string): UserDTO | undefined => {
+                      return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
+                    }}
+                    onDeleteComment={async (id: string) => {
+                      await dispatch(deleteCommentAction(id as string));
+                    }}
+                    commentSelectorHook={(parentId: string | null = null) => {
+                      const values: Comment[] = Object.values(allComments || []);
+                      if (values.length === 0) {
+                        return [];
+                      }
+                      const filtered: Comment[] = values.filter((comment: Comment) => {
+                        return comment!.comment_id === parentId;
+                      });
+                      // Sort comments by created_at desc
+                      filtered.sort((a: Comment, b: Comment) => {
+                        return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
+                      });
+                      return filtered;
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 };

@@ -47,7 +47,7 @@ const BreadcrumbNavbar = (props: Props) => {
     );
   }
 
-  if (Array.isArray(router.query.path)) {
+  if (report && Array.isArray(router.query.path)) {
     const paths = router.query.path;
     const reportUrl = `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
     const version = router.query.version as string;
@@ -57,7 +57,6 @@ const BreadcrumbNavbar = (props: Props) => {
         return new BreadcrumbItem(p, `${reportUrl}/${paths.slice(0, index + 1).join('/')}${version ? `?version=${version}` : ''}`, false);
       });
 
-    console.log(crumbs);
     breadcrumb.push(...crumbs);
   }
 
@@ -82,8 +81,8 @@ const BreadcrumbNavbar = (props: Props) => {
 
           {commonData.organization &&
             breadcrumb.map((page, index) => (
-              <>
-                <div key={page.href} className="flex items-center">
+              <div key={page.href} className="flex items-center">
+                <div className="flex items-center">
                   <a
                     href={page.href}
                     className={page.current ? 'text-sm hover:underline font-medium text-gray-800 hover:text-black' : 'text-sm hover:underline  font-medium text-gray-500 hover:text-gray-700'}
@@ -97,7 +96,7 @@ const BreadcrumbNavbar = (props: Props) => {
                     <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                   </svg>
                 )}
-              </>
+              </div>
             ))}
         </div>
       )}

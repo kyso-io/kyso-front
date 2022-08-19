@@ -3,6 +3,7 @@ import classNames from '@/helpers/class-names';
 import type { GithubFileHash, ReportDTO } from '@kyso-io/kyso-model';
 import { ChevronLeftIcon } from '@heroicons/react/solid';
 import type { CommonData } from '@/hooks/use-common-data';
+import Link from 'next/link';
 
 type IPureTree = {
   path: string;
@@ -12,10 +13,11 @@ type IPureTree = {
   version: string;
   selfTree: GithubFileHash[];
   parentTree: GithubFileHash[];
+  onNavigation?: (e: React.MouseEvent<HTMLElement>) => void;
 };
 
 const PureTree = (props: IPureTree) => {
-  const { path, basePath, version, commonData, report, selfTree = [], parentTree = [] } = props;
+  const { path, basePath, version, commonData, report, selfTree = [], parentTree = [], onNavigation } = props;
 
   let currentPath = '';
   if (path) {
@@ -109,13 +111,11 @@ const PureTree = (props: IPureTree) => {
           <div className={classNames('flex items-center whitespace-nowrap')}>
             {crumbs.map((crumb, index) => (
               <div key={`${crumb.href}+${index}`} className="flex flex-row items-center">
-                <a
-                  key={`${crumb.href}+${index}`}
-                  href={crumb.href}
-                  className={classNames('hover:underline text-sm', index + 1 === crumbs.length ? 'font-normal text-gray-400' : 'font-medium text-indigo-500')}
-                >
-                  {crumb.path}
-                </a>
+                <Link href={crumb.href}>
+                  <a className={classNames('hover:underline text-sm', index + 1 === crumbs.length ? 'font-normal text-gray-400' : 'font-medium text-indigo-500')} onClick={onNavigation}>
+                    {crumb.path}
+                  </a>
+                </Link>
                 <svg className="shrink-0 h-3 w-3 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                   <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                 </svg>
@@ -124,18 +124,21 @@ const PureTree = (props: IPureTree) => {
           </div>
         )}
 
-        <a href={getNewPath()} className={classNames('text-sm items-center', currentPath ? 'text-gray-400 hover:underline cursor-pointer' : 'text-gray-200 cursor-default')}>
-          <div className={classNames('group flex min-h-[24px] items-center', '')}>
+        <Link href={getNewPath()}>
+          <a
+            className={classNames('text-sm items-center group flex min-h-[24px]', currentPath ? 'text-gray-400 hover:underline cursor-pointer' : 'text-gray-200 cursor-default')}
+            onClick={onNavigation}
+          >
             <ChevronLeftIcon className="h-6 w-6 mr-1" />
-            <span>back</span>
-          </div>
-        </a>
+            back
+          </a>
+        </Link>
       </div>
 
       <div>
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {tree?.map((item: any) => (
-          <PureTreeItem key={item.path} treeItem={item} current={lastPathSegment === item.path} isMainFile={item.path === report.main_file} href={getNewPath(item)} />
+          <PureTreeItem onNavigation={onNavigation} key={item.path} treeItem={item} current={lastPathSegment === item.path} isMainFile={item.path === report.main_file} href={getNewPath(item)} />
         ))}
       </div>
     </div>
