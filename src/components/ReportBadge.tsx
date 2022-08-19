@@ -64,7 +64,7 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
         </div>
         <div className="flex-1 min-w-0 py-3 pr-2 relative">
           <a href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
-            <p className="text-sm font-medium text-gray-900 pb-2">{report.title}</p>
+            <h3 className="text-lg leading-6 font-medium text-gray-900">{report.title}</h3>
             <p className="text-sm text-gray-500">{description}</p>
           </a>
           <div className="absolute bottom-2 right-0">
@@ -94,8 +94,8 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
                     {hasPermissionReportGlobalPin && (
                       <Menu.Item>
                         {({ active }) => (
-                          <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
-                            <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
+                          <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-100': active })}>
+                            <button className={classNames(active ? 'bg-gray-100 text-gray-500' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
                               {report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
                             </button>
                           </div>
@@ -105,8 +105,8 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
                     {!report.pin && (
                       <Menu.Item>
                         {({ active }) => (
-                          <div onClick={toggleUserPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
-                            <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
+                          <div onClick={toggleUserPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-100': active })}>
+                            <button className={classNames(active ? 'bg-gray-100 text-gray-500' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
                               {report.user_pin ? 'Remove pin from the top' : 'Pin to the top'}
                             </button>
                           </div>
