@@ -5,13 +5,11 @@ import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import checkPermissions from '@/helpers/check-permissions';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
-import { useAuthors } from '@/hooks/use-authors';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import { useFileToRender } from '@/hooks/use-file-to-render';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { useReport } from '@/hooks/use-report';
 import { useTree } from '@/hooks/use-tree';
 import { useUserEntities } from '@/hooks/use-user-entities';
@@ -19,8 +17,8 @@ import { useVersions } from '@/hooks/use-versions';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import UnpureFileHeader from '@/unpure-components/UnpureFileHeader';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
-import type { Comment, GithubFileHash, KysoSetting, User, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import type { Comment, GithubFileHash, KysoSetting, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -28,14 +26,17 @@ import { dirname } from 'path';
 import { useEffect, useMemo } from 'react';
 
 const Index = () => {
-  useRedirectIfNoJWT();
   const dispatch = useAppDispatch();
   const router = useRouter();
   const commonData: CommonData = useCommonData();
 
   const version = router.query.version ? (router.query.version as string) : undefined;
 
-  const [report, refreshReport] = useReport({
+  const {
+    report,
+    authors,
+    mutate: refreshReport,
+  } = useReport({
     commonData,
     reportName: router.query.reportName as string,
   });
@@ -45,7 +46,6 @@ const Index = () => {
     commonData,
   });
 
-  const authors: User[] = useAuthors({ report });
   const channelMembers = useChannelMembers({ commonData });
 
   const allComments = useAppSelector((state) => state.comments.entities);
@@ -89,6 +89,13 @@ const Index = () => {
     tree: selfTree,
     mainFile: currentPath === '' ? report?.main_file : undefined,
   });
+
+  useEffect(() => {
+    if (commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC && !commonData.user) {
+      // Unauthenticated user trying to access a non public team
+      router.replace(`/${commonData.organization?.sluglified_name}`);
+    }
+  }, [commonData?.team]);
 
   useEffect(() => {
     if (report) {

@@ -7,7 +7,7 @@ import type { CommonData } from './use-common-data';
 
 interface Props {
   commonData: CommonData;
-  report: ReportDTO;
+  report: ReportDTO | null | undefined;
 }
 
 export interface Version {

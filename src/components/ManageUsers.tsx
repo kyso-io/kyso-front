@@ -7,6 +7,7 @@ import type { UserDTO } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
+import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import slugify from 'slugify';
 import checkPermissions from '../helpers/check-permissions';
@@ -47,6 +48,7 @@ interface Props {
 }
 
 const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles, onUpdateRoleMember, onInviteNewUser, onRemoveUser }: Props) => {
+  const router = useRouter();
   const [query, setQuery] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<UserDTO | Member | null>(null);
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -232,9 +234,11 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       return (
                         <li
                           key={member.id}
-                          className={clsx('py-1', isOrgAdmin || (isTeamAdmin && showTeamRoles) ? 'cursor-pointer' : 'cursor-default')}
+                          className={clsx('py-1', !commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles) ? 'cursor-pointer' : 'cursor-default')}
                           onClick={() => {
-                            if (isOrgAdmin || (isTeamAdmin && showTeamRoles)) {
+                            if (!commonData.user) {
+                              router.push(`/user/${member.username}`);
+                            } else if (isOrgAdmin || (isTeamAdmin && showTeamRoles)) {
                               setSelectedOrgRole(member.organization_roles[0]!);
                               if (member.team_roles && member.team_roles.length > 0) {
                                 setSelectedTeamRole(member.team_roles[0]!);
@@ -249,7 +253,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                               <PureAvatar src={member.avatar_url} title={member.display_name} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
                             </div>
                             <div className="flex-1" style={{ marginLeft: 10 }}>
-                              <p className="text-xs font-medium text-gray-900 truncate">{member.username}</p>
+                              <p className="text-xs font-medium text-gray-900 truncate">{member.display_name}</p>
                               <p className="text-xs text-gray-500 truncate">{roles}</p>
                             </div>
                           </div>
@@ -383,9 +387,11 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       return (
                         <li
                           key={user.id}
-                          className={clsx('py-1', isOrgAdmin || (commonData.team != null && isTeamAdmin) ? 'cursor-pointer' : 'cursor-default')}
+                          className={clsx('py-1', !commonData.user || isOrgAdmin || (commonData.team != null && isTeamAdmin) ? 'cursor-pointer' : 'cursor-default')}
                           onClick={() => {
-                            if (isOrgAdmin || (commonData.team != null && isTeamAdmin)) {
+                            if (!commonData.user) {
+                              router.push(`/user/${user.username}`);
+                            } else if (isOrgAdmin || (commonData.team != null && isTeamAdmin)) {
                               // Check if user is member
                               const index: number = members.findIndex((m: Member) => m.id === user.id);
                               if (index !== -1) {
