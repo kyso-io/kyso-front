@@ -42,43 +42,47 @@ export const useFileToRender = (props: Props): FileToRender | null => {
   });
 
   const fetcher = async () => {
-    let ftr: FileToRender | null = null;
+    try {
+      let ftr: FileToRender | null = null;
 
-    if (validFile) {
-      ftr = {
-        path: validFile!.path,
-        id: validFile!.id,
-        path_scs: validFile!.path_scs,
-        percentLoaded: 0,
-        isLoading: false,
-        content: null,
-      };
-    }
-
-    setFileToRender(ftr);
-
-    if (ftr && !ftr.path.endsWith('.html')) {
-      setFileToRender({ ...ftr, isLoading: true });
-      const api: Api = new Api(token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-      const data: Buffer = await api.getReportFileContent(ftr.id, {
-        onDownloadProgress(progressEvent) {
-          if (progressEvent.lengthComputable) {
-            const percentLoaded = progressEvent.loaded / progressEvent.total;
-            setFileToRender({ ...(ftr as FileToRender), percentLoaded });
-          } else {
-            setFileToRender({ ...(ftr as FileToRender), percentLoaded: (fileToRender?.percentLoaded as number) + 1 });
-          }
-        },
-      });
-      // const result = await dispatch(fetchFileContentAction(ftr.id));
-      let content = null;
-      if (data && isImage(ftr.path)) {
-        content = Buffer.from(data).toString('base64');
-      } else if (data) {
-        content = Buffer.from(data).toString('utf-8');
+      if (validFile) {
+        ftr = {
+          path: validFile!.path,
+          id: validFile!.id,
+          path_scs: validFile!.path_scs,
+          percentLoaded: 0,
+          isLoading: false,
+          content: null,
+        };
       }
 
-      setFileToRender({ ...ftr, content, isLoading: false });
+      setFileToRender(ftr);
+
+      if (ftr && !ftr.path.endsWith('.html')) {
+        setFileToRender({ ...ftr, isLoading: true });
+        const api: Api = new Api(token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+        const data: Buffer = await api.getReportFileContent(ftr.id, {
+          onDownloadProgress(progressEvent) {
+            if (progressEvent.lengthComputable) {
+              const percentLoaded = progressEvent.loaded / progressEvent.total;
+              setFileToRender({ ...(ftr as FileToRender), percentLoaded });
+            } else {
+              setFileToRender({ ...(ftr as FileToRender), percentLoaded: (fileToRender?.percentLoaded as number) + 1 });
+            }
+          },
+        });
+        // const result = await dispatch(fetchFileContentAction(ftr.id));
+        let content = null;
+        if (data && isImage(ftr.path)) {
+          content = Buffer.from(data).toString('base64');
+        } else if (data) {
+          content = Buffer.from(data).toString('utf-8');
+        }
+
+        setFileToRender({ ...ftr, content, isLoading: false });
+      }
+    } catch (e) {
+      // error fetching file
     }
   };
 

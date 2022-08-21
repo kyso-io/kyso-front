@@ -157,22 +157,32 @@ const Index = () => {
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
 
   return (
-    <div className="flex flex-row space-x-24">
-      {/* <div 
-        className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent inline mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300 w-5 h-5"></div> */}
+    <div>
+      {/* <div className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent inline mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300 w-5 h-5"></div> */}
+      <div className="flex flex-row">
+        <PureSideOverlayPanel key={report?.name} cacheKey={report?.name}>
+          <>
+            {report && commonData && (
+              <PureTree
+                path={currentPath}
+                basePath={router.basePath}
+                commonData={commonData}
+                report={report}
+                version={router.query.version as string}
+                selfTree={selfTree}
+                parentTree={parentTree}
+                // onNavigation={(e) => {
+                //   e.preventDefault()
+                //   router.push(e.currentTarget.href)
+                // }}
+              />
+            )}
+          </>
+        </PureSideOverlayPanel>
 
-      <div className="w-0/12">
         {selfTree && report && commonData && (
-          <PureSideOverlayPanel>
-            <PureTree path={currentPath} basePath={router.basePath} commonData={commonData} report={report} version={router.query.version as string} selfTree={selfTree} parentTree={parentTree} />
-          </PureSideOverlayPanel>
-        )}
-      </div>
-
-      <div className="w-10/12">
-        {report && commonData && (
-          <div className="flex flex-col space-y-2">
-            <div className="w-9/12 flex lg:flex-row flex-col justify-between rounded">
+          <>
+            <div className="w-full p-4 flex lg:flex-col flex-col justify-between rounded">
               <PureReportHeader
                 reportUrl={`${reportUrl}`}
                 frontEndUrl={frontEndUrl}
@@ -190,67 +200,55 @@ const Index = () => {
                 hasPermissionDeleteReport={hasPermissionDeleteReport}
                 commonData={commonData}
               />
-            </div>
 
-            <div>
-              <div className="w-9/12 flex container flex-col lg:space-y-0 space-y-2">
-                <div>
-                  {/* {fileToRender && ( */}
-                  <UnpureFileHeader
-                    tree={selfTree}
-                    report={report}
-                    fileToRender={fileToRender}
-                    basePath={router.basePath}
-                    path={currentPath}
-                    version={router.query.version as string}
-                    commonData={commonData}
-                  />
-                  {/* )} */}
+              <UnpureFileHeader
+                tree={selfTree}
+                report={report}
+                fileToRender={fileToRender}
+                basePath={router.basePath}
+                path={currentPath}
+                version={router.query.version as string}
+                commonData={commonData}
+              />
+
+              {fileToRender && onlyVisibleCell && (
+                <div className="w-full border-x border-b flex justify-end p-2 prose prose-sm text-xs max-w-none">
+                  Showing only this cell.
+                  <button
+                    onClick={() => {
+                      const qs = { ...router.query };
+                      delete qs.cell;
+                      return router.push({
+                        query: { ...qs },
+                      });
+                    }}
+                    className="ml-1 text-blue-500"
+                  >
+                    View entire notebook
+                  </button>
                 </div>
+              )}
 
-                {fileToRender && onlyVisibleCell && (
-                  <div className="w-full border-x border-b flex justify-end p-2 prose prose-sm text-xs max-w-none">
-                    Showing only this cell.
-                    <button
-                      onClick={() => {
-                        const qs = { ...router.query };
-                        delete qs.cell;
-                        return router.push({
-                          query: { ...qs },
-                        });
-                      }}
-                      className="ml-1 text-blue-500"
-                    >
-                      View entire notebook
-                    </button>
-                  </div>
-                )}
-              </div>
+              {fileToRender && (
+                <UnpureReportRender
+                  fileToRender={fileToRender}
+                  report={report}
+                  channelMembers={channelMembers}
+                  commonData={commonData}
+                  onlyVisibleCell={onlyVisibleCell}
+                  frontEndUrl={frontEndUrl}
+                  enabledCreateInlineComment={hasPermissionCreateInlineComment}
+                  enabledEditInlineComment={hasPermissionEditInlineComment}
+                  enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
+                />
+              )}
 
-              <div className="w-12/12 flex lg:flex-col flex-col">
-                {fileToRender && (
-                  <UnpureReportRender
-                    fileToRender={fileToRender}
-                    report={report}
-                    channelMembers={channelMembers}
-                    commonData={commonData}
-                    onlyVisibleCell={onlyVisibleCell}
-                    frontEndUrl={frontEndUrl}
-                    enabledCreateInlineComment={hasPermissionCreateInlineComment}
-                    enabledEditInlineComment={hasPermissionEditInlineComment}
-                    enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
-                  />
-                )}
+              {!fileToRender && (
+                <div className="border-x border-b rounded-b">
+                  <div className="prose p-3">Please choose a file in the filebrowser on the left.</div>
+                </div>
+              )}
 
-                {!fileToRender && (
-                  <div className="w-9/12 border-x border-b rounded-b">
-                    <div className="prose p-3">Please choose a file in the filebrowser on the left.</div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="w-9/12 lg:max-w-5xl lg:min-w-5xl flex lg:flex-row flex-col justify-between rounded">
               {hasPermissionReadComment && (
                 <div className="block pb-44 w-full">
                   <div className="prose max-w-none ">
@@ -287,7 +285,7 @@ const Index = () => {
                 </div>
               )}
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

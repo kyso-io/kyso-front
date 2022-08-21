@@ -80,7 +80,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-row space-x-8">
+    <div className="flex flex-row space-x-8 p-2">
       <div className="w-2/12"></div>
       <div className="w-6/12 flex flex-col space-y-6">
         <div>

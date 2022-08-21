@@ -39,7 +39,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
   }
 
   return (
-    <div className="flex flex-col space-y-6 min-h-screen">
+    <div className="flex flex-col min-h-screen">
       <div className="flex flex-col z-10 w-screen border-b">
         <Disclosure as="div" className="bg-slate-600">
           {({ open }) => (
@@ -180,7 +180,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
         )}
       </div>
 
-      <div className="grow p-2 w-full rounded">{children}</div>
+      <div className="grow w-full rounded">{children}</div>
       <div className="flex-none">
         <Footer />
       </div>

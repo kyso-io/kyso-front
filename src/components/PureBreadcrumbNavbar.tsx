@@ -48,7 +48,7 @@ const BreadcrumbNavbar = (props: Props) => {
     );
   }
 
-  if (Array.isArray(router.query.path)) {
+  if (report && Array.isArray(router.query.path)) {
     const paths = router.query.path;
     const reportUrl = `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
     const version = router.query.version as string;
@@ -58,7 +58,6 @@ const BreadcrumbNavbar = (props: Props) => {
         return new BreadcrumbItem(p, `${reportUrl}/${paths.slice(0, index + 1).join('/')}${version ? `?version=${version}` : ''}`, false);
       });
 
-    console.log(crumbs);
     breadcrumb.push(...crumbs);
   }
 
@@ -82,8 +81,8 @@ const BreadcrumbNavbar = (props: Props) => {
           )}
 
           {commonData.organization &&
-            breadcrumb.map((page: BreadcrumbItem, index: number) => (
-              <React.Fragment key={page.href}>
+            breadcrumb.map((page, index) => (
+              <div key={page.href} className="flex items-center">
                 <div className="flex items-center">
                   <a
                     href={page.href}
@@ -98,7 +97,7 @@ const BreadcrumbNavbar = (props: Props) => {
                     <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
                   </svg>
                 )}
-              </React.Fragment>
+              </div>
             ))}
         </div>
       )}

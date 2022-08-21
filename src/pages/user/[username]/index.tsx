@@ -295,7 +295,7 @@ const Index = () => {
   }
   console.log('activityFeed', activityFeed);
   return (
-    <div>
+    <div className="p-2">
       <UserProfileInfo userId={user.id} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfile} />
       <div className="flex flex-row space-x-8">
         <div className="w-1/6" />

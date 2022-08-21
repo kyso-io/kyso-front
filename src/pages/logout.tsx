@@ -22,7 +22,7 @@ const Page = () => {
   }, []);
 
   return (
-    <div className="">
+    <div className="p-2">
       <div className="">
         <h2>Logging you out.</h2>
       </div>

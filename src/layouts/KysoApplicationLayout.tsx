@@ -41,9 +41,13 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   ];
 
   return (
-    <PureKysoApplicationLayout commonData={commonData} report={report} basePath={router.basePath} userNavigation={userNavigation}>
-      {children}
-    </PureKysoApplicationLayout>
+    <>
+      {commonData && router.isReady && (
+        <PureKysoApplicationLayout commonData={commonData} report={report} basePath={router.basePath} userNavigation={userNavigation}>
+          {children}
+        </PureKysoApplicationLayout>
+      )}
+    </>
   );
 };
 export default KysoApplicationLayout;
