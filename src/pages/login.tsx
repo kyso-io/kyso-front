@@ -41,7 +41,7 @@ const Index = () => {
   const [enablePingSamlAuth, setEnablePingSamlAuth] = useState(true);
   const [pingUrl, setPingUrl] = useState('');
 
-  const [rightLogo, setRightLogo] = useState('/assets/images/kyso-logo-and-name-dark.svg');
+  const [rightLogo, setRightLogo] = useState(null);
   const [leftLogo, setLeftLogo] = useState('/assets/images/kyso-logo-and-name-dark.svg');
 
   // const [globalCss, setglobalCss] = useState(false);

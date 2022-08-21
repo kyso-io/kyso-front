@@ -3,8 +3,9 @@ import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
-import { BellIcon, MenuIcon, ShareIcon, XIcon } from '@heroicons/react/solid';
+import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import { Fragment, useState } from 'react';
@@ -83,6 +84,13 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                     <div className="hidden md:block">
                       <div className="flex items-center ml-6">
                         {/* Profile dropdown */}
+                        {!commonData.user && (
+                          <div className="flex items-center px-5">
+                            <Link href="/login">
+                              <a className="text-sm">Login</a>
+                            </Link>
+                          </div>
+                        )}
                         {commonData.user && (
                           <Menu as="div" className="relative">
                             <div>
@@ -123,7 +131,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         {open ? <XIcon className="block h-6 w-6" aria-hidden="true" /> : <MenuIcon className="block h-6 w-6" aria-hidden="true" />}
                       </Disclosure.Button>
                     </div>
-                    <ShareIcon className={classNames('h-6 w-6', 'mx-6', 'text-white')} aria-hidden="true" />
+                    {/* <ShareIcon className={classNames('h-6 w-6', 'mx-6', 'text-white')} aria-hidden="true" /> */}
                   </div>
                 </div>
               </div>
@@ -161,6 +169,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                       </button>
                     </div>
                   )}
+
                   <div className="mt-3 space-y-1 px-2">
                     {userNavigation.map((item) => (
                       <Disclosure.Button key={item.name} as="a" href={item.href} className="block rounded-md px-3 py-2 text-base font-medium text-white hover:bg-indigo-500/75">
