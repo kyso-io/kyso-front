@@ -2,15 +2,16 @@ import ActivityFeedComponent from '@/components/ActivityFeed';
 import UserProfileInfo from '@/components/UserProfileInfo';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useInterval } from '@/hooks/use-interval';
+import { useUser } from '@/hooks/use-user';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { ActivityFeed, NormalizedResponseDTO, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
+import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { PureSpinner } from '../../../components/PureSpinner';
 import ReportBadge from '../../../components/ReportBadge';
-import { useUser } from '../../../hooks/use-user';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 60;
@@ -62,7 +63,12 @@ const debouncedPaginatedReports = debounce(
 );
 
 const Index = () => {
-  const user: UserDTO = useUser();
+  const user: UserDTO | null = useUser();
+  const router = useRouter();
+  const { username } = router.query;
+
+  const [userProfile, setUser] = useState<UserDTO>();
+
   const [currentTab, onChangeTab] = useState<string>('Overview');
   // REPORTS
   const [reportsResponse, setReportsResponse] = useState<NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null>(null);
@@ -73,7 +79,14 @@ const Index = () => {
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
 
   useEffect(() => {
-    if (!user || !token) {
+    if (!user || !token || !username) {
+      return;
+    }
+    getUserByUsername();
+  }, [user, token, username]);
+
+  useEffect(() => {
+    if (!user || !token || !userProfile) {
       return;
     }
     getReports(1);
@@ -86,8 +99,18 @@ const Index = () => {
     getActivityFeed();
   }, [user, token, datetimeActivityFeed]);
 
+  const getUserByUsername = async () => {
+    try {
+      const api: Api = new Api(token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserProfileByUsername(username as string);
+      setUser(result.data);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   const refreshLastActivityFeed = useCallback(async () => {
-    if (!user || !token) {
+    if (!user || !token || !userProfile) {
       return;
     }
     const api: Api = new Api(token);
@@ -95,7 +118,7 @@ const Index = () => {
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getUserActivityFeed({
         start_datetime: moment().add(-DAYS_ACTIVITY_FEED, 'days').toDate(),
         end_datetime: moment().toDate(),
-        user_id: user.id,
+        user_id: userProfile.id,
       });
 
       result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
@@ -127,15 +150,18 @@ const Index = () => {
       setActivityFeed(newActivityFeed);
       setHasMore(result.data.length > 0);
     } catch (e) {}
-  }, [token, user]);
+  }, [token, user, userProfile]);
 
   useInterval(refreshLastActivityFeed, ACTIVITY_FEED_POOLING_MS);
 
   // START REPORT ACTIONS
 
   const getReports = async (page: number, queryParams?: string) => {
+    if (!userProfile) {
+      return;
+    }
     setRequestingReports(true);
-    debouncedPaginatedReports(token!, user.id, page, queryParams ?? '', (result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
+    debouncedPaginatedReports(token!, userProfile.id, page, queryParams ?? '', (result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
       setReportsResponse(result);
       setRequestingReports(false);
     });
@@ -227,7 +253,7 @@ const Index = () => {
   // START ACTIVITY FEED
 
   const getActivityFeed = async () => {
-    if (!token) {
+    if (!token || !userProfile) {
       return;
     }
     const api: Api = new Api(token);
@@ -236,7 +262,7 @@ const Index = () => {
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getUserActivityFeed({
         start_datetime: startDatetime,
         end_datetime: datetimeActivityFeed,
-        user_id: user.id,
+        user_id: userProfile.id,
       });
       result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
@@ -264,10 +290,13 @@ const Index = () => {
   if (!user) {
     return null;
   }
-
+  if (!userProfile) {
+    return null;
+  }
+  console.log('activityFeed', activityFeed);
   return (
     <div className="p-2">
-      <UserProfileInfo user={user} onChangeTab={onChangeTab} currentTab={currentTab} />
+      <UserProfileInfo userId={user.id} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfile} />
       <div className="flex flex-row space-x-8">
         <div className="w-1/6" />
         <div className="w-4/6">
@@ -324,6 +353,11 @@ const Index = () => {
               <p className="text-xs font-bold leading-relaxed text-gray-700 py-10">Most recent</p>
               <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
             </React.Fragment>
+          )}
+          {!activityFeed && (
+            <div className="pt-10 pb-20">
+              <p>The user has no activity</p>
+            </div>
           )}
         </div>
       </div>

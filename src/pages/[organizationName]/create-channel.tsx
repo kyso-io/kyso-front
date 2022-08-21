@@ -1,26 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import ChannelList from '@/components/ChannelList';
+import { PureSpinner } from '@/components/PureSpinner';
 import checkPermissions from '@/helpers/check-permissions';
+import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import { ArrowRightIcon } from '@heroicons/react/solid';
 import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { checkTeamNameIsUniqueAction, createTeamAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
-import ChannelList from '@/components/ChannelList';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { ArrowRightIcon } from '@heroicons/react/solid';
-import { useAppDispatch } from '@/hooks/redux-hooks';
-import { PureSpinner } from '@/components/PureSpinner';
 
 const Index = () => {
   const router = useRouter();
   useRedirectIfNoJWT();
   const dispatch = useAppDispatch();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+  const commonData: CommonData = useCommonData();
 
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
@@ -67,7 +64,7 @@ const Index = () => {
         setBusy(false);
         return;
       }
-      router.push(`/${commonData.organization.sluglified_name}/${team.sluglified_name}`);
+      router.push(`/${commonData.organization?.sluglified_name}/${team.sluglified_name}`);
     } catch (er: any) {
       setError(er.message);
       setBusy(false);
@@ -167,7 +164,7 @@ const Index = () => {
                                   }}
                                 />
                                 <label htmlFor="organization-only" className="ml-3 block text-sm  text-gray-700">
-                                  <strong>Organization only:</strong> all members of the <span className="font-medium">{commonData.organization.display_name}</span> organization can access this
+                                  <strong>Organization only:</strong> all members of the <span className="font-medium">{commonData.organization?.display_name}</span> organization can access this
                                   channel.
                                 </label>
                               </div>

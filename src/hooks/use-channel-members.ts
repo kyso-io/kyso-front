@@ -13,8 +13,8 @@ const token: string | null = getLocalStorageItem('jwt');
 
 const fetcher = async (props: Props) => {
   const { commonData } = props;
-  const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
-  const result: NormalizedResponseDTO<TeamMember[]> = await api.getTeamAssignees(commonData.team.id as string);
+  const api: Api = new Api(token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+  const result: NormalizedResponseDTO<TeamMember[]> = await api.getTeamAssignees(commonData.team?.id as string);
 
   return result.data as TeamMember[];
 };

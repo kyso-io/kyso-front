@@ -29,7 +29,7 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
     }
 
     setAlertText('Deleting...');
-    await dispatch(deleteTeamAction(commonData.team.id!));
+    await dispatch(deleteTeamAction(commonData.team!.id!));
     setAlertText('Deleted.');
     router.push(`${router.basePath}/${commonData.organization?.sluglified_name}`);
   };

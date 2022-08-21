@@ -60,7 +60,7 @@ export const useFileToRender = (props: Props): FileToRender | null => {
 
       if (ftr && !ftr.path.endsWith('.html')) {
         setFileToRender({ ...ftr, isLoading: true });
-        const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+        const api: Api = new Api(token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
         const data: Buffer = await api.getReportFileContent(ftr.id, {
           onDownloadProgress(progressEvent) {
             if (progressEvent.lengthComputable) {

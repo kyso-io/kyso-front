@@ -14,7 +14,7 @@ import BreadcrumbNavbar from './PureBreadcrumbNavbar';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
-  report?: ReportDTO;
+  report: ReportDTO | null | undefined;
   basePath: string;
   userNavigation: { name: string; href: string; newTab: boolean }[];
   commonData: CommonData;

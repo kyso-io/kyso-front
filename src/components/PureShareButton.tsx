@@ -19,7 +19,7 @@ const PureShareButton = (props: Props) => {
 
   const [url, setUrl] = useState('');
   useEffect(() => {
-    setUrl(`${window.location.origin}${basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}`);
+    setUrl(`${window.location.origin}${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}`);
   });
 
   return (

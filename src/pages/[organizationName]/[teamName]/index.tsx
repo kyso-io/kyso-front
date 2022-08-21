@@ -1,9 +1,9 @@
 import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import type { ActivityFeed, NormalizedResponseDTO, Organization, OrganizationMember, PaginatedResponseDto, ReportDTO, SearchUser, SearchUserDto, Team, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
@@ -35,28 +35,32 @@ const debouncedPaginatedReports = debounce(
         query += `&${queryParams}`;
       }
       const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getPaginatedReports(query);
-      const dataWithAuthors = [];
+      // Sort by global_pin and user_pin
+      result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
 
+      const dataWithAuthors = [];
       for (const x of result.data.results) {
         const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
         const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
         const allAuthorsData: UserDTO[] = [];
-
         for (const authorId of uniqueAllAuthorsId) {
           /* eslint-disable no-await-in-loop */
-          const userData: NormalizedResponseDTO<UserDTO> = await api.getUserProfileById(authorId);
-
-          if (userData && userData.data) {
-            allAuthorsData.push(userData.data);
+          if (result.relations?.user[authorId]) {
+            allAuthorsData.push(result.relations.user[authorId]);
           }
         }
-
         x.authors = allAuthorsData;
         dataWithAuthors.push(x);
       }
-
       result.data.results = dataWithAuthors;
-      console.log('result', result.data);
       cb(result);
     } catch (e) {
       cb(null);
@@ -67,11 +71,7 @@ const debouncedPaginatedReports = debounce(
 
 const Index = () => {
   const router = useRouter();
-  useRedirectIfNoJWT();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+  const commonData: CommonData = useCommonData();
   // MEMBERS
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
@@ -88,17 +88,28 @@ const Index = () => {
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
 
   useEffect(() => {
-    if (!commonData.team || !commonData.user) {
+    if (commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC && !commonData.user) {
+      // Unauthenticated user trying to access a non public team
+      router.replace(`/${commonData.organization?.sluglified_name}`);
+    }
+  }, [commonData?.team]);
+
+  useEffect(() => {
+    if (!commonData.team) {
       return;
     }
     getTeamMembers();
   }, [commonData?.team, commonData?.user]);
 
   useEffect(() => {
-    if (!commonData.organization || !commonData.team || !commonData.user) {
+    if (!commonData.organization || !commonData.team) {
       return;
     }
-    getSearchUser();
+    if (commonData.user) {
+      getSearchUser();
+    } else {
+      getReports(1);
+    }
   }, [commonData?.organization, commonData?.team, commonData?.user]);
 
   useEffect(() => {
@@ -110,7 +121,7 @@ const Index = () => {
 
   const getReports = async (page: number, queryParams?: string) => {
     setRequestingReports(true);
-    debouncedPaginatedReports(token!, commonData.organization, commonData.team, page, queryParams ?? '', (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
+    debouncedPaginatedReports(token!, commonData.organization!, commonData.team!, page, queryParams ?? '', (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
       setReportsResponse(data);
       setRequestingReports(false);
     });
@@ -121,39 +132,57 @@ const Index = () => {
   const getTeamMembers = async () => {
     const m: Member[] = [];
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name);
       const resultOrgMembers: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
       let userMember: Member | null = null;
+      resultOrgMembers.data.forEach((organizationMember: OrganizationMember) => {
+        if (organizationMember.id === commonData.user?.id) {
+          userMember = {
+            id: organizationMember.id,
+            nickname: organizationMember.nickname,
+            username: organizationMember.username,
+            display_name: organizationMember.nickname,
+            avatar_url: organizationMember.avatar_url,
+            email: organizationMember.email,
+            organization_roles: organizationMember.organization_roles,
+            team_roles: [],
+          };
+        } else {
+          m.push({
+            id: organizationMember.id,
+            nickname: organizationMember.nickname,
+            username: organizationMember.username,
+            display_name: organizationMember.nickname,
+            avatar_url: organizationMember.avatar_url,
+            email: organizationMember.email,
+            organization_roles: organizationMember.organization_roles,
+            team_roles: [],
+          });
+        }
+      });
+
       api.setTeamSlug(commonData.team!.sluglified_name);
       const resultTeamMembers: NormalizedResponseDTO<TeamMember[]> = await api.getTeamMembers(commonData.team!.id!);
       resultTeamMembers.data.forEach((teamMember: TeamMember) => {
-        const orgMember: OrganizationMember | undefined = resultOrgMembers.data.find((member: OrganizationMember) => member.id === teamMember.id);
-        if (orgMember) {
-          if (orgMember.id === commonData.user.id) {
-            userMember = {
-              id: orgMember.id,
-              nickname: orgMember.nickname,
-              username: orgMember.username,
-              display_name: orgMember.nickname,
-              avatar_url: orgMember.avatar_url,
-              email: orgMember.email,
-              organization_roles: orgMember.organization_roles,
-              team_roles: teamMember.team_roles,
-              membership_origin: teamMember.membership_origin,
-            };
-          } else {
-            m.push({
-              id: teamMember.id,
-              nickname: teamMember.nickname,
-              username: teamMember.username,
-              display_name: teamMember.nickname,
-              avatar_url: teamMember.avatar_url,
-              email: teamMember.email,
-              organization_roles: orgMember.organization_roles,
-              team_roles: teamMember.team_roles,
-              membership_origin: teamMember.membership_origin,
-            });
-          }
+        const member: Member | undefined = m.find((mem: Member) => mem.id === teamMember.id);
+        if (userMember && userMember.id === teamMember.id) {
+          userMember.team_roles = teamMember.team_roles;
+          userMember.membership_origin = teamMember.membership_origin;
+        } else if (member) {
+          member.team_roles = teamMember.team_roles;
+          member.membership_origin = teamMember.membership_origin;
+        } else {
+          m.push({
+            id: teamMember.id,
+            nickname: teamMember.nickname,
+            username: teamMember.username,
+            display_name: teamMember.nickname,
+            avatar_url: teamMember.avatar_url,
+            email: teamMember.email,
+            organization_roles: [],
+            team_roles: teamMember.team_roles,
+            membership_origin: teamMember.membership_origin,
+          });
         }
       });
       if (userMember) {
@@ -167,7 +196,7 @@ const Index = () => {
 
   const searchUsers = async (query: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name);
       const result: NormalizedResponseDTO<UserDTO[]> = await api.getUsers({
         userIds: [],
         page: 1,
@@ -185,9 +214,9 @@ const Index = () => {
     const index: number = members.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
       try {
-        const api: Api = new Api(token, commonData.organization.sluglified_name);
+        const api: Api = new Api(token, commonData.organization!.sluglified_name);
         await api.addUserToOrganization({
-          organizationId: commonData.organization.id!,
+          organizationId: commonData.organization!.id!,
           userId,
           role: organizationRole,
         });
@@ -197,7 +226,7 @@ const Index = () => {
     } else {
       if (!members[index]!.organization_roles.includes(organizationRole)) {
         try {
-          const api: Api = new Api(token, commonData.organization.sluglified_name);
+          const api: Api = new Api(token, commonData.organization!.sluglified_name);
           await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
             members: [
               {
@@ -212,7 +241,7 @@ const Index = () => {
       }
       if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
         try {
-          const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+          const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
           await api.updateTeamMemberRoles(commonData.team!.id!, {
             members: [
               {
@@ -231,10 +260,10 @@ const Index = () => {
 
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name);
       await api.inviteNewUser({
         email,
-        organizationSlug: commonData.organization.sluglified_name,
+        organizationSlug: commonData.organization!.sluglified_name,
         organizationRole,
       });
       getTeamMembers();
@@ -245,8 +274,8 @@ const Index = () => {
 
   const removeUser = async (userId: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
-      await api.deleteUserFromTeam(commonData.team.id!, userId);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      await api.deleteUserFromTeam(commonData.team!.id!, userId);
       getTeamMembers();
     } catch (e) {
       console.error(e);
@@ -259,7 +288,7 @@ const Index = () => {
 
   const toggleUserStarReport = async (reportId: string) => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportId);
       const { data: report } = result;
       const { results: reports } = reportsResponse!.data;
@@ -280,7 +309,7 @@ const Index = () => {
 
   const toggleUserPinReport = async (reportId: string) => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportId);
       const { data: report } = result;
       const { results: reports } = reportsResponse!.data;
@@ -301,7 +330,7 @@ const Index = () => {
 
   const toggleGlobalPinReport = async (reportId: string) => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportId);
       const { data: report } = result;
       const { results: reports } = reportsResponse!.data;
@@ -329,9 +358,9 @@ const Index = () => {
       return;
     }
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const startDatetime: Date = moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate();
-      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getTeamActivityFeed(commonData.organization.sluglified_name, commonData.team.sluglified_name, {
+      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getTeamActivityFeed(commonData.organization!.sluglified_name, commonData.team!.sluglified_name, {
         start_datetime: startDatetime,
         end_datetime: datetimeActivityFeed,
       });
@@ -364,18 +393,18 @@ const Index = () => {
 
   const getSearchUser = async () => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
-      const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization.id!, commonData.team.id);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization!.id!, commonData.team!.id);
       setSearchUser(result.data);
     } catch (e) {}
   };
 
   const createSearchUser = async (query: string, payload: ReportsFilter[]) => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const searchUserDto: SearchUserDto = {
-        organization_id: commonData.organization.id!,
-        team_id: commonData.team.id!,
+        organization_id: commonData.organization!.id!,
+        team_id: commonData.team!.id!,
         query,
         payload,
       };
@@ -386,7 +415,7 @@ const Index = () => {
 
   const deleteSearchUser = async () => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name, commonData.team.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       await api.deleteSearchUser(searchUser!.id!);
       setSearchUser(null);
     } catch (e) {}
@@ -408,6 +437,7 @@ const Index = () => {
             </div>
             <div className="w-2/6 flex flex-row justify-end items-center space-x-2">
               <ManageUsers
+                commonData={commonData}
                 members={members}
                 onInputChange={(query: string) => searchUsers(query)}
                 users={users}
@@ -419,73 +449,69 @@ const Index = () => {
 
               <UnpureDeleteChannelDropdown commonData={commonData} hasPermissionDeleteChannel={hasPermissionDeleteChannel} />
 
-              <PureNewReportPopover commonData={commonData} />
+              {commonData?.user && <PureNewReportPopover commonData={commonData} />}
             </div>
           </div>
         )}
 
-        {searchUser !== undefined && (
-          <React.Fragment>
-            <ReportsSearchBar
-              members={members}
-              onSaveSearch={(query: string | null, payload: ReportsFilter[] | null) => {
-                if (query) {
-                  createSearchUser(query, payload!);
-                } else if (searchUser && !query) {
-                  deleteSearchUser();
-                }
-              }}
-              onFiltersChange={(query: string) => getReports(1, query)}
-              searchUser={searchUser}
-              user={commonData.user}
-            />
-            {requestingReports && (
-              <div className="text-center">
-                <PureSpinner size={12} />
-              </div>
-            )}
-            {!requestingReports &&
-              (reportsResponse && reportsResponse.data.results && reportsResponse.data.results.length > 0 ? (
-                <React.Fragment>
-                  <div>
-                    <ul role="list" className="space-y-4">
-                      {reportsResponse.data.results?.map((report: ReportDTO) => (
-                        <ReportBadge
-                          key={report.id}
-                          report={report}
-                          authors={report.authors ? report.authors : []}
-                          toggleUserStarReport={() => toggleUserStarReport(report.id!)}
-                          toggleUserPinReport={() => toggleUserPinReport(report.id!)}
-                          toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
-                        />
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="flex-1 flex justify-center">
-                    {reportsResponse.data.currentPage - 1 >= 1 && (
-                      <span
-                        onClick={() => getReports(reportsResponse.data.currentPage - 1)}
-                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                      >
-                        Previous
-                      </span>
-                    )}
-                    <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {reportsResponse.data.currentPage}</p>
-                    {reportsResponse.data.currentPage + 1 <= reportsResponse.data.totalPages && (
-                      <span
-                        onClick={() => getReports(reportsResponse.data.currentPage + 1)}
-                        className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                      >
-                        Next
-                      </span>
-                    )}
-                  </div>
-                </React.Fragment>
-              ) : (
-                <p>No reports found</p>
-              ))}
-          </React.Fragment>
+        <ReportsSearchBar
+          members={members}
+          onSaveSearch={(query: string | null, payload: ReportsFilter[] | null) => {
+            if (query) {
+              createSearchUser(query, payload!);
+            } else if (searchUser && !query) {
+              deleteSearchUser();
+            }
+          }}
+          onFiltersChange={(query: string) => getReports(1, query)}
+          searchUser={searchUser}
+          user={commonData.user}
+        />
+        {requestingReports && (
+          <div className="text-center">
+            <PureSpinner size={12} />
+          </div>
         )}
+        {!requestingReports &&
+          (reportsResponse && reportsResponse.data.results && reportsResponse.data.results.length > 0 ? (
+            <React.Fragment>
+              <div>
+                <ul role="list" className="space-y-4">
+                  {reportsResponse.data.results?.map((report: ReportDTO) => (
+                    <ReportBadge
+                      key={report.id}
+                      report={report}
+                      authors={report.authors ? report.authors : []}
+                      toggleUserStarReport={() => toggleUserStarReport(report.id!)}
+                      toggleUserPinReport={() => toggleUserPinReport(report.id!)}
+                      toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+                    />
+                  ))}
+                </ul>
+              </div>
+              <div className="flex-1 flex justify-center">
+                {reportsResponse.data.currentPage - 1 >= 1 && (
+                  <span
+                    onClick={() => getReports(reportsResponse.data.currentPage - 1)}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                  >
+                    Previous
+                  </span>
+                )}
+                <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {reportsResponse.data.currentPage}</p>
+                {reportsResponse.data.currentPage + 1 <= reportsResponse.data.totalPages && (
+                  <span
+                    onClick={() => getReports(reportsResponse.data.currentPage + 1)}
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                  >
+                    Next
+                  </span>
+                )}
+              </div>
+            </React.Fragment>
+          ) : (
+            <p>No reports found</p>
+          ))}
       </div>
       {commonData.user && (
         <div className="w-1/6">

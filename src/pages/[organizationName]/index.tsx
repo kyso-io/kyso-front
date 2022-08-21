@@ -3,7 +3,6 @@ import ChannelList from '@/components/ChannelList';
 import Pagination from '@/components/Pagination';
 import PureAvatar from '@/components/PureAvatar';
 import PureNewReportPopover from '@/components/PureNewReportPopover';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
@@ -35,12 +34,7 @@ interface PaginationParams {
 
 const Index = () => {
   const router = useRouter();
-  useRedirectIfNoJWT();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
-
+  const commonData: CommonData = useCommonData();
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
   const [organizationInfo, setOrganizationInfo] = useState<OrganizationInfoDto | null>(null);
   const [paginationParams, setPaginationParams] = useState<PaginationParams>({
@@ -63,7 +57,7 @@ const Index = () => {
   }, [token, organizationName, paginationParams]);
 
   useEffect(() => {
-    if (!commonData.organization || !commonData.user) {
+    if (!commonData.organization) {
       return;
     }
     getOrganizationsInfo();
@@ -148,20 +142,15 @@ const Index = () => {
         const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
         const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
         const allAuthorsData: UserDTO[] = [];
-
         for (const authorId of uniqueAllAuthorsId) {
           /* eslint-disable no-await-in-loop */
-          const userData: NormalizedResponseDTO<UserDTO> = await api.getUserProfileById(authorId);
-
-          if (userData && userData.data) {
-            allAuthorsData.push(userData.data);
+          if (result.relations?.user[authorId]) {
+            allAuthorsData.push(result.relations.user[authorId]);
           }
         }
-
         x.authors = allAuthorsData;
         dataWithAuthors.push(x);
       }
-
       result.data.results = dataWithAuthors;
       setPaginatedResponseDto(result.data);
     } catch (e) {}
@@ -170,7 +159,7 @@ const Index = () => {
   const getOrganizationsInfo = async () => {
     try {
       const api: Api = new Api(token);
-      const result: NormalizedResponseDTO<OrganizationInfoDto[]> = await api.getOrganizationsInfo(commonData.organization.id);
+      const result: NormalizedResponseDTO<OrganizationInfoDto[]> = await api.getOrganizationsInfo(commonData.organization!.id);
       if (result?.data?.length > 0) {
         setOrganizationInfo(result.data[0]!);
       }
@@ -277,12 +266,12 @@ const Index = () => {
   // START ORGANIZATION MEMBERS
   const getOrganizationMembers = async () => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name);
       const result: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
       const m: Member[] = [];
       let userMember: Member | null = null;
       result.data.forEach((organizationMember: OrganizationMember) => {
-        if (organizationMember.id === commonData.user.id) {
+        if (organizationMember.id === commonData.user?.id) {
           userMember = {
             id: organizationMember.id,
             nickname: organizationMember.nickname,
@@ -317,7 +306,7 @@ const Index = () => {
 
   const searchUsers = async (query: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name);
       const result: NormalizedResponseDTO<UserDTO[]> = await api.getUsers({
         userIds: [],
         page: 1,
@@ -335,9 +324,9 @@ const Index = () => {
     const index: number = members.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
       try {
-        const api: Api = new Api(token, commonData.organization.sluglified_name);
+        const api: Api = new Api(token, commonData.organization!.sluglified_name);
         await api.addUserToOrganization({
-          organizationId: commonData.organization.id!,
+          organizationId: commonData.organization!.id!,
           userId,
           role: organizationRole,
         });
@@ -346,7 +335,7 @@ const Index = () => {
       }
     } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
-        const api: Api = new Api(token, commonData.organization.sluglified_name);
+        const api: Api = new Api(token, commonData.organization!.sluglified_name);
         await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
           members: [
             {
@@ -364,10 +353,10 @@ const Index = () => {
 
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name);
       await api.inviteNewUser({
         email,
-        organizationSlug: commonData.organization.sluglified_name,
+        organizationSlug: commonData.organization!.sluglified_name,
         organizationRole,
       });
       getOrganizationMembers();
@@ -378,8 +367,8 @@ const Index = () => {
 
   const removeUser = async (userId: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization.sluglified_name);
-      await api.removeUserFromOrganization(commonData.organization.id!, userId);
+      const api: Api = new Api(token, commonData.organization!.sluglified_name);
+      await api.removeUserFromOrganization(commonData.organization!.id!, userId);
       getOrganizationMembers();
     } catch (e) {
       console.error(e);
@@ -396,12 +385,13 @@ const Index = () => {
       <div className="w-4/6">
         <div className="flex items-center w justify-between p-2">
           <div className="shrink-0 flex flex-row items-center space-x-2">
-            <PureAvatar src={commonData.organization?.avatar_url} title={commonData.organization?.display_name} size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XL} />
+            <PureAvatar src={commonData.organization?.avatar_url || ''} title={commonData.organization?.display_name || ''} size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XL} />
             <h1 className="text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
             <p className="text-sm font-medium text-gray-500">{commonData.organization?.bio}</p>
           </div>
           <div className="flex items-center space-x-2">
             <ManageUsers
+              commonData={commonData}
               members={members}
               onInputChange={(query: string) => searchUsers(query)}
               users={users}
@@ -410,7 +400,7 @@ const Index = () => {
               onInviteNewUser={inviteNewUser}
               onRemoveUser={removeUser}
             />
-            <PureNewReportPopover commonData={commonData} />
+            {commonData?.user && <PureNewReportPopover commonData={commonData} />}
           </div>
         </div>
         <div className="flex items-center w justify-between p-2">

@@ -1,44 +1,42 @@
-import { useAuthors } from '@/hooks/use-authors';
+import PureComments from '@/components/PureComments';
+import { PurePermissionDenied } from '@/components/PurePermissionDenied';
+import PureReportHeader from '@/components/PureReportHeader';
+import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
+import PureTree from '@/components/PureTree';
+import checkPermissions from '@/helpers/check-permissions';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import { useChannelMembers } from '@/hooks/use-channel-members';
 import type { CommonData } from '@/hooks/use-common-data';
 import { useCommonData } from '@/hooks/use-common-data';
-import { useReport } from '@/hooks/use-report';
-import { useTree } from '@/hooks/use-tree';
-import PureComments from '@/components/PureComments';
-import type { GithubFileHash, Comment, User, UserDTO, KysoSetting } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
-import PureReportHeader from '@/components/PureReportHeader';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import { createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
-import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
-import UnpureFileHeader from '@/unpure-components/UnpureFileHeader';
-import PureTree from '@/components/PureTree';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import { useFileToRender } from '@/hooks/use-file-to-render';
+import { useReport } from '@/hooks/use-report';
+import { useTree } from '@/hooks/use-tree';
+import { useUserEntities } from '@/hooks/use-user-entities';
+import { useVersions } from '@/hooks/use-versions';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import UnpureFileHeader from '@/unpure-components/UnpureFileHeader';
+import UnpureReportRender from '@/unpure-components/UnpureReportRender';
+import type { Comment, GithubFileHash, KysoSetting, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import { createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
+import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
-import checkPermissions from '@/helpers/check-permissions';
 import { useEffect, useMemo } from 'react';
-import { PurePermissionDenied } from '@/components/PurePermissionDenied';
-import { useChannelMembers } from '@/hooks/use-channel-members';
-import { useUserEntities } from '@/hooks/use-user-entities';
-import moment from 'moment';
-import UnpureReportRender from '@/unpure-components/UnpureReportRender';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { useVersions } from '@/hooks/use-versions';
-import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 
 const Index = () => {
-  useRedirectIfNoJWT();
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+  const commonData: CommonData = useCommonData();
 
   const version = router.query.version ? (router.query.version as string) : undefined;
 
-  const [report, refreshReport] = useReport({
+  const {
+    report,
+    authors,
+    mutate: refreshReport,
+  } = useReport({
     commonData,
     reportName: router.query.reportName as string,
   });
@@ -48,7 +46,6 @@ const Index = () => {
     commonData,
   });
 
-  const authors: User[] = useAuthors({ report });
   const channelMembers = useChannelMembers({ commonData });
 
   const allComments = useAppSelector((state) => state.comments.entities);
@@ -92,6 +89,13 @@ const Index = () => {
     tree: selfTree,
     mainFile: currentPath === '' ? report?.main_file : undefined,
   });
+
+  useEffect(() => {
+    if (commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC && !commonData.user) {
+      // Unauthenticated user trying to access a non public team
+      router.replace(`/${commonData.organization?.sluglified_name}`);
+    }
+  }, [commonData?.team]);
 
   useEffect(() => {
     if (report) {
@@ -157,21 +161,23 @@ const Index = () => {
       {/* <div className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent inline mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300 w-5 h-5"></div> */}
       <div className="flex flex-row">
         <PureSideOverlayPanel key={report?.name} cacheKey={report?.name}>
-          {report && commonData && (
-            <PureTree
-              path={currentPath}
-              basePath={router.basePath}
-              commonData={commonData}
-              report={report}
-              version={router.query.version as string}
-              selfTree={selfTree}
-              parentTree={parentTree}
-              // onNavigation={(e) => {
-              //   e.preventDefault()
-              //   router.push(e.currentTarget.href)
-              // }}
-            />
-          )}
+          <>
+            {report && commonData && (
+              <PureTree
+                path={currentPath}
+                basePath={router.basePath}
+                commonData={commonData}
+                report={report}
+                version={router.query.version as string}
+                selfTree={selfTree}
+                parentTree={parentTree}
+                // onNavigation={(e) => {
+                //   e.preventDefault()
+                //   router.push(e.currentTarget.href)
+                // }}
+              />
+            )}
+          </>
         </PureSideOverlayPanel>
 
         {selfTree && report && commonData && (
@@ -189,7 +195,7 @@ const Index = () => {
                   refreshReport();
                 }}
                 hasPermissionEditReport={
-                  hasPermissionEditReport || ((report.user_id === commonData.user.id || report.author_ids.includes(commonData.user.id as string)) && hasPermissionEditReportOnlyMine)
+                  hasPermissionEditReport || ((report.user_id === commonData.user?.id || report.author_ids.includes(commonData.user?.id as string)) && hasPermissionEditReportOnlyMine)
                 }
                 hasPermissionDeleteReport={hasPermissionDeleteReport}
                 commonData={commonData}

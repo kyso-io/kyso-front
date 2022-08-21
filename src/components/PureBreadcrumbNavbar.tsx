@@ -1,16 +1,17 @@
 import { NavigationSelector } from '@/components/NavigationSelector';
 import type { CommonData } from '@/hooks/use-common-data';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
-import { useRouter } from 'next/router';
 import type { ReportDTO } from '@kyso-io/kyso-model';
+import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
+import React from 'react';
 import { ChannelSelector } from './ChannelSelector';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props {
   basePath: string;
   children?: ReactNode;
-  report?: ReportDTO;
+  report: ReportDTO | null | undefined;
   commonData: CommonData;
 }
 
@@ -42,7 +43,7 @@ const BreadcrumbNavbar = (props: Props) => {
       new BreadcrumbItem(
         report?.title,
         `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`,
-        commonData.organization && commonData.team && report && true,
+        commonData.organization != null && commonData.team != null && report != null,
       ),
     );
   }

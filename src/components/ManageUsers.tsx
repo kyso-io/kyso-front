@@ -4,7 +4,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { ChevronDownIcon, XIcon } from '@heroicons/react/solid';
 import type { UserDTO } from '@kyso-io/kyso-model';
-import { GlobalPermissionsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
+import { GlobalPermissionsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
@@ -13,7 +13,6 @@ import slugify from 'slugify';
 import checkPermissions from '../helpers/check-permissions';
 import { Helper } from '../helpers/Helper';
 import type { CommonData } from '../hooks/use-common-data';
-import { useCommonData } from '../hooks/use-common-data';
 import type { Member } from '../types/member';
 import PureAvatar from './PureAvatar';
 import PureAvatarGroup from './PureAvatarGroup';
@@ -38,6 +37,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
 }, 750);
 
 interface Props {
+  commonData: CommonData;
   members: Member[];
   users: UserDTO[];
   onInputChange: (query: string) => void;
@@ -47,7 +47,7 @@ interface Props {
   onRemoveUser: (userId: string) => void;
 }
 
-const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRoleMember, onInviteNewUser, onRemoveUser }: Props) => {
+const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles, onUpdateRoleMember, onInviteNewUser, onRemoveUser }: Props) => {
   const router = useRouter();
   const [query, setQuery] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<UserDTO | Member | null>(null);
@@ -59,12 +59,18 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
   const [inputDeleteUser, setInputDeleteUser] = useState<string>('');
   const [keyDeleteUser, setKeyDeleteUser] = useState<string>('');
 
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
-  const isOrgAdmin: boolean = useMemo(() => checkPermissions(commonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || checkPermissions(commonData, OrganizationPermissionsEnum.ADMIN), [commonData]);
+  const isOrgAdmin: boolean = useMemo(() => {
+    const copyCommonData: CommonData = { ...commonData, team: null };
+    return checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
+  }, [commonData]);
   const isTeamAdmin: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
+
+  const filteredMembers: Member[] = useMemo(() => {
+    if (commonData?.team && commonData.team.visibility === TeamVisibilityEnum.PRIVATE) {
+      return members.filter((member: Member) => member.membership_origin === TeamMembershipOriginEnum.TEAM);
+    }
+    return members;
+  }, [commonData?.team, members]);
 
   const organizationRoles: { value: string; label: string }[] = useMemo(() => {
     const data: { value: string; label: string }[] = [
@@ -96,8 +102,8 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
       { value: 'team-reader', label: 'Team Reader' },
     ];
     if (selectedUser) {
-      if (members.length > 0) {
-        const member: Member | undefined = members.find((m: Member) => m.id === selectedUser.id);
+      if (filteredMembers.length > 0) {
+        const member: Member | undefined = filteredMembers.find((m: Member) => m.id === selectedUser.id);
         if (member) {
           if (member?.membership_origin === TeamMembershipOriginEnum.TEAM) {
             data.push({ value: 'remove', label: 'Remove' });
@@ -111,7 +117,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
       }
     }
     return data;
-  }, [selectedUser, members, users]);
+  }, [selectedUser, filteredMembers, users]);
 
   useEffect(() => {
     if (!query || query.length === 0) {
@@ -148,8 +154,8 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
   };
 
   let plusMembers = 0;
-  if (members.length > MAX_USERS_TO_SHOW) {
-    plusMembers = members.length - MAX_USERS_TO_SHOW;
+  if (filteredMembers.length > MAX_USERS_TO_SHOW) {
+    plusMembers = filteredMembers.length - MAX_USERS_TO_SHOW;
   }
 
   let selectedUserInitials: string = '';
@@ -162,8 +168,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
       <Menu as="div" className="ml-2 relative inline-block text-left">
         <div>
           <Menu.Button className="flex items-center">
-            <PureAvatarGroup data={members.slice(0, MAX_USERS_TO_SHOW)}></PureAvatarGroup>
-
+            <PureAvatarGroup data={filteredMembers.slice(0, MAX_USERS_TO_SHOW)}></PureAvatarGroup>
             {plusMembers > 0 && <div className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-200">+{plusMembers}</div>}
             <ChevronDownIcon className="ml-2 h-5 w-5" aria-hidden="true" />
           </Menu.Button>
@@ -221,18 +226,19 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                 <React.Fragment>
                   <span className="my-4 text-xs font-medium text-gray-600">Members:</span>
                   <ul role="list" className="mt-1" style={{ maxHeight: 200, overflowY: 'scroll' }}>
-                    {members.map((member: Member, index: number) => {
+                    {filteredMembers.map((member: Member, index: number) => {
                       let roles: string | undefined = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
                       if (member.team_roles && member.team_roles.length > 0) {
                         roles += ` / ${organizationRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
                       }
-
                       return (
                         <li
                           key={member.id}
-                          className={clsx('py-1', isOrgAdmin || (isTeamAdmin && showTeamRoles) ? 'cursor-pointer' : 'cursor-default')}
+                          className={clsx('py-1', !commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles) ? 'cursor-pointer' : 'cursor-default')}
                           onClick={() => {
-                            if (isOrgAdmin || (isTeamAdmin && showTeamRoles)) {
+                            if (!commonData.user) {
+                              router.push(`/user/${member.username}`);
+                            } else if (isOrgAdmin || (isTeamAdmin && showTeamRoles)) {
                               setSelectedOrgRole(member.organization_roles[0]!);
                               if (member.team_roles && member.team_roles.length > 0) {
                                 setSelectedTeamRole(member.team_roles[0]!);
@@ -247,7 +253,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                               <PureAvatar src={member.avatar_url} title={member.display_name} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
                             </div>
                             <div className="flex-1" style={{ marginLeft: 10 }}>
-                              <p className="text-xs font-medium text-gray-900 truncate">{member.username}</p>
+                              <p className="text-xs font-medium text-gray-900 truncate">{member.display_name}</p>
                               <p className="text-xs text-gray-500 truncate">{roles}</p>
                             </div>
                           </div>
@@ -341,7 +347,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                           !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
                         )}
                         onClick={() => {
-                          const member: Member = members[selectedMemberIndex]!;
+                          const member: Member = filteredMembers[selectedMemberIndex]!;
                           onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
                           clearData();
                         }}
@@ -381,20 +387,21 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                       return (
                         <li
                           key={user.id}
-                          className={clsx('py-1', isOrgAdmin ? 'cursor-pointer' : 'cursor-default')}
+                          className={clsx('py-1', !commonData.user || isOrgAdmin || (commonData.team != null && isTeamAdmin) ? 'cursor-pointer' : 'cursor-default')}
                           onClick={() => {
-                            if (!isOrgAdmin) {
-                              return;
-                            }
-                            // Check if user is member
-                            const index: number = members.findIndex((m: Member) => m.id === user.id);
-                            if (index !== -1) {
-                              setSelectedOrgRole(members[index]!.organization_roles[0]!);
-                              if (members[index]?.team_roles && members[index]!.team_roles.length > 0) {
-                                setSelectedTeamRole(members[index]!.team_roles[0]!);
+                            if (!commonData.user) {
+                              router.push(`/user/${user.username}`);
+                            } else if (isOrgAdmin || (commonData.team != null && isTeamAdmin)) {
+                              // Check if user is member
+                              const index: number = members.findIndex((m: Member) => m.id === user.id);
+                              if (index !== -1) {
+                                setSelectedOrgRole(members[index]!.organization_roles[0]!);
+                                if (members[index]?.team_roles && members[index]!.team_roles.length > 0) {
+                                  setSelectedTeamRole(members[index]!.team_roles[0]!);
+                                }
                               }
+                              setSelectedUser(user);
                             }
-                            setSelectedUser(user);
                           }}
                         >
                           <div className="flex items-center space-x-4">
@@ -466,7 +473,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                   {selectedOrgRole === REMOVE_USER_VALUE && (
                     <div className="mt-4">
                       <p className="text-sm">
-                        The user <strong>{selectedUser.username}</strong> will be removed from the Organization <strong>{commonData.organization.display_name}</strong>.
+                        The user <strong>{selectedUser.username}</strong> will be removed from the Organization <strong>{commonData.organization?.display_name}</strong>.
                       </p>
                       <p className="text-sm my-2">
                         Please type <strong>&apos;{keyDeleteUser}&apos;</strong> in the text box before confirming:
@@ -482,7 +489,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                   {selectedTeamRole === REMOVE_USER_VALUE && (
                     <div className="mt-4">
                       <p className="text-sm">
-                        The user <strong>{selectedUser.username}</strong> will be removed from the Channel <strong>#{commonData.team.sluglified_name}</strong>.
+                        The user <strong>{selectedUser.username}</strong> will be removed from the Channel <strong>#{commonData.team!.sluglified_name}</strong>.
                       </p>
                       <p className="text-sm my-2">
                         Please type <strong>&apos;{keyDeleteUser}&apos;</strong> in the text box before confirming:
@@ -537,7 +544,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                           inputDeleteUser !== keyDeleteUser ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
                         )}
                         onClick={() => {
-                          const member: Member = members[selectedMemberIndex]!;
+                          const member: Member = filteredMembers[selectedMemberIndex]!;
                           onRemoveUser(member.id);
                           clearData();
                         }}
@@ -554,7 +561,7 @@ const ManageUsers = ({ members, users, onInputChange, showTeamRoles, onUpdateRol
                           !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
                         )}
                         onClick={() => {
-                          const member: Member = members[selectedMemberIndex]!;
+                          const member: Member = filteredMembers[selectedMemberIndex]!;
                           onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
                           clearData();
                         }}

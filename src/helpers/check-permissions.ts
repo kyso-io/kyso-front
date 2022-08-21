@@ -78,7 +78,7 @@ const checkPermissions = (commonData: CommonData, listOfPermissionsToCheck: stri
   let permissionsInThatOrganization: ResourcePermissions | undefined;
 
   if (commonData.team) {
-    permissionsInThatTeam = commonData.permissions.teams?.find((x: ResourcePermissions) => x.id === commonData.team.id);
+    permissionsInThatTeam = commonData.permissions.teams?.find((x: ResourcePermissions) => x.id === commonData.team?.id);
 
     /*
     console.log(
@@ -90,7 +90,7 @@ const checkPermissions = (commonData: CommonData, listOfPermissionsToCheck: stri
   }
 
   if (commonData.organization) {
-    permissionsInThatOrganization = commonData.permissions.organizations?.find((x: ResourcePermissions) => x.id === commonData.organization.id);
+    permissionsInThatOrganization = commonData.permissions.organizations?.find((x: ResourcePermissions) => x.id === commonData.organization?.id);
 
     /* console.log(
       `Permissions in that organization ${

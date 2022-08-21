@@ -2,7 +2,7 @@ import { useAppDispatch } from '@/hooks/redux-hooks';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { logoutAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 const Page = () => {
   const router = useRouter();

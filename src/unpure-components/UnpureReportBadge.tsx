@@ -34,7 +34,7 @@ const UnpureReportBadge = (props: IUnpureReportBadge) => {
     setIsPinnedBusy(false);
   };
 
-  const href = `${router.basePath}/${commonData.organization.sluglified_name}/${commonData.team.sluglified_name}/${report.name}`;
+  const href = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}`;
 
   return (
     <>
