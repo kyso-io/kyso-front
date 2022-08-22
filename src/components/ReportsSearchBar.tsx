@@ -44,7 +44,7 @@ const MenuItems = ({ filters, onSelect, onClickOutside }: MenuItemsProps) => {
         {filters.map((filter: ReportsFilter, index: number) => (
           <Menu.Item key={index}>
             {({ active }) => (
-              <div className={clsx(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex flex-row px-4 py-2 text-sm')} onClick={() => onSelect(filter)}>
+              <div className={clsx(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex flex-row px-4 py-2 text-sm cursor-default')} onClick={() => onSelect(filter)}>
                 {filter?.image && (
                   <div className="mr-4">
                     <PureAvatar src={filter.image as string} title={filter.label as string} />
@@ -256,8 +256,8 @@ interface ReportsSearchBarProps {
   onSaveSearch: (query: string | null, payload: any | null) => void;
   members: Member[];
   onFiltersChange: (query: string) => void;
-  searchUser: SearchUser | null;
-  user: UserDTO | null;
+  searchUser: SearchUser | null | undefined;
+  user: UserDTO | null | undefined;
 }
 
 const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, user }: ReportsSearchBarProps) => {
@@ -270,7 +270,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
     () =>
       members.map((member: Member) => ({
         key: member.id,
-        label: member.username,
+        label: member.display_name,
         modificable: true,
         type: 'user',
         image: member.avatar_url,
@@ -822,7 +822,7 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
           )}
         </React.Fragment>
       </Menu>
-      <SaveIcon onClick={() => onSaveSearch(query, selectedFilters)} className={clsx('cursor-pointer w-6 h-6 ml-2')} />
+      {user && <SaveIcon onClick={() => onSaveSearch(query, selectedFilters)} className={clsx('cursor-pointer w-6 h-6 ml-2')} />}
     </div>
   );
 };

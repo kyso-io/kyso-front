@@ -1,12 +1,12 @@
-import { useAppDispatch } from '@/hooks/redux-hooks';
-import { createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
-import { useEffect, useState } from 'react';
-import { PureSpinner } from '@/components/PureSpinner';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
+import { PureSpinner } from '@/components/PureSpinner';
+import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { FileToRender } from '@/hooks/use-file-to-render';
+import type { CommonData } from '@/types/common-data';
 import type { InlineCommentDto, ReportDTO, TeamMember, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
+import { createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
 import dynamic from 'next/dynamic';
-import type { CommonData } from '@/hooks/use-common-data';
+import { useEffect, useState } from 'react';
 
 // const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
@@ -131,7 +131,6 @@ const UnpureReportRender = (props: Props) => {
   };
 
   const editInlineComment = async (id: string, user_ids: string[], text: string) => {
-    console.log(user_ids);
     try {
       const data = await dispatch(
         updateInlineCommentAction({

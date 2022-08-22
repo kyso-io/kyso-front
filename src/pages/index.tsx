@@ -1,40 +1,50 @@
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import NoLayout from '@/layouts/NoLayout';
+import type { CommonData } from '@/types/common-data';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import ChannelList from '../components/ChannelList';
+import KysoApplicationLayout from '../layouts/KysoApplicationLayout';
 
-const Index = () => {
-  useRedirectIfNoJWT();
+interface Props {
+  commonData: CommonData;
+}
+
+const Index = ({ commonData }: Props) => {
   const router = useRouter();
-  const commonData: CommonData = useCommonData();
 
   useEffect(() => {
-    if (!commonData.user || !commonData.permissions) {
-      return;
-    }
-    let lastOrganizationDict: { [userId: string]: string } = {};
-    const lastOrganizationStr: string | null = getLocalStorageItem('last_organization');
-    if (lastOrganizationStr) {
-      try {
-        lastOrganizationDict = JSON.parse(lastOrganizationStr);
-      } catch (e) {}
-    }
-    if (lastOrganizationDict[commonData.user.id]) {
-      router.push(`${lastOrganizationDict[commonData.user.id]}`);
-    } else {
-      const orgs = commonData.permissions?.organizations;
-      if (orgs && orgs.length > 0) {
-        router.push(`${orgs[0]?.name}`);
+    const redirectUserToOrganization = async () => {
+      if (!commonData.user) {
+        return;
       }
-    }
-  }, [commonData?.user && commonData?.permissions]);
+      let lastOrganizationDict: { [userId: string]: string } = {};
+      const lastOrganizationStr: string | null = getLocalStorageItem('last_organization');
+      if (lastOrganizationStr) {
+        try {
+          lastOrganizationDict = JSON.parse(lastOrganizationStr);
+        } catch (e) {}
+      }
+      if (lastOrganizationDict[commonData.user.id]) {
+        router.push(`${lastOrganizationDict[commonData.user!.id]}`);
+      } else if (commonData.permissions) {
+        const orgs = commonData.permissions?.organizations;
+        if (orgs && orgs.length > 0) {
+          router.push(`${orgs[0]?.name}`);
+        }
+      }
+    };
+    redirectUserToOrganization();
+  }, []);
 
-  return <div className="mt-8">{/* <h1>Select an organization from the dropdown above.</h1> */}</div>;
+  return (
+    <div className="flex flex-row space-x-8">
+      <div className="w-1/6">
+        <ChannelList basePath={router.basePath} commonData={commonData} />
+      </div>
+    </div>
+  );
 };
 
-Index.layout = NoLayout;
+Index.layout = KysoApplicationLayout;
 
 export default Index;

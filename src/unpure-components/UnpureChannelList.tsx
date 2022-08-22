@@ -1,13 +1,13 @@
 import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import type { CommonData } from '@/hooks/use-common-data';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
+import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { DotsVerticalIcon, PlusCircleIcon, TrashIcon } from '@heroicons/react/outline';
+import { TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import { deleteTeamAction } from '@kyso-io/kyso-store';
-// import { deleteTeamAction } from '@kyso-io/kyso-store';
-import React, { Fragment, useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props {
@@ -27,8 +27,8 @@ const ChannelList = (props: Props) => {
       });
   }
 
-  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_TEAM'), [commonData]);
-  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_DELETE_TEAM'), [commonData]);
+  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.DELETE), [commonData]);
 
   const deleteChannel = async () => {
     if (!hasPermissionDeleteChannel) {

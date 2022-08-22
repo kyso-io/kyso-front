@@ -1,12 +1,15 @@
 import ActivityFeedComponent from '@/components/ActivityFeed';
+import UserProfileInfo from '@/components/UserProfileInfo';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useInterval } from '@/hooks/use-interval';
-import { useRouter } from 'next/router';
+import { useUser } from '@/hooks/use-user';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { CommonData } from '@/types/common-data';
 import type { ActivityFeed, NormalizedResponseDTO, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
+import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import UserProfileInfo from '@/components/UserProfileInfo';
 import { useUser } from '@/hooks/use-user';
@@ -62,13 +65,15 @@ const debouncedPaginatedReports = debounce(
   500,
 );
 
-const Index = () => {
-  const user: UserDTO = useUser();
+interface Props {
+  commonData: CommonData;
+}
+
+const Index = ({ commonData }: Props) => {
+  const user: UserDTO | null = useUser();
   const router = useRouter();
   const { username } = router.query;
-
   const [userProfile, setUser] = useState<UserDTO>();
-
   const [currentTab, onChangeTab] = useState<string>('Overview');
   // REPORTS
   const [reportsResponse, setReportsResponse] = useState<NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null>(null);
@@ -287,7 +292,7 @@ const Index = () => {
 
   // END ACTIVITY FEED
 
-  if (!user) {
+  if (!user || !userProfile || !commonData) {
     return null;
   }
   if (!userProfile) {
@@ -296,7 +301,7 @@ const Index = () => {
   console.log('requestingReports', requestingReports);
   console.log('userProfile', userProfile);
   return (
-    <div>
+    <div className="p-2">
       <UserProfileInfo userId={user.id} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfile} />
       <div className="flex flex-row space-x-8">
         <div className="w-1/6" />
@@ -313,6 +318,7 @@ const Index = () => {
                     <p className="text-xs font-bold leading-relaxed text-gray-700 pb-5">Most recent</p>
                     {reportsResponse.data.results?.map((report: ReportDTO) => (
                       <ReportBadge
+                        commonData={commonData}
                         key={report.id}
                         report={report}
                         authors={report.authors ? report.authors : []}

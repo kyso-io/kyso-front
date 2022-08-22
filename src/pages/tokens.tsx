@@ -1,10 +1,9 @@
 /* eslint-disable no-restricted-globals */
 import classNames from '@/helpers/class-names';
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { CommonData } from '@/types/common-data';
 import { TrashIcon } from '@heroicons/react/outline';
 import type { KysoUserAccessToken } from '@kyso-io/kyso-model';
 import { createAccessTokenAction, deleteAccessTokenAction, getAccessTokensAction, revokeAllAccessTokenAction } from '@kyso-io/kyso-store';
@@ -15,10 +14,13 @@ export const ucFirst = (str: string) => {
   return str && str.length > 0 ? str.charAt(0).toUpperCase() + str.slice(1) : '';
 };
 
-const Index = () => {
+interface Props {
+  commonData: CommonData;
+}
+
+const Index = ({ commonData }: Props) => {
   const dispatch = useAppDispatch();
   useRedirectIfNoJWT();
-  const commonData: CommonData = useCommonData();
 
   const [accessTokens, setAccessTokens] = useState<KysoUserAccessToken[]>([]);
   // const [selectedAccessToken, setSelectedAccessToken] = useState<KysoUserAccessToken | null>(null);
@@ -80,7 +82,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-row space-x-8">
+    <div className="flex flex-row space-x-8 p-2">
       <div className="w-2/12"></div>
       <div className="w-6/12 flex flex-col space-y-6">
         <div>

@@ -1,13 +1,13 @@
-import useSWR from 'swr';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import type { CommonData } from '@/types/common-data';
+import type { GithubFileHash, NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
-import type { GithubFileHash, NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
-import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import type { CommonData } from './use-common-data';
+import useSWR from 'swr';
 
 interface Props {
   path: string;
-  report: ReportDTO;
+  report: ReportDTO | null | undefined;
   version?: string;
   commonData: CommonData;
 }
@@ -23,7 +23,7 @@ const fetcher = async (props: Props) => {
   }
 
   const args: ArgType = {
-    reportId: report.id as string,
+    reportId: report!.id as string,
     filePath: (path as string) || '',
   };
 

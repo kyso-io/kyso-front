@@ -2,14 +2,13 @@ import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useChannelMembers } from '@/hooks/use-channel-members';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { FilesystemItem } from '@/model/filesystem-item.model';
+import type { CommonData } from '@/types/common-data';
 import type { KysoConfigFile, NormalizedResponseDTO, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
-import { ReportType } from '@kyso-io/kyso-model';
+import { ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import FormData from 'form-data';
 import JSZip from 'jszip';
@@ -45,10 +44,13 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
-const CreateReport = () => {
+interface Props {
+  commonData: CommonData;
+}
+
+const CreateReport = ({ commonData }: Props) => {
   useRedirectIfNoJWT();
   const router = useRouter();
-  const commonData: CommonData = useCommonData();
 
   const channelSelectorItems: BreadcrumbItem[] = [];
 
@@ -84,7 +86,7 @@ const CreateReport = () => {
   const [selectedFile, setSelectedFile] = useState<FilesystemItem>(new FilesystemItem(mainfile[0]!, [], 1));
   const [files, setFiles] = useState<CreationReportFileSystemObject[]>(mainfile);
 
-  const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_REPORT'), [commonData]);
+  const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
 
   const cleanStorage = () => {
     removeLocalStorageItem('formTitle');
@@ -285,7 +287,7 @@ const CreateReport = () => {
   }, []);
 
   return (
-    <div>
+    <div className="p-2">
       <div className="flex flex-row items-center">
         <div className="w-1/6"></div>
         <div className="w-4/6">

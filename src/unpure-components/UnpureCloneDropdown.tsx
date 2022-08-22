@@ -1,5 +1,5 @@
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import type { CommonData } from '@/hooks/use-common-data';
+import type { CommonData } from '@/types/common-data';
 import { Popover, Transition } from '@headlessui/react';
 import { ChevronDownIcon, ClipboardCopyIcon, FolderDownloadIcon, TerminalIcon, XIcon } from '@heroicons/react/outline';
 import type { ReportDTO } from '@kyso-io/kyso-model';

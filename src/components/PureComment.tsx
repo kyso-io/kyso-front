@@ -1,16 +1,16 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable no-restricted-globals */
 
-import { PureSpinner } from '@/components/PureSpinner';
-import type { CommonData } from '@/hooks/use-common-data';
-import dynamic from 'next/dynamic';
-import { useState } from 'react';
-import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import PureAvatar from '@/components/PureAvatar';
 import PureCommentForm from '@/components/PureCommentForm';
 import PureComments from '@/components/PureComments';
-import { formatDistanceToNow } from 'date-fns';
-import PureAvatar from '@/components/PureAvatar';
+import { PureSpinner } from '@/components/PureSpinner';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { CommonData } from '@/types/common-data';
+import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import { formatDistanceToNow } from 'date-fns';
+import dynamic from 'next/dynamic';
+import { useState } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
@@ -47,6 +47,10 @@ const PureComment = (props: IPureComment) => {
   let isUserAuthor = false;
   if (commonData.user && commonData.user.id === comment?.user_id) {
     isUserAuthor = true;
+  }
+
+  if (!commonData.user) {
+    return null;
   }
 
   return (
