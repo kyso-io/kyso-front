@@ -104,7 +104,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
     <>
       <div
         ref={hoverRef}
-        className={classNames('relative', open ? 'bg-gray-50' : '')}
+        className={classNames('relative', open ? 'bg-gray-50' : 'border-r')}
         style={{
           width: open ? `${width}px` : '',
         }}
@@ -138,7 +138,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
           </div>
         )}
 
-        {open && <div className="absolute inset-y-0 right-0 w-1 bg-gray-100 hover:bg-gray-200 cursor-ew-resize" onMouseDown={enableResize} />}
+        {open && <div className="absolute inset-y-0 w-1 right-0 border-r border-r-gray-200 hover:border-r-gray-400 cursor-ew-resize" onMouseDown={enableResize} />}
       </div>
     </>
   );

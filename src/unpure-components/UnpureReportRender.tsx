@@ -275,7 +275,7 @@ const UnpureReportRender = (props: Props) => {
       {!fileToRender.isLoading && fileToRender.path.endsWith('.ipynb') && render}
       {!fileToRender.isLoading && !fileToRender.path.endsWith('.ipynb') && (
         <div className="flex flex-row">
-          <div className={clsx('w-9/12 border-x border-b rounded-b', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
+          <div className={clsx('w-9/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
           <div className="w-3/12 p-2">
             <PureComments
               commonData={commonData}
