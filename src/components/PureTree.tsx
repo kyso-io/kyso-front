@@ -1,8 +1,8 @@
 import PureTreeItem from '@/components/PureTreeItem';
 import classNames from '@/helpers/class-names';
-import type { GithubFileHash, ReportDTO } from '@kyso-io/kyso-model';
+import type { CommonData } from '@/types/common-data';
 import { ChevronLeftIcon } from '@heroicons/react/solid';
-import type { CommonData } from '@/hooks/use-common-data';
+import type { GithubFileHash, ReportDTO } from '@kyso-io/kyso-model';
 import Link from 'next/link';
 
 type IPureTree = {

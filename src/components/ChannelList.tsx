@@ -1,9 +1,9 @@
 import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
-import type { CommonData } from '@/hooks/use-common-data';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
+import type { CommonData } from '@/types/common-data';
 import { PlusCircleIcon } from '@heroicons/react/outline';
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props {

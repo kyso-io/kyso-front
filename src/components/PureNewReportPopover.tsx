@@ -1,4 +1,4 @@
-import type { CommonData } from '@/hooks/use-common-data';
+import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon, ClipboardCopyIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
 import { useState } from 'react';

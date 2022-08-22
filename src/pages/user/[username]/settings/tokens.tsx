@@ -1,13 +1,14 @@
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-
 import { Helper } from '@/helpers/Helper';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { CommonData } from '@/types/common-data';
 import { useRouter } from 'next/router';
 
-const Index = () => {
+interface Props {
+  commonData: CommonData;
+}
+
+const Index = ({ commonData }: Props) => {
   const router = useRouter();
-  const commonData: CommonData = useCommonData();
 
   let sluglifiedName = '';
   if (commonData.user) {

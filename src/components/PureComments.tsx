@@ -1,6 +1,6 @@
 /* eslint-disable import/no-cycle */
 import classNames from '@/helpers/class-names';
-import type { CommonData } from '@/hooks/use-common-data';
+import type { CommonData } from '@/types/common-data';
 import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import PureComment from './PureComment';
 import PureCommentForm from './PureCommentForm';

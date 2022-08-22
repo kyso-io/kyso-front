@@ -1,6 +1,5 @@
 import checkPermissions from '@/helpers/check-permissions';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
+import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import type { ActivityFeed, NormalizedResponseDTO, Organization, OrganizationMember, PaginatedResponseDto, ReportDTO, SearchUser, SearchUserDto, Team, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
@@ -69,9 +68,13 @@ const debouncedPaginatedReports = debounce(
   500,
 );
 
-const Index = () => {
+interface Props {
+  commonData: CommonData;
+}
+
+const Index = ({ commonData }: Props) => {
   const router = useRouter();
-  const commonData: CommonData = useCommonData();
+
   // MEMBERS
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
@@ -479,6 +482,7 @@ const Index = () => {
                 <ul role="list" className="space-y-4">
                   {reportsResponse.data.results?.map((report: ReportDTO) => (
                     <ReportBadge
+                      commonData={commonData}
                       key={report.id}
                       report={report}
                       authors={report.authors ? report.authors : []}

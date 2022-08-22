@@ -6,8 +6,6 @@ import PureTree from '@/components/PureTree';
 import checkPermissions from '@/helpers/check-permissions';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useChannelMembers } from '@/hooks/use-channel-members';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import { useFileToRender } from '@/hooks/use-file-to-render';
 import { useReport } from '@/hooks/use-report';
@@ -15,6 +13,7 @@ import { useTree } from '@/hooks/use-tree';
 import { useUserEntities } from '@/hooks/use-user-entities';
 import { useVersions } from '@/hooks/use-versions';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { CommonData } from '@/types/common-data';
 import UnpureFileHeader from '@/unpure-components/UnpureFileHeader';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import type { Comment, GithubFileHash, KysoSetting, UserDTO } from '@kyso-io/kyso-model';
@@ -25,10 +24,13 @@ import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import { useEffect, useMemo } from 'react';
 
-const Index = () => {
+interface Props {
+  commonData: CommonData;
+}
+
+const Index = ({ commonData }: Props) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  const commonData: CommonData = useCommonData();
 
   const version = router.query.version ? (router.query.version as string) : undefined;
 

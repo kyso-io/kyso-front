@@ -1,18 +1,11 @@
 import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
+import type { CommonData } from '@/types/common-data';
 import type { NormalizedResponseDTO, Organization, ResourcePermissions, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
-
-export type CommonData = {
-  permissions: TokenPermissions | null;
-  token: string | null;
-  organization: Organization | null;
-  team: Team | null;
-  user: UserDTO | null | undefined;
-};
 
 export const useCommonData = (): CommonData => {
   const router = useRouter();
@@ -93,13 +86,17 @@ export const useCommonData = (): CommonData => {
   };
 
   const [mounted, setMounted] = useState<boolean>(false);
-  const { data } = useSWR(mounted ? 'use-common-data' : null, fetcher);
+  const { data, mutate } = useSWR(mounted ? 'use-common-data' : null, fetcher);
 
   useEffect(() => {
-    if (router.isReady) {
+    const organizationName: string | undefined = router.query.organizationName as string | undefined;
+    const teamName: string | undefined = router.query.teamName as string | undefined;
+    if (!mounted) {
       setMounted(true);
+    } else if (organizationName || teamName) {
+      mutate();
     }
-  }, [router.isReady]);
+  }, [router.asPath]);
 
   return {
     permissions: data?.permissions ? data.permissions : null,

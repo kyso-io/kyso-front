@@ -1,14 +1,14 @@
-import { Fragment, useState } from 'react';
-import type { FileToRender } from '@/hooks/use-file-to-render';
+import { PureSpinner } from '@/components/PureSpinner';
 import classNames from '@/helpers/class-names';
-import { QuestionMarkCircleIcon, StarIcon } from '@heroicons/react/solid';
-import { updateReportAction } from '@kyso-io/kyso-store';
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import type { GithubFileHash, ReportDTO, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
+import type { FileToRender } from '@/hooks/use-file-to-render';
+import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { ExternalLinkIcon } from '@heroicons/react/outline';
-import { PureSpinner } from '@/components/PureSpinner';
-import type { CommonData } from '@/hooks/use-common-data';
+import { QuestionMarkCircleIcon, StarIcon } from '@heroicons/react/solid';
+import type { GithubFileHash, ReportDTO, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
+import { updateReportAction } from '@kyso-io/kyso-store';
+import { Fragment, useState } from 'react';
 
 interface Props {
   tree: GithubFileHash[];

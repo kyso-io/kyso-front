@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { CommonData } from '@/types/common-data';
 import type { NormalizedResponseDTO, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
 import type { KeyedMutator } from 'swr';
 import useSWR from 'swr';
-import type { CommonData } from './use-common-data';
 
 interface Props {
   commonData: CommonData;

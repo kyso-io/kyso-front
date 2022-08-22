@@ -1,13 +1,13 @@
 import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import type { CommonData } from '@/hooks/use-common-data';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
+import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { DotsVerticalIcon, PlusCircleIcon, TrashIcon } from '@heroicons/react/outline';
 import { deleteTeamAction } from '@kyso-io/kyso-store';
 // import { deleteTeamAction } from '@kyso-io/kyso-store';
-import React, { Fragment, useMemo } from 'react';
+import { Fragment, useMemo } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props {

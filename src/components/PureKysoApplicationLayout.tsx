@@ -1,6 +1,6 @@
-import type { CommonData } from '@/hooks/use-common-data';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { CommonData } from '@/types/common-data';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/solid';
