@@ -1,4 +1,4 @@
-import type { CommonData } from '@/hooks/use-common-data';
+import type { CommonData } from '@/types/common-data';
 import type { KysoPermissions, ResourcePermissions } from '@kyso-io/kyso-model';
 
 /**

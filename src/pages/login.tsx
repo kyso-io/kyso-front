@@ -3,10 +3,10 @@ import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
-import { loginAction, setError as storeSetError } from '@kyso-io/kyso-store';
-import { useUser } from '@/hooks/use-user';
+import { Api, setError as storeSetError } from '@kyso-io/kyso-store';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -43,24 +43,16 @@ const Index = () => {
   const [enablePingSamlAuth, setEnablePingSamlAuth] = useState(true);
   const [pingUrl, setPingUrl] = useState('');
 
-  const [rightLogo, setRightLogo] = useState('/assets/images/kyso-logo-and-name-dark.svg');
+  const [rightLogo, setRightLogo] = useState(null);
   const [leftLogo, setLeftLogo] = useState('/assets/images/kyso-logo-and-name-dark.svg');
 
-  /* eslint-disable unused-imports/no-unused-vars */
-  const [globalCss, setglobalCss] = useState(false);
-  const [headerCss, setHeaderCss] = useState(false);
-  const [buttonCss, setButtonCss] = useState(false);
-  const [buttonHoverCss, setButtonHoverCss] = useState(false);
-  const [linkCss, setLinkCss] = useState(false);
-  const [showdivCss, setShowdivCss] = useState(false);
-  const [hiddendivCss, setHiddendivCss] = useState(false);
-
-  // To pass for now the eslint ...
-  console.log(`${globalCss} ${headerCss} ${buttonCss} ${buttonHoverCss} ${linkCss} 
-    ${showdivCss} ${hiddendivCss} ${error}`);
-
-  // const user = useSelector(selectUser);
-  const user = useUser();
+  // const [globalCss, setglobalCss] = useState(false);
+  // const [headerCss, setHeaderCss] = useState(false);
+  // const [buttonCss, setButtonCss] = useState(false);
+  // const [buttonHoverCss, setButtonHoverCss] = useState(false);
+  // const [linkCss, setLinkCss] = useState(false);
+  // const [showdivCss, setShowdivCss] = useState(false);
+  // const [hiddendivCss, setHiddendivCss] = useState(false);
 
   useEffect(() => {
     const getOrganizationOptions = async () => {
@@ -114,16 +106,6 @@ const Index = () => {
       const custumizeLeftLogo = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LEFT_LOGO_URL).value;
       const custumizeRightLogo = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_RIGHT_LOGO_URL).value;
 
-      const customizeGlobalCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_CSS_STYLES).value;
-
-      const customizeHeaderCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HEADER_CSS_STYLES)?.value;
-
-      const customizeButtonCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_CSS_STYLES)?.value;
-      const customizeButtonHoverCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_HOVER_CSS_STYLES)?.value;
-      const customizeLinkCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LINK_CSS_STYLES)?.value;
-      const customizeShowdivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES)?.value;
-      const customizeHiddendivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES)?.value;
-
       if (custumizeLeftLogo) {
         setLeftLogo(custumizeLeftLogo);
       }
@@ -131,13 +113,20 @@ const Index = () => {
         setRightLogo(custumizeRightLogo);
       }
 
-      setglobalCss(customizeGlobalCss);
-      setHeaderCss(customizeHeaderCss);
-      setButtonCss(customizeButtonCss);
-      setButtonHoverCss(customizeButtonHoverCss);
-      setLinkCss(customizeLinkCss);
-      setShowdivCss(customizeShowdivCss);
-      setHiddendivCss(customizeHiddendivCss);
+      // const customizeGlobalCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_CSS_STYLES).value;
+      // const customizeHeaderCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HEADER_CSS_STYLES)?.value;
+      // const customizeButtonCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_CSS_STYLES)?.value;
+      // const customizeButtonHoverCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_HOVER_CSS_STYLES)?.value;
+      // const customizeLinkCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LINK_CSS_STYLES)?.value;
+      // const customizeShowdivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES)?.value;
+      // const customizeHiddendivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES)?.value;
+      // setglobalCss(customizeGlobalCss);
+      // setHeaderCss(customizeHeaderCss);
+      // setButtonCss(customizeButtonCss);
+      // setButtonHoverCss(customizeButtonHoverCss);
+      // setLinkCss(customizeLinkCss);
+      // setShowdivCss(customizeShowdivCss);
+      // setHiddendivCss(customizeHiddendivCss);
 
       return '';
     };
@@ -150,29 +139,9 @@ const Index = () => {
     }
   }, [router.query.error]);
 
-  useEffect(() => {
-    if (user) {
-      // toaster.success("You are now logged in.");
-
-      setTimeout(() => {
-        if (user.show_captcha) {
-          if (redirect) {
-            router.push(`/captcha?redirect=${redirect}`);
-          } else {
-            router.push(`/captcha`);
-          }
-        } else if (redirect) {
-          router.push(redirect as string);
-        } else {
-          router.push('/');
-        }
-      }, 200);
-    }
-  }, [user]);
-
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const handleSubmit = async (event: any) => {
+    event.preventDefault();
 
     if (!email || email.length === 0) {
       setError('Email is required.');
@@ -190,12 +159,22 @@ const Index = () => {
     }
 
     const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
-
-    const result = await dispatch(loginAction(loginData));
-    if (result?.payload) {
-      localStorage.setItem('jwt', result.payload);
-      setTimeout(() => {
-        if (redirect) {
+    try {
+      const api: Api = new Api();
+      const result: NormalizedResponseDTO<string> = await api.login(loginData);
+      if (result?.data) {
+        const token: string = result.data;
+        localStorage.setItem('jwt', token);
+        api.setToken(token);
+        const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+        const user: UserDTO | null = responseUserDto.data;
+        if (user.show_captcha) {
+          if (redirect) {
+            router.push(`/captcha?redirect=${redirect}`);
+          } else {
+            router.push(`/captcha`);
+          }
+        } else if (redirect) {
           router.push(redirect as string);
         } else {
           router.push('/');
@@ -393,7 +372,7 @@ const Index = () => {
               </a>
             )}
 
-            {error && <div className="text-red-500 p-2">{error}</div>}
+            {error && <div className="text-red-500 text-center p-2">{error}</div>}
           </div>
         </main>
       </div>

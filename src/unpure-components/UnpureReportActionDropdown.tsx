@@ -1,12 +1,12 @@
-import { useAppDispatch } from '@/hooks/redux-hooks';
-import { Fragment, useState } from 'react';
 import classNames from '@/helpers/class-names';
-import { DotsVerticalIcon, FolderDownloadIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
+import { useAppDispatch } from '@/hooks/redux-hooks';
+import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
-import { deleteReportAction } from '@kyso-io/kyso-store';
+import { DotsVerticalIcon, FolderDownloadIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
+import { deleteReportAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import type { CommonData } from '@/hooks/use-common-data';
+import { Fragment, useState } from 'react';
 
 interface Props {
   report: ReportDTO;

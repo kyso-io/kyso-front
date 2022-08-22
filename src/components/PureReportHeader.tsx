@@ -1,22 +1,23 @@
-import format from 'date-fns/format';
-import type { ReportDTO, User } from '@kyso-io/kyso-model';
-import classNames from '@/helpers/class-names';
-import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDropdown';
-import type { CommonData } from '@/hooks/use-common-data';
 import PureShareButton from '@/components/PureShareButton';
-import UnpureCloneDropdown from '@/unpure-components/UnpureCloneDropdown';
 import PureVersionsDropdown from '@/components/PureVersionsDropdown';
-import router from 'next/router';
+import classNames from '@/helpers/class-names';
+import type { CommonData } from '@/types/common-data';
+import UnpureCloneDropdown from '@/unpure-components/UnpureCloneDropdown';
+import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDropdown';
 import { ThumbUpIcon } from '@heroicons/react/solid';
+import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import format from 'date-fns/format';
+import router from 'next/router';
 
 import type { Version } from '@/hooks/use-versions';
+import clsx from 'clsx';
 import PureAvatarGroup from './PureAvatarGroup';
 
 type IPureReportHeaderProps = {
   report: ReportDTO;
   reportUrl: string;
   frontEndUrl: string;
-  authors: User[];
+  authors: UserDTO[];
   version?: string;
   versions: Version[];
   onUpvoteReport: () => void;
@@ -50,8 +51,11 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
           {report?.id && (
             <button
               type="button"
-              className="inline-flex space-x-2 text-gray-400 hover:text-gray-500"
+              className={clsx('inline-flex space-x-2 text-gray-400 hover:text-gray-500', !commonData.user ? 'cursor-default' : '')}
               onClick={() => {
+                if (!commonData.user) {
+                  return;
+                }
                 onUpvoteReport();
               }}
             >

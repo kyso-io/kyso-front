@@ -1,9 +1,8 @@
 import checkPermissions from '@/helpers/check-permissions';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import type { ActivityFeed, NormalizedResponseDTO, Organization, OrganizationMember, PaginatedResponseDto, ReportDTO, SearchUser, SearchUserDto, Team, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import { TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
@@ -35,28 +34,32 @@ const debouncedPaginatedReports = debounce(
         query += `&${queryParams}`;
       }
       const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getPaginatedReports(query);
-      const dataWithAuthors = [];
+      // Sort by global_pin and user_pin
+      result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
+        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+          return -1;
+        }
+        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+          return 1;
+        }
+        return 0;
+      });
 
+      const dataWithAuthors = [];
       for (const x of result.data.results) {
         const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
         const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
         const allAuthorsData: UserDTO[] = [];
-
         for (const authorId of uniqueAllAuthorsId) {
           /* eslint-disable no-await-in-loop */
-          const userData: NormalizedResponseDTO<UserDTO> = await api.getUserProfileById(authorId);
-
-          if (userData && userData.data) {
-            allAuthorsData.push(userData.data);
+          if (result.relations?.user[authorId]) {
+            allAuthorsData.push(result.relations.user[authorId]);
           }
         }
-
         x.authors = allAuthorsData;
         dataWithAuthors.push(x);
       }
-
       result.data.results = dataWithAuthors;
-      console.log('result', result.data);
       cb(result);
     } catch (e) {
       cb(null);
@@ -65,13 +68,13 @@ const debouncedPaginatedReports = debounce(
   500,
 );
 
-const Index = () => {
+interface Props {
+  commonData: CommonData;
+}
+
+const Index = ({ commonData }: Props) => {
   const router = useRouter();
-  useRedirectIfNoJWT();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+
   // MEMBERS
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
@@ -83,22 +86,33 @@ const Index = () => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   // PERMISSIONS
-  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_DELETE_TEAM'), [commonData]);
+  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.DELETE), [commonData]);
   // SEARCH USER
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
 
   useEffect(() => {
-    if (!commonData.team || !commonData.user) {
+    if (commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC && !commonData.user) {
+      // Unauthenticated user trying to access a non public team
+      router.replace(`/${commonData.organization?.sluglified_name}`);
+    }
+  }, [commonData?.team]);
+
+  useEffect(() => {
+    if (!commonData.team) {
       return;
     }
     getTeamMembers();
   }, [commonData?.team, commonData?.user]);
 
   useEffect(() => {
-    if (!commonData.organization || !commonData.team || !commonData.user) {
+    if (!commonData.organization || !commonData.team) {
       return;
     }
-    getSearchUser();
+    if (commonData.user) {
+      getSearchUser();
+    } else {
+      getReports(1);
+    }
   }, [commonData?.organization, commonData?.team, commonData?.user]);
 
   useEffect(() => {
@@ -125,7 +139,7 @@ const Index = () => {
       const resultOrgMembers: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
       let userMember: Member | null = null;
       resultOrgMembers.data.forEach((organizationMember: OrganizationMember) => {
-        if (organizationMember.id === commonData.user.id) {
+        if (organizationMember.id === commonData.user?.id) {
           userMember = {
             id: organizationMember.id,
             nickname: organizationMember.nickname,
@@ -412,8 +426,12 @@ const Index = () => {
 
   // END SEARCH USER
 
+  if (!commonData.team) {
+    return <div className="text-center mt-4">You don&apos;t have permissions to access this team.</div>;
+  }
+
   return (
-    <div className="flex flex-row space-x-8">
+    <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
@@ -438,73 +456,70 @@ const Index = () => {
 
               <UnpureDeleteChannelDropdown commonData={commonData} hasPermissionDeleteChannel={hasPermissionDeleteChannel} />
 
-              <PureNewReportPopover commonData={commonData} />
+              {commonData?.user && <PureNewReportPopover commonData={commonData} />}
             </div>
           </div>
         )}
 
-        {searchUser !== undefined && (
-          <React.Fragment>
-            <ReportsSearchBar
-              members={members}
-              onSaveSearch={(query: string | null, payload: ReportsFilter[] | null) => {
-                if (query) {
-                  createSearchUser(query, payload!);
-                } else if (searchUser && !query) {
-                  deleteSearchUser();
-                }
-              }}
-              onFiltersChange={(query: string) => getReports(1, query)}
-              searchUser={searchUser}
-              user={commonData.user}
-            />
-            {requestingReports && (
-              <div className="text-center">
-                <PureSpinner size={12} />
-              </div>
-            )}
-            {!requestingReports &&
-              (reportsResponse && reportsResponse.data.results && reportsResponse.data.results.length > 0 ? (
-                <React.Fragment>
-                  <div>
-                    <ul role="list" className="space-y-4">
-                      {reportsResponse.data.results?.map((report: ReportDTO) => (
-                        <ReportBadge
-                          key={report.id}
-                          report={report}
-                          authors={report.authors ? report.authors : []}
-                          toggleUserStarReport={() => toggleUserStarReport(report.id!)}
-                          toggleUserPinReport={() => toggleUserPinReport(report.id!)}
-                          toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
-                        />
-                      ))}
-                    </ul>
-                  </div>
-                  <div className="flex-1 flex justify-center">
-                    {reportsResponse.data.currentPage - 1 >= 1 && (
-                      <span
-                        onClick={() => getReports(reportsResponse.data.currentPage - 1)}
-                        className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                      >
-                        Previous
-                      </span>
-                    )}
-                    <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {reportsResponse.data.currentPage}</p>
-                    {reportsResponse.data.currentPage + 1 <= reportsResponse.data.totalPages && (
-                      <span
-                        onClick={() => getReports(reportsResponse.data.currentPage + 1)}
-                        className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
-                      >
-                        Next
-                      </span>
-                    )}
-                  </div>
-                </React.Fragment>
-              ) : (
-                <p>No reports found</p>
-              ))}
-          </React.Fragment>
+        <ReportsSearchBar
+          members={members}
+          onSaveSearch={(query: string | null, payload: ReportsFilter[] | null) => {
+            if (query) {
+              createSearchUser(query, payload!);
+            } else if (searchUser && !query) {
+              deleteSearchUser();
+            }
+          }}
+          onFiltersChange={(query: string) => getReports(1, query)}
+          searchUser={searchUser}
+          user={commonData.user}
+        />
+        {requestingReports && (
+          <div className="text-center">
+            <PureSpinner size={12} />
+          </div>
         )}
+        {!requestingReports &&
+          (reportsResponse && reportsResponse.data.results && reportsResponse.data.results.length > 0 ? (
+            <React.Fragment>
+              <div>
+                <ul role="list" className="space-y-4">
+                  {reportsResponse.data.results?.map((report: ReportDTO) => (
+                    <ReportBadge
+                      commonData={commonData}
+                      key={report.id}
+                      report={report}
+                      authors={report.authors ? report.authors : []}
+                      toggleUserStarReport={() => toggleUserStarReport(report.id!)}
+                      toggleUserPinReport={() => toggleUserPinReport(report.id!)}
+                      toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+                    />
+                  ))}
+                </ul>
+              </div>
+              <div className="flex-1 flex justify-center">
+                {reportsResponse.data.currentPage - 1 >= 1 && (
+                  <span
+                    onClick={() => getReports(reportsResponse.data.currentPage - 1)}
+                    className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                  >
+                    Previous
+                  </span>
+                )}
+                <p className="px-6 py-2 text-sm font-medium rounded-md text-gray-700 hover:bg-gray-50">Page {reportsResponse.data.currentPage}</p>
+                {reportsResponse.data.currentPage + 1 <= reportsResponse.data.totalPages && (
+                  <span
+                    onClick={() => getReports(reportsResponse.data.currentPage + 1)}
+                    className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                  >
+                    Next
+                  </span>
+                )}
+              </div>
+            </React.Fragment>
+          ) : (
+            <p>No reports found</p>
+          ))}
       </div>
       {commonData.user && (
         <div className="w-1/6">

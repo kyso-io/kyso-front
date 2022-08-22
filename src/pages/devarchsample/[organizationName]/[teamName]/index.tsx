@@ -1,15 +1,11 @@
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
-import { useRouter } from 'next/router';
+import type { CommonData } from '@/types/common-data';
 
-const Index = () => {
-  const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
+interface Props {
+  commonData: CommonData;
+}
 
+const Index = ({ commonData }: Props) => {
   return (
     <>
       <div className="mt-8">

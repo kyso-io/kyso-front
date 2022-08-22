@@ -1,13 +1,13 @@
-import useSWR from 'swr';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import type { CommonData } from '@/types/common-data';
+import type { NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
-import type { NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
-import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import type { CommonData } from './use-common-data';
+import useSWR from 'swr';
 
 interface Props {
   commonData: CommonData;
-  report: ReportDTO;
+  report: ReportDTO | null | undefined;
 }
 
 export interface Version {

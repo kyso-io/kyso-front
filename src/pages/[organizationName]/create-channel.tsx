@@ -1,26 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import ChannelList from '@/components/ChannelList';
+import { PureSpinner } from '@/components/PureSpinner';
 import checkPermissions from '@/helpers/check-permissions';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
+import { useAppDispatch } from '@/hooks/redux-hooks';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { CommonData } from '@/types/common-data';
+import { ArrowRightIcon } from '@heroicons/react/solid';
+import { TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { checkTeamNameIsUniqueAction, createTeamAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
-import ChannelList from '@/components/ChannelList';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { ArrowRightIcon } from '@heroicons/react/solid';
-import { useAppDispatch } from '@/hooks/redux-hooks';
-import { PureSpinner } from '@/components/PureSpinner';
 
-const Index = () => {
+interface Props {
+  commonData: CommonData;
+}
+
+const Index = ({ commonData }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
   const dispatch = useAppDispatch();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
 
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
@@ -29,7 +28,7 @@ const Index = () => {
   const [formDescription, setFormDescription] = useState('');
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
 
-  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_TEAM'), [commonData]);
+  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
 
   const createChannel = async (ev: any) => {
     ev.preventDefault();
@@ -75,7 +74,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-row space-x-8">
+    <div className="flex flex-row space-x-8 p-2">
       <div className="w-2/12">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>

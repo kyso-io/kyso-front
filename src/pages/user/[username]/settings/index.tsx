@@ -1,20 +1,15 @@
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 
 const Index = () => {
-  useUser();
   const router = useRouter();
 
   useEffect(() => {
     router.push(`${router.basePath}/in/settings`);
   });
 
-  // const commonData: CommonData = useCommonData({
-  //   organizationName: router.query.organizationName as string,
-  //   teamName: router.query.teamName as string,
-  // });
+  // const commonData: CommonData = useCommonData();
 
   // let sluglifiedName = '';
 

@@ -1,3 +1,4 @@
+import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { BookmarkIcon, ChatIcon } from '@heroicons/react/outline';
 import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ShareIcon, ThumbUpIcon } from '@heroicons/react/solid';
@@ -6,11 +7,8 @@ import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
-import { useRouter } from 'next/router';
 import { Fragment, useMemo } from 'react';
 import checkPermissions from '../helpers/check-permissions';
-import type { CommonData } from '../hooks/use-common-data';
-import { useCommonData } from '../hooks/use-common-data';
 import PureAvatarGroup from './PureAvatarGroup';
 
 const MAX_LENGTH_DESCRIPTION: number = 200;
@@ -20,6 +18,7 @@ function classNames(...classes: string[]) {
 }
 
 interface Props {
+  commonData: CommonData;
   report: ReportDTO;
   authors: UserDTO[];
   toggleUserStarReport: () => void;
@@ -27,13 +26,7 @@ interface Props {
   toggleGlobalPinReport?: () => void;
 }
 
-const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
-  const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
-
+const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
   const hasPermissionReportGlobalPin: boolean = useMemo(() => {
     return checkPermissions(commonData, ReportPermissionsEnum.GLOBAL_PIN);
   }, [commonData.organization, commonData.team, commonData.user]);
@@ -99,8 +92,8 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
                     {hasPermissionReportGlobalPin && (
                       <Menu.Item>
                         {({ active }) => (
-                          <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
-                            <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
+                          <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-100': active })}>
+                            <button className={classNames(active ? 'bg-gray-100 text-gray-500' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
                               {report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
                             </button>
                           </div>
@@ -110,8 +103,8 @@ const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinRepor
                     {!report.pin && (
                       <Menu.Item>
                         {({ active }) => (
-                          <div onClick={toggleUserPinReport} className={clsx('py-1 pointer', { 'bg-gray-100': active })}>
-                            <button className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
+                          <div onClick={toggleUserPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-100': active })}>
+                            <button className={classNames(active ? 'bg-gray-100 text-gray-500' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
                               {report.user_pin ? 'Remove pin from the top' : 'Pin to the top'}
                             </button>
                           </div>

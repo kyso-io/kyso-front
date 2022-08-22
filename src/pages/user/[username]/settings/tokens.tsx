@@ -1,16 +1,14 @@
+import { Helper } from '@/helpers/Helper';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { CommonData } from '@/types/common-data';
 import { useRouter } from 'next/router';
 
-import { Helper } from '@/helpers/Helper';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
+interface Props {
+  commonData: CommonData;
+}
 
-const Index = () => {
+const Index = ({ commonData }: Props) => {
   const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
 
   let sluglifiedName = '';
   if (commonData.user) {

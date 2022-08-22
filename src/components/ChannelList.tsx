@@ -1,9 +1,10 @@
 import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
-import type { CommonData } from '@/hooks/use-common-data';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
+import type { CommonData } from '@/types/common-data';
 import { PlusCircleIcon } from '@heroicons/react/outline';
-import React, { useMemo } from 'react';
+import { TeamPermissionsEnum } from '@kyso-io/kyso-model';
+import { useMemo } from 'react';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props {
@@ -15,7 +16,7 @@ const ChannelList = (props: Props) => {
   const { basePath, commonData } = props;
   const channelSelectorItems: BreadcrumbItem[] = [];
 
-  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_TEAM'), [commonData]);
+  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
 
   if (commonData.permissions && commonData.permissions.teams) {
     commonData

@@ -1,35 +1,34 @@
-import type { ChangeEvent } from 'react';
-import { useState, useEffect, useMemo, Fragment, useCallback } from 'react';
-import type { TeamMember, NormalizedResponseDTO, KysoConfigFile, ReportDTO } from '@kyso-io/kyso-model';
-import { ReportType } from '@kyso-io/kyso-model';
-import { FilesystemItem } from '@/model/filesystem-item.model';
-import { CreationReportFileSystemObject } from '@/model/creation-report-file';
-import { BreadcrumbItem } from '@/model/breadcrum-item.model';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useChannelMembers } from '@/hooks/use-channel-members';
-import { useCommonData } from '@/hooks/use-common-data';
-import { useRouter } from 'next/router';
-import { Api } from '@kyso-io/kyso-store';
-import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
-import dynamic from 'next/dynamic';
-import debounce from 'lodash.debounce';
-import JSZip from 'jszip';
+import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { useChannelMembers } from '@/hooks/use-channel-members';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import { BreadcrumbItem } from '@/model/breadcrum-item.model';
+import { CreationReportFileSystemObject } from '@/model/creation-report-file';
+import { FilesystemItem } from '@/model/filesystem-item.model';
+import type { CommonData } from '@/types/common-data';
+import type { KysoConfigFile, NormalizedResponseDTO, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import { ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
+import { Api } from '@kyso-io/kyso-store';
 import FormData from 'form-data';
+import JSZip from 'jszip';
+import debounce from 'lodash.debounce';
+import dynamic from 'next/dynamic';
+import { useRouter } from 'next/router';
+import type { ChangeEvent } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 
+import ErrorNotification from '@/components/ErrorNotification';
 import Filesystem from '@/components/Filesystem';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import MemberFilterSelector from '@/components/MemberFilterSelector';
+import NewReportNamingDropdown from '@/components/NewReportNamingDropdown';
 import { PureSpinner } from '@/components/PureSpinner';
+import TagsFilterSelector from '@/components/TagsFilterSelector';
+import slugify from '@/helpers/slugify';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Menu, Transition } from '@headlessui/react';
 import { ArrowRightIcon, DocumentAddIcon, FolderAddIcon, SelectorIcon, UploadIcon } from '@heroicons/react/solid';
-import MemberFilterSelector from '@/components/MemberFilterSelector';
-import TagsFilterSelector from '@/components/TagsFilterSelector';
-import ErrorNotification from '@/components/ErrorNotification';
-import NewReportNamingDropdown from '@/components/NewReportNamingDropdown';
 import 'easymde/dist/easymde.min.css';
-import slugify from '@/helpers/slugify';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -45,13 +44,13 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
-const CreateReport = () => {
+interface Props {
+  commonData: CommonData;
+}
+
+const CreateReport = ({ commonData }: Props) => {
   useRedirectIfNoJWT();
   const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
 
   const channelSelectorItems: BreadcrumbItem[] = [];
 
@@ -87,7 +86,7 @@ const CreateReport = () => {
   const [selectedFile, setSelectedFile] = useState<FilesystemItem>(new FilesystemItem(mainfile[0]!, [], 1));
   const [files, setFiles] = useState<CreationReportFileSystemObject[]>(mainfile);
 
-  const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_REPORT'), [commonData]);
+  const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
 
   const cleanStorage = () => {
     removeLocalStorageItem('formTitle');
@@ -288,7 +287,7 @@ const CreateReport = () => {
   }, []);
 
   return (
-    <div>
+    <div className="p-2">
       <div className="flex flex-row items-center">
         <div className="w-1/6"></div>
         <div className="w-4/6">

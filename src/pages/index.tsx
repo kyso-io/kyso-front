@@ -1,39 +1,50 @@
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import { useEffect } from 'react';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import type { CommonData } from '@/types/common-data';
 import { useRouter } from 'next/router';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
-import NoLayout from '@/layouts/NoLayout';
+import { useEffect } from 'react';
+import ChannelList from '../components/ChannelList';
+import KysoApplicationLayout from '../layouts/KysoApplicationLayout';
 
-const Index = () => {
-  useRedirectIfNoJWT();
+interface Props {
+  commonData: CommonData;
+}
 
+const Index = ({ commonData }: Props) => {
   const router = useRouter();
-  const commonData: CommonData = useCommonData({
-    organizationName: router.query.organizationName as string,
-    teamName: router.query.teamName as string,
-  });
 
   useEffect(() => {
-    setTimeout(() => {
+    const redirectUserToOrganization = async () => {
       if (!commonData.user) {
         return;
       }
-      const lastOrganization: string | null = getLocalStorageItem('last_organization');
-      const orgs = commonData.permissions?.organizations;
-
-      if (lastOrganization && lastOrganization !== 'undefined') {
-        router.push(`${lastOrganization}`);
-      } else if (orgs && orgs.length > 0) {
-        router.push(`${orgs[0]?.name}`);
+      let lastOrganizationDict: { [userId: string]: string } = {};
+      const lastOrganizationStr: string | null = getLocalStorageItem('last_organization');
+      if (lastOrganizationStr) {
+        try {
+          lastOrganizationDict = JSON.parse(lastOrganizationStr);
+        } catch (e) {}
       }
-    }, 200);
-  }, [commonData]);
+      if (lastOrganizationDict[commonData.user.id]) {
+        router.push(`${lastOrganizationDict[commonData.user!.id]}`);
+      } else if (commonData.permissions) {
+        const orgs = commonData.permissions?.organizations;
+        if (orgs && orgs.length > 0) {
+          router.push(`${orgs[0]?.name}`);
+        }
+      }
+    };
+    redirectUserToOrganization();
+  }, []);
 
-  return <div className="mt-8">{/* <h1>Select an organization from the dropdown above.</h1> */}</div>;
+  return (
+    <div className="flex flex-row space-x-8">
+      <div className="w-1/6">
+        <ChannelList basePath={router.basePath} commonData={commonData} />
+      </div>
+    </div>
+  );
 };
 
-Index.layout = NoLayout;
+Index.layout = KysoApplicationLayout;
 
 export default Index;
