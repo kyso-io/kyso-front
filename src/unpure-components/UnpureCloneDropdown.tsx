@@ -47,7 +47,7 @@ const UnpureCloneDropdown = (props: Props) => {
 
   return (
     <>
-      <Popover as="div" className="z-50 relative inline-block">
+      <Popover as="div" className="relative inline-block">
         <Popover.Button className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm text-gray-700 flex flex-row items-center focus:ring-0 focus:outline-none">
           Clone
           <ChevronDownIcon className="w-5 h-5" />

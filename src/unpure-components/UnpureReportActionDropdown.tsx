@@ -38,7 +38,7 @@ const UnpureReportActionDropdown = (props: Props) => {
 
   return (
     <>
-      <Menu as="div" className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm z-50 relative inline-block">
+      <Menu as="div" className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm relative inline-block">
         <Menu.Button className="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
           <span className="sr-only">Open options</span>
           <DotsVerticalIcon className="h-5 w-5" aria-hidden="true" />

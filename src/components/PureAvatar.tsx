@@ -1,6 +1,7 @@
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import React, { useMemo } from 'react';
+import clsx from 'clsx';
+import React, { useMemo, useState } from 'react';
 import { v4 } from 'uuid';
 
 interface Props {
@@ -13,6 +14,9 @@ interface Props {
 
 const PureAvatar = (props: Props) => {
   // Default size
+
+  const [isLoaded, setIsLoaded] = useState(false);
+
   let size = TailwindHeightSizeEnum.H6;
   let textSize: TailwindFontSizeEnum = TailwindFontSizeEnum.XS;
 
@@ -33,22 +37,25 @@ const PureAvatar = (props: Props) => {
   const processLoadingImageError = (displayName: string, e: any): any => {
     const imgDefault = `https://ui-avatars.com/api/?name=${displayName.toUpperCase().split(' ').join('').slice(0, 2)}`;
     e.target.src = imgDefault;
+    setIsLoaded(true);
   };
 
   return (
     <>
       {props.src && (
-        <>
-          <img
-            key={v4()}
-            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-              processLoadingImageError(props.title, e);
-            }}
-            className={`object-cover inline-block h-${size} w-${size} rounded-full ring-2 ring-white hover:border transition duration-100`}
-            src={props.src}
-            alt={props.title}
-          />
-        </>
+        <img
+          key={v4()}
+          onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+            setIsLoaded(false);
+            processLoadingImageError(props.title, e);
+          }}
+          onLoad={() => {
+            setIsLoaded(true);
+          }}
+          className={clsx(`object-cover inline-block h-${size} w-${size} rounded-full ring-2 ring-white hover:border transition duration-100`, isLoaded ? '' : 'invisible')}
+          src={props.src}
+          alt={props.title}
+        />
       )}
       {!props.src && (
         // W-SIZE is a super-set of H-SIZE, so no problem there...

@@ -47,7 +47,7 @@ const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => 
               <span>
                 {' '}
                 on{' '}
-                <a href={`/${activityFeed.organization}/${activityFeed.team}/reports/${report.id}`} className="font-medium text-gray-900">
+                <a href={`/${activityFeed.organization}/${activityFeed.team}/${report.sluglified_name}`} className="font-medium text-gray-900">
                   {report.title}
                 </a>
               </span>
@@ -134,7 +134,7 @@ const ActivityFeedReport = ({ activityFeed, relations }: ActivityFeedProps) => {
           {activityFeed.action === ActionEnum.STAR && 'liked the report '}
           {activityFeed.action === ActionEnum.UNSTAR && 'unliked the report '}
           {activityFeed.action !== ActionEnum.DELETE ? (
-            <a href={`/${activityFeed.organization}/${activityFeed.team}/reports/${report.id}`} className="font-medium text-blue-600 underline">
+            <a href={`/${activityFeed.organization}/${activityFeed.team}/${report.sluglified_name}`} className="font-medium text-blue-600 underline">
               {report.title}
             </a>
           ) : (
