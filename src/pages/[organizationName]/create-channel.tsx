@@ -9,6 +9,7 @@ import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon } from '@heroicons/react/solid';
 import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { checkTeamNameIsUniqueAction, createTeamAction } from '@kyso-io/kyso-store';
+import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
 
@@ -30,15 +31,15 @@ const Index = ({ commonData }: Props) => {
 
   const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_TEAM'), [commonData]);
 
-  const createChannel = async (ev: any) => {
-    ev.preventDefault();
-    setError('');
-    if (!formName || formName.length === 0) {
-      setError('Please specify a channel name.');
-      return;
+  const delayCheckingName = debounce(async (payload: string) => {
+    if (!payload) {
+      setError('Channel name in used.');
+      setBusy(false);
     }
+  }, 1000);
 
-    setBusy(true);
+  const checkName = async (name: string) => {
+    setFormName(name);
     try {
       const { payload } = await dispatch(
         checkTeamNameIsUniqueAction({
@@ -46,11 +47,34 @@ const Index = ({ commonData }: Props) => {
           teamName: formName,
         }),
       );
-      if (!payload) {
-        setError('Name in use.');
-        setBusy(false);
-        return;
-      }
+      delayCheckingName(payload);
+    } catch (er: any) {
+      setError(er.message);
+      setBusy(false);
+    }
+  };
+
+  const createChannel = async (ev: any) => {
+    ev.preventDefault();
+    setError('');
+    if (!formName || formName.length === 0) {
+      setError('Please specify a channel name.');
+      return;
+    }
+    setBusy(true);
+    try {
+      // const { payload } = await dispatch(
+      //   checkTeamNameIsUniqueAction({
+      //     organizationId: commonData.organization!.id!,
+      //     teamName: formName,
+      //   }),
+      // );
+
+      // if (!payload) {
+      //   setError('Channel name in used.');
+      //   setBusy(false);
+      //   return;
+      // }
       const result = await dispatch(
         createTeamAction({
           sluglified_name: formName,
@@ -100,7 +124,7 @@ const Index = ({ commonData }: Props) => {
                           name="name"
                           id="name"
                           autoComplete="name"
-                          onChange={(e) => setFormName(e.target.value)}
+                          onChange={(e) => checkName(e.target.value)}
                           className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
                         />
                       </div>
