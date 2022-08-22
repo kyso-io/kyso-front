@@ -20,7 +20,6 @@ import { isImage } from '@/hooks/use-file-to-render';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
-import UnpureFileHeader from '@/unpure-components/UnpureFileHeader';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import ManageUsers from '@/components/ManageUsers';
 import { useChannelMembers } from '@/hooks/use-channel-members';
@@ -435,7 +434,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
 
   return (
     <div>
-      {/* <div className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-y-inherit border-y-white border-b-inherit border-y-transparent inline mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300 w-5 h-5"></div> */}
+      {/* <div className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-dashed border-y-inherit border-white border-inherit border-transparent inline mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300 w-5 h-5"></div> */}
       <div className="flex flex-row">
         <PureSideOverlayPanel key={report?.name} cacheKey={report?.name}>
           <>
@@ -459,86 +458,87 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
 
         {selfTree && report && commonData && (
           <>
-            <div className="w-full p-4 flex lg:flex-col flex-col justify-between rounded">
-              <PureReportHeader
-                reportUrl={`${reportUrl}`}
-                frontEndUrl={frontEndUrl}
-                versions={versions}
-                report={report}
-                authors={authors}
-                version={version}
-                onUpvoteReport={async () => {
-                  await dispatch(toggleUserStarReportAction(report.id as string));
-                  refreshReport();
-                }}
-                hasPermissionEditReport={
-                  hasPermissionEditReport || ((report.user_id === commonData.user?.id || report.author_ids.includes(commonData.user?.id as string)) && hasPermissionEditReportOnlyMine)
-                }
-                hasPermissionDeleteReport={hasPermissionDeleteReport}
-                commonData={commonData}
-              >
-                <ManageUsers
-                  commonData={commonData}
-                  members={members}
-                  onInputChange={(query: string) => searchUsers(query)}
-                  users={users}
-                  showTeamRoles={true}
-                  onUpdateRoleMember={updateMemberRole}
-                  onInviteNewUser={inviteNewUser}
-                  onRemoveUser={removeUser}
-                />
-              </PureReportHeader>
-
-              <UnpureFileHeader
-                tree={selfTree}
-                report={report}
-                fileToRender={fileToRender}
-                basePath={router.basePath}
-                path={currentPath}
-                version={router.query.version as string}
-                commonData={commonData}
-              />
-
-              {fileToRender && onlyVisibleCell && (
-                <div className="w-full border-x border-b flex justify-end p-2 prose prose-sm text-xs max-w-none">
-                  Showing only this cell.
-                  <button
-                    onClick={() => {
-                      const qs = { ...router.query };
-                      delete qs.cell;
-                      return router.push({
-                        query: { ...qs },
-                      });
-                    }}
-                    className="ml-1 text-blue-500"
-                  >
-                    View entire notebook
-                  </button>
-                </div>
-              )}
-
-              {fileToRender && (
-                <UnpureReportRender
+            <div className="w-full flex lg:flex-col flex-col justify-between rounded">
+              <div className="w-full p-4">
+                <PureReportHeader
+                  reportUrl={`${reportUrl}`}
+                  frontEndUrl={frontEndUrl}
+                  versions={versions}
                   fileToRender={fileToRender}
                   report={report}
-                  channelMembers={channelMembers}
+                  authors={authors}
+                  version={version}
+                  onUpvoteReport={async () => {
+                    await dispatch(toggleUserStarReportAction(report.id as string));
+                    refreshReport();
+                  }}
+                  hasPermissionEditReport={
+                    hasPermissionEditReport || ((report.user_id === commonData.user?.id || report.author_ids.includes(commonData.user?.id as string)) && hasPermissionEditReportOnlyMine)
+                  }
+                  hasPermissionDeleteReport={hasPermissionDeleteReport}
                   commonData={commonData}
-                  onlyVisibleCell={onlyVisibleCell}
-                  frontEndUrl={frontEndUrl}
-                  enabledCreateInlineComment={hasPermissionCreateInlineComment}
-                  enabledEditInlineComment={hasPermissionEditInlineComment}
-                  enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
-                />
-              )}
+                >
+                  <ManageUsers
+                    commonData={commonData}
+                    members={members}
+                    onInputChange={(query: string) => searchUsers(query)}
+                    users={users}
+                    showTeamRoles={true}
+                    onUpdateRoleMember={updateMemberRole}
+                    onInviteNewUser={inviteNewUser}
+                    onRemoveUser={removeUser}
+                  />
+                </PureReportHeader>
+              </div>
 
-              {!fileToRender && (
-                <div className="border-x border-b rounded-b">
-                  <div className="prose p-3">Please choose a file in the filebrowser on the left.</div>
-                </div>
-              )}
+              <div className="border-y p-4">
+                {/* <UnpureFileHeader
+                  tree={selfTree}
+                  report={report}
+                  fileToRender={fileToRender}
+                  basePath={router.basePath}
+                  path={currentPath}
+                  version={router.query.version as string}
+                  commonData={commonData}
+                /> */}
+
+                {fileToRender && onlyVisibleCell && (
+                  <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
+                    Showing only this cell.
+                    <button
+                      onClick={() => {
+                        const qs = { ...router.query };
+                        delete qs.cell;
+                        return router.push({
+                          query: { ...qs },
+                        });
+                      }}
+                      className="ml-1 text-blue-500"
+                    >
+                      View entire notebook
+                    </button>
+                  </div>
+                )}
+
+                {fileToRender && (
+                  <UnpureReportRender
+                    fileToRender={fileToRender}
+                    report={report}
+                    channelMembers={channelMembers}
+                    commonData={commonData}
+                    onlyVisibleCell={onlyVisibleCell}
+                    frontEndUrl={frontEndUrl}
+                    enabledCreateInlineComment={hasPermissionCreateInlineComment}
+                    enabledEditInlineComment={hasPermissionEditInlineComment}
+                    enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
+                  />
+                )}
+
+                {!fileToRender && <div className="prose p-3">Please choose a file in the filebrowser on the left.</div>}
+              </div>
 
               {hasPermissionReadComment && (
-                <div className="block pb-44 w-full">
+                <div className="block pb-44 w-full p-4">
                   <div className="prose max-w-none ">
                     <h2>Comments</h2>
                   </div>
