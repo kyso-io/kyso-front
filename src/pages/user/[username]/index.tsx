@@ -298,8 +298,7 @@ const Index = ({ commonData }: Props) => {
   if (!userProfile) {
     return null;
   }
-  console.log('requestingReports', requestingReports);
-  console.log('userProfile', userProfile);
+
   return (
     <div className="p-2">
       <UserProfileInfo userId={user.id} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfile} />

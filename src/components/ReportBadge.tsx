@@ -51,7 +51,7 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
     }
     return report?.description ? report.description : '';
   }, [report.description]);
-  // console.log('authors', authors);
+
   return (
     <div className="bg-white rounded-lg shadow" style={{ height: 262 }}>
       <div className="relative bg-white shadow-sm flex space-x-3">
@@ -63,7 +63,7 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
         <div className="flex-1 min-w-0 py-3 pr-2 relative">
           <a href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
             <h3 className="text-lg leading-6 font-medium text-gray-900">{report.title}</h3>
-            <p className="text-sm text-gray-500">{description}</p>
+            <p className="text-sm text-gray-500 pt-3">{description}</p>
           </a>
           <div className="absolute bottom-2 right-0">
             {report.report_type && <span className="bg-orange-100 text-orange-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900">{report.report_type}</span>}
