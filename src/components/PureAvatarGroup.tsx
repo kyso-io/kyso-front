@@ -19,7 +19,7 @@ const PureAvatarGroup = (props: Props) => {
 
   return (
     <div className="flex -space-x-1 overflow-hidden">
-      {props.data.map((author: Avatar, index: number) => (
+      {[...props.data].reverse().map((author: Avatar, index: number) => (
         <PureAvatar key={index} src={author.avatar_url!} title={author.display_name} size={size} />
       ))}
     </div>

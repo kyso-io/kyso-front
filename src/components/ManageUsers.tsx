@@ -66,18 +66,19 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
   const isTeamAdmin: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
 
   const filteredMembers: Member[] = useMemo(() => {
+    let m: Member[] = members;
     if (commonData?.team && commonData.team.visibility === TeamVisibilityEnum.PRIVATE) {
-      return members.filter((member: Member) => member.membership_origin === TeamMembershipOriginEnum.TEAM);
+      m = members.filter((member: Member) => member.membership_origin === TeamMembershipOriginEnum.TEAM);
     }
-    return members;
+    return m;
   }, [commonData?.team, members]);
 
   const organizationRoles: { value: string; label: string }[] = useMemo(() => {
     const data: { value: string; label: string }[] = [
-      { value: 'organization-admin', label: 'Organization Admin' },
-      { value: 'team-admin', label: 'Team Admin' },
-      { value: 'team-contributor', label: 'Team Contributor' },
-      { value: 'team-reader', label: 'Team Reader' },
+      { value: 'organization-admin', label: 'Admin of this organization' },
+      { value: 'team-admin', label: 'Full access all channels' },
+      { value: 'team-contributor', label: 'Can edit all channels' },
+      { value: 'team-reader', label: 'Can comment all channels' },
     ];
     if (selectedUser) {
       if (members.length > 0) {
@@ -97,9 +98,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   const teamRoles: { value: string; label: string }[] = useMemo(() => {
     const data: { value: string; label: string }[] = [
-      { value: 'team-admin', label: 'Team Admin' },
-      { value: 'team-contributor', label: 'Team Contributor' },
-      { value: 'team-reader', label: 'Team Reader' },
+      { value: 'organization-admin', label: 'Full access' },
+      { value: 'team-admin', label: 'Full access' },
+      { value: 'team-contributor', label: 'Can edit' },
+      { value: 'team-reader', label: 'Can comment' },
     ];
     if (selectedUser) {
       if (filteredMembers.length > 0) {
@@ -227,14 +229,21 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                   <span className="my-4 text-xs font-medium text-gray-600">Members:</span>
                   <ul role="list" className="mt-1" style={{ maxHeight: 200, overflowY: 'scroll' }}>
                     {filteredMembers.map((member: Member, index: number) => {
-                      let roles: string | undefined = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
-                      if (member.team_roles && member.team_roles.length > 0) {
-                        roles += ` / ${organizationRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
+                      let roles: string | undefined = '';
+
+                      if (!commonData.team) {
+                        roles = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
+                      } else if (member.team_roles && member.team_roles.length > 0) {
+                        roles += `${teamRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
                       }
                       return (
                         <li
                           key={member.id}
-                          className={clsx('py-1', !commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles) ? 'cursor-pointer' : 'cursor-default')}
+                          className={clsx(
+                            'p-2 hover:bg-gray-100',
+                            !commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles) ? 'cursor-pointer' : 'cursor-default',
+                            commonData.user?.id === member.id ? 'border border-yellow-200 rounded' : '',
+                          )}
                           onClick={() => {
                             if (!commonData.user) {
                               router.push(`/user/${member.username}`);
@@ -253,7 +262,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                               <PureAvatar src={member.avatar_url} title={member.display_name} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
                             </div>
                             <div className="flex-1" style={{ marginLeft: 10 }}>
-                              <p className="text-xs font-medium text-gray-900 truncate">{member.display_name}</p>
+                              <p className="text-xs font-medium text-gray-900 truncate">
+                                {member.display_name}
+                                {commonData.user?.id === member.id ? ' (You)' : ''}
+                              </p>
                               <p className="text-xs text-gray-500 truncate">{roles}</p>
                             </div>
                           </div>
@@ -281,7 +293,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           onChange={(e) => setSelectedOrgRole(e.target.value)}
                           className="mt-1 mr-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                         >
-                          <option value="">Select a role</option>
+                          <option>Select a role</option>
                           {organizationRoles.map((role: { value: string; label: string }) => (
                             <option key={role.value} value={role.value}>
                               {role.label}
@@ -294,7 +306,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                             onChange={(e) => setSelectedTeamRole(e.target.value)}
                             className="mt-1 ml-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                           >
-                            <option value="">Select a role</option>
+                            <option>Select a role</option>
                             {teamRoles.map((role: { value: string; label: string }) => (
                               <option key={role.value} value={role.value}>
                                 {role.label}
@@ -446,7 +458,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           onChange={(e) => setSelectedOrgRole(e.target.value)}
                           className="mt-1 mr-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                         >
-                          <option value="">Select a role</option>
+                          <option>Select a role</option>
                           {organizationRoles.map((role: { value: string; label: string }) => (
                             <option key={role.value} value={role.value}>
                               {role.label}
@@ -459,7 +471,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                             onChange={(e) => setSelectedTeamRole(e.target.value)}
                             className="mt-1 ml-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                           >
-                            <option value="">Select a role</option>
+                            <option>Select a role</option>
                             {teamRoles.map((role: { value: string; label: string }) => (
                               <option key={role.value} value={role.value}>
                                 {role.label}

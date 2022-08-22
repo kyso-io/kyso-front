@@ -1,3 +1,4 @@
+import type { ReactElement } from 'react';
 import PureShareButton from '@/components/PureShareButton';
 import PureVersionsDropdown from '@/components/PureVersionsDropdown';
 import classNames from '@/helpers/class-names';
@@ -24,10 +25,11 @@ type IPureReportHeaderProps = {
   commonData: CommonData;
   hasPermissionEditReport: boolean;
   hasPermissionDeleteReport: boolean;
+  children?: ReactElement;
 };
 
 const PureReportHeader = (props: IPureReportHeaderProps) => {
-  const { report, frontEndUrl, versions, authors, version, reportUrl, onUpvoteReport, commonData, hasPermissionEditReport, hasPermissionDeleteReport } = props;
+  const { report, frontEndUrl, children, versions, authors, version, reportUrl, onUpvoteReport, commonData, hasPermissionEditReport, hasPermissionDeleteReport } = props;
 
   return (
     <div className="w-full flex flex-row justify-between p-2">
@@ -48,6 +50,8 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
       </div>
       <div className="flex w-2/6 flex-col justify-between items-start space-y-8">
         <div className="flex flex-row w-full justify-end space-x-4">
+          {children}
+
           {report?.id && (
             <button
               type="button"
