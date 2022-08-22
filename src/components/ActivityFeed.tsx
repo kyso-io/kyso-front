@@ -29,7 +29,6 @@ const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => 
     <React.Fragment>
       <div className="relative">
         <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
-
         <span className="absolute -bottom-0.5 -right-1 bg-white rounded-tl px-0.5 py-px">
           <ChatAltIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
         </span>
@@ -37,7 +36,7 @@ const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => 
       <div className="min-w-0 flex-1">
         <div>
           <div className="text-sm">
-            <a href="#" className="font-medium text-gray-900">
+            <a href={`/user/${user.username}`} className="font-medium text-gray-900">
               {user.display_name}
             </a>
           </div>
@@ -87,7 +86,7 @@ const ActivityFeedTag = ({ activityFeed, relations }: ActivityFeedProps) => {
       <div className="min-w-0 flex-1 py-0">
         <div className="text-sm leading-8 text-gray-500">
           <span className="mr-0.5">
-            <a href="#" className="font-medium text-gray-900">
+            <a href={`/user/${user.username}`} className="font-medium text-gray-900">
               {user.display_name}
             </a>{' '}
             added tag
@@ -119,7 +118,7 @@ const ActivityFeedReport = ({ activityFeed, relations }: ActivityFeedProps) => {
       </div>
       <div className="min-w-0 flex-1 py-1.5">
         <div className="text-sm text-gray-500">
-          <a href="#" className="font-medium text-gray-900">
+          <a href={`/user/${user.username}`} className="font-medium text-gray-900">
             {user.display_name}
           </a>{' '}
           {activityFeed.action === ActionEnum.ADD_AUTHOR && 'was added like author in report '}
@@ -160,7 +159,7 @@ const ActivityFeedDiscussion = ({ activityFeed, relations }: ActivityFeedProps) 
       </div>
       <div className="min-w-0 flex-1 py-1.5">
         <div className="text-sm text-gray-500">
-          <a href="#" className="font-medium text-gray-900">
+          <a href={`/user/${user.username}`} className="font-medium text-gray-900">
             {user.display_name}
           </a>{' '}
           {activityFeed.action === ActionEnum.NEW_ASSIGNMENT && 'was added in the discussion '}
@@ -195,12 +194,12 @@ const ActivityFeedOrganization = ({ activityFeed, relations }: ActivityFeedProps
       </div>
       <div className="min-w-0 flex-1 py-1.5">
         <div className="text-sm text-gray-500">
-          <a href="#" className="font-medium text-gray-900">
+          <a href={`/user/${user.username}`} className="font-medium text-gray-900">
             {user.display_name}
           </a>{' '}
           {activityFeed.action === ActionEnum.ADD_MEMBER && 'was added as a member in the organization '}
           {activityFeed.action === ActionEnum.REMOVE_MEMBER && 'was removed from the organization '}
-          <a href={`/${activityFeed.organization}`} className="font-medium text-gray-900">
+          <a href={`/${activityFeed.organization}`} className="font-medium text-blue-600 underline">
             {organization.display_name}
           </a>{' '}
           <span className="whitespace-nowrap">{moment(activityFeed.created_at).fromNow()}</span>
@@ -222,12 +221,12 @@ const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
       </div>
       <div className="min-w-0 flex-1 py-1.5">
         <div className="text-sm text-gray-500">
-          <a href="#" className="font-medium text-gray-900">
+          <a href={`/user/${user.username}`} className="font-medium text-gray-900">
             {user.display_name}
           </a>{' '}
           {activityFeed.action === ActionEnum.ADD_MEMBER && 'was added as a member in the team '}
           {activityFeed.action === ActionEnum.REMOVE_MEMBER && 'was removed from the team '}
-          <a href={`/${activityFeed.organization}/${activityFeed.team}`} className="font-medium text-gray-900">
+          <a href={`/${activityFeed.organization}/${activityFeed.team}`} className="font-medium text-blue-600 underline">
             {team.display_name}
           </a>{' '}
           <span className="whitespace-nowrap">{moment(activityFeed.created_at).fromNow()}</span>
