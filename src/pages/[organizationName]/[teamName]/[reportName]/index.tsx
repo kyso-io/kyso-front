@@ -5,56 +5,125 @@ import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import checkPermissions from '@/helpers/check-permissions';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
-import { useChannelMembers } from '@/hooks/use-channel-members';
 import type { FileToRender } from '@/hooks/use-file-to-render';
-import { useFileToRender } from '@/hooks/use-file-to-render';
-import { useReport } from '@/hooks/use-report';
-import { useTree } from '@/hooks/use-tree';
-import { useUserEntities } from '@/hooks/use-user-entities';
-import { useVersions } from '@/hooks/use-versions';
+import { isImage } from '@/hooks/use-file-to-render';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import UnpureFileHeader from '@/unpure-components/UnpureFileHeader';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
-import type { Comment, GithubFileHash, KysoSetting, UserDTO } from '@kyso-io/kyso-model';
+import type { Comment, GithubFileHash, KysoSetting, NormalizedResponseDTO, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import { CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
-import { createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
+import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useChannelMembers } from '../../../../hooks/use-channel-members';
+import { useUserEntities } from '../../../../hooks/use-user-entities';
+import type { Version } from '../../../../hooks/use-versions';
+import { useVersions } from '../../../../hooks/use-versions';
 
 interface Props {
   commonData: CommonData;
+  setReportData: (data: { report: ReportDTO | null; authors: UserDTO[] } | null) => void;
+  reportData: { report: ReportDTO | null; authors: UserDTO[] } | null;
 }
 
-const Index = ({ commonData }: Props) => {
+const Index = ({ commonData, reportData, setReportData }: Props) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-
+  // const [reportData, setReportData] = useState<{ report: ReportDTO | null; authors: UserDTO[] } | null>(null);
+  const [selfTree, setSelfTree] = useState<GithubFileHash[]>([]);
+  const [parentTree, setParentTree] = useState<GithubFileHash[]>([]);
+  const [fileToRender, setFileToRender] = useState<FileToRender | null>(null);
   const version = router.query.version ? (router.query.version as string) : undefined;
-
-  const {
-    report,
-    authors,
-    mutate: refreshReport,
-  } = useReport({
-    commonData,
-    reportName: router.query.reportName as string,
-  });
-
-  const versions = useVersions({
-    report,
+  const versions: Version[] = useVersions({
+    report: reportData?.report ? reportData.report : null,
     commonData,
   });
-
-  const channelMembers = useChannelMembers({ commonData });
-
+  const channelMembers: TeamMember[] = useChannelMembers({ commonData });
   const allComments = useAppSelector((state) => state.comments.entities);
-
-  const userEntities = useUserEntities();
-
+  const userEntities: User[] = useUserEntities();
   const onlyVisibleCell = router.query.cell ? (router.query.cell as string) : undefined;
+
+  // useEffect(() => {
+  //   if (commonData.team && router.query.reportName) {
+  //     refreshReport();
+  //   }
+  // }, [commonData?.team, router.query?.reportName]);
+
+  useEffect(() => {
+    if (!reportData || !reportData.report) {
+      return;
+    }
+    const getData = async () => {
+      const t: GithubFileHash[] = await getTree({
+        path: currentPath,
+        version,
+        report: reportData.report,
+        commonData,
+      });
+      setSelfTree(t);
+      const pt: GithubFileHash[] = await getTree({
+        path: dirname(currentPath),
+        version,
+        report: reportData.report,
+        commonData,
+      });
+      setParentTree(pt);
+    };
+    getData();
+  }, [reportData?.report, router.query]);
+
+  const refreshReport = async () => {
+    try {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.getReportByTeamIdAndSlug(commonData.team!.id!, router.query.reportName as string);
+      const authors: UserDTO[] = [];
+      result.data.author_ids.forEach((authorId: string) => {
+        if (result.relations?.user[authorId]) {
+          authors.push(result.relations.user[authorId]);
+        }
+      });
+      setReportData({ report: result.data, authors });
+    } catch (e) {
+      setReportData({ report: null, authors: [] });
+    }
+  };
+
+  const getTree = async (args: { path: string; report: ReportDTO | null | undefined; version?: string; commonData: CommonData }): Promise<GithubFileHash[]> => {
+    const { report, version: v, commonData: cd } = args;
+    let { path } = args;
+    if (!report || !commonData) {
+      return [];
+    }
+    if (path === null) {
+      path = '';
+    } else if (path === '.') {
+      path = '';
+    }
+    interface ArgType {
+      reportId: string;
+      filePath: string;
+      version?: number;
+    }
+    const argsType: ArgType = {
+      reportId: report!.id as string,
+      filePath: (path as string) || '',
+    };
+    if (v && !Number.isNaN(v)) {
+      argsType.version = parseInt(v as string, 10);
+    }
+    const api: Api = new Api(commonData.token, cd.organization?.sluglified_name, cd.team?.sluglified_name);
+    const result: NormalizedResponseDTO<GithubFileHash | GithubFileHash[]> = await api.getReportFileTree(argsType);
+    let tr = [result.data];
+    if (result.data && Array.isArray(result.data)) {
+      tr = [...result.data].sort((ta, tb) => {
+        return Number(ta.type > tb.type);
+      });
+    }
+    return tr as GithubFileHash[];
+  };
 
   let currentPath = '';
   if (router.query.path) {
@@ -65,32 +134,58 @@ const Index = ({ commonData }: Props) => {
     }
   }
 
-  const selfTree: GithubFileHash[] = useTree(
-    {
-      path: currentPath,
-      version,
-      report,
-      commonData,
-    },
-    [router.query],
-  );
+  useEffect(() => {
+    if (!reportData || !reportData.report || !selfTree) {
+      return;
+    }
+    const getData = async () => {
+      const mainFile = currentPath === '' ? reportData.report!.main_file : undefined;
+      const validFiles: GithubFileHash[] = selfTree.filter((item: GithubFileHash) => item.type === 'file');
+      const allowedPaths = [currentPath, mainFile, 'Readme.md'];
+      const validFile: GithubFileHash | undefined = validFiles?.find((item: GithubFileHash) => {
+        return allowedPaths.includes(item.path);
+      });
+      try {
+        let ftr: FileToRender | null = null;
 
-  const parentTree: GithubFileHash[] = useTree(
-    {
-      path: dirname(currentPath),
-      version,
-      report,
-      commonData,
-    },
-    [router.query],
-  );
-
-  const fileToRender: FileToRender | null = useFileToRender({
-    path: currentPath,
-    commonData,
-    tree: selfTree,
-    mainFile: currentPath === '' ? report?.main_file : undefined,
-  });
+        if (validFile) {
+          ftr = {
+            path: validFile!.path,
+            id: validFile!.id,
+            path_scs: validFile!.path_scs,
+            percentLoaded: 0,
+            isLoading: false,
+            content: null,
+          };
+        }
+        setFileToRender(ftr);
+        if (ftr && !ftr.path.endsWith('.html')) {
+          setFileToRender({ ...ftr, isLoading: true });
+          const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+          const data: Buffer = await api.getReportFileContent(ftr.id, {
+            onDownloadProgress(progressEvent) {
+              if (progressEvent.lengthComputable) {
+                const percentLoaded = progressEvent.loaded / progressEvent.total;
+                setFileToRender({ ...(ftr as FileToRender), percentLoaded });
+              } else {
+                setFileToRender({ ...(ftr as FileToRender), percentLoaded: (fileToRender?.percentLoaded as number) + 1 });
+              }
+            },
+          });
+          let content = null;
+          if (data && isImage(ftr.path)) {
+            content = Buffer.from(data).toString('base64');
+          } else if (data) {
+            content = Buffer.from(data).toString('utf-8');
+          }
+          setFileToRender({ ...ftr, content, isLoading: false });
+        }
+      } catch (e) {
+        // error fetching file
+      }
+    };
+    getData();
+  }, [selfTree, router.query?.path]);
 
   useEffect(() => {
     if (commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC && !commonData.user) {
@@ -100,7 +195,7 @@ const Index = ({ commonData }: Props) => {
   }, [commonData?.team]);
 
   useEffect(() => {
-    if (report) {
+    if (reportData?.report?.id) {
       dispatch(
         fetchReportCommentsAction({
           reportId: report.id as string,
@@ -108,7 +203,7 @@ const Index = ({ commonData }: Props) => {
         }),
       );
     }
-  }, [report?.id]);
+  }, [reportData?.report?.id]);
 
   // TODO -> confusion as to whether these are Conmment or CommentDTO
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,10 +214,10 @@ const Index = ({ commonData }: Props) => {
       await dispatch(createCommentAction(newComment));
     }
 
-    if (report) {
+    if (reportData?.report) {
       await dispatch(
         fetchReportCommentsAction({
-          reportId: report.id as string,
+          reportId: reportData.report.id as string,
           sort: '-created_at',
         }),
       );
@@ -153,6 +248,12 @@ const Index = ({ commonData }: Props) => {
   const hasPermissionCreateInlineComment = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.CREATE), [commonData]);
   const hasPermissionEditInlineComment = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData]);
   const hasPermissionDeleteInlineComment = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData]);
+
+  if (!reportData || !reportData.report) {
+    return null;
+  }
+
+  const { report, authors } = reportData;
 
   if (report && commonData && !hasPermissionReadReport) {
     return <PurePermissionDenied />;
