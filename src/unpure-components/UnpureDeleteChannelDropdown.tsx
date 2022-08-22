@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import { Fragment, useState } from 'react';
-import { DotsVerticalIcon, FolderDownloadIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
+import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
+import { DotsVerticalIcon, FolderDownloadIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
 import { deleteTeamAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import type { CommonData } from '@/hooks/use-common-data';
+import { Fragment, useState } from 'react';
 
 interface Props {
   commonData: CommonData;

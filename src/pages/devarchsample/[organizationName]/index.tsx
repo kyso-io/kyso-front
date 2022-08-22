@@ -1,10 +1,11 @@
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { CommonData } from '@/types/common-data';
 
-const Index = () => {
-  const commonData: CommonData = useCommonData();
+interface Props {
+  commonData: CommonData;
+}
 
+const Index = ({ commonData }: Props) => {
   return (
     <>
       <div className="mt-8">

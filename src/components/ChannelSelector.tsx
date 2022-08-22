@@ -1,7 +1,7 @@
-import { Fragment } from 'react';
+import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { SelectorIcon, ViewListIcon } from '@heroicons/react/outline';
-import type { CommonData } from '@/hooks/use-common-data';
+import { Fragment } from 'react';
 import ChannelList from './ChannelList';
 
 type IChannelSelectorProps = {

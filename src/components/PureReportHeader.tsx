@@ -1,7 +1,7 @@
 import PureShareButton from '@/components/PureShareButton';
 import PureVersionsDropdown from '@/components/PureVersionsDropdown';
 import classNames from '@/helpers/class-names';
-import type { CommonData } from '@/hooks/use-common-data';
+import type { CommonData } from '@/types/common-data';
 import UnpureCloneDropdown from '@/unpure-components/UnpureCloneDropdown';
 import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDropdown';
 import { ThumbUpIcon } from '@heroicons/react/solid';

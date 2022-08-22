@@ -1,3 +1,4 @@
+import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { BookmarkIcon, ChatIcon } from '@heroicons/react/outline';
 import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ShareIcon, ThumbUpIcon } from '@heroicons/react/solid';
@@ -8,8 +9,6 @@ import { toSvg } from 'jdenticon';
 import moment from 'moment';
 import { Fragment, useMemo } from 'react';
 import checkPermissions from '../helpers/check-permissions';
-import type { CommonData } from '../hooks/use-common-data';
-import { useCommonData } from '../hooks/use-common-data';
 import PureAvatarGroup from './PureAvatarGroup';
 
 const MAX_LENGTH_DESCRIPTION: number = 200;
@@ -19,6 +18,7 @@ function classNames(...classes: string[]) {
 }
 
 interface Props {
+  commonData: CommonData;
   report: ReportDTO;
   authors: UserDTO[];
   toggleUserStarReport: () => void;
@@ -26,9 +26,7 @@ interface Props {
   toggleGlobalPinReport?: () => void;
 }
 
-const ReportBadge = ({ report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
-  const commonData: CommonData = useCommonData();
-
+const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
   const hasPermissionReportGlobalPin: boolean = useMemo(() => {
     return checkPermissions(commonData, ReportPermissionsEnum.GLOBAL_PIN);
   }, [commonData.organization, commonData.team, commonData.user]);

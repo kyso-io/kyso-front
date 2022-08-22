@@ -1,9 +1,9 @@
 import { Fragment, useEffect, useState } from 'react';
 
 import classNames from '@/helpers/class-names';
+import type { CommonData } from '@/types/common-data';
+import { Dialog, Transition } from '@headlessui/react';
 import { ShareIcon } from '@heroicons/react/solid';
-import { Transition, Dialog } from '@headlessui/react';
-import type { CommonData } from '@/hooks/use-common-data';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 
 type Props = {

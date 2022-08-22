@@ -1,8 +1,8 @@
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import type { CommonData } from '@/types/common-data';
 import type { GithubFileHash } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
-import type { CommonData } from './use-common-data';
 
 export interface FileToRender {
   path: string;

@@ -1,11 +1,11 @@
-import { useAppDispatch } from '@/hooks/redux-hooks';
-import { useState } from 'react';
-import { useRouter } from 'next/router';
 import PureReportBadge from '@/components/PureReportBadge';
+import { useAppDispatch } from '@/hooks/redux-hooks';
+import { useAuthors } from '@/hooks/use-authors';
+import type { CommonData } from '@/types/common-data';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { toggleGlobalPinReportAction, toggleUserPinReportAction, toggleUserStarReportAction } from '@kyso-io/kyso-store';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useAuthors } from '@/hooks/use-authors';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 import PureUpvoteButton from '../components/PureUpvoteButton';
 
 type IUnpureReportBadge = {

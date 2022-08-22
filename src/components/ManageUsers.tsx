@@ -1,5 +1,6 @@
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { ChevronDownIcon, XIcon } from '@heroicons/react/solid';
@@ -12,7 +13,6 @@ import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import slugify from 'slugify';
 import checkPermissions from '../helpers/check-permissions';
 import { Helper } from '../helpers/Helper';
-import type { CommonData } from '../hooks/use-common-data';
 import type { Member } from '../types/member';
 import PureAvatar from './PureAvatar';
 import PureAvatarGroup from './PureAvatarGroup';

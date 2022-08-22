@@ -1,10 +1,9 @@
 import { NavigationSelector } from '@/components/NavigationSelector';
-import type { CommonData } from '@/hooks/use-common-data';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
+import type { CommonData } from '@/types/common-data';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
-import React from 'react';
 import { ChannelSelector } from './ChannelSelector';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

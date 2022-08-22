@@ -2,12 +2,11 @@ import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useChannelMembers } from '@/hooks/use-channel-members';
-import type { CommonData } from '@/hooks/use-common-data';
-import { useCommonData } from '@/hooks/use-common-data';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { FilesystemItem } from '@/model/filesystem-item.model';
+import type { CommonData } from '@/types/common-data';
 import type { KysoConfigFile, NormalizedResponseDTO, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import { ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -45,10 +44,13 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
-const CreateReport = () => {
+interface Props {
+  commonData: CommonData;
+}
+
+const CreateReport = ({ commonData }: Props) => {
   useRedirectIfNoJWT();
   const router = useRouter();
-  const commonData: CommonData = useCommonData();
 
   const channelSelectorItems: BreadcrumbItem[] = [];
 
