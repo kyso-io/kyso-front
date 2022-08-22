@@ -435,7 +435,7 @@ const Index = ({ commonData }: Props) => {
       <div className="w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
-      <div className="w-4/6 flex flex-col space-y-8">
+      <div className="w-4/6 flex flex-col space-y-8 mt-2">
         {commonData.team && (
           <div className="flex flex-row w-full justify-between space-x-2">
             <div className="w-4/6 flex flex-col justify-between">

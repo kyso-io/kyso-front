@@ -44,7 +44,12 @@ const PureNewReportPopover = (props: Props) => {
               <div className="text-md font-medium">Push with the Kyso CLI</div>
             </div>
 
-            <div className="text-sm">1. Install the Kyso CLI.</div>
+            <div className="text-sm">
+              1. Install the{' '}
+              <a href="https://cli.kyso.io/" target="_blank" rel="noreferrer">
+                Kyso CLI
+              </a>
+            </div>
 
             <div className="text-sm">2. Copy this yaml to a kyso.yaml in your project directory.</div>
 
