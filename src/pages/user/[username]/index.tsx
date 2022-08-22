@@ -11,8 +11,6 @@ import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
-import UserProfileInfo from '@/components/UserProfileInfo';
-import { useUser } from '@/hooks/use-user';
 import { PureSpinner } from '@/components/PureSpinner';
 import ReportBadge from '@/components/ReportBadge';
 

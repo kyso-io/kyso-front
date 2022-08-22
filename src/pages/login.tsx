@@ -3,10 +3,9 @@ import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
-import { Api, setError as storeSetError } from '@kyso-io/kyso-store';
+import { loginAction, setError as storeSetError } from '@kyso-io/kyso-store';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -357,7 +356,7 @@ const Index = () => {
 
             {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
               <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
-                <img src="/pingid_logo.jpg" className="w-4 h-4 inline m-0 mr-1" />
+                <img src="/pingid_logo.jpg" alt="PingID Logo" className="w-4 h-4 inline m-0 mr-1" />
                 Log in with PingID
               </a>
             )}

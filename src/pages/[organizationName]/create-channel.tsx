@@ -2,15 +2,15 @@
 import ChannelList from '@/components/ChannelList';
 import { PureSpinner } from '@/components/PureSpinner';
 import checkPermissions from '@/helpers/check-permissions';
-import { useAppDispatch } from '@/hooks/redux-hooks';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon } from '@heroicons/react/solid';
-import { TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
-import { checkTeamNameIsUniqueAction, createTeamAction } from '@kyso-io/kyso-store';
+import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import { TeamPermissionsEnum, TeamVisibilityEnum, Team } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
+import { Api } from '@kyso-io/kyso-store';
 
 interface Props {
   commonData: CommonData;
@@ -19,7 +19,6 @@ interface Props {
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
-  const dispatch = useAppDispatch();
 
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
@@ -40,28 +39,21 @@ const Index = ({ commonData }: Props) => {
 
     setBusy(true);
     try {
-      const { payload } = await dispatch(
-        checkTeamNameIsUniqueAction({
-          organizationId: commonData.organization!.id!,
-          teamName: formName,
-        }),
-      );
-      if (!payload) {
+      const api: Api = new Api(commonData.token);
+      api.setOrganizationSlug(commonData.organization!.sluglified_name);
+
+      const teamAvailable: NormalizedResponseDTO<boolean> = await api.teamNameIsAvailable(commonData.organization?.id!, formName);
+
+      if (!teamAvailable) {
         setError('Name in use.');
         setBusy(false);
         return;
       }
-      const result = await dispatch(
-        createTeamAction({
-          sluglified_name: formName,
-          display_name: formName,
-          roles: [],
-          visibility: formPermissions,
-          organization_id: commonData.organization!.id!,
-          bio: formDescription,
-        } as any),
-      );
-      const team = result.payload;
+
+      const result: NormalizedResponseDTO<Team> = await api.createTeam(new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions));
+
+      const team: Team = result.data;
+
       if (!team) {
         setBusy(false);
         return;
