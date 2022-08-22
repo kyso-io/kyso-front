@@ -419,7 +419,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           <div className="flex items-center space-x-4">
                             <div className="shrink-0">
                               {user.avatar_url ? (
-                                <img className="h-6 w-6 rounded-full" src={user.avatar_url} alt="" />
+                                <PureAvatar src={user.avatar_url} title={user.display_name}></PureAvatar>
                               ) : (
                                 <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-500">
                                   <span className="text-xs font-medium leading-none text-white">{initials}</span>
@@ -442,7 +442,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                   <div className="flex items-center space-x-4 mt-4">
                     <div className="shrink-0">
                       {selectedUser.avatar_url ? (
-                        <img className="object-cover inline-block h-6 w-6 rounded-full ring-2 ring-white" src={selectedUser.avatar_url} alt="" />
+                        <PureAvatar src={selectedUser.avatar_url} title={selectedUser.display_name}></PureAvatar>
                       ) : (
                         <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-500">
                           <span className="text-xs font-medium leading-none text-white">{selectedUserInitials}</span>
