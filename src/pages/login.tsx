@@ -159,22 +159,12 @@ const Index = () => {
     }
 
     const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
-    try {
-      const api: Api = new Api();
-      const result: NormalizedResponseDTO<string> = await api.login(loginData);
-      if (result?.data) {
-        const token: string = result.data;
-        localStorage.setItem('jwt', token);
-        api.setToken(token);
-        const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-        const user: UserDTO | null = responseUserDto.data;
-        if (user.show_captcha) {
-          if (redirect) {
-            router.push(`/captcha?redirect=${redirect}`);
-          } else {
-            router.push(`/captcha`);
-          }
-        } else if (redirect) {
+
+    const result = await dispatch(loginAction(loginData));
+    if (result?.payload) {
+      localStorage.setItem('jwt', result.payload);
+      setTimeout(() => {
+        if (redirect) {
           router.push(redirect as string);
         } else {
           router.push('/');
