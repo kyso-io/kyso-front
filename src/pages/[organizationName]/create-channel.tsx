@@ -7,7 +7,7 @@ import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon } from '@heroicons/react/solid';
-import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import { TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { checkTeamNameIsUniqueAction, createTeamAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
@@ -28,7 +28,7 @@ const Index = ({ commonData }: Props) => {
   const [formDescription, setFormDescription] = useState('');
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
 
-  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_TEAM'), [commonData]);
+  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
 
   const createChannel = async (ev: any) => {
     ev.preventDefault();
