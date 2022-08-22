@@ -2,7 +2,7 @@ import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import type { ActivityFeed, NormalizedResponseDTO, Organization, OrganizationMember, PaginatedResponseDto, ReportDTO, SearchUser, SearchUserDto, Team, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import { TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
@@ -86,7 +86,7 @@ const Index = ({ commonData }: Props) => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   // PERMISSIONS
-  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_DELETE_TEAM'), [commonData]);
+  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.DELETE), [commonData]);
   // SEARCH USER
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
 
@@ -426,12 +426,16 @@ const Index = ({ commonData }: Props) => {
 
   // END SEARCH USER
 
+  if (!commonData.team) {
+    return <div className="text-center mt-4">You don&apos;t have permissions to access this team.</div>;
+  }
+
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
-      <div className="w-4/6 flex flex-col space-y-8">
+      <div className="w-4/6 flex flex-col space-y-8 mt-2">
         {commonData.team && (
           <div className="flex flex-row w-full justify-between space-x-2">
             <div className="w-4/6 flex flex-col justify-between">

@@ -8,7 +8,7 @@ import { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { FilesystemItem } from '@/model/filesystem-item.model';
 import type { CommonData } from '@/types/common-data';
 import type { KysoConfigFile, NormalizedResponseDTO, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
-import { ReportType } from '@kyso-io/kyso-model';
+import { ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import FormData from 'form-data';
 import JSZip from 'jszip';
@@ -86,7 +86,7 @@ const CreateReport = ({ commonData }: Props) => {
   const [selectedFile, setSelectedFile] = useState<FilesystemItem>(new FilesystemItem(mainfile[0]!, [], 1));
   const [files, setFiles] = useState<CreationReportFileSystemObject[]>(mainfile);
 
-  const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_REPORT'), [commonData]);
+  const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
 
   const cleanStorage = () => {
     removeLocalStorageItem('formTitle');

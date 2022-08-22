@@ -190,7 +190,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
       </div>
 
       <div className="grow w-full rounded">{children}</div>
-      <div className="flex-none">
+      <div className="flex-none pt-10">
         <Footer />
       </div>
     </div>

@@ -3,15 +3,15 @@ import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
-import { Api, setError as storeSetError } from '@kyso-io/kyso-store';
+import { loginAction, setError as storeSetError } from '@kyso-io/kyso-store';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import uuid from 'uuid';
+import ErrorNotification from '@/components/ErrorNotification';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -26,7 +26,8 @@ const Index = () => {
   const { redirect } = router.query;
 
   const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
+  // const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const dispatch = useDispatch<AppDispatch>();
   const [bitbucketUrl, setBitbucketUrl] = useState('');
@@ -157,31 +158,19 @@ const Index = () => {
     }
 
     const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
-    try {
-      const api: Api = new Api();
-      const result: NormalizedResponseDTO<string> = await api.login(loginData);
-      if (result?.data) {
-        const token: string = result.data;
-        localStorage.setItem('jwt', token);
-        api.setToken(token);
-        const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-        const user: UserDTO | null = responseUserDto.data;
-        if (user.show_captcha) {
-          if (redirect) {
-            router.push(`/captcha?redirect=${redirect}`);
-          } else {
-            router.push(`/captcha`);
-          }
-        } else if (redirect) {
+
+    const result = await dispatch(loginAction(loginData));
+    if (result?.payload) {
+      localStorage.setItem('jwt', result.payload);
+      setTimeout(() => {
+        if (redirect) {
           router.push(redirect as string);
         } else {
           router.push('/');
         }
-      }
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-    } catch (e: any) {
-      const message: string = typeof e.response !== 'undefined' ? e.response.data.message : e.message;
-      setError(message);
+      }, 200);
+    } else {
+      setError('Invalid credentials');
     }
   };
 
@@ -224,7 +213,7 @@ const Index = () => {
             {rightLogo && <img src={rightLogo} className="h-8" alt="logo" />}
           </div>
         )}
-
+        <div className="text-right">{error && <ErrorNotification message={error} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-6 flex-col grow items-center mx-auto max-w-[1400px] space-x-10">
           <div className="prose grow max-w-none px-6 m-0">
             <h1>Kyso.io</h1>
@@ -367,7 +356,7 @@ const Index = () => {
 
             {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
               <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
-                <img src="/pingid_logo.jpg" className="w-4 h-4 inline m-0 mr-1" />
+                <img src="/pingid_logo.jpg" alt="PingID Logo" className="w-4 h-4 inline m-0 mr-1" />
                 Log in with PingID
               </a>
             )}

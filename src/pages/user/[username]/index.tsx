@@ -11,8 +11,8 @@ import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { PureSpinner } from '../../../components/PureSpinner';
-import ReportBadge from '../../../components/ReportBadge';
+import { PureSpinner } from '@/components/PureSpinner';
+import ReportBadge from '@/components/ReportBadge';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 60;
@@ -93,7 +93,7 @@ const Index = ({ commonData }: Props) => {
       return;
     }
     getReports(1);
-  }, [user, token]);
+  }, [user, token, userProfile]);
 
   useEffect(() => {
     if (!user || !token) {
@@ -291,6 +291,9 @@ const Index = ({ commonData }: Props) => {
   // END ACTIVITY FEED
 
   if (!user || !userProfile || !commonData) {
+    return null;
+  }
+  if (!userProfile) {
     return null;
   }
 

@@ -2,16 +2,15 @@
 import ChannelList from '@/components/ChannelList';
 import { PureSpinner } from '@/components/PureSpinner';
 import checkPermissions from '@/helpers/check-permissions';
-import { useAppDispatch } from '@/hooks/redux-hooks';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon } from '@heroicons/react/solid';
-import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
-import { checkTeamNameIsUniqueAction, createTeamAction } from '@kyso-io/kyso-store';
-import debounce from 'lodash.debounce';
+import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import { TeamPermissionsEnum, TeamVisibilityEnum, Team } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
+import { Api } from '@kyso-io/kyso-store';
 
 interface Props {
   commonData: CommonData;
@@ -20,7 +19,6 @@ interface Props {
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
-  const dispatch = useAppDispatch();
 
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
@@ -29,7 +27,7 @@ const Index = ({ commonData }: Props) => {
   const [formDescription, setFormDescription] = useState('');
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
 
-  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, 'KYSO_IO_CREATE_TEAM'), [commonData]);
+  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
 
   const delayCheckingName = debounce(async (payload: string) => {
     if (!payload) {
@@ -41,51 +39,21 @@ const Index = ({ commonData }: Props) => {
   const checkName = async (name: string) => {
     setFormName(name);
     try {
-      const { payload } = await dispatch(
-        checkTeamNameIsUniqueAction({
-          organizationId: commonData.organization!.id!,
-          teamName: formName,
-        }),
-      );
-      delayCheckingName(payload);
-    } catch (er: any) {
-      setError(er.message);
-      setBusy(false);
-    }
-  };
+      const api: Api = new Api(commonData.token);
+      api.setOrganizationSlug(commonData.organization!.sluglified_name);
 
-  const createChannel = async (ev: any) => {
-    ev.preventDefault();
-    setError('');
-    if (!formName || formName.length === 0) {
-      setError('Please specify a channel name.');
-      return;
-    }
-    setBusy(true);
-    try {
-      // const { payload } = await dispatch(
-      //   checkTeamNameIsUniqueAction({
-      //     organizationId: commonData.organization!.id!,
-      //     teamName: formName,
-      //   }),
-      // );
+      const teamAvailable: NormalizedResponseDTO<boolean> = await api.teamNameIsAvailable(commonData.organization?.id!, formName);
 
-      // if (!payload) {
-      //   setError('Channel name in used.');
-      //   setBusy(false);
-      //   return;
-      // }
-      const result = await dispatch(
-        createTeamAction({
-          sluglified_name: formName,
-          display_name: formName,
-          roles: [],
-          visibility: formPermissions,
-          organization_id: commonData.organization!.id!,
-          bio: formDescription,
-        } as any),
-      );
-      const team = result.payload;
+      if (!teamAvailable) {
+        setError('Name in use.');
+        setBusy(false);
+        return;
+      }
+
+      const result: NormalizedResponseDTO<Team> = await api.createTeam(new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions));
+
+      const team: Team = result.data;
+
       if (!team) {
         setBusy(false);
         return;
