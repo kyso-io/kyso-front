@@ -6,7 +6,7 @@ import moment from 'moment';
 import { Calendar } from 'primereact/calendar';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { SaveIcon } from '@heroicons/react/outline';
+import { FilterIcon } from '@heroicons/react/outline';
 import type { SearchUser, UserDTO } from '@kyso-io/kyso-model';
 import 'primeicons/primeicons.css'; // icons
 import 'primereact/resources/primereact.min.css'; // core css
@@ -822,7 +822,11 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
           )}
         </React.Fragment>
       </Menu>
-      {user && <SaveIcon onClick={() => onSaveSearch(query, selectedFilters)} className={clsx('cursor-pointer w-6 h-6 ml-2')} />}
+      {user && (
+        <>
+          <FilterIcon onClick={() => onSaveSearch(query, selectedFilters)} className={clsx('cursor-pointer w-6 h-6 ml-2')} />
+        </>
+      )}
     </div>
   );
 };

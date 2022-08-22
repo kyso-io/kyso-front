@@ -224,7 +224,9 @@ const BrandSidebarWithLightHeader: LayoutProps = ({ children }: any) => {
           </main>
         </div>
       </div>
-      <Footer />
+      <div className="pt-10">
+        <Footer />
+      </div>
     </>
   );
 };

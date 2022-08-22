@@ -229,7 +229,13 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     if (settings && settings.length > 0) {
       return settings[0].value;
     }
-    return undefined;
+
+    // Emergency case to just don't return undefined
+    if (window) {
+      return window.location.origin;
+    }
+
+    return '';
   });
 
   const hasPermissionCreateComment = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.CREATE), [commonData]);
