@@ -3,9 +3,11 @@ import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import { setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { getCommonData } from '../helpers/get-common-data';
 import { getReport } from '../helpers/get-report';
 
@@ -17,6 +19,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   const router = useRouter();
   const [commonData, setCommonData] = useState<CommonData | null>(null);
   const [reportData, setReportData] = useState<{ report: ReportDTO | null | undefined; authors: UserDTO[] } | null>(null);
+  const dispatch = useDispatch();
 
   let slugifiedName = '';
   if (commonData?.user && commonData?.user?.display_name) {
@@ -43,10 +46,14 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       return;
     }
     const organizationName: string | undefined = router.query.organizationName as string | undefined;
+    const teamName: string | undefined = router.query.teamName as string | undefined;
     const getData = async () => {
       const cd: CommonData = await getCommonData({
         organizationName: organizationName as string,
+        teamName: teamName as string,
       });
+      // TODO: remove use of store in the near future
+      dispatch(setTokenAuthAction(cd.token));
       setCommonData(cd);
       if (router.query.reportName) {
         const getReportData = async () => {
