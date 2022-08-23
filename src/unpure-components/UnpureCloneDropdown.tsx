@@ -27,6 +27,7 @@ const UnpureCloneDropdown = (props: Props) => {
   const [show, setShow] = useState(false);
   const [copied, setCopied] = useState(false);
   const [alertText, setAlertText] = useState('Creating zip, this may take a moment...');
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   const downloadReport = async () => {
     setAlertText('Creating zip, this may take a moment...');
@@ -53,7 +54,7 @@ const UnpureCloneDropdown = (props: Props) => {
           <ChevronDownIcon className="w-5 h-5" />
         </Popover.Button>
 
-        <Popover.Panel className="min-w-[400px] p-4 origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none">
+        <Popover.Panel className="min-w-[400px] p-4 origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none" style={{ zIndex: 1 }}>
           <div className="flex flex-col space-y-8">
             <div className="flex flex-col space-y-4">
               <div className="flex flex-row items-center space-x-2">
@@ -70,8 +71,13 @@ const UnpureCloneDropdown = (props: Props) => {
                     onClick={async () => {
                       navigator.clipboard.writeText(cloneCommand);
                       setCopied(true);
-                      // await timeout(3000);
-                      // setCopied(false);
+                      if (timeoutId != null) {
+                        clearTimeout(timeoutId);
+                      }
+                      const t: NodeJS.Timeout = setTimeout(() => {
+                        setCopied(false);
+                      }, 3000);
+                      setTimeoutId(t);
                     }}
                   >
                     {!copied && <ClipboardCopyIcon className="w-5 h-5" />}
