@@ -29,7 +29,7 @@ const OrganizationInfo = ({ organizationInfo }: Props) => {
       </div>
       {organizationInfo.lastChange && (
         <div className="flex items-center mr-10">
-          <CalendarIcon className="h-6 w-6 text-red-400" />
+          <CalendarIcon className="h-6 w-6 text-pink-500" />
           <span className="ml-1 text-sm text-gray-500">{moment(organizationInfo.lastChange).format('DD/MM/YYYY')} last activity</span>
         </div>
       )}
