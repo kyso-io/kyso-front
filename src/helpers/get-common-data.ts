@@ -108,6 +108,19 @@ export const getCommonData = async ({ organizationName, teamName }: Props): Prom
             errorTeam = e.response.data.message;
           }
         }
+      } else {
+        try {
+          const fetchTeamRequest: NormalizedResponseDTO<Team> = await api.getTeamBySlug(organization.id!, teamName);
+          team = fetchTeamRequest.data;
+        } catch (e: any) {
+          if (e.response.data.statusCode === 403) {
+            errorTeam = `You don't have permission to access this team`;
+          } else if (e.response.data.statusCode === 404) {
+            errorTeam = 'The team does not exist';
+          } else {
+            errorTeam = e.response.data.message;
+          }
+        }
       }
     }
   }
