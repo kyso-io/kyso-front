@@ -426,8 +426,8 @@ const Index = ({ commonData }: Props) => {
 
   // END SEARCH USER
 
-  if (!commonData.team) {
-    return <div className="text-center mt-4">You don&apos;t have permissions to access this team.</div>;
+  if (commonData.errorTeam) {
+    return <div className="text-center mt-4">{commonData.errorTeam}</div>;
   }
 
   return (

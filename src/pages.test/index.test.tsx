@@ -15,7 +15,9 @@ describe('Index page', () => {
             user: null,
             permissions: null,
             organization: null,
+            errorOrganization: null,
             team: null,
+            errorTeam: null,
           }}
         />,
       );

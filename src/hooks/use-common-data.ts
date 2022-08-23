@@ -102,7 +102,9 @@ export const useCommonData = (): CommonData => {
     permissions: data?.permissions ? data.permissions : null,
     token,
     organization: data?.organization ? data.organization : null,
+    errorOrganization: null,
     team: data?.team ? data.team : null,
+    errorTeam: null,
     user: data?.user ? data.user : null,
   };
 };
