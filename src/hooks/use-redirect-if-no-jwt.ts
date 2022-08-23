@@ -1,18 +1,11 @@
 import { Helper } from '@/helpers/Helper';
 import type { KeyValue } from '@/model/key-value.model';
-import type { Token } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import decode from 'jwt-decode';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
-
-export type DecodedToken = {
-  exp: number;
-  iat: number;
-  iss: string;
-  payload: Token;
-};
+import type { DecodedToken } from '../types/decoded-token';
 
 export const useRedirectIfNoJWT = () => {
   const router = useRouter();
