@@ -1,7 +1,20 @@
 import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
-import type { ActivityFeed, NormalizedResponseDTO, Organization, OrganizationMember, PaginatedResponseDto, ReportDTO, SearchUser, SearchUserDto, Team, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import type {
+  ActivityFeed,
+  NormalizedResponseDTO,
+  Organization,
+  OrganizationMember,
+  PaginatedResponseDto,
+  ReportDTO,
+  SearchUser,
+  SearchUserDto,
+  Team,
+  TeamInfoDto,
+  TeamMember,
+  UserDTO,
+} from '@kyso-io/kyso-model';
 import { TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
@@ -10,6 +23,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import ActivityFeedComponent from '../../../components/ActivityFeed';
 import ChannelList from '../../../components/ChannelList';
+import InfoActivity from '../../../components/InfoActivity';
 import ManageUsers from '../../../components/ManageUsers';
 import PureNewReportPopover from '../../../components/PureNewReportPopover';
 import { PureSpinner } from '../../../components/PureSpinner';
@@ -72,7 +86,7 @@ interface Props {
 
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
-
+  const [teamInfo, setTeamInfo] = useState<TeamInfoDto | null>(null);
   // MEMBERS
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
@@ -111,6 +125,7 @@ const Index = ({ commonData }: Props) => {
     if (!commonData.team) {
       return;
     }
+    getTeamsInfo();
     getTeamMembers();
   }, [commonData?.team, commonData?.user]);
 
@@ -138,6 +153,16 @@ const Index = ({ commonData }: Props) => {
       setReportsResponse(data);
       setRequestingReports(false);
     });
+  };
+
+  const getTeamsInfo = async () => {
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+      const result: NormalizedResponseDTO<TeamInfoDto[]> = await api.getTeamsInfo(commonData!.team!.id);
+      if (result?.data?.length > 0) {
+        setTeamInfo(result.data[0]!);
+      }
+    } catch (e) {}
   };
 
   // START TEAM MEMBERS
@@ -465,6 +490,11 @@ const Index = ({ commonData }: Props) => {
 
               {commonData?.user && <PureNewReportPopover commonData={commonData} />}
             </div>
+          </div>
+        )}
+        {teamInfo && (
+          <div className="flex items-center justify-between p-2">
+            <InfoActivity info={teamInfo} />
           </div>
         )}
 

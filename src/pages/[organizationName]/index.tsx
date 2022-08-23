@@ -12,8 +12,8 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import { useCallback, useEffect, useState } from 'react';
 import ActivityFeedComponent from '../../components/ActivityFeed';
+import InfoActivity from '../../components/InfoActivity';
 import ManageUsers from '../../components/ManageUsers';
-import OrganizationInfo from '../../components/OrganizationActivity';
 import ReportBadge from '../../components/ReportBadge';
 import { useInterval } from '../../hooks/use-interval';
 import type { CommonData } from '../../types/common-data';
@@ -413,13 +413,13 @@ const Index = ({ commonData }: Props) => {
             {commonData?.user && <PureNewReportPopover commonData={commonData} />}
           </div>
         </div>
-        <div className="flex items-center w justify-between p-2">
-          {organizationInfo && (
+        {organizationInfo && (
+          <div className="flex items-center justify-between p-2">
             <div className="mb-10">
-              <OrganizationInfo organizationInfo={organizationInfo} />
+              <InfoActivity info={organizationInfo} />
             </div>
-          )}
-        </div>
+          </div>
+        )}
         <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
           {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
           {paginatedResponseDto?.results &&

@@ -1,40 +1,40 @@
 import { CalendarIcon, ChatAlt2Icon, ChatIcon, DocumentReportIcon } from '@heroicons/react/outline';
-import type { OrganizationInfoDto } from '@kyso-io/kyso-model';
+import type { OrganizationInfoDto, TeamInfoDto } from '@kyso-io/kyso-model';
 import moment from 'moment';
 
 interface Props {
-  organizationInfo: OrganizationInfoDto;
+  info: OrganizationInfoDto | TeamInfoDto;
 }
 
-const OrganizationInfo = ({ organizationInfo }: Props) => {
+const InfoActivity = ({ info }: Props) => {
   return (
     <div className="flex">
       <div className="flex items-center mr-10">
         <DocumentReportIcon className="h-6 w-6 text-blue-500" />
         <span className="ml-1 text-sm text-gray-500">
-          {organizationInfo.reports} {organizationInfo.reports === 1 ? 'report' : 'reports'}
+          {info.reports} {info.reports === 1 ? 'report' : 'reports'}
         </span>
       </div>
       <div className="flex items-center mr-10">
         <ChatIcon className="h-6 w-6 text-orange-400" />
         <span className="ml-1 text-sm text-gray-500">
-          {organizationInfo.comments} {organizationInfo.comments === 1 ? 'comment' : 'comments'}
+          {info.comments} {info.comments === 1 ? 'comment' : 'comments'}
         </span>
       </div>
       <div className="flex items-center mr-10">
         <ChatAlt2Icon className="h-6 w-6 text-cyan-300" />
         <span className="ml-1 text-sm text-gray-500">
-          {organizationInfo.discussions} {organizationInfo.discussions === 1 ? 'discussion' : 'discussions'}
+          {info.discussions} {info.discussions === 1 ? 'discussion' : 'discussions'}
         </span>
       </div>
-      {organizationInfo.lastChange && (
+      {info.lastChange && (
         <div className="flex items-center mr-10">
           <CalendarIcon className="h-6 w-6 text-pink-500" />
-          <span className="ml-1 text-sm text-gray-500">{moment(organizationInfo.lastChange).format('DD/MM/YYYY')} last activity</span>
+          <span className="ml-1 text-sm text-gray-500">{moment(info.lastChange).format('DD/MM/YYYY')} last activity</span>
         </div>
       )}
     </div>
   );
 };
 
-export default OrganizationInfo;
+export default InfoActivity;
