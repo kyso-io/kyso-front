@@ -2,6 +2,8 @@ import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
 import type { CommonData } from '@/types/common-data';
 import type { NormalizedResponseDTO, Organization, ResourcePermissions, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import decode from 'jwt-decode';
+import type { DecodedToken } from '../types/decoded-token';
 import { getLocalStorageItem } from './isomorphic-local-storage';
 
 interface Props {
@@ -10,7 +12,15 @@ interface Props {
 }
 
 export const getCommonData = async ({ organizationName, teamName }: Props): Promise<CommonData> => {
-  const token: string | null = getLocalStorageItem('jwt');
+  let token: string | null = getLocalStorageItem('jwt');
+  if (token) {
+    const jwtToken: DecodedToken = decode<DecodedToken>(token);
+    if (new Date(jwtToken.exp * 1000) <= new Date()) {
+      // token is out of date
+      localStorage.removeItem('jwt');
+      token = null;
+    }
+  }
   const api: Api = new Api();
   let user: UserDTO | null = null;
   let permissions: TokenPermissions | null = null;

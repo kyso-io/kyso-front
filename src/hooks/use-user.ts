@@ -1,14 +1,8 @@
-import type { NormalizedResponseDTO, Token, UserDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import decode from 'jwt-decode';
 import useSWR from 'swr';
-
-export type DecodedToken = {
-  exp: number;
-  iat: number;
-  iss: string;
-  payload: Token;
-};
+import type { DecodedToken } from '../types/decoded-token';
 
 export const useUser = (): UserDTO | null => {
   const fetcher = async (): Promise<UserDTO | null> => {
