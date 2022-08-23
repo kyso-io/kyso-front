@@ -15,18 +15,16 @@ import PureNewReportPopover from '../../../components/PureNewReportPopover';
 import { PureSpinner } from '../../../components/PureSpinner';
 import ReportBadge from '../../../components/ReportBadge';
 import ReportsSearchBar from '../../../components/ReportsSearchBar';
-import { getLocalStorageItem } from '../../../helpers/isomorphic-local-storage';
 import type { ReportsFilter } from '../../../interfaces/reports-filter';
 import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
 import type { Member } from '../../../types/member';
 
-const token: string | null = getLocalStorageItem('jwt');
 const LIMIT_REPORTS = 10;
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 
 const debouncedPaginatedReports = debounce(
-  async (tkn: string, organization: Organization, team: Team, page: number, queryParams: string, cb: (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => void) => {
+  async (tkn: string | null, organization: Organization, team: Team, page: number, queryParams: string, cb: (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => void) => {
     try {
       const api: Api = new Api(tkn, organization.sluglified_name, team.sluglified_name);
       let query = `team_id=${team.id}&skip=${(page - 1) * LIMIT_REPORTS}&limit=${LIMIT_REPORTS}`;
@@ -91,11 +89,18 @@ const Index = ({ commonData }: Props) => {
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
 
   useEffect(() => {
-    if (commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC && !commonData.user) {
-      // Unauthenticated user trying to access a non public team
-      router.replace(`/${commonData.organization?.sluglified_name}`);
+    if (commonData) {
+      if (commonData.token === null && commonData.organization === null && !commonData.errorOrganization) {
+        // An unautenticated user is trying to access an organization that does not have public teams
+        router.replace('/');
+        return;
+      }
+      if (commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC && commonData.user === null) {
+        // An unautenticated user is trying to access a non public team
+        router.replace(`/${commonData.organization.sluglified_name}`);
+      }
     }
-  }, [commonData?.team]);
+  }, [commonData]);
 
   useEffect(() => {
     if (!commonData.team) {
@@ -124,7 +129,7 @@ const Index = ({ commonData }: Props) => {
 
   const getReports = async (page: number, queryParams?: string) => {
     setRequestingReports(true);
-    debouncedPaginatedReports(token!, commonData.organization!, commonData.team!, page, queryParams ?? '', (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
+    debouncedPaginatedReports(commonData.token, commonData.organization!, commonData.team!, page, queryParams ?? '', (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
       setReportsResponse(data);
       setRequestingReports(false);
     });
@@ -135,7 +140,7 @@ const Index = ({ commonData }: Props) => {
   const getTeamMembers = async () => {
     const m: Member[] = [];
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       const resultOrgMembers: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
       let userMember: Member | null = null;
       resultOrgMembers.data.forEach((organizationMember: OrganizationMember) => {
@@ -199,7 +204,7 @@ const Index = ({ commonData }: Props) => {
 
   const searchUsers = async (query: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       const result: NormalizedResponseDTO<UserDTO[]> = await api.getUsers({
         userIds: [],
         page: 1,
@@ -217,7 +222,7 @@ const Index = ({ commonData }: Props) => {
     const index: number = members.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
       try {
-        const api: Api = new Api(token, commonData.organization!.sluglified_name);
+        const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         await api.addUserToOrganization({
           organizationId: commonData.organization!.id!,
           userId,
@@ -229,7 +234,7 @@ const Index = ({ commonData }: Props) => {
     } else {
       if (!members[index]!.organization_roles.includes(organizationRole)) {
         try {
-          const api: Api = new Api(token, commonData.organization!.sluglified_name);
+          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
           await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
             members: [
               {
@@ -244,7 +249,7 @@ const Index = ({ commonData }: Props) => {
       }
       if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
         try {
-          const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
           await api.updateTeamMemberRoles(commonData.team!.id!, {
             members: [
               {
@@ -263,7 +268,7 @@ const Index = ({ commonData }: Props) => {
 
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       await api.inviteNewUser({
         email,
         organizationSlug: commonData.organization!.sluglified_name,
@@ -277,7 +282,7 @@ const Index = ({ commonData }: Props) => {
 
   const removeUser = async (userId: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       await api.deleteUserFromTeam(commonData.team!.id!, userId);
       getTeamMembers();
     } catch (e) {
@@ -291,7 +296,7 @@ const Index = ({ commonData }: Props) => {
 
   const toggleUserStarReport = async (reportId: string) => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportId);
       const { data: report } = result;
       const { results: reports } = reportsResponse!.data;
@@ -312,7 +317,7 @@ const Index = ({ commonData }: Props) => {
 
   const toggleUserPinReport = async (reportId: string) => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportId);
       const { data: report } = result;
       const { results: reports } = reportsResponse!.data;
@@ -333,7 +338,7 @@ const Index = ({ commonData }: Props) => {
 
   const toggleGlobalPinReport = async (reportId: string) => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportId);
       const { data: report } = result;
       const { results: reports } = reportsResponse!.data;
@@ -357,11 +362,8 @@ const Index = ({ commonData }: Props) => {
   // START ACTIVITY FEED
 
   const getActivityFeed = async () => {
-    if (!token) {
-      return;
-    }
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const startDatetime: Date = moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate();
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getTeamActivityFeed(commonData.organization!.sluglified_name, commonData.team!.sluglified_name, {
         start_datetime: startDatetime,
@@ -396,7 +398,7 @@ const Index = ({ commonData }: Props) => {
 
   const getSearchUser = async () => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization!.id!, commonData.team!.id);
       setSearchUser(result.data);
     } catch (e) {}
@@ -404,7 +406,7 @@ const Index = ({ commonData }: Props) => {
 
   const createSearchUser = async (query: string, payload: ReportsFilter[]) => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const searchUserDto: SearchUserDto = {
         organization_id: commonData.organization!.id!,
         team_id: commonData.team!.id!,
@@ -418,7 +420,7 @@ const Index = ({ commonData }: Props) => {
 
   const deleteSearchUser = async () => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       await api.deleteSearchUser(searchUser!.id!);
       setSearchUser(null);
     } catch (e) {}

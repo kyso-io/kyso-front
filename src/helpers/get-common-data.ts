@@ -77,19 +77,6 @@ export const getCommonData = async ({ organizationName, teamName }: Props): Prom
           }
         }
       }
-    } else {
-      try {
-        const result: NormalizedResponseDTO<Organization> = await api.getOrganizationBySlug(organizationName);
-        organization = result.data;
-      } catch (e: any) {
-        if (e.response.data.statusCode === 403) {
-          errorOrganization = `You don't have permission to access this organization`;
-        } else if (e.response.data.statusCode === 404) {
-          errorOrganization = 'The organization does not exist';
-        } else {
-          errorOrganization = e.response.data.message;
-        }
-      }
     }
     let lastOrganizationDict: { [userId: string]: string } = {};
     if (user && organization) {
