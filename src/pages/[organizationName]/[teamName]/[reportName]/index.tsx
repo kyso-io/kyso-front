@@ -14,7 +14,6 @@ import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import checkPermissions from '@/helpers/check-permissions';
-import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import type { FileToRender } from '@/hooks/use-file-to-render';
@@ -34,8 +33,6 @@ interface Props {
   setReportData: (data: ReportData | null) => void;
   reportData: ReportData | null;
 }
-
-const token: string | null = getLocalStorageItem('jwt');
 
 const Index = ({ commonData, reportData, setReportData }: Props) => {
   const dispatch = useAppDispatch();
@@ -187,18 +184,30 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   }, [selfTree, router.query?.path]);
 
   useEffect(() => {
-    if (commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC && !commonData.user) {
-      // Unauthenticated user trying to access a non public team
-      router.replace(`/${commonData.organization?.sluglified_name}`);
+    if (commonData) {
+      if (commonData.token === null && commonData.organization === null && !commonData.errorOrganization) {
+        // An unautenticated user is trying to access an organization that does not have public teams
+        router.replace('/');
+        return;
+      }
+      if (commonData.token === null && commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC) {
+        // An unautenticated user is trying to access a non public team
+        router.replace(`/${commonData.organization.sluglified_name}`);
+        return;
+      }
+      if (commonData.organization && commonData.team == null) {
+        // Autenticated user is trying to access a non public team
+        router.replace(`/${commonData.organization.sluglified_name}`);
+      }
     }
-  }, [commonData?.team]);
+  }, [commonData]);
 
   // START TEAM MEMBERS
 
   const getTeamMembers = async () => {
     const m: Member[] = [];
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       const resultOrgMembers: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData.organization!.id!);
       let userMember: Member | null = null;
       resultOrgMembers.data.forEach((organizationMember: OrganizationMember) => {
@@ -262,7 +271,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
 
   const searchUsers = async (query: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       const result: NormalizedResponseDTO<UserDTO[]> = await api.getUsers({
         userIds: [],
         page: 1,
@@ -280,7 +289,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     const index: number = members.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
       try {
-        const api: Api = new Api(token, commonData.organization!.sluglified_name);
+        const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         await api.addUserToOrganization({
           organizationId: commonData.organization!.id!,
           userId,
@@ -292,7 +301,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     } else {
       if (!members[index]!.organization_roles.includes(organizationRole)) {
         try {
-          const api: Api = new Api(token, commonData.organization!.sluglified_name);
+          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
           await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
             members: [
               {
@@ -307,7 +316,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
       }
       if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
         try {
-          const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
           await api.updateTeamMemberRoles(commonData.team!.id!, {
             members: [
               {
@@ -326,7 +335,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
 
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       await api.inviteNewUser({
         email,
         organizationSlug: commonData.organization!.sluglified_name,
@@ -340,7 +349,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
 
   const removeUser = async (userId: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       await api.deleteUserFromTeam(commonData.team!.id!, userId);
       getTeamMembers();
     } catch (e) {
