@@ -29,15 +29,15 @@ const Index = ({ commonData }: Props) => {
 
   const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
 
-  const createChannel = async (ev: any) => {
-    ev.preventDefault();
-    setError('');
-    if (!formName || formName.length === 0) {
-      setError('Please specify a channel name.');
-      return;
+  const delayCheckingName = debounce(async (payload: string) => {
+    if (!payload) {
+      setError('Channel name in used.');
+      setBusy(false);
     }
+  }, 1000);
 
-    setBusy(true);
+  const checkName = async (name: string) => {
+    setFormName(name);
     try {
       const api: Api = new Api(commonData.token);
       api.setOrganizationSlug(commonData.organization!.sluglified_name);
@@ -92,7 +92,7 @@ const Index = ({ commonData }: Props) => {
                           name="name"
                           id="name"
                           autoComplete="name"
-                          onChange={(e) => setFormName(e.target.value)}
+                          onChange={(e) => checkName(e.target.value)}
                           className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
                         />
                       </div>
