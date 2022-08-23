@@ -378,8 +378,8 @@ const Index = ({ commonData }: Props) => {
 
   // END ORGANIZATION MEMBERS
 
-  if (!commonData.organization) {
-    return <div className="text-center mt-4">You don&apos;t have permissions to access this organization.</div>;
+  if (commonData.errorOrganization) {
+    return <div className="text-center mt-4">{commonData.errorOrganization}</div>;
   }
 
   return (

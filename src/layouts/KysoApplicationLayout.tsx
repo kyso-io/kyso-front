@@ -2,7 +2,7 @@ import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
 import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
 import type { LayoutProps } from '@/types/pageWithLayout';
-import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import type { ReportData } from '@/types/report-data';
 import { setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
@@ -18,7 +18,7 @@ type IUnpureKysoApplicationLayoutProps = {
 const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplicationLayoutProps) => {
   const router = useRouter();
   const [commonData, setCommonData] = useState<CommonData | null>(null);
-  const [reportData, setReportData] = useState<{ report: ReportDTO | null | undefined; authors: UserDTO[] } | null>(null);
+  const [reportData, setReportData] = useState<ReportData | null>(null);
   const dispatch = useDispatch();
 
   let slugifiedName = '';
@@ -64,7 +64,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       setCommonData(cd);
       if (router.query.reportName) {
         const getReportData = async () => {
-          const data: { report: ReportDTO | null | undefined; authors: UserDTO[] } = await getReport({
+          const data: ReportData = await getReport({
             commonData: cd,
             reportName: router.query.reportName as string,
           });

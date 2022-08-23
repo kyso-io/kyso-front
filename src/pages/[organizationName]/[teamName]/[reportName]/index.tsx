@@ -1,12 +1,13 @@
 import moment from 'moment';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
 import { dirname } from 'path';
+import { useEffect, useMemo, useState } from 'react';
 
-import type { OrganizationMember, User, ReportDTO, TeamMember, NormalizedResponseDTO, Comment, GithubFileHash, KysoSetting, UserDTO } from '@kyso-io/kyso-model';
+import type { Comment, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import { CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 
+import ManageUsers from '@/components/ManageUsers';
 import PureComments from '@/components/PureComments';
 import { PurePermissionDenied } from '@/components/PurePermissionDenied';
 import PureReportHeader from '@/components/PureReportHeader';
@@ -15,22 +16,23 @@ import PureTree from '@/components/PureTree';
 import checkPermissions from '@/helpers/check-permissions';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import { useChannelMembers } from '@/hooks/use-channel-members';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import { isImage } from '@/hooks/use-file-to-render';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { CommonData } from '@/types/common-data';
-import type { Member } from '@/types/member';
-import UnpureReportRender from '@/unpure-components/UnpureReportRender';
-import ManageUsers from '@/components/ManageUsers';
-import { useChannelMembers } from '@/hooks/use-channel-members';
 import { useUserEntities } from '@/hooks/use-user-entities';
 import type { Version } from '@/hooks/use-versions';
 import { useVersions } from '@/hooks/use-versions';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { CommonData } from '@/types/common-data';
+import type { Member } from '@/types/member';
+import type { ReportData } from '@/types/report-data';
+import UnpureReportRender from '@/unpure-components/UnpureReportRender';
+import { getReport } from '../../../../helpers/get-report';
 
 interface Props {
   commonData: CommonData;
-  setReportData: (data: { report: ReportDTO | null; authors: UserDTO[] } | null) => void;
-  reportData: { report: ReportDTO | null; authors: UserDTO[] } | null;
+  setReportData: (data: ReportData | null) => void;
+  reportData: ReportData | null;
 }
 
 const token: string | null = getLocalStorageItem('jwt');
@@ -84,19 +86,8 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   }, [reportData?.report, router.query]);
 
   const refreshReport = async () => {
-    try {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<ReportDTO> = await api.getReportByTeamIdAndSlug(commonData.team!.id!, router.query.reportName as string);
-      const authors: UserDTO[] = [];
-      result.data.author_ids.forEach((authorId: string) => {
-        if (result.relations?.user[authorId]) {
-          authors.push(result.relations.user[authorId]);
-        }
-      });
-      setReportData({ report: result.data, authors });
-    } catch (e) {
-      setReportData({ report: null, authors: [] });
-    }
+    const rd: ReportData = await getReport({ commonData, reportName: router.query.reportName as string });
+    setReportData(rd);
   };
 
   const getTree = async (args: { path: string; report: ReportDTO | null | undefined; version?: string; commonData: CommonData }): Promise<GithubFileHash[]> => {
@@ -369,7 +360,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     if (reportData?.report?.id) {
       dispatch(
         fetchReportCommentsAction({
-          reportId: report.id as string,
+          reportId: reportData.report.id as string,
           sort: '-created_at',
         }),
       );
@@ -420,8 +411,20 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   const hasPermissionEditInlineComment = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData]);
   const hasPermissionDeleteInlineComment = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData]);
 
-  if (!reportData || !reportData.report) {
+  if (commonData.errorOrganization) {
+    return <div className="text-center mt-4">{commonData.errorOrganization}</div>;
+  }
+
+  if (commonData.errorTeam) {
+    return <div className="text-center mt-4">{commonData.errorTeam}</div>;
+  }
+
+  if (!reportData) {
     return null;
+  }
+
+  if (reportData.errorReport) {
+    return <div className="text-center mt-4">{reportData.errorReport}</div>;
   }
 
   const { report, authors } = reportData;

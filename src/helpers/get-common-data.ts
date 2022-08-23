@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
 import type { CommonData } from '@/types/common-data';
 import type { NormalizedResponseDTO, Organization, ResourcePermissions, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
@@ -43,7 +44,9 @@ export const getCommonData = async ({ organizationName, teamName }: Props): Prom
     organizationResourcePermissions = permissions!.organizations!.find((org: ResourcePermissions) => org.name === organizationName);
   }
   let organization: Organization | null = null;
+  let errorOrganization: string | null = null;
   let team: Team | null = null;
+  let errorTeam: string | null = null;
   if (organizationName) {
     api.setOrganizationSlug(organizationName);
     if (organizationResourcePermissions) {
@@ -51,18 +54,42 @@ export const getCommonData = async ({ organizationName, teamName }: Props): Prom
         try {
           const fetchOrganizationRequest: NormalizedResponseDTO<Organization> = await api.getOrganization(organizationResourcePermissions.id);
           organization = fetchOrganizationRequest.data;
-        } catch (e) {}
+        } catch (e: any) {
+          if (e.response.data.statusCode === 403) {
+            errorOrganization = `You don't have permission to access this organization`;
+          } else if (e.response.data.statusCode === 404) {
+            errorOrganization = 'The organization does not exist';
+          } else {
+            errorOrganization = e.response.data.message;
+          }
+        }
       } else {
         try {
           const result: NormalizedResponseDTO<Organization> = await api.getOrganizationBySlug(organizationName);
           organization = result.data;
-        } catch (e) {}
+        } catch (e: any) {
+          if (e.response.data.statusCode === 403) {
+            errorOrganization = `You don't have permission to access this organization`;
+          } else if (e.response.data.statusCode === 404) {
+            errorOrganization = 'The organization does not exist';
+          } else {
+            errorOrganization = e.response.data.message;
+          }
+        }
       }
     } else {
       try {
         const result: NormalizedResponseDTO<Organization> = await api.getOrganizationBySlug(organizationName);
         organization = result.data;
-      } catch (e) {}
+      } catch (e: any) {
+        if (e.response.data.statusCode === 403) {
+          errorOrganization = `You don't have permission to access this organization`;
+        } else if (e.response.data.statusCode === 404) {
+          errorOrganization = 'The organization does not exist';
+        } else {
+          errorOrganization = e.response.data.message;
+        }
+      }
     }
     let lastOrganizationDict: { [userId: string]: string } = {};
     if (user && organization) {
@@ -85,9 +112,17 @@ export const getCommonData = async ({ organizationName, teamName }: Props): Prom
         try {
           const fetchTeamRequest: NormalizedResponseDTO<Team> = await api.getTeam(teamResourcePermissions.id);
           team = fetchTeamRequest.data;
-        } catch (err) {}
+        } catch (e: any) {
+          if (e.response.data.statusCode === 403) {
+            errorTeam = `You don't have permission to access this team`;
+          } else if (e.response.data.statusCode === 404) {
+            errorTeam = 'The team does not exist';
+          } else {
+            errorTeam = e.response.data.message;
+          }
+        }
       }
     }
   }
-  return { token, user, permissions, organization, team };
+  return { token, user, permissions, organization, errorOrganization, team, errorTeam };
 };
