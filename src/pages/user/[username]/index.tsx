@@ -1,4 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import ActivityFeedComponent from '@/components/ActivityFeed';
+import { PureSpinner } from '@/components/PureSpinner';
+import ReportBadge from '@/components/ReportBadge';
 import UserProfileInfo from '@/components/UserProfileInfo';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useInterval } from '@/hooks/use-interval';
@@ -11,8 +14,6 @@ import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { PureSpinner } from '@/components/PureSpinner';
-import ReportBadge from '@/components/ReportBadge';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 60;
@@ -63,6 +64,11 @@ const debouncedPaginatedReports = debounce(
   500,
 );
 
+type UserProfileData = {
+  userProfile: UserDTO | null;
+  errorUserProfile: string | null;
+};
+
 interface Props {
   commonData: CommonData;
 }
@@ -71,7 +77,7 @@ const Index = ({ commonData }: Props) => {
   const user: UserDTO | null = useUser();
   const router = useRouter();
   const { username } = router.query;
-  const [userProfile, setUser] = useState<UserDTO>();
+  const [userProfileData, setUserProfileData] = useState<UserProfileData | null>(null);
   const [currentTab, onChangeTab] = useState<string>('Overview');
   // REPORTS
   const [reportsResponse, setReportsResponse] = useState<NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null>(null);
@@ -82,18 +88,18 @@ const Index = ({ commonData }: Props) => {
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
 
   useEffect(() => {
-    if (!user || !token || !username) {
+    if (!username) {
       return;
     }
     getUserByUsername();
   }, [user, token, username]);
 
   useEffect(() => {
-    if (!user || !token || !userProfile) {
+    if (!userProfileData || !userProfileData.userProfile) {
       return;
     }
     getReports(1);
-  }, [user, token, userProfile]);
+  }, [user, token, userProfileData]);
 
   useEffect(() => {
     if (!user || !token) {
@@ -106,22 +112,34 @@ const Index = ({ commonData }: Props) => {
     try {
       const api: Api = new Api(token);
       const result: NormalizedResponseDTO<UserDTO> = await api.getUserProfileByUsername(username as string);
-      setUser(result.data);
-    } catch (e) {
-      console.log(e);
+      setUserProfileData({
+        userProfile: result.data,
+        errorUserProfile: null,
+      });
+    } catch (e: any) {
+      let errorUserProfile: string | null = null;
+      if (e.response.data.statusCode === 404) {
+        errorUserProfile = 'The user does not exist';
+      } else {
+        errorUserProfile = e.response.data.message;
+      }
+      setUserProfileData({
+        userProfile: null,
+        errorUserProfile,
+      });
     }
   };
 
   const refreshLastActivityFeed = useCallback(async () => {
-    if (!user || !token || !userProfile) {
+    if (!user || !token) {
       return;
     }
     const api: Api = new Api(token);
     try {
-      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getUserActivityFeed({
+      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getUserActivityFeed(username as string, {
         start_datetime: moment().add(-DAYS_ACTIVITY_FEED, 'days').toDate(),
         end_datetime: moment().toDate(),
-        user_id: userProfile.id,
+        user_id: user.id,
       });
 
       result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
@@ -153,18 +171,15 @@ const Index = ({ commonData }: Props) => {
       setActivityFeed(newActivityFeed);
       setHasMore(result.data.length > 0);
     } catch (e) {}
-  }, [token, user, userProfile]);
+  }, [token, user, userProfileData]);
 
   useInterval(refreshLastActivityFeed, ACTIVITY_FEED_POOLING_MS);
 
   // START REPORT ACTIONS
 
   const getReports = async (page: number, queryParams?: string) => {
-    if (!userProfile) {
-      return;
-    }
     setRequestingReports(true);
-    debouncedPaginatedReports(token!, userProfile.id, page, queryParams ?? '', (result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
+    debouncedPaginatedReports(token!, userProfileData!.userProfile!.id, page, queryParams ?? '', (result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
       setReportsResponse(result);
       setRequestingReports(false);
     });
@@ -256,16 +271,16 @@ const Index = ({ commonData }: Props) => {
   // START ACTIVITY FEED
 
   const getActivityFeed = async () => {
-    if (!token || !userProfile) {
+    if (!userProfileData || !userProfileData.userProfile) {
       return;
     }
     const api: Api = new Api(token);
     try {
       const startDatetime: Date = moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate();
-      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getUserActivityFeed({
+      const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getUserActivityFeed(username as string, {
         start_datetime: startDatetime,
         end_datetime: datetimeActivityFeed,
-        user_id: userProfile.id,
+        user_id: userProfileData.userProfile.id,
       });
       result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
       const newActivityFeed: NormalizedResponseDTO<ActivityFeed[]> = { ...(activityFeed || { data: [], relations: {} }) };
@@ -290,16 +305,17 @@ const Index = ({ commonData }: Props) => {
 
   // END ACTIVITY FEED
 
-  if (!user || !userProfile || !commonData) {
+  if (!userProfileData || !commonData) {
     return null;
   }
-  if (!userProfile) {
-    return null;
+
+  if (userProfileData.errorUserProfile) {
+    return <div className="text-center mt-4">{userProfileData.errorUserProfile}</div>;
   }
 
   return (
     <div className="p-2">
-      <UserProfileInfo userId={user.id} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfile} />
+      <UserProfileInfo userId={userProfileData.userProfile!.id} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfileData.userProfile!} />
       <div className="flex flex-row space-x-8">
         <div className="w-1/6" />
         <div className="w-4/6">
@@ -354,14 +370,17 @@ const Index = ({ commonData }: Props) => {
           )}
           {currentTab === 'Activity' && (
             <React.Fragment>
-              <p className="text-xs font-bold leading-relaxed text-gray-700 py-10">Most recent</p>
-              <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+              {activityFeed ? (
+                <React.Fragment>
+                  <p className="text-xs font-bold leading-relaxed text-gray-700 py-10">Most recent</p>
+                  <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+                </React.Fragment>
+              ) : (
+                <div className="pt-10 pb-20">
+                  <p>The user has no activity</p>
+                </div>
+              )}
             </React.Fragment>
-          )}
-          {!activityFeed && (
-            <div className="pt-10 pb-20">
-              <p>The user has no activity</p>
-            </div>
           )}
         </div>
       </div>

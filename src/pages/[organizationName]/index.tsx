@@ -15,12 +15,10 @@ import ActivityFeedComponent from '../../components/ActivityFeed';
 import ManageUsers from '../../components/ManageUsers';
 import OrganizationInfo from '../../components/OrganizationActivity';
 import ReportBadge from '../../components/ReportBadge';
-import { getLocalStorageItem } from '../../helpers/isomorphic-local-storage';
 import { useInterval } from '../../hooks/use-interval';
 import type { CommonData } from '../../types/common-data';
 import type { Member } from '../../types/member';
 
-const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
@@ -51,11 +49,18 @@ const Index = ({ commonData }: Props) => {
   const [users, setUsers] = useState<UserDTO[]>([]);
 
   useEffect(() => {
+    if (commonData !== null && commonData.token === null && commonData.organization === null && !commonData.errorOrganization) {
+      // An unautenticated user is trying to access an organization that does not have public teams
+      router.replace('/');
+    }
+  }, [commonData]);
+
+  useEffect(() => {
     if (!commonData.organization) {
       return;
     }
     getReports();
-  }, [token, commonData.organization, paginationParams]);
+  }, [commonData.organization, paginationParams]);
 
   useEffect(() => {
     if (!commonData.organization) {
@@ -70,13 +75,13 @@ const Index = ({ commonData }: Props) => {
       return;
     }
     getActivityFeed();
-  }, [token, commonData.organization, datetimeActivityFeed]);
+  }, [commonData.organization, datetimeActivityFeed]);
 
   const refreshLastActivityFeed = useCallback(async () => {
-    if (!commonData.organization || !token) {
+    if (!commonData.organization) {
       return;
     }
-    const api: Api = new Api(token);
+    const api: Api = new Api(commonData.token);
     try {
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(commonData.organization.sluglified_name as string, {
         start_datetime: moment().add(-DAYS_ACTIVITY_FEED, 'days').toDate(),
@@ -112,13 +117,13 @@ const Index = ({ commonData }: Props) => {
       setActivityFeed(newActivityFeed);
       setHasMore(result.data.length > 0);
     } catch (e) {}
-  }, [token, commonData.organization]);
+  }, [commonData.organization]);
 
   useInterval(refreshLastActivityFeed, ACTIVITY_FEED_POOLING_MS);
 
   const getReports = async () => {
     try {
-      const api: Api = new Api(token);
+      const api: Api = new Api(commonData.token);
       const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getOrganizationReports(
         commonData.organization!.sluglified_name,
         paginationParams.page,
@@ -159,7 +164,7 @@ const Index = ({ commonData }: Props) => {
 
   const getOrganizationsInfo = async () => {
     try {
-      const api: Api = new Api(token);
+      const api: Api = new Api(commonData.token);
       const result: NormalizedResponseDTO<OrganizationInfoDto[]> = await api.getOrganizationsInfo(commonData!.organization!.id);
       if (result?.data?.length > 0) {
         setOrganizationInfo(result.data[0]!);
@@ -168,7 +173,7 @@ const Index = ({ commonData }: Props) => {
   };
 
   const toggleUserStarReport = async (reportId: string) => {
-    const api: Api = new Api(token);
+    const api: Api = new Api(commonData.token);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportId);
       const { data: report } = result;
@@ -189,7 +194,7 @@ const Index = ({ commonData }: Props) => {
   };
 
   const toggleUserPinReport = async (reportId: string) => {
-    const api: Api = new Api(token);
+    const api: Api = new Api(commonData.token);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportId);
       const { data: report } = result;
@@ -210,7 +215,7 @@ const Index = ({ commonData }: Props) => {
   };
 
   const toggleGlobalPinReport = async (reportId: string) => {
-    const api: Api = new Api(token, commonData.organization?.sluglified_name);
+    const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportId);
       const { data: report } = result;
@@ -231,10 +236,10 @@ const Index = ({ commonData }: Props) => {
   };
 
   const getActivityFeed = async () => {
-    if (!token || !commonData.organization) {
+    if (!commonData.organization) {
       return;
     }
-    const api: Api = new Api(token);
+    const api: Api = new Api(commonData.token);
     try {
       const startDatetime: Date = moment(datetimeActivityFeed).add(-DAYS_ACTIVITY_FEED, 'day').toDate();
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getOrganizationActivityFeed(commonData.organization.sluglified_name, {
@@ -267,7 +272,7 @@ const Index = ({ commonData }: Props) => {
   // START ORGANIZATION MEMBERS
   const getOrganizationMembers = async () => {
     try {
-      const api: Api = new Api(token, commonData!.organization!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
       const result: NormalizedResponseDTO<OrganizationMember[]> = await api.getOrganizationMembers(commonData!.organization!.id!);
       const m: Member[] = [];
       let userMember: Member | null = null;
@@ -307,7 +312,7 @@ const Index = ({ commonData }: Props) => {
 
   const searchUsers = async (query: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData!.organization!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
       const result: NormalizedResponseDTO<UserDTO[]> = await api.getUsers({
         userIds: [],
         page: 1,
@@ -325,7 +330,7 @@ const Index = ({ commonData }: Props) => {
     const index: number = members.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
       try {
-        const api: Api = new Api(token, commonData!.organization!.sluglified_name);
+        const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
         await api.addUserToOrganization({
           organizationId: commonData!.organization!.id!,
           userId,
@@ -336,7 +341,7 @@ const Index = ({ commonData }: Props) => {
       }
     } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
-        const api: Api = new Api(token, commonData!.organization!.sluglified_name);
+        const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
         await api.updateOrganizationMemberRoles(commonData!.organization!.id!, {
           members: [
             {
@@ -354,7 +359,7 @@ const Index = ({ commonData }: Props) => {
 
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData!.organization!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
       await api.inviteNewUser({
         email,
         organizationSlug: commonData!.organization!.sluglified_name,
@@ -368,7 +373,7 @@ const Index = ({ commonData }: Props) => {
 
   const removeUser = async (userId: string): Promise<void> => {
     try {
-      const api: Api = new Api(token, commonData!.organization!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
       await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
       getOrganizationMembers();
     } catch (e) {
