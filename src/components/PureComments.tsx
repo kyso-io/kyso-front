@@ -2,6 +2,7 @@
 import classNames from '@/helpers/class-names';
 import type { CommonData } from '@/types/common-data';
 import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import clsx from 'clsx';
 import PureComment from './PureComment';
 import PureCommentForm from './PureCommentForm';
 
@@ -29,7 +30,7 @@ const PureComments = (props: IPureComments) => {
         <PureCommentForm user={commonData.user} report={report} userSelectorHook={userSelectorHook} submitComment={submitComment} channelMembers={channelMembers} />
       )}
 
-      <div className="flex flex-col">
+      <div className={clsx('flex flex-col', commonData.user === null ? 'mt-6' : '')}>
         {comments &&
           comments.map((comment) => (
             <PureComment

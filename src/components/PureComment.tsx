@@ -49,13 +49,9 @@ const PureComment = (props: IPureComment) => {
     isUserAuthor = true;
   }
 
-  if (!commonData.user) {
-    return null;
-  }
-
   return (
     <div className="flex flex-col space-y-2">
-      {comment && isEditing ? (
+      {commonData.user != null && comment && isEditing ? (
         <PureCommentForm
           report={report}
           user={commonData.user}
@@ -122,7 +118,7 @@ const PureComment = (props: IPureComment) => {
           </div>
         </div>
       )}
-      {comment && isReplying && (
+      {comment && isReplying && commonData.user && (
         <div>
           <PureCommentForm
             user={commonData.user}
