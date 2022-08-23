@@ -11,6 +11,7 @@ import { TeamPermissionsEnum, TeamVisibilityEnum, Team } from '@kyso-io/kyso-mod
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
 import { Api } from '@kyso-io/kyso-store';
+import classNames from '@/helpers/class-names';
 
 interface Props {
   commonData: CommonData;
@@ -25,9 +26,32 @@ const Index = ({ commonData }: Props) => {
 
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
+  const [isTeamAvailable, setTeamAvailable] = useState(true);
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
 
   const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
+
+  const checkName = async (name: string) => {
+    setFormName(name);
+    setError('');
+    try {
+      const api: Api = new Api(commonData.token);
+      api.setOrganizationSlug(commonData.organization!.sluglified_name);
+      const teamAvailable: NormalizedResponseDTO<boolean> = await api.teamNameIsAvailable(commonData.organization?.id!, name);
+
+      if (!teamAvailable.data) {
+        setError('Name in use.');
+        setBusy(false);
+        setTeamAvailable(false);
+        return;
+      }
+
+      setTeamAvailable(true);
+    } catch (er: any) {
+      setError(er.message);
+      setBusy(false);
+    }
+  };
 
   const createChannel = async (ev: any) => {
     ev.preventDefault();
@@ -41,17 +65,13 @@ const Index = ({ commonData }: Props) => {
     try {
       const api: Api = new Api(commonData.token);
       api.setOrganizationSlug(commonData.organization!.sluglified_name);
-
-      const teamAvailable: NormalizedResponseDTO<boolean> = await api.teamNameIsAvailable(commonData.organization?.id!, formName);
-
-      if (!teamAvailable) {
+      if (!isTeamAvailable) {
         setError('Name in use.');
         setBusy(false);
         return;
       }
 
       const result: NormalizedResponseDTO<Team> = await api.createTeam(new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions));
-
       const team: Team = result.data;
 
       if (!team) {
@@ -92,7 +112,7 @@ const Index = ({ commonData }: Props) => {
                           name="name"
                           id="name"
                           autoComplete="name"
-                          onChange={(e) => setFormName(e.target.value)}
+                          onChange={(e) => checkName(e.target.value)}
                           className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
                         />
                       </div>
@@ -194,7 +214,10 @@ const Index = ({ commonData }: Props) => {
                   <div className="text-red-500 text-sm">{error}</div>
                   <button
                     type="submit"
-                    className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    className={classNames(
+                      error ? 'opacity-75 cursor-not-allowed' : 'hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
+                      'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 ',
+                    )}
                   >
                     {!isBusy && (
                       <>
