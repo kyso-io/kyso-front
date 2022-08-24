@@ -169,10 +169,15 @@ const Index = ({ commonData }: Props) => {
       resultTeamMembers.data.forEach((teamMember: TeamMember) => {
         const member: Member | undefined = m.find((mem: Member) => mem.id === teamMember.id);
         if (userMember && userMember.id === teamMember.id) {
-          userMember.team_roles = teamMember.team_roles;
+          /**
+           * this weird filter is there because sometimes team_roles looks like [null],
+           * it has an element of null
+           */
+
+          userMember.team_roles = teamMember.team_roles.filter((r) => !!r);
           userMember.membership_origin = teamMember.membership_origin;
         } else if (member) {
-          member.team_roles = teamMember.team_roles;
+          member.team_roles = teamMember.team_roles.filter((r) => !!r);
           member.membership_origin = teamMember.membership_origin;
         } else {
           m.push({
@@ -183,7 +188,7 @@ const Index = ({ commonData }: Props) => {
             avatar_url: teamMember.avatar_url,
             email: teamMember.email,
             organization_roles: [],
-            team_roles: teamMember.team_roles,
+            team_roles: teamMember.team_roles.filter((r) => !!r),
             membership_origin: teamMember.membership_origin,
           });
         }

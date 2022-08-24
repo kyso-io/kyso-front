@@ -438,7 +438,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
       <div className="flex flex-row">
         <PureSideOverlayPanel key={report?.name} cacheKey={report?.name}>
           <>
-            {report && commonData && (
+            {report && (
               <PureTree
                 path={currentPath}
                 basePath={router.basePath}
@@ -456,7 +456,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
           </>
         </PureSideOverlayPanel>
 
-        {selfTree && report && commonData && (
+        {report && (
           <>
             <div className="w-full flex lg:flex-col flex-col justify-between rounded">
               <div className="w-full p-4">
@@ -492,16 +492,6 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
               </div>
 
               <div className="border-y p-4">
-                {/* <UnpureFileHeader
-                  tree={selfTree}
-                  report={report}
-                  fileToRender={fileToRender}
-                  basePath={router.basePath}
-                  path={currentPath}
-                  version={router.query.version as string}
-                  commonData={commonData}
-                /> */}
-
                 {fileToRender && onlyVisibleCell && (
                   <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
                     Showing only this cell.
