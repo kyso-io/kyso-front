@@ -38,9 +38,7 @@ const Index = ({ commonData }: Props) => {
 
   return (
     <div className="flex flex-row space-x-8">
-      <div className="w-1/6">
-        <ChannelList basePath={router.basePath} commonData={commonData} />
-      </div>
+      <div className="w-1/6">{commonData.user && <ChannelList basePath={router.basePath} commonData={commonData} />}</div>
     </div>
   );
 };

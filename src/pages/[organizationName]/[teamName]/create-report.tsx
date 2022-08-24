@@ -7,7 +7,7 @@ import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { FilesystemItem } from '@/model/filesystem-item.model';
 import type { CommonData } from '@/types/common-data';
-import type { KysoConfigFile, NormalizedResponseDTO, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import type { Tag, KysoConfigFile, NormalizedResponseDTO, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import { ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import FormData from 'form-data';
@@ -74,12 +74,9 @@ const CreateReport = ({ commonData }: Props) => {
   const [description, setDescription] = useState('');
   const [draftStatus, setDraftStatus] = useState('');
 
-  // const tabs = [{ name: 'Write' }, { name: 'Preview' }];
-  // const [currentTab, onChangeTab] = useState('Write');
-
   const [selectedTags, setTags] = useState([]);
-  const [selectedPeople, setSelectedPeople] = useState<TeamMember[]>([]);
-  const tags = ['plotly', 'multiqc', 'python', 'data-science', 'rstudio', 'genetics', 'physics'];
+  const [selectedPeople, setSelectedPeople] = useState<TeamMember[]>(channelMembers);
+  const [allowedTags, setAllowedTags] = useState<string[]>([]);
 
   const mainfile: CreationReportFileSystemObject[] = [new CreationReportFileSystemObject('Readme.md', 'Readme.md', 'Readme.md', 'file', '')];
 
@@ -99,6 +96,30 @@ const CreateReport = ({ commonData }: Props) => {
       removeLocalStorageItem(file.id);
     }
   };
+
+  const filterTags = async (query?: string) => {
+    const api: Api = new Api(token);
+    api.setOrganizationSlug(commonData.organization!.sluglified_name);
+    if (commonData.team) {
+      api.setTeamSlug(commonData.team?.sluglified_name);
+    }
+
+    interface QueryInterface {
+      filter?: {};
+    }
+    const queryObj: QueryInterface = {};
+    if (query) {
+      queryObj.filter = { search: query };
+    }
+
+    const result: NormalizedResponseDTO<Tag[]> = await api.getTags(queryObj);
+
+    setAllowedTags(result.data.map((t) => t.name));
+  };
+
+  useEffect(() => {
+    filterTags();
+  }, [commonData.organization, commonData.team]);
 
   useEffect(() => {
     if (getLocalStorageItem('formTitle')) {
@@ -208,7 +229,7 @@ const CreateReport = ({ commonData }: Props) => {
       description,
       organization: commonData.organization!.sluglified_name,
       team: commonData.team.sluglified_name,
-      tags,
+      tags: selectedTags,
       type: ReportType.Markdown,
       authors: selectedPeople.map((person) => person.email),
     };
@@ -292,63 +313,53 @@ const CreateReport = ({ commonData }: Props) => {
         <div className="w-1/6"></div>
         <div className="w-4/6">
           <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-row items-center justify-between">
-              <div className="mr-2">posting into</div>
-              <Menu as="div" className="relative w-fit inline-block text-left">
-                <Menu.Button className="hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded">
-                  {commonData.team ? commonData.team.display_name : 'Select a channel'}
-                  <div className="pl-2">
-                    <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
-                  </div>
-                </Menu.Button>
-
-                <Transition
-                  as={Fragment}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <Menu.Items className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
-                    <div className="p-2">
-                      <div>
-                        <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
-                          Channels
-                        </h3>
-                        <div className="flex flex-col justify-start">
-                          {channelSelectorItems &&
-                            channelSelectorItems.map((item: BreadcrumbItem) => (
-                              <a
-                                key={item.href}
-                                href={item.href}
-                                className={classNames(
-                                  item.current ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                                  'flex items-center px-3 py-2 text-sm font-medium rounded-md',
-                                )}
-                              >
-                                {item.name}
-                              </a>
-                            ))}
-                        </div>
-                      </div>
-                    </div>
-                  </Menu.Items>
-                </Transition>
-              </Menu>
-            </div>
+            <div className="flex flex-row items-center justify-between"></div>
             <div className="flex flex-col">
               <div className="flex flex-row items-center space-x-2">
-                <TagsFilterSelector label={'Add Tags'} initial={tags} selected={selectedTags} setSelected={(newTags: string[]) => setTagsDelay(newTags)} />
+                <div className="mr-2">posting into</div>
+                <Menu as="div" className="relative w-fit inline-block text-left">
+                  <Menu.Button className="hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded">
+                    {commonData.team ? commonData.team.display_name : 'Select a channel'}
+                    <div className="pl-2">
+                      <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
+                    </div>
+                  </Menu.Button>
 
-                <MemberFilterSelector
-                  label={'Add authors'}
-                  initial={channelMembers}
-                  selected={selectedPeople}
-                  setSelected={(newSelectedPeople: TeamMember[]) => setSelectedPeopleDelay(newSelectedPeople)}
-                />
-
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
+                      <div className="p-2">
+                        <div>
+                          <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
+                            Channels
+                          </h3>
+                          <div className="flex flex-col justify-start">
+                            {channelSelectorItems &&
+                              channelSelectorItems.map((item: BreadcrumbItem) => (
+                                <a
+                                  key={item.href}
+                                  href={item.href}
+                                  className={classNames(
+                                    item.current ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                                    'flex items-center px-3 py-2 text-sm font-medium rounded-md',
+                                  )}
+                                >
+                                  {item.name}
+                                </a>
+                              ))}
+                          </div>
+                        </div>
+                      </div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
                 {hasAnythingCached && (
                   <button
                     type="reset"
@@ -412,6 +423,25 @@ const CreateReport = ({ commonData }: Props) => {
                   setDescriptionDelay(e.target.value);
                 }}
                 className="p-0 focus:shadow-sm focus:ring-indigo-500 focus:border-indigo-500  block  w-full h-full focus:w-full  border-white border-0 text-gray-500 sm:text-sm rounded-md"
+              />
+            </div>
+
+            <div className="flex flex-row items-center space-x-2">
+              <TagsFilterSelector
+                filter={(query) => {
+                  console.log(2);
+                  filterTags(query);
+                }}
+                initial={allowedTags}
+                selected={selectedTags}
+                setSelected={(newTags: string[]) => setTagsDelay(newTags)}
+              />
+
+              <MemberFilterSelector
+                initial={channelMembers}
+                selected={selectedPeople}
+                setSelected={(newSelectedPeople: TeamMember[]) => setSelectedPeopleDelay(newSelectedPeople)}
+                emptyMessage={commonData.team ? 'No authors' : 'First select a channel to add authors'}
               />
             </div>
           </div>
