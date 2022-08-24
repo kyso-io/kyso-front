@@ -1,51 +1,80 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import PureTopTabs from '@/components/PureTopTabs';
-import { useRouter } from 'next/router';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faPeriod } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { PlusSmIcon as PlusSmIconSolid } from '@heroicons/react/solid';
 import type { UserDTO } from '@kyso-io/kyso-model';
 import moment from 'moment';
+import { useRouter } from 'next/router';
+import { useRef } from 'react';
+import type { CommonData } from '../types/common-data';
 import PureAvatar from './PureAvatar';
 
 const BACKGROUND_IMAGE = 'https://images.unsplash.com/photo-1444628838545-ac4016a5418a?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80';
 
 type IUserProfileInfo = {
-  userId: string;
+  commonData: CommonData;
   onChangeTab: (_tag: string) => void;
   currentTab: string;
   userProfile: UserDTO;
+  onChangeBackgroundImage: (file: File) => void;
 };
 
 const UserProfileInfo = (props: IUserProfileInfo) => {
-  const { userId, onChangeTab, currentTab, userProfile } = props;
+  const { commonData, onChangeTab, currentTab, userProfile, onChangeBackgroundImage } = props;
   const router = useRouter();
   const tabs = [{ name: 'Overview' }, { name: 'Activity' }];
+  const imageInputFileRef = useRef<any>(null);
 
-  let isUserAuthor = false;
-  if (userId === userProfile.id) {
-    isUserAuthor = true;
+  let isUserLoggedIn = false;
+  if (commonData?.user?.id === userProfile.id) {
+    isUserLoggedIn = true;
   }
+
+  const backgroundImage: string = userProfile.background_image_url ? userProfile.background_image_url : BACKGROUND_IMAGE;
 
   return (
     <div className="flex flex-row space-x-8">
       <div className="w-1/6"></div>
       <div className="w-4/6 flex flex-col">
-        {BACKGROUND_IMAGE && (
-          <div>
-            <img className="h-32 w-full object-cover lg:h-80" src={BACKGROUND_IMAGE} alt="" />
-          </div>
-        )}
-        {/* avatar */}
-        {!BACKGROUND_IMAGE && <div className="h-20 w-full object-cover" />}
+        <div className="relative">
+          <img className="h-32 w-full object-cover lg:h-80" src={backgroundImage} alt="" />
+          {isUserLoggedIn && (
+            <div className="absolute top-5 right-5">
+              <button
+                type="button"
+                onClick={() => imageInputFileRef.current.click()}
+                className="inline-flex items-center p-1 border border-transparent rounded-full shadow-sm text-gray-700 bg-white hover:bg-gray-50  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                title="Change background image"
+              >
+                <PlusSmIconSolid className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <input
+                ref={imageInputFileRef}
+                type="file"
+                accept="image/*"
+                onClick={(event: any) => {
+                  event.target.value = null;
+                }}
+                onChange={(e: any) => {
+                  if (e.target.files.length > 0) {
+                    onChangeBackgroundImage(e.target.files[0]);
+                  }
+                }}
+                style={{ display: 'none' }}
+              />
+            </div>
+          )}
+        </div>
         <div className="sm:flex sm:items-center sm:justify-between px-10">
           <div className="-mt-12 sm:-mt-16 sm:flex sm:items-end sm:space-x-5">
-            <div className="flex">
+            <div className="flex" style={{ zIndex: 1 }}>
               <PureAvatar src={userProfile.avatar_url} title={userProfile.display_name} size={TailwindHeightSizeEnum.H24} />
-              {/* <img className="h-24 w-24 rounded-full ring-4 ring-white sm:h-32 sm:w-32" src={userProfile.avatar_url} alt="" /> */}
             </div>
           </div>
-          {isUserAuthor && (
+          {isUserLoggedIn && (
             <div className="mt-6 mb-1 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
               <button
                 type="button"

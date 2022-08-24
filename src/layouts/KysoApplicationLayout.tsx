@@ -3,6 +3,7 @@ import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import type { ReportData } from '@/types/report-data';
+import type { UserDTO } from '@kyso-io/kyso-model';
 import { setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
@@ -76,11 +77,18 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     getData();
   }, [router.asPath]);
 
+  const setUser = (user: UserDTO): void => {
+    setCommonData({
+      ...commonData!,
+      user,
+    });
+  };
+
   return (
     <React.Fragment>
       {commonData && router.isReady && (
         <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
-          {React.cloneElement(children, { commonData, reportData, setReportData })}
+          {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
         </PureKysoApplicationLayout>
       )}
     </React.Fragment>
