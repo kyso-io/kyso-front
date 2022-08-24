@@ -1,4 +1,5 @@
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import type { CommonData } from '@/types/common-data';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
@@ -11,6 +12,8 @@ interface Props {
 
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
+
+  useRedirectIfNoJWT();
 
   useEffect(() => {
     const redirectUserToOrganization = async () => {
