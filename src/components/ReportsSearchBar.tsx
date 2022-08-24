@@ -6,7 +6,6 @@ import moment from 'moment';
 import { Calendar } from 'primereact/calendar';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import { FilterIcon } from '@heroicons/react/outline';
 import type { SearchUser, UserDTO } from '@kyso-io/kyso-model';
 import 'primeicons/primeicons.css'; // icons
 import 'primereact/resources/primereact.min.css'; // core css
@@ -24,9 +23,9 @@ const AUTHOR_OPERATORS_FILTERS: ReportsFilter[] = [
 ];
 
 const DATE_OPERATORS: ReportsFilter[] = [
-  { key: '<', label: '<', modificable: true, type: 'date-operator', isLeaf: false },
-  { key: '>', label: '>', modificable: true, type: 'date-operator', isLeaf: false },
-  { key: '=', label: '=', modificable: true, type: 'date-operator', isLeaf: false },
+  { key: '<', label: 'before', modificable: true, type: 'date-operator', isLeaf: false },
+  { key: '>', label: 'after', modificable: true, type: 'date-operator', isLeaf: false },
+  { key: '=', label: 'on', modificable: true, type: 'date-operator', isLeaf: false },
 ];
 
 interface MenuItemsProps {
@@ -39,7 +38,7 @@ const MenuItems = ({ filters, onSelect, onClickOutside }: MenuItemsProps) => {
   const wrapperRef = useRef(null);
   useClickOutside(wrapperRef, onClickOutside);
   return (
-    <Menu.Items ref={wrapperRef} className="origin-top-right mt-2 w-56 rounded-md shadow-lg bg-white ring-opacity/5 focus:outline-none">
+    <Menu.Items ref={wrapperRef} className="origin-top-right w-56 rounded-md shadow-lg bg-white ring-0 focus:outline-none">
       <div className="py-1">
         {filters.map((filter: ReportsFilter, index: number) => (
           <Menu.Item key={index}>
@@ -104,7 +103,16 @@ const MenuMultipleItems = ({ filter, options, onClickOutside }: MenuMultipleItem
           return (
             <Menu.Item key={index}>
               {({ active }) => (
-                <div className={clsx(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'relative flex items-start p-4 py-2 text-sm')}>
+                <div
+                  className={clsx(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'relative flex items-start p-4 py-2 text-sm')}
+                  onClick={() => {
+                    if (indexChecked === -1) {
+                      setSelected([...selected, option]);
+                    } else {
+                      setSelected([...selected.slice(0, indexChecked), ...selected.slice(indexChecked + 1)]);
+                    }
+                  }}
+                >
                   <div className="min-w-0 flex-1 text-sm">
                     <div className="flex flex-row">
                       <div className="mr-4">{option?.image && <PureAvatar src={option.image} title={option.label} />}</div>
@@ -134,6 +142,7 @@ const MenuMultipleItems = ({ filter, options, onClickOutside }: MenuMultipleItem
     </Menu.Items>
   );
 };
+
 interface InputTagProps {
   value: string;
   onSave: (value: string) => void;
@@ -260,7 +269,7 @@ interface ReportsSearchBarProps {
   user: UserDTO | null | undefined;
 }
 
-const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, user }: ReportsSearchBarProps) => {
+const ReportsSearchBar = ({ members, onFiltersChange, searchUser, user }: ReportsSearchBarProps) => {
   const [selectedFilters, setSelectedFilters] = useState<ReportsFilter[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<any | null>(null);
   const [showMenu, setShowMenu] = useState<boolean>(false);
@@ -759,7 +768,9 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
         <React.Fragment>
           <Menu.Button ref={buttonRef} className="w-full" onClick={onClickNewFilter}>
             <div className="mt-1 relative flex items-center content-center w-full">
-              <div className="shadow-sm  block w-full pr-12 sm:text-sm border-gray-300 rounded-md" style={{ height: 40 }}></div>
+              <div className="shadow-sm border w-full text-gray-400 p-2 items-center flex sm:text-sm border-gray-300 rounded-md" style={{ height: 40 }}>
+                {selectedFilters.length === 0 && 'Filter reports'}
+              </div>
               <div className="absolute inset-y-0 flex py-1.5 pr-1.5">
                 {selectedFilters.map((selectedFilter: ReportsFilter, index: number) => (
                   <kbd
@@ -817,16 +828,18 @@ const ReportsSearchBar = ({ members, onSaveSearch, onFiltersChange, searchUser, 
               leaveFrom="transform opacity-100 scale-100"
               leaveTo="transform opacity-0 scale-95"
             >
-              {(ref) => <div ref={ref}>{selectedComponent}</div>}
+              {(ref) => (
+                <div className="absolute z-50 border rounded" ref={ref}>
+                  {selectedComponent}
+                </div>
+              )}
             </Transition>
           )}
         </React.Fragment>
       </Menu>
-      {user && (
-        <>
-          <FilterIcon onClick={() => onSaveSearch(query, selectedFilters)} className={clsx('cursor-pointer w-6 h-6 ml-2')} />
-        </>
-      )}
+      {/* {user && (
+        <FilterIcon onClick={() => onSaveSearch(query, selectedFilters)} className={clsx('cursor-pointer w-6 h-6 ml-2')} />
+      )} */}
     </div>
   );
 };

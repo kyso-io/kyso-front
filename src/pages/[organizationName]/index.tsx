@@ -14,7 +14,6 @@ import { useCallback, useEffect, useState } from 'react';
 import ActivityFeedComponent from '../../components/ActivityFeed';
 import InfoActivity from '../../components/InfoActivity';
 import ManageUsers from '../../components/ManageUsers';
-import PureSideOverlayPanel from '../../components/PureSideOverlayPanel';
 import ReportBadge from '../../components/ReportBadge';
 import { useInterval } from '../../hooks/use-interval';
 import type { CommonData } from '../../types/common-data';
@@ -390,9 +389,7 @@ const Index = ({ commonData }: Props) => {
 
   return (
     <div className="flex flex-row space-x-8 p-2">
-      <PureSideOverlayPanel key="teams-list" cacheKey="teams-list">
-        <ChannelList basePath={router.basePath} commonData={commonData} />
-      </PureSideOverlayPanel>
+      <ChannelList basePath={router.basePath} commonData={commonData} />
       <div className="w-4/6">
         <div className="flex items-center w justify-between p-2">
           <div className="shrink-0 flex flex-row items-center space-x-2">
