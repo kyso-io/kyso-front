@@ -231,11 +231,12 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                     {filteredMembers.map((member: Member, index: number) => {
                       let roles: string | undefined = '';
 
-                      if (!commonData.team) {
+                      if (member.team_roles && member.team_roles.length > 0) {
+                        roles = `${teamRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
+                      } else {
                         roles = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
-                      } else if (member.team_roles && member.team_roles.length > 0) {
-                        roles += `${teamRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
                       }
+
                       return (
                         <li
                           key={member.id}
