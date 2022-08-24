@@ -111,7 +111,7 @@ const UnpureReportRender = (props: Props) => {
       };
       getReportInlineComments();
     }
-  }, [report.id]);
+  }, [report.id, fileToRender.id]);
 
   const createInlineComment = async (cell_id: string, user_ids: string[], text: string) => {
     try {
@@ -274,27 +274,29 @@ const UnpureReportRender = (props: Props) => {
       {!fileToRender.content && <div />}
       {!fileToRender.isLoading && fileToRender.path.endsWith('.ipynb') && render}
       {!fileToRender.isLoading && !fileToRender.path.endsWith('.ipynb') && (
-        <div className="flex flex-row">
-          <div className={clsx('w-9/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
-          <div className="w-3/12 p-2">
-            <PureComments
-              commonData={commonData}
-              report={report}
-              channelMembers={channelMembers}
-              hasPermissionCreateComment={enabledCreateInlineComment}
-              hasPermissionDeleteComment={enabledDeleteInlineComment}
-              comments={inlineComments}
-              onDeleteComment={(commentId: string) => {
-                deleteInlineComment(commentId);
-              }}
-              submitComment={(text: string, user_ids: string[], commentId: string) => {
-                if (!commentId) {
-                  createInlineComment(fileToRender.id, user_ids, text);
-                } else {
-                  editInlineComment(commentId, user_ids, text);
-                }
-              }}
-            />
+        <div className="flex flex-col">
+          <div className="flex flex-row">
+            <div className={clsx('w-9/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
+            <div className="w-3/12 p-2 border-l">
+              <PureComments
+                commonData={commonData}
+                report={report}
+                channelMembers={channelMembers}
+                hasPermissionCreateComment={enabledCreateInlineComment}
+                hasPermissionDeleteComment={enabledDeleteInlineComment}
+                comments={inlineComments}
+                onDeleteComment={(commentId: string) => {
+                  deleteInlineComment(commentId);
+                }}
+                submitComment={(text: string, user_ids: string[], commentId: string) => {
+                  if (!commentId) {
+                    createInlineComment(fileToRender.id, user_ids, text);
+                  } else {
+                    editInlineComment(commentId, user_ids, text);
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
       )}

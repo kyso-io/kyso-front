@@ -58,7 +58,6 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   //     refreshReport();
   //   }
   // }, [commonData?.team, router.query?.reportName]);
-
   useEffect(() => {
     if (!reportData || !reportData.report) {
       return;
@@ -80,7 +79,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
       setParentTree(pt);
     };
     getData();
-  }, [reportData?.report, router.query]);
+  }, [reportData?.report?.id, router.query.path]);
 
   const refreshReport = async () => {
     const rd: ReportData = await getReport({ commonData, reportName: router.query.reportName as string });
@@ -134,6 +133,9 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     if (!reportData || !reportData.report || !selfTree) {
       return;
     }
+
+    console.log({ selfTree });
+
     const getData = async () => {
       const mainFile = currentPath === '' ? reportData.report!.main_file : undefined;
       const validFiles: GithubFileHash[] = selfTree.filter((item: GithubFileHash) => item.type === 'file');
@@ -150,7 +152,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
             id: validFile!.id,
             path_scs: validFile!.path_scs,
             percentLoaded: 0,
-            isLoading: false,
+            isLoading: !validFile!.path.endsWith('.html'),
             content: null,
           };
         }
@@ -181,7 +183,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
       }
     };
     getData();
-  }, [selfTree, router.query?.path]);
+  }, [selfTree]);
 
   useEffect(() => {
     if (commonData) {
@@ -444,6 +446,8 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
 
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
 
+  console.log(fileToRender?.id, fileToRender?.path, fileToRender?.isLoading);
+
   return (
     <div>
       {/* <div className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-dashed border-y-inherit border-white border-inherit border-transparent inline mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300 w-5 h-5"></div> */}
@@ -503,7 +507,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                 </PureReportHeader>
               </div>
 
-              <div className="border-y p-4">
+              <div className="border-y p-0">
                 {fileToRender && onlyVisibleCell && (
                   <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
                     Showing only this cell.
@@ -524,6 +528,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
 
                 {fileToRender && (
                   <UnpureReportRender
+                    key={fileToRender.id}
                     fileToRender={fileToRender}
                     report={report}
                     channelMembers={channelMembers}
@@ -536,7 +541,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                   />
                 )}
 
-                {!fileToRender && <div className="prose p-3">Please choose a file in the filebrowser on the left.</div>}
+                {!fileToRender && <div className="prose p-2">Please choose a file in the filebrowser on the left.</div>}
               </div>
 
               {hasPermissionReadComment && (
