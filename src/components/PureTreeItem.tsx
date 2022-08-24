@@ -1,6 +1,6 @@
 import { faChrome, faJediOrder, faJs, faLinux, faMarkdown, faPython } from '@fortawesome/free-brands-svg-icons';
-import { faFolder } from '@fortawesome/pro-solid-svg-icons';
 import { faFile, faFileCsv, faFileImage, faFilePdf, faText } from '@fortawesome/pro-light-svg-icons';
+import { faFolder } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Link from 'next/link';
 
@@ -101,9 +101,8 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
             {extension !== 'ipynb' && <FontAwesomeIcon style={{ marginRight: 8 }} icon={icon} />}
           </span>
           <span className="text-gray-500">{treeItem.path.split('/').reverse()[0]}</span>
-          {/* </a> */}
         </div>
-        <div>{isMainFile && <div className="text-sm text-gray-500">main</div>}</div>
+        {isMainFile && <div className="text-sm text-gray-500 ml-3">main</div>}
       </a>
     </Link>
   );
