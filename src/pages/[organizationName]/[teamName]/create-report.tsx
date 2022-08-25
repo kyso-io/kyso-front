@@ -444,6 +444,12 @@ const CreateReport = ({ commonData }: Props) => {
                 selected={selectedTags}
                 setSelected={(newTags: string[]) => setTagsDelay(newTags)}
               />
+
+              {selectedTags.map((tag) => (
+                <div key={tag} className="text-xs rounded bg-slate-100 p-1">
+                  {tag}
+                </div>
+              ))}
             </div>
           </div>
         </div>
