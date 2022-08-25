@@ -1,5 +1,5 @@
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { ChatAltIcon, TagIcon } from '@heroicons/react/solid';
+import { ChatAltIcon, ChatIcon, TagIcon, DocumentReportIcon, ChatAlt2Icon, UserGroupIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, Comment, Discussion, NormalizedResponseDTO, Organization, Relations, Report, Tag, Team, User } from '@kyso-io/kyso-model';
 import { ActionEnum, EntityEnum } from '@kyso-io/kyso-model';
 import moment from 'moment';
@@ -28,8 +28,14 @@ const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => 
   return (
     <React.Fragment>
       <div className="relative">
-        <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
-
+        <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
+          <div className="flex -space-x-1 overflow-hidden items-end">
+            <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+            <div className={`h-4 w-4 rounded-full -ml-2`}>
+              <ChatIcon className="h-4 w-4 text-orange-400 -ml-2 bg-white rounded-full" />
+            </div>
+          </div>
+        </span>
         <span className="absolute -bottom-0.5 -right-1 bg-white rounded-tl px-0.5 py-px">
           <ChatAltIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
         </span>
@@ -113,8 +119,15 @@ const ActivityFeedReport = ({ activityFeed, relations }: ActivityFeedProps) => {
   return (
     <React.Fragment>
       <div>
-        <div className="relative px-1">
-          <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+        <div className="relative">
+          <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
+            <div className="flex -space-x-1 overflow-hidden items-end">
+              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+              <div className={`h-4 w-4 rounded-full -ml-2`}>
+                <DocumentReportIcon className="h-4 w-4 text-blue-500 -ml-2 bg-white rounded-full" />
+              </div>
+            </div>
+          </span>
         </div>
       </div>
       <div className="min-w-0 flex-1 py-1.5">
@@ -154,8 +167,15 @@ const ActivityFeedDiscussion = ({ activityFeed, relations }: ActivityFeedProps) 
   return (
     <React.Fragment>
       <div>
-        <div className="relative px-1">
-          <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+        <div className="relative">
+          <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
+            <div className="flex -space-x-1 overflow-hidden items-end">
+              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+              <div className={`h-4 w-4 rounded-full -ml-2`}>
+                <ChatAlt2Icon className="h-4 w-4 text-cyan-300 -ml-2 bg-white rounded-full" />
+              </div>
+            </div>
+          </span>
         </div>
       </div>
       <div className="min-w-0 flex-1 py-1.5">
@@ -189,8 +209,15 @@ const ActivityFeedOrganization = ({ activityFeed, relations }: ActivityFeedProps
   return (
     <React.Fragment>
       <div>
-        <div className="relative px-1">
-          <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+        <div className="relative">
+          <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
+            <div className="flex -space-x-1 overflow-hidden items-end">
+              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+              <div className={`h-4 w-4 rounded-full -ml-2`}>
+                <UserGroupIcon className="h-4 w-4 text-purple-500 -ml-2 bg-white rounded-full" />
+              </div>
+            </div>
+          </span>
         </div>
       </div>
       <div className="min-w-0 flex-1 py-1.5">
@@ -216,8 +243,15 @@ const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
   return (
     <React.Fragment>
       <div>
-        <div className="relative px-1">
-          <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+        <div className="relative">
+          <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
+            <div className="flex -space-x-1 overflow-hidden items-end">
+              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+              <div className={`h-4 w-4 rounded-full -ml-2`}>
+                <UserGroupIcon className="h-4 w-4 text-purple-500 -ml-2 bg-white rounded-full" />
+              </div>
+            </div>
+          </span>
         </div>
       </div>
       <div className="min-w-0 flex-1 py-1.5">
@@ -295,7 +329,7 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
             return (
               <li key={af.id}>
                 <div className="relative pb-8">
-                  {index < activityFeed.data.length - 1 && <span className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />}
+                  {index < activityFeed.data.length - 1 && <span className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-300" aria-hidden="true" />}
                   <div className="relative flex items-start space-x-3">
                     {af.entity === EntityEnum.COMMENT && <ActivityFeedComment activityFeed={af} relations={activityFeed.relations!} />}
                     {af.entity === EntityEnum.DISCUSSION && <ActivityFeedDiscussion activityFeed={af} relations={activityFeed.relations!} />}
