@@ -34,7 +34,7 @@
     "noEmit": true,
     "isolatedModules": true,
     "incremental": true,
-
+    "downlevelIteration": true,
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],

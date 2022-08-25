@@ -468,15 +468,15 @@ const Index = ({ commonData }: Props) => {
   }
 
   return (
-    <div className="flex flex-row space-x-8 p-2">
+    <div className="flex flex-row space-x-8 p-4">
       <div className="w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
-      <div className="w-4/6 flex flex-col space-y-8 mt-2">
+      <div className="w-4/6 flex flex-col space-y-4">
         {commonData.team && (
           <div className="flex flex-row w-full justify-between space-x-2">
             <div className="w-3/6 flex flex-col justify-between">
-              <div className="text-xl font-medium">#{commonData.team.display_name}</div>
+              <div className="text-xl font-medium">{commonData.team.display_name}</div>
               <div className="text-md">{commonData.team.bio}</div>
             </div>
             <div className="w-3/6 flex flex-row justify-end items-center space-x-2">
@@ -497,11 +497,7 @@ const Index = ({ commonData }: Props) => {
             </div>
           </div>
         )}
-        {teamInfo && (
-          <div className="flex items-center justify-between p-2">
-            <InfoActivity info={teamInfo} />
-          </div>
-        )}
+        {teamInfo && <InfoActivity info={teamInfo} />}
 
         <ReportsSearchBar
           members={members}

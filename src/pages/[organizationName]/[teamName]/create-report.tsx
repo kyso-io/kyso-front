@@ -308,12 +308,48 @@ const CreateReport = ({ commonData }: Props) => {
   }, []);
 
   return (
-    <div className="p-2">
+    <div className="p-4">
       <div className="flex flex-row items-center">
         <div className="w-1/6"></div>
         <div className="w-4/6">
           <div className="flex flex-row items-center justify-between">
-            <div className="flex flex-row items-center justify-between"></div>
+            <div className="flex flex-col">
+              <textarea
+                style={{
+                  height: '55px',
+                  border: 'none',
+                  resize: 'none',
+                  outline: 'none',
+                  overflow: 'auto',
+                  WebkitBoxShadow: 'none',
+                  boxShadow: 'none',
+                }}
+                value={title || ''}
+                onChange={(e) => {
+                  setTitleDelay(e.target.value);
+                }}
+                placeholder="Title"
+                className="p-0 focus:shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900"
+              />
+              {title && slugify(title)}
+              <textarea
+                style={{
+                  height: '38px',
+                  border: 'none',
+                  resize: 'none',
+                  outline: 'none',
+                  overflow: 'auto',
+                  WebkitBoxShadow: 'none',
+                  boxShadow: 'none',
+                }}
+                value={description || ''}
+                placeholder="Description"
+                onChange={(e) => {
+                  setDescriptionDelay(e.target.value);
+                }}
+                className="p-0 focus:shadow-sm focus:ring-indigo-500 focus:border-indigo-500  block  w-full h-full focus:w-full  border-white border-0 text-gray-500 sm:text-sm rounded-md"
+              />
+            </div>
             <div className="flex flex-col">
               <div className="flex flex-row items-center space-x-2">
                 <div className="mr-2">posting into</div>
@@ -387,61 +423,26 @@ const CreateReport = ({ commonData }: Props) => {
 
           {commonData.team && !hasPermissionCreateReport && <div className="ml-3 mb-2 text-xs text-red-500">Sorry, you do not have permission to post into this channel, please select another.</div>}
 
-          <div className="flex flex-row justify-between">
-            <div className="flex flex-col">
-              <textarea
-                style={{
-                  height: '55px',
-                  border: 'none',
-                  resize: 'none',
-                  outline: 'none',
-                  overflow: 'auto',
-                  WebkitBoxShadow: 'none',
-                  boxShadow: 'none',
-                }}
-                value={title || ''}
-                onChange={(e) => {
-                  setTitleDelay(e.target.value);
-                }}
-                placeholder="Title"
-                className="p-0 focus:shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900"
-              />
-              {title && slugify(title)}
-              <textarea
-                style={{
-                  height: '38px',
-                  border: 'none',
-                  resize: 'none',
-                  outline: 'none',
-                  overflow: 'auto',
-                  WebkitBoxShadow: 'none',
-                  boxShadow: 'none',
-                }}
-                value={description || ''}
-                placeholder="Description"
-                onChange={(e) => {
-                  setDescriptionDelay(e.target.value);
-                }}
-                className="p-0 focus:shadow-sm focus:ring-indigo-500 focus:border-indigo-500  block  w-full h-full focus:w-full  border-white border-0 text-gray-500 sm:text-sm rounded-md"
-              />
-            </div>
-
+          <div className="flex flex-row justify-between mb-2">
             <div className="flex flex-row items-center space-x-2">
-              <TagsFilterSelector
-                filter={(query) => {
-                  console.log(2);
-                  filterTags(query);
-                }}
-                initial={allowedTags}
-                selected={selectedTags}
-                setSelected={(newTags: string[]) => setTagsDelay(newTags)}
-              />
-
               <MemberFilterSelector
                 initial={channelMembers}
                 selected={selectedPeople}
                 setSelected={(newSelectedPeople: TeamMember[]) => setSelectedPeopleDelay(newSelectedPeople)}
                 emptyMessage={commonData.team ? 'No authors' : 'First select a channel to add authors'}
+              />
+
+              <TagsFilterSelector
+                filter={(query) => {
+                  filterTags(query);
+                }}
+                onAddTags={(newTags) => {
+                  const newAllowedTags = [...new Set([...allowedTags, ...newTags])];
+                  setAllowedTags(newAllowedTags);
+                }}
+                initial={allowedTags}
+                selected={selectedTags}
+                setSelected={(newTags: string[]) => setTagsDelay(newTags)}
               />
             </div>
           </div>
