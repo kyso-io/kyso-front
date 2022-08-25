@@ -48,7 +48,7 @@ const PureReportBadge = (props: IPureReportBadgeProps) => {
               <div className="grow flex space-x-3">
                 <div className="min-w-0 flex-1">
                   <a href={reportHref}>
-                    <h2 id={`report-title-${report.id}`} className="text-base text-indigo-500">
+                    <h2 id={`report-title-${report.id}`} className="text-base text-indigo-700">
                       {reportTitle && reportTitle.length >= 100 && `${reportTitle.slice(0, 100)}...`}
                       {reportTitle && reportTitle.length < 100 && `${reportTitle.slice(0, 100)}`}
                     </h2>

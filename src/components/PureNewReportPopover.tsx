@@ -29,7 +29,7 @@ const PureNewReportPopover = (props: Props) => {
       <Popover.Panel className="min-w-[400px] origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none">
         <div className="flex flex-col ">
           <div className="p-4 border-b">
-            <a href={createLink} className="hover:text-blue-800">
+            <a href={createLink} className="hover:text-indigo-700">
               <div className=" flex flex-row items-center space-x-2">
                 <PencilAltIcon className="w-5 h-5" />
                 <div className="text-md font-medium">Create new report in UI</div>

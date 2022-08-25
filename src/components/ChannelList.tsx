@@ -27,7 +27,7 @@ const ChannelList = (props: Props) => {
   }
 
   return (
-    <div className="w-1/6">
+    <div>
       <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
         Channels
       </h3>
