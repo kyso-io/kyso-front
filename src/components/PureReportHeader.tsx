@@ -70,7 +70,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               <span className="sr-only">upvotes</span>
             </button>
           )}
-          <PureShareButton report={report} basePath={router.basePath} commonData={commonData} />
+          <PureShareButton report={report} basePath={router.basePath} commonData={commonData} withText={true} color={'text-indigo-500'} />
         </div>
 
         <div className="flex flex-row items-center justify-end w-full">

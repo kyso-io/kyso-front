@@ -130,7 +130,7 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
               </div>
             )}
           </div>
-          <div>
+          <div className="border-b">
             <PureTopTabs tabs={tabs} onChangeTab={onChangeTab} currentTab={currentTab} marginTopSmall={'mt-3'} marginTopBig={'mt-10'} />
           </div>
         </div>

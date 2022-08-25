@@ -1,15 +1,17 @@
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { BookmarkIcon, ChatIcon } from '@heroicons/react/outline';
-import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ShareIcon, ThumbUpIcon } from '@heroicons/react/solid';
+import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ThumbUpIcon } from '@heroicons/react/solid';
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
 import { Fragment, useMemo } from 'react';
+import router from 'next/router';
 import checkPermissions from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
+import PureShareButton from './PureShareButton';
 
 const MAX_LENGTH_DESCRIPTION: number = 200;
 
@@ -66,16 +68,18 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
             <p className="text-sm text-gray-500 pt-3">{description}</p>
           </a>
           <div className="absolute bottom-2 right-0">
-            {report.report_type && <span className="bg-orange-100 text-orange-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-orange-200 dark:text-orange-900">{report.report_type}</span>}
+            {report.report_type && (
+              <span className="bg-orange-100 text-orange-800 text-xs font-semibold mr-2 px-2.5 py-1 rounded-xl dark:bg-orange-200 dark:text-orange-900">{report.report_type}</span>
+            )}
             {report.tags.map((tag: string, indexTag: number) => (
-              <span key={indexTag} className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">
+              <span key={indexTag} className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-1 rounded-xl dark:bg-blue-200 dark:text-blue-800">
                 {tag}
               </span>
             ))}
           </div>
         </div>
         {commonData.user && (
-          <div className="absolute top-3 right-0">
+          <div className="absolute top-0 right-0">
             <Menu as="div" className="relative inline-block text-left">
               <Menu.Button>{report.pin || report.user_pin ? <BookmarkIconSolid className="h-7 w-7 text-indigo-600 -mt-1" /> : <BookmarkIcon className="h-7 w-10 text-indigo-600 -mt-1" />}</Menu.Button>
               {toggleUserPinReport && toggleGlobalPinReport && (
@@ -121,19 +125,19 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
       <div className="flex items-center p-2 border-t">
         <div className="grow flex flex-row items-center text-gray-500 text-xs space-x-2">
           {authors && <PureAvatarGroup data={authors}></PureAvatarGroup>}
-          <span>{moment(report.created_at).format('MMMM DD, YYYY')}</span>
+          <span className="pr-3">{moment(report.created_at).format('MMMM DD, YYYY')}</span>
           <EyeIcon className="shrink-0 h-5 w-5 text-gray-500" />
-          <span>{report.views}</span>
-          <ChatIcon className="shrink-0 h-5 w-5 text-gray-500" />
+          <span className="pr-3">{report.views}</span>
+          <ChatIcon className="shrink-0 h-5 w-5 text-orange-500" />
           <span>{report.comments.length}</span>
         </div>
         <div className="flex flex-row items-center text-gray-500 text-xs space-x-4">
-          <ShareIcon className="shrink-0 h-5 w-5" />
+          <PureShareButton report={report} basePath={router.basePath} commonData={commonData} color={'text-gray-500'} />
           <div className="flex flex-row items-center space-x-2">
-            <span>{report.stars}</span>
+            <span className="pl-3">{report.stars}</span>
             <ThumbUpIcon
               className={clsx('shrink-0 h-5 w-5 ', { 'cursor-pointer': commonData.user !== null })}
-              color={report.mark_as_star_by_user ? 'blue' : ''}
+              color={report.mark_as_star_by_user ? '#5850ec' : ''}
               onClick={onClickToggleUserStarReport}
             />
           </div>
