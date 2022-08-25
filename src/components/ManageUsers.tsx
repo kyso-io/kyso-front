@@ -248,7 +248,11 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                             <div className="flex-1" style={{ marginLeft: 10 }}>
                               <p className="text-xs font-medium text-gray-900 truncate">
                                 {member.display_name}
-                                {commonData.user?.id === member.id ? ' (You)' : ''}
+                                {commonData.user?.id === member.id ? (
+                                  <span className="bg-orange-100 text-orange-800 text-xs font-semibold mr-2 px-2.5 py-1 rounded-xl dark:bg-orange-200 dark:text-orange-900">You</span>
+                                ) : (
+                                  ''
+                                )}
                               </p>
                               <p className="text-xs text-gray-500 truncate">{roles}</p>
                             </div>
