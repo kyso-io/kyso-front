@@ -71,7 +71,7 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
         <div className="sm:flex sm:items-center sm:justify-between px-10">
           <div className="-mt-12 sm:-mt-16 sm:flex sm:items-end sm:space-x-5">
             <div className="flex" style={{ zIndex: 1 }}>
-              <PureAvatar src={userProfile.avatar_url} title={userProfile.display_name} size={TailwindHeightSizeEnum.H24} />
+              <PureAvatar src={userProfile.avatar_url} title={userProfile.display_name} size={TailwindHeightSizeEnum.H20} />
             </div>
           </div>
           {isUserLoggedIn && (

@@ -5,13 +5,14 @@ import { useState } from 'react';
 
 type ITagsFilterSelector = {
   filter: (query: string) => void;
+  onAddTags: (newTags: string[]) => void;
   initial: string[];
   setSelected: (selected: string[]) => void;
   selected: string[];
 };
 
 const TagsFilterSelector = (props: ITagsFilterSelector) => {
-  const { initial = [], setSelected, selected = [], filter } = props;
+  const { initial = [], setSelected, selected = [], onAddTags } = props;
   const [query, setQuery] = useState('');
 
   const filtered =
@@ -27,6 +28,8 @@ const TagsFilterSelector = (props: ITagsFilterSelector) => {
         value={selected}
         onChange={(newlySelected: string[]) => {
           setSelected(newlySelected);
+          onAddTags(newlySelected);
+          setQuery('');
         }}
         multiple
       >
@@ -35,8 +38,6 @@ const TagsFilterSelector = (props: ITagsFilterSelector) => {
             className="w-44 rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
             onChange={(event) => {
               setQuery(event.target.value);
-              console.log(1);
-              filter(event.target.value);
             }}
             placeholder={selected.length > 0 ? selected.join(', ') : 'Add tags'}
           />
@@ -45,7 +46,12 @@ const TagsFilterSelector = (props: ITagsFilterSelector) => {
           </Combobox.Button>
 
           <Combobox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-0 border ro-5 focus:outline-none sm:text-sm">
-            {filtered.map((tag) => (
+            {query.length > 0 && (
+              <Combobox.Option value={query} className={({ active }) => classNames('relative cursor-default select-none py-2 pl-3 pr-9', active ? 'bg-indigo-600 text-white' : 'text-gray-900')}>
+                {'Create "{query}"'}
+              </Combobox.Option>
+            )}
+            {filtered.sort().map((tag) => (
               <Combobox.Option
                 key={tag}
                 value={tag}
