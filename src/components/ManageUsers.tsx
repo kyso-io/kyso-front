@@ -226,7 +226,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           className={clsx(
                             'p-2 hover:bg-gray-100',
                             !commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles) ? 'cursor-pointer' : 'cursor-default',
-                            commonData.user?.id === member.id ? 'border border-yellow-200 rounded' : '',
+                            commonData.user?.id === member.id ? 'border rounded' : '',
                           )}
                           onClick={() => {
                             if (!commonData.user) {
