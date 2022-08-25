@@ -10,10 +10,12 @@ type Props = {
   commonData: CommonData;
   report: ReportDTO;
   basePath: string;
+  color: string | 'text-indigo-500';
+  withText?: boolean;
 };
 
 const PureShareButton = (props: Props) => {
-  const { basePath, commonData, report } = props;
+  const { basePath, commonData, report, color, withText } = props;
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -31,9 +33,13 @@ const PureShareButton = (props: Props) => {
           setOpen(true);
         }}
       >
-        <ShareIcon className={classNames('h-5 w-5', 'text-indigo-500')} aria-hidden="true" />
-        <span className="text-gray-900">Share</span>
-        <span className="sr-only">Share</span>
+        <ShareIcon className={classNames('h-5 w-5', color)} aria-hidden="true" />
+        {withText && (
+          <>
+            <span className="text-gray-900">Share</span>
+            <span className="sr-only">Share</span>
+          </>
+        )}
       </button>
       <Transition.Root show={open} as={Fragment}>
         <Dialog

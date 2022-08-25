@@ -1,15 +1,17 @@
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { BookmarkIcon, ChatIcon } from '@heroicons/react/outline';
-import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ShareIcon, ThumbUpIcon } from '@heroicons/react/solid';
+import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ThumbUpIcon } from '@heroicons/react/solid';
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
 import { Fragment, useMemo } from 'react';
+import router from 'next/router';
 import checkPermissions from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
+import PureShareButton from './PureShareButton';
 
 const MAX_LENGTH_DESCRIPTION: number = 200;
 
@@ -130,7 +132,7 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
           <span>{report.comments.length}</span>
         </div>
         <div className="flex flex-row items-center text-gray-500 text-xs space-x-4">
-          <ShareIcon className="shrink-0 h-5 w-5" />
+          <PureShareButton report={report} basePath={router.basePath} commonData={commonData} color={'text-gray-500'} />
           <div className="flex flex-row items-center space-x-2">
             <span className="pl-3">{report.stars}</span>
             <ThumbUpIcon
