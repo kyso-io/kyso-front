@@ -1,11 +1,8 @@
 /* eslint no-empty: "off" */
 import ChannelList from '@/components/ChannelList';
 import Pagination from '@/components/Pagination';
-import PureAvatar from '@/components/PureAvatar';
 import PureNewReportPopover from '@/components/PureNewReportPopover';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -416,8 +413,10 @@ const Index = ({ commonData }: Props) => {
       <ChannelList basePath={router.basePath} commonData={commonData} />
       <div className="w-4/6">
         <div className="flex items-center w justify-between p-2">
-          <div className="shrink-0 flex flex-row items-center space-x-2">
-            <PureAvatar src={commonData.organization?.avatar_url || ''} title={commonData.organization?.display_name || ''} size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XL} />
+          <div className="shrink-0 flex flex-row items-end space-x-2">
+            {commonData.organization?.avatar_url && (
+              <img className="object-cover" style={{ width: 52, height: 52 }} src={commonData.organization.avatar_url} alt={commonData.organization.display_name} />
+            )}
             <h1 className="text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
           </div>
           <div className="flex items-center space-x-2">
