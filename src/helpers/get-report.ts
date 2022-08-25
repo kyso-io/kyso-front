@@ -22,7 +22,10 @@ export const getReport = async ({ commonData, reportName }: Props): Promise<Repo
     return { report: result.data, authors, errorReport: null };
   } catch (e: any) {
     let errorReport: string | null = null;
-    if (e.response.data.statusCode === 403) {
+    if (!e.response) {
+      errorReport = `An unkown error occurred.`;
+      console.error(e);
+    } else if (e.response.data.statusCode === 403) {
       errorReport = `You don't have permission to access this report`;
     } else if (e.response.data.statusCode === 404) {
       errorReport = 'The report does not exist';

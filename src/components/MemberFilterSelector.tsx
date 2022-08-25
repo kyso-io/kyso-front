@@ -26,8 +26,8 @@ const MemberFilterSelector = (props: IMemberFilterSelector) => {
         });
 
   return (
-    <>
-      <div className="flex -space-x-1 overflow-hidden">
+    <div className="flex flex-row items-center">
+      <div className="flex flex-row overflow-hidden">
         {selected?.map((person: TeamMember) => (
           <PureAvatar key={person.id} src={person?.avatar_url} title={person.nickname} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
         ))}
@@ -41,7 +41,7 @@ const MemberFilterSelector = (props: IMemberFilterSelector) => {
       >
         <div className="relative">
           <Combobox.Input
-            className="w-44 rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+            className="w-44 rounded-md border border-gray-300 bg-white shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
             onChange={(event) => {
               setQuery(event.target.value);
             }}
@@ -86,7 +86,7 @@ const MemberFilterSelector = (props: IMemberFilterSelector) => {
           </Combobox.Options>
         </div>
       </Combobox>
-    </>
+    </div>
   );
 };
 

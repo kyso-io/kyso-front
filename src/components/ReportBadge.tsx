@@ -53,11 +53,11 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
   }, [report.description]);
 
   return (
-    <div className={classNames(report.pin || report.user_pin ? ' border border-indigo-600' : '', 'bg-white rounded-lg shadow mb-5')} style={{ height: 270 }}>
-      <div className="relative bg-white rounded-lg shadow-sm flex space-x-3">
+    <div className={classNames(report.pin || report.user_pin ? ' border border-indigo-600' : '', 'bg-white rounded border')}>
+      <div className="relative flex space-x-2">
         <div className="shrink-0">
           <div className="bg-stripes-sky-blue rounded-tl-lg text-center overflow-hidden mx-auto border-r border-r-gray-200">
-            <img className="object-cover" style={{ width: 224, height: 224 }} src={reportImage} alt="report preview image" />
+            <img className="object-cover" style={{ width: 200, height: 200 }} src={reportImage} alt="report preview image" />
           </div>
         </div>
         <div className="flex-1 min-w-0 py-3 pr-3 relative">
@@ -75,7 +75,7 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
           </div>
         </div>
         {commonData.user && (
-          <div className="absolute top-0 right-0">
+          <div className="absolute top-3 right-0">
             <Menu as="div" className="relative inline-block text-left">
               <Menu.Button>{report.pin || report.user_pin ? <BookmarkIconSolid className="h-7 w-7 text-indigo-600 -mt-1" /> : <BookmarkIcon className="h-7 w-10 text-indigo-600 -mt-1" />}</Menu.Button>
               {toggleUserPinReport && toggleGlobalPinReport && (
@@ -118,23 +118,26 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
           </div>
         )}
       </div>
-      <div className="-mt-px flex items-center px-2 py-3">
-        <div className="grow flex flex-row items-center">
+      <div className="flex items-center p-2 border-t">
+        <div className="grow flex flex-row items-center text-gray-500 text-xs space-x-2">
           {authors && <PureAvatarGroup data={authors}></PureAvatarGroup>}
-
-          <span className="text-gray-500 text-sm pl-4 pr-5">{moment(report.created_at).format('MMMM DD, YYYY')}</span>
-          <EyeIcon className="shrink-0 h-5 w-5 text-gray-600" />
-          <span className="text-gray-500 text-sm pl-4 pr-5">{report.views}</span>
-          <ChatIcon className="shrink-0 h-5 w-5 text-orange-400" />
-          <span className="text-gray-500 text-sm pl-4 pr-5">{report.comments.length}</span>
+          <span>{moment(report.created_at).format('MMMM DD, YYYY')}</span>
+          <EyeIcon className="shrink-0 h-5 w-5 text-gray-500" />
+          <span>{report.views}</span>
+          <ChatIcon className="shrink-0 h-5 w-5 text-gray-500" />
+          <span>{report.comments.length}</span>
         </div>
-        <ShareIcon className="shrink-0 h-5 w-5 text-gray-600 mr-1" />
-        <span className="text-gray-500 text-sm pl-5 pr-2 ">{report.stars}</span>
-        <ThumbUpIcon
-          className={clsx('shrink-0 h-5 w-5 text-gray-600', { 'cursor-pointer': commonData.user !== null })}
-          color={report.mark_as_star_by_user ? 'blue' : ''}
-          onClick={onClickToggleUserStarReport}
-        />
+        <div className="flex flex-row items-center text-gray-500 text-xs space-x-4">
+          <ShareIcon className="shrink-0 h-5 w-5" />
+          <div className="flex flex-row items-center space-x-2">
+            <span>{report.stars}</span>
+            <ThumbUpIcon
+              className={clsx('shrink-0 h-5 w-5 ', { 'cursor-pointer': commonData.user !== null })}
+              color={report.mark_as_star_by_user ? 'blue' : ''}
+              onClick={onClickToggleUserStarReport}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
