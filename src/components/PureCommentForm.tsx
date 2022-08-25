@@ -17,6 +17,7 @@ type IPureCommentForm = {
   userSelectorHook: (id?: string) => UserDTO | undefined;
   hasPermissionCreateComment?: boolean;
   channelMembers: TeamMember[];
+  defaultPlaceholderText?: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   submitComment: (newComment: any, parentComment?: any) => void;
 };
@@ -85,7 +86,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
     onSubmitted();
   };
 
-  let message = 'Write a new comment';
+  let message = props.defaultPlaceholderText ? props.defaultPlaceholderText : 'Write a new comment';
 
   if (comment?.id) {
     message = 'Edit comment';

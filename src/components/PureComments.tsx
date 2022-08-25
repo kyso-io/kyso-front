@@ -18,6 +18,7 @@ type IPureComments = {
   onDeleteComment: (id: string) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   submitComment: (newComment: any, parentComment?: any) => void;
+  defaultPlaceholderText?: string;
 };
 
 const PureComments = (props: IPureComments) => {
@@ -27,7 +28,14 @@ const PureComments = (props: IPureComments) => {
   return (
     <div className={classNames('w-full flex flex-col', parentComment?.id ? 'pl-10' : '')}>
       {!parentComment && commonData.user != null && (
-        <PureCommentForm user={commonData.user} report={report} userSelectorHook={userSelectorHook} submitComment={submitComment} channelMembers={channelMembers} />
+        <PureCommentForm
+          user={commonData.user}
+          report={report}
+          userSelectorHook={userSelectorHook}
+          submitComment={submitComment}
+          channelMembers={channelMembers}
+          defaultPlaceholderText={props.defaultPlaceholderText}
+        />
       )}
 
       <div className={clsx('flex flex-col', commonData.user === null ? 'mt-6' : '')}>
