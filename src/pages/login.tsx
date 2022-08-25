@@ -214,7 +214,7 @@ const Index = () => {
           </div>
         )}
         <div className="text-right">{error && <ErrorNotification message={error} />}</div>
-        <main className="flex lg:flex-row lg:space-y-0 space-y-6 flex-col grow items-center mx-auto max-w-[1400px] space-x-10">
+        <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col grow items-center mx-auto max-w-[1400px] space-x-10">
           <div className="prose grow max-w-none px-6 m-0">
             <h1>Kyso.io</h1>
             <p>Kyso.io offers free unlimited (private) repositories and unlimited collaborators.</p>
@@ -251,11 +251,11 @@ const Index = () => {
             </ul>
           </div>
 
-          <div className="prose min-w-[400px] flex flex-col space-y-4 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
-            <h2>Sign in to Kyso</h2>
+          <div className="prose min-w-[400px] flex flex-col space-y-2 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
+            <h2 className="my-0 mb-1">Sign in to Kyso</h2>
 
             {enableKysoAuth && (
-              <form className="flex flex-col space-y-4" method="post" action={`/api/login`} onSubmit={handleSubmit}>
+              <form className="flex flex-col space-y-2" method="post" action={`/api/login`} onSubmit={handleSubmit}>
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
                     Email
@@ -299,7 +299,7 @@ const Index = () => {
                   Forgot your password?
                 </a>
                 <button type="submit" className="border bg-white border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center text-bold">
-                  Log in now
+                  Log in
                 </button>
               </form>
             )}
