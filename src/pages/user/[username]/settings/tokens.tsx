@@ -21,7 +21,7 @@ const Index = ({ commonData }: Props) => {
         <div className="max-w-3xl mx-auto mt-24">
           <h1>User token settings: {commonData.user?.display_name}</h1>
           <p>
-            <a href={`${router.basePath}/user/${sluglifiedName}/settings`} className="text-indigo-500">
+            <a href={`${router.basePath}/user/${sluglifiedName}/settings`} className="text-indigo-700">
               Go to user settings
             </a>
           </p>

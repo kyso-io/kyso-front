@@ -65,7 +65,7 @@ const UnureFileHeader = (props: Props) => {
             {crumbs.map((crumb, index) => (
               <div key={`${crumb.href}+${index}`}>
                 <div className={classNames('flex items-center')}>
-                  <a href={crumb.href} className={classNames('hover:underline ml-0 text-sm', index + 1 === crumbs.length ? 'font-normal text-gray-500' : 'font-medium text-indigo-500')}>
+                  <a href={crumb.href} className={classNames('hover:underline ml-0 text-sm', index + 1 === crumbs.length ? 'font-normal text-gray-500' : 'font-medium text-indigo-700')}>
                     {crumb.path}
                   </a>
                   {index + 1 !== crumbs.length && (

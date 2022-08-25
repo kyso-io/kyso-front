@@ -79,9 +79,9 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
             <div className="mt-6 mb-1 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
               <button
                 type="button"
-                className="inline-flex justify-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex justify-center px-4 py-2 border border-indigo-700 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                <a href={`${router.basePath}/in/settings`} className="text-indigo-500">
+                <a href={`${router.basePath}/in/settings`} className="text-indigo-700">
                   Edit
                 </a>
               </button>
