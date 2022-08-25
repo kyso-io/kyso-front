@@ -51,4 +51,22 @@ export class Helper {
       (name.toLowerCase().endsWith('.png') || name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.jpeg') || name.toLowerCase().endsWith('.gif') || name.toLowerCase().endsWith('.svg'))
     );
   };
+
+  public static parseFileSizeStr = (fileSizeStr: string): number => {
+    const units: string[] = ['b', 'kb', 'mb', 'gb', 'tb', 'pb', 'eb', 'zb', 'yb'];
+    const size: number = parseFloat(fileSizeStr);
+    const unit: string = fileSizeStr.replace(/[^a-z]/gi, '').toLowerCase();
+    const power: number = units.indexOf(unit);
+    return Math.floor(size * 1024 ** power);
+  };
+
+  public static parseFileSize = (fileSize: number): string => {
+    const units: string[] = ['b', 'kb', 'mb', 'gb', 'tb', 'pb', 'eb', 'zb', 'yb'];
+    let power: number = 0;
+    while (fileSize > 1024) {
+      fileSize /= 1024;
+      power += 1;
+    }
+    return Math.round(fileSize * 100) / 100 + units[power]!;
+  };
 }
