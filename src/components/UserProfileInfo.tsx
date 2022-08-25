@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import PureTopTabs from '@/components/PureTopTabs';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faPeriod } from '@fortawesome/pro-solid-svg-icons';
@@ -71,7 +72,7 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
         <div className="sm:flex sm:items-center sm:justify-between px-10">
           <div className="-mt-12 sm:-mt-16 sm:flex sm:items-end sm:space-x-5">
             <div className="flex" style={{ zIndex: 1 }}>
-              <PureAvatar src={userProfile.avatar_url} title={userProfile.display_name} size={TailwindHeightSizeEnum.H20} />
+              <PureAvatar src={userProfile.avatar_url} title={userProfile.display_name} size={TailwindHeightSizeEnum.H20} textSize={TailwindFontSizeEnum.XXXXL} />
             </div>
           </div>
           {isUserLoggedIn && (

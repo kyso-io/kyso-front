@@ -10,6 +10,8 @@ import type { SearchUser, UserDTO } from '@kyso-io/kyso-model';
 import 'primeicons/primeicons.css'; // icons
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { useClickOutside } from '../hooks/use-click-outside';
 import type { ReportsFilter } from '../interfaces/reports-filter';
 import type { Member } from '../types/member';
@@ -46,7 +48,7 @@ const MenuItems = ({ filters, onSelect, onClickOutside }: MenuItemsProps) => {
               <div className={clsx(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'flex flex-row px-4 py-2 text-sm cursor-default')} onClick={() => onSelect(filter)}>
                 {filter?.image && (
                   <div className="mr-4">
-                    <PureAvatar src={filter.image as string} title={filter.label as string} />
+                    <PureAvatar src={filter.image as string} title={filter.label as string} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
                   </div>
                 )}
                 <span>{filter.label}</span>
@@ -115,7 +117,7 @@ const MenuMultipleItems = ({ filter, options, onClickOutside }: MenuMultipleItem
                 >
                   <div className="min-w-0 flex-1 text-sm">
                     <div className="flex flex-row">
-                      <div className="mr-4">{option?.image && <PureAvatar src={option.image} title={option.label} />}</div>
+                      <div className="mr-4">{option?.image && <PureAvatar src={option.image} title={option.label} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />}</div>
                       <label className="font-medium text-gray-700 select-none">{option.label}</label>
                     </div>
                   </div>

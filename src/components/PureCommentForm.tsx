@@ -4,6 +4,7 @@ import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-mode
 import classNames from '@/helpers/class-names';
 import { PureSpinner } from '@/components/PureSpinner';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import PureAvatar from './PureAvatar';
 
 type IPureCommentForm = {
@@ -113,7 +114,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
   const itemTemplate = (suggestion: TeamMember) => {
     return (
       <div className="flex flex-row items-center space-x-2 text-sm p-2 cursor-pointer hover:bg-blue-200">
-        <PureAvatar src={suggestion.avatar_url} title={suggestion.nameSlug} size={TailwindHeightSizeEnum.H5} />
+        <PureAvatar src={suggestion.avatar_url} title={suggestion.nameSlug} size={TailwindHeightSizeEnum.H5} textSize={TailwindFontSizeEnum.XS} />
         <div>{suggestion.nameSlug}</div>
       </div>
     );
