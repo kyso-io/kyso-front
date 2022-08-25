@@ -104,7 +104,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
     <>
       <div
         ref={hoverRef}
-        className={classNames('relative', open ? 'bg-gray-50' : 'border-r')}
+        className={classNames('relative', open ? 'bg-gray-50  -mb-10' : 'border-r  -mb-10')}
         style={{
           width: open ? `${width}px` : '',
         }}
