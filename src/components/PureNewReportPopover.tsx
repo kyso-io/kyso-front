@@ -46,7 +46,7 @@ const PureNewReportPopover = (props: Props) => {
 
             <div className="text-sm">
               1. Install the{' '}
-              <a href="https://cli.kyso.io/" target="_blank" rel="noreferrer">
+              <a className="underline" href="https://cli.kyso.io/" target="_blank" rel="noreferrer">
                 Kyso CLI
               </a>
             </div>
@@ -78,7 +78,7 @@ const PureNewReportPopover = (props: Props) => {
               </button>
             </div>
 
-            <div className="text-sm">2. Run kyso push</div>
+            <div className="text-sm">3. Run kyso push</div>
 
             <div className="my-2 max-w-lg flex rounded-md shadow-sm">
               <textarea rows={1} value={`kyso push`} className="flex-1 block w-full focus:ring-0 focus:outline-none min-w-0 rounded-md sm:text-sm border-gray-300" />
