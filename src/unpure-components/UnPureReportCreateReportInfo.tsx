@@ -1,4 +1,6 @@
 import PureAvatar from '@/components/PureAvatar';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { UserDTO, TeamMember } from '@kyso-io/kyso-model';
 import UnPureSuggestContentDropdown from './UnPureSuggestContentDropdown';
 import UnPureSuggestTagsListbox from './UnPureSuggestTagsListbox';
@@ -20,12 +22,12 @@ const UnPureReportCreateReportInfo = (props: UnPureReportCreateReportInfoProps) 
     <>
       <div className="md:grid md:grid-cols-1 md:gap-6">
         <div className="md:col-span-1 inline-flex items-center">
-          <PureAvatar src={user?.avatar_url} title={user?.display_name} />
+          <PureAvatar src={user?.avatar_url} title={user?.display_name} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
           <p className="mx-3 text-sm font-medium text-gray-700 group-hover:text-gray-900">{user?.display_name}</p>
           {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
           {selectedPeople?.map((person: any) => (
             <div key={person.id} className="flex -space-x-1 overflow-hidden">
-              <PureAvatar src={person?.avatar_url} title={person.nickname} />
+              <PureAvatar src={person?.avatar_url} title={person.nickname} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
             </div>
           ))}
           <UnPureSuggestContentDropdown label={'Add authors'} channelMembers={channelMembers} selectedPeople={selectedPeople} setSelectedPeople={setSelectedPeople} />

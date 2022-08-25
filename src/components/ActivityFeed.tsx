@@ -1,3 +1,4 @@
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { ChatAltIcon, ChatIcon, TagIcon, DocumentReportIcon, ChatAlt2Icon, UserGroupIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, Comment, Discussion, NormalizedResponseDTO, Organization, Relations, Report, Tag, Team, User } from '@kyso-io/kyso-model';
@@ -26,7 +27,7 @@ const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => 
       <div className="relative">
         <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
           <div className="flex -space-x-1 overflow-hidden items-end">
-            <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+            <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
             <div className={`h-4 w-4 rounded-full -ml-2`}>
               <ChatIcon className="h-4 w-4 text-orange-400 -ml-2 bg-white rounded-full" />
             </div>
@@ -115,7 +116,7 @@ const ActivityFeedReport = ({ activityFeed, relations }: ActivityFeedProps) => {
         <div className="relative">
           <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
             <div className="flex -space-x-1 overflow-hidden items-end">
-              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
               <div className={`h-4 w-4 rounded-full -ml-2`}>
                 <DocumentReportIcon className="h-4 w-4 text-blue-500 -ml-2 bg-white rounded-full" />
               </div>
@@ -163,7 +164,7 @@ const ActivityFeedDiscussion = ({ activityFeed, relations }: ActivityFeedProps) 
         <div className="relative">
           <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
             <div className="flex -space-x-1 overflow-hidden items-end">
-              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
               <div className={`h-4 w-4 rounded-full -ml-2`}>
                 <ChatAlt2Icon className="h-4 w-4 text-cyan-300 -ml-2 bg-white rounded-full" />
               </div>
@@ -205,7 +206,7 @@ const ActivityFeedOrganization = ({ activityFeed, relations }: ActivityFeedProps
         <div className="relative">
           <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
             <div className="flex -space-x-1 overflow-hidden items-end">
-              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
               <div className={`h-4 w-4 rounded-full -ml-2`}>
                 <UserGroupIcon className="h-4 w-4 text-purple-500 -ml-2 bg-white rounded-full" />
               </div>
@@ -239,7 +240,7 @@ const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
         <div className="relative">
           <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
             <div className="flex -space-x-1 overflow-hidden items-end">
-              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} />
+              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
               <div className={`h-4 w-4 rounded-full -ml-2`}>
                 <UserGroupIcon className="h-4 w-4 text-purple-500 -ml-2 bg-white rounded-full" />
               </div>

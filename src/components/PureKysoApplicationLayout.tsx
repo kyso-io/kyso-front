@@ -96,7 +96,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                             <div>
                               <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
                                 <span className="sr-only">Open user menu</span>
-                                <PureAvatar src={commonData.user.avatar_url} title={commonData.user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XL} />
+                                <PureAvatar src={commonData.user.avatar_url} title={commonData.user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
                               </Menu.Button>
                             </div>
                             <Transition
@@ -154,7 +154,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                   {commonData.user && (
                     <div className="flex items-center px-5">
                       <div className="shrink-0">
-                        <img className="object-cover h-10 w-10 rounded-full" src={commonData.user.avatar_url} alt="" />
+                        <PureAvatar src={commonData.user.avatar_url} title={commonData.user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XL} />
                       </div>
                       <div className="ml-3">
                         <div className="text-base font-medium text-white">{commonData.user.display_name}</div>

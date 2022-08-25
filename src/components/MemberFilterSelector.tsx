@@ -3,6 +3,8 @@ import classNames from '@/helpers/class-names';
 import { Combobox } from '@headlessui/react';
 import { SelectorIcon, CheckIcon } from '@heroicons/react/solid';
 import { useState } from 'react';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import PureAvatar from './PureAvatar';
 
 type IMemberFilterSelector = {
@@ -27,7 +29,7 @@ const MemberFilterSelector = (props: IMemberFilterSelector) => {
     <div className="flex flex-row items-center">
       <div className="flex flex-row overflow-hidden">
         {selected?.map((person: TeamMember) => (
-          <PureAvatar key={person.id} src={person?.avatar_url} title={person.nickname} />
+          <PureAvatar key={person.id} src={person?.avatar_url} title={person.nickname} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
         ))}
       </div>
       <Combobox
@@ -67,7 +69,7 @@ const MemberFilterSelector = (props: IMemberFilterSelector) => {
                     return (
                       <>
                         <div className="flex items-center">
-                          <PureAvatar key={person.id} src={person?.avatar_url} title={person.nickname} />
+                          <PureAvatar key={person.id} src={person?.avatar_url} title={person.nickname} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
                           <span className={classNames('ml-3 truncate', isSelected ? 'font-semibold' : 'font-medium')}>{person.nickname}</span>
                         </div>
 

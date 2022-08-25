@@ -556,6 +556,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                     hasPermissionDeleteComment={hasPermissionDeleteComment}
                     channelMembers={channelMembers}
                     submitComment={submitComment}
+                    defaultPlaceholderText="Write a new report's global comment"
                     userSelectorHook={(id?: string): UserDTO | undefined => {
                       return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
                     }}

@@ -20,18 +20,6 @@ import PureAvatarGroup from './PureAvatarGroup';
 const MAX_USERS_TO_SHOW = 5;
 const REMOVE_USER_VALUE = 'remove';
 
-const getInitials = (str: string) => {
-  if (!str) {
-    return '';
-  }
-  return str
-    .split(' ')
-    .map((name: string) => name[0])
-    .slice(0, 2)
-    .join('')
-    .toUpperCase();
-};
-
 const debouncedFetchData = debounce((cb: () => void) => {
   cb();
 }, 750);
@@ -158,11 +146,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
   let plusMembers = 0;
   if (filteredMembers.length > MAX_USERS_TO_SHOW) {
     plusMembers = filteredMembers.length - MAX_USERS_TO_SHOW;
-  }
-
-  let selectedUserInitials: string = '';
-  if (selectedUser && !selectedUser.avatar_url) {
-    selectedUserInitials = getInitials((selectedUser as UserDTO).display_name || (selectedUser as Member).username);
   }
 
   return (
@@ -385,10 +368,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                   <span className="my-4 text-xs font-medium text-gray-600">Select a person:</span>
                   <ul role="list" className="mt-1" style={{ maxHeight: 200, overflowY: 'scroll' }}>
                     {users.map((user: UserDTO) => {
-                      let initials: string = '';
-                      if (!user.avatar_url) {
-                        initials = getInitials(user.name);
-                      }
                       const member: Member | undefined = members.find((m: Member) => m.id === user.id);
                       let roles: string | undefined = '';
                       if (member) {
@@ -419,13 +398,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         >
                           <div className="flex items-center space-x-4">
                             <div className="shrink-0">
-                              {user.avatar_url ? (
-                                <PureAvatar src={user.avatar_url} title={user.display_name}></PureAvatar>
-                              ) : (
-                                <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-500">
-                                  <span className="text-xs font-medium leading-none text-white">{initials}</span>
-                                </span>
-                              )}
+                              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS}></PureAvatar>
                             </div>
                             <div className="flex-1" style={{ marginLeft: 10 }}>
                               <p className="text-xs font-medium text-gray-900 truncate">{user.display_name}</p>
@@ -442,13 +415,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                 <React.Fragment>
                   <div className="flex items-center space-x-4 mt-4">
                     <div className="shrink-0">
-                      {selectedUser.avatar_url ? (
-                        <PureAvatar src={selectedUser.avatar_url} title={selectedUser.display_name}></PureAvatar>
-                      ) : (
-                        <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-500">
-                          <span className="text-xs font-medium leading-none text-white">{selectedUserInitials}</span>
-                        </span>
-                      )}
+                      <PureAvatar src={selectedUser.avatar_url} title={selectedUser.display_name} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS}></PureAvatar>
                     </div>
                     <div className="flex-1" style={{ marginLeft: 10 }}>
                       <p className="text-xs font-medium text-gray-900 truncate">{(selectedUser as UserDTO).display_name || selectedUser.username}</p>

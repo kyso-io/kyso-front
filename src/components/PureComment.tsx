@@ -5,6 +5,7 @@ import PureAvatar from '@/components/PureAvatar';
 import PureCommentForm from '@/components/PureCommentForm';
 import PureComments from '@/components/PureComments';
 import { PureSpinner } from '@/components/PureSpinner';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
@@ -65,7 +66,7 @@ const PureComment = (props: IPureComment) => {
         />
       ) : (
         <div className="flex flex-row space-x-2">
-          {commentUser && <PureAvatar src={commentUser.avatar_url} title={commentUser.name} size={TailwindHeightSizeEnum.H8} />}
+          {commentUser && <PureAvatar src={commentUser.avatar_url} title={commentUser.name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />}
           <div className="rounded border w-full p-2">
             <div className="flex flex-row justify-between">
               <div className="pt-0 rounded-t flex flex-row items-center space-x-1 text-sm font-light text-gray-400">
