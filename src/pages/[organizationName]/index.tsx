@@ -395,7 +395,6 @@ const Index = ({ commonData }: Props) => {
           <div className="shrink-0 flex flex-row items-center space-x-2">
             <PureAvatar src={commonData.organization?.avatar_url || ''} title={commonData.organization?.display_name || ''} size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XL} />
             <h1 className="text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
-            <p className="text-sm font-medium text-gray-500">{commonData.organization?.bio}</p>
           </div>
           <div className="flex items-center space-x-2">
             <ManageUsers
@@ -443,6 +442,10 @@ const Index = ({ commonData }: Props) => {
       {commonData.user && (
         <div className="w-1/6">
           <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+          <div className="pt-10 border-t-gray-300 border-t-4 mt-2">
+            <h1 className="text-xl font-bold text-gray-800 mb-2">About {commonData.organization?.display_name}</h1>
+            <p className="text-sm text-gray-500 pt-3">{commonData.organization?.bio}</p>
+          </div>
         </div>
       )}
     </div>

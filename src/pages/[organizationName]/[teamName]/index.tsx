@@ -476,7 +476,7 @@ const Index = ({ commonData }: Props) => {
         {commonData.team && (
           <div className="flex flex-row w-full justify-between space-x-2">
             <div className="w-3/6 flex flex-col justify-between">
-              <div className="text-xl font-medium">{commonData.team.display_name}</div>
+              <div className="text-xl font-medium">#{commonData.team.display_name}</div>
               <div className="text-md">{commonData.team.bio}</div>
             </div>
             <div className="w-3/6 flex flex-row justify-end items-center space-x-2">
