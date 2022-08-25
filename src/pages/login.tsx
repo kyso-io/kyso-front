@@ -295,7 +295,7 @@ const Index = () => {
                     }}
                   />
                 </div>
-                <a className="text-xs no-underline hover:underline" href="/reset-password">
+                <a className="text-xs no-underline hover:underline" href="/in/reset-password">
                   Forgot your password?
                 </a>
                 <button type="submit" className="border bg-white border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center text-bold">
