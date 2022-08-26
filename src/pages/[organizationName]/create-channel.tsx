@@ -194,7 +194,7 @@ const Index = ({ commonData }: Props) => {
                                   }}
                                 />
                                 <label htmlFor="public" className="ml-3 block text-sm  text-gray-700">
-                                  <strong>Public:</strong> Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url..
+                                  <strong>Public:</strong> Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url.
                                 </label>
                               </div>
                             </div>
