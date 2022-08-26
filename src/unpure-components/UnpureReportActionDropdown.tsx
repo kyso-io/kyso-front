@@ -12,11 +12,10 @@ interface Props {
   report: ReportDTO;
   commonData: CommonData;
   hasPermissionDeleteReport: boolean;
-  hasPermissionEditReport: boolean;
 }
 
 const UnpureReportActionDropdown = (props: Props) => {
-  const { report, commonData, hasPermissionDeleteReport, hasPermissionEditReport } = props;
+  const { report, commonData, hasPermissionDeleteReport } = props;
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [show, setShow] = useState(false);
@@ -55,13 +54,13 @@ const UnpureReportActionDropdown = (props: Props) => {
         >
           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none">
             <div className="py-1">
-              {hasPermissionEditReport && (
+              {/* {hasPermissionEditReport && (
                 <Menu.Item>
                   <a href="settings" className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50')}>
                     Edit Report
                   </a>
                 </Menu.Item>
-              )}
+              )} */}
 
               {hasPermissionDeleteReport && (
                 <Menu.Item>

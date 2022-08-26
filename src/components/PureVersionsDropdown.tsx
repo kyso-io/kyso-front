@@ -21,7 +21,7 @@ const PureVersionsDropdown = (props: Props) => {
           {version ? `Version: #${version}` : 'Versions'}
         </Popover.Button>
 
-        <Popover.Panel className="min-w-[400px] origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none">
+        <Popover.Panel className="min-w-[400px] origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none z-50">
           <div className="flex flex-col">
             {versions?.map((item) => (
               <a
