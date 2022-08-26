@@ -94,7 +94,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
 
             <PureVersionsDropdown versions={versions} version={version} reportUrl={reportUrl} />
 
-            <UnpureReportActionDropdown report={report} commonData={commonData} hasPermissionEditReport={hasPermissionEditReport} hasPermissionDeleteReport={hasPermissionDeleteReport} />
+            <UnpureReportActionDropdown report={report} commonData={commonData} hasPermissionDeleteReport={hasPermissionDeleteReport} />
           </div>
         </div>
       </div>
