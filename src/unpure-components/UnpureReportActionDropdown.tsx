@@ -63,11 +63,6 @@ const UnpureReportActionDropdown = (props: Props) => {
                 </Menu.Item>
               )}
 
-              <Menu.Item>
-                <a href="versions" className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50')}>
-                  Versions
-                </a>
-              </Menu.Item>
               {hasPermissionDeleteReport && (
                 <Menu.Item>
                   <a href="#" onClick={() => deleteReport()} className="text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50 group flex items-center">
