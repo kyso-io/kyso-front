@@ -86,7 +86,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   const teamRoles: { value: string; label: string }[] = useMemo(() => {
     const data: { value: string; label: string }[] = [
-      { value: 'organization-admin', label: 'Full access' },
       { value: 'team-admin', label: 'Full access' },
       { value: 'team-contributor', label: 'Can edit' },
       { value: 'team-reader', label: 'Can comment' },
@@ -281,7 +280,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           onChange={(e) => setSelectedOrgRole(e.target.value)}
                           className="mt-1 mr-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                         >
-                          <option>Select a role</option>
+                          <option>Organization role</option>
                           {organizationRoles.map((role: { value: string; label: string }) => (
                             <option key={role.value} value={role.value}>
                               {role.label}
@@ -294,7 +293,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                             onChange={(e) => setSelectedTeamRole(e.target.value)}
                             className="mt-1 ml-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                           >
-                            <option>Select a role</option>
+                            <option>Channel role</option>
                             {teamRoles.map((role: { value: string; label: string }) => (
                               <option key={role.value} value={role.value}>
                                 {role.label}
@@ -430,7 +429,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           onChange={(e) => setSelectedOrgRole(e.target.value)}
                           className="mt-1 mr-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                         >
-                          <option>Select a role</option>
+                          <option>Organization role</option>
                           {organizationRoles.map((role: { value: string; label: string }) => (
                             <option key={role.value} value={role.value}>
                               {role.label}
@@ -443,7 +442,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                             onChange={(e) => setSelectedTeamRole(e.target.value)}
                             className="mt-1 ml-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                           >
-                            <option>Select a role</option>
+                            <option>Channel role</option>
                             {teamRoles.map((role: { value: string; label: string }) => (
                               <option key={role.value} value={role.value}>
                                 {role.label}
