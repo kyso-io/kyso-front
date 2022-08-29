@@ -71,7 +71,7 @@ const Index = ({ commonData }: Props) => {
         return;
       }
 
-      const result: NormalizedResponseDTO<Team> = await api.createTeam(new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions));
+      const result: NormalizedResponseDTO<Team> = await api.createTeam(new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions, commonData.user!.id));
       const team: Team = result.data;
 
       if (!team) {

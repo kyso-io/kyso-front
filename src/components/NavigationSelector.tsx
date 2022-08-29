@@ -1,11 +1,12 @@
 import type { BreadcrumbItem } from '@/model/breadcrum-item.model';
-import { Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
-import { SelectorIcon, ViewListIcon, HomeIcon } from '@heroicons/react/outline';
+import { HomeIcon, SelectorIcon, ViewListIcon } from '@heroicons/react/outline';
+import { Fragment } from 'react';
 
 type INavigationSelectorProps = {
   selectorItems: BreadcrumbItem[];
   selectorLabel?: string;
+  extraItem?: React.ReactElement;
 };
 
 function classNames(...classes: string[]) {
@@ -18,7 +19,7 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
     currentOrg = props.selectorItems.find((item) => item.current);
   }
 
-  const { selectorLabel = 'organization' } = props;
+  const { selectorLabel = 'organization', extraItem } = props;
 
   return (
     <div className="rounded-md flex items-center">
@@ -81,19 +82,21 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
                   <p className="text-sm text-gray-500 truncate">Choose {selectorLabel}:</p>
                 </div>
               )}
-
-              {props.selectorItems &&
-                props.selectorItems
-                  // .filter((o) => !o.current)
-                  .map((item: BreadcrumbItem) => (
-                    <Menu.Item key={item.href}>
-                      {({ active }) => (
-                        <a href={item.href} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm', item.current ? 'font-bold' : 'font-normal')}>
-                          {item.name}
-                        </a>
-                      )}
-                    </Menu.Item>
-                  ))}
+              <div className="flex flex-col justify-start">
+                {props.selectorItems &&
+                  props.selectorItems
+                    // .filter((o) => !o.current)
+                    .map((item: BreadcrumbItem) => (
+                      <Menu.Item key={item.href}>
+                        {({ active }) => (
+                          <a href={item.href} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm', item.current ? 'font-bold' : 'font-normal')}>
+                            {item.name}
+                          </a>
+                        )}
+                      </Menu.Item>
+                    ))}
+                {extraItem}
+              </div>
             </div>
           </Menu.Items>
         </Transition>
