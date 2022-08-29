@@ -1,9 +1,12 @@
 import { NavigationSelector } from '@/components/NavigationSelector';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import type { CommonData } from '@/types/common-data';
+import { PlusCircleIcon } from '@heroicons/react/outline';
 import type { ReportDTO } from '@kyso-io/kyso-model';
+import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
+import React from 'react';
 import { ChannelSelector } from './ChannelSelector';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,10 +21,10 @@ const BreadcrumbNavbar = (props: Props) => {
   const { basePath, report, commonData } = props;
   const router = useRouter();
 
-  const selectorItems: BreadcrumbItem[] = [];
+  const organizationSelectorItems: BreadcrumbItem[] = [];
   if (commonData.permissions && commonData.permissions.organizations) {
     commonData.permissions!.organizations.forEach((organization) => {
-      selectorItems.push(new BreadcrumbItem(organization.display_name, `${basePath}/${organization.name}`, commonData.organization?.sluglified_name === organization.name));
+      organizationSelectorItems.push(new BreadcrumbItem(organization.display_name, `${basePath}/${organization.name}`, commonData.organization?.sluglified_name === organization.name));
     });
   }
 
@@ -62,9 +65,21 @@ const BreadcrumbNavbar = (props: Props) => {
 
   return (
     <div>
-      {selectorItems.length > 0 && (
+      {organizationSelectorItems.length > 0 && (
         <div className="flex lg:flex-row flex-col lg:items-center space-y-2 lg:space-y-0 lg:space-x-0 p-2">
-          {<NavigationSelector selectorItems={selectorItems} />}
+          {
+            <NavigationSelector
+              selectorItems={organizationSelectorItems}
+              extraItem={
+                <React.Fragment>
+                  <span className="my-2 bg-gray-300 h-0.5 mx-3" />
+                  <a href={`${basePath}/create-organization`} className={clsx('text-gray-500 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm  rounded-md')}>
+                    <PlusCircleIcon className="w-5 h-5 mr-1" /> New organization
+                  </a>
+                </React.Fragment>
+              }
+            />
+          }
           {commonData.organization && (
             <svg className="hidden lg:inline-block shrink-0 h-5 w-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
