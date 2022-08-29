@@ -21,8 +21,6 @@ const BreadcrumbNavbar = (props: Props) => {
   const { basePath, report, commonData } = props;
   const router = useRouter();
 
-  console.log('llega');
-
   const organizationSelectorItems: BreadcrumbItem[] = [];
   if (commonData.permissions && commonData.permissions.organizations) {
     commonData.permissions!.organizations.forEach((organization) => {
