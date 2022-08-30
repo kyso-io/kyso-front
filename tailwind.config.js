@@ -10,7 +10,7 @@ module.exports = {
       colors: {
         'default-kyso': '#244362',
         'default-kyso-disable': 'rgba(36, 67, 97, 0.7)',
-        'default-kyso-focus': 'rgb(31, 136, 219)',
+        'default-kyso-button-hover': '#162c40',
       },
     },
   },

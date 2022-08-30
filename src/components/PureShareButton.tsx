@@ -28,7 +28,7 @@ const PureShareButton = (props: Props) => {
     <>
       <button
         type="button"
-        className="inline-flex space-x-2 text-gray-400 hover:text-gray-500"
+        className="inline-flex space-x-2 text-sm font-small rounded-md text-gray-500 items-center focus:outline-none focus:ring-0 border border-transparent bg-white hover:bg-gray-100 px-2.5 py-1.5"
         onClick={() => {
           setOpen(true);
         }}
@@ -68,7 +68,7 @@ const PureShareButton = (props: Props) => {
                 <Dialog.Panel className="relative min-w-fit bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transition-all sm:my-8 xl:max-w-xl sm:w-full sm:p-6">
                   <div>
                     <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
-                      <ShareIcon className="h-6 w-6 text-blue-600" aria-hidden="true" />
+                      <ShareIcon className="h-6 w-6 text-default-kyso" aria-hidden="true" />
                     </div>
                     <div className="mt-3 text-center sm:mt-5">
                       <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
@@ -83,7 +83,24 @@ const PureShareButton = (props: Props) => {
                   <div className="">
                     <button
                       type="button"
-                      className="inline-flex justify-center w-full rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm"
+                      className="
+                      inline-flex
+                      justify-center
+                      w-full
+                      rounded-md
+                      border
+                      border-transparent
+                      shadow-sm
+                      px-4 py-2
+                      bg-default-kyso
+                      text-base
+                      font-medium
+                      text-white
+                      hover:bg-default-kyso-button-hover
+                      focus:outline-none
+                      focus:ring-2
+                      focus:ring-offset-2
+                      focus:ring-indigo-900 sm:text-sm"
                       onClick={() => {
                         navigator.clipboard.writeText(url);
                         setCopied(true);

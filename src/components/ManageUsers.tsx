@@ -152,7 +152,20 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     <React.Fragment>
       <Menu as="div" className="ml-2 relative inline-block text-left">
         <div>
-          <Menu.Button className="flex items-center">
+          <Menu.Button
+            className="flex items-center
+              text-sm
+              font-small
+              rounded-md
+              text-gray-500
+              focus:outline-none
+              focus:ring-0
+              border 
+              border-transparent
+              bg-white
+              hover:bg-gray-100          
+              px-2.5 py-1.5"
+          >
             <PureAvatarGroup data={filteredMembers.slice(0, MAX_USERS_TO_SHOW)}></PureAvatarGroup>
             {plusMembers > 0 && <div className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-200">+{plusMembers}</div>}
             <ChevronDownIcon className="ml-2 h-5 w-5" aria-hidden="true" />

@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
-import { ChevronDownIcon, ClipboardCopyIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon, ChevronUpIcon, ClipboardCopyIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
 import React, { useEffect, useState } from 'react';
 
 const TIMEOUT_MS = 5000;
@@ -36,9 +36,9 @@ const PureNewReportPopover = (props: Props) => {
         }, [open]);
         return (
           <React.Fragment>
-            <Popover.Button className="w-fit whitespace-nowrap p-3 font-medium text-white rounded bg-gray-500 hover:bg-gray-600 text-sm flex flex-row items-center focus:ring-0 focus:outline-none">
+            <Popover.Button className="w-fit whitespace-nowrap p-3 font-medium text-white rounded bg-default-kyso hover:bg-default-kyso-button-hover text-sm flex flex-row items-center focus:ring-0 focus:outline-none">
               Post a report
-              <ChevronDownIcon className="w-5 h-5 ml-2" />
+              {open ? <ChevronUpIcon className="w-5 h-5 ml-2" /> : <ChevronDownIcon className="w-5 h-5 ml-2" />}
             </Popover.Button>
 
             <Popover.Panel className="min-w-[400px] origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none">
@@ -75,7 +75,7 @@ const PureNewReportPopover = (props: Props) => {
                   <div className="flex flex-row w-full justify-end">
                     <button
                       type="button"
-                      className="inline-flex items-center hover:bg-gray-100 text-gray-500 sm:text-sm"
+                      className="inline-flex items-center hover:bg-gray-100 text-gray-500 rounded-md sm:text-sm px-2.5 py-1.5"
                       onClick={async () => {
                         navigator.clipboard.writeText(kysoYamlContent);
                         setCopiedKysoConfigFile(true);

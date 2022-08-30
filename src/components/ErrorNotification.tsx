@@ -33,6 +33,7 @@ const ErrorNotification = (props: Props) => {
                   <p className="text-sm font-medium text-gray-900">{props.message}</p>
                 </div>
                 <div className="ml-4 shrink-0 flex">
+                  {/* done */}
                   <button
                     type="button"
                     className="rounded-md inline-flex text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

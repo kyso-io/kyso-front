@@ -168,3 +168,79 @@ See [LICENSE](LICENSE) for more information.
 Made with ♥ by [CreativeDesignsGuru](https://creativedesignsguru.com) [![Twitter](https://img.shields.io/twitter/url/https/twitter.com/cloudposse.svg?style=social&label=Follow%20%40Ixartz)](https://twitter.com/ixartz)
 
 [![React SaaS Boilerplate](https://creativedesignsguru.com/assets/images/themes/next-js-saas-starter-kit.jpg)](https://nextlessjs.com)
+
+
+
+### Kyso button css 
+# 1. Primary 
+Sample - Create New Report
+className:
+
+text-sm
+font-small
+rounded-md
+shadow-sm
+text-white 
+focus:outline-none
+focus:ring-0border
+border-transparent
+border
+bg-default-kyso
+hover:bg-default-kyso-button-hover
+focus:ring-indigo-900
+focus:ring-offset-2
+
+px-2 py-1
+
+
+# 2. Secondary (border)
+Usecase:  Cancel
+className:
+
+text-sm
+font-small
+rounded-md
+shadow-sm
+text-gray-500
+inline-flex
+items-center
+focus:outline-none
+focus:ring-0
+border border-gray-500
+bg-white
+hover:bg-gray-100
+
+px-2 py-1
+
+# 3. Tertiary (No border)
+Usecase: Edit, reply, load more
+className:
+
+
+text-sm
+font-small
+rounded-md
+text-gray-500
+inline-flex
+items-center
+focus:outline-none
+focus:ring-0
+border 
+border-transparent
+bg-white
+hover:bg-gray-100
+
+px-2.5 py-1.5
+
+Atention - Delete:
+  text-rose-700
+  hover:bg-rose-100
+
+
+
+### Links
+# Black words links
+ text-gray-900 hover:text-indigo-600 hover:underline
+
+# Blue links
+font-medium text-indigo-600 hover:text-indigo-700 hover:underline

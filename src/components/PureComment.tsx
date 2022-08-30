@@ -74,14 +74,21 @@ const PureComment = (props: IPureComment) => {
                 <div>{comment?.created_at ? ` wrote ${formatDistanceToNow(new Date(comment?.created_at))} ago` : ''}</div>
               </div>
               <div className="pt-0 rounded-t flex flex-row items-center space-x-2 text-sm font-light text-gray-400">
-                {isUserAuthor && hasPermissionCreateComment && (
-                  <button className="hover:underline" onClick={() => setIsEditing(!isEditing)}>
-                    Edit
-                  </button>
-                )}
                 {(isUserAuthor || hasPermissionDeleteComment) && (
                   <button
-                    className="hover:underline"
+                    className="text-sm
+                    font-small
+                    rounded-md
+                    text-rose-700
+                    inline-flex
+                    items-center
+                    focus:outline-none
+                    focus:ring-0
+                    border 
+                    border-transparent
+                    bg-white
+                    hover:bg-rose-100
+                    px-2.5 py-1.5"
                     onClick={() => {
                       if (confirm('Are you sure you want to delete this comment?')) {
                         onDeleteComment(comment.id as string);
@@ -89,6 +96,28 @@ const PureComment = (props: IPureComment) => {
                     }}
                   >
                     Delete
+                  </button>
+                )}
+                {isUserAuthor && hasPermissionCreateComment && (
+                  <button
+                    className="
+                      text-sm
+                      font-small
+                      rounded-md
+                      text-gray-500
+                      inline-flex
+                      items-center
+                      focus:outline-none
+                      focus:ring-0
+                      border 
+                      border-transparent
+                      bg-white
+                      hover:bg-gray-100
+                      px-2.5
+                      py-1.5"
+                    onClick={() => setIsEditing(!isEditing)}
+                  >
+                    Edit
                   </button>
                 )}
               </div>
@@ -101,7 +130,21 @@ const PureComment = (props: IPureComment) => {
                 <div className="space-x-2 mt-2">
                   {hasPermissionCreateComment && (
                     <button
-                      className="hover:underline font-medium"
+                      className="
+                      text-sm
+                      font-small
+                      rounded-md
+                      text-gray-500
+                      inline-flex
+                      items-center
+                      focus:outline-none
+                      focus:ring-0
+                      border 
+                      border-transparent
+                      bg-white
+                      hover:bg-gray-100
+                      px-2.5
+                      py-1.5"
                       onClick={() => {
                         if (!hasPermissionCreateComment) {
                           alert('Sorry, but you do not have the permission to reply to comments.');
