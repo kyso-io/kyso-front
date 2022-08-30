@@ -350,7 +350,9 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
+                            ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500'
+                            : 'bg-kyso-primary hover:bg-kyso-primary focus:ring-indigo-500',
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
@@ -365,7 +367,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       onClick={clearData}
                       type="button"
                       className={clsx(
-                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 bg-slate-300 hover:bg-slate-300 focus:ring-slate-300',
+                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border text-xs font-medium rounded shadow-sm text-kyso-primary focus:outline-none focus:ring-2 focus:ring-offset-2 border-kyso-secondary-border bg-kyso-secondary hover:bg-kyso-secondary focus:ring-slate-300',
                       )}
                     >
                       Cancel
@@ -533,7 +535,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={inputDeleteUser !== keyDeleteUser}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          inputDeleteUser !== keyDeleteUser ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                          inputDeleteUser !== keyDeleteUser ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-primary hover:bg-kyso-primary-700 focus:ring-indigo-500',
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
@@ -550,7 +552,9 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
+                            ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500'
+                            : 'bg-kyso-primary hover:bg-kyso-primary-700 focus:ring-indigo-500',
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
@@ -565,7 +569,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       onClick={clearData}
                       type="button"
                       className={clsx(
-                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 bg-slate-300 hover:bg-slate-300 focus:ring-slate-300',
+                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border text-xs font-medium rounded shadow-sm text-kyso-primary focus:outline-none focus:ring-2 focus:ring-offset-2 border-kyso-secondary-border bg-kyso-secondary hover:bg-kyso-secondary focus:ring-slate-300',
                       )}
                     >
                       Cancel
