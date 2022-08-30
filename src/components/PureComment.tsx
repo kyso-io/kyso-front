@@ -87,7 +87,7 @@ const PureComment = (props: IPureComment) => {
                     border 
                     border-transparent
                     bg-white
-                    hover:bg-rose-100
+                    hover:bg-gray-100
                     px-2.5 py-1.5"
                     onClick={() => {
                       if (confirm('Are you sure you want to delete this comment?')) {
