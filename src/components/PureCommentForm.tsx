@@ -184,7 +184,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
               type="submit"
               className={classNames(
                 'inline-flex items-center px-2 py-1 border border-transparent text-sm font-small rounded-md shadow-sm text-white focus:outline-none focus:ring-0',
-                'bg-default-kyso hover:bg-default-kyso-button-hover focus:ring-default-kyso-button-hover focus:ring-offset-2',
+                'bg-kyso-600 hover:bg-kyso-700 focus:ring-kyso-700 focus:ring-offset-2',
               )}
             >
               {isLoading && <PureSpinner size={5} />}

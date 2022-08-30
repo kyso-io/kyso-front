@@ -36,7 +36,7 @@ const PureNewReportPopover = (props: Props) => {
         }, [open]);
         return (
           <React.Fragment>
-            <Popover.Button className="w-fit whitespace-nowrap p-3 font-medium text-white rounded bg-default-kyso hover:bg-default-kyso-button-hover text-sm flex flex-row items-center focus:ring-0 focus:outline-none">
+            <Popover.Button className="w-fit whitespace-nowrap p-3 font-medium text-white rounded bg-kyso-600 hover:bg-kyso-700 text-sm flex flex-row items-center focus:ring-0 focus:outline-none">
               Post a report
               {open ? <ChevronUpIcon className="w-5 h-5 ml-2" /> : <ChevronDownIcon className="w-5 h-5 ml-2" />}
             </Popover.Button>

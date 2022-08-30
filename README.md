@@ -182,7 +182,7 @@ rounded-md
 shadow-sm
 text-white 
 focus:outline-none
-focus:ring-0border
+focus:ring-0
 border-transparent
 border
 bg-default-kyso
@@ -201,11 +201,13 @@ text-sm
 font-small
 rounded-md
 shadow-sm
-text-gray-500
+
 inline-flex
 items-center
 focus:outline-none
 focus:ring-0
+
+text-gray-500
 border border-gray-500
 bg-white
 hover:bg-gray-100

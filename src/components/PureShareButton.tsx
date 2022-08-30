@@ -5,6 +5,7 @@ import type { CommonData } from '@/types/common-data';
 import { Dialog, Transition } from '@headlessui/react';
 import { ShareIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
+import PurePrimaryKysoBtn from './PrimaryKysoBtn';
 
 type Props = {
   commonData: CommonData;
@@ -68,7 +69,7 @@ const PureShareButton = (props: Props) => {
                 <Dialog.Panel className="relative min-w-fit bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transition-all sm:my-8 xl:max-w-xl sm:w-full sm:p-6">
                   <div>
                     <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
-                      <ShareIcon className="h-6 w-6 text-default-kyso" aria-hidden="true" />
+                      <ShareIcon className="h-6 w-6 text-kyso-600" aria-hidden="true" />
                     </div>
                     <div className="mt-3 text-center sm:mt-5">
                       <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
@@ -81,26 +82,9 @@ const PureShareButton = (props: Props) => {
                     </div>
                   </div>
                   <div className="">
-                    <button
-                      type="button"
-                      className="
-                      inline-flex
-                      justify-center
-                      w-full
-                      rounded-md
-                      border
-                      border-transparent
-                      shadow-sm
-                      px-4 py-2
-                      bg-default-kyso
-                      text-base
-                      font-medium
-                      text-white
-                      hover:bg-default-kyso-button-hover
-                      focus:outline-none
-                      focus:ring-2
-                      focus:ring-offset-2
-                      focus:ring-indigo-900 sm:text-sm"
+                    <PurePrimaryKysoBtn
+                      extraCss={'justify-center w-full'}
+                      padding="px-4 py-2"
                       onClick={() => {
                         navigator.clipboard.writeText(url);
                         setCopied(true);
@@ -108,7 +92,7 @@ const PureShareButton = (props: Props) => {
                     >
                       {!copied && 'Copy link'}
                       {copied && 'Copied!'}
-                    </button>
+                    </PurePrimaryKysoBtn>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
