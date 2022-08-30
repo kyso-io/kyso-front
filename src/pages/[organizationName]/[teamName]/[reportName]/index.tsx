@@ -134,8 +134,6 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
       return;
     }
 
-    console.log({ selfTree });
-
     const getData = async () => {
       const mainFile = currentPath === '' ? reportData.report!.main_file : undefined;
       const validFiles: GithubFileHash[] = selfTree.filter((item: GithubFileHash) => item.type === 'file');
@@ -445,8 +443,6 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   }
 
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
-
-  console.log(fileToRender?.id, fileToRender?.path, fileToRender?.isLoading);
 
   return (
     <div>

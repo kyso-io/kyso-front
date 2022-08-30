@@ -48,19 +48,20 @@ const BreadcrumbNavbar = (props: Props) => {
         commonData.organization != null && commonData.team != null && report != null,
       ),
     );
-  }
-
-  if (report && Array.isArray(router.query.path)) {
-    const paths = router.query.path;
     const reportUrl = `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
     const version = router.query.version as string;
-    const crumbs = paths
-      .filter((p) => p !== '')
-      .map((p, index) => {
-        return new BreadcrumbItem(p, `${reportUrl}/${paths.slice(0, index + 1).join('/')}${version ? `?version=${version}` : ''}`, false);
-      });
-
-    breadcrumb.push(...crumbs);
+    if (router.query.path && Array.isArray(router.query.path)) {
+      const paths = router.query.path;
+      const crumbs = paths
+        .filter((p: string) => p !== '')
+        .map((p, index) => {
+          return new BreadcrumbItem(p, `${reportUrl}/${paths.slice(0, index + 1).join('/')}${version ? `?version=${version}` : ''}`, false);
+        });
+      breadcrumb.push(...crumbs);
+    } else if (report.main_file) {
+      const breadcrumItem: BreadcrumbItem = new BreadcrumbItem(report.main_file, `${reportUrl}/${report.main_file}${version ? `?version=${version}` : ''}`, false);
+      breadcrumb.push(breadcrumItem);
+    }
   }
 
   return (

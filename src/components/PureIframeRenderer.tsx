@@ -1,5 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { iframeResizer } from 'iframe-resizer';
-import React from 'react';
 import TurndownService from 'turndown';
 import { v4 } from 'uuid';
 
@@ -38,6 +38,16 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   );
   // }, []);
 
+  const onInitializedIframe = () => {
+    const myIframe: any = document.getElementById('theframe');
+    const doc = myIframe!.contentDocument;
+    doc.body.innerHTML = `${doc.body.innerHTML}<style>
+        .mqc_table .wrapper {
+          z-index: 0 !important;
+        }
+      </style>`;
+  };
+
   if (!file || !file.path_scs || file.path_scs.length === 0) {
     return <div>Invalid path</div>;
   }
@@ -52,8 +62,8 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
         width: '100%',
         minHeight: '65vh',
       }}
-      // src={`https://dev.kyso.io${'/scs'}${file.path_scs}`}
       src={`${'/scs'}${file.path_scs}`}
+      onLoad={onInitializedIframe}
     />
   );
 };
