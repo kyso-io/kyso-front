@@ -312,7 +312,7 @@ const CreateReport = ({ commonData }: Props) => {
       <div className="flex flex-row items-center">
         <div className="w-1/6"></div>
         <div className="w-4/6">
-          <div className="flex flex-row items-center justify-between">
+          <div className="w-full">
             <div className="flex flex-col">
               <textarea
                 style={{
@@ -331,7 +331,6 @@ const CreateReport = ({ commonData }: Props) => {
                 placeholder="Title"
                 className="p-0 focus:shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900"
               />
-              {title && slugify(title)}
               <textarea
                 style={{
                   height: '38px',
