@@ -112,17 +112,20 @@ const Index = ({ commonData }: Props) => {
       if (commonData.token === null && commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC) {
         // An unautenticated user is trying to access a non public team
         router.replace(`/${commonData.organization.sluglified_name}`);
-        return;
       }
-      if (commonData.organization && commonData.team == null) {
-        // Autenticated user is trying to access a non public team
-        router.replace(`/${commonData.organization.sluglified_name}`);
-      }
+      // if (commonData.organization && commonData.team == null) {
+      //   // Autenticated user is trying to access a non public team
+      //   router.replace(`/${commonData.organization.sluglified_name}`);
+      // }
     }
   }, [commonData]);
 
   useEffect(() => {
     if (!commonData.team) {
+      return;
+    }
+    if (!commonData.team && commonData.organization) {
+      router.replace(`/${commonData.organization.sluglified_name}`);
       return;
     }
     getTeamsInfo();
