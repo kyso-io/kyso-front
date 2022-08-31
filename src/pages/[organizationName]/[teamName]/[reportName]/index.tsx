@@ -152,6 +152,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
         'index.ppt',
         'index.xsl',
         'index.txt',
+        'index.pdf',
       ];
 
       let validFile: GithubFileHash | undefined = validFiles?.find((item: GithubFileHash) => {
