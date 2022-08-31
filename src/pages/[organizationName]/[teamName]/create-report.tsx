@@ -334,6 +334,7 @@ const CreateReport = ({ commonData }: Props) => {
 
   const [selectedFileValue, setSelectedFileValue] = useState('initial value');
   const handleEditorChange = useCallback((fileId: string, value: string) => {
+    console.log(value);
     setSelectedFileValue(value);
     setLocalStorageItem(fileId, `data:text/plain;base64,${btoa(value)}`);
     setHasAnythingCached(true);

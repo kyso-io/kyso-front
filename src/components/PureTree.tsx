@@ -107,22 +107,25 @@ const PureTree = (props: IPureTree) => {
         <h3 className=" text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
           Files
         </h3>
-        {crumbs && crumbs.length > 0 && (
-          <div className={classNames('w-full flex items-center whitespace-nowrap')}>
-            {crumbs.map((crumb, index) => (
-              <div key={`${crumb.href}+${index}`} className="flex flex-row items-center">
-                <Link href={crumb.href}>
-                  <a className={classNames('hover:underline text-sm', index + 1 === crumbs.length ? 'font-normal text-gray-400' : 'font-medium text-indigo-500')} onClick={onNavigation}>
-                    {crumb.path}
-                  </a>
-                </Link>
-                <svg className="shrink-0 h-3 w-3 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
-                  <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
-                </svg>
-              </div>
-            ))}
-          </div>
-        )}
+        {
+          /* Removed crumbs with && false */
+          crumbs && crumbs.length > 0 && false && (
+            <div className={classNames('w-full flex items-center whitespace-nowrap')}>
+              {crumbs.map((crumb, index) => (
+                <div key={`${crumb.href}+${index}`} className="flex flex-row items-center">
+                  <Link href={crumb.href}>
+                    <a className={classNames('hover:underline text-sm', index + 1 === crumbs.length ? 'font-normal text-gray-400' : 'font-medium text-indigo-500')} onClick={onNavigation}>
+                      {crumb.path}
+                    </a>
+                  </Link>
+                  <svg className="shrink-0 h-3 w-3 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
+                  </svg>
+                </div>
+              ))}
+            </div>
+          )
+        }
 
         <Link href={getNewPath()}>
           <a
