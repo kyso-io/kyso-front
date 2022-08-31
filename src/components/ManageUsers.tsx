@@ -92,9 +92,11 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
       { value: 'team-reader', label: 'Can comment' },
     ];
     if (selectedUser) {
+      console.log(selectedUser);
       if (filteredMembers.length > 0) {
         const member: Member | undefined = filteredMembers.find((m: Member) => m.id === selectedUser.id);
         if (member) {
+          console.log(member);
           if (member?.membership_origin === TeamMembershipOriginEnum.TEAM) {
             data.push({ value: 'remove', label: 'Remove' });
           }
@@ -147,6 +149,9 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
   if (filteredMembers.length > MAX_USERS_TO_SHOW) {
     plusMembers = filteredMembers.length - MAX_USERS_TO_SHOW;
   }
+
+  console.log('isOrgAdmin', isOrgAdmin);
+  console.log('isTeamAdmin', isTeamAdmin);
 
   return (
     <React.Fragment>
@@ -396,13 +401,16 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       return (
                         <li
                           key={user.id}
-                          className={clsx('py-1', !commonData.user || isOrgAdmin || (commonData.team != null && isTeamAdmin) ? 'cursor-pointer' : 'cursor-default')}
+                          className={clsx('py-1', !commonData.user || isOrgAdmin || (commonData.team != null && isTeamAdmin && member !== undefined) ? 'cursor-pointer' : 'cursor-default')}
                           onClick={() => {
                             if (!commonData.user) {
                               router.push(`/user/${user.username}`);
                             } else if (isOrgAdmin || (commonData.team != null && isTeamAdmin)) {
                               // Check if user is member
                               const index: number = members.findIndex((m: Member) => m.id === user.id);
+                              if (!isOrgAdmin && commonData.team != null && isTeamAdmin && index === -1) {
+                                return;
+                              }
                               if (index !== -1) {
                                 setSelectedOrgRole(members[index]!.organization_roles[0]!);
                                 if (members[index]?.team_roles && members[index]!.team_roles.length > 0) {

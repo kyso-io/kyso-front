@@ -47,7 +47,7 @@ const Index = ({ commonData }: Props) => {
       setBusy(false);
     }
   };
-
+  console.log('error', error);
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-2/12">
@@ -75,7 +75,10 @@ const Index = ({ commonData }: Props) => {
                         id="displayName"
                         value={displayName}
                         autoComplete="displayName"
-                        onChange={(e) => setDisplayName(e.target.value)}
+                        onChange={(e) => {
+                          setError('');
+                          setDisplayName(e.target.value);
+                        }}
                         className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
                       />
                     </div>
@@ -112,8 +115,8 @@ const Index = ({ commonData }: Props) => {
                 <button
                   type="submit"
                   className={classNames(
-                    error ? 'opacity-75 cursor-not-allowed' : 'hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500',
-                    'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 ',
+                    error ? 'opacity-75 cursor-not-allowed' : 'hover:bg-kyso-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
+                    'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-kyso-600 ',
                   )}
                 >
                   {!isBusy && (

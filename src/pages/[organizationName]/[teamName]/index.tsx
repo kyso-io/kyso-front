@@ -112,12 +112,12 @@ const Index = ({ commonData }: Props) => {
       if (commonData.token === null && commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC) {
         // An unautenticated user is trying to access a non public team
         router.replace(`/${commonData.organization.sluglified_name}`);
-        return;
       }
-      if (commonData.organization && commonData.team == null) {
-        // Autenticated user is trying to access a non public team
-        router.replace(`/${commonData.organization.sluglified_name}`);
-      }
+      // It is not working
+      // if (commonData.organization && commonData.team == null) {
+      //   // Autenticated user is trying to access a non public team
+      //   router.replace(`/${commonData.organization.sluglified_name}`);
+      // }
     }
   }, [commonData]);
 
@@ -125,6 +125,7 @@ const Index = ({ commonData }: Props) => {
     if (!commonData.team) {
       return;
     }
+
     getTeamsInfo();
     getTeamMembers();
   }, [commonData?.team, commonData?.user]);
@@ -493,6 +494,7 @@ const Index = ({ commonData }: Props) => {
   if (commonData.errorTeam) {
     return <div className="text-center mt-4">{commonData.errorTeam}</div>;
   }
+  console.log(commonData.team?.visibility);
 
   return (
     <div className="flex flex-row space-x-8 p-4">
@@ -503,7 +505,7 @@ const Index = ({ commonData }: Props) => {
         {commonData.team && (
           <div className="flex flex-row w-full justify-between space-x-2">
             <div className="w-3/6 flex flex-col justify-between">
-              <div className="text-xl font-medium">#{commonData.team.display_name}</div>
+              <div className="text-xl font-medium">{commonData.team.display_name}</div>
               <div className="text-md">{commonData.team.bio}</div>
             </div>
             <div className="w-3/6 flex flex-row justify-end items-center space-x-2">
@@ -524,7 +526,8 @@ const Index = ({ commonData }: Props) => {
             </div>
           </div>
         )}
-        {teamInfo && <InfoActivity info={teamInfo} />}
+
+        {teamInfo && <InfoActivity info={teamInfo} visibility={commonData.team?.visibility} hasLabel={true} showPrivacy={true} />}
 
         <ReportsSearchBar
           members={members}
