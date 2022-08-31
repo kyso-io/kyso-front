@@ -184,7 +184,18 @@ const CreateReport = ({ commonData }: Props) => {
   };
 
   const addNewFile = (newFile: CreationReportFileSystemObject) => {
-    files.push(newFile);
+    // Search for a file with the same ID --> THAT MEANS IS A RENAME
+    const existingFileIndex = files.findIndex((x) => x.id === newFile.id);
+
+    if (existingFileIndex < 0) {
+      // Does not exist, so it's a new file
+      files.push(newFile);
+    } else {
+      // Already exists, so we just need to change the name
+      files[existingFileIndex]!.name = newFile.name;
+      files[existingFileIndex]!.path = newFile.path;
+      files[existingFileIndex]!.type = newFile.type;
+    }
 
     setFiles([...files]);
     setDraftStatus('Saving ...');
@@ -471,7 +482,7 @@ const CreateReport = ({ commonData }: Props) => {
                   router.reload();
                 }}
               >
-                Clear
+                Reset
               </PureKysoButton>
             )}
           </div>

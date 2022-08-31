@@ -9,6 +9,7 @@ interface Props {
   /* Tailwind width https://tailwindcss.com/docs/width */
   size: TailwindHeightSizeEnum;
   textSize: TailwindFontSizeEnum;
+  className?: string;
 }
 
 const getInitials = (str: string) => {
@@ -39,17 +40,22 @@ const PureAvatar = (props: Props) => {
           onLoad={() => {
             setIsLoaded(true);
           }}
-          className={clsx(`object-cover inline-block text-${props.textSize} h-${props.size} w-${props.size} rounded-full ring-0 border transition duration-100`, isLoaded ? '' : 'invisible')}
+          className={clsx(
+            `object-cover inline-block text-${props.textSize} h-${props.size} w-${props.size} rounded-full ring-0 border transition duration-100 ${props.className}`,
+            isLoaded ? '' : 'invisible',
+          )}
           src={props.src}
           alt={props.title}
         />
       )}
       {props.src && isError && (
-        <div className={`bg-white text-gray-600 flex items-center justify-center text-${props.textSize} h-${props.size} w-${props.size} rounded-full border`}>{getInitials(props.title)}</div>
+        <div className={`bg-white text-gray-600 flex items-center justify-center text-${props.textSize} h-${props.size} w-${props.size} rounded-full border ${props.className}`}>
+          {getInitials(props.title)}
+        </div>
       )}
       {!props.src && (
         // W-SIZE is a super-set of H-SIZE, so no problem there...
-        <span className={`inline-flex items-center justify-center h-${props.size} w-${props.size} rounded-full bg-gray-200 hover:scale-110 transition duration-100`}>
+        <span className={`inline-flex items-center justify-center h-${props.size} w-${props.size} rounded-full bg-gray-200 hover:scale-110 transition duration-100 ${props.className}`}>
           <span className={`text-${props.textSize} font-medium leading-none text-gray-500`}>{getInitials(props.title)}</span>
         </span>
       )}

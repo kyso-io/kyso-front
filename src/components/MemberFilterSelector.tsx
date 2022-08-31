@@ -29,7 +29,7 @@ const MemberFilterSelector = (props: IMemberFilterSelector) => {
     <div className="flex flex-row items-center">
       <div className="flex flex-row overflow-hidden">
         {selected?.map((person: TeamMember) => (
-          <PureAvatar key={person.id} src={person?.avatar_url} title={person.nickname} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} />
+          <PureAvatar key={person.id} src={person?.avatar_url} title={person.nickname} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS} className="mr-1" />
         ))}
       </div>
       <Combobox

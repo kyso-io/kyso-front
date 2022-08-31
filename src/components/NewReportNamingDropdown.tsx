@@ -11,6 +11,10 @@ type INewReportNamingDropdown = {
   isFolder?: boolean;
   parent?: CreationReportFileSystemObject;
   showLabel?: boolean;
+  value?: string;
+  className?: string;
+  okButtonLabel?: string;
+  cancelButtonLabel?: string;
   onCreate: (newName: CreationReportFileSystemObject) => void;
 };
 
@@ -46,7 +50,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
   }
 
   return (
-    <Menu as="div" className="">
+    <Menu as="div" className={props.className}>
       <Menu.Button className="w-full flex items-center p-3 py-2 rounded mr-1 border-gray-300 text-sm text-gray-700 hover:bg-gray-100 focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500">
         <NewIcon className={classNames(`h-5 w-5 text-gray-600`, showLabel ? `mr-4` : ``)} aria-hidden="true" />
         {showLabel && label}
@@ -68,6 +72,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                 <p className="block text-sm font-medium text-gray-700">{label}</p>
                 <div className="relative mt-1">
                   <input
+                    placeholder={props.value}
                     className="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                     onChange={(event) => {
                       onHandleName(event.target.value);
@@ -92,7 +97,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                   className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-900 hover:bg-blue-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   onClick={() => {}}
                 >
-                  Cancel
+                  {props.cancelButtonLabel ? props.cancelButtonLabel : 'Cancel'}
                 </Menu.Button>
                 <Menu.Button
                   className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
@@ -100,7 +105,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                     handleCreation(newName, computedIsFolder, onCreate, parent);
                   }}
                 >
-                  Create
+                  {props.okButtonLabel ? props.okButtonLabel : 'Create'}
                 </Menu.Button>
               </div>
             </div>
