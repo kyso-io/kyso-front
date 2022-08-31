@@ -5,7 +5,8 @@ import type { CommonData } from '@/types/common-data';
 import { Dialog, Transition } from '@headlessui/react';
 import { ShareIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
-import PurePrimaryKysoBtn from './PrimaryKysoBtn';
+import { KysoButton } from '@/types/kyso-button.enum';
+import PureKysoButton from './PureKysoButton';
 
 type Props = {
   commonData: CommonData;
@@ -82,9 +83,9 @@ const PureShareButton = (props: Props) => {
                     </div>
                   </div>
                   <div className="">
-                    <PurePrimaryKysoBtn
-                      extraCss={'justify-center w-full'}
-                      padding="px-4 py-2"
+                    <PureKysoButton
+                      type={KysoButton.TERCIARY}
+                      className={'justify-center w-full px-4 py-2'}
                       onClick={() => {
                         navigator.clipboard.writeText(url);
                         setCopied(true);
@@ -92,7 +93,7 @@ const PureShareButton = (props: Props) => {
                     >
                       {!copied && 'Copy link'}
                       {copied && 'Copied!'}
-                    </PurePrimaryKysoBtn>
+                    </PureKysoButton>
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
