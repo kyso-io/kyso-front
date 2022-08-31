@@ -29,6 +29,8 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Menu, Transition } from '@headlessui/react';
 import { ArrowRightIcon, DocumentAddIcon, FolderAddIcon, SelectorIcon, UploadIcon } from '@heroicons/react/solid';
 import 'easymde/dist/easymde.min.css';
+import PureKysoButton from '@/components/PureKysoButton';
+import { KysoButton } from '@/types/kyso-button.enum';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -186,8 +188,11 @@ const CreateReport = ({ commonData }: Props) => {
   }, 1000);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: any) => {
+    if (e) {
+      e.preventDefault();
+    }
+
     setError(null);
 
     if (!title || title.trim().length === 0) {
@@ -312,7 +317,55 @@ const CreateReport = ({ commonData }: Props) => {
       <div className="flex flex-row items-center">
         <div className="w-1/6"></div>
         <div className="w-4/6">
-          <div className="flex flex-row items-center justify-between">
+          <div className="flex justify-end">
+            <div className="flex flex-row items-center space-x-2">
+              <div className="mr-2">posting into</div>
+              <Menu as="div" className="relative w-fit inline-block text-left">
+                <Menu.Button className="hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded">
+                  {commonData.team ? commonData.team.display_name : 'Select a channel'}
+                  <div className="pl-2">
+                    <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
+                  </div>
+                </Menu.Button>
+
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
+                    <div className="p-2">
+                      <div>
+                        <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
+                          Channels
+                        </h3>
+                        <div className="flex flex-col justify-start">
+                          {channelSelectorItems &&
+                            channelSelectorItems.map((item: BreadcrumbItem) => (
+                              <a
+                                key={item.href}
+                                href={item.href}
+                                className={classNames(
+                                  item.current ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                                  'flex items-center px-3 py-2 text-sm font-medium rounded-md',
+                                )}
+                              >
+                                {item.name}
+                              </a>
+                            ))}
+                        </div>
+                      </div>
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
+            </div>
+          </div>
+          <div className="w-full mb-4">
             <div className="flex flex-col">
               <textarea
                 style={{
@@ -331,7 +384,6 @@ const CreateReport = ({ commonData }: Props) => {
                 placeholder="Title"
                 className="p-0 focus:shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900"
               />
-              {title && slugify(title)}
               <textarea
                 style={{
                   height: '38px',
@@ -349,75 +401,6 @@ const CreateReport = ({ commonData }: Props) => {
                 }}
                 className="p-0 focus:shadow-sm focus:ring-indigo-500 focus:border-indigo-500  block  w-full h-full focus:w-full  border-white border-0 text-gray-500 sm:text-sm rounded-md"
               />
-            </div>
-            <div className="flex flex-col">
-              <div className="flex flex-row items-center space-x-2">
-                <div className="mr-2">posting into</div>
-                <Menu as="div" className="relative w-fit inline-block text-left">
-                  <Menu.Button className="hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded">
-                    {commonData.team ? commonData.team.display_name : 'Select a channel'}
-                    <div className="pl-2">
-                      <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
-                    </div>
-                  </Menu.Button>
-
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <Menu.Items className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
-                      <div className="p-2">
-                        <div>
-                          <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
-                            Channels
-                          </h3>
-                          <div className="flex flex-col justify-start">
-                            {channelSelectorItems &&
-                              channelSelectorItems.map((item: BreadcrumbItem) => (
-                                <a
-                                  key={item.href}
-                                  href={item.href}
-                                  className={classNames(
-                                    item.current ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                                    'flex items-center px-3 py-2 text-sm font-medium rounded-md',
-                                  )}
-                                >
-                                  {item.name}
-                                </a>
-                              ))}
-                          </div>
-                        </div>
-                      </div>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
-                {hasAnythingCached && (
-                  <button
-                    type="reset"
-                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-900 hover:bg-blue-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    onClick={() => {
-                      cleanStorage();
-                      router.reload();
-                    }}
-                  >
-                    Clear
-                  </button>
-                )}
-                <button
-                  type="submit"
-                  onClick={handleSubmit}
-                  className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                >
-                  {busy && <PureSpinner size={5} />}
-                  Post <ArrowRightIcon className="ml-2 w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex flex-row justify-end mt-2">{draftStatus && <h6 className="text-gray-500 text-xs">{draftStatus}</h6>}</div>
             </div>
           </div>
 
@@ -452,6 +435,7 @@ const CreateReport = ({ commonData }: Props) => {
               ))}
             </div>
           </div>
+          <div className="flex flex-row justify-end mt-2">{draftStatus && <h6 className="text-gray-500 text-xs">{draftStatus}</h6>}</div>
         </div>
       </div>
       <div className="flex flex-row">
@@ -523,6 +507,41 @@ const CreateReport = ({ commonData }: Props) => {
         <div className="w-4/6">
           <SimpleMdeReact key="editor" options={editorOptions} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
           <div className="text-right">{error && <ErrorNotification message={error} />}</div>
+        </div>
+      </div>
+      <div className="flex flex-row items-center">
+        <div className="w-1/6"></div>
+        <div className="w-4/6">
+          <div className="flex justify-end">
+            <div className="flex flex-row items-center space-x-2">
+              <div className="mr-2">
+                {hasAnythingCached && (
+                  <button
+                    type="reset"
+                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    onClick={() => {
+                      cleanStorage();
+                      router.reload();
+                    }}
+                  >
+                    Clear
+                  </button>
+                )}
+                <PureKysoButton type={KysoButton.PRIMARY} onClick={handleSubmit}>
+                  {busy && <PureSpinner size={5} />}
+                  Post <ArrowRightIcon className="ml-2 w-4 h-4" />
+                </PureKysoButton>
+                <button
+                  type="submit"
+                  onClick={handleSubmit}
+                  className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-default-kyso hover:bg-default-kyso-button-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                >
+                  {busy && <PureSpinner size={5} />}
+                  Post <ArrowRightIcon className="ml-2 w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

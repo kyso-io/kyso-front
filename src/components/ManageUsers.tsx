@@ -157,7 +157,20 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     <React.Fragment>
       <Menu as="div" className="ml-2 relative inline-block text-left">
         <div>
-          <Menu.Button className="flex items-center">
+          <Menu.Button
+            className="flex items-center
+              text-sm
+              font-small
+              rounded-md
+              text-gray-500
+              focus:outline-none
+              focus:ring-0
+              border 
+              border-transparent
+              bg-white
+              hover:bg-gray-100          
+              px-2.5 py-1.5"
+          >
             <PureAvatarGroup data={filteredMembers.slice(0, MAX_USERS_TO_SHOW)}></PureAvatarGroup>
             {plusMembers > 0 && <div className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-200">+{plusMembers}</div>}
             <ChevronDownIcon className="ml-2 h-5 w-5" aria-hidden="true" />
@@ -349,7 +362,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
@@ -364,7 +377,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       onClick={clearData}
                       type="button"
                       className={clsx(
-                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 bg-slate-300 hover:bg-slate-300 focus:ring-slate-300',
+                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border border-gray-500 text-xs font-medium rounded shadow-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white hover:bg-gray-100 focus:ring-gray-100',
                       )}
                     >
                       Cancel
@@ -533,7 +546,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={inputDeleteUser !== keyDeleteUser}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          inputDeleteUser !== keyDeleteUser ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                          inputDeleteUser !== keyDeleteUser ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
@@ -550,7 +563,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
@@ -565,7 +578,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       onClick={clearData}
                       type="button"
                       className={clsx(
-                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 bg-slate-300 hover:bg-slate-300 focus:ring-slate-300',
+                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border border-gray-500 text-xs font-medium rounded shadow-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white hover:bg-gray-100 focus:ring-gray-100',
                       )}
                     >
                       Cancel
