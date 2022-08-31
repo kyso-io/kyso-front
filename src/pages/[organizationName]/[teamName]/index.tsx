@@ -113,6 +113,7 @@ const Index = ({ commonData }: Props) => {
         // An unautenticated user is trying to access a non public team
         router.replace(`/${commonData.organization.sluglified_name}`);
       }
+      // It is not working
       // if (commonData.organization && commonData.team == null) {
       //   // Autenticated user is trying to access a non public team
       //   router.replace(`/${commonData.organization.sluglified_name}`);
@@ -124,10 +125,7 @@ const Index = ({ commonData }: Props) => {
     if (!commonData.team) {
       return;
     }
-    if (!commonData.team && commonData.organization) {
-      router.replace(`/${commonData.organization.sluglified_name}`);
-      return;
-    }
+
     getTeamsInfo();
     getTeamMembers();
   }, [commonData?.team, commonData?.user]);
