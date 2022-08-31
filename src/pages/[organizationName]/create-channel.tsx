@@ -5,7 +5,7 @@ import checkPermissions from '@/helpers/check-permissions';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
-import { ArrowRightIcon } from '@heroicons/react/solid';
+import { ArrowRightIcon, LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { TeamPermissionsEnum, TeamVisibilityEnum, Team } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
@@ -84,7 +84,7 @@ const Index = ({ commonData }: Props) => {
       setBusy(false);
     }
   };
-
+  // shield-check
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-2/12">
@@ -161,7 +161,8 @@ const Index = ({ commonData }: Props) => {
                                     setFormPermissions(TeamVisibilityEnum.PRIVATE);
                                   }}
                                 />
-                                <label htmlFor="private" className="ml-3 block text-sm  text-gray-700">
+                                <LockClosedIcon className="w-5 h-5 ml-3" />
+                                <label htmlFor="private" className="ml-1 block text-sm  text-gray-700">
                                   <strong>Private:</strong> Only invited members of this channel have access to this channels content.
                                   <p className="text-gray-500 text-xs">You can invite members on the next page.</p>
                                 </label>
@@ -177,7 +178,8 @@ const Index = ({ commonData }: Props) => {
                                     setFormPermissions(TeamVisibilityEnum.PROTECTED);
                                   }}
                                 />
-                                <label htmlFor="organization-only" className="ml-3 block text-sm  text-gray-700">
+                                <ShieldCheckIcon className="w-6 h-5 ml-3" />
+                                <label htmlFor="organization-only" className="ml-1 block text-sm  text-gray-700">
                                   <strong>Organization only:</strong> all members of the <span className="font-medium">{commonData.organization?.display_name}</span> organization can access this
                                   channel.
                                 </label>
@@ -193,8 +195,10 @@ const Index = ({ commonData }: Props) => {
                                     setFormPermissions(TeamVisibilityEnum.PUBLIC);
                                   }}
                                 />
-                                <label htmlFor="public" className="ml-3 block text-sm  text-gray-700">
-                                  <strong>Public:</strong> Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url.
+                                <LockOpenIcon className="w-6 h-5 ml-3" />
+                                <label htmlFor="public" className="ml-1 block text-sm  text-gray-700">
+                                  <strong>Public:</strong>
+                                  Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url.
                                 </label>
                               </div>
                             </div>
