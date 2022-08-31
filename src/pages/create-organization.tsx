@@ -47,7 +47,7 @@ const Index = ({ commonData }: Props) => {
       setBusy(false);
     }
   };
-
+  console.log('error', error);
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-2/12">
@@ -75,7 +75,10 @@ const Index = ({ commonData }: Props) => {
                         id="displayName"
                         value={displayName}
                         autoComplete="displayName"
-                        onChange={(e) => setDisplayName(e.target.value)}
+                        onChange={(e) => {
+                          setError('');
+                          setDisplayName(e.target.value);
+                        }}
                         className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
                       />
                     </div>

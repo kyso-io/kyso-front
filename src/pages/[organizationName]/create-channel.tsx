@@ -78,7 +78,7 @@ const Index = ({ commonData }: Props) => {
         setBusy(false);
         return;
       }
-      router.push(`/${commonData.organization?.sluglified_name}/${team.sluglified_name}`);
+      router.push(`/${commonData.organization!.sluglified_name}/${team.sluglified_name}`);
     } catch (er: any) {
       setError(er.message);
       setBusy(false);
