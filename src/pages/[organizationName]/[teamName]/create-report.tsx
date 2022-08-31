@@ -68,6 +68,16 @@ const CreateReport = ({ commonData }: Props) => {
 
   const channelMembers = useChannelMembers({ commonData });
 
+  useEffect(() => {
+    if (channelMembers) {
+      const currentUser = channelMembers.filter((x) => x.id === commonData.user?.id)[0];
+
+      if (currentUser && !selectedPeople) {
+        setSelectedPeople([currentUser]);
+      }
+    }
+  }, [channelMembers]);
+
   const [title, setTitle] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState<boolean>(false);
@@ -80,7 +90,7 @@ const CreateReport = ({ commonData }: Props) => {
   const [selectedPeople, setSelectedPeople] = useState<TeamMember[]>(channelMembers);
   const [allowedTags, setAllowedTags] = useState<string[]>([]);
 
-  const mainfile: CreationReportFileSystemObject[] = [new CreationReportFileSystemObject('Readme.md', 'Readme.md', 'Readme.md', 'file', '')];
+  const mainfile: CreationReportFileSystemObject[] = [new CreationReportFileSystemObject('Readme.md', 'Readme.md', 'Readme.md', 'file', '', undefined, true)];
 
   const [selectedFile, setSelectedFile] = useState<FilesystemItem>(new FilesystemItem(mainfile[0]!, [], 1));
   const [files, setFiles] = useState<CreationReportFileSystemObject[]>(mainfile);
@@ -227,9 +237,16 @@ const CreateReport = ({ commonData }: Props) => {
       return;
     }
 
+    const mainIndex = files.findIndex((x) => x.main === true);
+    let mainFile = 'Readme.md';
+
+    if (mainIndex >= 0) {
+      mainFile = files[mainIndex]!.path;
+    }
+
     const zip = new JSZip();
     const kysoConfigFile: KysoConfigFile = {
-      main: 'Readme.md',
+      main: mainFile,
       title,
       description,
       organization: commonData.organization!.sluglified_name,
@@ -411,7 +428,13 @@ const CreateReport = ({ commonData }: Props) => {
               <MemberFilterSelector
                 initial={channelMembers}
                 selected={selectedPeople}
-                setSelected={(newSelectedPeople: TeamMember[]) => setSelectedPeopleDelay(newSelectedPeople)}
+                setSelected={(newSelectedPeople: TeamMember[]) => {
+                  if (newSelectedPeople.length > 0) {
+                    setSelectedPeopleDelay(newSelectedPeople);
+                  } else {
+                    setError('At least one author is required');
+                  }
+                }}
                 emptyMessage={commonData.team ? 'No authors' : 'First select a channel to add authors'}
               />
 
@@ -435,7 +458,23 @@ const CreateReport = ({ commonData }: Props) => {
               ))}
             </div>
           </div>
-          <div className="flex flex-row justify-end mt-2">{draftStatus && <h6 className="text-gray-500 text-xs">{draftStatus}</h6>}</div>
+
+          <div className="flex flex-row justify-end my-2">
+            {draftStatus && <h6 className="pt-2 text-gray-500 text-xs">{draftStatus}</h6>}
+
+            {hasAnythingCached && (
+              <PureKysoButton
+                type={KysoButton.SECONDARY}
+                className="ml-2"
+                onClick={() => {
+                  cleanStorage();
+                  router.reload();
+                }}
+              >
+                Clear
+              </PureKysoButton>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex flex-row">
@@ -487,6 +526,28 @@ const CreateReport = ({ commonData }: Props) => {
                 onUploadFile={onUploadFile}
                 files={files}
                 selectedFileId={selectedFile.file.id}
+                onSetAsMainFile={(newFile: FilesystemItem) => {
+                  const index = files.findIndex((x) => x.id === newFile.file.id);
+
+                  if (index >= 0) {
+                    const newFiles = Array.from(
+                      files.map((x) => {
+                        x.main = false;
+                        return x;
+                      }),
+                    );
+
+                    const newMainFile = files[index]!;
+                    newMainFile.main = true;
+                    newFiles.push(newMainFile);
+
+                    setFiles(newFiles);
+                    setDraftStatus('Saving ...');
+                    delayedCallback('formFile', newFiles);
+                  } else {
+                    setError(`${newFile.file.path} no longer exists and can't be set as main`);
+                  }
+                }}
                 onAddNewFile={(newFile: CreationReportFileSystemObject) => {
                   addNewFile(newFile);
                 }}
@@ -515,30 +576,10 @@ const CreateReport = ({ commonData }: Props) => {
           <div className="flex justify-end">
             <div className="flex flex-row items-center space-x-2">
               <div className="mr-2">
-                {hasAnythingCached && (
-                  <button
-                    type="reset"
-                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    onClick={() => {
-                      cleanStorage();
-                      router.reload();
-                    }}
-                  >
-                    Clear
-                  </button>
-                )}
-                <PureKysoButton type={KysoButton.PRIMARY} onClick={handleSubmit}>
+                <PureKysoButton type={KysoButton.PRIMARY} onClick={handleSubmit} className="ml-2">
                   {busy && <PureSpinner size={5} />}
                   Post <ArrowRightIcon className="ml-2 w-4 h-4" />
                 </PureKysoButton>
-                <button
-                  type="submit"
-                  onClick={handleSubmit}
-                  className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-default-kyso hover:bg-default-kyso-button-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
-                >
-                  {busy && <PureSpinner size={5} />}
-                  Post <ArrowRightIcon className="ml-2 w-4 h-4" />
-                </button>
               </div>
             </div>
           </div>

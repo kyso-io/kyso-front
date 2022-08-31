@@ -8,6 +8,7 @@ interface Props {
   files: CreationReportFileSystemObject[];
   onAddNewFile?: (newFile: CreationReportFileSystemObject) => void;
   onRemoveFile?: (newfile: CreationReportFileSystemObject) => void;
+  onSetAsMainFile?: (newfile: FilesystemItem) => void;
   onSelectedFile?: (selectedFile: FilesystemItem) => void;
   onUploadFile: (event: ChangeEvent<HTMLInputElement>, parent: FilesystemItem) => void;
   selectedFileId: string;
@@ -93,6 +94,9 @@ const Filesystem = (props: Props) => {
           selectedFileId={props.selectedFileId}
           key={item.file.id}
           item={item}
+          onSetAsMainFile={(newFile: FilesystemItem) => {
+            props.onSetAsMainFile!(newFile);
+          }}
           onAddNewFile={(newFile: CreationReportFileSystemObject) => {
             props.onAddNewFile!(newFile);
           }}

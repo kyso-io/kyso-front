@@ -3,7 +3,7 @@ import type { FilesystemItem } from '@/model/filesystem-item.model';
 import NewReportNamingDropdown from '@/components/NewReportNamingDropdown';
 import { Menu, Transition } from '@headlessui/react';
 import { DocumentAddIcon, DocumentIcon, UploadIcon, FolderAddIcon } from '@heroicons/react/outline';
-import { DotsVerticalIcon, FolderIcon, FolderOpenIcon, PencilAltIcon, TrashIcon } from '@heroicons/react/solid';
+import { DotsVerticalIcon, FolderIcon, FolderOpenIcon, PencilAltIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
 import type { ChangeEvent } from 'react';
 import React, { Fragment, useState } from 'react';
 import classNames from '@/helpers/class-names';
@@ -12,6 +12,7 @@ interface FilesystemEntryProps {
   item: FilesystemItem;
   onAddNewFile: (newFile: CreationReportFileSystemObject) => void;
   onRemoveFile: (newfile: CreationReportFileSystemObject) => void;
+  onSetAsMainFile?: (newMainFile: FilesystemItem) => void;
   onSelectedFile?: (selectedFile: FilesystemItem) => void;
   onUploadFile: (event: ChangeEvent<HTMLInputElement>, parent: FilesystemItem) => void;
   selectedFileId: string;
@@ -47,12 +48,14 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
           <div className="flex-1 inline-flex items-center">
             {hasChildren ? <FolderOpenIcon className="mr-1 h-5 w-5 text-gray-400" aria-hidden="true" /> : <NewIcon className="mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />}
 
-            <div>{item.file.name}</div>
+            <div>
+              {item.file.name} {item.main ? <StarIcon style={{ width: '18px', display: 'initial' }} aria-hidden="true" /> : ''}
+            </div>
           </div>
         </button>
         <Menu as="div" className="relative inline-block text-left">
           <Menu.Button className="border-none inline-flex justify-center w-full rounded p-2 text-sm font-medium text-gray-700 hover:bg-gray-200" onClick={() => setOpen(!open)}>
-            <DotsVerticalIcon className="-m-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+            <DotsVerticalIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </Menu.Button>
 
           <Transition
@@ -117,6 +120,21 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                     </label>
                   </>
                 )}
+
+                {fileType === 'file' && (
+                  <button
+                    className={classNames('w-full hover:cursor-pointer text-gray-700 hover:bg-gray-100', 'group flex items-center px-4 py-2 text-sm text-gray-400 group-hover:text-gray-500')}
+                    onClick={() => {
+                      if (props.onSetAsMainFile) {
+                        props.onSetAsMainFile(item);
+                      }
+                    }}
+                  >
+                    <StarIcon className="mr-3 h-5 w-5" aria-hidden="true" />
+                    Set as main
+                  </button>
+                )}
+
                 <button
                   className={classNames('w-full hover:cursor-pointer text-gray-700 hover:bg-gray-100', 'group flex items-center px-4 py-2 text-sm text-gray-400 group-hover:text-gray-500')}
                   onClick={() => {
@@ -147,6 +165,9 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
           selectedFileId={selectedFileId}
           key={fsItem.file.id}
           item={fsItem}
+          onSetAsMainFile={(newFile: FilesystemItem) => {
+            props.onSetAsMainFile!(newFile);
+          }}
           onAddNewFile={(newFile: CreationReportFileSystemObject) => {
             props.onAddNewFile!(newFile);
           }}

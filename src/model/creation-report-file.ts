@@ -11,12 +11,20 @@ export class CreationReportFileSystemObject {
 
   public text: string | null;
 
-  constructor(id: string, path: string, name: string, type: string, text: string, parentId?: string) {
+  public main?: boolean;
+
+  constructor(id: string, path: string, name: string, type: string, text: string, parentId?: string, main?: boolean) {
     this.id = id;
     this.name = name;
     this.path = path;
     this.type = type;
     this.text = text;
+
+    if (main) {
+      this.main = main;
+    } else {
+      this.main = false;
+    }
 
     if (parentId) {
       this.parentId = parentId;

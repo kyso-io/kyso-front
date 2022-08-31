@@ -19,7 +19,7 @@ const handleCreation = (newName: string, isFolder: boolean, onCreate: (newName: 
     console.error('newName property was not provided');
   }
 
-  const fileType: string = newName.split('.').length > 1 ? newName.split('.').pop()! : 'unknown';
+  const fileType: string = newName.split('.').length > 1 ? newName.split('.').pop()! : 'file';
 
   if (!isFolder && !newName.endsWith('.md')) {
     newName = `${newName}.md`;

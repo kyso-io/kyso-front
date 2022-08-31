@@ -41,7 +41,6 @@ const useResize = (props: UseResizeProps): UseResizeReturn => {
   );
 
   const disableResize = useCallback(() => {
-    console.log('disableResize');
     setIsResizing(false);
   }, [setIsResizing]);
 
@@ -50,7 +49,6 @@ const useResize = (props: UseResizeProps): UseResizeReturn => {
     (e: any) => {
       if (isResizing) {
         const newWidth = e.clientX; // You may want to add some offset here from props
-        console.log({ currentWidth: width, newWidth, isResizing });
         if (newWidth >= 200 && newWidth <= 1000) {
           setWidth(newWidth + 80);
         }

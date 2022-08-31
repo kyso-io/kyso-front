@@ -7,10 +7,18 @@ export class FilesystemItem {
 
   public level: number;
 
-  constructor(file: CreationReportFileSystemObject, children: FilesystemItem[], level: number) {
+  public main: boolean;
+
+  constructor(file: CreationReportFileSystemObject, children: FilesystemItem[], level: number, main?: boolean) {
     this.file = file;
     this.children = children;
     this.level = level;
+
+    if (main) {
+      this.main = main;
+    } else {
+      this.main = false;
+    }
   }
 
   public hasChildren(): boolean {
@@ -18,7 +26,7 @@ export class FilesystemItem {
   }
 
   public static from(object: CreationReportFileSystemObject): FilesystemItem {
-    return new FilesystemItem(object, [], object.path.split('/').length);
+    return new FilesystemItem(object, [], object.path.split('/').length, object.main ? object.main : false);
   }
 
   public static fromArray(object: CreationReportFileSystemObject[]): FilesystemItem[] {
