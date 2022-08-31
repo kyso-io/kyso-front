@@ -137,10 +137,33 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     const getData = async () => {
       const mainFile = currentPath === '' ? reportData.report!.main_file : undefined;
       const validFiles: GithubFileHash[] = selfTree.filter((item: GithubFileHash) => item.type === 'file');
-      const allowedPaths = [currentPath, mainFile, 'Readme.md'];
-      const validFile: GithubFileHash | undefined = validFiles?.find((item: GithubFileHash) => {
+      const allowedPaths = [currentPath, mainFile];
+
+      const defaultRenderFiles: string[] = [
+        'Readme.md',
+        'readme.md',
+        'index.md',
+        'index.html',
+        'index.ipynb',
+        'index.pptx',
+        'index.docx',
+        'index.xlsx',
+        'index.doc',
+        'index.ppt',
+        'index.xsl',
+        'index.txt',
+      ];
+
+      let validFile: GithubFileHash | undefined = validFiles?.find((item: GithubFileHash) => {
         return allowedPaths.includes(item.path);
       });
+
+      if (!validFile) {
+        validFile = validFiles?.find((item: GithubFileHash) => {
+          return defaultRenderFiles.includes(item.path);
+        });
+      }
+
       try {
         let ftr: FileToRender | null = null;
 
