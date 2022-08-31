@@ -398,7 +398,7 @@ const CreateReport = ({ commonData }: Props) => {
                 {hasAnythingCached && (
                   <button
                     type="reset"
-                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-900 hover:bg-blue-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     onClick={() => {
                       cleanStorage();
                       router.reload();
@@ -410,7 +410,7 @@ const CreateReport = ({ commonData }: Props) => {
                 <button
                   type="submit"
                   onClick={handleSubmit}
-                  className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-default-kyso hover:bg-default-kyso-button-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                 >
                   {busy && <PureSpinner size={5} />}
                   Post <ArrowRightIcon className="ml-2 w-4 h-4" />

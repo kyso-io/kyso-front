@@ -27,7 +27,7 @@ const PureVersionsDropdown = (props: Props) => {
               <a
                 aria-label="open"
                 key={item.version}
-                className={classNames('flex flex-row p-4 hover:bg-gray-200 items-center text-sm', item.version.toString() === version ? 'bg-gray-100' : '')}
+                className={classNames('flex flex-row p-4 hover:bg-gray-100 items-center text-sm', item.version.toString() === version ? 'bg-gray-100' : '')}
                 href={`${reportUrl}?version=${item.version}`}
               >
                 <div className="text-gray-800 mr-1">Version #{item.version}</div>

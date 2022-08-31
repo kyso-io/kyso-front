@@ -50,7 +50,7 @@ const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => 
               <span>
                 {' '}
                 on{' '}
-                <a href={`/${activityFeed.organization}/${activityFeed.team}/${report.sluglified_name}`} className="font-medium  text-blue-600 hover:text-indigo-700 hover:underline">
+                <a href={`/${activityFeed.organization}/${activityFeed.team}/${report.sluglified_name}`} className="font-medium  text-indigo-600 hover:text-indigo-700 hover:underline">
                   {report.title}
                 </a>
               </span>
@@ -59,7 +59,7 @@ const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => 
               <span>
                 {' '}
                 on{' '}
-                <a href={`/${activityFeed.organization}/${activityFeed.team}/discussions/${discussion.id}`} className="font-medium  text-blue-600 hover:text-indigo-700 hover:underline">
+                <a href={`/${activityFeed.organization}/${activityFeed.team}/discussions/${discussion.id}`} className="font-medium  text-indigo-600 hover:text-indigo-700 hover:underline">
                   {discussion.title}
                 </a>
               </span>
@@ -340,7 +340,8 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
       </div>
       {hasMore ? (
         <div className="flex justify-center items-center mt-6">
-          <button onClick={getMore} className="text-sm text-gray-500">
+          {/* done */}
+          <button onClick={getMore} className="text-sm px-2.5 py-1.5 rounded-md text-gray-500 bg-white hover:bg-gray-100 focus:outline-none ">
             Load more
           </button>
         </div>

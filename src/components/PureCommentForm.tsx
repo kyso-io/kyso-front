@@ -157,7 +157,10 @@ const PureCommentForm = (props: IPureCommentForm) => {
 
         <div className="flex flex-row space-x-2">
           {(comment?.id || parentComment?.id) && (
-            <button className="hover:underline text-gray-500 text-sm" onClick={onCancel}>
+            <button
+              className="inline-flex items-center px-2 py-1 mr-2 text-sm font-small rounded-md shadow-sm text-gray-500 focus:outline-none focus:ring-0 bg-white hover:bg-gray-100 border border-gray-500"
+              onClick={onCancel}
+            >
               Cancel
             </button>
           )}
@@ -168,7 +171,9 @@ const PureCommentForm = (props: IPureCommentForm) => {
                 e.preventDefault();
                 setValue('');
               }}
-              className={classNames('inline-flex items-center px-2 py-1 text-xs text-gray-500 hover:underline font-medium focus:outline-none focus:ring-0')}
+              className={classNames(
+                'inline-flex items-center px-2 py-1 mr-2 text-sm font-small rounded-md shadow-sm text-gray-500 focus:outline-none focus:ring-0 bg-white hover:bg-gray-100 border border-gray-500',
+              )}
             >
               Cancel
             </button>
@@ -178,8 +183,8 @@ const PureCommentForm = (props: IPureCommentForm) => {
             <button
               type="submit"
               className={classNames(
-                'inline-flex items-center px-2 py-1 border border-transparent text-sm font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-0',
-                'bg-indigo-600  hover:bg-indigo-700',
+                'inline-flex items-center px-2 py-1 border border-transparent text-sm font-small rounded-md shadow-sm text-white focus:outline-none focus:ring-0',
+                'bg-kyso-600 hover:bg-kyso-700 focus:ring-kyso-700 focus:ring-offset-2',
               )}
             >
               {isLoading && <PureSpinner size={5} />}

@@ -86,6 +86,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   const teamRoles: { value: string; label: string }[] = useMemo(() => {
     const data: { value: string; label: string }[] = [
+      { value: 'organization-admin', label: 'Full access' },
       { value: 'team-admin', label: 'Full access' },
       { value: 'team-contributor', label: 'Can edit' },
       { value: 'team-reader', label: 'Can comment' },
@@ -151,7 +152,20 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     <React.Fragment>
       <Menu as="div" className="ml-2 relative inline-block text-left">
         <div>
-          <Menu.Button className="flex items-center">
+          <Menu.Button
+            className="flex items-center
+              text-sm
+              font-small
+              rounded-md
+              text-gray-500
+              focus:outline-none
+              focus:ring-0
+              border 
+              border-transparent
+              bg-white
+              hover:bg-gray-100          
+              px-2.5 py-1.5"
+          >
             <PureAvatarGroup data={filteredMembers.slice(0, MAX_USERS_TO_SHOW)}></PureAvatarGroup>
             {plusMembers > 0 && <div className="ml-2 text-sm font-semibold text-slate-500 dark:text-slate-200">+{plusMembers}</div>}
             <ChevronDownIcon className="ml-2 h-5 w-5" aria-hidden="true" />
@@ -215,11 +229,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
                       if (member.team_roles && member.team_roles.length > 0) {
                         roles = `${teamRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
-
-                        if (roles === 'undefined') {
-                          // Take a look at the organization level
-                          roles = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
-                        }
                       } else {
                         roles = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
                       }
@@ -282,11 +291,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       <div className="flex flex-row">
                         <select
                           value={selectedOrgRole}
-                          placeholder="Organization role"
                           onChange={(e) => setSelectedOrgRole(e.target.value)}
                           className="mt-1 mr-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                         >
-                          <option disabled={true}>Organization role</option>
+                          <option>Select a role</option>
                           {organizationRoles.map((role: { value: string; label: string }) => (
                             <option key={role.value} value={role.value}>
                               {role.label}
@@ -296,11 +304,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         {showTeamRoles && (
                           <select
                             value={selectedTeamRole}
-                            placeholder="Channel role"
                             onChange={(e) => setSelectedTeamRole(e.target.value)}
                             className="mt-1 ml-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                           >
-                            <option disabled={true}>Channel role</option>
+                            <option>Select a role</option>
                             {teamRoles.map((role: { value: string; label: string }) => (
                               <option key={role.value} value={role.value}>
                                 {role.label}
@@ -350,9 +357,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
-                            ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500'
-                            : 'bg-kyso-primary hover:bg-kyso-primary focus:ring-indigo-500',
+                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
@@ -367,7 +372,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       onClick={clearData}
                       type="button"
                       className={clsx(
-                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border text-xs font-medium rounded shadow-sm text-kyso-primary focus:outline-none focus:ring-2 focus:ring-offset-2 border-kyso-secondary-border bg-kyso-secondary hover:bg-kyso-secondary focus:ring-slate-300',
+                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border border-gray-500 text-xs font-medium rounded shadow-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white hover:bg-gray-100 focus:ring-gray-100',
                       )}
                     >
                       Cancel
@@ -435,11 +440,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         <select
                           disabled={!isOrgAdmin}
                           value={selectedOrgRole}
-                          placeholder="Organization role"
                           onChange={(e) => setSelectedOrgRole(e.target.value)}
                           className="mt-1 mr-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                         >
-                          <option disabled={true}>Organization role</option>
+                          <option>Select a role</option>
                           {organizationRoles.map((role: { value: string; label: string }) => (
                             <option key={role.value} value={role.value}>
                               {role.label}
@@ -449,11 +453,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         {showTeamRoles && (
                           <select
                             value={selectedTeamRole}
-                            placeholder="Channel role"
                             onChange={(e) => setSelectedTeamRole(e.target.value)}
                             className="mt-1 ml-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                           >
-                            <option disabled={true}>Channel role</option>
+                            <option>Select a role</option>
                             {teamRoles.map((role: { value: string; label: string }) => (
                               <option key={role.value} value={role.value}>
                                 {role.label}
@@ -535,7 +538,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={inputDeleteUser !== keyDeleteUser}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          inputDeleteUser !== keyDeleteUser ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-primary hover:bg-kyso-primary-700 focus:ring-indigo-500',
+                          inputDeleteUser !== keyDeleteUser ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
@@ -552,9 +555,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
-                            ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500'
-                            : 'bg-kyso-primary hover:bg-kyso-primary-700 focus:ring-indigo-500',
+                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
@@ -569,7 +570,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       onClick={clearData}
                       type="button"
                       className={clsx(
-                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border text-xs font-medium rounded shadow-sm text-kyso-primary focus:outline-none focus:ring-2 focus:ring-offset-2 border-kyso-secondary-border bg-kyso-secondary hover:bg-kyso-secondary focus:ring-slate-300',
+                        'mt-3 mr-2 inline-flex items-center px-2.5 py-1.5 border border-gray-500 text-xs font-medium rounded shadow-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white hover:bg-gray-100 focus:ring-gray-100',
                       )}
                     >
                       Cancel

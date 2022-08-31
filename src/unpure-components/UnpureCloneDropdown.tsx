@@ -1,3 +1,4 @@
+import PurePrimaryKysoBtn from '@/components/PrimaryKysoBtn';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
 import { Popover, Transition } from '@headlessui/react';
@@ -86,11 +87,12 @@ const UnpureCloneDropdown = (props: Props) => {
                 </div>
               </div>
             </div>
-
-            <div className="flex flex-row items-center space-x-2 hover:underline hover:cursor-pointer" onClick={() => downloadReport()}>
-              <FolderDownloadIcon className="w-5 h-5" />
-              <div className="text-md font-medium">Download zip</div>
-            </div>
+            <PurePrimaryKysoBtn terciary={true} onClick={() => downloadReport()} extraCss={'flex flex-row'} textSize={'text-md font-medium'}>
+              <div className="flex flex-row items-center space-x-2">
+                <FolderDownloadIcon className="w-5 h-5 text-gray-900" />
+                <div className="text-md font-medium text-gray-900">Download zip</div>
+              </div>
+            </PurePrimaryKysoBtn>
           </div>
         </Popover.Panel>
       </Popover>

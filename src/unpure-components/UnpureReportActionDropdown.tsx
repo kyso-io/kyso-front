@@ -55,7 +55,7 @@ const UnpureReportActionDropdown = (props: Props) => {
             <div className="py-1">
               {/* {hasPermissionEditReport && (
                 <Menu.Item>
-                  <a href="settings" className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50')}>
+                  <a href="settings" className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-100')}>
                     Edit Report
                   </a>
                 </Menu.Item>
@@ -63,8 +63,8 @@ const UnpureReportActionDropdown = (props: Props) => {
 
               {hasPermissionDeleteReport && (
                 <Menu.Item>
-                  <a href="#" onClick={() => deleteReport()} className="text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50 group flex items-center">
-                    <TrashIcon className="mr-1 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
+                  <a href="#" onClick={() => deleteReport()} className="text-rose-700 ', 'block px-4 py-2 text-sm hover:bg-gray-100 group flex items-center">
+                    <TrashIcon className="mr-1 h-5 w-5 text-rose-700  hover:bg-rose-100" aria-hidden="true" />
                     Delete
                   </a>
                 </Menu.Item>
@@ -75,7 +75,7 @@ const UnpureReportActionDropdown = (props: Props) => {
                   // onClick={() => }
                   className={classNames(
                     'text-gray-700',
-                    'block px-4 py-2 text-sm hover:bg-gray-50'
+                    'block px-4 py-2 text-sm hover:bg-gray-100'
                   )}
                 >
                   Download current file as pdf
