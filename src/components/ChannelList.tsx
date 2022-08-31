@@ -48,7 +48,7 @@ const ChannelList = (props: Props) => {
             <span className="my-2 bg-gray-300 h-0.5 mx-3" />
             <a
               href={`${basePath}/${commonData.organization?.sluglified_name}/create-channel`}
-              className={classNames('text-gray-500 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm  rounded-md')}
+              className={classNames('text-gray-500 hover:bg-gray-100 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm  rounded-md')}
             >
               <PlusCircleIcon className="w-5 h-5 mr-1" /> New channel
             </a>

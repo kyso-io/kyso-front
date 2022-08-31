@@ -57,7 +57,10 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
           {report?.id && (
             <button
               type="button"
-              className={clsx('inline-flex space-x-2 text-gray-400 hover:text-gray-500', !commonData.user ? 'cursor-default' : '')}
+              className={clsx(
+                'inline-flex space-x-2 text-sm font-small rounded-md text-gray-500 items-center focus:outline-none focus:ring-0 border border-transparent bg-white hover:bg-gray-100 px-2.5 py-1.5',
+                !commonData.user ? 'cursor-default' : '',
+              )}
               onClick={() => {
                 if (!commonData.user) {
                   return;
@@ -65,12 +68,12 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
                 onUpvoteReport();
               }}
             >
-              <ThumbUpIcon className={classNames('h-5 w-5', report.mark_as_star_by_user ? 'text-indigo-500' : '')} aria-hidden="true" />
-              <span className="text-gray-900">{report.stars}</span>
+              <span className="text-gray-500">{report.stars}</span>
+              <ThumbUpIcon className={classNames('h-5 w-5', report.mark_as_star_by_user ? 'text-indigo-600 hover:text-indigo-700' : '')} aria-hidden="true" />
               <span className="sr-only">upvotes</span>
             </button>
           )}
-          <PureShareButton report={report} basePath={router.basePath} commonData={commonData} withText={true} color={'text-indigo-500'} />
+          <PureShareButton report={report} basePath={router.basePath} commonData={commonData} withText={true} color={'text-indigo-600 hover:text-indigo-700'} />
         </div>
 
         <div className="flex flex-row items-center justify-end w-full">

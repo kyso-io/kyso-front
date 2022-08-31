@@ -42,7 +42,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
   return (
     <div className="flex flex-col min-h-screen">
       <div className="flex flex-col z-10 w-screen border-b">
-        <Disclosure as="div" className="bg-default-kyso">
+        <Disclosure as="div" className="bg-kyso-600">
           {({ open }) => (
             <>
               <div className="mx-auto px-4 sm:px-6 lg:px-8 text-white">

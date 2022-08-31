@@ -81,7 +81,13 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
         {commonData.user && (
           <div className="absolute top-0 right-0">
             <Menu as="div" className="relative inline-block text-left">
-              <Menu.Button>{report.pin || report.user_pin ? <BookmarkIconSolid className="h-7 w-7 text-indigo-600 -mt-1" /> : <BookmarkIcon className="h-7 w-10 text-indigo-600 -mt-1" />}</Menu.Button>
+              <Menu.Button>
+                {report.pin || report.user_pin ? (
+                  <BookmarkIconSolid className="h-7 w-7 text-indigo-600 -mt-1 hover:text-indigo-700" />
+                ) : (
+                  <BookmarkIcon className="h-7 w-10 text-indigo-600 -mt-1 hover:text-indigo-700" />
+                )}
+              </Menu.Button>
               {toggleUserPinReport && toggleGlobalPinReport && (
                 <Transition
                   as={Fragment}
@@ -92,12 +98,12 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="origin-top-right absolute right-0 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity/5 focus:outline-none">
+                  <Menu.Items className="origin-top-right absolute right-0 w-48 rounded-md shadow-lg bg-white ring-1 ring-gray-200 ring-opacity/5 focus:outline-none">
                     {hasPermissionReportGlobalPin && (
                       <Menu.Item>
                         {({ active }) => (
-                          <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-100': active })}>
-                            <button className={classNames(active ? 'bg-gray-100 text-gray-500' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
+                          <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-50': active })}>
+                            <button className={classNames(active ? 'bg-gray-50 text-gray-700' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
                               {report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
                             </button>
                           </div>
@@ -107,8 +113,8 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
                     {!report.pin && (
                       <Menu.Item>
                         {({ active }) => (
-                          <div onClick={toggleUserPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-100': active })}>
-                            <button className={classNames(active ? 'bg-gray-100 text-gray-500' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
+                          <div onClick={toggleUserPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-50': active })}>
+                            <button className={classNames(active ? 'bg-gray-50 text-gray-700' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
                               {report.user_pin ? 'Remove pin from the top' : 'Pin to the top'}
                             </button>
                           </div>
@@ -133,11 +139,11 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
         </div>
         <div className="flex flex-row items-center text-gray-500 text-xs space-x-4">
           <PureShareButton report={report} basePath={router.basePath} commonData={commonData} color={'text-gray-500'} />
-          <div className="flex flex-row items-center space-x-2">
-            <span className="pl-3">{report.stars}</span>
+          <div className="flex flex-row items-center space-x-2 bg-white hover:bg-gray-100 p-2  rounded-md">
+            <span>{report.stars}</span>
             <ThumbUpIcon
-              className={clsx('shrink-0 h-5 w-5 ', { 'cursor-pointer': commonData.user !== null })}
-              color={report.mark_as_star_by_user ? '#5850ec' : ''}
+              className={clsx('shrink-0 h-5 w-5 text ', { 'cursor-pointer': commonData.user !== null })}
+              color={report.mark_as_star_by_user ? '#4f46e5' : ''}
               onClick={onClickToggleUserStarReport}
             />
           </div>
