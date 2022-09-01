@@ -527,7 +527,7 @@ const Index = ({ commonData }: Props) => {
           </div>
         )}
 
-        {teamInfo && <InfoActivity info={teamInfo} visibility={commonData.team?.visibility} hasLabel={true} showPrivacy={true} />}
+        {teamInfo && <InfoActivity info={teamInfo} visibility={commonData.team?.visibility} hasLabel={true} showPrivacy={false} />}
 
         <ReportsSearchBar
           members={members}

@@ -49,7 +49,7 @@ const PureNewReportPopover = (props: Props) => {
                       <PencilAltIcon className="w-5 h-5" />
                       <div className="text-md font-medium">Create new report in UI</div>
                     </div>
-                    <div className="text-sm">Create a report in Kyso{"'s"}s web editor.</div>
+                    <div className="text-sm">Create a report in Kyso{"'s"} web editor.</div>
                   </a>
                 </div>
 
