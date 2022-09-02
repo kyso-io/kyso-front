@@ -643,7 +643,7 @@ const CreateReport = ({ commonData }: Props) => {
         <div className="w-4/6">
           <div className="flex justify-end">
             <div className="flex flex-row items-center space-x-2">
-              <div className="mr-2">
+              <div className="mr-2 mt-2">
                 <PureKysoButton type={KysoButton.PRIMARY} onClick={handleSubmit} className="ml-2">
                   {busy && <PureSpinner size={5} />}
                   Post <ArrowRightIcon className="ml-2 w-4 h-4" />

@@ -177,7 +177,7 @@ const UnpureReportRender = (props: Props) => {
       render = <KysoMarkdownRenderer source={fileToRender.content} />;
     } else if (FileTypesHelper.isImage(fileToRender.path)) {
       render = <RenderBase64Image base64={fileToRender.content as string} />;
-    } else if (FileTypesHelper.isJupyterNotebook('.ipynb')) {
+    } else if (FileTypesHelper.isJupyterNotebook(fileToRender.path)) {
       render = (
         <KysoJupyterRenderer
           commonData={commonData}
