@@ -1,34 +1,32 @@
 import PureKysoButton from '@/components/PureKysoButton';
-import Head from 'next/head';
 import PureNotification from '@/components/PureNotification';
 import MainLayout from '@/layouts/MainLayout';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
-import { emailRecoveryPasswordAction } from '@kyso-io/kyso-store';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import { useAppDispatch } from '@/hooks/redux-hooks';
 
-const validateEmail = (email: string) => {
-  /* eslint-disable no-useless-escape */
-  const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(email);
-};
+// const validateEmail = (email: string) => {
+//   /* eslint-disable no-useless-escape */
+//   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+//   return re.test(email);
+// };
 
-type IResetPassword = {
+type IChangePassword = {
   commonData: CommonData;
 };
 
-const ResetPassword = (props: IResetPassword) => {
+const ChangePassword = (props: IChangePassword) => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  // const dispatch = useAppDispatch();
   const { commonData } = props;
 
-  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [repeatPassword, setRepeatPassword] = useState('');
   const [notification, setNotification] = useState('');
   const [notificationType, setNotificationType] = useState('');
   const [requesting, setRequesting] = useState(Boolean(false));
-  const [captchaToken, setCaptchaToken] = useState('');
 
   useEffect(() => {
     if (commonData && commonData.user) {
@@ -37,56 +35,63 @@ const ResetPassword = (props: IResetPassword) => {
   }, [commonData]);
 
   const onSubmit = async () => {
-    if (!validateEmail(email)) {
-      setNotification('error');
-      setNotificationType('Invalid email');
+    if (password !== repeatPassword) {
+      setNotificationType('error');
+      setNotification("Passwords don't match");
       return;
     }
-
     setRequesting(true);
 
-    const result = await dispatch(emailRecoveryPasswordAction({ email, captchaToken }));
+    // + is replaced by blank space dont know why...
+    // email = email.replace(' ', '+');
 
-    if (result?.payload) {
-      setNotification('success');
-      setNotificationType('An email has been sent to you with the instructions.');
-      setTimeout(() => {
-        router.replace('/');
-      }, 1000);
-      setEmail('');
-      setCaptchaToken('');
-      setRequesting(false);
-    } else {
-      setNotification('error');
-      setNotificationType('Something went wrong. Please contact with support@kyso.io');
-      setRequesting(false);
-    }
+    // const result = await dispatch(changePasswordAction({ email, token, password }));
+    // if (result?.payload) {
+    //   setNotificationType('success');
+    //   setNotification('Password changed successfully.');
+    //   setTimeout(() => {
+    //     router.replace('/');
+    //   }, 1000);
+    // }
+    setPassword('');
+    setRepeatPassword('');
+    setRequesting(false);
   };
 
   return (
     <div className="w-full min-h-full flex items-center ">
       <Head>
-        <title> Kyso | Reset password </title>
+        <title> Kyso | Change password </title>
       </Head>
       <div className="text-left">{notification && <PureNotification message={notification} type={notificationType} />}</div>
       <div className="border p-10 justify-between mx-auto mt-20 max-w-lg">
-        <h1 className="text-2xl font-bold text-gray-900">Reset password.</h1>
-        <p className="text-l font-small text-gray-500 mt-4 mb-8 max-w-prose">
-          Do you forgot your password? Please write your email address, and we will send you a password recovery email with all the instructions.
-        </p>
+        <h1 className="text-2xl font-bold text-gray-900">Change password.</h1>
         <div>
-          <p className="font-small text-gray-500 my-4 max-w-prose">Please enter your email address.</p>
+          <p className="font-small text-gray-500 my-4 max-w-prose">Please enter new password.</p>
           <input
             className="border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
-            aria-label="Email"
-            type="text"
+            aria-label="password"
+            type="password"
             name="email"
-            value={email}
-            placeholder="Email"
+            value={password}
+            placeholder="Password"
             onChange={(e) => {
               setNotification('');
               setNotificationType('error');
-              setEmail(e.target.value);
+              setPassword(e.target.value);
+            }}
+          />
+          <input
+            className="border rounded w-full mt-4 py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+            aria-label="Repeat password"
+            type="password"
+            name="Repeat password"
+            value={repeatPassword}
+            placeholder="Repeat password"
+            onChange={(e) => {
+              setNotification('');
+              setNotificationType('error');
+              setRepeatPassword(e.target.value);
             }}
           />
           <div className="flex justify-between mx-auto mt-10">
@@ -110,7 +115,7 @@ const ResetPassword = (props: IResetPassword) => {
                 onSubmit();
               }}
             >
-              Send email
+              Submit
             </PureKysoButton>
           </div>
         </div>
@@ -119,6 +124,6 @@ const ResetPassword = (props: IResetPassword) => {
   );
 };
 
-ResetPassword.layout = MainLayout;
+ChangePassword.layout = MainLayout;
 
-export default ResetPassword;
+export default ChangePassword;
