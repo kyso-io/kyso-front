@@ -328,7 +328,7 @@ const CreateReport = ({ commonData }: Props) => {
     return {
       autofocus: false,
       spellChecker: false,
-      hideIcons: ['side-by-side', 'fullscreen'],
+      hideIcons: ['side-by-side', 'fullscreen', 'preview'],
     };
   }, []);
 
