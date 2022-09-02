@@ -1,4 +1,5 @@
 import React from 'react';
+import RenderError from './RenderError';
 
 export type Props = {
   base64: string;
@@ -7,7 +8,7 @@ export type Props = {
 
 const RenderBase64Image = (props: Props) => {
   if (!props.base64) {
-    return <h2>This image can&apos;t be rendered</h2>;
+    return <RenderError message={`This image can't be rendered`} />;
   }
 
   let src: string = '';

@@ -1,5 +1,6 @@
 import React from 'react';
 import hljs from 'highlight.js';
+import RenderError from './RenderError';
 
 export type Props = {
   code: string | Buffer | undefined;
@@ -13,8 +14,9 @@ function classNames(...classes: string[]) {
 
 const RenderCode = (props: Props) => {
   const { code } = props;
+
   if (!code) {
-    return <p>Invalid properties</p>;
+    return <RenderError message="No content to show" />;
   }
 
   const highlightedCode = hljs.highlightAuto(code.toString()).value;
