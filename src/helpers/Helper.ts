@@ -12,8 +12,12 @@ export class Helper {
   }
 
   public static async getKysoPublicSettings(): Promise<KeyValue[]> {
-    if (localStorage.getItem('kyso-settings')) {
-      return JSON.parse(localStorage.getItem('kyso-settings') as string);
+    // Don't save it in the localStorage, because in re-deployments the values will dont change
+    // and guide us to errors or missunderstoods. With the sessionStorage we retrieve that data once
+    // in every new session, which I think is a good balance between being updated and don't overwhelm
+    // the API
+    if (sessionStorage.getItem('kyso-settings')) {
+      return JSON.parse(sessionStorage.getItem('kyso-settings') as string);
     }
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -23,7 +27,7 @@ export class Helper {
       return new KeyValue(x.key, x.value);
     });
 
-    localStorage.setItem('kyso-settings', JSON.stringify(publicKeys));
+    sessionStorage.setItem('kyso-settings', JSON.stringify(publicKeys));
 
     return publicKeys;
   }
