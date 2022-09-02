@@ -173,7 +173,7 @@ const UnpureReportRender = (props: Props) => {
   let render = null;
 
   if (fileToRender.content !== null) {
-    if (fileToRender.path.endsWith('.md')) {
+    if (FileTypesHelper.isTextBasedFiled(fileToRender.path)) {
       render = <KysoMarkdownRenderer source={fileToRender.content} />;
     } else if (FileTypesHelper.isImage(fileToRender.path)) {
       render = <RenderBase64Image base64={fileToRender.content as string} />;
