@@ -3,7 +3,8 @@ import hljs from 'highlight.js';
 
 export type Props = {
   code: string | Buffer | undefined;
-  embedded?: boolean;
+  showFileNumbers?: boolean;
+  className?: string;
 };
 
 function classNames(...classes: string[]) {
@@ -11,25 +12,24 @@ function classNames(...classes: string[]) {
 }
 
 const RenderCode = (props: Props) => {
-  const { embedded = true, code } = props;
+  const { code } = props;
   if (!code) {
     return <p>Invalid properties</p>;
   }
 
   const highlightedCode = hljs.highlightAuto(code.toString()).value;
-
   return (
     <div
-      className={classNames('flex flex-col w-full whitespace-pre w-full overflow-x-scroll my-2', embedded ? 'bg-gray-100 px-0 border-y py-2' : '')}
+      className={classNames('flex flex-col w-full whitespace-pre w-full overflow-x-scroll my-2', props.className ? props.className : '')}
       style={{
         overflowX: 'auto',
       }}
     >
       {highlightedCode?.split('\n').map((line: string, index: number) => (
         <div key={`cd-cell${index}`} className="flex flex-row items-center space-x-4 not-prose">
-          <code className="text-gray-500 text-xs whitespace-pre text-right border-r px-2 w-8">{index + 1}</code>
+          {props.showFileNumbers && <code className="text-gray-500 text-xs whitespace-pre text-right border-r px-2 w-8">{index + 1}</code>}
           <code
-            className="text-xs not-prose whitespace-pre"
+            className="text-sm not-prose whitespace-pre"
             style={{
               whiteSpace: 'pre',
             }}

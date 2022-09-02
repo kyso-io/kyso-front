@@ -31,8 +31,9 @@ import { ArrowRightIcon, DocumentAddIcon, FolderAddIcon, SelectorIcon, UploadIco
 import 'easymde/dist/easymde.min.css';
 import PureKysoButton from '@/components/PureKysoButton';
 import { KysoButton } from '@/types/kyso-button.enum';
-import { Helper } from '@/helpers/Helper';
 import RenderBase64Image from '@/components/renderers/RenderBase64Image';
+import { FileTypesHelper } from '@/helpers/FileTypesHelper';
+import RenderCode from '@/components/renderers/RenderCode';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -329,7 +330,7 @@ const CreateReport = ({ commonData }: Props) => {
       return setSelectedFileValue(base64);
     };
 
-    if (Helper.isImage(selectedFile.file.path)) {
+    if (FileTypesHelper.isImage(selectedFile.file.path)) {
       go(false);
     } else {
       go(true);
@@ -346,7 +347,6 @@ const CreateReport = ({ commonData }: Props) => {
 
   const [selectedFileValue, setSelectedFileValue] = useState('initial value');
   const handleEditorChange = useCallback((fileId: string, value: string) => {
-    console.log(value);
     setSelectedFileValue(value);
     setLocalStorageItem(fileId, `data:text/plain;base64,${btoa(value)}`);
     setHasAnythingCached(true);
@@ -584,6 +584,7 @@ const CreateReport = ({ commonData }: Props) => {
                   delayedCallback('formFile', newFiles);
                 }}
                 onSelectedFile={(sFile: FilesystemItem) => {
+                  setSelectedFileValue('');
                   setSelectedFile(sFile);
                 }}
               />
@@ -591,15 +592,103 @@ const CreateReport = ({ commonData }: Props) => {
           </div>
         </div>
         <div className="w-4/6">
-          {selectedFile.file.path.endsWith('.md') && (
+          {FileTypesHelper.isTextBasedFiled(selectedFile.file.path) && (
             <>
               <SimpleMdeReact key="editor" options={editorOptions} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
             </>
           )}
 
-          {Helper.isImage(selectedFile.file.path) && (
-            <>
+          {FileTypesHelper.isImage(selectedFile.file.path) && (
+            <div className="pl-10">
               <RenderBase64Image base64={selectedFileValue} alt={selectedFile.file.name} />
+            </div>
+          )}
+
+          {FileTypesHelper.isJupyterNotebook(selectedFile.file.path) && (
+            <>
+              <button
+                type="button"
+                className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"></svg>
+
+                <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                  />
+                </svg>
+                <span className="mt-2 block text-sm font-medium text-gray-900">Jupyter notebooks can only be displayed once the report is created.</span>
+              </button>
+            </>
+          )}
+
+          {FileTypesHelper.isCode(selectedFile.file.path) && (
+            <>
+              <RenderCode code={selectedFileValue} showFileNumbers={true} />
+            </>
+          )}
+
+          {FileTypesHelper.isOffice365(selectedFile.file.path) && (
+            <>
+              <button
+                type="button"
+                className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"></svg>
+
+                <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                  />
+                </svg>
+                <span className="mt-2 block text-sm font-medium text-gray-900">Microsoft Office content only can be displayed when the report is created.</span>
+              </button>
+            </>
+          )}
+
+          {FileTypesHelper.isGoogleDocs(selectedFile.file.path) && (
+            <>
+              <button
+                type="button"
+                className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"></svg>
+
+                <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                  />
+                </svg>
+                <span className="mt-2 block text-sm font-medium text-gray-900">
+                  Files of type {FileTypesHelper.getExtension(selectedFile.file.path)} only can be displayed when the report is created
+                </span>
+              </button>
+            </>
+          )}
+
+          {!FileTypesHelper.isSupported(selectedFile.file.path) && (
+            <>
+              <button
+                type="button"
+                className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6"></svg>
+
+                <svg className="mx-auto h-12 w-12 text-gray-400" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" fill="none" viewBox="0 0 48 48" aria-hidden="true">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"
+                  />
+                </svg>
+                <span className="mt-2 block text-sm font-medium text-gray-900">This file can&apos;t be rendered while you create a report</span>
+              </button>
             </>
           )}
 
