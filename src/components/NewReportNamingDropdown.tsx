@@ -26,10 +26,6 @@ const handleCreation = (newName: string, isFolder: boolean, onCreate: (newName: 
 
   const fileType: string = newName.split('.').length > 1 ? newName.split('.').pop()! : 'file';
 
-  if (!isFolder && !newName.endsWith('.md')) {
-    newName = `${newName}.md`;
-  }
-
   const fileObject = new CreationReportFileSystemObject(v4(), newName, newName, isFolder ? 'folder' : fileType, '', parent?.id);
 
   onCreate(fileObject);
