@@ -1,5 +1,8 @@
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { PureSpinner } from '@/components/PureSpinner';
+import RenderCode from '@/components/renderers/RenderCode';
+import RenderGoogleDocs from '@/components/renderers/RenderGoogleDocs';
+import RenderOffice365 from '@/components/renderers/RenderOffice365';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import type { CommonData } from '@/types/common-data';
@@ -41,7 +44,7 @@ const KysoJupyterRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponen
   ),
 });
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+/* // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const KysoCodeRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoCodeRenderer), {
   ssr: false,
   loading: () => (
@@ -69,7 +72,7 @@ const KysoGoogleDocsRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcompo
       <PureSpinner />
     </div>
   ),
-});
+}); */
 
 const isImage = (name: string) => {
   return (
@@ -213,7 +216,7 @@ const UnpureReportRender = (props: Props) => {
       fileToRender.path.endsWith('.py') ||
       fileToRender.path.endsWith('.css')
     ) {
-      render = <KysoCodeRenderer embedded={false} code={fileToRender.content} />;
+      render = <RenderCode embedded={false} code={fileToRender.content} />;
     } else if (
       (fileToRender.path.toLowerCase().endsWith('.pptx') ||
         fileToRender.path.toLowerCase().endsWith('.ppt') ||
@@ -224,7 +227,7 @@ const UnpureReportRender = (props: Props) => {
       frontEndUrl
     ) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-      render = <KysoOffice365Renderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
+      render = <RenderOffice365 fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
     } else if (
       (fileToRender.path.toLowerCase().endsWith('.rtf') ||
         fileToRender.path.toLowerCase().endsWith('.pdf') ||
@@ -252,7 +255,8 @@ const UnpureReportRender = (props: Props) => {
       frontEndUrl
     ) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-      render = <KysoGoogleDocsRenderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
+      // render = <KysoGoogleDocsRenderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
+      render = <RenderGoogleDocs fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
     } else {
       render = (
         <div className="prose p-3">
