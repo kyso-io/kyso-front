@@ -31,6 +31,8 @@ import { ArrowRightIcon, DocumentAddIcon, FolderAddIcon, SelectorIcon, UploadIco
 import 'easymde/dist/easymde.min.css';
 import PureKysoButton from '@/components/PureKysoButton';
 import { KysoButton } from '@/types/kyso-button.enum';
+import { Helper } from '@/helpers/Helper';
+import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -299,6 +301,7 @@ const CreateReport = ({ commonData }: Props) => {
       return;
     }
     const newFiles = Array.from(event.target.files);
+
     newFiles.forEach(async (file) => {
       try {
         setError(null);
@@ -313,22 +316,31 @@ const CreateReport = ({ commonData }: Props) => {
   };
 
   useEffect(() => {
-    const go = async () => {
+    const go = async (asText: boolean) => {
       const base64 = getLocalStorageItem(selectedFile?.file.id);
       if (!base64) {
         return setSelectedFileValue('');
       }
-      const text = await (await fetch(base64)).text();
-      return setSelectedFileValue(text);
+
+      if (asText) {
+        const text = await (await fetch(base64)).text();
+        return setSelectedFileValue(text);
+      }
+      return setSelectedFileValue(base64);
     };
-    go();
+
+    if (Helper.isImage(selectedFile.file.path)) {
+      go(false);
+    } else {
+      go(true);
+    }
   }, [selectedFile?.file.id]);
 
   const editorOptions = useMemo(() => {
     return {
       autofocus: false,
       spellChecker: false,
-      hideIcons: ['side-by-side', 'fullscreen'],
+      hideIcons: ['side-by-side', 'fullscreen', 'preview'],
     };
   }, []);
 
@@ -542,6 +554,7 @@ const CreateReport = ({ commonData }: Props) => {
                   const index = files.findIndex((x) => x.id === newFile.file.id);
 
                   if (index >= 0) {
+                    // Create a new array putting all the mains to false
                     const newFiles = Array.from(
                       files.map((x) => {
                         x.main = false;
@@ -549,9 +562,9 @@ const CreateReport = ({ commonData }: Props) => {
                       }),
                     );
 
+                    // Set the new main
                     const newMainFile = files[index]!;
                     newMainFile.main = true;
-                    newFiles.push(newMainFile);
 
                     setFiles(newFiles);
                     setDraftStatus('Saving ...');
@@ -578,7 +591,18 @@ const CreateReport = ({ commonData }: Props) => {
           </div>
         </div>
         <div className="w-4/6">
-          <SimpleMdeReact key="editor" options={editorOptions} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
+          {selectedFile.file.path.endsWith('.md') && (
+            <>
+              <SimpleMdeReact key="editor" options={editorOptions} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
+            </>
+          )}
+
+          {Helper.isImage(selectedFile.file.path) && (
+            <>
+              <RenderBase64Image base64={selectedFileValue} alt={selectedFile.file.name} />
+            </>
+          )}
+
           <div className="text-right">{error && <ErrorNotification message={error} />}</div>
         </div>
       </div>

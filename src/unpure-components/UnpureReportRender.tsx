@@ -1,8 +1,10 @@
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { PureSpinner } from '@/components/PureSpinner';
+import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 import RenderCode from '@/components/renderers/RenderCode';
 import RenderGoogleDocs from '@/components/renderers/RenderGoogleDocs';
 import RenderOffice365 from '@/components/renderers/RenderOffice365';
+import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import type { CommonData } from '@/types/common-data';
@@ -73,13 +75,6 @@ const KysoGoogleDocsRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcompo
     </div>
   ),
 }); */
-
-const isImage = (name: string) => {
-  return (
-    name != null &&
-    (name.toLowerCase().endsWith('.png') || name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.jpeg') || name.toLowerCase().endsWith('.gif') || name.toLowerCase().endsWith('.svg'))
-  );
-};
 
 interface Props {
   fileToRender: FileToRender;
@@ -180,14 +175,8 @@ const UnpureReportRender = (props: Props) => {
   if (fileToRender.content !== null) {
     if (fileToRender.path.endsWith('.md')) {
       render = <KysoMarkdownRenderer source={fileToRender.content} />;
-    } else if (isImage(fileToRender.path)) {
-      render = (
-        <img
-          // className="w-full"
-          src={`data:image/jpeg;base64,${fileToRender.content}`}
-          alt="file image"
-        />
-      );
+    } else if (Helper.isImage(fileToRender.path)) {
+      render = <RenderBase64Image base64={fileToRender.content as string} />;
     } else if (fileToRender.path.endsWith('.ipynb')) {
       render = (
         <KysoJupyterRenderer
