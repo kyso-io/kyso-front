@@ -88,10 +88,10 @@ const UnpureCloneDropdown = (props: Props) => {
                 </div>
               </div>
             </div>
-            <PureKysoButton type={KysoButton.TERCIARY} onClick={() => downloadReport()} className={'flex flex-row text-md font-medium'}>
+            <PureKysoButton type={KysoButton.TERCIARY} onClick={() => downloadReport()} className={'flex flex-row text-base font-medium text-gray-900'}>
               <div className="flex flex-row items-center space-x-2">
-                <FolderDownloadIcon className="w-5 h-5 text-gray-900" />
-                <div className="text-md font-medium text-gray-900">Download zip</div>
+                <FolderDownloadIcon className="w-6 h-6 text-gray-900" />
+                <div className="text-base font-medium text-gray-900">Download zip</div>
               </div>
             </PureKysoButton>
           </div>

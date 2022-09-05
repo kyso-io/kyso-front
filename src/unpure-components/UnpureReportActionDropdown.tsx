@@ -1,11 +1,13 @@
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
-import { Menu, Transition } from '@headlessui/react';
-import { DotsVerticalIcon, FolderDownloadIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
+import { KysoButton } from '@/types/kyso-button.enum';
+import { Transition } from '@headlessui/react';
+import { FolderDownloadIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { deleteReportAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { Fragment, useState } from 'react';
+import PureKysoButton from '@/components/PureKysoButton';
 
 interface Props {
   report: ReportDTO;
@@ -36,7 +38,12 @@ const UnpureReportActionDropdown = (props: Props) => {
 
   return (
     <>
-      <Menu as="div" className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm relative inline-block" style={{ zIndex: 1 }}>
+      <PureKysoButton type={KysoButton.TERCIARY} onClick={() => deleteReport()} className={'relative inline-block text-rose-700 rounded-none  border border-r-0 border-y-0 border-gray-300 p-2'}>
+        <TrashIcon className="mr-1 h-5 w-5 text-rose-700" aria-hidden="true" />
+        Delete
+      </PureKysoButton>
+
+      {/* <Menu as="div" className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm relative inline-block" style={{ zIndex: 1 }}>
         <Menu.Button className="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
           <span className="sr-only">Open options</span>
           <DotsVerticalIcon className="h-5 w-5" aria-hidden="true" />
@@ -53,23 +60,23 @@ const UnpureReportActionDropdown = (props: Props) => {
         >
           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none">
             <div className="py-1">
-              {/* {hasPermissionEditReport && (
+              {hasPermissionEditReport && (
                 <Menu.Item>
                   <a href="settings" className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-100')}>
                     Edit Report
                   </a>
                 </Menu.Item>
-              )} */}
+              )}
 
               {hasPermissionDeleteReport && (
                 <Menu.Item>
                   <a href="#" onClick={() => deleteReport()} className="text-rose-700 ', 'block px-4 py-2 text-sm hover:bg-gray-100 group flex items-center">
-                    <TrashIcon className="mr-1 h-5 w-5 text-rose-700  hover:bg-rose-100" aria-hidden="true" />
+                    <TrashIcon className="mr-1 h-5 w-5 text-rose-700" aria-hidden="true" />
                     Delete
                   </a>
                 </Menu.Item>
               )}
-              {/* <Menu.Item>
+              <Menu.Item>
                 <a
                   href="#"
                   // onClick={() => }
@@ -81,11 +88,10 @@ const UnpureReportActionDropdown = (props: Props) => {
                   Download current file as pdf
                 </a>
             </Menu.Item>
-             */}
             </div>
           </Menu.Items>
         </Transition>
-      </Menu>
+      </Menu> */}
       <div aria-live="assertive" className="z-50 fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start">
         <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
           {/* Notification panel, dynamically insert this into the live region when it needs to be displayed */}
