@@ -1,17 +1,13 @@
 import PureKysoButton from '@/components/PureKysoButton';
 import PureNotification from '@/components/PureNotification';
+import { useAppDispatch } from '@/hooks/redux-hooks';
 import MainLayout from '@/layouts/MainLayout';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
+import { changePasswordAction } from '@kyso-io/kyso-store';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-
-// const validateEmail = (email: string) => {
-//   /* eslint-disable no-useless-escape */
-//   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-//   return re.test(email);
-// };
 
 type IChangePassword = {
   commonData: CommonData;
@@ -19,7 +15,7 @@ type IChangePassword = {
 
 const ChangePassword = (props: IChangePassword) => {
   const router = useRouter();
-  // const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
   const { commonData } = props;
 
   const [password, setPassword] = useState('');
@@ -27,6 +23,9 @@ const ChangePassword = (props: IChangePassword) => {
   const [notification, setNotification] = useState('');
   const [notificationType, setNotificationType] = useState('');
   const [requesting, setRequesting] = useState(Boolean(false));
+
+  let email: string | undefined = router.query.email as string | undefined;
+  const token: string | undefined = router.query.token as string | undefined;
 
   useEffect(() => {
     if (commonData && commonData.user) {
@@ -36,26 +35,27 @@ const ChangePassword = (props: IChangePassword) => {
 
   const onSubmit = async () => {
     if (password !== repeatPassword) {
-      setNotificationType('error');
+      setNotificationType('danger');
       setNotification("Passwords don't match");
       return;
     }
     setRequesting(true);
 
-    // + is replaced by blank space dont know why...
-    // email = email.replace(' ', '+');
-
-    // const result = await dispatch(changePasswordAction({ email, token, password }));
-    // if (result?.payload) {
-    //   setNotificationType('success');
-    //   setNotification('Password changed successfully.');
-    //   setTimeout(() => {
-    //     router.replace('/');
-    //   }, 1000);
-    // }
-    setPassword('');
-    setRepeatPassword('');
-    setRequesting(false);
+    // + is replaced by blank space in case that we need to use an alternative email with same root...
+    if (email && token) {
+      email = email.replace(' ', '+');
+      const result = await dispatch(changePasswordAction({ email, token, password }));
+      if (result?.payload) {
+        setNotificationType('success');
+        setNotification('Password changed successfully.');
+        setTimeout(() => {
+          router.replace('/');
+        }, 1000);
+      }
+      setPassword('');
+      setRepeatPassword('');
+      setRequesting(false);
+    }
   };
 
   return (

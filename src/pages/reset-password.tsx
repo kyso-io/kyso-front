@@ -1,13 +1,16 @@
 import PureKysoButton from '@/components/PureKysoButton';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import Head from 'next/head';
+import { Helper } from '@/helpers/Helper';
 import PureNotification from '@/components/PureNotification';
 import MainLayout from '@/layouts/MainLayout';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { emailRecoveryPasswordAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAppDispatch } from '@/hooks/redux-hooks';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -29,6 +32,9 @@ const ResetPassword = (props: IResetPassword) => {
   const [notificationType, setNotificationType] = useState('');
   const [requesting, setRequesting] = useState(Boolean(false));
   const [captchaToken, setCaptchaToken] = useState('');
+  const [captchaEnabled, setCaptchaEnabled] = useState(false);
+  const [captchaSiteKey, setCaptchaSiteKey] = useState('');
+  const hCaptchaRef = useRef(null);
 
   useEffect(() => {
     if (commonData && commonData.user) {
@@ -36,20 +42,48 @@ const ResetPassword = (props: IResetPassword) => {
     }
   }, [commonData]);
 
+  useEffect(() => {
+    const getOrganizationOptions = async () => {
+      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+      const publicKeys: any[] = await Helper.getKysoPublicSettings();
+
+      if (!publicKeys || publicKeys.length === 0) {
+        // api might be down
+        setNotificationType('danger');
+        setNotification('An unknown error has occurred');
+        return;
+      }
+
+      const newCaptchaSiteKey = publicKeys.find((x) => x.key === KysoSettingsEnum.HCAPTCHA_SITE_KEY).value;
+
+      const newCaptchaEnabled = publicKeys.find((x) => x.key === KysoSettingsEnum.HCAPTCHA_ENABLED).value === 'true';
+
+      setCaptchaSiteKey(newCaptchaSiteKey);
+      setCaptchaEnabled(newCaptchaEnabled);
+    };
+    getOrganizationOptions();
+  }, []);
+
   const onSubmit = async () => {
     if (!validateEmail(email)) {
-      setNotification('error');
-      setNotificationType('Invalid email');
+      setNotificationType('danger');
+      setNotification('Invalid email');
       return;
     }
-
+    if (captchaEnabled) {
+      if (!captchaToken || captchaToken.length === 0) {
+        setNotificationType('danger');
+        setNotification('Please verify that you are not a robot');
+        return;
+      }
+    }
     setRequesting(true);
 
     const result = await dispatch(emailRecoveryPasswordAction({ email, captchaToken }));
 
     if (result?.payload) {
-      setNotification('success');
-      setNotificationType('An email has been sent to you with the instructions.');
+      setNotificationType('success');
+      setNotification('An email has been sent to you with the instructions.');
       setTimeout(() => {
         router.replace('/');
       }, 1000);
@@ -57,8 +91,8 @@ const ResetPassword = (props: IResetPassword) => {
       setCaptchaToken('');
       setRequesting(false);
     } else {
-      setNotification('error');
-      setNotificationType('Something went wrong. Please contact with support@kyso.io');
+      setNotification('Something went wrong. Please contact with support@kyso.io');
+      setNotificationType('danger');
       setRequesting(false);
     }
   };
@@ -89,6 +123,7 @@ const ResetPassword = (props: IResetPassword) => {
               setEmail(e.target.value);
             }}
           />
+          <div className="flex justify-between mx-auto mt-10">{captchaEnabled && captchaSiteKey && <HCaptcha ref={hCaptchaRef} sitekey={captchaSiteKey} onVerify={setCaptchaToken} />}</div>
           <div className="flex justify-between mx-auto mt-10">
             <PureKysoButton
               type={KysoButton.SECONDARY}

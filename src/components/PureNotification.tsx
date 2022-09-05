@@ -31,6 +31,7 @@ const PureNotification = (props: Props) => {
   if (props.type === 'danger') {
     NotificationIcon = ExclamationCircleIcon;
   }
+  console.log('props.type', props.type);
 
   return (
     <div key={props.message} aria-live="assertive" className="z-50 fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start">
