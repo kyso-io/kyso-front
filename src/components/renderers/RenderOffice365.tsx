@@ -1,5 +1,6 @@
 import React from 'react';
 import { v4 } from 'uuid';
+import RenderError from './RenderError';
 
 export type Props = {
   fileUrl: string;
@@ -10,7 +11,7 @@ const RenderOffice365 = (props: Props) => {
   const id = v4();
 
   if (!props.fileUrl) {
-    <p>Invalid properties</p>;
+    return <RenderError message={`Sorry, we can't retrieve the content of this Microsoft Office file`} />;
   }
 
   let parameters = `src=${props.fileUrl}`;

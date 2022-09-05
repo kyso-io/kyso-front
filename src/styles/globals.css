@@ -4,4 +4,4 @@
 @tailwind variants;
 
 /* TODO: check with Fran if this is ok -> it feels a little dirty to import the css for another module (kyso-webcomponents) */
-@import 'highlight.js/styles/github.css';
+@import 'highlight.js/styles/vs.css';

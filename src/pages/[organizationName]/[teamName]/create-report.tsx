@@ -31,8 +31,10 @@ import { ArrowRightIcon, DocumentAddIcon, FolderAddIcon, SelectorIcon, UploadIco
 import 'easymde/dist/easymde.min.css';
 import PureKysoButton from '@/components/PureKysoButton';
 import { KysoButton } from '@/types/kyso-button.enum';
-import { Helper } from '@/helpers/Helper';
 import RenderBase64Image from '@/components/renderers/RenderBase64Image';
+import { FileTypesHelper } from '@/helpers/FileTypesHelper';
+import RenderCode from '@/components/renderers/RenderCode';
+import RenderError from '@/components/renderers/RenderError';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -329,7 +331,7 @@ const CreateReport = ({ commonData }: Props) => {
       return setSelectedFileValue(base64);
     };
 
-    if (Helper.isImage(selectedFile.file.path)) {
+    if (FileTypesHelper.isImage(selectedFile.file.path)) {
       go(false);
     } else {
       go(true);
@@ -346,7 +348,6 @@ const CreateReport = ({ commonData }: Props) => {
 
   const [selectedFileValue, setSelectedFileValue] = useState('initial value');
   const handleEditorChange = useCallback((fileId: string, value: string) => {
-    console.log(value);
     setSelectedFileValue(value);
     setLocalStorageItem(fileId, `data:text/plain;base64,${btoa(value)}`);
     setHasAnythingCached(true);
@@ -507,7 +508,7 @@ const CreateReport = ({ commonData }: Props) => {
             <div className="flex min-h-12 border-b">
               <div className="inline-flex items-center justify-end w-full">
                 <NewReportNamingDropdown
-                  label="Create new markdown file"
+                  label="Create new file"
                   icon={DocumentAddIcon}
                   onCreate={(newFile: CreationReportFileSystemObject) => {
                     addNewFile(newFile);
@@ -584,6 +585,7 @@ const CreateReport = ({ commonData }: Props) => {
                   delayedCallback('formFile', newFiles);
                 }}
                 onSelectedFile={(sFile: FilesystemItem) => {
+                  setSelectedFileValue('');
                   setSelectedFile(sFile);
                 }}
               />
@@ -591,15 +593,45 @@ const CreateReport = ({ commonData }: Props) => {
           </div>
         </div>
         <div className="w-4/6">
-          {selectedFile.file.path.endsWith('.md') && (
+          {FileTypesHelper.isTextBasedFiled(selectedFile.file.path) && (
             <>
               <SimpleMdeReact key="editor" options={editorOptions} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
             </>
           )}
 
-          {Helper.isImage(selectedFile.file.path) && (
-            <>
+          {FileTypesHelper.isImage(selectedFile.file.path) && (
+            <div className="pl-10">
               <RenderBase64Image base64={selectedFileValue} alt={selectedFile.file.name} />
+            </div>
+          )}
+
+          {FileTypesHelper.isJupyterNotebook(selectedFile.file.path) && (
+            <>
+              <RenderError message="Jupyter notebooks can only be displayed once the report is created." />
+            </>
+          )}
+
+          {FileTypesHelper.isCode(selectedFile.file.path) && (
+            <>
+              <RenderCode code={selectedFileValue} showFileNumbers={true} />
+            </>
+          )}
+
+          {FileTypesHelper.isOffice365(selectedFile.file.path) && (
+            <>
+              <RenderError message="Microsoft Office content only can be displayed when the report is created." />
+            </>
+          )}
+
+          {FileTypesHelper.isGoogleDocs(selectedFile.file.path) && (
+            <>
+              <RenderError message={`Files of type ${FileTypesHelper.getExtension(selectedFile.file.path)} only can be displayed when the report is created`} />
+            </>
+          )}
+
+          {!FileTypesHelper.isSupported(selectedFile.file.path) && (
+            <>
+              <RenderError message={`This file can't be rendered while you create a report. Did you miss to set the extension of the file?`} />
             </>
           )}
 
@@ -611,7 +643,7 @@ const CreateReport = ({ commonData }: Props) => {
         <div className="w-4/6">
           <div className="flex justify-end">
             <div className="flex flex-row items-center space-x-2">
-              <div className="mr-2">
+              <div className="mr-2 mt-2">
                 <PureKysoButton type={KysoButton.PRIMARY} onClick={handleSubmit} className="ml-2">
                   {busy && <PureSpinner size={5} />}
                   Post <ArrowRightIcon className="ml-2 w-4 h-4" />

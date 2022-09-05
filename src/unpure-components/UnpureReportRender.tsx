@@ -4,7 +4,7 @@ import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 import RenderCode from '@/components/renderers/RenderCode';
 import RenderGoogleDocs from '@/components/renderers/RenderGoogleDocs';
 import RenderOffice365 from '@/components/renderers/RenderOffice365';
-import { Helper } from '@/helpers/Helper';
+import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import type { CommonData } from '@/types/common-data';
@@ -173,11 +173,11 @@ const UnpureReportRender = (props: Props) => {
   let render = null;
 
   if (fileToRender.content !== null) {
-    if (fileToRender.path.endsWith('.md')) {
+    if (FileTypesHelper.isTextBasedFiled(fileToRender.path)) {
       render = <KysoMarkdownRenderer source={fileToRender.content} />;
-    } else if (Helper.isImage(fileToRender.path)) {
+    } else if (FileTypesHelper.isImage(fileToRender.path)) {
       render = <RenderBase64Image base64={fileToRender.content as string} />;
-    } else if (fileToRender.path.endsWith('.ipynb')) {
+    } else if (FileTypesHelper.isJupyterNotebook(fileToRender.path)) {
       render = (
         <KysoJupyterRenderer
           commonData={commonData}
@@ -196,55 +196,13 @@ const UnpureReportRender = (props: Props) => {
           enabledDeleteInlineComment={enabledDeleteInlineComment}
         />
       );
-    } else if (
-      fileToRender.path.endsWith('.txt') ||
-      fileToRender.path.endsWith('.json') ||
-      fileToRender.path.endsWith('.yaml') ||
-      fileToRender.path.endsWith('.yml') ||
-      fileToRender.path.endsWith('.js') ||
-      fileToRender.path.endsWith('.py') ||
-      fileToRender.path.endsWith('.css')
-    ) {
-      render = <RenderCode embedded={false} code={fileToRender.content} />;
-    } else if (
-      (fileToRender.path.toLowerCase().endsWith('.pptx') ||
-        fileToRender.path.toLowerCase().endsWith('.ppt') ||
-        fileToRender.path.toLowerCase().endsWith('.xlsx') ||
-        fileToRender.path.toLowerCase().endsWith('.xls') ||
-        fileToRender.path.toLowerCase().endsWith('.docx') ||
-        fileToRender.path.toLowerCase().endsWith('.doc')) &&
-      frontEndUrl
-    ) {
+    } else if (FileTypesHelper.isCode(fileToRender.path)) {
+      render = <RenderCode code={fileToRender.content} showFileNumbers={true} />;
+    } else if (FileTypesHelper.isOffice365(fileToRender.path) && frontEndUrl) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
       render = <RenderOffice365 fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
-    } else if (
-      (fileToRender.path.toLowerCase().endsWith('.rtf') ||
-        fileToRender.path.toLowerCase().endsWith('.pdf') ||
-        fileToRender.path.toLowerCase().endsWith('.txt') ||
-        fileToRender.path.toLowerCase().endsWith('.webm') ||
-        fileToRender.path.toLowerCase().endsWith('.mpeg4') ||
-        fileToRender.path.toLowerCase().endsWith('.3gpp') ||
-        fileToRender.path.toLowerCase().endsWith('.mov') ||
-        fileToRender.path.toLowerCase().endsWith('.avi') ||
-        fileToRender.path.toLowerCase().endsWith('.mpegps') ||
-        fileToRender.path.toLowerCase().endsWith('.wmv') ||
-        fileToRender.path.toLowerCase().endsWith('.flv') ||
-        fileToRender.path.toLowerCase().endsWith('.pages') ||
-        fileToRender.path.toLowerCase().endsWith('.ai') ||
-        fileToRender.path.toLowerCase().endsWith('.psd') ||
-        fileToRender.path.toLowerCase().endsWith('.tiff') ||
-        fileToRender.path.toLowerCase().endsWith('.dxf') ||
-        fileToRender.path.toLowerCase().endsWith('.svg') ||
-        fileToRender.path.toLowerCase().endsWith('.eps') ||
-        fileToRender.path.toLowerCase().endsWith('.ps') ||
-        fileToRender.path.toLowerCase().endsWith('.ttf') ||
-        fileToRender.path.toLowerCase().endsWith('.xps') ||
-        fileToRender.path.toLowerCase().endsWith('.zip') ||
-        fileToRender.path.toLowerCase().endsWith('.rar')) &&
-      frontEndUrl
-    ) {
+    } else if (FileTypesHelper.isGoogleDocs(fileToRender.path) && frontEndUrl) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-      // render = <KysoGoogleDocsRenderer fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
       render = <RenderGoogleDocs fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
     } else {
       render = (

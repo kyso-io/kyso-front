@@ -1,5 +1,6 @@
 import React from 'react';
 import { v4 } from 'uuid';
+import RenderError from './RenderError';
 
 export type Props = {
   fileUrl: string;
@@ -13,7 +14,7 @@ const RenderGoogleDocs = (props: Props) => {
   let appliedStyle: React.CSSProperties;
 
   if (!props.fileUrl) {
-    <p>Invalid properties</p>;
+    return <RenderError message={`Sorry, we can't retrieve the content of this file`} />;
   }
 
   if (!props.style) {

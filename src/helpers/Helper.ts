@@ -49,13 +49,6 @@ export class Helper {
     return re.test(String(email).toLowerCase());
   }
 
-  public static isImage = (name: string) => {
-    return (
-      name != null &&
-      (name.toLowerCase().endsWith('.png') || name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.jpeg') || name.toLowerCase().endsWith('.gif') || name.toLowerCase().endsWith('.svg'))
-    );
-  };
-
   public static parseFileSizeStr = (fileSizeStr: string): number => {
     const units: string[] = ['b', 'kb', 'mb', 'gb', 'tb', 'pb', 'eb', 'zb', 'yb'];
     const size: number = parseFloat(fileSizeStr);

@@ -21,13 +21,10 @@ type INewReportNamingDropdown = {
 const handleCreation = (newName: string, isFolder: boolean, onCreate: (newName: CreationReportFileSystemObject) => void, parent?: CreationReportFileSystemObject): void => {
   if (!newName) {
     console.error('newName property was not provided');
+    return;
   }
 
   const fileType: string = newName.split('.').length > 1 ? newName.split('.').pop()! : 'file';
-
-  if (!isFolder && !newName.endsWith('.md')) {
-    newName = `${newName}.md`;
-  }
 
   const fileObject = new CreationReportFileSystemObject(v4(), newName, newName, isFolder ? 'folder' : fileType, '', parent?.id);
 
@@ -100,7 +97,10 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                   {props.cancelButtonLabel ? props.cancelButtonLabel : 'Cancel'}
                 </Menu.Button>
                 <Menu.Button
-                  className="mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className={`mt-3 w-full inline-flex items-center justify-center px-4 py-2 border border-transparent shadow-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm ${
+                    newName.length > 0 ? 'bg-indigo-600 hover:bg-indigo-700' : 'text-slate-200	bg-slate-500'
+                  }`}
+                  disabled={!(newName.length > 0)}
                   onClick={() => {
                     handleCreation(newName, computedIsFolder, onCreate, parent);
                   }}
