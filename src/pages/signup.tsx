@@ -26,9 +26,11 @@ const Index = () => {
   const { redirect } = router.query;
 
   const [email, setEmail] = useState('');
-  // const [error, setError] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [username, setusername] = useState('');
   const [password, setPassword] = useState('');
+
+  const [error, setError] = useState<string | null>(null);
+
   const dispatch = useDispatch<AppDispatch>();
   const [bitbucketUrl, setBitbucketUrl] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
@@ -156,7 +158,10 @@ const Index = () => {
       setError('Password is required.');
       return;
     }
-
+    if (!username || username.length === 0) {
+      setError('Username is required.');
+      return;
+    }
     const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
 
     const result = await dispatch(loginAction(loginData));
@@ -202,7 +207,7 @@ const Index = () => {
   return (
     <>
       <Head>
-        <title> Kyso | Login </title>
+        <title> Kyso | Signup </title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -255,18 +260,17 @@ const Index = () => {
             <h2 className="my-0 mb-1">Sign in to Kyso</h2>
 
             {enableKysoAuth && (
-              <form className="flex flex-col space-y-2" method="post" action={`/api/login`} onSubmit={handleSubmit}>
+              <form className="flex flex-col space-y-2 mb-5" method="post" action={`/api/login`} onSubmit={handleSubmit}>
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
                     Email
                   </label>
                   <input
-                    className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                    className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
                     aria-label="Email"
                     type="text"
                     name="email"
                     value={email}
-                    placeholder="Email"
                     onChange={(e) => {
                       setError('');
                       dispatch(storeSetError(''));
@@ -274,14 +278,30 @@ const Index = () => {
                     }}
                   />
                 </div>
-
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
+                    Username
+                  </label>
+                  <input
+                    className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                    aria-label="username"
+                    type="text"
+                    name="username"
+                    value={username}
+                    onChange={(e) => {
+                      setError('');
+                      dispatch(storeSetError(''));
+                      setusername(e.target.value);
+                    }}
+                  />
+                </div>
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
                     Password
                   </label>
 
                   <input
-                    className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                    className="mb-5 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
                     // description="Please enter your password."
                     value={password}
                     name="password"
@@ -295,20 +315,17 @@ const Index = () => {
                     }}
                   />
                 </div>
-                <a className="text-xs no-underline hover:none  text-gray-900 hover:text-indigo-600" href="/reset-password">
-                  Forgot your password?
-                </a>
                 <button
                   type="submit"
                   className="shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
                 >
-                  Log in
+                  Register
                 </button>
               </form>
             )}
 
-            <div className="my-6 mx-auto w-6/12 border-b" />
-
+            <div className="pt-5 mx-auto w-6/12 border-b" />
+            <div className="pt-5 mx-auto w-12/12 " />
             {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
               <a href={githubUrl} className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center">
                 <FontAwesomeIcon
@@ -317,7 +334,7 @@ const Index = () => {
                   }}
                   icon={faGithub}
                 />
-                Log in with Github
+                Sign up with Github
               </a>
             )}
 
@@ -329,7 +346,7 @@ const Index = () => {
                   }}
                   icon={faBitbucket}
                 />
-                Log in with Bitbucket
+                Sign up with Bitbucket
               </a>
             )}
 
@@ -341,7 +358,7 @@ const Index = () => {
                   }}
                   icon={faGitlab}
                 />
-                Log in with Gitlab
+                Sign up with Gitlab
               </a>
             )}
 
@@ -353,18 +370,24 @@ const Index = () => {
                   }}
                   icon={faGoogle}
                 />
-                Log in with Google
+                Sign up with Google
               </a>
             )}
 
             {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
               <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
                 <img src="/pingid_logo.jpg" alt="PingID Logo" className="w-4 h-4 inline m-0 mr-1" />
-                Log in with PingID
+                Sign up with PingID
               </a>
             )}
 
             {error && <div className="text-red-500 text-center p-2">{error}</div>}
+            <div className="pt-5 flex flex-row items-center ">
+              <p className="text-sm mr-5">Already have login and password?</p>
+              <a className="text-sm no-underline hover:none text-gray-900 hover:text-indigo-600" href="/login">
+                Log in
+              </a>
+            </div>
           </div>
         </main>
       </div>

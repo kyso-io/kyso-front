@@ -150,9 +150,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     plusMembers = filteredMembers.length - MAX_USERS_TO_SHOW;
   }
 
-  console.log('isOrgAdmin', isOrgAdmin);
-  console.log('isTeamAdmin', isTeamAdmin);
-
   return (
     <React.Fragment>
       <Menu as="div" className="ml-2 relative inline-block text-left">
