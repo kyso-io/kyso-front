@@ -11,7 +11,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import uuid from 'uuid';
-import ErrorNotification from '@/components/ErrorNotification';
+import PureNotification from '@/components/PureNotification';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -26,9 +26,13 @@ const Index = () => {
   const { redirect } = router.query;
 
   const [email, setEmail] = useState('');
-  // const [error, setError] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
+
+  const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState('');
+  const [notificationType, setNotificationType] = useState('');
+
   const dispatch = useDispatch<AppDispatch>();
   const [bitbucketUrl, setBitbucketUrl] = useState('');
   const [githubUrl, setGithubUrl] = useState('');
@@ -143,21 +147,33 @@ const Index = () => {
     event.preventDefault();
 
     if (!email || email.length === 0) {
+      setNotificationType('danger');
+      setNotification('Email is required');
       setError('Email is required.');
       return;
     }
 
     if (!validateEmail(email)) {
+      setNotificationType('danger');
+      setNotification('Email not valid.');
       setError('Email not valid.');
       return;
     }
 
     if (!password || password.length === 0) {
+      setNotificationType('danger');
+      setNotification('Password is required');
       setError('Password is required.');
       return;
     }
+    if (!nickname || nickname.length === 0) {
+      setNotificationType('danger');
+      setNotification('Username is required.');
+      setError('Username is required.');
+      return;
+    }
 
-    const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
+    const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, nickname, {});
 
     const result = await dispatch(loginAction(loginData));
     if (result?.payload) {
@@ -170,6 +186,8 @@ const Index = () => {
         }
       }, 200);
     } else {
+      setNotificationType('danger');
+      setNotification('Invalid credentials');
       setError('Invalid credentials');
     }
   };
@@ -202,7 +220,7 @@ const Index = () => {
   return (
     <>
       <Head>
-        <title> Kyso | Signin </title>
+        <title> Kyso | Signup </title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -213,7 +231,7 @@ const Index = () => {
             {rightLogo && <img src={rightLogo} className="h-8" alt="logo" />}
           </div>
         )}
-        <div className="text-right">{error && <ErrorNotification message={error} />}</div>
+        <div className="text-right">{notification && <PureNotification message={notification} type={notificationType} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col mt-20 items-center mx-auto max-w-[1400px] space-x-10">
           <div className="prose grow max-w-none px-6 m-0">
             <h1>Kyso.io</h1>
@@ -252,36 +270,53 @@ const Index = () => {
           </div>
 
           <div className="prose min-w-[400px] flex flex-col space-y-2 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
-            <h2 className="my-0 mb-1">Sign in to Kyso</h2>
+            <h2 className="my-0 mb-1">Sign up to Kyso</h2>
 
             {enableKysoAuth && (
-              <form className="flex flex-col space-y-2" method="post" action={`/api/login`} onSubmit={handleSubmit}>
+              <form className="flex flex-col space-y-2 mb-5" method="post" action={`/api/login`} onSubmit={handleSubmit}>
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
                     Email
                   </label>
                   <input
-                    className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                    className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
                     aria-label="Email"
                     type="text"
                     name="email"
                     value={email}
-                    placeholder="Email"
                     onChange={(e) => {
                       setError('');
+                      setNotification('');
                       dispatch(storeSetError(''));
                       setEmail(e.target.value);
                     }}
                   />
                 </div>
-
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
+                    Username
+                  </label>
+                  <input
+                    className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                    aria-label="username"
+                    type="text"
+                    name="nickname"
+                    value={nickname}
+                    onChange={(e) => {
+                      setError('');
+                      setNotification('');
+                      dispatch(storeSetError(''));
+                      setNickname(e.target.value);
+                    }}
+                  />
+                </div>
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
                     Password
                   </label>
 
                   <input
-                    className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                    className="mb-5 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
                     // description="Please enter your password."
                     value={password}
                     name="password"
@@ -290,25 +325,23 @@ const Index = () => {
                     autoComplete="off"
                     onChange={(e) => {
                       setError('');
+                      setNotification('');
                       dispatch(storeSetError(''));
                       setPassword(e.target.value);
                     }}
                   />
                 </div>
-                <a className="text-xs no-underline hover:none  text-gray-900 hover:text-indigo-600" href="/reset-password">
-                  Forgot your password?
-                </a>
                 <button
                   type="submit"
                   className="shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
                 >
-                  Sign in
+                  Register
                 </button>
               </form>
             )}
 
-            <div className="my-6 mx-auto w-6/12 border-b" />
-
+            <div className="pt-5 mx-auto w-6/12 border-b" />
+            <div className="pt-5 mx-auto w-12/12 " />
             {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
               <a href={githubUrl} className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center">
                 <FontAwesomeIcon
@@ -317,7 +350,7 @@ const Index = () => {
                   }}
                   icon={faGithub}
                 />
-                Sign in with Github
+                Sign up with Github
               </a>
             )}
 
@@ -329,7 +362,7 @@ const Index = () => {
                   }}
                   icon={faBitbucket}
                 />
-                Sign in with Bitbucket
+                Sign up with Bitbucket
               </a>
             )}
 
@@ -341,7 +374,7 @@ const Index = () => {
                   }}
                   icon={faGitlab}
                 />
-                Sign in with Gitlab
+                Sign up with Gitlab
               </a>
             )}
 
@@ -353,18 +386,24 @@ const Index = () => {
                   }}
                   icon={faGoogle}
                 />
-                Sign in with Google
+                Sign up with Google
               </a>
             )}
 
             {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
               <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
                 <img src="/pingid_logo.jpg" alt="PingID Logo" className="w-4 h-4 inline m-0 mr-1" />
-                Sign in with PingID
+                Sign up with PingID
               </a>
             )}
 
             {error && <div className="text-red-500 text-center p-2">{error}</div>}
+            <div className="pt-5 flex flex-row items-center ">
+              <p className="text-sm mr-5">Already have signin and password?</p>
+              <a className="text-sm no-underline hover:none text-gray-900 hover:text-indigo-600" href="/login">
+                Sign in
+              </a>
+            </div>
           </div>
         </main>
       </div>
