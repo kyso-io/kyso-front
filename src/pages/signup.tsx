@@ -26,7 +26,7 @@ const Index = () => {
   const { redirect } = router.query;
 
   const [email, setEmail] = useState('');
-  const [username, setusername] = useState('');
+  const [nickname, setNickname] = useState('');
   const [password, setPassword] = useState('');
 
   const [error, setError] = useState<string | null>(null);
@@ -158,11 +158,11 @@ const Index = () => {
       setError('Password is required.');
       return;
     }
-    if (!username || username.length === 0) {
+    if (!nickname || nickname.length === 0) {
       setError('Username is required.');
       return;
     }
-    const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
+    const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, nickname, {});
 
     const result = await dispatch(loginAction(loginData));
     if (result?.payload) {
@@ -286,12 +286,12 @@ const Index = () => {
                     className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
                     aria-label="username"
                     type="text"
-                    name="username"
-                    value={username}
+                    name="nickname"
+                    value={nickname}
                     onChange={(e) => {
                       setError('');
                       dispatch(storeSetError(''));
-                      setusername(e.target.value);
+                      setNickname(e.target.value);
                     }}
                   />
                 </div>
