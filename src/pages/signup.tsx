@@ -11,7 +11,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import uuid from 'uuid';
-import ErrorNotification from '@/components/ErrorNotification';
+import PureNotification from '@/components/PureNotification';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -30,6 +30,8 @@ const Index = () => {
   const [password, setPassword] = useState('');
 
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState('');
+  const [notificationType, setNotificationType] = useState('');
 
   const dispatch = useDispatch<AppDispatch>();
   const [bitbucketUrl, setBitbucketUrl] = useState('');
@@ -145,23 +147,32 @@ const Index = () => {
     event.preventDefault();
 
     if (!email || email.length === 0) {
+      setNotificationType('danger');
+      setNotification('Email is required');
       setError('Email is required.');
       return;
     }
 
     if (!validateEmail(email)) {
+      setNotificationType('danger');
+      setNotification('Email not valid.');
       setError('Email not valid.');
       return;
     }
 
     if (!password || password.length === 0) {
+      setNotificationType('danger');
+      setNotification('Password is required');
       setError('Password is required.');
       return;
     }
     if (!nickname || nickname.length === 0) {
+      setNotificationType('danger');
+      setNotification('Username is required.');
       setError('Username is required.');
       return;
     }
+
     const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, nickname, {});
 
     const result = await dispatch(loginAction(loginData));
@@ -175,6 +186,8 @@ const Index = () => {
         }
       }, 200);
     } else {
+      setNotificationType('danger');
+      setNotification('Invalid credentials');
       setError('Invalid credentials');
     }
   };
@@ -218,7 +231,7 @@ const Index = () => {
             {rightLogo && <img src={rightLogo} className="h-8" alt="logo" />}
           </div>
         )}
-        <div className="text-right">{error && <ErrorNotification message={error} />}</div>
+        <div className="text-right">{notification && <PureNotification message={notification} type={notificationType} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col mt-20 items-center mx-auto max-w-[1400px] space-x-10">
           <div className="prose grow max-w-none px-6 m-0">
             <h1>Kyso.io</h1>
@@ -273,6 +286,7 @@ const Index = () => {
                     value={email}
                     onChange={(e) => {
                       setError('');
+                      setNotification('');
                       dispatch(storeSetError(''));
                       setEmail(e.target.value);
                     }}
@@ -290,6 +304,7 @@ const Index = () => {
                     value={nickname}
                     onChange={(e) => {
                       setError('');
+                      setNotification('');
                       dispatch(storeSetError(''));
                       setNickname(e.target.value);
                     }}
@@ -310,6 +325,7 @@ const Index = () => {
                     autoComplete="off"
                     onChange={(e) => {
                       setError('');
+                      setNotification('');
                       dispatch(storeSetError(''));
                       setPassword(e.target.value);
                     }}
