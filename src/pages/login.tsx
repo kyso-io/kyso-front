@@ -202,7 +202,7 @@ const Index = () => {
   return (
     <>
       <Head>
-        <title> Kyso | Login </title>
+        <title> Kyso | Signin </title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
 
@@ -302,7 +302,7 @@ const Index = () => {
                   type="submit"
                   className="shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
                 >
-                  Log in
+                  Sign in
                 </button>
               </form>
             )}
@@ -317,7 +317,7 @@ const Index = () => {
                   }}
                   icon={faGithub}
                 />
-                Log in with Github
+                Sign in with Github
               </a>
             )}
 
@@ -329,7 +329,7 @@ const Index = () => {
                   }}
                   icon={faBitbucket}
                 />
-                Log in with Bitbucket
+                Sign in with Bitbucket
               </a>
             )}
 
@@ -341,7 +341,7 @@ const Index = () => {
                   }}
                   icon={faGitlab}
                 />
-                Log in with Gitlab
+                Sign in with Gitlab
               </a>
             )}
 
@@ -353,14 +353,14 @@ const Index = () => {
                   }}
                   icon={faGoogle}
                 />
-                Log in with Google
+                Sign in with Google
               </a>
             )}
 
             {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
               <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
                 <img src="/pingid_logo.jpg" alt="PingID Logo" className="w-4 h-4 inline m-0 mr-1" />
-                Log in with PingID
+                Sign in with PingID
               </a>
             )}
 

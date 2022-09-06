@@ -257,7 +257,7 @@ const Index = () => {
           </div>
 
           <div className="prose min-w-[400px] flex flex-col space-y-2 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
-            <h2 className="my-0 mb-1">Sign in to Kyso</h2>
+            <h2 className="my-0 mb-1">Sign up to Kyso</h2>
 
             {enableKysoAuth && (
               <form className="flex flex-col space-y-2 mb-5" method="post" action={`/api/login`} onSubmit={handleSubmit}>
@@ -383,9 +383,9 @@ const Index = () => {
 
             {error && <div className="text-red-500 text-center p-2">{error}</div>}
             <div className="pt-5 flex flex-row items-center ">
-              <p className="text-sm mr-5">Already have login and password?</p>
+              <p className="text-sm mr-5">Already have signin and password?</p>
               <a className="text-sm no-underline hover:none text-gray-900 hover:text-indigo-600" href="/login">
-                Log in
+                Sign in
               </a>
             </div>
           </div>
