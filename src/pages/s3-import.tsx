@@ -49,12 +49,12 @@ const MetadataImport = () => {
   const [awsSecretKey, setAwsSecretKey] = useState<string>('Wru6RNamvWY3Zm4L2q4U9UaHCTJiFcithXKOZtfO');
   const [s3Region, setS3Region] = useState<string>('eu-north-1');
   const [s3Bucket, setS3Bucket] = useState<string>('kyso-s3fs-test');
-  const [s3Path, setS3Path] = useState<string>('pptx');
+  const [s3Path, setS3Path] = useState<string>('s3/oncology');
 
   const [author, setAuthor] = useState<string>('lo+palpatine@dev.kyso.io');
   const [organization, setOrganization] = useState<string>('palpatines-workspace');
   const [channel, setChannel] = useState<string>('general');
-  const [force, setForce] = useState<boolean>(true);
+  const [force, setForce] = useState<boolean>(false);
 
   const [userEmail, setUserEmail] = useState<string>('lo+palpatine@dev.kyso.io');
   const [userAccessToken, setUserAccessToken] = useState<string>('defe1df9-b00f-4ad9-a931-8d39de676fce');
