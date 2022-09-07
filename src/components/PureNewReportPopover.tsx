@@ -16,8 +16,8 @@ const PureNewReportPopover = (props: Props) => {
   const [copiedKysoConfigFile, setCopiedKysoConfigFile] = useState<boolean>(false);
   const [copiedKysoPush, setCopiedKysoPush] = useState<boolean>(false);
 
-  const kysoYamlContent = `organization: ${commonData.organization?.sluglified_name}\nteam: ${
-    commonData.team?.sluglified_name || 'team-name'
+  const kysoYamlContent = `organization: ${commonData.organization?.sluglified_name}\nchannel: ${
+    commonData.team?.sluglified_name || 'channel-name'
   }\ntype: markdown\ntitle: "Add your title"\nmain: Readme.md`;
   let createLink = `/${commonData.organization?.sluglified_name}/create-report`;
 

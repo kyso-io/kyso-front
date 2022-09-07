@@ -253,8 +253,8 @@ const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
           <a href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
             {user.display_name}
           </a>{' '}
-          {activityFeed.action === ActionEnum.ADD_MEMBER && 'was added as a member in the team '}
-          {activityFeed.action === ActionEnum.REMOVE_MEMBER && 'was removed from the team '}
+          {activityFeed.action === ActionEnum.ADD_MEMBER && 'was added as a member in the channel '}
+          {activityFeed.action === ActionEnum.REMOVE_MEMBER && 'was removed from the channel '}
           <a href={`/${activityFeed.organization}/${activityFeed.team}`} className="font-medium text-indigo-600 hover:text-indigo-700">
             {team.display_name}
           </a>{' '}

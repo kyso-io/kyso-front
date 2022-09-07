@@ -101,9 +101,9 @@ export const getCommonData = async ({ organizationName, teamName }: Props): Prom
           team = fetchTeamRequest.data;
         } catch (e: any) {
           if (e.response.data.statusCode === 403) {
-            errorTeam = `You don't have permission to access this team`;
+            errorTeam = `You don't have permission to access this channel`;
           } else if (e.response.data.statusCode === 404) {
-            errorTeam = 'The team does not exist';
+            errorTeam = 'The channel does not exist';
           } else {
             errorTeam = e.response.data.message;
           }
@@ -114,9 +114,9 @@ export const getCommonData = async ({ organizationName, teamName }: Props): Prom
           team = fetchTeamRequest.data;
         } catch (e: any) {
           if (e.response.data.statusCode === 403) {
-            errorTeam = `You don't have permission to access this team`;
+            errorTeam = `You don't have permission to access this channel`;
           } else if (e.response.data.statusCode === 404) {
-            errorTeam = 'The team does not exist';
+            errorTeam = 'The channel does not exist';
           } else {
             errorTeam = e.response.data.message;
           }
