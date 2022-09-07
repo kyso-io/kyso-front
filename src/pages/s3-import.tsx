@@ -16,48 +16,23 @@ const MetadataImport = () => {
   useRedirectIfNoJWT();
 
   const commonData: CommonData = useCommonData();
-  console.log('commonData', commonData);
 
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
 
-  /*
-                        {
-                          aws: {
-                            key: 'AKIA4P2GVSUVON2MHX6I',
-                            secret_key: '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',
-                          },
-                          s3: {
-                            region: 'eu-north-1',
-                            bucket: 'kyso-s3fs-test',
-                          },
-                          kyso: {
-                            username: 'lo+palpatine@dev.kyso.io',
-                            token: 'defe1df9-b00f-4ad9-a931-8d39de676fce',
-                          },
-                          import: {
-                            s3path: 'pptx',
-                            author: 'lo+palpatine@dev.kyso.io',
-                            channel: 'general',
-                            force: 'true',
-                            organization: 'palpatines-workspace',
-                            mappings: '',
-                          },
-                        } */
+  const [awsKey, setAWSKey] = useState<string>('');
+  const [awsSecretKey, setAwsSecretKey] = useState<string>('');
+  const [s3Region, setS3Region] = useState<string>('');
+  const [s3Bucket, setS3Bucket] = useState<string>('');
+  const [s3Path, setS3Path] = useState<string>('');
 
-  const [awsKey, setAWSKey] = useState<string>('AKIA4P2GVSUVON2MHX6I');
-  const [awsSecretKey, setAwsSecretKey] = useState<string>('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');
-  const [s3Region, setS3Region] = useState<string>('eu-north-1');
-  const [s3Bucket, setS3Bucket] = useState<string>('kyso-s3fs-test');
-  const [s3Path, setS3Path] = useState<string>('s3/oncology');
-
-  const [author, setAuthor] = useState<string>('lo+palpatine@dev.kyso.io');
-  const [organization, setOrganization] = useState<string>('palpatines-workspace');
-  const [channel, setChannel] = useState<string>('general');
+  const [author, setAuthor] = useState<string>('');
+  const [organization, setOrganization] = useState<string>('');
+  const [channel, setChannel] = useState<string>('');
   const [force, setForce] = useState<boolean>(false);
 
-  const [userEmail, setUserEmail] = useState<string>('lo+palpatine@dev.kyso.io');
-  const [userAccessToken, setUserAccessToken] = useState<string>('defe1df9-b00f-4ad9-a931-8d39de676fce');
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [userAccessToken, setUserAccessToken] = useState<string>('');
 
   const [importing, setImporting] = useState<boolean>(false);
   const [imported, setImported] = useState<boolean>(false);
@@ -463,7 +438,7 @@ const MetadataImport = () => {
           <PureSpinner />
         </div>
       )}
-      {/* Wru6RNamvWY3Zm4L2q4U9UaHCTJiFcithXKOZtfO */}
+
       {!importing && imported && (
         <>
           <div
