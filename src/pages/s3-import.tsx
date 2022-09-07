@@ -379,7 +379,7 @@ const MetadataImport = () => {
                     <div className="mt-1 sm:mt-0 sm:col-span-2">
                       <div className="max-w-lg flex rounded-md shadow-sm">
                         <input
-                          type="text"
+                          type="password"
                           name="userAccessToken"
                           id="userAccessToken"
                           value={userAccessToken}
