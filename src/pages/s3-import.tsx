@@ -256,7 +256,7 @@ const MetadataImport = () => {
                     <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:pt-5">
                       <div className="sm:col-span-3">
                         <h2 className="text-xl font-medium text-blue-gray-900">Import Data</h2>
-                        <p className="mt-1 text-sm text-blue-gray-500">This information will be displayed </p>
+                        <p className="mt-1 text-sm text-blue-gray-500">Configure the default values if not found in metadata</p>
                       </div>
                     </div>
 
