@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import ChannelList from '@/components/ChannelList';
 import { PureSpinner } from '@/components/PureSpinner';
 import classNames from '@/helpers/class-names';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
@@ -47,12 +46,10 @@ const Index = ({ commonData }: Props) => {
       setBusy(false);
     }
   };
-  console.log('error', error);
+
   return (
-    <div className="flex flex-row space-x-8 p-2">
-      <div className="w-2/12">
-        <ChannelList basePath={router.basePath} commonData={commonData} />
-      </div>
+    <div className="flex flex-row space-x-8 p-2 pt-10">
+      <div className="w-2/12">{/* <ChannelList basePath={router.basePath} commonData={commonData} /> */}</div>
       <div className="w-8/12 flex flex-col space-y-8">
         <form className="space-y-8 divide-y divide-gray-200" onSubmit={createOrganization}>
           <div className="space-y-8 divide-y divide-gray-200 sm:space-y-5">
