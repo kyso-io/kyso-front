@@ -7,9 +7,10 @@ import MainLayout from '@/layouts/MainLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon } from '@heroicons/react/solid';
 // import type { NormalizedResponseDTO, Organization } from '@kyso-io/kyso-model';
-// import { Api } from '@kyso-io/kyso-store';
+import { Api } from '@kyso-io/kyso-store';
 // import { useRouter } from 'next/router';
 import React, { useState } from 'react';
+import { useCommonData } from '@/hooks/use-common-data';
 
 interface Props {
   commonData: CommonData;
@@ -19,6 +20,9 @@ const MetadataImport = ({ commonData }: Props) => {
   // const router = useRouter();
   useRedirectIfNoJWT();
   console.log('commonData', commonData);
+
+  const tempCommonData: CommonData = useCommonData();
+  console.log('commonData', tempCommonData);
 
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
@@ -283,6 +287,34 @@ const MetadataImport = ({ commonData }: Props) => {
                     <div className="text-red-500 text-sm">{error}</div>
                     <button
                       type="submit"
+                      onClick={async () => {
+                        const api: Api = new Api(tempCommonData.token, 'palpatines-workspace', 'general');
+
+                        const result = await api.importS3Bucket({
+                          aws: {
+                            key: 'AKIA4P2GVSUVON2MHX6I',
+                            secret_key: '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',
+                          },
+                          s3: {
+                            region: 'eu-north-1',
+                            bucket: 'kyso-s3fs-test',
+                          },
+                          kyso: {
+                            username: 'lo+palpatine@dev.kyso.io',
+                            token: 'defe1df9-b00f-4ad9-a931-8d39de676fce',
+                          },
+                          import: {
+                            s3path: 'pptx',
+                            author: 'lo+palpatine@dev.kyso.io',
+                            channel: 'general',
+                            force: 'true',
+                            organization: 'palpatines-workspace',
+                            mappings: '',
+                          },
+                        });
+
+                        console.log(result);
+                      }}
                       className={classNames(
                         error ? 'opacity-75 cursor-not-allowed' : 'hover:bg-kyso-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
                         'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-kyso-600 ',
