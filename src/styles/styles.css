@@ -127,7 +127,3 @@
 #tooltip[data-popper-placement^='right'] > #arrow {
   left: -4px;
 }
-
-.mqc_table .wrapper {
-  z-index: 0 !important;
-}
