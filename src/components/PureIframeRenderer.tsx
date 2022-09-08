@@ -2,7 +2,6 @@
 import TurndownService from 'turndown';
 import { v4 } from 'uuid';
 import Script from 'next/script';
-import iframeResizer from 'iframe-resizer';
 
 const turndownPluginGfm = require('joplin-turndown-plugin-gfm');
 
@@ -24,8 +23,10 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const onInitializedIframe = () => {
     try {
       const myIframe: any = document.getElementById('theframe');
+      console.log(`${myIframe.contentWindow.document.body.offsetHeight}px`);
 
-      if (myIframe) {
+      /* if (myIframe) {
+        console.log("resizing");
         iframeResizer(
           {
             log: false,
@@ -38,7 +39,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
           },
           `#theframe`,
         );
-      }
+      } */
     } catch (ex) {
       // Silent
     }
