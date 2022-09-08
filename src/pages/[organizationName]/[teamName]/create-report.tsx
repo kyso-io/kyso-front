@@ -7,8 +7,8 @@ import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { FilesystemItem } from '@/model/filesystem-item.model';
 import type { CommonData } from '@/types/common-data';
-import type { Tag, KysoConfigFile, NormalizedResponseDTO, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
-import { ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
+import type { Tag, KysoConfigFile, NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
+import { TeamMember, TeamMembershipOriginEnum, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import FormData from 'form-data';
 import JSZip from 'jszip';
@@ -149,6 +149,20 @@ const CreateReport = ({ commonData }: Props) => {
     if (getLocalStorageItem('formSelectedPeople')) {
       setSelectedPeople(JSON.parse(getLocalStorageItem('formSelectedPeople')!));
       setHasAnythingCached(true);
+    } else {
+      // Put current user as author
+      setSelectedPeople([
+        new TeamMember(
+          commonData.user?.id!,
+          commonData.user?.display_name!,
+          commonData.user?.username!,
+          [],
+          '',
+          commonData.user?.avatar_url!,
+          commonData.user?.email!,
+          TeamMembershipOriginEnum.ORGANIZATION,
+        ),
+      ]);
     }
     if (getLocalStorageItem('formTags')) {
       setTags(JSON.parse(getLocalStorageItem('formTags')!));
