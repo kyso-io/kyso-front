@@ -188,7 +188,7 @@ const UnpureReportRender = (props: Props) => {
 
   return (
     <>
-      <Script src="https://cdn.plot.ly/plotly-latest.min.js" />
+      <Script src="https://cdn.plot.ly/plotly-1.48.2.min.js" />
 
       {fileToRender.isLoading && (
         <div className="prose flex justify-center p-10">
