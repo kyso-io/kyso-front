@@ -23,29 +23,37 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   // const frameId = `iframe-${id}`;
 
   // useEffect(() => {
-  iframeResizer(
-    {
-      log: false,
-      checkOrigin: false,
-      inPageLinks: true,
-      scrolling: false,
-      /* resizedCallback: (data) => {
-          console.log(data.height);
-          setResizedHeight(`${data.height} px`);
-        }, */
-    },
-    `#theframe`,
-  );
-  // }, []);
+  try {
+    iframeResizer(
+      {
+        log: false,
+        checkOrigin: false,
+        inPageLinks: true,
+        scrolling: false,
+        /* resizedCallback: (data) => {
+            console.log(data.height);
+            setResizedHeight(`${data.height} px`);
+          }, */
+      },
+      `#theframe`,
+    );
+    // }, []);
+  } catch (ex) {
+    console.log('Error iframe');
+  }
 
   const onInitializedIframe = () => {
-    const myIframe: any = document.getElementById('theframe');
-    const doc = myIframe!.contentDocument;
-    doc.body.innerHTML = `${doc.body.innerHTML}<style>
-        .mqc_table .wrapper {
-          z-index: 0 !important;
-        }
-      </style>`;
+    try {
+      const myIframe: any = document.getElementById('theframe');
+      const doc = myIframe!.contentDocument;
+      doc.body.innerHTML = `${doc.body.innerHTML}<style>
+          .mqc_table .wrapper {
+            z-index: 0 !important;
+          }
+        </style>`;
+    } catch (ex) {
+      // Silent
+    }
   };
 
   if (!file || !file.path_scs || file.path_scs.length === 0) {
