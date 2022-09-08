@@ -32,10 +32,9 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
             checkOrigin: false,
             inPageLinks: true,
             scrolling: false,
-            /* resizedCallback: (data) => {
-                console.log(data.height);
-                setResizedHeight(`${data.height} px`);
-              }, */
+            resizedCallback: (data) => {
+              console.log(data.height);
+            },
           },
           `#theframe`,
         );
