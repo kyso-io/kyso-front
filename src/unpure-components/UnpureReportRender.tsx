@@ -13,7 +13,6 @@ import { createInlineCommentAction, deleteInlineCommentAction, getInlineComments
 import clsx from 'clsx';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
-import Script from 'next/script';
 
 // const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
@@ -188,8 +187,6 @@ const UnpureReportRender = (props: Props) => {
 
   return (
     <>
-      <Script src="https://cdn.plot.ly/plotly-1.48.2.min.js" />
-
       {fileToRender.isLoading && (
         <div className="prose flex justify-center p-10">
           <PureSpinner />
