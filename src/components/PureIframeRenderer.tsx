@@ -37,7 +37,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
             },
           },
           `#theframe`,
-        );
+        ); */
 
         const doc = myIframe!.contentDocument;
 
@@ -47,7 +47,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
                 z-index: 0 !important;
               }
             </style>`;
-        } */
+        }
       }
     } catch (ex) {
       // Silent
