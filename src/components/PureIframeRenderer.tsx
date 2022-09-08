@@ -19,32 +19,27 @@ type IPureIFrameRendererProps = {
 const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const { file } = props;
   const id = v4();
-  // const [resizedHeight, setResizedHeight] = useState('65vh');
-  // const frameId = `iframe-${id}`;
-
-  // useEffect(() => {
-  try {
-    iframeResizer(
-      {
-        log: false,
-        checkOrigin: false,
-        inPageLinks: true,
-        scrolling: false,
-        /* resizedCallback: (data) => {
-            console.log(data.height);
-            setResizedHeight(`${data.height} px`);
-          }, */
-      },
-      `#theframe`,
-    );
-    // }, []);
-  } catch (ex) {
-    console.log('Error iframe');
-  }
 
   const onInitializedIframe = () => {
     try {
       const myIframe: any = document.getElementById('theframe');
+
+      if (myIframe) {
+        iframeResizer(
+          {
+            log: false,
+            checkOrigin: false,
+            inPageLinks: true,
+            scrolling: false,
+            /* resizedCallback: (data) => {
+                console.log(data.height);
+                setResizedHeight(`${data.height} px`);
+              }, */
+          },
+          `#theframe`,
+        );
+      }
+
       const doc = myIframe!.contentDocument;
       doc.body.innerHTML = `${doc.body.innerHTML}<style>
           .mqc_table .wrapper {
@@ -68,7 +63,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
       style={{
         border: 'none 0px',
         width: '100%',
-        minHeight: '65vh',
+        minHeight: '68vh',
       }}
       src={`${'/scs'}${file.path_scs}`}
       onLoad={onInitializedIframe}
