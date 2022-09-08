@@ -25,6 +25,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
       const myIframe: any = document.getElementById('theframe');
 
       if (myIframe) {
+        console.log('Resizing...');
         iframeResizer(
           {
             log: false,
@@ -38,14 +39,17 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
           },
           `#theframe`,
         );
-      }
 
-      const doc = myIframe!.contentDocument;
-      doc.body.innerHTML = `${doc.body.innerHTML}<style>
-          .mqc_table .wrapper {
-            z-index: 0 !important;
-          }
-        </style>`;
+        const doc = myIframe!.contentDocument;
+
+        if (doc && doc.body) {
+          doc.body.innerHTML = `${doc.body.innerHTML}<style>
+              .mqc_table .wrapper {
+                z-index: 0 !important;
+              }
+            </style>`;
+        }
+      }
     } catch (ex) {
       // Silent
     }
