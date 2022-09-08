@@ -2,6 +2,7 @@
 import TurndownService from 'turndown';
 import { v4 } from 'uuid';
 import Script from 'next/script';
+import { useState } from 'react';
 
 const turndownPluginGfm = require('joplin-turndown-plugin-gfm');
 
@@ -19,12 +20,14 @@ type IPureIFrameRendererProps = {
 const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const { file } = props;
   const id = v4();
+  const [height, setHeight] = useState('70vh');
 
   const onInitializedIframe = () => {
     try {
       const myIframe: any = document.getElementById('theframe');
-      console.log(`${myIframe.contentWindow.document.body.offsetHeight}px`);
+      console.log(`Resizing to: ${myIframe.contentWindow.document.body.scrollHeight}px`);
 
+      setHeight(`${myIframe.contentWindow.document.body.scrollHeight}px`);
       /* if (myIframe) {
         console.log("resizing");
         iframeResizer(
@@ -59,7 +62,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
         style={{
           border: 'none 0px',
           width: '100%',
-          minHeight: '68vh',
+          height,
         }}
         src={`${'/scs'}${file.path_scs}`}
         onLoad={onInitializedIframe}
