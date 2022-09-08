@@ -2,6 +2,7 @@
 import { iframeResizer } from 'iframe-resizer';
 import TurndownService from 'turndown';
 import { v4 } from 'uuid';
+import Script from 'next/script';
 
 const turndownPluginGfm = require('joplin-turndown-plugin-gfm');
 
@@ -59,18 +60,21 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   }
 
   return (
-    <iframe
-      title={id}
-      id="theframe"
-      sandbox={`allow-scripts allow-same-origin allow-forms allow-modals allow-popups`}
-      style={{
-        border: 'none 0px',
-        width: '100%',
-        minHeight: '68vh',
-      }}
-      src={`${'/scs'}${file.path_scs}`}
-      onLoad={onInitializedIframe}
-    />
+    <>
+      <Script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.8.3/plotly.min.js" />
+      <iframe
+        title={id}
+        id="theframe"
+        sandbox={`allow-scripts allow-same-origin allow-forms allow-modals allow-popups`}
+        style={{
+          border: 'none 0px',
+          width: '100%',
+          minHeight: '68vh',
+        }}
+        src={`${'/scs'}${file.path_scs}`}
+        onLoad={onInitializedIframe}
+      />
+    </>
   );
 };
 
