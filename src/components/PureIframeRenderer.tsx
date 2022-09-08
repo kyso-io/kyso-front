@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { iframeResizer } from 'iframe-resizer';
 import TurndownService from 'turndown';
 import { v4 } from 'uuid';
 import Script from 'next/script';
@@ -26,7 +25,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
       const myIframe: any = document.getElementById('theframe');
 
       if (myIframe) {
-        console.log('Resizing...');
+        /* console.log('Resizing...');
         iframeResizer(
           {
             log: false,
@@ -48,7 +47,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
                 z-index: 0 !important;
               }
             </style>`;
-        }
+        } */
       }
     } catch (ex) {
       // Silent
