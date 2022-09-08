@@ -13,6 +13,7 @@ import { createInlineCommentAction, deleteInlineCommentAction, getInlineComments
 import clsx from 'clsx';
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
+import Plot from 'react-plotly.js';
 
 // const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
@@ -46,36 +47,6 @@ const KysoJupyterRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponen
   ),
 });
 
-/* // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const KysoCodeRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoCodeRenderer), {
-  ssr: false,
-  loading: () => (
-    <div className="flex justify-center p-7 w-full">
-      <PureSpinner />
-    </div>
-  ),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const KysoOffice365Renderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoOffice365Renderer), {
-  ssr: false,
-  loading: () => (
-    <div className="flex justify-center p-7 w-full">
-      <PureSpinner />
-    </div>
-  ),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const KysoGoogleDocsRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoGoogleDocsRenderer), {
-  ssr: false,
-  loading: () => (
-    <div className="flex justify-center p-7 w-full">
-      <PureSpinner />
-    </div>
-  ),
-}); */
-
 interface Props {
   fileToRender: FileToRender;
   commonData: CommonData;
@@ -94,6 +65,9 @@ const UnpureReportRender = (props: Props) => {
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
+
+  console.log('Plotly');
+  console.log(Plot);
 
   useEffect(() => {
     if (report.id) {
