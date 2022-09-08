@@ -25,9 +25,9 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const onInitializedIframe = () => {
     try {
       const myIframe: any = document.getElementById('theframe');
-      console.log(`Resizing to: ${myIframe.contentWindow.document.body.scrollHeight}px`);
+      console.log(`Resizing to: ${myIframe.contentWindow.document.body.scrollHeight + 40}px`);
 
-      setHeight(`${myIframe.contentWindow.document.body.scrollHeight}px`);
+      setHeight(`${myIframe.contentWindow.document.body.scrollHeight + 40}px`);
       /* if (myIframe) {
         console.log("resizing");
         iframeResizer(
