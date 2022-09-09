@@ -138,7 +138,6 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
       const mainFile = currentPath === '' ? reportData.report!.main_file : undefined;
       const validFiles: GithubFileHash[] = selfTree.filter((item: GithubFileHash) => item.type === 'file');
       const allowedPaths = [currentPath, mainFile];
-      const selectedVersion: number = selfTree[0]?.version!;
 
       const defaultRenderFiles: string[] = [
         'Readme.md',
@@ -159,7 +158,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
       let validFile: GithubFileHash | undefined;
 
       if (mainFile) {
-        validFile = new GithubFileHash('', 'file', mainFile, '', '', reportData.report?.main_file_path_scs!, selectedVersion);
+        validFile = new GithubFileHash(reportData.report?.main_file_id!, 'file', mainFile, '', '', reportData.report?.main_file_path_scs!, reportData.report?.main_file_version!);
       } else {
         validFile = validFiles?.find((item: GithubFileHash) => {
           return allowedPaths.includes(item.path);
