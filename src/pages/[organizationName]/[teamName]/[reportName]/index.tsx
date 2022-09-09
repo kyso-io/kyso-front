@@ -137,6 +137,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     const getData = async () => {
       const mainFile = currentPath === '' ? reportData.report!.main_file : undefined;
       const validFiles: GithubFileHash[] = selfTree.filter((item: GithubFileHash) => item.type === 'file');
+      const allowedPaths = [currentPath, mainFile];
       const selectedVersion: number = selfTree[0]?.version!;
 
       const defaultRenderFiles: string[] = [
@@ -161,8 +162,15 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
         validFile = new GithubFileHash('', 'file', mainFile, '', '', reportData.report?.main_file_path_scs!, selectedVersion);
       } else {
         validFile = validFiles?.find((item: GithubFileHash) => {
-          return defaultRenderFiles.includes(item.path);
+          return allowedPaths.includes(item.path);
         });
+
+        if (!validFile) {
+          // Check the defaults
+          validFile = validFiles?.find((item: GithubFileHash) => {
+            return defaultRenderFiles.includes(item.path);
+          });
+        }
       }
 
       try {
@@ -561,7 +569,14 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                   />
                 )}
 
-                {!fileToRender && <div className="prose p-2">Please choose a file in the filebrowser on the left.</div>}
+                {!fileToRender && (
+                  <button
+                    type="button"
+                    className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  >
+                    <span className="mt-2 block text-sm font-medium text-gray-900">Please choose a file in the filebrowser on the left.</span>
+                  </button>
+                )}
               </div>
 
               {hasPermissionReadComment && (
