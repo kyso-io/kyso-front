@@ -478,7 +478,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   return (
     <div>
       {/* <div className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-dashed border-y-inherit border-white border-inherit border-transparent inline mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300 w-5 h-5"></div> */}
-      <div className="flex flex-row">
+      <div className="flex flex-row items-start">
         <PureSideOverlayPanel key={report?.name} cacheKey={report?.name}>
           <>
             {report && (
