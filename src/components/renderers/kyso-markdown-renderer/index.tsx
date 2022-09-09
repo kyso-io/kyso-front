@@ -22,12 +22,13 @@ const translateImagesToSCSUrl = (source: string, c: ReportContext) => {
       if (imageUrl) {
         let s1 = imageUrl.pop();
 
+        // Remove parenthesis
+        s1 = s1?.substring(1);
+        s1 = s1?.slice(0, -1);
+
         if (s1?.startsWith('http') || s1?.startsWith('https')) {
           // Global URL, do nothing
         } else {
-          s1 = s1?.substring(1);
-          s1 = s1?.slice(0, -1);
-
           const newUrl = `/scs/${c.organizationSlug}/${c.teamSlug}/reports/${c.reportSlug}/${c.version}/${s1}`;
 
           const processedImage = image.replace(s1!, newUrl);
