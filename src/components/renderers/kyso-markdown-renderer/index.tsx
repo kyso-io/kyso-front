@@ -21,14 +21,19 @@ const translateImagesToSCSUrl = (source: string, c: ReportContext) => {
 
       if (imageUrl) {
         let s1 = imageUrl.pop();
-        s1 = s1?.substring(1);
-        s1 = s1?.slice(0, -1);
 
-        const newUrl = `/scs/${c.organizationSlug}/${c.teamSlug}/reports/${c.reportSlug}/${c.version}/${s1}`;
+        if (s1?.startsWith('http') || s1?.startsWith('https')) {
+          // Global URL, do nothing
+        } else {
+          s1 = s1?.substring(1);
+          s1 = s1?.slice(0, -1);
 
-        const processedImage = image.replace(s1!, newUrl);
+          const newUrl = `/scs/${c.organizationSlug}/${c.teamSlug}/reports/${c.reportSlug}/${c.version}/${s1}`;
 
-        finalContent = finalContent.replace(image, processedImage);
+          const processedImage = image.replace(s1!, newUrl);
+
+          finalContent = finalContent.replace(image, processedImage);
+        }
       }
     }
   }
