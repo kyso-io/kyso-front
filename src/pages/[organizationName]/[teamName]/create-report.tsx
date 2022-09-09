@@ -289,7 +289,7 @@ const CreateReport = ({ commonData }: Props) => {
     zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });
     for (const file of files) {
       const blob = await (await fetch(getLocalStorageItem(file.id) as string)).blob();
-      zip.file(file.name, blob);
+      zip.file(file.name, blob, { createFolders: true });
     }
     const blobZip = await zip.generateAsync({ type: 'blob' });
     const formData = new FormData();
