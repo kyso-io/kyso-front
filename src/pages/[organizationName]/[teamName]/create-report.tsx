@@ -289,9 +289,18 @@ const CreateReport = ({ commonData }: Props) => {
     zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });
     for (const file of files) {
       const blob = await (await fetch(getLocalStorageItem(file.id) as string)).blob();
-      zip.file(file.path, blob, { createFolders: true });
+
+      if (file.type === 'folder') {
+        zip.folder(file.path);
+      } else {
+        zip.file(file.path, blob, { createFolders: true });
+      }
     }
     const blobZip = await zip.generateAsync({ type: 'blob' });
+
+    // testing: to download generated zip file
+    // saveAs(blobZip)
+
     const formData = new FormData();
     formData.append('file', blobZip);
 
