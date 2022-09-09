@@ -3,8 +3,8 @@ import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import { useEffect, useMemo, useState } from 'react';
 
-import type { Comment, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
-import { CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
+import { GithubFileHash, CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 
 import ManageUsers from '@/components/ManageUsers';
@@ -137,7 +137,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     const getData = async () => {
       const mainFile = currentPath === '' ? reportData.report!.main_file : undefined;
       const validFiles: GithubFileHash[] = selfTree.filter((item: GithubFileHash) => item.type === 'file');
-      const allowedPaths = [currentPath, mainFile];
+      const selectedVersion: number = selfTree[0]?.version!;
 
       const defaultRenderFiles: string[] = [
         'Readme.md',
@@ -155,11 +155,11 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
         'index.pdf',
       ];
 
-      let validFile: GithubFileHash | undefined = validFiles?.find((item: GithubFileHash) => {
-        return allowedPaths.includes(item.path);
-      });
+      let validFile: GithubFileHash | undefined;
 
-      if (!validFile) {
+      if (mainFile) {
+        validFile = new GithubFileHash('', 'file', mainFile, '', '', reportData.report?.main_file_path_scs!, selectedVersion);
+      } else {
         validFile = validFiles?.find((item: GithubFileHash) => {
           return defaultRenderFiles.includes(item.path);
         });

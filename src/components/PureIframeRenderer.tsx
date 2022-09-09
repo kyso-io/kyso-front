@@ -28,21 +28,6 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
       console.log(`Resizing to: ${myIframe.contentWindow.document.body.scrollHeight + 40}px`);
 
       setHeight(`${myIframe.contentWindow.document.body.scrollHeight + 40}px`);
-      /* if (myIframe) {
-        console.log("resizing");
-        iframeResizer(
-          {
-            log: false,
-            checkOrigin: false,
-            inPageLinks: true,
-            scrolling: false,
-            resizedCallback: (data) => {
-              console.log(data.height);
-            },
-          },
-          `#theframe`,
-        );
-      } */
     } catch (ex) {
       // Silent
     }
