@@ -102,6 +102,12 @@ const BreadcrumbNavbar = (props: Props) => {
                   <a
                     href={page.href}
                     className={page.current ? 'text-sm hover:underline font-medium text-gray-800 hover:text-black' : 'text-sm hover:underline  font-medium text-gray-500 hover:text-gray-700'}
+                    style={{
+                      textOverflow: 'ellipsis',
+                      maxWidth: '55vh',
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                    }}
                     aria-current={page.current ? 'page' : undefined}
                   >
                     {page.name}
