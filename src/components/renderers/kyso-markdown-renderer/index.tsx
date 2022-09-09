@@ -18,7 +18,7 @@ const translateImagesToSCSUrl = (source: string, c: ReportContext) => {
   if (results) {
     for (const image of results) {
       const imageUrl = image.match(extractFromParenthesis);
-      console.log(imageUrl);
+
       if (imageUrl) {
         let s1 = imageUrl.pop();
         s1 = s1?.substring(1);
@@ -28,8 +28,6 @@ const translateImagesToSCSUrl = (source: string, c: ReportContext) => {
 
         const processedImage = image.replace(s1!, newUrl);
 
-        console.log(image);
-        console.log(processedImage);
         finalContent = finalContent.replace(image, processedImage);
       }
     }
