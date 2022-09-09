@@ -47,7 +47,16 @@ const MemberFilterSelector = (props: IMemberFilterSelector) => {
             }}
             placeholder={selected.length > 0 ? selected.map((s) => s.nameSlug).join(', ') : 'Add authors'}
           />
-          <Combobox.Button className="mx-3 absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
+          <Combobox.Button
+            className="mx-3 absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none bg-white"
+            style={{
+              zIndex: '10',
+              height: '17px',
+              position: 'absolute',
+              top: '11px',
+              right: '-11px',
+            }}
+          >
             <SelectorIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
           </Combobox.Button>
 
