@@ -1,5 +1,8 @@
+import PureComments from '@/comments-container/components/pure-comments';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { PureSpinner } from '@/components/PureSpinner';
+import { RenderJupyter } from '@/components/renderers/kyso-jupyter-renderer';
+import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
 import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 import RenderCode from '@/components/renderers/RenderCode';
 import RenderGoogleDocs from '@/components/renderers/RenderGoogleDocs';
@@ -11,40 +14,9 @@ import type { CommonData } from '@/types/common-data';
 import type { InlineCommentDto, ReportDTO, TeamMember, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
-import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 
 // const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const PureComments = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.PureComments), {
-  ssr: false,
-  loading: () => (
-    <div className="flex justify-center p-7 w-full">
-      <PureSpinner />
-    </div>
-  ),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
-  ssr: false,
-  loading: () => (
-    <div className="flex justify-center p-7 w-full">
-      <PureSpinner />
-    </div>
-  ),
-});
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const KysoJupyterRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoJupyterRenderer), {
-  ssr: false,
-  loading: () => (
-    <div className="flex justify-center p-7 w-full">
-      <PureSpinner />
-    </div>
-  ),
-});
 
 interface Props {
   fileToRender: FileToRender;
@@ -144,12 +116,15 @@ const UnpureReportRender = (props: Props) => {
 
   if (fileToRender.content !== null) {
     if (FileTypesHelper.isTextBasedFiled(fileToRender.path)) {
-      render = <KysoMarkdownRenderer source={fileToRender.content} />;
+      console.log('Markdown');
+      console.log(fileToRender.content);
+      render = <RenderMarkdown source={fileToRender.content} />;
     } else if (FileTypesHelper.isImage(fileToRender.path)) {
       render = <RenderBase64Image base64={fileToRender.content as string} />;
     } else if (FileTypesHelper.isJupyterNotebook(fileToRender.path)) {
+      console.log(fileToRender);
       render = (
-        <KysoJupyterRenderer
+        <RenderJupyter
           commonData={commonData}
           report={report}
           onlyVisibleCell={onlyVisibleCell}
@@ -209,11 +184,11 @@ const UnpureReportRender = (props: Props) => {
                 onDeleteComment={(commentId: string) => {
                   deleteInlineComment(commentId);
                 }}
-                submitComment={(text: string, user_ids: string[], commentId: string) => {
+                submitComment={(text?: string, user_ids?: string[], commentId?: string) => {
                   if (!commentId) {
-                    createInlineComment(fileToRender.id, user_ids, text);
+                    createInlineComment(fileToRender.id, user_ids!, text!);
                   } else {
-                    editInlineComment(commentId, user_ids, text);
+                    editInlineComment(commentId, user_ids!, text!);
                   }
                 }}
               />

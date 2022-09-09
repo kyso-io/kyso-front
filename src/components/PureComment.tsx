@@ -4,24 +4,13 @@
 import PureAvatar from '@/components/PureAvatar';
 import PureCommentForm from '@/components/PureCommentForm';
 import PureComments from '@/components/PureComments';
-import { PureSpinner } from '@/components/PureSpinner';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { formatDistanceToNow } from 'date-fns';
-import dynamic from 'next/dynamic';
 import { useState } from 'react';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const KysoMarkdownRenderer = dynamic<any>(() => import('@kyso-io/kyso-webcomponents').then((mod) => mod.KysoMarkdownRenderer), {
-  ssr: false,
-  loading: () => (
-    <div className="flex justify-center p-7 w-full">
-      <PureSpinner />
-    </div>
-  ),
-});
+import { RenderMarkdown } from './renderers/kyso-markdown-renderer';
 
 type IPureComment = {
   hasPermissionCreateComment: boolean;
@@ -124,7 +113,7 @@ const PureComment = (props: IPureComment) => {
             </div>
 
             <div className="text-sm">
-              <KysoMarkdownRenderer source={comment?.text} />
+              <RenderMarkdown source={comment?.text} />
 
               <div className="rounded-t flex items-center justify-end space-x-2 text-sm text-gray-400">
                 <div className="space-x-2 mt-2">
