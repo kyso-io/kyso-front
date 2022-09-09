@@ -3,11 +3,13 @@ import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { PureSpinner } from '@/components/PureSpinner';
 import { RenderJupyter } from '@/components/renderers/kyso-jupyter-renderer';
 import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
+import type { ReportContext } from '@/components/renderers/kyso-markdown-renderer/interfaces/context';
 import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 import RenderCode from '@/components/renderers/RenderCode';
 import RenderGoogleDocs from '@/components/renderers/RenderGoogleDocs';
 import RenderOffice365 from '@/components/renderers/RenderOffice365';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
+import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import type { CommonData } from '@/types/common-data';
@@ -116,9 +118,14 @@ const UnpureReportRender = (props: Props) => {
 
   if (fileToRender.content !== null) {
     if (FileTypesHelper.isTextBasedFiled(fileToRender.path)) {
-      console.log('Markdown');
-      console.log(fileToRender.content);
-      render = <RenderMarkdown source={fileToRender.content} />;
+      const markdownContext: ReportContext = {
+        organizationSlug: commonData.organization?.sluglified_name!,
+        teamSlug: commonData.team?.sluglified_name!,
+        reportSlug: Helper.slugify(report.title),
+        version: report.last_version,
+      };
+
+      render = <RenderMarkdown source={fileToRender.content} context={markdownContext} />;
     } else if (FileTypesHelper.isImage(fileToRender.path)) {
       render = <RenderBase64Image base64={fileToRender.content as string} />;
     } else if (FileTypesHelper.isJupyterNotebook(fileToRender.path)) {

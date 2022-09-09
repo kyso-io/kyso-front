@@ -5,8 +5,10 @@ import PureComments from '@/comments-container/components/pure-comments';
 import { useHover } from 'usehooks-ts';
 import { useNavigateToHashOnce } from '@/hooks/use-navigate-to-hash-once';
 import type { CommonData } from '@/types/common-data';
+import { Helper } from '@/helpers/Helper';
 import Cell from './cell';
 import type { Cell as ICell } from '../interfaces/jupyter-notebook';
+import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -50,6 +52,13 @@ const CellWrapper = (props: Props) => {
     editInlineComment,
   } = props;
 
+  const reportContext: ReportContext = {
+    organizationSlug: commonData.organization?.sluglified_name!,
+    teamSlug: commonData.team?.sluglified_name!,
+    reportSlug: Helper.slugify(report.title),
+    version: report.last_version,
+  };
+
   const inlineCommentDtos: InlineCommentDto[] = inlineComments.filter((inlineComment: InlineCommentDto) => inlineComment.cell_id === cell.id);
 
   const [inputShown, setInputShown] = useState(showInputs);
@@ -89,7 +98,7 @@ const CellWrapper = (props: Props) => {
           // (!onlyVisibleCell && isHover) ? "border-x border-y" : `border-x ${(onlyVisibleCell || last) ? " border-b border-b-inherit" : "border-y border-y-white"}`,
         )}
       >
-        <Cell cell={cell} showInput={inputShown} showOutput={outputShown} />
+        <Cell cell={cell} showInput={inputShown} showOutput={outputShown} context={reportContext} />
       </div>
 
       <div className={classNames('w-3/12 p-[1px]')}>

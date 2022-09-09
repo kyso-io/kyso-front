@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
 import type { Cell } from '../interfaces/jupyter-notebook';
 import InputCellCode from './input-cell-code';
 import InputCellMarkdown from './input-cell-markdown';
@@ -7,6 +8,7 @@ import InputCellRaw from './input-cell-raw';
 interface Props {
   cell: Cell;
   showInput: boolean;
+  context?: ReportContext;
 }
 
 const InputCell = (props: Props) => {
@@ -17,7 +19,7 @@ const InputCell = (props: Props) => {
   if (props.cell.cell_type === 'markdown') {
     return (
       <div className="p-2">
-        <InputCellMarkdown cell={props.cell} />
+        <InputCellMarkdown cell={props.cell} context={props.context} />
       </div>
     );
   }
