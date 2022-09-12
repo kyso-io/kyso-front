@@ -129,7 +129,6 @@ const UnpureReportRender = (props: Props) => {
     } else if (FileTypesHelper.isImage(fileToRender.path)) {
       render = <RenderBase64Image base64={fileToRender.content as string} />;
     } else if (FileTypesHelper.isJupyterNotebook(fileToRender.path)) {
-      console.log(fileToRender);
       render = (
         <RenderJupyter
           commonData={commonData}
