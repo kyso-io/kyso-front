@@ -667,7 +667,7 @@ const CreateReport = ({ commonData }: Props) => {
           <div className="flex justify-end">
             <div className="flex flex-row items-center space-x-2">
               <div className="mr-2 mt-2">
-                <PureKysoButton type={KysoButton.PRIMARY} onClick={handleSubmit} className="ml-2">
+                <PureKysoButton type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY} onClick={handleSubmit} className="ml-2" disabled={!hasPermissionCreateReport}>
                   {busy && <PureSpinner size={5} />}
                   Post <ArrowRightIcon className="ml-2 w-4 h-4" />
                 </PureKysoButton>

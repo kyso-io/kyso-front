@@ -1,8 +1,10 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon, ChevronUpIcon, ClipboardCopyIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 
 const TIMEOUT_MS = 5000;
 
@@ -12,6 +14,8 @@ interface Props {
 
 const PureNewReportPopover = (props: Props) => {
   const { commonData } = props;
+
+  const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
 
   const [copiedKysoConfigFile, setCopiedKysoConfigFile] = useState<boolean>(false);
   const [copiedKysoPush, setCopiedKysoPush] = useState<boolean>(false);
@@ -34,6 +38,11 @@ const PureNewReportPopover = (props: Props) => {
             setCopiedKysoPush(false);
           }
         }, [open]);
+
+        if (!hasPermissionCreateReport) {
+          return <></>;
+        }
+
         return (
           <React.Fragment>
             <Popover.Button className="w-fit whitespace-nowrap p-3 font-medium text-white rounded bg-kyso-600 hover:bg-kyso-700 text-sm flex flex-row items-center focus:ring-0 focus:outline-none">
