@@ -4,6 +4,7 @@ import React from 'react';
 
 type IPureKysoButton = {
   children: ReactNode;
+  disabled?: boolean;
   type: KysoButton;
   onClick: () => void;
   className?: string;
@@ -14,6 +15,7 @@ const PureKysoButton = (props: IPureKysoButton) => {
 
   return (
     <button
+      disabled={props.disabled}
       type="button"
       className={`
         px-2 py-1

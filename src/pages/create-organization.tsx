@@ -41,7 +41,7 @@ const Index = ({ commonData }: Props) => {
       const organization: Organization = result.data;
       router.push(`/${organization.sluglified_name}`);
     } catch (er: any) {
-      setError(er.message);
+      setError(er.response.data.message);
     } finally {
       setBusy(false);
     }
