@@ -62,7 +62,7 @@ const PureComment = (props: IPureComment) => {
                 Edit
               </button>
             )}
-            {(isUserAuthor || hasPermissionDeleteComment) && (
+            {isUserAuthor && hasPermissionDeleteComment && (
               <button
                 className="hover:underline"
                 onClick={() => {
