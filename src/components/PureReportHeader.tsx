@@ -24,6 +24,7 @@ type IPureReportHeaderProps = {
   version?: string;
   versions: Version[];
   onUpvoteReport: () => void;
+  openMetadata: () => void;
   commonData: CommonData;
   hasPermissionEditReport: boolean;
   hasPermissionDeleteReport: boolean;
@@ -31,7 +32,7 @@ type IPureReportHeaderProps = {
 };
 
 const PureReportHeader = (props: IPureReportHeaderProps) => {
-  const { report, frontEndUrl, children, fileToRender, versions, authors, version, reportUrl, onUpvoteReport, commonData, hasPermissionEditReport, hasPermissionDeleteReport } = props;
+  const { report, frontEndUrl, children, fileToRender, versions, authors, version, reportUrl, onUpvoteReport, openMetadata, commonData, hasPermissionEditReport, hasPermissionDeleteReport } = props;
 
   return (
     <div className="w-full flex flex-row justify-between p-2">
@@ -96,7 +97,13 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
             />
 
             <PureVersionsDropdown versions={versions} version={version} reportUrl={reportUrl} />
-            {hasPermissionDeleteReport && <UnpureReportActionDropdown report={report} commonData={commonData} hasPermissionDeleteReport={hasPermissionDeleteReport} />}
+            <UnpureReportActionDropdown
+              report={report}
+              commonData={commonData}
+              hasPermissionDeleteReport={hasPermissionDeleteReport}
+              hasPermissionEditReport={hasPermissionEditReport}
+              openMetadata={openMetadata}
+            />
           </div>
         </div>
       </div>

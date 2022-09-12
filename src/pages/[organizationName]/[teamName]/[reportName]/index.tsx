@@ -2,6 +2,7 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import { useEffect, useMemo, useState } from 'react';
+import PureEditMetadata from '@/components/PureEditMetadata';
 
 import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import { GithubFileHash, CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
@@ -56,7 +57,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   const [users, setUsers] = useState<UserDTO[]>([]);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
-
+  const [isOpenMetadata, openMetadata] = useState(false);
   // useEffect(() => {
   //   if (commonData.team && router.query.reportName) {
   //     refreshReport();
@@ -481,6 +482,22 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
 
   return (
     <div>
+      {report && (
+        <PureEditMetadata
+          isOpen={isOpenMetadata}
+          setOpen={() => openMetadata(!isOpenMetadata)}
+          report={report}
+          commonData={commonData}
+          members={members}
+          onInputChange={(query: string) => searchUsers(query)}
+          users={users}
+          showTeamRoles={true}
+          onUpdateRoleMember={updateMemberRole}
+          onInviteNewUser={inviteNewUser}
+          onRemoveUser={removeUser}
+          authors={authors}
+        />
+      )}
       <div className={classNames('z-0 fixed flex flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
         <div>
           <div className="flex flex-1 flex-col pt-32 mt-2">
@@ -526,6 +543,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                         report={report}
                         authors={authors}
                         version={version}
+                        openMetadata={() => openMetadata(!isOpenMetadata)}
                         onUpvoteReport={async () => {
                           await dispatch(toggleUserStarReportAction(report.id as string));
                           refreshReport();
