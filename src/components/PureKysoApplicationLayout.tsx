@@ -183,14 +183,14 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
           )}
         </Disclosure>
         {!userProfile && (
-          <div className="p-2">
+          <div className="p-2 z-40 bg-white">
             <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
           </div>
         )}
       </div>
 
       <div className="grow w-full rounded">{children}</div>
-      <div className="flex-none pt-10">
+      <div className="flex-none pt-10 z-10">
         <Footer />
       </div>
     </div>
