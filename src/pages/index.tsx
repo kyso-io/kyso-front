@@ -31,6 +31,7 @@ const Index = ({ commonData }: Props) => {
         router.push(`${lastOrganizationDict[commonData.user!.id]}`);
       } else if (commonData.permissions) {
         const orgs = commonData.permissions?.organizations;
+        console.log(commonData);
         if (orgs && orgs.length > 0) {
           router.push(`${orgs[0]?.name}`);
         }
