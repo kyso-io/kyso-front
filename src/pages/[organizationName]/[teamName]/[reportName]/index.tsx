@@ -7,6 +7,8 @@ import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, R
 import { GithubFileHash, CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 
+import classNames from '@/helpers/class-names';
+
 import ManageUsers from '@/components/ManageUsers';
 import PureComments from '@/components/PureComments';
 import { PurePermissionDenied } from '@/components/PurePermissionDenied';
@@ -52,6 +54,8 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   const onlyVisibleCell = router.query.cell ? (router.query.cell as string) : undefined;
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   // useEffect(() => {
   //   if (commonData.team && router.query.reportName) {
@@ -477,146 +481,160 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
 
   return (
     <div>
-      {/* <div className="hidden bg-gray-50 bg-gray-100 w-3/12 bg-gray-200 bg-red-100 bg-blue-100 border-dashed border-y-inherit border-white border-inherit border-transparent inline mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300 w-5 h-5"></div> */}
-      <div className="flex flex-row items-start">
-        <PureSideOverlayPanel key={report?.name} cacheKey={report?.name}>
-          <>
-            {report && (
-              <PureTree
-                path={currentPath}
-                basePath={router.basePath}
-                commonData={commonData}
-                report={report}
-                version={router.query.version as string}
-                selfTree={selfTree}
-                parentTree={parentTree}
-                // onNavigation={(e) => {
-                //   e.preventDefault()
-                //   router.push(e.currentTarget.href)
-                // }}
-              />
-            )}
-          </>
-        </PureSideOverlayPanel>
+      <div className={classNames('z-0 fixed flex flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
+        <div>
+          <div className="flex flex-1 flex-col pt-32 mt-2">
+            <nav className="flex-1 space-y-1">
+              <PureSideOverlayPanel key={report?.name} cacheKey={report?.name} setSidebarOpen={(p) => setSidebarOpen(p)}>
+                <>
+                  {report && (
+                    <PureTree
+                      path={currentPath}
+                      basePath={router.basePath}
+                      commonData={commonData}
+                      report={report}
+                      version={router.query.version as string}
+                      selfTree={selfTree}
+                      parentTree={parentTree}
+                      // onNavigation={(e) => {
+                      //   e.preventDefault()
+                      //   router.push(e.currentTarget.href)
+                      // }}
+                    />
+                  )}
+                </>
+              </PureSideOverlayPanel>
+            </nav>
+          </div>
+        </div>
+      </div>
 
-        {report && (
-          <>
-            <div className="w-full flex lg:flex-col flex-col justify-between rounded">
-              <div className="w-full p-4">
-                <PureReportHeader
-                  reportUrl={`${reportUrl}`}
-                  frontEndUrl={frontEndUrl}
-                  versions={versions}
-                  fileToRender={fileToRender}
-                  report={report}
-                  authors={authors}
-                  version={version}
-                  onUpvoteReport={async () => {
-                    await dispatch(toggleUserStarReportAction(report.id as string));
-                    refreshReport();
-                  }}
-                  hasPermissionEditReport={
-                    hasPermissionEditReport || ((report.user_id === commonData.user?.id || report.author_ids.includes(commonData.user?.id as string)) && hasPermissionEditReportOnlyMine)
-                  }
-                  hasPermissionDeleteReport={hasPermissionDeleteReport}
-                  commonData={commonData}
-                >
-                  <ManageUsers
-                    commonData={commonData}
-                    members={members}
-                    onInputChange={(query: string) => searchUsers(query)}
-                    users={users}
-                    showTeamRoles={true}
-                    onUpdateRoleMember={updateMemberRole}
-                    onInviteNewUser={inviteNewUser}
-                    onRemoveUser={removeUser}
-                  />
-                </PureReportHeader>
-              </div>
+      <div className={classNames('flex flex-1 flex-col', sidebarOpen ? 'pl-64' : 'pl-10')}>
+        <main>
+          <div className="w-full px-4 sm:px-6 md:px-10">
+            {/* Replace with your content */}
+            <div className="py-4">
+              {report && (
+                <>
+                  <div className="w-full flex lg:flex-col flex-col justify-between rounded">
+                    <div className="w-full p-4">
+                      <PureReportHeader
+                        reportUrl={`${reportUrl}`}
+                        frontEndUrl={frontEndUrl}
+                        versions={versions}
+                        fileToRender={fileToRender}
+                        report={report}
+                        authors={authors}
+                        version={version}
+                        onUpvoteReport={async () => {
+                          await dispatch(toggleUserStarReportAction(report.id as string));
+                          refreshReport();
+                        }}
+                        hasPermissionEditReport={
+                          hasPermissionEditReport || ((report.user_id === commonData.user?.id || report.author_ids.includes(commonData.user?.id as string)) && hasPermissionEditReportOnlyMine)
+                        }
+                        hasPermissionDeleteReport={hasPermissionDeleteReport}
+                        commonData={commonData}
+                      >
+                        <ManageUsers
+                          commonData={commonData}
+                          members={members}
+                          onInputChange={(query: string) => searchUsers(query)}
+                          users={users}
+                          showTeamRoles={true}
+                          onUpdateRoleMember={updateMemberRole}
+                          onInviteNewUser={inviteNewUser}
+                          onRemoveUser={removeUser}
+                        />
+                      </PureReportHeader>
+                    </div>
 
-              <div className="border-y p-0">
-                {fileToRender && onlyVisibleCell && (
-                  <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
-                    Showing only this cell.
-                    <button
-                      onClick={() => {
-                        const qs = { ...router.query };
-                        delete qs.cell;
-                        return router.push({
-                          query: { ...qs },
-                        });
-                      }}
-                      className="ml-1 text-blue-500"
-                    >
-                      View entire notebook
-                    </button>
+                    <div className="border-y p-0">
+                      {fileToRender && onlyVisibleCell && (
+                        <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
+                          Showing only this cell.
+                          <button
+                            onClick={() => {
+                              const qs = { ...router.query };
+                              delete qs.cell;
+                              return router.push({
+                                query: { ...qs },
+                              });
+                            }}
+                            className="ml-1 text-blue-500"
+                          >
+                            View entire notebook
+                          </button>
+                        </div>
+                      )}
+
+                      {fileToRender && (
+                        <UnpureReportRender
+                          key={fileToRender.id}
+                          fileToRender={fileToRender}
+                          report={report}
+                          channelMembers={channelMembers}
+                          commonData={commonData}
+                          onlyVisibleCell={onlyVisibleCell}
+                          frontEndUrl={frontEndUrl}
+                          enabledCreateInlineComment={hasPermissionCreateInlineComment}
+                          enabledEditInlineComment={hasPermissionEditInlineComment}
+                          enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
+                        />
+                      )}
+
+                      {!fileToRender && (
+                        <button
+                          type="button"
+                          className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                          <span className="mt-2 block text-sm font-medium text-gray-900">Please choose a file in the filebrowser on the left.</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {hasPermissionReadComment && (
+                      <div className="block pb-44 w-full p-4">
+                        <div className="prose max-w-none ">
+                          <h2>Comments</h2>
+                        </div>
+                        <PureComments
+                          report={report}
+                          commonData={commonData}
+                          hasPermissionCreateComment={hasPermissionCreateComment}
+                          hasPermissionDeleteComment={hasPermissionDeleteComment}
+                          channelMembers={channelMembers}
+                          submitComment={submitComment}
+                          defaultPlaceholderText="Write a new report's global comment"
+                          userSelectorHook={(id?: string): UserDTO | undefined => {
+                            return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
+                          }}
+                          onDeleteComment={async (id: string) => {
+                            await dispatch(deleteCommentAction(id as string));
+                          }}
+                          commentSelectorHook={(parentId: string | null = null) => {
+                            const values: Comment[] = Object.values(allComments || []);
+                            if (values.length === 0) {
+                              return [];
+                            }
+                            const filtered: Comment[] = values.filter((comment: Comment) => {
+                              return comment!.comment_id === parentId;
+                            });
+                            // Sort comments by created_at desc
+                            filtered.sort((a: Comment, b: Comment) => {
+                              return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
+                            });
+                            return filtered;
+                          }}
+                        />
+                      </div>
+                    )}
                   </div>
-                )}
-
-                {fileToRender && (
-                  <UnpureReportRender
-                    key={fileToRender.id}
-                    fileToRender={fileToRender}
-                    report={report}
-                    channelMembers={channelMembers}
-                    commonData={commonData}
-                    onlyVisibleCell={onlyVisibleCell}
-                    frontEndUrl={frontEndUrl}
-                    enabledCreateInlineComment={hasPermissionCreateInlineComment}
-                    enabledEditInlineComment={hasPermissionEditInlineComment}
-                    enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
-                  />
-                )}
-
-                {!fileToRender && (
-                  <button
-                    type="button"
-                    className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  >
-                    <span className="mt-2 block text-sm font-medium text-gray-900">Please choose a file in the filebrowser on the left.</span>
-                  </button>
-                )}
-              </div>
-
-              {hasPermissionReadComment && (
-                <div className="block pb-44 w-full p-4">
-                  <div className="prose max-w-none ">
-                    <h2>Comments</h2>
-                  </div>
-                  <PureComments
-                    report={report}
-                    commonData={commonData}
-                    hasPermissionCreateComment={hasPermissionCreateComment}
-                    hasPermissionDeleteComment={hasPermissionDeleteComment}
-                    channelMembers={channelMembers}
-                    submitComment={submitComment}
-                    defaultPlaceholderText="Write a new report's global comment"
-                    userSelectorHook={(id?: string): UserDTO | undefined => {
-                      return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
-                    }}
-                    onDeleteComment={async (id: string) => {
-                      await dispatch(deleteCommentAction(id as string));
-                    }}
-                    commentSelectorHook={(parentId: string | null = null) => {
-                      const values: Comment[] = Object.values(allComments || []);
-                      if (values.length === 0) {
-                        return [];
-                      }
-                      const filtered: Comment[] = values.filter((comment: Comment) => {
-                        return comment!.comment_id === parentId;
-                      });
-                      // Sort comments by created_at desc
-                      filtered.sort((a: Comment, b: Comment) => {
-                        return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
-                      });
-                      return filtered;
-                    }}
-                  />
-                </div>
+                </>
               )}
             </div>
-          </>
-        )}
+          </div>
+        </main>
       </div>
     </div>
   );

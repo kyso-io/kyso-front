@@ -8,6 +8,7 @@ import { setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 type IPureSideOverlayPanel = {
   cacheKey?: string;
   children: ReactElement;
+  setSidebarOpen: (p: boolean) => void;
 };
 
 type UseResizeProps = {
@@ -71,8 +72,7 @@ const useResize = (props: UseResizeProps): UseResizeReturn => {
 };
 
 const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
-  const { cacheKey = 'overlay-panel-state', children } = props;
-
+  const { cacheKey = 'overlay-panel-state', children, setSidebarOpen } = props;
   const [open, setOpen] = useState(true);
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const hoverRef = useRef(null);
@@ -94,6 +94,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
   const setOpenAndCache = () => {
     setLocalStorageItem(cacheKey, !open);
     setOpen(!open);
+    setSidebarOpen(!open);
     setIsHover(false);
     setShowTooltip(false);
   };
@@ -102,7 +103,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
     <>
       <div
         ref={hoverRef}
-        className={classNames('relative', open ? 'bg-gray-50  -mb-10' : 'border-r  -mb-10')}
+        className="-mb-10"
         style={{
           width: open ? `${width}px` : '',
         }}
@@ -136,7 +137,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
           </div>
         )}
 
-        {open && <div className="absolute inset-y-0 w-1 right-0 border-r border-r-gray-200 hover:border-r-gray-400 cursor-ew-resize" onMouseDown={enableResize} />}
+        {open && <div className="absolute inset-y-0 w-1 right-0cursor-ew-resize" onMouseDown={enableResize} />}
       </div>
     </>
   );

@@ -83,7 +83,7 @@ const CellWrapper = (props: Props) => {
     <div
       ref={hoverRef}
       className={classNames(
-        'w-full flex lg:flex-row flex-col lg:space-y-0 p-2',
+        'w-full flex lg:flex-row flex-col lg:space-y-0 p-2 break-all',
         isHover && !onlyVisibleCell && !first ? 'border border-inherit border-dashed' : 'border border-transparent',
         isHover && !onlyVisibleCell && first ? 'border border-inherit border-dashed' : 'border border-transparent',
         // last && !onlyVisibleCell ? "border-b border-b-inherit ": "",
