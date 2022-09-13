@@ -12,8 +12,9 @@ import router from 'next/router';
 import checkPermissions from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureShareButton from './PureShareButton';
+import PureTagGroup from './PureTagGroup';
 
-const MAX_LENGTH_DESCRIPTION: number = 200;
+const MAX_LENGTH_DESCRIPTION: number = 700;
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -71,11 +72,8 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
             {report.report_type && (
               <span className="bg-orange-100 text-orange-800 text-xs font-semibold mr-2 px-2.5 py-1 rounded-xl dark:bg-orange-200 dark:text-orange-900">{report.report_type}</span>
             )}
-            {report.tags.map((tag: string, indexTag: number) => (
-              <span key={indexTag} className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-1 rounded-xl dark:bg-blue-200 dark:text-blue-800">
-                {tag}
-              </span>
-            ))}
+
+            <PureTagGroup tags={report.tags} />
           </div>
         </div>
         {commonData.user && (

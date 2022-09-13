@@ -43,18 +43,41 @@ const SearchIndex = () => {
     filterPeople: [],
   });
   const [navigation, setNavigation] = useState<SearchNavItem[]>([]);
+
+  const keepOnlyLatestVersions = (results: FullTextSearchResultType) => {
+    const map = new Map();
+    const regex = /(?:^|[?&])version=([^&]*)/g;
+
+    for (const x of results.results) {
+      const key = x.link.replace(regex, '').toLowerCase();
+
+      if (map.has(key)) {
+        const currentValue = map.get(key);
+        if (currentValue.version < x.version) {
+          map.set(key, x);
+        }
+      } else {
+        map.set(key, x);
+      }
+    }
+
+    results.results = Array.from(map.values());
+
+    return results;
+  };
+
   const fullTextSearchResultType: FullTextSearchResultType | null = useMemo(() => {
     if (!fullTextSearchDTO) {
       return null;
     }
     if (fullTextSearchParams.type === ElasticSearchIndex.Report) {
-      return fullTextSearchDTO.reports;
+      return keepOnlyLatestVersions(fullTextSearchDTO.reports);
     }
     if (fullTextSearchParams.type === ElasticSearchIndex.Discussion) {
-      return fullTextSearchDTO.discussions;
+      return keepOnlyLatestVersions(fullTextSearchDTO.discussions);
     }
     if (fullTextSearchParams.type === ElasticSearchIndex.Comment) {
-      return fullTextSearchDTO.comments;
+      return keepOnlyLatestVersions(fullTextSearchDTO.comments);
     }
     return null;
   }, [fullTextSearchDTO]);
