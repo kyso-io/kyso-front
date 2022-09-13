@@ -3,6 +3,7 @@ import SearchItem from '@/components/search-item';
 import SearchNavigation from '@/components/search-navigation';
 import SearchPagination from '@/components/search-pagination';
 import { useAppDispatch } from '@/hooks/redux-hooks';
+import { useCommonData } from '@/hooks/use-common-data';
 import type { FullTextSearchParams } from '@/interfaces/full-text-search-params';
 import type { SearchNavItem } from '@/interfaces/search-nav-item';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
@@ -28,6 +29,7 @@ const debouncedFetchData = debounce((params: FullTextSearchParams, dispatch: any
 
 const SearchIndex = () => {
   const router = useRouter();
+  const commonData = useCommonData();
   const { q } = router.query;
   const dispatch = useAppDispatch();
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -115,6 +117,10 @@ const SearchIndex = () => {
 
   useEffect(() => {
     setRequesting(true);
+
+    fullTextSearchParams.filterOrgs = commonData.permissions?.organizations?.map((x) => x.name);
+    fullTextSearchParams.filterTeams = commonData.permissions?.teams?.map((x) => x.name);
+
     debouncedFetchData(fullTextSearchParams, dispatch, (result: FullTextSearchDTO | null) => {
       setFullTextSearchDTO(result);
       if (result) {

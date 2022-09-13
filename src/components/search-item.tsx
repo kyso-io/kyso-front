@@ -1,3 +1,5 @@
+import { FileTypesHelper } from '@/helpers/FileTypesHelper';
+import { Helper } from '@/helpers/Helper';
 import type { FullTextSearchResult } from '@kyso-io/kyso-model';
 import { ElasticSearchIndex } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
@@ -11,6 +13,22 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
   const router = useRouter();
   const { basePath } = router;
 
+  const isUnknownFile = (name: string) => {
+    return (
+      !FileTypesHelper.isPowerpoint(name) &&
+      !FileTypesHelper.isWord(name) &&
+      !FileTypesHelper.isExcel(name) &&
+      !FileTypesHelper.isPDF(name) &&
+      !FileTypesHelper.isJupyterNotebook(name) &&
+      !FileTypesHelper.isMarkdown(name) &&
+      !FileTypesHelper.isPython(name) &&
+      !FileTypesHelper.isR(name) &&
+      !FileTypesHelper.isJavascript(name) &&
+      !FileTypesHelper.isTypescript(name) &&
+      !FileTypesHelper.isHTML(name)
+    );
+  };
+
   return (
     <li className="mb-4 relative bg-white py-5 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
       <div className="flex justify-between space-x-3">
@@ -20,11 +38,68 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
             {fullTextSearchResult.type !== ElasticSearchIndex.Comment && (
               <>
                 <p className="text-sm mb-2 font-medium text-gray-900 truncate">
+                  {FileTypesHelper.isPowerpoint(fullTextSearchResult.filePath) ? (
+                    <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/powerpoint.svg`} alt="Powerpoint File" />
+                  ) : (
+                    ''
+                  )}
+
+                  {FileTypesHelper.isWord(fullTextSearchResult.filePath) ? <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/word.svg`} alt="Word File" /> : ''}
+
+                  {FileTypesHelper.isExcel(fullTextSearchResult.filePath) ? <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/excel.svg`} alt="Excel File" /> : ''}
+
+                  {FileTypesHelper.isPDF(fullTextSearchResult.filePath) ? <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/pdf.svg`} alt="PDF File" /> : ''}
+
+                  {FileTypesHelper.isJupyterNotebook(fullTextSearchResult.filePath) ? (
+                    <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/jupyter.svg`} alt="Jupyter File" />
+                  ) : (
+                    ''
+                  )}
+
+                  {FileTypesHelper.isMarkdown(fullTextSearchResult.filePath) ? (
+                    <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/markdown.svg`} alt="Markdown File" />
+                  ) : (
+                    ''
+                  )}
+
+                  {FileTypesHelper.isPython(fullTextSearchResult.filePath) ? <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/python.svg`} alt="Python File" /> : ''}
+
+                  {FileTypesHelper.isR(fullTextSearchResult.filePath) ? <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/r.svg`} alt="R File" /> : ''}
+
+                  {FileTypesHelper.isJavascript(fullTextSearchResult.filePath) ? (
+                    <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/javascript.svg`} alt="Javascript File" />
+                  ) : (
+                    ''
+                  )}
+
+                  {FileTypesHelper.isTypescript(fullTextSearchResult.filePath) ? (
+                    <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/typescript.svg`} alt="Typescript File" />
+                  ) : (
+                    ''
+                  )}
+
+                  {FileTypesHelper.isHTML(fullTextSearchResult.filePath) ? (
+                    <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/${FileTypesHelper.getBrowser()}`} alt="HTML File" />
+                  ) : (
+                    ''
+                  )}
+
+                  {isUnknownFile(fullTextSearchResult.filePath) ? <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/file.svg`} alt="Typescript File" /> : ''}
+
                   {fullTextSearchResult.title}
 
                   {otherVersionResultsNumber && otherVersionResultsNumber > 1 && (
                     <span className="text-xs font-semibold inline-block py-1 px-2 ml-2 rounded text-black bg-white last:mr-0 mr-1 border">{`+${otherVersionResultsNumber - 1} more versions`}</span>
                   )}
+
+                  {
+                    <div style={{ marginLeft: '27px', fontSize: '0.9em', fontFamily: 'monospace' }}>
+                      {fullTextSearchResult.filePath.replace(
+                        `/${fullTextSearchResult.organizationSlug}/${fullTextSearchResult.teamSlug}/reports/${Helper.slugify(fullTextSearchResult.title)}/${fullTextSearchResult.version}`,
+                        '.',
+                      )}
+                    </div>
+                  }
                 </p>
               </>
             )}
