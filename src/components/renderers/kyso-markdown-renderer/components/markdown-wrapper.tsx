@@ -117,7 +117,7 @@ interface Props {
 }
 const MarkdownWrapper = ({ source }: Props) => {
   return (
-    <div className="prose max-w-none break-all">
+    <div className="prose max-w-none break-words">
       <ReactMarkdown remarkPlugins={[gfm, remarkMath, directive, customDirectives, remarkUnwrapImages]} rehypePlugins={[rehypeSlug, rehypeKatex, rehypeRaw]} components={components}>
         {source}
       </ReactMarkdown>
