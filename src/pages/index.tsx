@@ -37,7 +37,7 @@ const Index = ({ commonData }: Props) => {
       }
     };
     redirectUserToOrganization();
-  }, []);
+  }, [commonData]);
 
   return (
     <div className="flex flex-row space-x-8">

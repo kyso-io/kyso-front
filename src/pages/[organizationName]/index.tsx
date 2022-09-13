@@ -410,7 +410,6 @@ const Index = ({ commonData }: Props) => {
   if (commonData.errorOrganization) {
     return <div className="text-center mt-4">{commonData.errorOrganization}</div>;
   }
-  console.log('commonData.errorOrganizatio', commonData.organization);
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
