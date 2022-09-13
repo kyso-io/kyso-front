@@ -46,7 +46,6 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
   }, []);
 
   // const backgroundImage: string = report.preview_picture ? report.preview_picture : BACKGROUND_IMAGE;
-  console.log(report);
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
