@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ReportDTO, UserDTO, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { UpdateReportRequestDTO } from '@kyso-io/kyso-model';
-import { Fragment, useState, useMemo, useRef } from 'react';
+import { Fragment, useState, useRef } from 'react';
 // import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { toSvg } from 'jdenticon';
 import { Dialog, Transition } from '@headlessui/react';
@@ -43,16 +43,14 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
   // const [notification, setNotification] = useState('');
   // const [notificationType, setNotificationType] = useState('');
   const [newAuthors, setNewAuthors] = useState(authors.map((x) => x.email) || []);
-  // const [picture, setPicture] = useState([]);
+  const [picture, setPicture] = useState<string>();
 
-  // const imageInputFileRef = useRef<any>(null);
-  const reportImage: string = useMemo(() => {
-    if (report.preview_picture) {
-      return report.preview_picture;
-    }
+  if (report.preview_picture) {
+    setPicture(report.preview_picture);
+  } else {
     const svgString = toSvg(report.title, 400);
-    return `data:image/svg+xml;charset=utf8,${encodeURIComponent(svgString)}`;
-  }, []);
+    setPicture(`data:image/svg+xml;charset=utf8,${encodeURIComponent(svgString)}`);
+  }
 
   // const backgroundImage: string = report.preview_picture ? report.preview_picture : BACKGROUND_IMAGE;
   const imageInputFileRef = useRef<any>(null);
@@ -98,10 +96,8 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
 
       const response: NormalizedResponseDTO<ReportDTO> = await api.updateReportImage(props.report.id!, file);
       console.log(response.data);
-      /*
-      setUser(response.data);
-      setUserProfileData({ errorUserProfile: null, userProfile: response.data });
-      */
+      setPicture(response.data.preview_picture);
+
       setMessageToaster('Image uploaded successfully!');
       setTimeout(() => {
         setShowToaster(false);
@@ -170,7 +166,7 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                             <div>
                               {/* Preview picture */}
                               <div className="relative h-40 sm:h-56">
-                                <img className="absolute h-full w-full object-cover opacity-70" src={reportImage} alt="preview picture" />
+                                <img className="absolute h-full w-full object-cover opacity-70" src={picture} alt="preview picture" />
                                 <div className="absolute top-5 right-5">
                                   <button
                                     type="button"
