@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ReportDTO, UserDTO, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import { UpdateReportRequestDTO } from '@kyso-io/kyso-model';
 import { Fragment, useState, useMemo, useRef } from 'react';
 // import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { toSvg } from 'jdenticon';
@@ -58,6 +59,31 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
 
+  const updateReportMetadata = async () => {
+    try {
+      setShowToaster(true);
+      setMessageToaster('Uploading image...');
+      const api: Api = new Api(props.commonData.token);
+
+      api.setOrganizationSlug(props.commonData.organization?.sluglified_name!);
+      api.setTeamSlug(props.commonData.team?.sluglified_name!);
+
+      const updateReportRequest: UpdateReportRequestDTO = new UpdateReportRequestDTO(title, description, report.show_code, report.show_output, report.main_file, tags, newAuthors);
+      const response: NormalizedResponseDTO<ReportDTO> = await api.updateReport(props.report.id!, updateReportRequest);
+      console.log(response.data);
+
+      setMessageToaster('Report updated successfully!');
+      setTimeout(() => {
+        setShowToaster(false);
+      }, 3000);
+    } catch (ex) {
+      setMessageToaster('An error occurred updating the report. Please try again');
+      setTimeout(() => {
+        setShowToaster(false);
+      }, 3000);
+    }
+  };
+
   const onChangeBackgroundImage = async (file: File) => {
     if (!file) {
       return;
@@ -67,6 +93,9 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
       setShowToaster(true);
       setMessageToaster('Uploading image...');
       const api: Api = new Api(props.commonData.token);
+      api.setOrganizationSlug(props.commonData.organization?.sluglified_name!);
+      api.setTeamSlug(props.commonData.team?.sluglified_name!);
+
       const response: NormalizedResponseDTO<ReportDTO> = await api.updateReportImage(props.report.id!, file);
       console.log(response.data);
       /*
@@ -77,7 +106,12 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
       setTimeout(() => {
         setShowToaster(false);
       }, 3000);
-    } catch (e) {}
+    } catch (e) {
+      setMessageToaster('An error occurred uploading the image. Please try again');
+      setTimeout(() => {
+        setShowToaster(false);
+      }, 3000);
+    }
   };
 
   return (
@@ -318,8 +352,9 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                             Cancel
                           </button>
                           <button
-                            type="submit"
+                            type="button"
                             className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            onClick={() => updateReportMetadata()}
                           >
                             Save
                           </button>
