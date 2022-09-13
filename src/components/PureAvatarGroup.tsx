@@ -8,6 +8,7 @@ import PureAvatar from './PureAvatar';
 interface Props {
   data: Avatar[] | UserDTO[] | Member[];
   size?: TailwindHeightSizeEnum;
+  tooltip?: boolean;
 }
 
 const PureAvatarGroup = (props: Props) => {
@@ -21,7 +22,7 @@ const PureAvatarGroup = (props: Props) => {
   return (
     <div className="flex -space-x-1 overflow-hidden">
       {[...props.data].reverse().map((author: Avatar, index: number) => (
-        <PureAvatar key={index} src={author.avatar_url!} title={author.display_name} size={size} textSize={TailwindFontSizeEnum.XS} />
+        <PureAvatar key={index} src={author.avatar_url!} title={author.display_name} size={size} textSize={TailwindFontSizeEnum.XS} tooltip={props.tooltip} />
       ))}
     </div>
   );

@@ -1,7 +1,8 @@
 import type { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import type { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import clsx from 'clsx';
-import React, { useState } from 'react';
+import { useEventListener } from 'usehooks-ts';
+import React, { useState, useRef } from 'react';
 
 interface Props {
   src: string;
@@ -10,6 +11,7 @@ interface Props {
   size: TailwindHeightSizeEnum;
   textSize: TailwindFontSizeEnum;
   className?: string;
+  tooltip?: boolean;
 }
 
 const getInitials = (str: string) => {
@@ -28,12 +30,26 @@ const PureAvatar = (props: Props) => {
   // Default size
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setIsError] = useState(false);
+  const { tooltip } = props;
 
+  const tooltipRef1 = useRef(null);
+
+  const [showTooltip, setShowTooltip] = useState<boolean>(false);
+
+  useEventListener(
+    'mouseenter',
+    () => {
+      setTimeout(() => setShowTooltip(true), 100);
+    },
+    tooltipRef1,
+  );
+  useEventListener('mouseleave', () => setShowTooltip(false), tooltipRef1);
   return (
     <>
       {props.src && !isError && (
         <img
           key={props.title}
+          ref={tooltipRef1}
           onError={() => {
             setIsError(true);
           }}
@@ -47,6 +63,11 @@ const PureAvatar = (props: Props) => {
           src={props.src}
           alt={props.title}
         />
+      )}
+      {tooltip && showTooltip && (
+        <div className="pt-9 absolute">
+          <div className="text-xs w-32 absolute flex flex-row items-center h-fit p-2 font-medium text-white bg-gray-500 rounded-lg shadow-sm tooltip">{props.title}</div>
+        </div>
       )}
       {props.src && isError && (
         <div className={`bg-white text-gray-600 flex items-center justify-center text-${props.textSize} h-${props.size} w-${props.size} rounded-full border ${props.className}`}>

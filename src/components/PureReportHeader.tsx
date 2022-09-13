@@ -1,6 +1,7 @@
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import PureShareButton from '@/components/PureShareButton';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import PureVersionsDropdown from '@/components/PureVersionsDropdown';
 import classNames from '@/helpers/class-names';
 import type { CommonData } from '@/types/common-data';
@@ -51,22 +52,23 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
         <h1 className="text-2xl font-medium">{report?.title}</h1>
         {description && <div className="text-sm">{description}</div>}
 
-        <div className="mt-3 flex text-sm flex-col lg:flex-row lg:items-center text-gray-500 font-light space-x-2">
+        <div className="mt-3 flex text-sm flex-col lg:flex-row lg:items-top text-gray-500 font-light space-x-2 min-h-min">
           <div className="flex">
-            <PureAvatarGroup data={authors}></PureAvatarGroup>
+            <PureAvatarGroup data={authors} size={TailwindHeightSizeEnum.H8} tooltip={true}></PureAvatarGroup>
           </div>
           <div>
-            created
-            <span className="text-gray-800 mx-1 ">{report?.created_at && format(new Date(report.created_at), 'MMM dd, yyyy')}.</span>
-            Last update on
-            <span className="text-gray-800 mx-2">{report?.updated_at && format(new Date(report.updated_at), 'MMM dd, yyyy')}.</span>
+            <p className="mt-2 text-sm text-gray-500">
+              Created
+              <span className="text-gray-800 ml-1 mr-2 ">{report?.created_at && format(new Date(report.created_at), 'MMM dd, yyyy')}.</span>
+              Last update on
+              <span className="text-gray-800 ml-1 mr-2">{report?.updated_at && format(new Date(report.updated_at), 'MMM dd, yyyy')}.</span>
+            </p>
           </div>
 
           {report?.tags && (
             <div
+              className="min-h-min"
               style={{
-                maxWidth: '80vh',
-                overflow: 'hidden',
                 overflowWrap: 'break-word',
                 maxHeight: '1vh',
               }}
