@@ -48,7 +48,7 @@ const TagsFilterSelector = (props: ITagsFilterSelector) => {
           <Combobox.Options className="absolute z-10 mt-1 max-h-56 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-0 border ro-5 focus:outline-none sm:text-sm">
             {query.length > 0 && (
               <Combobox.Option value={query} className={({ active }) => classNames('relative cursor-default select-none py-2 pl-3 pr-9', active ? 'bg-indigo-600 text-white' : 'text-gray-900')}>
-                {'Create "{query}"'}
+                {'Create tags'}
               </Combobox.Option>
             )}
             {filtered.sort().map((tag) => (

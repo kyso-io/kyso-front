@@ -92,11 +92,9 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
       { value: 'team-reader', label: 'Can comment' },
     ];
     if (selectedUser) {
-      console.log(selectedUser);
       if (filteredMembers.length > 0) {
         const member: Member | undefined = filteredMembers.find((m: Member) => m.id === selectedUser.id);
         if (member) {
-          console.log(member);
           if (member?.membership_origin === TeamMembershipOriginEnum.TEAM) {
             data.push({ value: 'remove', label: 'Remove' });
           }
