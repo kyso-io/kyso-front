@@ -4,9 +4,10 @@ import { useRouter } from 'next/router';
 
 interface Props {
   fullTextSearchResult: FullTextSearchResult;
+  otherVersionResultsNumber?: number;
 }
 
-const SearchItem = ({ fullTextSearchResult }: Props) => {
+const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) => {
   const router = useRouter();
   const { basePath } = router;
 
@@ -16,7 +17,17 @@ const SearchItem = ({ fullTextSearchResult }: Props) => {
         <div className="min-w-0 flex-1">
           <a href={`${basePath}${fullTextSearchResult.link}`} className="block focus:outline-none">
             <span className="absolute inset-0" aria-hidden="true"></span>
-            {fullTextSearchResult.type !== ElasticSearchIndex.Comment && <p className="text-sm font-medium text-gray-900 truncate">{fullTextSearchResult.title}</p>}
+            {fullTextSearchResult.type !== ElasticSearchIndex.Comment && (
+              <>
+                <p className="text-sm mb-2 font-medium text-gray-900 truncate">
+                  {fullTextSearchResult.title}
+
+                  {otherVersionResultsNumber && otherVersionResultsNumber > 1 && (
+                    <span className="text-xs font-semibold inline-block py-1 px-2 ml-2 rounded text-black bg-white last:mr-0 mr-1 border">{`+${otherVersionResultsNumber - 1} more versions`}</span>
+                  )}
+                </p>
+              </>
+            )}
             {fullTextSearchResult.organizationSlug && (
               <span className="bg-blue-100 text-blue-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-blue-200 dark:text-blue-800">{fullTextSearchResult.organizationSlug}</span>
             )}

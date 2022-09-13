@@ -12,7 +12,7 @@ import { fullTextSearchAction } from '@kyso-io/kyso-store';
 import { unwrapResult } from '@reduxjs/toolkit';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const fetchData = async (params: FullTextSearchParams, dispatch: any, cb: (fullTextSearchDTO: FullTextSearchDTO | null) => void) => {
@@ -43,43 +43,62 @@ const SearchIndex = () => {
     filterPeople: [],
   });
   const [navigation, setNavigation] = useState<SearchNavItem[]>([]);
+  const [fullTextSearchResultType, setFullTextSearchResultType] = useState<FilteredFullTextSearchResultType[] | null>(null);
+  const [rawResults, setRawResults] = useState<FullTextSearchResultType | null>(null);
 
-  const keepOnlyLatestVersions = (results: FullTextSearchResultType) => {
-    const map = new Map();
+  interface FilteredFullTextSearchResultType {
+    result: FullTextSearchResult | null;
+    subResults: number;
+  }
+
+  const keepOnlyLatestVersions = (results: FullTextSearchResultType): FilteredFullTextSearchResultType[] => {
+    const map = new Map<string, FilteredFullTextSearchResultType>();
     const regex = /(?:^|[?&])version=([^&]*)/g;
 
     for (const x of results.results) {
       const key = x.link.replace(regex, '').toLowerCase();
 
+      const filteredResult: FilteredFullTextSearchResultType = {
+        result: x,
+        subResults: 1,
+      };
+
       if (map.has(key)) {
         const currentValue = map.get(key);
-        if (currentValue.version < x.version) {
-          map.set(key, x);
+
+        currentValue!.subResults = currentValue!.subResults + 1;
+
+        if (currentValue!.result!.version < x.version) {
+          currentValue!.result = x;
         }
+
+        map.set(key, currentValue!);
       } else {
-        map.set(key, x);
+        map.set(key, filteredResult);
       }
     }
 
-    results.results = Array.from(map.values());
-
-    return results;
+    return Array.from(map.values()) as FilteredFullTextSearchResultType[];
   };
 
-  const fullTextSearchResultType: FullTextSearchResultType | null = useMemo(() => {
+  useEffect(() => {
     if (!fullTextSearchDTO) {
-      return null;
+      setFullTextSearchResultType(null);
+      return;
     }
+
     if (fullTextSearchParams.type === ElasticSearchIndex.Report) {
-      return keepOnlyLatestVersions(fullTextSearchDTO.reports);
+      setRawResults(fullTextSearchDTO.reports);
+      setFullTextSearchResultType(keepOnlyLatestVersions(fullTextSearchDTO.reports));
     }
     if (fullTextSearchParams.type === ElasticSearchIndex.Discussion) {
-      return keepOnlyLatestVersions(fullTextSearchDTO.discussions);
+      setRawResults(fullTextSearchDTO.discussions);
+      setFullTextSearchResultType(keepOnlyLatestVersions(fullTextSearchDTO.discussions));
     }
     if (fullTextSearchParams.type === ElasticSearchIndex.Comment) {
-      return keepOnlyLatestVersions(fullTextSearchDTO.comments);
+      setRawResults(fullTextSearchDTO.comments);
+      setFullTextSearchResultType(keepOnlyLatestVersions(fullTextSearchDTO.comments));
     }
-    return null;
   }, [fullTextSearchDTO]);
 
   useEffect(() => {
@@ -154,16 +173,18 @@ const SearchIndex = () => {
           <div className="bg-white py-4 text-center text-base text-gray-600 hover:text-gray-900">No results found</div>
         ) : (
           <div className="py-6">
-            {fullTextSearchResultType.results.length === 0 ? (
+            {fullTextSearchResultType.length === 0 ? (
               <div className="bg-white py-4 text-center text-base text-gray-600 hover:text-gray-900">No results found</div>
             ) : (
               <React.Fragment>
                 <ul role="list" className="divide-y divide-gray-200">
-                  {fullTextSearchResultType.results.map((fullTextSearchResult: FullTextSearchResult, index: number) => (
-                    <SearchItem key={index} fullTextSearchResult={fullTextSearchResult} />
+                  {fullTextSearchResultType.map((fullTextSearchResult: FilteredFullTextSearchResultType, index: number) => (
+                    <>
+                      <SearchItem key={index} fullTextSearchResult={fullTextSearchResult.result!} otherVersionResultsNumber={fullTextSearchResult.subResults} />
+                    </>
                   ))}
                 </ul>
-                <SearchPagination goToPage={(page: number) => setFullTextSearchParams({ ...fullTextSearchParams, page })} fullTextSearchMetadata={fullTextSearchResultType.metadata} />
+                <SearchPagination goToPage={(page: number) => setFullTextSearchParams({ ...fullTextSearchParams, page })} fullTextSearchMetadata={rawResults!.metadata} />
               </React.Fragment>
             )}
           </div>
