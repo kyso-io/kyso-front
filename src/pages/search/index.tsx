@@ -120,13 +120,13 @@ const SearchIndex = () => {
       if (result) {
         setNavigation([
           { name: 'Reports', elasticSearchIndex: ElasticSearchIndex.Report, count: result.reports.metadata.total },
-          { name: 'Discussions', elasticSearchIndex: ElasticSearchIndex.Discussion, count: result.discussions.metadata.total },
+          /* { name: 'Discussions', elasticSearchIndex: ElasticSearchIndex.Discussion, count: result.discussions.metadata.total }, */
           { name: 'Comments', elasticSearchIndex: ElasticSearchIndex.Comment, count: result.comments.metadata.total },
         ]);
       } else {
         setNavigation([
           { name: 'Reports', elasticSearchIndex: ElasticSearchIndex.Report, count: 0 },
-          { name: 'Discussions', elasticSearchIndex: ElasticSearchIndex.Discussion, count: 0 },
+          /* { name: 'Discussions', elasticSearchIndex: ElasticSearchIndex.Discussion, count: 0 }, */
           { name: 'Comments', elasticSearchIndex: ElasticSearchIndex.Comment, count: 0 },
         ]);
       }
