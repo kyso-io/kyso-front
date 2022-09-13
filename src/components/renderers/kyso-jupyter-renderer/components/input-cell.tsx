@@ -13,19 +13,27 @@ interface Props {
 
 const InputCell = (props: Props) => {
   if (props.showInput && props.cell.cell_type === 'code') {
-    return <InputCellCode cell={props.cell} />;
+    return (
+      <div className="pl-4 p-2 ">
+        <InputCellCode cell={props.cell} />;
+      </div>
+    );
   }
 
   if (props.cell.cell_type === 'markdown') {
     return (
-      <div className="p-2">
+      <div className="pl-4 p-2 ">
         <InputCellMarkdown cell={props.cell} context={props.context} />
       </div>
     );
   }
 
   if (props.showInput && props.cell.cell_type === 'raw') {
-    return <InputCellRaw cell={props.cell} />;
+    return (
+      <div className="pl-4 p-2">
+        <InputCellRaw cell={props.cell} />
+      </div>
+    );
   }
 
   return null;
