@@ -1,12 +1,14 @@
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
-import { Fragment, useState } from 'react';
+import { Fragment, useState, useMemo } from 'react';
 // import { CopyToClipboard } from 'react-copy-to-clipboard';
 import ManageUsers from '@/components/ManageUsers';
+import { toSvg } from 'jdenticon';
 import { Dialog, Transition } from '@headlessui/react';
 import type { CommonData } from '@/types/common-data';
-import { LinkIcon, PlusIcon } from '@heroicons/react/solid';
+import { LinkIcon, PlusIcon, PlusSmIcon as PlusSmIconSolid } from '@heroicons/react/solid';
 // import PureNotification from '@/components/PureNotification';
 import type { Member } from '../types/member';
+// import { useRouter } from 'next/router';
 import PureAvatarGroup from './PureAvatarGroup';
 
 interface IPureEditMetadata {
@@ -26,6 +28,7 @@ interface IPureEditMetadata {
 
 const PureEditMetadata = (props: IPureEditMetadata) => {
   const { isOpen, setOpen, report, authors, users, commonData, members, onUpdateRoleMember, onInviteNewUser, onRemoveUser } = props;
+  // const router = useRouter();
 
   const [title, setTitle] = useState(report.title || '');
   const [description, setDescription] = useState(report.description || '');
@@ -33,6 +36,18 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
   // const [notificationType, setNotificationType] = useState('');
   // const [newAuthors, setAuthors] = useState(authors || []);
   // const [picture, setPicture] = useState([]);
+
+  // const imageInputFileRef = useRef<any>(null);
+  const reportImage: string = useMemo(() => {
+    if (report.preview_picture) {
+      return report.preview_picture;
+    }
+    const svgString = toSvg(report.title, 400);
+    return `data:image/svg+xml;charset=utf8,${encodeURIComponent(svgString)}`;
+  }, []);
+
+  // const backgroundImage: string = report.preview_picture ? report.preview_picture : BACKGROUND_IMAGE;
+  console.log(report);
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -59,7 +74,6 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                         <div className="flex items-start justify-between space-x-3">
                           <div className="space-y-1">
                             <Dialog.Title className="text-lg font-medium text-gray-900">Edit report metadata</Dialog.Title>
-                            {/* <p className="text-sm text-gray-500">Edit here how the report is display in .</p> */}
                           </div>
                           <div className="flex h-7 items-center">
                             <button type="button" className="text-gray-400 hover:text-gray-500" onClick={() => setOpen()}>
@@ -78,6 +92,39 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
 
                       {/* Divider container */}
                       <div className="space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0">
+                        <div className="pb-1 sm:pb-6">
+                          <div>
+                            {/* Preview picture */}
+                            <div className="relative h-40 sm:h-56">
+                              <img className="absolute h-full w-full object-cover opacity-70" src={reportImage} alt="preview picture" />
+                              <div className="absolute top-5 right-5">
+                                <button
+                                  type="button"
+                                  // onClick={() => imageInputFileRef.current.click()}
+                                  className="inline-flex items-center p-1 border border-gray-200  rounded-full shadow-sm text-gray-700 bg-white hover:bg-gray-50  focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                  title="Change background image"
+                                >
+                                  <PlusSmIconSolid className="h-5 w-5" aria-hidden="true" />
+                                </button>
+                                <input
+                                  // ref={imageInputFileRef}
+                                  type="file"
+                                  accept="image/*"
+                                  // onClick={(event: any) => {
+                                  //   event.target.value = null;
+                                  // }}
+                                  // onChange={(e: any) => {
+                                  //   if (e.target.files.length > 0) {
+                                  //     console.log('onChangeBackgroundImage', e.target.files[0]);
+                                  //     onChangeBackgroundImage(e.target.files[0]);
+                                  //   }
+                                  // }}
+                                  style={{ display: 'none' }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                         {/* Project name */}
                         <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                           <div>
@@ -218,13 +265,7 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                               <div className="flex-1">
                                 {/* <div className="text-left">{notification && <PureNotification message={notification} type={notificationType} />}</div> */}
                                 {/* <CopyToClipboard
-                                text={`${baseUrl}/${slugify(
-                                  ifNullReturnDefault(organizationName, "")
-                                )}/${slugify(
-                                  ifNullReturnDefault(teamName, "")
-                                )}/${slugify(
-                                  ifNullReturnDefault(reportName, "")
-                                )}/share`}
+                                text={`${router.basePath}/share`}
                                 onCopy={() =>{
                                   setNotificationType('success');
                                   setNotification('Copy on your clipboard');
