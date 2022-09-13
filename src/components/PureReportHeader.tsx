@@ -1,4 +1,5 @@
 import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 import PureShareButton from '@/components/PureShareButton';
 import PureVersionsDropdown from '@/components/PureVersionsDropdown';
 import classNames from '@/helpers/class-names';
@@ -14,6 +15,7 @@ import type { Version } from '@/hooks/use-versions';
 import clsx from 'clsx';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import PureAvatarGroup from './PureAvatarGroup';
+import PureTagGroup from './PureTagGroup';
 
 type IPureReportHeaderProps = {
   report: ReportDTO;
@@ -34,12 +36,22 @@ type IPureReportHeaderProps = {
 const PureReportHeader = (props: IPureReportHeaderProps) => {
   const { report, frontEndUrl, children, fileToRender, versions, authors, version, reportUrl, onUpvoteReport, openMetadata, commonData, hasPermissionEditReport, hasPermissionDeleteReport } = props;
 
+  const MAX_LENGTH_DESCRIPTION: number = 400;
+
+  const description: string = useMemo(() => {
+    if (report?.description && report.description.length > MAX_LENGTH_DESCRIPTION) {
+      return `${report.description.substring(0, MAX_LENGTH_DESCRIPTION)}...`;
+    }
+    return report?.description ? report.description : '';
+  }, [report.description]);
+
   return (
     <div className="w-full flex flex-row justify-between p-2">
       <div className="w-4/6 flex flex-col justify-between">
         <h1 className="text-2xl font-medium">{report?.title}</h1>
-        {/* {report?.description && <div className="text-md">{report?.description}</div>} */}
-        <div className="flex text-sm flex-col lg:flex-row lg:items-center text-gray-500 font-light space-x-2">
+        {description && <div className="text-sm">{description}</div>}
+
+        <div className="mt-3 flex text-sm flex-col lg:flex-row lg:items-center text-gray-500 font-light space-x-2">
           <div className="flex">
             <PureAvatarGroup data={authors}></PureAvatarGroup>
           </div>
@@ -49,6 +61,19 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
             Last update on
             <span className="text-gray-800 mx-2">{report?.updated_at && format(new Date(report.updated_at), 'MMM dd, yyyy')}.</span>
           </div>
+
+          {report?.tags && (
+            <div
+              style={{
+                maxWidth: '80vh',
+                overflow: 'hidden',
+                overflowWrap: 'break-word',
+                maxHeight: '1vh',
+              }}
+            >
+              <PureTagGroup tags={[...report.tags]} />
+            </div>
+          )}
         </div>
       </div>
       <div className="flex w-2/6 flex-col justify-between items-start space-y-8">

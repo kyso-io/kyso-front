@@ -1,11 +1,10 @@
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Fragment, useState, useMemo } from 'react';
 // import { CopyToClipboard } from 'react-copy-to-clipboard';
-import ManageUsers from '@/components/ManageUsers';
 import { toSvg } from 'jdenticon';
 import { Dialog, Transition } from '@headlessui/react';
 import type { CommonData } from '@/types/common-data';
-import { LinkIcon, PlusIcon, PlusSmIcon as PlusSmIconSolid } from '@heroicons/react/solid';
+import { PlusIcon, PlusSmIcon as PlusSmIconSolid } from '@heroicons/react/solid';
 // import PureNotification from '@/components/PureNotification';
 import type { Member } from '../types/member';
 // import { useRouter } from 'next/router';
@@ -27,7 +26,7 @@ interface IPureEditMetadata {
 }
 
 const PureEditMetadata = (props: IPureEditMetadata) => {
-  const { isOpen, setOpen, report, authors, users, commonData, members, onUpdateRoleMember, onInviteNewUser, onRemoveUser } = props;
+  const { isOpen, setOpen, report, authors } = props;
   // const router = useRouter();
 
   const [title, setTitle] = useState(report.title || '');
@@ -164,7 +163,7 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                           </div>
                         </div>
 
-                        {/* Team members */}
+                        {/* Authors */}
                         <div className="space-y-2 px-4 sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                           <div>
                             <h3 className="text-sm font-medium text-gray-900">Authors</h3>
@@ -183,6 +182,24 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                           </div>
                         </div>
 
+                        {/* Tags */}
+                        <div className="space-y-2 px-4 sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                          <div>
+                            <h3 className="text-sm font-medium text-gray-900">Tags</h3>
+                          </div>
+                          <div className="sm:col-span-2">
+                            <div className="flex space-x-2">
+                              <button
+                                type="button"
+                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-gray-200 bg-white text-gray-400 hover:border-gray-300 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                              >
+                                <span className="sr-only">Add author</span>
+                                <PlusIcon className="h-5 w-5" aria-hidden="true" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
                         {/* Privacy */}
                         <fieldset className="space-y-2 px-4 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                           <legend className="sr-only">Privacy</legend>
@@ -190,16 +207,6 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                             Privacy
                           </div>
                           <div className="space-y-5 sm:col-span-2">
-                            <ManageUsers
-                              commonData={commonData}
-                              members={members}
-                              onInputChange={(query: string) => onRemoveUser(query)}
-                              users={users}
-                              showTeamRoles={true}
-                              onUpdateRoleMember={onUpdateRoleMember}
-                              onInviteNewUser={onInviteNewUser}
-                              onRemoveUser={onRemoveUser}
-                            />
                             <div className="space-y-5 sm:mt-0">
                               <div className="relative flex items-start">
                                 <div className="absolute flex h-5 items-center">
@@ -259,29 +266,6 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                                   </p>
                                 </div>
                               </div>
-                            </div>
-                            <hr className="border-gray-200" />
-                            <div className="space-between sm:space-between flex flex-col space-y-4 sm:flex-row sm:items-center sm:space-y-0">
-                              <div className="flex-1">
-                                {/* <div className="text-left">{notification && <PureNotification message={notification} type={notificationType} />}</div> */}
-                                {/* <CopyToClipboard
-                                text={`${router.basePath}/share`}
-                                onCopy={() =>{
-                                  setNotificationType('success');
-                                  setNotification('Copy on your clipboard');
-                                > */}
-                                <a href="#" className="group flex items-center space-x-2.5 text-sm font-medium text-indigo-600 hover:text-indigo-900">
-                                  <LinkIcon className="h-5 w-5 text-indigo-500 group-hover:text-indigo-900" aria-hidden="true" />
-                                  <span>Copy shareable link</span>
-                                </a>
-                                {/* </CopyToClipboard> */}
-                              </div>
-                              {/* <div>
-                                <a href="#" className="group flex items-center space-x-2.5 text-sm text-gray-500 hover:text-gray-900">
-                                  <QuestionMarkCircleIcon className="h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
-                                  <span>Learn more about sharing</span>
-                                </a>
-                              </div> */}
                             </div>
                           </div>
                         </fieldset>
