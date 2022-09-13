@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ReportDTO, UserDTO, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { UpdateReportRequestDTO } from '@kyso-io/kyso-model';
-import { Fragment, useState, useRef } from 'react';
+import { Fragment, useState, useRef, useEffect } from 'react';
 // import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { toSvg } from 'jdenticon';
 import { Dialog, Transition } from '@headlessui/react';
@@ -15,6 +15,7 @@ import 'primereact/resources/primereact.min.css'; // core css
 import 'primeicons/primeicons.css'; // icons
 import { Api } from '@kyso-io/kyso-store';
 import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
+import { useRouter } from 'next/router';
 import ToasterNotification from './ToasterNotification';
 import type { Member } from '../types/member';
 
@@ -36,7 +37,7 @@ interface IPureEditMetadata {
 const PureEditMetadata = (props: IPureEditMetadata) => {
   const { isOpen, setOpen, report, authors } = props;
   // const router = useRouter();
-
+  const router = useRouter();
   const [title, setTitle] = useState(report.title || '');
   const [description, setDescription] = useState(report.description || '');
   const [tags, setTags] = useState(report.tags || []);
@@ -45,12 +46,14 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
   const [newAuthors, setNewAuthors] = useState(authors.map((x) => x.email) || []);
   const [picture, setPicture] = useState<string>();
 
-  if (report.preview_picture) {
-    setPicture(report.preview_picture);
-  } else {
-    const svgString = toSvg(report.title, 400);
-    setPicture(`data:image/svg+xml;charset=utf8,${encodeURIComponent(svgString)}`);
-  }
+  useEffect(() => {
+    if (report.preview_picture) {
+      setPicture(report.preview_picture);
+    } else {
+      const svgString = toSvg(report.title, 400);
+      setPicture(`data:image/svg+xml;charset=utf8,${encodeURIComponent(svgString)}`);
+    }
+  }, []);
 
   // const backgroundImage: string = report.preview_picture ? report.preview_picture : BACKGROUND_IMAGE;
   const imageInputFileRef = useRef<any>(null);
@@ -73,7 +76,8 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
       setMessageToaster('Report updated successfully!');
       setTimeout(() => {
         setShowToaster(false);
-      }, 3000);
+        router.reload();
+      }, 1500);
     } catch (ex) {
       setMessageToaster('An error occurred updating the report. Please try again');
       setTimeout(() => {
