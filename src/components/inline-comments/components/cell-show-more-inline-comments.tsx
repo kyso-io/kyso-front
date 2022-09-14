@@ -5,7 +5,7 @@ interface Props {
   showAllComments: () => void;
 }
 
-const CellShowMoreComments = ({ numComments, showAllComments }: Props) => {
+const CellShowMoreInlineComments = ({ numComments, showAllComments }: Props) => {
   let text: string = '1 more comment';
   if (numComments > 1) {
     text = `${numComments} more comments`;
@@ -17,4 +17,4 @@ const CellShowMoreComments = ({ numComments, showAllComments }: Props) => {
   );
 };
 
-export default CellShowMoreComments;
+export default CellShowMoreInlineComments;

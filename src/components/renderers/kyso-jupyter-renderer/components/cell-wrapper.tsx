@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import { ChatAltIcon, CodeIcon, LinkIcon } from '@heroicons/react/outline';
-import PureComments from '@/comments-container/components/pure-comments';
 import { useHover } from 'usehooks-ts';
 import { useNavigateToHashOnce } from '@/hooks/use-navigate-to-hash-once';
 import type { CommonData } from '@/types/common-data';
 import { Helper } from '@/helpers/Helper';
+import PureInlineComments from '@/components/inline-comments/components/pure-inline-comments';
 import Cell from './cell';
 import type { Cell as ICell } from '../interfaces/jupyter-notebook';
 import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
@@ -145,7 +145,7 @@ const CellWrapper = (props: Props) => {
         </div>
 
         {showComments && (
-          <PureComments
+          <PureInlineComments
             commonData={commonData}
             report={report}
             channelMembers={channelMembers}

@@ -11,13 +11,13 @@ import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
 import PureAvatar from '@/components/PureAvatar';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
-import PureCommentForm from './pure-comment-form';
+import PureInlineCommentForm from './pure-inline-comment-form';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-type IPureComment = {
+type IPureInlineComment = {
   hasPermissionCreateComment: boolean;
   hasPermissionDeleteComment: boolean;
   commonData: CommonData;
@@ -30,7 +30,7 @@ type IPureComment = {
   onDeleteComment: (id: string) => void;
 };
 
-const PureComment = (props: IPureComment) => {
+const PureInlineComment = (props: IPureInlineComment) => {
   const { commonData, submitComment, report, channelMembers, onDeleteComment, hasPermissionDeleteComment, hasPermissionCreateComment, comment } = props;
 
   console.log(report.id);
@@ -38,14 +38,19 @@ const PureComment = (props: IPureComment) => {
   const [isEditing, setIsEditing] = useState(false);
 
   let isUserAuthor = false;
+
   if (commonData.user && commonData.user.id === comment?.user_id) {
     isUserAuthor = true;
+  }
+
+  if (comment.markedAsDeleted) {
+    return <></>;
   }
 
   return (
     <div className="not-prose">
       {comment && isEditing ? (
-        <PureCommentForm
+        <PureInlineCommentForm
           user={commonData.user!}
           submitComment={submitComment}
           comment={comment}
@@ -90,4 +95,4 @@ const PureComment = (props: IPureComment) => {
   );
 };
 
-export default PureComment;
+export default PureInlineComment;

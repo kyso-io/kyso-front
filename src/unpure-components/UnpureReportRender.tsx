@@ -1,4 +1,4 @@
-import PureComments from '@/comments-container/components/pure-comments';
+import PureInlineComments from '@/components/inline-comments/components/pure-inline-comments';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { PureSpinner } from '@/components/PureSpinner';
 import { RenderJupyter } from '@/components/renderers/kyso-jupyter-renderer';
@@ -180,7 +180,7 @@ const UnpureReportRender = (props: Props) => {
           <div className="flex flex-row">
             <div className={clsx('w-9/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
             <div className="w-3/12 p-2 border-l">
-              <PureComments
+              <PureInlineComments
                 commonData={commonData}
                 report={report}
                 channelMembers={channelMembers}

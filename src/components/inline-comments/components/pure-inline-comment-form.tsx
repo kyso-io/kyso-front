@@ -35,7 +35,7 @@ const parseMentions = function (str: string) {
   return tokens;
 };
 
-const PureCommentForm = (props: IPureCommentForm) => {
+const PureInlineCommentForm = (props: IPureCommentForm) => {
   const { comment, submitComment, user, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true } = props;
 
   let initialValue = '';
@@ -167,4 +167,4 @@ const PureCommentForm = (props: IPureCommentForm) => {
   );
 };
 
-export default PureCommentForm;
+export default PureInlineCommentForm;
