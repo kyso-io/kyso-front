@@ -221,6 +221,7 @@ const ActivityFeedOrganization = ({ activityFeed, relations }: ActivityFeedProps
           </a>{' '}
           {activityFeed.action === ActionEnum.ADD_MEMBER && 'was added as a member in the organization '}
           {activityFeed.action === ActionEnum.REMOVE_MEMBER && 'was removed from the organization '}
+          {activityFeed.action === ActionEnum.CREATE && 'created the organization '}
           <a href={`/${activityFeed.organization}`} className="font-medium text-indigo-600 hover:text-indigo-700">
             {organization.display_name}
           </a>{' '}
@@ -255,6 +256,7 @@ const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
           </a>{' '}
           {activityFeed.action === ActionEnum.ADD_MEMBER && 'was added as a member in the channel '}
           {activityFeed.action === ActionEnum.REMOVE_MEMBER && 'was removed from the channel '}
+          {activityFeed.action === ActionEnum.CREATE && 'created the channel '}
           <a href={`/${activityFeed.organization}/${activityFeed.team}`} className="font-medium text-indigo-600 hover:text-indigo-700">
             {team.display_name}
           </a>{' '}
@@ -295,7 +297,7 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
                 if (!activityFeed.relations!.organization[af.entity_id!]) {
                   return null;
                 }
-                if (af.action !== ActionEnum.ADD_MEMBER && af.action !== ActionEnum.REMOVE_MEMBER) {
+                if (af.action !== ActionEnum.ADD_MEMBER && af.action !== ActionEnum.REMOVE_MEMBER && af.action !== ActionEnum.CREATE) {
                   return null;
                 }
                 break;
@@ -313,7 +315,7 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
                 if (!activityFeed.relations!.team[af.entity_id!]) {
                   return null;
                 }
-                if (af.action !== ActionEnum.ADD_MEMBER && af.action !== ActionEnum.REMOVE_MEMBER) {
+                if (af.action !== ActionEnum.ADD_MEMBER && af.action !== ActionEnum.REMOVE_MEMBER && af.action !== ActionEnum.CREATE) {
                   return null;
                 }
                 break;
