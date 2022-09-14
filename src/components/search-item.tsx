@@ -116,6 +116,7 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
                 </span>
               ))}
             {fullTextSearchResult.tags &&
+              Array.isArray(fullTextSearchResult.tags) &&
               fullTextSearchResult.tags.map((tag: string, index: number) => (
                 <span key={index} className="bg-yellow-100 text-yellow-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-200 dark:text-yellow-900">
                   {tag}
