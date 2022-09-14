@@ -109,16 +109,18 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
             {fullTextSearchResult.teamSlug && (
               <span className="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">{fullTextSearchResult.teamSlug}</span>
             )}
-            {fullTextSearchResult.people.map((person: string, index: number) => (
-              <span key={index} className="bg-purple-100 text-purple-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-purple-200 dark:text-purple-900">
-                {person}
-              </span>
-            ))}
-            {fullTextSearchResult.tags.map((tag: string, index: number) => (
-              <span key={index} className="bg-yellow-100 text-yellow-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-200 dark:text-yellow-900">
-                {tag}
-              </span>
-            ))}
+            {fullTextSearchResult.people &&
+              fullTextSearchResult.people.map((person: string, index: number) => (
+                <span key={index} className="bg-purple-100 text-purple-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-purple-200 dark:text-purple-900">
+                  {person}
+                </span>
+              ))}
+            {fullTextSearchResult.tags &&
+              fullTextSearchResult.tags.map((tag: string, index: number) => (
+                <span key={index} className="bg-yellow-100 text-yellow-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-yellow-200 dark:text-yellow-900">
+                  {tag}
+                </span>
+              ))}
           </a>
         </div>
       </div>
