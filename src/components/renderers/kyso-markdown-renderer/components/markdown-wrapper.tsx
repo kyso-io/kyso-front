@@ -88,7 +88,7 @@ const Heading: React.FC<HeadingResolverProps> = ({ level, children }) => {
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const components: any = {
   /* eslint-disable @typescript-eslint/no-explicit-any */
-  img: (props: any) => <img {...props} style={{ width: '100%' }} alt={props.alt} />,
+  img: (props: any) => <img {...props} style={{ width: 'auto', maxWidth: '70%' }} alt={props.alt} />,
   /* eslint-disable @typescript-eslint/no-explicit-any */
   mermaid: (props: any) => <Mermaid source={props.text} />,
   /* eslint-disable @typescript-eslint/no-explicit-any */

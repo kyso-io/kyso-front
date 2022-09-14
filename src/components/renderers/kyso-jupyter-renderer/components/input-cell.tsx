@@ -10,11 +10,12 @@ interface Props {
   showInput: boolean;
   context?: ReportContext;
 }
+// change css here
 
 const InputCell = (props: Props) => {
   if (props.showInput && props.cell.cell_type === 'code') {
     return (
-      <div className="pl-4 p-2 ">
+      <div className="pl-4 p-2 bg-gray-50 border">
         <InputCellCode cell={props.cell} />;
       </div>
     );

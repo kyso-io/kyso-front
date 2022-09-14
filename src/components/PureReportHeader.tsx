@@ -108,7 +108,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
           <div className="flex flex-row border rounded divide-x items-center">
             {fileToRender?.path.endsWith('.html') && fileToRender && (
               <a href={`${'/scs'}${fileToRender.path_scs}`} className="block" target="_blank" rel="noreferrer">
-                <button className="inline-flex w-38 items-center px-3 py-2 border hover:bg-slate-200  rounded text-xs font-medium text-slate-500">
+                <button className="inline-flex w-38 items-center  hover:bg-gray-100 p-1.5 px-2 font-medium text-sm text-gray-700 focus:ring-0 focus:outline-none">
                   {/* <ArrowsExpandIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" /> */}
                   Open in Full screen
                   <ExternalLinkIcon className="ml-1 h-4 w-4" aria-hidden="true" />
