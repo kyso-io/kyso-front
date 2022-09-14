@@ -15,7 +15,7 @@ import type {
   TeamMember,
   UserDTO,
 } from '@kyso-io/kyso-model';
-import { TeamPermissionsEnum, OrganizationPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import { OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
@@ -316,10 +316,14 @@ const Index = ({ commonData }: Props) => {
     }
   };
 
-  const removeUser = async (userId: string): Promise<void> => {
+  const removeUser = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      await api.deleteUserFromTeam(commonData.team!.id!, userId);
+      if (type === TeamMembershipOriginEnum.ORGANIZATION) {
+        await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
+      } else {
+        await api.deleteUserFromTeam(commonData.team!.id!, userId);
+      }
       getTeamMembers();
     } catch (e) {
       console.error(e);

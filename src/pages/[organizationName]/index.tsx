@@ -7,6 +7,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import { TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -395,10 +396,14 @@ const Index = ({ commonData }: Props) => {
     }
   };
 
-  const removeUser = async (userId: string): Promise<void> => {
+  const removeUser = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
     try {
-      const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
-      await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      if (type === TeamMembershipOriginEnum.ORGANIZATION) {
+        await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
+      } else {
+        await api.deleteUserFromTeam(commonData.team!.id!, userId);
+      }
       getOrganizationMembers();
     } catch (e) {
       console.error(e);

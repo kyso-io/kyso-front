@@ -32,7 +32,7 @@ interface Props {
   showTeamRoles: boolean;
   onUpdateRoleMember: (userId: string, organizationRole: string, teamRole?: string) => void;
   onInviteNewUser: (email: string, organizationRole: string, teamRole?: string) => void;
-  onRemoveUser: (userId: string) => void;
+  onRemoveUser: (userId: string, type: TeamMembershipOriginEnum) => void;
 }
 
 const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles, onUpdateRoleMember, onInviteNewUser, onRemoveUser }: Props) => {
@@ -545,7 +545,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
-                          onRemoveUser(member.id);
+                          onRemoveUser(member.id, selectedOrgRole ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                           clearData();
                         }}
                       >
