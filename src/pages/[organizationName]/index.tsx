@@ -169,10 +169,10 @@ const Index = ({ commonData }: Props) => {
     } catch (e) {}
   };
 
-  const toggleUserStarReport = async (reportId: string) => {
-    const api: Api = new Api(commonData.token);
+  const toggleUserStarReport = async (reportDto: ReportDTO) => {
+    const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
-      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportId);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportDto.id!);
       const { data: report } = result;
       const allAuthorsId: string[] = [report.user_id, ...report.author_ids];
       const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
@@ -199,10 +199,10 @@ const Index = ({ commonData }: Props) => {
     } catch (e) {}
   };
 
-  const toggleUserPinReport = async (reportId: string) => {
-    const api: Api = new Api(commonData.token);
+  const toggleUserPinReport = async (reportDto: ReportDTO) => {
+    const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
-      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportId);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportDto.id!);
       const { data: report } = result;
       const allAuthorsId: string[] = [report.user_id, ...report.author_ids];
       const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
@@ -229,10 +229,10 @@ const Index = ({ commonData }: Props) => {
     } catch (e) {}
   };
 
-  const toggleGlobalPinReport = async (reportId: string) => {
-    const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
+  const toggleGlobalPinReport = async (reportDto: ReportDTO) => {
+    const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
-      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportId);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportDto.id!);
       const { data: report } = result;
       const allAuthorsId: string[] = [report.user_id, ...report.author_ids];
       const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
@@ -457,9 +457,9 @@ const Index = ({ commonData }: Props) => {
                 key={report.id}
                 report={report}
                 authors={report.authors ? report.authors : []}
-                toggleUserStarReport={() => toggleUserStarReport(report.id!)}
-                toggleUserPinReport={() => toggleUserPinReport(report.id!)}
-                toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+                toggleUserStarReport={() => toggleUserStarReport(report)}
+                toggleUserPinReport={() => toggleUserPinReport(report)}
+                toggleGlobalPinReport={() => toggleGlobalPinReport(report)}
               />
             ))}
         </div>

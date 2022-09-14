@@ -97,21 +97,21 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     getUserByUsername();
-  }, [user, token, username]);
+  }, [username]);
 
   useEffect(() => {
     if (!userProfileData || !userProfileData.userProfile) {
       return;
     }
     getReports(1);
-  }, [user, token, userProfileData]);
+  }, [userProfileData]);
 
   useEffect(() => {
-    if (!user || !token) {
+    if (!userProfileData || !userProfileData.userProfile) {
       return;
     }
     getActivityFeed();
-  }, [user, token, datetimeActivityFeed]);
+  }, [userProfileData, datetimeActivityFeed]);
 
   const getUserByUsername = async () => {
     try {
@@ -136,7 +136,7 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   const refreshLastActivityFeed = useCallback(async () => {
-    if (!user || !token) {
+    if (!user) {
       return;
     }
     const api: Api = new Api(token);
@@ -176,7 +176,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setActivityFeed(newActivityFeed);
       setHasMore(result.data.length > 0);
     } catch (e) {}
-  }, [token, user, userProfileData]);
+  }, [user, userProfileData]);
 
   useInterval(refreshLastActivityFeed, ACTIVITY_FEED_POOLING_MS);
 
@@ -190,10 +190,10 @@ const Index = ({ commonData, setUser }: Props) => {
     });
   };
 
-  const toggleUserStarReport = async (reportId: string) => {
-    const api: Api = new Api(token);
+  const toggleUserStarReport = async (reportDto: ReportDTO) => {
+    const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
-      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportId);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportDto.id!);
       const { data: report } = result;
       const allAuthorsId: string[] = [report.user_id, ...report.author_ids];
       const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
@@ -227,10 +227,10 @@ const Index = ({ commonData, setUser }: Props) => {
     } catch (e) {}
   };
 
-  const toggleUserPinReport = async (reportId: string) => {
+  const toggleUserPinReport = async (reportDto: ReportDTO) => {
     try {
-      const api: Api = new Api(token);
-      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportId);
+      const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportDto.id!);
       const { data: report } = result;
       const allAuthorsId: string[] = [report.user_id, ...report.author_ids];
       const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
@@ -264,10 +264,10 @@ const Index = ({ commonData, setUser }: Props) => {
     } catch (e) {}
   };
 
-  const toggleGlobalPinReport = async (reportId: string) => {
+  const toggleGlobalPinReport = async (reportDto: ReportDTO) => {
     try {
-      const api: Api = new Api(token);
-      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportId);
+      const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
+      const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportDto.id!);
       const { data: report } = result;
       const allAuthorsId: string[] = [report.user_id, ...report.author_ids];
       const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
@@ -395,9 +395,9 @@ const Index = ({ commonData, setUser }: Props) => {
                         key={report.id}
                         report={report}
                         authors={report.authors ? report.authors : []}
-                        toggleUserStarReport={() => toggleUserStarReport(report.id!)}
-                        toggleUserPinReport={() => toggleUserPinReport(report.id!)}
-                        toggleGlobalPinReport={() => toggleGlobalPinReport(report.id!)}
+                        toggleUserStarReport={() => toggleUserStarReport(report)}
+                        toggleUserPinReport={() => toggleUserPinReport(report)}
+                        toggleGlobalPinReport={() => toggleGlobalPinReport(report)}
                       />
                     ))}
                   </div>
@@ -430,7 +430,7 @@ const Index = ({ commonData, setUser }: Props) => {
           )}
           {currentTab === 'Activity' && (
             <React.Fragment>
-              {activityFeed ? (
+              {activityFeed && activityFeed.data.length > 0 ? (
                 <React.Fragment>
                   <p className="text-xs font-bold leading-relaxed text-gray-700 py-10">Most recent</p>
                   <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
