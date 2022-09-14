@@ -122,9 +122,10 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
           </a>
         </div>
       </div>
-      <div className="mt-2">
+      {/* Content show */}
+      {/* <div className="mt-2">
         <p className="line-clamp-2 text-sm text-gray-600">{fullTextSearchResult.content}</p>
-      </div>
+      </div> */}
     </li>
   );
 };
