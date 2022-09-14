@@ -34,6 +34,8 @@ const MetadataImport = () => {
   const [userEmail, setUserEmail] = useState<string>('');
   const [userAccessToken, setUserAccessToken] = useState<string>('');
 
+  const [mappings, setMappings] = useState<string>('');
+
   const [importing, setImporting] = useState<boolean>(false);
   const [imported, setImported] = useState<boolean>(false);
   const [importResults, setImportResults] = useState<string>('');
@@ -369,6 +371,37 @@ const MetadataImport = () => {
                   </div>
                 </div>
 
+                {/* Mappings */}
+                <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
+                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:pt-5">
+                    <div className="sm:col-span-3">
+                      <h2 className="text-xl font-medium text-blue-gray-900">Mappings</h2>
+                      <p className="mt-1 text-sm text-blue-gray-500">Configure where Kyso will retrieve the metadata</p>
+                    </div>
+                  </div>
+
+                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:pt-5">
+                    <label htmlFor="name" className={classNames('text-gray-700', 'block text-sm font-medium sm:mt-px sm:pt-2')}>
+                      Mappings
+                    </label>
+                    <div className="mt-1 sm:mt-0 sm:col-span-2">
+                      <div className="max-w-lg flex rounded-md shadow-sm">
+                        <input
+                          type="text"
+                          name="mappings"
+                          id="mappings"
+                          value={mappings}
+                          autoComplete="mappings"
+                          onChange={(e) => {
+                            setMappings(e.target.value);
+                          }}
+                          className={classNames(' focus:ring-indigo-500 focus:border-indigo-500', 'flex-1 block w-full min-w-0 rounded-md sm:text-sm border-gray-300')}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Import button */}
                 <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                   <div className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"></div>
@@ -400,7 +433,7 @@ const MetadataImport = () => {
                               channel,
                               force,
                               organization,
-                              mappings: '',
+                              mappings,
                             },
                           });
 

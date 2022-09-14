@@ -15,7 +15,7 @@ import type {
   TeamMember,
   UserDTO,
 } from '@kyso-io/kyso-model';
-import { TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import { TeamPermissionsEnum, OrganizationPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
@@ -98,7 +98,7 @@ const Index = ({ commonData }: Props) => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   // PERMISSIONS
-  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.DELETE), [commonData]);
+  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, [OrganizationPermissionsEnum.ADMIN, TeamPermissionsEnum.ADMIN, TeamPermissionsEnum.DELETE]), [commonData]);
   // SEARCH USER
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
 
