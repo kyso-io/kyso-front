@@ -569,50 +569,52 @@ const CreateReport = ({ commonData }: Props) => {
                 </div>
               </div>
             </div>
-            {files && files.length > 0 && (
-              <Filesystem
-                onUploadFile={onUploadFile}
-                files={files}
-                selectedFileId={selectedFile.file.id}
-                onSetAsMainFile={(newFile: FilesystemItem) => {
-                  const index = files.findIndex((x) => x.id === newFile.file.id);
+            <div className="min-h-12 border-b max-w-fit">
+              {files && files.length > 0 && (
+                <Filesystem
+                  onUploadFile={onUploadFile}
+                  files={files}
+                  selectedFileId={selectedFile.file.id}
+                  onSetAsMainFile={(newFile: FilesystemItem) => {
+                    const index = files.findIndex((x) => x.id === newFile.file.id);
 
-                  if (index >= 0) {
-                    // Create a new array putting all the mains to false
-                    const newFiles = Array.from(
-                      files.map((x) => {
-                        x.main = false;
-                        return x;
-                      }),
-                    );
+                    if (index >= 0) {
+                      // Create a new array putting all the mains to false
+                      const newFiles = Array.from(
+                        files.map((x) => {
+                          x.main = false;
+                          return x;
+                        }),
+                      );
 
-                    // Set the new main
-                    const newMainFile = files[index]!;
-                    newMainFile.main = true;
+                      // Set the new main
+                      const newMainFile = files[index]!;
+                      newMainFile.main = true;
 
+                      setFiles(newFiles);
+                      setDraftStatus('Saving ...');
+                      delayedCallback('formFile', newFiles);
+                    } else {
+                      setError(`${newFile.file.path} no longer exists and can't be set as main`);
+                    }
+                  }}
+                  onAddNewFile={(newFile: CreationReportFileSystemObject) => {
+                    addNewFile(newFile);
+                  }}
+                  onRemoveFile={(fileToRemove: CreationReportFileSystemObject) => {
+                    removeLocalStorageItem(fileToRemove.id);
+                    const newFiles = files.filter((x) => x.id !== fileToRemove.id && x.parentId !== fileToRemove.id);
                     setFiles(newFiles);
                     setDraftStatus('Saving ...');
                     delayedCallback('formFile', newFiles);
-                  } else {
-                    setError(`${newFile.file.path} no longer exists and can't be set as main`);
-                  }
-                }}
-                onAddNewFile={(newFile: CreationReportFileSystemObject) => {
-                  addNewFile(newFile);
-                }}
-                onRemoveFile={(fileToRemove: CreationReportFileSystemObject) => {
-                  removeLocalStorageItem(fileToRemove.id);
-                  const newFiles = files.filter((x) => x.id !== fileToRemove.id && x.parentId !== fileToRemove.id);
-                  setFiles(newFiles);
-                  setDraftStatus('Saving ...');
-                  delayedCallback('formFile', newFiles);
-                }}
-                onSelectedFile={(sFile: FilesystemItem) => {
-                  setSelectedFileValue('');
-                  setSelectedFile(sFile);
-                }}
-              />
-            )}
+                  }}
+                  onSelectedFile={(sFile: FilesystemItem) => {
+                    setSelectedFileValue('');
+                    setSelectedFile(sFile);
+                  }}
+                />
+              )}
+            </div>
           </div>
         </div>
         <div className="w-4/6">
