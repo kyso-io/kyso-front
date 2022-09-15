@@ -545,7 +545,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         )}
                         onClick={() => {
                           const member: Member = filteredMembers[selectedMemberIndex]!;
-                          onRemoveUser(member.id, selectedOrgRole ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
+                          onRemoveUser(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                           clearData();
                         }}
                       >

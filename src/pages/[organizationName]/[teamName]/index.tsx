@@ -267,6 +267,21 @@ const Index = ({ commonData }: Props) => {
       } catch (e) {
         console.error(e);
       }
+      if (teamRole) {
+        try {
+          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+          await api.updateTeamMemberRoles(commonData.team!.id!, {
+            members: [
+              {
+                userId,
+                role: teamRole,
+              },
+            ],
+          });
+        } catch (e) {
+          console.error(e);
+        }
+      }
     } else {
       if (!members[index]!.organization_roles.includes(organizationRole)) {
         try {

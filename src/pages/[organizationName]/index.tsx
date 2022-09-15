@@ -398,7 +398,7 @@ const Index = ({ commonData }: Props) => {
 
   const removeUser = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
     try {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       if (type === TeamMembershipOriginEnum.ORGANIZATION) {
         await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
       } else {
