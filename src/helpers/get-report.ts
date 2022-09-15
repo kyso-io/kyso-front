@@ -14,7 +14,7 @@ export const getReport = async ({ commonData, reportName }: Props): Promise<Repo
   try {
     const api: Api = new Api(commonData.token);
     if (!commonData.team) {
-      const errorReport = `The report does not exist or you don't have access.`;
+      const errorReport = `The report does not exist, or you don't have access.`;
       return { report: null, authors: [], errorReport };
     }
     const result: NormalizedResponseDTO<ReportDTO> = await api.getReportByTeamIdAndSlug(commonData.team!.id!, reportName);
