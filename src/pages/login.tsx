@@ -159,6 +159,7 @@ const Index = () => {
 
     const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
 
+    console.log(loginData);
     const result = await dispatch(loginAction(loginData));
     if (result?.payload) {
       localStorage.setItem('jwt', result.payload);

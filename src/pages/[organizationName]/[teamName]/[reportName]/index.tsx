@@ -1,11 +1,11 @@
+import PureEditMetadata from '@/components/PureEditMetadata';
+import { TeamMembershipOriginEnum, TeamVisibilityEnum, CommentPermissionsEnum, GithubFileHash, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import { useEffect, useMemo, useState } from 'react';
-import PureEditMetadata from '@/components/PureEditMetadata';
 
 import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
-import { GithubFileHash, CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 
 import classNames from '@/helpers/class-names';
@@ -383,10 +383,14 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     }
   };
 
-  const removeUser = async (userId: string): Promise<void> => {
+  const removeUser = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      await api.deleteUserFromTeam(commonData.team!.id!, userId);
+      if (type === TeamMembershipOriginEnum.ORGANIZATION) {
+        await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
+      } else {
+        await api.deleteUserFromTeam(commonData.team!.id!, userId);
+      }
       getTeamMembers();
     } catch (e) {
       console.error(e);

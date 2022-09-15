@@ -1,23 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { ReportDTO, UserDTO, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, ReportDTO, UserDTO, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { UpdateReportRequestDTO } from '@kyso-io/kyso-model';
-import { Fragment, useState, useRef, useEffect } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 // import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { toSvg } from 'jdenticon';
-import { Dialog, Transition } from '@headlessui/react';
 import type { CommonData } from '@/types/common-data';
+import { Dialog, Transition } from '@headlessui/react';
 import { InformationCircleIcon, PlusSmIcon as PlusSmIconSolid } from '@heroicons/react/solid';
+import { toSvg } from 'jdenticon';
 // import PureNotification from '@/components/PureNotification';
 // import { useRouter } from 'next/router';
-import { Chips } from 'primereact/chips';
-import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
-import 'primereact/resources/primereact.min.css'; // core css
-import 'primeicons/primeicons.css'; // icons
-import { Api } from '@kyso-io/kyso-store';
 import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
+import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import ToasterNotification from './ToasterNotification';
+import 'primeicons/primeicons.css'; // icons
+import { Chips } from 'primereact/chips';
+import 'primereact/resources/primereact.min.css'; // core css
+import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import type { Member } from '../types/member';
+import ToasterNotification from './ToasterNotification';
 
 interface IPureEditMetadata {
   report: ReportDTO;
@@ -31,7 +31,7 @@ interface IPureEditMetadata {
   showTeamRoles: boolean;
   onUpdateRoleMember: (userId: string, organizationRole: string, teamRole?: string) => void;
   onInviteNewUser: (email: string, organizationRole: string, teamRole?: string) => void;
-  onRemoveUser: (userId: string) => void;
+  onRemoveUser: (userId: string, type: TeamMembershipOriginEnum) => void;
 }
 
 const PureEditMetadata = (props: IPureEditMetadata) => {

@@ -40,24 +40,26 @@ const UnPureSuggestTagsListbox = (props: IUnPureSuggestTagsListbox) => {
 
                 <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
                   <Listbox.Options className="text-left absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-0 border overflow-auto focus:outline-none sm:text-sm">
-                    {tags.map((tag) => (
-                      <Listbox.Option
-                        key={tag}
-                        className={({ active }) => classNames(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'cursor-default select-none relative py-2 pl-3 pr-9')}
-                        value={tag}
-                      >
-                        {({ selected, active }) => (
-                          <>
-                            {selected ? (
-                              <span className={classNames(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
-                                <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                              </span>
-                            ) : null}
-                            <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>{tag}</span>
-                          </>
-                        )}
-                      </Listbox.Option>
-                    ))}
+                    {tags &&
+                      Array.isArray(tags) &&
+                      tags.map((tag) => (
+                        <Listbox.Option
+                          key={tag}
+                          className={({ active }) => classNames(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'cursor-default select-none relative py-2 pl-3 pr-9')}
+                          value={tag}
+                        >
+                          {({ selected, active }) => (
+                            <>
+                              {selected ? (
+                                <span className={classNames(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
+                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                </span>
+                              ) : null}
+                              <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>{tag}</span>
+                            </>
+                          )}
+                        </Listbox.Option>
+                      ))}
                   </Listbox.Options>
                 </Transition>
               </div>
