@@ -10,8 +10,13 @@ interface Props {
 }
 
 export const getReport = async ({ commonData, reportName }: Props): Promise<ReportData> => {
+  console.log('errorReport', commonData.team);
   try {
     const api: Api = new Api(commonData.token);
+    if (!commonData.team) {
+      const errorReport = `The report does not exist or you don't have access.`;
+      return { report: null, authors: [], errorReport };
+    }
     const result: NormalizedResponseDTO<ReportDTO> = await api.getReportByTeamIdAndSlug(commonData.team!.id!, reportName);
     const authors: UserDTO[] = [];
     result.data.author_ids.forEach((authorId: string) => {
@@ -21,14 +26,16 @@ export const getReport = async ({ commonData, reportName }: Props): Promise<Repo
     });
     return { report: result.data, authors, errorReport: null };
   } catch (e: any) {
+    console.log('errorReport', e);
+
     let errorReport: string | null = null;
     if (!e.response) {
       errorReport = `An unkown error occurred.`;
       console.error(e);
     } else if (e.response.data.statusCode === 403) {
-      errorReport = `You don't have permission to access this report`;
+      errorReport = `You don't have permission to access this report.`;
     } else if (e.response.data.statusCode === 404) {
-      errorReport = 'The report does not exist';
+      errorReport = 'The report does not exist.';
     } else {
       errorReport = e.response.data.message;
     }
