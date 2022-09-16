@@ -1,11 +1,11 @@
-import { Fragment, useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import classNames from '@/helpers/class-names';
 import type { CommonData } from '@/types/common-data';
+import { KysoButton } from '@/types/kyso-button.enum';
 import { Dialog, Transition } from '@headlessui/react';
 import { ShareIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
-import { KysoButton } from '@/types/kyso-button.enum';
 import PureKysoButton from './PureKysoButton';
 
 type Props = {
@@ -17,17 +17,17 @@ type Props = {
 };
 
 const PureShareButton = (props: Props) => {
-  const { basePath, commonData, report, color, withText } = props;
+  const { color, withText } = props;
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-
   const [url, setUrl] = useState('');
+
   useEffect(() => {
-    setUrl(`${window.location.origin}${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}`);
-  });
+    setUrl(window.location.href);
+  }, [window.location.href]);
 
   return (
-    <>
+    <React.Fragment>
       <button
         type="button"
         className="inline-flex space-x-2 text-sm font-small rounded-md text-gray-500 items-center focus:outline-none focus:ring-0 border border-transparent bg-white hover:bg-gray-100 px-2.5 py-1.5"
@@ -37,10 +37,10 @@ const PureShareButton = (props: Props) => {
       >
         <ShareIcon className={classNames('h-5 w-5', color)} aria-hidden="true" />
         {withText && (
-          <>
+          <React.Fragment>
             <span className="text-gray-900">Share</span>
             <span className="sr-only">Share</span>
-          </>
+          </React.Fragment>
         )}
       </button>
       <Transition.Root show={open} as={Fragment}>
@@ -78,7 +78,7 @@ const PureShareButton = (props: Props) => {
                       </Dialog.Title>
                       <div className="py-3 sm:col-span-2 text-sm font-light text-gray-700">Send this url to someone to share this report</div>
                       <div className="py-3 sm:col-span-2">
-                        <input className="p-4 block w-full text-center border shadow-sm outline-none sm:text-sm border-gray-300 rounded-md" value={url}></input>
+                        <input readOnly className="p-4 block w-full text-center border shadow-sm outline-none sm:text-sm border-gray-300 rounded-md" defaultValue={url}></input>
                       </div>
                     </div>
                   </div>
@@ -101,7 +101,7 @@ const PureShareButton = (props: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
-    </>
+    </React.Fragment>
   );
 };
 
