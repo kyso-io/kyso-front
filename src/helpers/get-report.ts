@@ -10,7 +10,6 @@ interface Props {
 }
 
 export const getReport = async ({ commonData, reportName }: Props): Promise<ReportData> => {
-  console.log('errorReport', commonData.team);
   try {
     const api: Api = new Api(commonData.token);
     if (!commonData.team) {

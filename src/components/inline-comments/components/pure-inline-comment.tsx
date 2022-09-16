@@ -31,9 +31,7 @@ type IPureInlineComment = {
 };
 
 const PureInlineComment = (props: IPureInlineComment) => {
-  const { commonData, submitComment, report, channelMembers, onDeleteComment, hasPermissionDeleteComment, hasPermissionCreateComment, comment } = props;
-
-  console.log(report.id);
+  const { commonData, submitComment, channelMembers, onDeleteComment, hasPermissionDeleteComment, hasPermissionCreateComment, comment } = props;
 
   const [isEditing, setIsEditing] = useState(false);
 
