@@ -1,14 +1,14 @@
-import { useAppDispatch } from '@/hooks/redux-hooks';
+/* eslint-disable  @typescript-eslint/no-explicit-any */
+import PureKysoButton from '@/components/PureKysoButton';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Popover, Transition } from '@headlessui/react';
-import { ChevronDownIcon, ClipboardCopyIcon, FolderDownloadIcon, TerminalIcon, XIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon, ClipboardCopyIcon, ExclamationCircleIcon, FolderDownloadIcon, TerminalIcon, XIcon } from '@heroicons/react/outline';
 import type { ReportDTO } from '@kyso-io/kyso-model';
-import { downloadReportAction } from '@kyso-io/kyso-store';
+import { Api } from '@kyso-io/kyso-store';
 import saveAs from 'file-saver';
-import { Fragment, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import slugify from 'slugify';
-import PureKysoButton from '@/components/PureKysoButton';
 
 interface Props {
   reportUrl: string;
@@ -18,32 +18,42 @@ interface Props {
   hasPermissionEditReport: boolean;
 }
 
-// function timeout(ms) {
-//   return new Promise((resolve) => setTimeout(resolve, ms));
-// }
-
 const UnpureCloneDropdown = (props: Props) => {
-  const { reportUrl } = props;
+  const { reportUrl, commonData } = props;
   const { report } = props;
-  const dispatch = useAppDispatch();
   const [show, setShow] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [alertText, setAlertText] = useState('Creating zip, this may take a moment...');
+  const [alertText, setAlertText] = useState<string>('Creating zip, this may take a moment...');
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
+  const [error, setError] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!show) {
+      setTimeout(() => {
+        setError(false);
+      }, 1000);
+    }
+  }, [show]);
 
   const downloadReport = async () => {
+    setError(false);
     setAlertText('Creating zip, this may take a moment...');
     setShow(true);
-    const result = await dispatch(downloadReportAction(report.id!));
-    setAlertText('Downloading...');
-    if (result.payload) {
-      const blob = new Blob([result.payload], { type: 'application/zip' });
+    try {
+      const api: Api = new Api(commonData.token);
+      const result: Buffer = await api.downloadReport(report.id!);
+      const blob = new Blob([result], { type: 'application/zip' });
       saveAs(blob, `${slugify(report.name)}.zip`);
       setAlertText('Download fininshed.');
-    } else {
-      setShow(true);
-      setAlertText('An error occured with the download.');
+    } catch (e: any) {
+      setError(true);
+      const errorData: any = JSON.parse(Buffer.from(e.response.data).toString());
+      setAlertText(errorData.message);
     }
+    setTimeout(() => {
+      setShow(false);
+      setError(false);
+    }, 5000);
   };
 
   const cloneCommand = `kyso clone ${reportUrl}`;
@@ -66,7 +76,11 @@ const UnpureCloneDropdown = (props: Props) => {
 
               <div className="mt-1 sm:mt-0 sm:col-span-2">
                 <div className="max-w-lg flex rounded-md shadow-sm">
-                  <input value={cloneCommand} type="text" className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-l-md sm:text-sm border-gray-300" />
+                  <input
+                    defaultValue={cloneCommand}
+                    type="text"
+                    className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-l-md sm:text-sm border-gray-300"
+                  />
                   <button
                     type="button"
                     className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-500 sm:text-sm"
@@ -115,7 +129,7 @@ const UnpureCloneDropdown = (props: Props) => {
               <div className="p-4">
                 <div className="flex items-start">
                   <div className="shrink-0">
-                    <FolderDownloadIcon className="h-6 w-6 text-green-400" aria-hidden="true" />
+                    {error ? <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" /> : <FolderDownloadIcon className="h-6 w-6 text-green-400" aria-hidden="true" />}
                   </div>
                   <div className="ml-3 w-0 flex-1 pt-0.5">
                     <p className="text-sm font-medium text-gray-900">{alertText}</p>
