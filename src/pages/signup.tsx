@@ -1,17 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import PureNotification from '@/components/PureNotification';
 import { Helper } from '@/helpers/Helper';
 import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
+import type { SignUpDto } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
-import { loginAction, setError as storeSetError } from '@kyso-io/kyso-store';
+import { Api, setError as storeSetError } from '@kyso-io/kyso-store';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import uuid from 'uuid';
-import PureNotification from '@/components/PureNotification';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -23,11 +25,12 @@ const githubScopes = ['read:user', 'user:email', 'read:org', 'repo', 'admin:repo
 
 const Index = () => {
   const router = useRouter();
-  const { redirect } = router.query;
 
-  const [email, setEmail] = useState('');
-  const [nickname, setNickname] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState<string>('');
+  const [nickname, setNickname] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [repeatPassword, setRepeatPassword] = useState<string>('');
+  const [displayName, setDisplayName] = useState<string>('');
 
   const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState('');
@@ -145,25 +148,34 @@ const Index = () => {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   const handleSubmit = async (event: any) => {
     event.preventDefault();
-
     if (!email || email.length === 0) {
       setNotificationType('danger');
       setNotification('Email is required');
       setError('Email is required.');
       return;
     }
-
     if (!validateEmail(email)) {
       setNotificationType('danger');
       setNotification('Email not valid.');
       setError('Email not valid.');
       return;
     }
-
     if (!password || password.length === 0) {
       setNotificationType('danger');
       setNotification('Password is required');
       setError('Password is required.');
+      return;
+    }
+    if (!repeatPassword || repeatPassword.length === 0) {
+      setNotificationType('danger');
+      setNotification('Repeat password is required');
+      setError('Repeat password is required.');
+      return;
+    }
+    if (password !== repeatPassword) {
+      setNotificationType('danger');
+      setNotification('Passwords do not match');
+      setError('Passwords do not match.');
       return;
     }
     if (!nickname || nickname.length === 0) {
@@ -172,23 +184,37 @@ const Index = () => {
       setError('Username is required.');
       return;
     }
-
-    const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, nickname, {});
-
-    const result = await dispatch(loginAction(loginData));
-    if (result?.payload) {
-      localStorage.setItem('jwt', result.payload);
-      setTimeout(() => {
-        if (redirect) {
-          router.push(redirect as string);
-        } else {
-          router.push('/');
-        }
-      }, 200);
-    } else {
+    if (!displayName || displayName.length === 0) {
       setNotificationType('danger');
-      setNotification('Invalid credentials');
-      setError('Invalid credentials');
+      setNotification('Name is required.');
+      setError('Name is required.');
+      return;
+    }
+    try {
+      const api: Api = new Api();
+      const signUpDto: SignUpDto = {
+        email,
+        username: nickname,
+        display_name: displayName,
+        password,
+      };
+      await api.signup(signUpDto);
+      setNotificationType('success');
+      setNotification('User registered successfully.');
+      localStorage.setItem('email', email);
+      setError('');
+      setEmail('');
+      setPassword('');
+      setNickname('');
+      setDisplayName('');
+      router.push('/login');
+    } catch (e: any) {
+      console.log(e.response);
+      const errorData: { statusCode: number; message: string; error: string } = e.response.data;
+      console.log(errorData);
+      setNotificationType('danger');
+      setNotification(errorData.message);
+      setError(errorData.message);
     }
   };
 
@@ -294,6 +320,24 @@ const Index = () => {
                 </div>
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
+                    Full name
+                  </label>
+                  <input
+                    className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                    aria-label="name"
+                    type="text"
+                    name="name"
+                    value={displayName}
+                    onChange={(e) => {
+                      setError('');
+                      setNotification('');
+                      dispatch(storeSetError(''));
+                      setDisplayName(e.target.value);
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
                     Username
                   </label>
                   <input
@@ -314,20 +358,35 @@ const Index = () => {
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
                     Password
                   </label>
-
                   <input
-                    className="mb-5 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
-                    // description="Please enter your password."
+                    className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
                     value={password}
                     name="password"
                     type="password"
-                    // placeholder="Password"
                     autoComplete="off"
                     onChange={(e) => {
                       setError('');
                       setNotification('');
                       dispatch(storeSetError(''));
                       setPassword(e.target.value);
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                    Repeat password
+                  </label>
+                  <input
+                    className="mb-5 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                    value={repeatPassword}
+                    name="repeatPpassword"
+                    type="password"
+                    autoComplete="off"
+                    onChange={(e) => {
+                      setError('');
+                      setNotification('');
+                      dispatch(storeSetError(''));
+                      setRepeatPassword(e.target.value);
                     }}
                   />
                 </div>
