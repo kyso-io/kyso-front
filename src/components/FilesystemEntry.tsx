@@ -36,18 +36,22 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
 
   return (
     <>
-      <div className={classNames('inline-flex items-center w-full hover:bg-gray-50', selectedFileId === item.file.id ? 'bg-gray-100' : '')} style={{ paddingLeft: `${appliedPadding}px` }}>
+      <div
+        className={classNames('inline-flex items-center w-full hover:bg-gray-50 break-all mb-1', selectedFileId === item.file.id ? 'bg-gray-100' : '')}
+        style={{ paddingLeft: `${appliedPadding}px` }}
+      >
         <button
           onClick={() => {
             if (onSelectedFile) {
               onSelectedFile(item);
             }
           }}
-          className={classNames('w-full flex-1 inline-flex items-center ')}
+          className={classNames('flex-1 inline-flex items-center')}
         >
-          <div className="flex-1 inline-flex items-center">
-            {hasChildren ? <FolderOpenIcon className="mr-1 h-5 w-5 text-gray-400" aria-hidden="true" /> : <NewIcon className="mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />}
-
+          <div className="flex-1 inline-flex items-center flex-row">
+            <div className="min-w-fit">
+              {hasChildren ? <FolderOpenIcon className="mr-1 h-5 w-5 text-gray-500" aria-hidden="true" /> : <NewIcon className="mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />}
+            </div>
             <div>
               {item.file.name} {item.main ? <StarIcon style={{ width: '18px', display: 'initial' }} aria-hidden="true" /> : ''}
             </div>
@@ -55,7 +59,7 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
         </button>
         <Menu as="div" className="relative inline-block text-left">
           <Menu.Button className="border-none inline-flex justify-center w-full rounded p-2 text-sm font-medium text-gray-700 hover:bg-gray-200" onClick={() => setOpen(!open)}>
-            <DotsVerticalIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            <DotsVerticalIcon className="h-5 w-5 text-gray-500" aria-hidden="true" />
           </Menu.Button>
 
           <Transition

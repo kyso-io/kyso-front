@@ -34,8 +34,8 @@ const handleCreation = (newName: string, isFolder: boolean, onCreate: (newName: 
 // Don't know why eslint complains here...
 /* eslint-disable  @typescript-eslint/no-explicit-any */
 const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
-  const { label, icon: NewIcon, onCreate, isFolder, parent, showLabel } = props;
-  const [newName, onHandleName] = useState('');
+  const { label, icon: NewIcon, onCreate, isFolder, parent, showLabel, value } = props;
+  const [newName, onHandleName] = useState(value || '');
   let computedIsFolder = false;
   const defaultInputRef: any = null;
 
@@ -69,7 +69,8 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                 <p className="block text-sm font-medium text-gray-700">{label}</p>
                 <div className="relative mt-1">
                   <input
-                    placeholder={props.value}
+                    placeholder={value}
+                    value={newName}
                     className="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                     onChange={(event) => {
                       onHandleName(event.target.value);
