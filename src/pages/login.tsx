@@ -1,3 +1,4 @@
+import ErrorNotification from '@/components/ErrorNotification';
 import { Helper } from '@/helpers/Helper';
 import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
@@ -11,7 +12,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import uuid from 'uuid';
-import ErrorNotification from '@/components/ErrorNotification';
+import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -25,7 +26,7 @@ const Index = () => {
   const router = useRouter();
   const { redirect } = router.query;
 
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(getLocalStorageItem('email') || '');
   // const [error, setError] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState('');
@@ -294,9 +295,14 @@ const Index = () => {
                     }}
                   />
                 </div>
-                <a className="text-xs no-underline hover:none  text-gray-900 hover:text-indigo-600" href="/reset-password">
-                  Forgot your password?
-                </a>
+                <div className="flex items-center justify-between">
+                  <a className="text-xs no-underline hover:none  text-gray-900 hover:text-indigo-600" href="/reset-password">
+                    Forgot your password?
+                  </a>
+                  <a className="text-xs no-underline hover:none  text-gray-900 hover:text-indigo-600" href="/signup">
+                    Create an account
+                  </a>
+                </div>
                 <button
                   type="submit"
                   className="shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
