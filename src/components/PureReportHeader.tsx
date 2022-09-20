@@ -47,8 +47,8 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
   }, [report.description]);
 
   return (
-    <div className="w-full flex flex-row justify-between p-2">
-      <div className="w-4/6 flex flex-col justify-between">
+    <div className="w-full flex 2xl:flex-row lg:flex-col justify-between p-2">
+      <div className="2xl:w-4/6 flex flex-col justify-between">
         <h1 className="text-2xl font-medium">{report?.title}</h1>
         {description && <div className="text-sm">{description}</div>}
 
@@ -78,7 +78,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
           )}
         </div>
       </div>
-      <div className="flex w-2/6 flex-col justify-between items-start space-y-8">
+      <div className="flex 2xl:w-2/6 flex-col justify-between items-start space-y-8">
         <div className="flex flex-row w-full justify-end space-x-4">
           {children}
 
@@ -107,7 +107,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
         <div className="flex flex-row items-center justify-end w-full">
           <div className="flex flex-row border rounded divide-x items-center">
             {fileToRender?.path.endsWith('.html') && fileToRender && (
-              <a href={`${'/scs'}${fileToRender.path_scs}`} className="block" target="_blank" rel="noreferrer">
+              <a href={`${'/scs'}${fileToRender.path_scs}`} target="_blank" rel="noreferrer">
                 <button className="inline-flex w-38 items-center  hover:bg-gray-100 p-1.5 px-2 font-medium text-sm text-gray-700 focus:ring-0 focus:outline-none">
                   {/* <ArrowsExpandIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" /> */}
                   Open in Full screen
