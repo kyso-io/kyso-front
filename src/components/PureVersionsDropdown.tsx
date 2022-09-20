@@ -33,7 +33,7 @@ const PureVersionsDropdown = (props: Props) => {
                 <div className="text-gray-800 mr-1">Version #{item.version}</div>
                 <div className="text-gray-500">
                   <span>published on: </span>
-                  {format(new Date(item.created_at), 'HH:MM MMM d, yyyy')}
+                  {format(new Date(item.created_at), 'HH:mm MMM d, yyyy')}
                 </div>
               </a>
             ))}
