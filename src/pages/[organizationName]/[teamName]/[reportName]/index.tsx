@@ -616,7 +616,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                     </div>
 
                     {hasPermissionReadComment && (
-                      <div className="block pb-44 w-full p-4">
+                      <div className="block pb-44 w-full p-4 pl-8">
                         <div className="prose max-w-none ">
                           <h2>Comments</h2>
                         </div>
