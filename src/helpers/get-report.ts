@@ -7,16 +7,17 @@ import { Api } from '@kyso-io/kyso-store';
 interface Props {
   commonData: CommonData;
   reportName: string;
+  version?: number;
 }
 
-export const getReport = async ({ commonData, reportName }: Props): Promise<ReportData> => {
+export const getReport = async ({ commonData, reportName, version }: Props): Promise<ReportData> => {
   try {
     const api: Api = new Api(commonData.token);
     if (!commonData.team) {
       const errorReport = `The report does not exist, or you don't have access.`;
       return { report: null, authors: [], errorReport };
     }
-    const result: NormalizedResponseDTO<ReportDTO> = await api.getReportByTeamIdAndSlug(commonData.team!.id!, reportName);
+    const result: NormalizedResponseDTO<ReportDTO> = await api.getReportByTeamIdAndSlug(commonData.team!.id!, reportName, version);
     const authors: UserDTO[] = [];
     result.data.author_ids.forEach((authorId: string) => {
       if (result.relations?.user[authorId]) {

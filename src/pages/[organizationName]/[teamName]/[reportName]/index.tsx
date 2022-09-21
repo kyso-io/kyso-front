@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import PureEditMetadata from '@/components/PureEditMetadata';
-import { TeamMembershipOriginEnum, TeamVisibilityEnum, CommentPermissionsEnum, GithubFileHash, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum } from '@kyso-io/kyso-model';
+import { CommentPermissionsEnum, GithubFileHash, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
@@ -87,7 +88,11 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   }, [reportData?.report?.id, router.query.path]);
 
   const refreshReport = async () => {
-    const rd: ReportData = await getReport({ commonData, reportName: router.query.reportName as string });
+    let versionNum: number = 0;
+    if (version && !Number.isNaN(version as any)) {
+      versionNum = parseInt(version as string, 10);
+    }
+    const rd: ReportData = await getReport({ commonData, reportName: router.query.reportName as string, version: versionNum });
     setReportData(rd);
   };
 

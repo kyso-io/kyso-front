@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
 import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
@@ -63,11 +64,16 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       // TODO: remove use of store in the near future
       dispatch(setTokenAuthAction(cd.token));
       setCommonData(cd);
+      let version: number = 0;
+      if (router.query.version && !Number.isNaN(router.query.version as any)) {
+        version = parseInt(router.query.version as string, 10);
+      }
       if (router.query.reportName) {
         const getReportData = async () => {
           const data: ReportData = await getReport({
             commonData: cd,
             reportName: router.query.reportName as string,
+            version,
           });
           setReportData(data);
         };

@@ -128,6 +128,8 @@ const UnpureReportRender = (props: Props) => {
       render = <RenderMarkdown source={fileToRender.content} context={markdownContext} />;
     } else if (FileTypesHelper.isImage(fileToRender.path)) {
       render = <RenderBase64Image base64={fileToRender.content as string} />;
+    } else if (fileToRender.path.toLowerCase().endsWith('.webp')) {
+      render = <img src={`${frontEndUrl}/scs${fileToRender.path_scs}`} alt={'An image'} />;
     } else if (FileTypesHelper.isJupyterNotebook(fileToRender.path)) {
       render = (
         <RenderJupyter
@@ -158,7 +160,11 @@ const UnpureReportRender = (props: Props) => {
     } else {
       render = (
         <div className="prose p-3">
-          Kyso cannot render this type of file. Do you need it? Give us <a href="/feedback">feedback</a> and we will consider it! 🤓
+          Kyso cannot render this type of file. Do you need it? Give us{' '}
+          <a href="/feedback" className="font-medium text-indigo-600 hover:text-indigo-500">
+            feedback
+          </a>{' '}
+          and we will consider it! 🤓
         </div>
       );
     }

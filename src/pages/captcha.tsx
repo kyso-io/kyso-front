@@ -70,6 +70,7 @@ const Index = ({ commonData }: Props) => {
 
   const onSubmit = async () => {
     if (!captchaToken) {
+      setShow(true);
       setAlertText('Please verify that you are not a robot.');
       return;
     }
@@ -83,6 +84,7 @@ const Index = ({ commonData }: Props) => {
       }
       setTimeout(() => router.replace(redirectUrl), 200);
     } else {
+      setShow(true);
       setAlertText('Please verify that you are not a robot.');
     }
     setRequesting(false);
