@@ -46,6 +46,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
   const [isEmail, setIsEmail] = useState<boolean>(false);
   const [inputDeleteUser, setInputDeleteUser] = useState<string>('');
   const [keyDeleteUser, setKeyDeleteUser] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
 
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
@@ -141,6 +142,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     setSelectedTeamRole('');
     setInputDeleteUser('');
     setKeyDeleteUser('');
+    setErrorMessage('');
   };
 
   let plusMembers = 0;
@@ -481,7 +483,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       <input
                         value={inputDeleteUser}
                         type="text"
-                        onChange={(e) => setInputDeleteUser(e.target.value)}
+                        onChange={(e) => {
+                          setInputDeleteUser(e.target.value);
+                          setErrorMessage('');
+                        }}
                         className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                       />
                     </div>
@@ -502,6 +507,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       />
                     </div>
                   )}
+                  {errorMessage && <p className="text-sm text-red-500 my-2">{errorMessage}</p>}
                   <div className="flex flex-row-reverse">
                     {selectedMemberIndex === -1 && selectedUser && (
                       <button
@@ -538,12 +544,15 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                     {(selectedOrgRole === REMOVE_USER_VALUE || selectedTeamRole === REMOVE_USER_VALUE) && selectedMemberIndex !== -1 && (
                       <button
                         type="button"
-                        disabled={inputDeleteUser !== keyDeleteUser}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
                           inputDeleteUser !== keyDeleteUser ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
+                          if (inputDeleteUser !== keyDeleteUser) {
+                            setErrorMessage('Please type the correct key to remove the user.');
+                            return;
+                          }
                           const member: Member = filteredMembers[selectedMemberIndex]!;
                           onRemoveUser(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                           clearData();

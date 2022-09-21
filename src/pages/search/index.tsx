@@ -127,13 +127,13 @@ const SearchIndex = () => {
         setNavigation([
           { name: 'Report files', elasticSearchIndex: ElasticSearchIndex.Report, count: result.reports.metadata.total },
           /* { name: 'Discussions', elasticSearchIndex: ElasticSearchIndex.Discussion, count: result.discussions.metadata.total }, */
-          { name: 'Report and discussion comments', elasticSearchIndex: ElasticSearchIndex.Comment, count: result.comments.metadata.total },
+          { name: 'Report comments', elasticSearchIndex: ElasticSearchIndex.Comment, count: result.comments.metadata.total },
         ]);
       } else {
         setNavigation([
           { name: 'Report files', elasticSearchIndex: ElasticSearchIndex.Report, count: 0 },
           /* { name: 'Discussions', elasticSearchIndex: ElasticSearchIndex.Discussion, count: 0 }, */
-          { name: 'Report and discussion comments', elasticSearchIndex: ElasticSearchIndex.Comment, count: 0 },
+          { name: 'Report comments', elasticSearchIndex: ElasticSearchIndex.Comment, count: 0 },
         ]);
       }
       setRequesting(false);
