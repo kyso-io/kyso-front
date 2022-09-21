@@ -4,11 +4,14 @@ import classNames from '@/helpers/class-names';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
-import { ArrowRightIcon } from '@heroicons/react/solid';
-import type { NormalizedResponseDTO, Organization } from '@kyso-io/kyso-model';
+import { ArrowRightIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import type { KysoSetting, NormalizedResponseDTO, Organization } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import ToasterNotification from '../components/ToasterNotification';
+import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 
 interface Props {
   commonData: CommonData;
@@ -17,15 +20,52 @@ interface Props {
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
-
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
-
   const [displayName, setDisplayName] = useState<string>('');
   const [bio, setBio] = useState<string>('');
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
+  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const api: Api = new Api();
+        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
+        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (index !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        }
+      } catch (errorHttp: any) {
+        console.error(errorHttp.response.data);
+      }
+    };
+    getData();
+  }, []);
 
   const createOrganization = async (ev: any) => {
     ev.preventDefault();
+
+    if (commonData.user?.email_verified === false) {
+      setShowToaster(true);
+      setMessageToaster('Your account is not verified. Please check your email before creating an organization.');
+      return;
+    }
+
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        router.push('/captcha');
+      }, 2000);
+      return;
+    }
+
+    setShowToaster(false);
+    setMessageToaster('');
+
     setError('');
     if (!displayName || displayName.length === 0) {
       setError('Please specify a organization name.');
@@ -132,6 +172,13 @@ const Index = ({ commonData }: Props) => {
           </div>
         </form>
       </div>
+      <ToasterNotification
+        show={showToaster}
+        setShow={setShowToaster}
+        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
+        message={messageToaster}
+        backgroundColor={TailwindColor.SLATE_50}
+      />
     </div>
   );
 };
