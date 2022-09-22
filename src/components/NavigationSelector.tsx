@@ -1,7 +1,7 @@
 import type { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { Menu, Transition } from '@headlessui/react';
 import { HomeIcon, SelectorIcon, ViewListIcon } from '@heroicons/react/outline';
-import { Fragment } from 'react';
+import { Fragment, useMemo } from 'react';
 
 type INavigationSelectorProps = {
   selectorItems: BreadcrumbItem[];
@@ -20,6 +20,23 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
   }
 
   const { selectorLabel = 'organization', extraItem } = props;
+
+  const sortedSelectorItems: BreadcrumbItem[] = useMemo(() => {
+    if (props.selectorItems) {
+      return props.selectorItems.sort((a: BreadcrumbItem, b: BreadcrumbItem) => {
+        const nameA: string = a.name.toLowerCase();
+        const nameB: string = b.name.toLowerCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+    return [];
+  }, [props.selectorItems]);
 
   return (
     <div className="rounded-md flex items-center">
@@ -83,8 +100,8 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
                 </div>
               )}
               <div className="flex flex-col justify-start">
-                {props.selectorItems &&
-                  props.selectorItems
+                {sortedSelectorItems &&
+                  sortedSelectorItems
                     // .filter((o) => !o.current)
                     .map((item: BreadcrumbItem) => (
                       <Menu.Item key={item.href}>
