@@ -47,7 +47,6 @@ export const useRedirectIfNoJWT = () => {
     }
 
     const jwtToken: DecodedToken = decode<DecodedToken>(jwt);
-    console.log('new Date(jwtToken.exp * 1000) <= new Date()', new Date(jwtToken.exp * 1000) <= new Date());
     if (new Date(jwtToken.exp * 1000) <= new Date()) {
       // token is out of date
       localStorage.removeItem('jwt');

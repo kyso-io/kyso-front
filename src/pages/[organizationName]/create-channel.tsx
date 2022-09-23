@@ -80,7 +80,8 @@ const Index = ({ commonData }: Props) => {
       }
       router.push(`/${commonData.organization!.sluglified_name}/${team.sluglified_name}`);
     } catch (er: any) {
-      setError(er.message);
+      setError(er.response.data.message);
+    } finally {
       setBusy(false);
     }
   };
