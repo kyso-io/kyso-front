@@ -25,9 +25,9 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const onInitializedIframe = () => {
     try {
       const myIframe: any = document.getElementById('theframe');
-      // console.log(`Resizing to: ${myIframe.contentWindow.document.body.scrollHeight + 40}px`);
-
-      setHeight(`${myIframe.contentWindow.document.body.scrollHeight + 40}px`);
+      setTimeout(() => {
+        setHeight(`${myIframe.contentWindow.document.body.scrollHeight + 20}px`);
+      }, 1500);
     } catch (ex) {
       // Silent
     }
@@ -48,6 +48,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
           border: 'none 0px',
           width: '100%',
           height,
+          overflow: 'hidden',
         }}
         src={`${'/scs'}${file.path_scs}`}
         onLoad={onInitializedIframe}
