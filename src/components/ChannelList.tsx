@@ -3,6 +3,7 @@ import classNames from '@/helpers/class-names';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import type { CommonData } from '@/types/common-data';
 import { PlusCircleIcon } from '@heroicons/react/outline';
+import type { ResourcePermissions } from '@kyso-io/kyso-model';
 import { TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import { useMemo } from 'react';
 
@@ -14,17 +15,33 @@ interface Props {
 
 const ChannelList = (props: Props) => {
   const { basePath, commonData } = props;
-  const channelSelectorItems: BreadcrumbItem[] = [];
-
-  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
-
-  if (commonData.permissions && commonData.permissions.teams) {
-    commonData
-      .permissions!.teams.filter((team) => team.organization_id === commonData.organization?.id)
-      .forEach((team) => {
-        channelSelectorItems.push(new BreadcrumbItem(team.display_name, `${basePath}/${commonData.organization?.sluglified_name}/${team.name}`, commonData.team?.sluglified_name === team.name));
+  const hasPermissionCreateChannel: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
+  const channelSelectorItems: BreadcrumbItem[] = useMemo(() => {
+    if (commonData?.permissions?.teams && commonData.permissions.teams.length > 0) {
+      const breadcrumbItems: BreadcrumbItem[] = commonData.permissions.teams
+        .filter((teamResourcePermissions: ResourcePermissions) => teamResourcePermissions.organization_id === commonData.organization?.id)
+        .map((teamResourcePermissions: ResourcePermissions) => {
+          return new BreadcrumbItem(
+            teamResourcePermissions.display_name,
+            `${basePath}/${commonData.organization?.sluglified_name}/${teamResourcePermissions.name}`,
+            commonData.team?.sluglified_name === teamResourcePermissions.name,
+          );
+        });
+      breadcrumbItems.sort((a: BreadcrumbItem, b: BreadcrumbItem) => {
+        const nameA: string = a.name.toLowerCase();
+        const nameB: string = b.name.toLowerCase();
+        if (nameA < nameB) {
+          return -1;
+        }
+        if (nameA > nameB) {
+          return 1;
+        }
+        return 0;
       });
-  }
+      return breadcrumbItems;
+    }
+    return [];
+  }, []);
 
   return (
     <div>
@@ -32,16 +49,15 @@ const ChannelList = (props: Props) => {
         Channels
       </h3>
       <div className="flex flex-col justify-start">
-        {channelSelectorItems &&
-          channelSelectorItems.map((item: BreadcrumbItem) => (
-            <a
-              key={item.href}
-              href={item.href}
-              className={classNames(item.current ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm font-medium rounded-md')}
-            >
-              {item.name}
-            </a>
-          ))}
+        {channelSelectorItems.map((item: BreadcrumbItem) => (
+          <a
+            key={item.href}
+            href={item.href}
+            className={classNames(item.current ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm font-medium rounded-md')}
+          >
+            {item.name}
+          </a>
+        ))}
 
         {hasPermissionCreateChannel && (
           <>
