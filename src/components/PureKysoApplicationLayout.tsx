@@ -5,7 +5,7 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
-import Link from 'next/link';
+import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import { Fragment, useState } from 'react';
@@ -23,6 +23,7 @@ type IPureKysoApplicationLayoutProps = {
 
 const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): ReactElement => {
   const router = useRouter();
+  const user = useUser();
   const { children, report, commonData, basePath, userNavigation } = props;
   const [focusOnSearchInput, setFocusOnSearchInput] = useState<boolean>(false);
   const [query, setQuery] = useState<string>('');
@@ -50,7 +51,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                   <div className="flex items-center">
                     <div className="shrink-0">
                       {/* This always must redirect to the homepage */}
-                      <a href="/">
+                      <a href={user ? '/' : 'https://about.kyso.io/'}>
                         <img className="h-8 w-8" src={`/assets/images/kyso-logo-white.svg`} alt="Kyso" />
                       </a>
                     </div>
@@ -84,13 +85,13 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                     <div className="hidden md:block">
                       <div className="flex items-center ml-6">
                         {/* Profile dropdown */}
-                        {!commonData.user && (
+                        {/* {!commonData.user && (
                           <div className="flex items-center px-5">
                             <Link href="/login">
                               <a className="text-sm">Login</a>
                             </Link>
                           </div>
-                        )}
+                        )} */}
                         {commonData.user && (
                           <Menu as="div" className="relative">
                             <div>
