@@ -1,3 +1,4 @@
+import { useUser } from '@/hooks/use-user';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
@@ -5,7 +6,6 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
-import { useUser } from '@/hooks/use-user';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import { Fragment, useState } from 'react';
@@ -186,9 +186,14 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
             </>
           )}
         </Disclosure>
-        {!userProfile && (
+        {!userProfile && !settings && router.query.organizationName && (
           <div className="p-2 z-40 bg-white">
-            {settings ? <SettingsBreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} /> : <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />}
+            <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
+          </div>
+        )}
+        {!userProfile && settings && router.query.organizationName && (
+          <div className="p-2 z-40 bg-white">
+            <SettingsBreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
           </div>
         )}
       </div>

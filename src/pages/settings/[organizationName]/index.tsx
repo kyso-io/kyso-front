@@ -3,20 +3,24 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { NormalizedResponseDTO, OrganizationMember, UserDTO } from '@kyso-io/kyso-model';
-import { GlobalPermissionsEnum, OrganizationPermissionsEnum } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, UserDTO } from '@kyso-io/kyso-model';
+import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
+import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import PureAvatar from '../../../components/PureAvatar';
+import ToasterNotification from '../../../components/ToasterNotification';
 import checkPermissions from '../../../helpers/check-permissions';
 import { Helper } from '../../../helpers/Helper';
+import { useRedirectIfNoJWT } from '../../../hooks/use-redirect-if-no-jwt';
+import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
 import { TailwindFontSizeEnum } from '../../../tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '../../../tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '../../../types/common-data';
 import type { Member } from '../../../types/member';
 
-const RoleToLabel: { [role: string]: string } = {
+const OrganizationRoleToLabel: { [role: string]: string } = {
   'organization-admin': 'Admin of this organization',
   'team-admin': 'Full access all channels',
   'team-contributor': 'Can edit all channels',
@@ -32,6 +36,8 @@ const debouncedFetchData = debounce((cb: () => void) => {
 }, 750);
 
 const Index = ({ commonData }: Props) => {
+  const router = useRouter();
+  useRedirectIfNoJWT();
   const [query, setQuery] = useState<string>('');
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -48,17 +54,39 @@ const Index = ({ commonData }: Props) => {
   }, [commonData]);
   const organizationsRoles: { label: string; value: string }[] = useMemo(() => {
     const data: { label: string; value: string }[] = [];
-    for (const orgRole in RoleToLabel) {
-      if (RoleToLabel[orgRole]) {
-        data.push({ label: RoleToLabel[orgRole]!, value: orgRole });
+    for (const orgRole in OrganizationRoleToLabel) {
+      if (OrganizationRoleToLabel[orgRole]) {
+        data.push({ label: OrganizationRoleToLabel[orgRole]!, value: orgRole });
       }
     }
     return data;
   }, []);
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
+  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
 
   useEffect(() => {
-    getOrganizationMembers();
+    const getData = async () => {
+      try {
+        const api: Api = new Api();
+        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
+        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (index !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        }
+      } catch (errorHttp: any) {
+        console.error(errorHttp.response.data);
+      }
+    };
+    getData();
   }, []);
+
+  useEffect(() => {
+    if (!commonData.organization) {
+      return;
+    }
+    getOrganizationMembers();
+  }, [commonData?.organization]);
 
   useEffect(() => {
     if (!query || query.length === 0) {
@@ -279,6 +307,16 @@ const Index = ({ commonData }: Props) => {
                           <button
                             disabled={requesting}
                             onClick={() => {
+                              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                setShowToaster(true);
+                                setMessageToaster('Please verify the captcha');
+                                setTimeout(() => {
+                                  setShowToaster(false);
+                                  sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
+                                  router.push('/captcha');
+                                }, 2000);
+                                return;
+                              }
                               if (requesting) {
                                 return;
                               }
@@ -303,7 +341,7 @@ const Index = ({ commonData }: Props) => {
             <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members:</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {members.map((member: Member) => {
-                const labelRole: string = member.organization_roles.length > 0 && RoleToLabel[member.organization_roles[0]!] ? RoleToLabel[member.organization_roles[0]!]! : '';
+                const labelRole: string = member.organization_roles.length > 0 && OrganizationRoleToLabel[member.organization_roles[0]!] ? OrganizationRoleToLabel[member.organization_roles[0]!]! : '';
                 return (
                   <div
                     key={member.id}
@@ -323,6 +361,16 @@ const Index = ({ commonData }: Props) => {
                         <div title="Edit member role in the organization">
                           <PencilIcon
                             onClick={() => {
+                              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                setShowToaster(true);
+                                setMessageToaster('Please verify the captcha');
+                                setTimeout(() => {
+                                  setShowToaster(false);
+                                  sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
+                                  router.push('/captcha');
+                                }, 2000);
+                                return;
+                              }
                               if (requesting) {
                                 return;
                               }
@@ -335,6 +383,16 @@ const Index = ({ commonData }: Props) => {
                         <div title="Remove member from the organization">
                           <TrashIcon
                             onClick={() => {
+                              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                setShowToaster(true);
+                                setMessageToaster('Please verify the captcha');
+                                setTimeout(() => {
+                                  setShowToaster(false);
+                                  sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
+                                  router.push('/captcha');
+                                }, 2000);
+                                return;
+                              }
                               if (requesting) {
                                 return;
                               }
@@ -593,6 +651,13 @@ const Index = ({ commonData }: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
+      <ToasterNotification
+        show={showToaster}
+        setShow={setShowToaster}
+        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
+        message={messageToaster}
+        backgroundColor={TailwindColor.SLATE_50}
+      />
     </div>
   );
 };
