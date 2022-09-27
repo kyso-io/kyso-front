@@ -1,8 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import type {
   ActivityFeed,
+  KysoSetting,
   NormalizedResponseDTO,
   Organization,
   OrganizationMember,
@@ -15,7 +17,7 @@ import type {
   TeamMember,
   UserDTO,
 } from '@kyso-io/kyso-model';
-import { OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
@@ -98,9 +100,26 @@ const Index = ({ commonData }: Props) => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   // PERMISSIONS
-  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, [OrganizationPermissionsEnum.ADMIN, TeamPermissionsEnum.ADMIN, TeamPermissionsEnum.DELETE]), [commonData]);
+  const hasPermissionDeleteChannel: boolean = useMemo(() => checkPermissions(commonData, [OrganizationPermissionsEnum.ADMIN, TeamPermissionsEnum.ADMIN, TeamPermissionsEnum.DELETE]), [commonData]);
   // SEARCH USER
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
+  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const api: Api = new Api();
+        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
+        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (index !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        }
+      } catch (errorHttp: any) {
+        console.error(errorHttp.response.data);
+      }
+    };
+    getData();
+  }, []);
 
   useEffect(() => {
     if (commonData) {
@@ -539,9 +558,9 @@ const Index = ({ commonData }: Props) => {
                 onRemoveUser={removeUser}
               />
 
-              <UnpureDeleteChannelDropdown commonData={commonData} hasPermissionDeleteChannel={hasPermissionDeleteChannel} />
+              <UnpureDeleteChannelDropdown commonData={commonData} hasPermissionDeleteChannel={hasPermissionDeleteChannel} captchaIsEnabled={captchaIsEnabled} />
 
-              {commonData?.user && <PureNewReportPopover commonData={commonData} />}
+              {commonData?.user && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} />}
             </div>
           </div>
         )}

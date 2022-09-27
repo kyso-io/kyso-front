@@ -13,10 +13,14 @@ import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import type { CommonData } from '@/types/common-data';
+import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { InlineCommentDto, ReportDTO, TeamMember, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
+import router from 'next/router';
 import { useEffect, useState } from 'react';
+import ToasterNotification from '../components/ToasterNotification';
+import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 
 // const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
@@ -30,14 +34,18 @@ interface Props {
   enabledCreateInlineComment: boolean;
   enabledEditInlineComment: boolean;
   enabledDeleteInlineComment: boolean;
+  captchaIsEnabled: boolean;
 }
 
 const UnpureReportRender = (props: Props) => {
-  const { report, onlyVisibleCell, frontEndUrl, fileToRender, commonData, channelMembers, enabledCreateInlineComment, enabledEditInlineComment, enabledDeleteInlineComment } = props;
+  const { report, onlyVisibleCell, frontEndUrl, fileToRender, commonData, channelMembers, enabledCreateInlineComment, enabledEditInlineComment, enabledDeleteInlineComment, captchaIsEnabled } = props;
   const dispatch = useAppDispatch();
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
+  const version = router.query.version ? (router.query.version as string) : undefined;
 
   useEffect(() => {
     if (report.id) {
@@ -56,6 +64,19 @@ const UnpureReportRender = (props: Props) => {
   }, [report.id, fileToRender.id]);
 
   const createInlineComment = async (cell_id: string, user_ids: string[], text: string) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        sessionStorage.setItem(
+          'redirectUrl',
+          `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}?${version ? `version=${version}` : ''}&path=${fileToRender.path}`,
+        );
+        router.push('/captcha');
+      }, 2000);
+      return;
+    }
     try {
       const data = await dispatch(
         createInlineCommentAction({
@@ -74,6 +95,19 @@ const UnpureReportRender = (props: Props) => {
   };
 
   const editInlineComment = async (id: string, user_ids: string[], text: string) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        sessionStorage.setItem(
+          'redirectUrl',
+          `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}?${version ? `version=${version}` : ''}&path=${fileToRender.path}`,
+        );
+        router.push('/captcha');
+      }, 2000);
+      return;
+    }
     try {
       const data = await dispatch(
         updateInlineCommentAction({
@@ -100,6 +134,19 @@ const UnpureReportRender = (props: Props) => {
   };
 
   const deleteInlineComment = async (id: string) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        sessionStorage.setItem(
+          'redirectUrl',
+          `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}?${version ? `version=${version}` : ''}&path=${fileToRender.path}`,
+        );
+        router.push('/captcha');
+      }, 2000);
+      return;
+    }
     try {
       const data = await dispatch(deleteInlineCommentAction(id));
       if (data?.payload) {
@@ -208,6 +255,13 @@ const UnpureReportRender = (props: Props) => {
           </div>
         </div>
       )}
+      <ToasterNotification
+        show={showToaster}
+        setShow={setShowToaster}
+        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
+        message={messageToaster}
+        backgroundColor={TailwindColor.SLATE_50}
+      />
     </>
   );
 };

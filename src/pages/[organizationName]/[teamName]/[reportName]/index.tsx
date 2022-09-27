@@ -1,23 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import PureEditMetadata from '@/components/PureEditMetadata';
-import { CommentPermissionsEnum, GithubFileHash, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
-import moment from 'moment';
-import { useRouter } from 'next/router';
-import { dirname } from 'path';
-import { useEffect, useMemo, useState } from 'react';
-
-import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
-import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
-
-import classNames from '@/helpers/class-names';
-
 import ManageUsers from '@/components/ManageUsers';
 import PureComments from '@/components/PureComments';
+import PureEditMetadata from '@/components/PureEditMetadata';
 import { PurePermissionDenied } from '@/components/PurePermissionDenied';
 import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import checkPermissions from '@/helpers/check-permissions';
+import classNames from '@/helpers/class-names';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import type { FileToRender } from '@/hooks/use-file-to-render';
@@ -30,7 +20,17 @@ import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
+import { ExclamationCircleIcon } from '@heroicons/react/solid';
+import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
+import { CommentPermissionsEnum, GithubFileHash, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
+import moment from 'moment';
+import { useRouter } from 'next/router';
+import { dirname } from 'path';
+import { useEffect, useMemo, useState } from 'react';
+import ToasterNotification from '../../../../components/ToasterNotification';
 import { getReport } from '../../../../helpers/get-report';
+import { TailwindColor } from '../../../../tailwind/enum/tailwind-color.enum';
 
 interface Props {
   commonData: CommonData;
@@ -41,7 +41,6 @@ interface Props {
 const Index = ({ commonData, reportData, setReportData }: Props) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
-  // const [reportData, setReportData] = useState<{ report: ReportDTO | null; authors: UserDTO[] } | null>(null);
   const [selfTree, setSelfTree] = useState<GithubFileHash[]>([]);
   const [parentTree, setParentTree] = useState<GithubFileHash[]>([]);
   const [fileToRender, setFileToRender] = useState<FileToRender | null>(null);
@@ -56,14 +55,28 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   const onlyVisibleCell = router.query.cell ? (router.query.cell as string) : undefined;
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
-
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isOpenMetadata, openMetadata] = useState(false);
-  // useEffect(() => {
-  //   if (commonData.team && router.query.reportName) {
-  //     refreshReport();
-  //   }
-  // }, [commonData?.team, router.query?.reportName]);
+  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const api: Api = new Api();
+        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
+        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (index !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        }
+      } catch (errorHttp: any) {
+        console.error(errorHttp.response.data);
+      }
+    };
+    getData();
+  }, []);
+
   useEffect(() => {
     if (!reportData || !reportData.report) {
       return;
@@ -424,6 +437,20 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   // TODO -> confusion as to whether these are Conmment or CommentDTO
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const submitComment = async (newComment: any, parentComment: any) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        sessionStorage.setItem(
+          'redirectUrl',
+          `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${reportData?.report?.name}?${version ? `version=${version}` : ''}&path=${fileToRender?.path}`,
+        );
+        router.push('/captcha');
+      }, 2000);
+      return;
+    }
+
     if (parentComment && parentComment.id) {
       await dispatch(updateCommentAction({ commentId: parentComment.id, comment: newComment }));
     } else {
@@ -454,16 +481,16 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     return '';
   });
 
-  const hasPermissionCreateComment = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.CREATE), [commonData]);
-  const hasPermissionReadComment = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.READ), [commonData]);
-  const hasPermissionDeleteComment = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.DELETE), [commonData]);
-  const hasPermissionReadReport = useMemo(() => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : checkPermissions(commonData, ReportPermissionsEnum.READ)), [commonData]);
-  const hasPermissionDeleteReport = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.DELETE), [commonData]);
-  const hasPermissionEditReport = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData]);
-  const hasPermissionEditReportOnlyMine = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.EDIT_ONLY_MINE), [commonData]);
-  const hasPermissionCreateInlineComment = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.CREATE), [commonData]);
-  const hasPermissionEditInlineComment = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData]);
-  const hasPermissionDeleteInlineComment = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData]);
+  const hasPermissionCreateComment: boolean = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionReadComment: boolean = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.READ), [commonData]);
+  const hasPermissionDeleteComment: boolean = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.DELETE), [commonData]);
+  const hasPermissionReadReport: boolean = useMemo(() => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : checkPermissions(commonData, ReportPermissionsEnum.READ)), [commonData]);
+  const hasPermissionDeleteReport: boolean = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.DELETE), [commonData]);
+  const hasPermissionEditReport: boolean = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData]);
+  const hasPermissionEditReportOnlyMine: boolean = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.EDIT_ONLY_MINE), [commonData]);
+  const hasPermissionCreateInlineComment: boolean = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionEditInlineComment: boolean = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData]);
+  const hasPermissionDeleteInlineComment: boolean = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData]);
 
   if (commonData.errorOrganization) {
     return <div className="text-center mt-4">{commonData.errorOrganization}</div>;
@@ -607,6 +634,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                           enabledCreateInlineComment={hasPermissionCreateInlineComment}
                           enabledEditInlineComment={hasPermissionEditInlineComment}
                           enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
+                          captchaIsEnabled={captchaIsEnabled}
                         />
                       )}
 
@@ -637,6 +665,19 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                             return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
                           }}
                           onDeleteComment={async (id: string) => {
+                            if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                              setShowToaster(true);
+                              setMessageToaster('Please verify the captcha');
+                              setTimeout(() => {
+                                setShowToaster(false);
+                                sessionStorage.setItem(
+                                  'redirectUrl',
+                                  `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${reportData?.report?.name}${version ? `?version=${version}` : ''}`,
+                                );
+                                router.push('/captcha');
+                              }, 2000);
+                              return;
+                            }
                             await dispatch(deleteCommentAction(id as string));
                           }}
                           commentSelectorHook={(parentId: string | null = null) => {
@@ -663,6 +704,13 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
           </div>
         </main>
       </div>
+      <ToasterNotification
+        show={showToaster}
+        setShow={setShowToaster}
+        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
+        message={messageToaster}
+        backgroundColor={TailwindColor.SLATE_50}
+      />
     </div>
   );
 };

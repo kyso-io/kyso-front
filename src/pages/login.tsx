@@ -4,9 +4,10 @@ import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
-import { loginAction, setError as storeSetError } from '@kyso-io/kyso-store';
+import { Api, loginAction, setError as storeSetError } from '@kyso-io/kyso-store';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -42,6 +43,7 @@ const Index = () => {
   const [enableKysoAuth, setEnableKysoAuth] = useState(true);
   const [enablePingSamlAuth, setEnablePingSamlAuth] = useState(true);
   const [pingUrl, setPingUrl] = useState('');
+  const [captchaEnabled, setCaptchaEnabled] = useState<boolean>(true);
 
   const [rightLogo, setRightLogo] = useState(null);
   const [leftLogo, setLeftLogo] = useState('/assets/images/kyso-logo-and-name-dark.svg');
@@ -128,6 +130,9 @@ const Index = () => {
       // setShowdivCss(customizeShowdivCss);
       // setHiddendivCss(customizeHiddendivCss);
 
+      const captchaEnabledValue: string = publicKeys.find((x) => x.key === KysoSettingsEnum.HCAPTCHA_ENABLED).value;
+      setCaptchaEnabled(captchaEnabledValue === 'true');
+
       return '';
     };
     getOrganizationOptions();
@@ -161,9 +166,20 @@ const Index = () => {
     const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
     const result = await dispatch(loginAction(loginData));
     if (result?.payload) {
-      localStorage.setItem('jwt', result.payload);
+      localStorage.removeItem('email');
+      const token: string = result.payload;
+      localStorage.setItem('jwt', token);
+      // Get user info to check if has completed the captcha challenge
+      const api: Api = new Api(token);
+      const resultUser: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      const user: UserDTO = resultUser.data;
       setTimeout(() => {
-        if (redirect) {
+        if (captchaEnabled && user.show_captcha) {
+          if (redirect) {
+            sessionStorage.setItem('redirectUrl', redirect as string);
+          }
+          router.push('/captcha');
+        } else if (redirect) {
           router.push(redirect as string);
         } else {
           router.push('/');

@@ -58,6 +58,7 @@ const Index = ({ commonData }: Props) => {
       setMessageToaster('Please verify the captcha');
       setTimeout(() => {
         setShowToaster(false);
+        sessionStorage.setItem('redirectUrl', `/create-organization`);
         router.push('/captcha');
       }, 2000);
       return;
