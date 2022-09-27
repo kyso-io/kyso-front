@@ -10,8 +10,7 @@ const Page = () => {
 
   useEffect(() => {
     const doLogout = async () => {
-      const token = localStorage.getItem('jwt');
-      console.log('token', token);
+      const token: string | null = localStorage.getItem('jwt');
       if (token && token.length > 0) {
         await dispatch(logoutAction());
         localStorage.removeItem('jwt');

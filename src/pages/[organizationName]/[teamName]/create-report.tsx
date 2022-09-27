@@ -1,15 +1,33 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import ErrorNotification from '@/components/ErrorNotification';
+import Filesystem from '@/components/Filesystem';
+import MemberFilterSelector from '@/components/MemberFilterSelector';
+import NewReportNamingDropdown from '@/components/NewReportNamingDropdown';
+import PureKysoButton from '@/components/PureKysoButton';
+import { PureSpinner } from '@/components/PureSpinner';
+import RenderBase64Image from '@/components/renderers/RenderBase64Image';
+import RenderCode from '@/components/renderers/RenderCode';
+import RenderError from '@/components/renderers/RenderError';
+import TagsFilterSelector from '@/components/TagsFilterSelector';
 import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
+import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import slugify from '@/helpers/slugify';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { FilesystemItem } from '@/model/filesystem-item.model';
 import type { CommonData } from '@/types/common-data';
-import type { Tag, KysoConfigFile, NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
-import { TeamMember, TeamMembershipOriginEnum, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
+import { KysoButton } from '@/types/kyso-button.enum';
+import { Menu, Transition } from '@headlessui/react';
+import { ArrowRightIcon, DocumentAddIcon, ExclamationCircleIcon, FolderAddIcon, SelectorIcon, UploadIcon } from '@heroicons/react/solid';
+import type { KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, Tag } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, ReportPermissionsEnum, ReportType, TeamMember, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import 'easymde/dist/easymde.min.css';
 import FormData from 'form-data';
 import JSZip from 'jszip';
 import debounce from 'lodash.debounce';
@@ -17,24 +35,8 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-
-import ErrorNotification from '@/components/ErrorNotification';
-import Filesystem from '@/components/Filesystem';
-import MemberFilterSelector from '@/components/MemberFilterSelector';
-import NewReportNamingDropdown from '@/components/NewReportNamingDropdown';
-import { PureSpinner } from '@/components/PureSpinner';
-import TagsFilterSelector from '@/components/TagsFilterSelector';
-import slugify from '@/helpers/slugify';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { Menu, Transition } from '@headlessui/react';
-import { ArrowRightIcon, DocumentAddIcon, FolderAddIcon, SelectorIcon, UploadIcon } from '@heroicons/react/solid';
-import 'easymde/dist/easymde.min.css';
-import PureKysoButton from '@/components/PureKysoButton';
-import { KysoButton } from '@/types/kyso-button.enum';
-import RenderBase64Image from '@/components/renderers/RenderBase64Image';
-import { FileTypesHelper } from '@/helpers/FileTypesHelper';
-import RenderCode from '@/components/renderers/RenderCode';
-import RenderError from '@/components/renderers/RenderError';
+import ToasterNotification from '../../../components/ToasterNotification';
+import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -57,6 +59,28 @@ interface Props {
 const CreateReport = ({ commonData }: Props) => {
   useRedirectIfNoJWT();
   const router = useRouter();
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
+  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
+    const getData = async () => {
+      try {
+        const api: Api = new Api();
+        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
+        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (index !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        }
+      } catch (errorHttp: any) {
+        console.error(errorHttp.response.data);
+      }
+    };
+    getData();
+  }, []);
 
   const channelSelectorItems: BreadcrumbItem[] = [];
 
@@ -134,7 +158,9 @@ const CreateReport = ({ commonData }: Props) => {
   };
 
   useEffect(() => {
-    filterTags();
+    if (commonData.organization) {
+      filterTags();
+    }
   }, [commonData.organization, commonData.team]);
 
   useEffect(() => {
@@ -241,6 +267,17 @@ const CreateReport = ({ commonData }: Props) => {
 
     if (!commonData.team) {
       setError('Please select a channel.');
+      return;
+    }
+
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        sessionStorage.setItem('redirectUrl', `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report`);
+        router.push('/captcha');
+      }, 2000);
       return;
     }
 
@@ -683,6 +720,13 @@ const CreateReport = ({ commonData }: Props) => {
           </div>
         </div>
       </div>
+      <ToasterNotification
+        show={showToaster}
+        setShow={setShowToaster}
+        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
+        message={messageToaster}
+        backgroundColor={TailwindColor.SLATE_50}
+      />
     </div>
   );
 };
