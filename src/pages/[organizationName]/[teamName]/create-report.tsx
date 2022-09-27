@@ -606,7 +606,7 @@ const CreateReport = ({ commonData }: Props) => {
                 </div>
               </div>
             </div>
-            <div className="min-h-12 border-b max-w-fit">
+            <div className="min-h-12 border-b w-full">
               {files && files.length > 0 && (
                 <Filesystem
                   onUploadFile={onUploadFile}

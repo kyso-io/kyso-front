@@ -52,13 +52,13 @@ const Index = () => {
   const [rightLogo, setRightLogo] = useState(null);
   const [leftLogo, setLeftLogo] = useState('/assets/images/kyso-logo-and-name-dark.svg');
 
-  // const [globalCss, setglobalCss] = useState(false);
-  // const [headerCss, setHeaderCss] = useState(false);
-  // const [buttonCss, setButtonCss] = useState(false);
-  // const [buttonHoverCss, setButtonHoverCss] = useState(false);
-  // const [linkCss, setLinkCss] = useState(false);
-  // const [showdivCss, setShowdivCss] = useState(false);
-  // const [hiddendivCss, setHiddendivCss] = useState(false);
+  const [globalCss, setglobalCss] = useState(false);
+  const [headerCss, setHeaderCss] = useState(false);
+  const [buttonCss, setButtonCss] = useState(false);
+  const [buttonHoverCss, setButtonHoverCss] = useState(false);
+  const [linkCss, setLinkCss] = useState(false);
+  const [showdivCss, setShowdivCss] = useState(false);
+  const [hiddendivCss, setHiddendivCss] = useState(false);
 
   useEffect(() => {
     const getOrganizationOptions = async () => {
@@ -119,20 +119,20 @@ const Index = () => {
         setRightLogo(custumizeRightLogo);
       }
 
-      // const customizeGlobalCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_CSS_STYLES).value;
-      // const customizeHeaderCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HEADER_CSS_STYLES)?.value;
-      // const customizeButtonCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_CSS_STYLES)?.value;
-      // const customizeButtonHoverCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_HOVER_CSS_STYLES)?.value;
-      // const customizeLinkCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LINK_CSS_STYLES)?.value;
-      // const customizeShowdivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES)?.value;
-      // const customizeHiddendivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES)?.value;
-      // setglobalCss(customizeGlobalCss);
-      // setHeaderCss(customizeHeaderCss);
-      // setButtonCss(customizeButtonCss);
-      // setButtonHoverCss(customizeButtonHoverCss);
-      // setLinkCss(customizeLinkCss);
-      // setShowdivCss(customizeShowdivCss);
-      // setHiddendivCss(customizeHiddendivCss);
+      const customizeGlobalCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_CSS_STYLES).value;
+      const customizeHeaderCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HEADER_CSS_STYLES)?.value;
+      const customizeButtonCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_CSS_STYLES)?.value;
+      const customizeButtonHoverCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_HOVER_CSS_STYLES)?.value;
+      const customizeLinkCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LINK_CSS_STYLES)?.value;
+      const customizeShowdivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES)?.value;
+      const customizeHiddendivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES)?.value;
+      setglobalCss(customizeGlobalCss);
+      setHeaderCss(customizeHeaderCss);
+      setButtonCss(customizeButtonCss);
+      setButtonHoverCss(customizeButtonHoverCss);
+      setLinkCss(customizeLinkCss);
+      setShowdivCss(customizeShowdivCss);
+      setHiddendivCss(customizeHiddendivCss);
 
       return '';
     };
@@ -209,9 +209,7 @@ const Index = () => {
       setDisplayName('');
       router.push('/login');
     } catch (e: any) {
-      console.log(e.response);
       const errorData: { statusCode: number; message: string; error: string } = e.response.data;
-      console.log(errorData);
       setNotificationType('danger');
       setNotification(errorData.message);
       setError(errorData.message);
@@ -260,7 +258,7 @@ const Index = () => {
         <div className="text-right">{notification && <PureNotification message={notification} type={notificationType} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col mt-20 items-center mx-auto max-w-[1400px] space-x-10">
           <div className="prose grow max-w-none px-6 m-0">
-            <h1>Kyso.io</h1>
+            <h1 className="login-header">Kyso.io</h1>
             <p>Kyso.io offers free unlimited (private) repositories and unlimited collaborators.</p>
             <ul>
               <li>
@@ -465,6 +463,29 @@ const Index = () => {
             </div>
           </div>
         </main>
+        <style jsx global>{`
+          html * {
+            ${globalCss};
+          }
+          .login-header {
+            ${headerCss}
+          }
+          .login-btn {
+            ${buttonCss}
+          }
+          .login-btn:hover {
+            ${buttonHoverCss}
+          }
+          .login-link {
+            ${linkCss};
+          }
+          .shown-div {
+            ${showdivCss}
+          }
+          .hidden-div {
+            ${hiddendivCss}
+          }
+        `}</style>
       </div>
     </>
   );
