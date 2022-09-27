@@ -2,16 +2,18 @@
 import ChannelList from '@/components/ChannelList';
 import { PureSpinner } from '@/components/PureSpinner';
 import checkPermissions from '@/helpers/check-permissions';
+import classNames from '@/helpers/class-names';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
-import { ArrowRightIcon, LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from '@heroicons/react/solid';
-import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
-import { TeamPermissionsEnum, TeamVisibilityEnum, Team } from '@kyso-io/kyso-model';
-import { useRouter } from 'next/router';
-import { useMemo, useState } from 'react';
+import { ArrowRightIcon, ExclamationCircleIcon, LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from '@heroicons/react/solid';
+import type { KysoSetting, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, Team, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
-import classNames from '@/helpers/class-names';
+import { useRouter } from 'next/router';
+import { useEffect, useMemo, useState } from 'react';
+import ToasterNotification from '../../components/ToasterNotification';
+import { TailwindColor } from '../../tailwind/enum/tailwind-color.enum';
 
 interface Props {
   commonData: CommonData;
@@ -20,16 +22,32 @@ interface Props {
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
-
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
-
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [isTeamAvailable, setTeamAvailable] = useState(true);
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
+  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+  const hasPermissionCreateChannel: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
 
-  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const api: Api = new Api();
+        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
+        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (index !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        }
+      } catch (errorHttp: any) {
+        console.error(errorHttp.response.data);
+      }
+    };
+    getData();
+  }, []);
 
   const checkName = async (name: string) => {
     setFormName(name);
@@ -55,9 +73,21 @@ const Index = ({ commonData }: Props) => {
 
   const createChannel = async (ev: any) => {
     ev.preventDefault();
+
     setError('');
     if (!formName || formName.length === 0) {
       setError('Please specify a channel name.');
+      return;
+    }
+
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        sessionStorage.setItem('redirectUrl', `/${commonData.organization?.sluglified_name}/create-channel`);
+        router.push('/captcha');
+      }, 2000);
       return;
     }
 
@@ -241,6 +271,13 @@ const Index = ({ commonData }: Props) => {
           </form>
         )}
       </div>
+      <ToasterNotification
+        show={showToaster}
+        setShow={setShowToaster}
+        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
+        message={messageToaster}
+        backgroundColor={TailwindColor.SLATE_50}
+      />
     </div>
   );
 };

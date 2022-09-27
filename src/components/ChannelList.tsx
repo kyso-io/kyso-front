@@ -41,7 +41,7 @@ const ChannelList = (props: Props) => {
       return breadcrumbItems;
     }
     return [];
-  }, []);
+  }, [commonData?.organization, commonData?.permissions?.teams]);
 
   return (
     <div>

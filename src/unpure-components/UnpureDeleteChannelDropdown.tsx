@@ -1,26 +1,41 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
-import { DotsVerticalIcon, FolderDownloadIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
-import { deleteTeamAction } from '@kyso-io/kyso-store';
+import { DotsVerticalIcon, ExclamationCircleIcon, FolderDownloadIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
+import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { Fragment, useState } from 'react';
+import ToasterNotification from '../components/ToasterNotification';
+import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 
 interface Props {
   commonData: CommonData;
   hasPermissionDeleteChannel: boolean;
+  captchaIsEnabled: boolean;
 }
 
 const UnpureDeleteChannelDropdown = (props: Props) => {
-  const { commonData, hasPermissionDeleteChannel } = props;
-  const dispatch = useAppDispatch();
+  const { commonData, hasPermissionDeleteChannel, captchaIsEnabled } = props;
   const router = useRouter();
   const [show, setShow] = useState(false);
   const [alertText, setAlertText] = useState('Creating zip, this may take a moment...');
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
 
-  const deleteReport = async (e: any) => {
+  const deleteTeam = async (e: any) => {
     e.preventDefault();
+
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        sessionStorage.setItem('redirectUrl', `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
+        router.push('/captcha');
+      }, 2000);
+      return;
+    }
+
     if (!hasPermissionDeleteChannel) {
       return;
     }
@@ -29,7 +44,13 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
     }
 
     setAlertText('Deleting...');
-    await dispatch(deleteTeamAction(commonData.team!.id!));
+    // await dispatch(deleteTeamAction(commonData.team!.id!));
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      await api.deleteTeam(commonData.team!.id!);
+    } catch (error: any) {
+      console.log(error.response.data.message);
+    }
     setAlertText('Deleted.');
     router.push(`${router.basePath}/${commonData.organization?.sluglified_name}`);
   };
@@ -58,7 +79,7 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none">
             <div className="py-1">
               <Menu.Item>
-                <a href="#" onClick={(e) => deleteReport(e)} className="text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50 group flex items-center">
+                <a href="#" onClick={(e) => deleteTeam(e)} className="text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-50 group flex items-center">
                   <TrashIcon className="mr-1 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
                   Delete Channel
                 </a>
@@ -107,6 +128,13 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
           </Transition>
         </div>
       </div>
+      <ToasterNotification
+        show={showToaster}
+        setShow={setShowToaster}
+        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
+        message={messageToaster}
+        backgroundColor={TailwindColor.SLATE_50}
+      />
     </>
   );
 };

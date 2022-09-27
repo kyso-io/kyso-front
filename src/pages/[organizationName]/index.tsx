@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint no-empty: "off" */
 import ChannelList from '@/components/ChannelList';
 import Pagination from '@/components/Pagination';
@@ -6,8 +7,8 @@ import PureNewReportPopover from '@/components/PureNewReportPopover';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
-import { TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
+import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -48,6 +49,23 @@ const Index = ({ commonData }: Props) => {
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
+  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const api: Api = new Api();
+        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
+        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (index !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        }
+      } catch (errorHttp: any) {
+        console.error(errorHttp.response.data);
+      }
+    };
+    getData();
+  }, []);
 
   useEffect(() => {
     if (commonData !== null && commonData.token === null && commonData.organization === null && !commonData.errorOrganization) {
@@ -442,7 +460,7 @@ const Index = ({ commonData }: Props) => {
               onInviteNewUser={inviteNewUser}
               onRemoveUser={removeUser}
             />
-            {commonData?.user && <PureNewReportPopover commonData={commonData} />}
+            {commonData?.user && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} />}
           </div>
         </div>
         {organizationInfo && (
