@@ -16,6 +16,7 @@ import type {
   TeamInfoDto,
   TeamMember,
   UserDTO,
+  ResourcePermissions,
 } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -121,24 +122,19 @@ const Index = ({ commonData }: Props) => {
     getData();
   }, []);
 
-  // useEffect(() => {
-  //   if (commonData) {
-  //     if (commonData.token === null && commonData.organization === null && !commonData.errorOrganization) {
-  //       // An unautenticated user is trying to access an organization that does not have public teams
-  //       router.replace('/');
-  //       return;
-  //     }
-  //     if (commonData.token === null && commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC) {
-  //       // An unautenticated user is trying to access a non public team
-  //       router.replace(`/${commonData.organization.sluglified_name}`);
-  //     }
-  //     // It is not working
-  //     if (commonData.organization && commonData.team == null) {
-  //       // Autenticated user is trying to access a non public team
-  //       router.replace(`/${commonData.organization.sluglified_name}`);
-  //     }
-  //   }
-  // }, [commonData]);
+  useEffect(() => {
+    if (commonData.permissions?.organizations && commonData.permissions?.teams) {
+      const indexOrganization: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
+      if (indexOrganization === -1) {
+        router.replace('/');
+        return;
+      }
+      const indexTeam: number = commonData.permissions.teams.findIndex((item: ResourcePermissions) => item.name === router.query.teamName);
+      if (indexTeam === -1) {
+        router.replace(`/${router.query.organizationName}`);
+      }
+    }
+  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams]);
 
   useEffect(() => {
     if (!commonData.team) {

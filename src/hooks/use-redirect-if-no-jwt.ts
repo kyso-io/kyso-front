@@ -13,39 +13,25 @@ export const useRedirectIfNoJWT = () => {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  let publicKeys: KeyValue[];
-
   const fetcher = async () => {
-    publicKeys = await Helper.getKysoPublicSettings();
-
-    let unauthorizedRedirectUrl;
-    if (publicKeys) {
-      const settingsUnauthRedirect = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
-      if (settingsUnauthRedirect) {
-        unauthorizedRedirectUrl = settingsUnauthRedirect.value;
-      } else {
-        unauthorizedRedirectUrl = '/login';
-      }
-    } else {
-      unauthorizedRedirectUrl = '/login';
-    }
-
     const jwt: string = localStorage.getItem('jwt') as string;
-
-    if (!jwt && router.query.redirect === undefined) {
-      let redirectUrl = '?redirect=';
+    if (!jwt && !router.query.redirect) {
+      let unauthorizedRedirectUrl = '/login';
+      const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
+      if (publicKeys !== null && publicKeys.length > 0) {
+        const settingsUnauthRedirect: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
+        if (settingsUnauthRedirect) {
+          unauthorizedRedirectUrl = settingsUnauthRedirect.value;
+          if (unauthorizedRedirectUrl.includes('http')) {
+            window.location.href = unauthorizedRedirectUrl;
+            return;
+          }
+        }
+      }
       if (router?.asPath && router.asPath.length > 0) {
-        redirectUrl += `${router.basePath}${router.asPath}`;
+        sessionStorage.setItem('redirectUrl', router.asPath);
       }
-
-      if (window.location.pathname === router.basePath) {
-        // We are at the base of the URL, redirect to unauthorized redirect URL
-        router.push(unauthorizedRedirectUrl);
-      } else {
-        // We are in other place, redirect to login
-        router.push(`/login${redirectUrl}`);
-      }
-
+      router.push(unauthorizedRedirectUrl);
       return;
     }
 
