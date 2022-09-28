@@ -1,14 +1,14 @@
-import React, { useState, useRef } from 'react';
-import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
-import { ChatAltIcon, CodeIcon, LinkIcon } from '@heroicons/react/outline';
-import { useHover } from 'usehooks-ts';
+import PureInlineComments from '@/components/inline-comments/components/pure-inline-comments';
+import { Helper } from '@/helpers/Helper';
 import { useNavigateToHashOnce } from '@/hooks/use-navigate-to-hash-once';
 import type { CommonData } from '@/types/common-data';
-import { Helper } from '@/helpers/Helper';
-import PureInlineComments from '@/components/inline-comments/components/pure-inline-comments';
-import Cell from './cell';
-import type { Cell as ICell } from '../interfaces/jupyter-notebook';
+import { ChatAltIcon, CodeIcon, LinkIcon } from '@heroicons/react/outline';
+import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import { useRef, useState } from 'react';
+import { useHover } from 'usehooks-ts';
 import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
+import type { Cell as ICell } from '../interfaces/jupyter-notebook';
+import Cell from './cell';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -121,11 +121,6 @@ const CellWrapper = (props: Props) => {
             <a
               className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', inputShown ? 'bg-gray-100 hover:bg-gray-200' : 'hover:bg-gray-50')}
               href={`?cell=${cell?.id}`}
-              // onClick={() => {
-              //   if (cell?.id) {
-              //     window.location.hash = cell?.id
-              //   }
-              // }}
             >
               <LinkIcon className="h-4 w-4" aria-hidden="true" />
             </a>

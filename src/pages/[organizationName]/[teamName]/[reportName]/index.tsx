@@ -469,7 +469,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     }
 
     // Emergency case to just don't return undefined
-    if (window) {
+    if (typeof window !== 'undefined') {
       return window.location.origin;
     }
 

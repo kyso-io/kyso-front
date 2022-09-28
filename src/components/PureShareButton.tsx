@@ -23,8 +23,10 @@ const PureShareButton = (props: Props) => {
   const [url, setUrl] = useState('');
 
   useEffect(() => {
-    setUrl(window.location.href);
-  }, [window.location.href]);
+    if (typeof window !== 'undefined') {
+      setUrl(window.location.href);
+    }
+  }, [window?.location?.href]);
 
   return (
     <React.Fragment>
