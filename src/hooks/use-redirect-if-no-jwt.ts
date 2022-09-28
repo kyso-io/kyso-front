@@ -23,7 +23,7 @@ export const useRedirectIfNoJWT = () => {
         if (settingsUnauthRedirect) {
           unauthorizedRedirectUrl = settingsUnauthRedirect.value;
           if (unauthorizedRedirectUrl.includes('http')) {
-            window.location.href = unauthorizedRedirectUrl;
+            router.push(unauthorizedRedirectUrl);
             return;
           }
         }
