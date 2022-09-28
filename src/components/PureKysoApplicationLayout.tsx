@@ -1,6 +1,7 @@
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
+import Link from 'next/link';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/solid';
@@ -85,13 +86,13 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                     <div className="hidden md:block">
                       <div className="flex items-center ml-6">
                         {/* Profile dropdown */}
-                        {/* {!commonData.user && (
+                        {!commonData.user && (
                           <div className="flex items-center px-5">
                             <Link href="/login">
                               <a className="text-sm">Login</a>
                             </Link>
                           </div>
-                        )} */}
+                        )}
                         {commonData.user && (
                           <Menu as="div" className="relative">
                             <div>
