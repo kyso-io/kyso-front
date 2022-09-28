@@ -21,7 +21,9 @@ const Footer = () => {
         <div
           className="border border-white cursor-pointer p-1 mr-4"
           onClick={() => {
-            window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+            if (typeof window !== 'undefined') {
+              window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+            }
           }}
         >
           <ArrowUpIcon className="w-4 h-4" />

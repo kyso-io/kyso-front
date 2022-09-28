@@ -25,5 +25,5 @@ export const useNavigateToHashOnce = (props: Props) => {
       }
       setHasDoneOnce(true);
     }
-  }, [isMounted, window.location.hash]);
+  }, [isMounted, window?.location?.hash]);
 };
