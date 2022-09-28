@@ -67,12 +67,12 @@ const Index = ({ commonData }: Props) => {
     getData();
   }, []);
 
-  useEffect(() => {
-    if (commonData !== null && commonData.token === null && commonData.organization === null && !commonData.errorOrganization) {
-      // An unautenticated user is trying to access an organization that does not have public teams
-      router.replace('/');
-    }
-  }, [commonData]);
+  // useEffect(() => {
+  //   if (commonData !== null && commonData.token === null && commonData.organization === null && !commonData.errorOrganization) {
+  //     // An unautenticated user is trying to access an organization that does not have public teams
+  //     router.replace('/');
+  //   }
+  // }, [commonData]);
 
   useEffect(() => {
     if (!commonData.organization) {

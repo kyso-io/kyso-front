@@ -1,24 +1,24 @@
+import { useUser } from '@/hooks/use-user';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
-import Link from 'next/link';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
-import { useUser } from '@/hooks/use-user';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import { Fragment, useState } from 'react';
+import BreadcrumbNavbar from './BreadcrumbNavbar';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
-import BreadcrumbNavbar from './BreadcrumbNavbar';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
   report: ReportDTO | null | undefined;
   basePath: string;
-  userNavigation: { name: string; href: string; newTab: boolean }[];
+  userNavigation: { name: string; href?: string; newTab: boolean; callback?: () => void }[];
   commonData: CommonData;
 };
 
@@ -113,11 +113,24 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                               <Menu.Items className="z-[100] absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
                                 {userNavigation.map((item) => (
                                   <Menu.Item key={item.name}>
-                                    {({ active }) => (
-                                      <a href={item.href} className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')} target={classNames(item.newTab ? '_blank' : '')}>
-                                        {item.name}
-                                      </a>
-                                    )}
+                                    {({ active }) => {
+                                      if (item.callback) {
+                                        return (
+                                          <button className={classNames(active ? 'bg-gray-100' : '', 'w-full text-left px-4 py-2 text-sm text-gray-700')} onClick={item.callback}>
+                                            {item.name}
+                                          </button>
+                                        );
+                                      }
+                                      return (
+                                        <a
+                                          href={item.href}
+                                          className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
+                                          target={classNames(item.newTab ? '_blank' : '')}
+                                        >
+                                          {item.name}
+                                        </a>
+                                      );
+                                    }}
                                   </Menu.Item>
                                 ))}
                               </Menu.Items>
