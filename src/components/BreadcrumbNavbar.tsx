@@ -72,12 +72,14 @@ const BreadcrumbNavbar = (props: Props) => {
             <NavigationSelector
               selectorItems={organizationSelectorItems}
               extraItem={
-                <React.Fragment>
-                  <span className="my-2 bg-gray-300 h-0.5 mx-3" />
-                  <a href={`${basePath}/create-organization`} className={clsx('text-gray-500 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm  rounded-md')}>
-                    <PlusCircleIcon className="w-5 h-5 mr-1" /> New organization
-                  </a>
-                </React.Fragment>
+                commonData.user !== null ? (
+                  <React.Fragment>
+                    <span className="my-2 bg-gray-300 h-0.5 mx-3" />
+                    <a href={`${basePath}/create-organization`} className={clsx('text-gray-500 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm  rounded-md')}>
+                      <PlusCircleIcon className="w-5 h-5 mr-1" /> New organization
+                    </a>
+                  </React.Fragment>
+                ) : undefined
               }
             />
           }
