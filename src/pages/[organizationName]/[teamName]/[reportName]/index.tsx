@@ -21,7 +21,7 @@ import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
+import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO, ResourcePermissions } from '@kyso-io/kyso-model';
 import { CommentPermissionsEnum, GithubFileHash, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -237,24 +237,19 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     getData();
   }, [selfTree]);
 
-  // useEffect(() => {
-  //   if (commonData) {
-  //     if (commonData.token === null && commonData.organization === null && !commonData.errorOrganization) {
-  //       // An unautenticated user is trying to access an organization that does not have public teams
-  //       router.replace('/');
-  //       return;
-  //     }
-  //     if (commonData.token === null && commonData.organization && commonData.team && commonData.team.visibility !== TeamVisibilityEnum.PUBLIC) {
-  //       // An unautenticated user is trying to access a non public team
-  //       router.replace(`/${commonData.organization.sluglified_name}`);
-  //       return;
-  //     }
-  //     if (commonData.organization && commonData.team == null) {
-  //       // Autenticated user is trying to access a non public team
-  //       router.replace(`/${commonData.organization.sluglified_name}`);
-  //     }
-  //   }
-  // }, [commonData]);
+  useEffect(() => {
+    if (commonData.permissions?.organizations && commonData.permissions?.teams) {
+      const indexOrganization: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
+      if (indexOrganization === -1) {
+        router.replace('/');
+        return;
+      }
+      const indexTeam: number = commonData.permissions.teams.findIndex((item: ResourcePermissions) => item.name === router.query.teamName);
+      if (indexTeam === -1) {
+        router.replace(`/${router.query.organizationName}`);
+      }
+    }
+  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams]);
 
   // START TEAM MEMBERS
 

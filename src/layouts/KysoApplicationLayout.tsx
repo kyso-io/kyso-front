@@ -19,7 +19,7 @@ type IUnpureKysoApplicationLayoutProps = {
 
 const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplicationLayoutProps) => {
   const router = useRouter();
-  const [commonData, setCommonData] = useState<CommonData | null>({
+  const [commonData, setCommonData] = useState<CommonData>({
     permissions: null,
     token: null,
     organization: null,
@@ -109,13 +109,9 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   };
 
   return (
-    <React.Fragment>
-      {commonData && router.isReady && (
-        <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
-          {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
-        </PureKysoApplicationLayout>
-      )}
-    </React.Fragment>
+    <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
+      {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
+    </PureKysoApplicationLayout>
   );
 };
 export default KysoApplicationLayout;
