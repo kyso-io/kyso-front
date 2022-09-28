@@ -1,8 +1,8 @@
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { logoutAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import MainLayout from '../layouts/MainLayout';
 
 const Page = () => {
   const router = useRouter();
@@ -16,20 +16,14 @@ const Page = () => {
         localStorage.removeItem('jwt');
         localStorage.removeItem('shownVerifiedAlert');
       }
-      router.push('/login?logout=true');
+      router.replace('/login');
     };
     doLogout();
   }, []);
 
-  return (
-    <div className="p-2">
-      <div className="">
-        <h2>Logging you out.</h2>
-      </div>
-    </div>
-  );
+  return <div></div>;
 };
 
-Page.layout = KysoApplicationLayout;
+Page.layout = MainLayout;
 
 export default Page;
