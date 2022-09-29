@@ -5,13 +5,13 @@ import type { CommonData } from '@/types/common-data';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import type { ReportData } from '@/types/report-data';
 import type { UserDTO } from '@kyso-io/kyso-model';
-import { setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
+import { logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { getCommonData } from '../helpers/get-common-data';
 import { getReport } from '../helpers/get-report';
+import { useAppDispatch } from '../hooks/redux-hooks';
 
 type IUnpureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -19,9 +19,17 @@ type IUnpureKysoApplicationLayoutProps = {
 
 const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplicationLayoutProps) => {
   const router = useRouter();
-  const [commonData, setCommonData] = useState<CommonData | null>(null);
+  const [commonData, setCommonData] = useState<CommonData>({
+    permissions: null,
+    token: null,
+    organization: null,
+    errorOrganization: null,
+    team: null,
+    errorTeam: null,
+    user: null,
+  });
   const [reportData, setReportData] = useState<ReportData | null>(null);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
 
   let slugifiedName = '';
   if (commonData?.user && commonData?.user?.username) {
@@ -41,7 +49,17 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       href: `https://docs.kyso.io/`,
       newTab: true,
     },
-    { name: 'Sign out', href: `${router.basePath}/logout`, newTab: false },
+    {
+      name: 'Sign out',
+      newTab: false,
+      callback: async () => {
+        localStorage.removeItem('jwt');
+        localStorage.removeItem('shownVerifiedAlert');
+        sessionStorage.setItem('redirectUrl', router.asPath);
+        await dispatch(logoutAction());
+        router.replace(`/login`);
+      },
+    },
   ];
 
   useEffect(() => {
@@ -91,13 +109,9 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   };
 
   return (
-    <React.Fragment>
-      {commonData && router.isReady && (
-        <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
-          {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
-        </PureKysoApplicationLayout>
-      )}
-    </React.Fragment>
+    <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
+      {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
+    </PureKysoApplicationLayout>
   );
 };
 export default KysoApplicationLayout;

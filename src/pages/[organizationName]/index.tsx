@@ -7,7 +7,7 @@ import PureNewReportPopover from '@/components/PureNewReportPopover';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO, ResourcePermissions } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -68,11 +68,13 @@ const Index = ({ commonData }: Props) => {
   }, []);
 
   useEffect(() => {
-    if (commonData !== null && commonData.token === null && commonData.organization === null && !commonData.errorOrganization) {
-      // An unautenticated user is trying to access an organization that does not have public teams
-      router.replace('/');
+    if (commonData.permissions?.organizations) {
+      const index: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
+      if (index === -1) {
+        router.replace('/');
+      }
     }
-  }, [commonData]);
+  }, [commonData?.permissions?.organizations]);
 
   useEffect(() => {
     if (!commonData.organization) {

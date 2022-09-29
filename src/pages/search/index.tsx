@@ -36,7 +36,7 @@ const SearchIndex = () => {
   const [fullTextSearchDTO, setFullTextSearchDTO] = useState<FullTextSearchDTO | null>(null);
   const [fullTextSearchParams, setFullTextSearchParams] = useState<FullTextSearchParams>({
     type: ElasticSearchIndex.Report,
-    terms: '',
+    terms: q ? q.toString() : '',
     page: 1,
     perPage: 10,
     filterOrgs: [],

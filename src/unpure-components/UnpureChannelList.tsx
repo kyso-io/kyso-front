@@ -35,7 +35,7 @@ const ChannelList = (props: Props) => {
       return;
     }
 
-    if (!window.confirm('Are you sure you want to delete this report?')) {
+    if (typeof window !== 'undefined' && !window.confirm('Are you sure you want to delete this report?')) {
       return;
     }
 
