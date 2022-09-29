@@ -9,6 +9,7 @@ import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import SettingsAside from '../../../components/SettingsAside';
 import PureAvatar from '../../../components/PureAvatar';
 import ToasterNotification from '../../../components/ToasterNotification';
 import checkPermissions from '../../../helpers/check-permissions';
@@ -270,7 +271,9 @@ const Index = ({ commonData }: Props) => {
 
   return (
     <div className="flex flex-row space-x-8 p-2">
-      <div className="w-1/6"></div>
+      <div className="w-1/6">
+        <SettingsAside commonData={commonData} />
+      </div>
       <div className="w-4/6">
         <div className="py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

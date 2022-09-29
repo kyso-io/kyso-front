@@ -27,7 +27,7 @@ const SettingsBreadcrumbNavbar = (props: Props) => {
       );
     }
     return [];
-  }, []);
+  }, [commonData?.permissions, commonData?.organization]);
 
   const channelSelectorItems: BreadcrumbItem[] = useMemo(() => {
     if (commonData.permissions && commonData.permissions.teams) {
@@ -44,7 +44,7 @@ const SettingsBreadcrumbNavbar = (props: Props) => {
       return data;
     }
     return [];
-  }, []);
+  }, [commonData?.permissions, commonData?.organization]);
 
   return (
     <div>

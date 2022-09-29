@@ -1,15 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Transition } from '@headlessui/react';
-import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
+import { LinkIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { InviteUserDto, KysoSetting, NormalizedResponseDTO, OrganizationMember, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
+import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import PureAvatar from '../../../../components/PureAvatar';
+import SettingsAside from '../../../../components/SettingsAside';
 import ToasterNotification from '../../../../components/ToasterNotification';
 import checkPermissions from '../../../../helpers/check-permissions';
 import { Helper } from '../../../../helpers/Helper';
@@ -82,6 +83,7 @@ const Index = ({ commonData }: Props) => {
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+  const hasPermissionEditChannel: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.EDIT), [commonData]);
 
   useEffect(() => {
     const getData = async () => {
@@ -97,8 +99,14 @@ const Index = ({ commonData }: Props) => {
       }
     };
     getData();
-    getTeamMembers();
   }, []);
+
+  useEffect(() => {
+    if (!commonData.team) {
+      return;
+    }
+    getTeamMembers();
+  }, [commonData.team]);
 
   useEffect(() => {
     if (!query || query.length === 0) {
@@ -352,12 +360,63 @@ const Index = ({ commonData }: Props) => {
     setRequesting(true);
   };
 
+  const updateTeamVisiblity = async (teamVisiblityEnum: TeamVisibilityEnum) => {
+    setRequesting(true);
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+      await api.updateTeam(commonData.team?.id!, { visibility: teamVisiblityEnum } as any);
+      router.reload();
+    } catch (e: any) {
+      console.log(e.response.data);
+    }
+    setRequesting(false);
+  };
+
   return (
     <div className="flex flex-row space-x-8 p-2">
-      <div className="w-1/6"></div>
+      <div className="w-1/6">
+        <SettingsAside commonData={commonData} />
+      </div>
       <div className="w-4/6">
         <div className="py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-row items-center">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">{commonData.team?.display_name}</h3>
+              <a href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`} className="max-w-2xl text-sm text-gray-500 ml-5">
+                View channel
+                <LinkIcon className="inline-block w-4 h-4 ml-1" />
+              </a>
+            </div>
+            <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5 mb-5">
+              <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Visiblity:</label>
+              <div className="mt-1 sm:col-span-2 sm:mt-0">
+                <select
+                  disabled={!hasPermissionEditChannel || requesting}
+                  value={commonData.team?.visibility}
+                  onChange={(e: any) => updateTeamVisiblity(e.target.value)}
+                  name="teamVisiblity"
+                  className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                >
+                  <option value={TeamVisibilityEnum.PROTECTED}>Protected</option>
+                  <option value={TeamVisibilityEnum.PRIVATE}>Private</option>
+                  <option value={TeamVisibilityEnum.PUBLIC}>Public</option>
+                </select>
+              </div>
+            </div>
+            <div className="text-sm text-gray-700">
+              <ul style={{ listStyle: 'circle' }}>
+                <li>
+                  <strong>Protected:</strong> only members within the organization can access this channel&apos;s content.
+                </li>
+                <li>
+                  <strong>Private:</strong> only members of this channel have access to this channel&apos;s content.
+                </li>
+                <li>
+                  <strong>Public:</strong> any member of any organization can access this channel&apos;s content. Reports in this channel can also be viewed by external users with no Kyso account by
+                  sharing a report&apos;s shareable link.
+                </li>
+              </ul>
+            </div>
             {isOrgAdmin && (
               <React.Fragment>
                 {/* SEARCH USERS */}
@@ -423,7 +482,22 @@ const Index = ({ commonData }: Props) => {
               </React.Fragment>
             )}
             {/* TEAM MEMBERS */}
-            <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Team members:</h3>
+            <h3 className="text-lg font-medium leading-6 text-gray-900 mt-8">Team members:</h3>
+            <div className="mt-4 mb-6 text-sm text-gray-600">
+              {commonData.team?.visibility === TeamVisibilityEnum.PROTECTED && (
+                <p>
+                  Only the following users can access to this channel. Check the members of this channel and manage them. The roles marked with a organization&apos;s tag comes from the
+                  organization&apos;s configuration, and those without tag are explicit members of the channel.
+                </p>
+              )}
+              {commonData.team?.visibility === TeamVisibilityEnum.PRIVATE && <p>Only the following users can access to this channel</p>}
+              {commonData.team?.visibility === TeamVisibilityEnum.PUBLIC && (
+                <p>
+                  All users on Kyso can discover this channel and see its contents. Check the members of this channel and manage them. The roles marked with a organization&apos;s tag comes from the
+                  organization&apos;s configuration, and those without tag are explicit members of the channel.
+                </p>
+              )}
+            </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {members.map((member: Member) => {
                 const labelRole: string = member.team_roles.length > 0 && TeamRoleToLabel[member.team_roles[0]!] ? TeamRoleToLabel[member.team_roles[0]!]! : '';
