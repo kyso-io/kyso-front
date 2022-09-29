@@ -188,7 +188,13 @@ const Index = ({ commonData }: Props) => {
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-yellow-800">Forbidden resource</h3>
                 <div className="mt-2 text-sm text-yellow-700">
-                  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Aliquid pariatur, ipsum similique veniam quo totam eius aperiam dolorum.</p>
+                  <p>
+                    This page is only available to registered users.{' '}
+                    <a href="/login" className="font-bold">
+                      Sign in
+                    </a>{' '}
+                    now.
+                  </p>
                 </div>
               </div>
             </div>

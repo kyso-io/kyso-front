@@ -26,6 +26,7 @@ import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
+import { checkJwt } from '../../../helpers/check-jwt';
 import { Helper } from '../../../helpers/Helper';
 import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
 
@@ -54,11 +55,11 @@ const CreateReport = ({ commonData }: Props) => {
   const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
   const [files, setFiles] = useState<File[]>([]);
   const [mainFile, setMainFile] = useState<string | null>(null);
+  const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!commonData.user) {
-      return;
-    }
+    const result: boolean = checkJwt();
+    setUserIsLogged(result);
     const getData = async () => {
       try {
         const api: Api = new Api();
@@ -260,6 +261,10 @@ const CreateReport = ({ commonData }: Props) => {
     setFiles([...files, ...newFiles]);
   };
 
+  if (userIsLogged === null) {
+    return null;
+  }
+
   return (
     <div className="p-4">
       <div className="flex flex-row items-center">
@@ -386,7 +391,6 @@ const CreateReport = ({ commonData }: Props) => {
               ))}
             </div>
           </div>
-
           <div className="flex flex-row justify-end my-2">
             {draftStatus && <h6 className="pt-2 text-gray-500 text-xs">{draftStatus}</h6>}
             {hasAnythingCached && (
