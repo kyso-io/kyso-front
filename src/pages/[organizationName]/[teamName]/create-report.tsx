@@ -164,6 +164,9 @@ const CreateReport = ({ commonData }: Props) => {
   }, [commonData.organization, commonData.team]);
 
   useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
     if (getLocalStorageItem('formTitle')) {
       setTitle(JSON.parse(getLocalStorageItem('formTitle')!));
       setHasAnythingCached(true);
@@ -199,7 +202,7 @@ const CreateReport = ({ commonData }: Props) => {
       setFiles(JSON.parse(getLocalStorageItem('formFile')!));
       setHasAnythingCached(true);
     }
-  }, []);
+  }, [commonData.user]);
 
   const setTitleDelay = (_title: string) => {
     setTitle(_title);
@@ -350,7 +353,7 @@ const CreateReport = ({ commonData }: Props) => {
         removeLocalStorageItem(file.id);
       }
       setBusy(false);
-      router.push(`/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`);
+      window.location.href = `/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setBusy(false);
