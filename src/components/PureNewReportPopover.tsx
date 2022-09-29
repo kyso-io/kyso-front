@@ -36,8 +36,6 @@ const PureNewReportPopover = (props: Props) => {
     createLink = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form`;
   }
 
-  console.log(createLink);
-
   return (
     <React.Fragment>
       <Popover as="div" className="z-50 relative inline-block">
