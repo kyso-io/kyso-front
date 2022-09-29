@@ -39,7 +39,7 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
     if (!hasPermissionDeleteChannel) {
       return;
     }
-    if (!window.confirm('Are you sure you want to delete this channel?')) {
+    if (typeof window !== 'undefined' && !window.confirm('Are you sure you want to delete this channel?')) {
       return;
     }
 

@@ -7,15 +7,16 @@ set -e
 RELPATH_TO_WORKDIR=".."
 
 # Variables
-IMAGE_NAME="k3d-registry.lo.kyso.io:5000/kyso-front"
-IMAGE_TAG="latest"
-CONTAINER_NAME="kyso-front"
-BUILD_ARGS=""
-BUILD_SECRETS=""
-BUILD_TAG="$IMAGE_NAME:$IMAGE_TAG"
+IMAGE_NAME="registry.kyso.io/docker/node-builder"
+IMAGE_TAG="16.16.0-bullseye-slim"
+CONTAINER_NAME="kyso-front-builder"
+BUILDER_TAG="$IMAGE_NAME:$IMAGE_TAG"
+HOSTS_FILE=".hosts.docker"
 NPMRC_KYSO=".npmrc.kyso"
 NPMRC_DOCKER=".npmrc.docker"
-PUBLISH_PORTS="--publish=0.0.0.0:3000:3000"
+ENV_DOCKER=".env.docker"
+CONTAINER_VARS=""
+PUBLISH_PORTS="--publish 0.0.0.0:3000:3000"
 
 # ---------
 # FUNCTIONS
@@ -45,7 +46,7 @@ _readlinkf_posix() {
       return 0
     fi
     # `ls -dl` format: "%s %u %s %s %u %s %s -> %s\n",
-    #   <file mode>, <number of links>, <owner name>, <group name>,
+    #   <file mode>, <numbur of links>, <owner name>, <group name>,
     #   <size>, <date and time>, <pathname of link>, <contents of link>
     # https://pubs.opengroup.org/onlinepubs/9699919799/utilities/ls.html
     link=$(ls -dl -- "$target" 2>/dev/null) || break
@@ -80,63 +81,19 @@ docker_setup() {
 //gitlab.kyso.io/api/v4/packages/npm/:_authToken=${PACKAGE_READER_TOKEN}
 EOF
   fi
-}
-
-docker_build() {
-  if [ ! -f "./.npmrc.kyso" ]; then
-    echo "Missing file '.npmrc.kyso', call $0 init to create it"
-    exit 1
+  if [ ! -f "$ENV_DOCKER" ]; then
+    echo "Copying the sample ./.env file to $ENV_DOCKER"
+    cp "./.env" "$ENV_DOCKER"
+    echo "Adjust values for your setup!!!"
   fi
-  # Prepare .npmrc.docker
-  if [ -f ".npmrc" ]; then
-    cat ".npmrc" "$NPMRC_KYSO" >"$NPMRC_DOCKER"
-  else
-    cat "$NPMRC_KYSO" >"$NPMRC_DOCKER"
-  fi
-
-  # Compute build args
-  if [ -f "./.build-args" ]; then
-    BUILD_ARGS="$(
-      awk '!/^#/ { printf(" --build-arg \"%s\"", $0); }' "./.build-args"
-    )"
-  fi
-  # Compute build secrets if there is a .build_secrets file
-  if [ -f "./.build-secrets" ]; then
-    BUILD_SECRETS="$(
-      awk -f- "./.build-secrets" <<EOF
-!/^#/{
-  sub("src=.npmrc","src=$NPMRC_DOCKER",\$0);
-  printf(" --secret \"%s\"", \$0);
-}
-EOF
-    )"
-  fi
-  DOCKER_COMMAND="$(
-    printf "%s" \
-      "DOCKER_BUILDKIT=1 docker build${BUILD_ARGS}${BUILD_SECRETS}" \
-      " --tag '$BUILD_TAG' ."
-  )"
-  eval "$DOCKER_COMMAND"
-}
-
-docker_build_prune() {
-  DOCKER_BUILDKIT=1 docker builder prune -af
-}
-
-push_lo() {
-  docker push "$BUILD_TAG"
-}
-
-docker_epsh() {
-  if [ "$(docker_status)" ]; then
-    docker rm "$CONTAINER_NAME"
-  fi
-  docker run --entrypoint '/bin/sh' --rm -ti --name "$CONTAINER_NAME" \
-    "$PUBLISH_PORTS" "$BUILD_TAG"
 }
 
 docker_logs() {
   docker logs "$@" "$CONTAINER_NAME"
+}
+
+docker_pull() {
+  docker pull "$BUILDER_TAG"
 }
 
 docker_rm() {
@@ -144,14 +101,47 @@ docker_rm() {
 }
 
 docker_run() {
+  if [ ! -f "./.npmrc.kyso" ]; then
+    echo "Missing file '.npmrc.kyso', call $0 init to create it"
+    exit 1
+  fi
   if [ "$(docker_status)" ]; then
     docker rm "$CONTAINER_NAME"
   fi
-  docker run -d --name "$CONTAINER_NAME" "$PUBLISH_PORTS" "$BUILD_TAG"
+  HOSTS=""
+  if  [ -f "$HOSTS_FILE" ]; then
+    while read -r _host _ip; do
+      HOSTS="$HOSTS --add-host $_host:$_ip"
+    done <<EOF
+$(grep -v "^#" "$HOSTS_FILE")
+EOF
+  fi
+  # Prepare .npmrc.docker
+  if [ -f ".npmrc" ]; then
+    cat ".npmrc" "$NPMRC_KYSO" >"$NPMRC_DOCKER"
+  else
+    cat "$NPMRC_KYSO" >"$NPMRC_DOCKER"
+  fi
+  VOLUMES="-v $(pwd)/:/app/"
+  VOLUMES="$VOLUMES -v $(pwd)/$ENV_DOCKER:/app/.env"
+  VOLUMES="$VOLUMES -v $(pwd)/.npmrc.kyso:/app/.npmrc"
+  VOLUMES="$VOLUMES --tmpfs /data"
+  WORKDIR="-w /app"
+  DOCKER_COMMAND="$(
+    printf "%s" \
+      "docker run -d --user '$(id -u):$(id -g)' --name '$CONTAINER_NAME' " \
+      "$CONTAINER_VARS $PUBLISH_PORTS $HOSTS $VOLUMES $WORKDIR " \
+      "'$BUILDER_TAG' /bin/sh -c 'npm install && npm run dev'"
+  )"
+  eval "$DOCKER_COMMAND"
 }
 
 docker_sh() {
-  docker exec -ti "$CONTAINER_NAME" /bin/sh
+  if [ "$1" = "root" ]; then
+    docker exec -u 0:0 -ti "$CONTAINER_NAME" /bin/bash
+  else
+    docker exec -ti "$CONTAINER_NAME" /bin/bash
+  fi
 }
 
 docker_status() {
@@ -169,13 +159,12 @@ usage() {
 Usage: $0 CMND [ARGS]
 
 Where CMND can be one of:
+- pull: pull latest version of the builder container image
 - setup: prepare local files (.npmrc.kyso & .env.docker)
-- build: create container
-- build-prune: cleanup builder caché
 - start: launch container in daemon mode with the right settings
 - stop|status|rm|logs: operations on the container
-- sh: execute interactive shell (/bin/sh) on the running container
-- epsh: launch container using /bin/sh as entrypoint
+- sh: execute interactive shell (/bin/bash) on the running container
+- shr: execute interactive shell (/bin/bash) as root on the running container
 EOF
 }
 
@@ -188,14 +177,12 @@ echo "WORKING DIRECTORY = '$(pwd)'"
 echo ""
 
 case "$1" in
-build) docker_build ;;
-build-prune) docker_build_prune ;;
-push) push_lo ;;
-epsh) docker_epsh ;;
+pull) docker_pull ;;
 logs) shift && docker_logs "$@" ;;
 rm) docker_rm ;;
 setup) docker_setup ;;
 sh) docker_sh ;;
+shr) docker_sh "root";;
 start) docker_run ;;
 status) docker_status ;;
 stop) docker_stop ;;

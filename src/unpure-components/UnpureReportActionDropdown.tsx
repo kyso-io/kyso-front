@@ -1,14 +1,13 @@
+import PureKysoButton from '@/components/PureKysoButton';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
-import { DotsVerticalIcon, FolderDownloadIcon, TrashIcon, XIcon, PencilIcon } from '@heroicons/react/solid';
+import { DotsVerticalIcon, FolderDownloadIcon, PencilIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { deleteReportAction } from '@kyso-io/kyso-store';
-import { useRouter } from 'next/router';
-import { Fragment, useState } from 'react';
-import PureKysoButton from '@/components/PureKysoButton';
 import { classNames } from 'primereact/utils';
+import { Fragment, useState } from 'react';
 
 interface Props {
   report: ReportDTO;
@@ -21,9 +20,7 @@ interface Props {
 const UnpureReportActionDropdown = (props: Props) => {
   const { report, commonData, hasPermissionDeleteReport, hasPermissionEditReport, openMetadata } = props;
   const dispatch = useAppDispatch();
-  const router = useRouter();
   const [show, setShow] = useState(false);
-  // const [isEditOpen, openEdit] = useState(false);
 
   const [alertText, setAlertText] = useState('Creating zip, this may take a moment...');
 
@@ -31,14 +28,14 @@ const UnpureReportActionDropdown = (props: Props) => {
     if (!hasPermissionDeleteReport) {
       return;
     }
-    if (!window.confirm('Are you sure you want to delete this report?')) {
+    if (typeof window !== 'undefined' && !window.confirm('Are you sure you want to delete this report?')) {
       return;
     }
 
     setAlertText('Deleting...');
     await dispatch(deleteReportAction(report.id!));
     setAlertText('Deleted.');
-    router.push(`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
+    window.location.href = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`;
   };
 
   return (

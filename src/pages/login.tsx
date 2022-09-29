@@ -22,6 +22,7 @@ const validateEmail = (email: string) => {
 };
 
 const githubScopes = ['read:user', 'user:email', 'read:org', 'repo', 'admin:repo_hook', 'public_repo'];
+const gitlabScope = 'read_user';
 
 const Index = () => {
   const router = useRouter();
@@ -94,7 +95,7 @@ const Index = () => {
 
       setGithubUrl(`https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(',')}&state=${uuid ? uuid.v4() : ''}`);
 
-      setGitlabUrl(`https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&redirect_uri=${gitlabRedirectURI}&response_type=code`);
+      setGitlabUrl(`https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&scope=${gitlabScope}&redirect_uri=${gitlabRedirectURI}&response_type=code`);
 
       setPingUrl(pingIdSamlSSOUrl);
 
