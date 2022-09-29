@@ -277,20 +277,23 @@ const Index = () => {
                 </a>
               </li>
             </ul>
-
-            <p>By signing up for and by signing in to this service you accept our:</p>
-            <ul>
-              <li>
-                <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
-                  Terms of service
-                </a>
-              </li>
-              <li>
-                <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
-                  Privacy statement
-                </a>
-              </li>
-            </ul>
+            <div className="hidden-div">
+              <div>
+                <p>By signing up for and by signing in to this service you accept our:</p>
+                <ul>
+                  <li>
+                    <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
+                      Terms of service
+                    </a>
+                  </li>
+                  <li>
+                    <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
+                      Privacy statement
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div className="prose min-w-[400px] flex flex-col space-y-2 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
@@ -390,7 +393,7 @@ const Index = () => {
                 </div>
                 <button
                   type="submit"
-                  className="shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
+                  className="login-btn shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
                 >
                   Register
                 </button>
@@ -455,8 +458,8 @@ const Index = () => {
             )}
 
             {error && <div className="text-red-500 text-center p-2">{error}</div>}
-            <div className="pt-5 flex flex-row items-center ">
-              <p className="text-sm mr-5">Already have signin and password?</p>
+            <div className="pt-5 flex flex-row items-center shown-div ">
+              <p className="text-sm mr-5">Already have an account?</p>
               <a className="text-sm no-underline hover:none text-gray-900 hover:text-indigo-600" href="/login">
                 Sign in
               </a>
@@ -471,7 +474,7 @@ const Index = () => {
             ${headerCss}
           }
           .login-btn {
-            ${buttonCss}
+            ${buttonCss};
           }
           .login-btn:hover {
             ${buttonHoverCss}

@@ -252,20 +252,23 @@ const Index = () => {
                 </a>
               </li>
             </ul>
-
-            <p>By signing up for and by signing in to this service you accept our:</p>
-            <ul>
-              <li>
-                <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
-                  Terms of service
-                </a>
-              </li>
-              <li>
-                <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
-                  Privacy statement
-                </a>
-              </li>
-            </ul>
+            <div className="hidden-div">
+              <div>
+                <p>By signing up for and by signing in to this service you accept our:</p>
+                <ul>
+                  <li>
+                    <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
+                      Terms of service
+                    </a>
+                  </li>
+                  <li>
+                    <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
+                      Privacy statement
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div className="prose min-w-[400px] flex flex-col space-y-2 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
@@ -312,7 +315,7 @@ const Index = () => {
                     }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between hidden-div">
                   <a className="text-xs no-underline hover:none  text-gray-900 hover:text-indigo-600" href="/reset-password">
                     Forgot your password?
                   </a>
