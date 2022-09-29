@@ -1,6 +1,3 @@
-import { Helper } from '@/helpers/Helper';
-import type { KeyValue } from '@/model/key-value.model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { logoutAction } from '@kyso-io/kyso-store';
 import decode from 'jwt-decode';
 import { useRouter } from 'next/router';
@@ -16,22 +13,10 @@ export const useRedirectIfNoJWT = () => {
   const fetcher = async () => {
     const jwt: string = localStorage.getItem('jwt') as string;
     if (!jwt && !router.query.redirect) {
-      let unauthorizedRedirectUrl = '/login';
-      const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-      if (publicKeys !== null && publicKeys.length > 0) {
-        const settingsUnauthRedirect: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
-        if (settingsUnauthRedirect) {
-          unauthorizedRedirectUrl = settingsUnauthRedirect.value;
-          if (unauthorizedRedirectUrl.includes('http')) {
-            router.push(unauthorizedRedirectUrl);
-            return;
-          }
-        }
-      }
       if (router?.asPath && router.asPath.length > 0) {
         sessionStorage.setItem('redirectUrl', router.asPath);
       }
-      router.push(unauthorizedRedirectUrl);
+      router.push('/login');
       return;
     }
 

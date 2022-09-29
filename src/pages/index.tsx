@@ -1,9 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import type { KeyValue } from '@/model/key-value.model';
 import type { CommonData } from '@/types/common-data';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import ChannelList from '../components/ChannelList';
+import { Helper } from '../helpers/Helper';
 import KysoApplicationLayout from '../layouts/KysoApplicationLayout';
 
 interface Props {
@@ -13,7 +16,27 @@ interface Props {
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
 
-  useRedirectIfNoJWT();
+  useEffect(() => {
+    const checkUserLogged = async () => {
+      try {
+        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
+        if (publicKeys !== null && publicKeys.length > 0) {
+          let unauthorizedRedirectUrl = '/login';
+          const settingsUnauthRedirect: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
+          if (settingsUnauthRedirect) {
+            unauthorizedRedirectUrl = settingsUnauthRedirect.value;
+          }
+          router.replace(unauthorizedRedirectUrl);
+        }
+      } catch (e: any) {
+        console.log(e.response.data);
+      }
+    };
+    const jwt: string | null = localStorage.getItem('jwt') as string;
+    if (!jwt) {
+      checkUserLogged();
+    }
+  }, []);
 
   useEffect(() => {
     const redirectUserToOrganization = async () => {
