@@ -6,7 +6,6 @@ import { Menu, Transition } from '@headlessui/react';
 import { DotsVerticalIcon, FolderDownloadIcon, PencilIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { deleteReportAction } from '@kyso-io/kyso-store';
-import { useRouter } from 'next/router';
 import { classNames } from 'primereact/utils';
 import { Fragment, useState } from 'react';
 
@@ -21,9 +20,7 @@ interface Props {
 const UnpureReportActionDropdown = (props: Props) => {
   const { report, commonData, hasPermissionDeleteReport, hasPermissionEditReport, openMetadata } = props;
   const dispatch = useAppDispatch();
-  const router = useRouter();
   const [show, setShow] = useState(false);
-  // const [isEditOpen, openEdit] = useState(false);
 
   const [alertText, setAlertText] = useState('Creating zip, this may take a moment...');
 
@@ -38,7 +35,7 @@ const UnpureReportActionDropdown = (props: Props) => {
     setAlertText('Deleting...');
     await dispatch(deleteReportAction(report.id!));
     setAlertText('Deleted.');
-    router.push(`${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
+    window.location.href = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`;
   };
 
   return (
