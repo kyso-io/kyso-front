@@ -497,7 +497,11 @@ const Index = ({ commonData }: Props) => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization!.id!, commonData.team!.id);
-      setSearchUser(result.data);
+      if (result.data) {
+        setSearchUser(result.data);
+      } else {
+        getReports(1);
+      }
     } catch (e) {}
   };
 

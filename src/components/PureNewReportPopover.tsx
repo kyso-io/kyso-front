@@ -30,10 +30,10 @@ const PureNewReportPopover = (props: Props) => {
   const kysoYamlContent = `organization: ${commonData.organization?.sluglified_name}\nchannel: ${
     commonData.team?.sluglified_name || 'channel-name'
   }\ntype: markdown\ntitle: "Add your title"\nmain: Readme.md`;
-  let createLink = `/${commonData.organization?.sluglified_name}/create-report`;
+  let createLink = `/${commonData.organization?.sluglified_name}/create-report-form`;
 
   if (commonData.team) {
-    createLink = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report`;
+    createLink = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form`;
   }
 
   return (
