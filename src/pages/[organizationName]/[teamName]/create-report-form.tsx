@@ -5,25 +5,23 @@ import { PureSpinner } from '@/components/PureSpinner';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
 import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
-import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { getLocalStorageItem, removeLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import slugify from '@/helpers/slugify';
-import { useChannelMembers } from '@/hooks/use-channel-members';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
+import { FolderAddIcon } from '@heroicons/react/outline';
 import { ArrowRightIcon, ExclamationCircleIcon, InformationCircleIcon, SelectorIcon } from '@heroicons/react/solid';
-import type { KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, Tag, TeamMember } from '@kyso-io/kyso-model';
+import type { KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, ResourcePermissions, Tag, TeamMember } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import 'easymde/dist/easymde.min.css';
 import FormData from 'form-data';
 import JSZip from 'jszip';
-import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
-import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { Helper } from '../../../helpers/Helper';
@@ -43,17 +41,30 @@ const CreateReport = ({ commonData }: Props) => {
   const inputRef = useRef<any>(null);
   const [title, setTitle] = useState('');
   const [busy, setBusy] = useState<boolean>(false);
-  const [hasAnythingCached, setHasAnythingCached] = useState(false);
   const [description, setDescription] = useState('');
-  const [draftStatus, setDraftStatus] = useState('');
-  const [selectedTags, setTags] = useState([]);
-  const channelMembers = useChannelMembers({ commonData });
+  const [selectedTags, setTags] = useState<string[]>([]);
+  const [channelMembers, setChannelMembers] = useState<TeamMember[]>([]);
   const [selectedPeople, setSelectedPeople] = useState<TeamMember[]>(channelMembers);
   const [allowedTags, setAllowedTags] = useState<string[]>([]);
-  const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionCreateReport: boolean | null = useMemo(() => {
+    if (!commonData.permissions) {
+      return null;
+    }
+    return checkPermissions(commonData, ReportPermissionsEnum.CREATE);
+  }, [commonData.permissions]);
   const [files, setFiles] = useState<File[]>([]);
   const [mainFile, setMainFile] = useState<string | null>(null);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
+  const [selectedTeam, setSelectedTeam] = useState<ResourcePermissions | null>(null);
+  const teamsResourcePermissions: ResourcePermissions[] = useMemo(() => {
+    if (!commonData.organization) {
+      return [];
+    }
+    if (!commonData.permissions || !commonData.permissions.teams) {
+      return [];
+    }
+    return commonData.permissions.teams.filter((teamResourcePermissions: ResourcePermissions) => teamResourcePermissions.organization_id === commonData.organization!.id);
+  }, [commonData.permissions, commonData.organization]);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -73,17 +84,42 @@ const CreateReport = ({ commonData }: Props) => {
     getData();
   }, []);
 
-  const channelSelectorItems: BreadcrumbItem[] = [];
+  useEffect(() => {
+    if (!router.query.teamName) {
+      return;
+    }
+    if (!commonData.organization) {
+      return;
+    }
+    if (!commonData.permissions) {
+      return;
+    }
+    if (!commonData.permissions.teams) {
+      return;
+    }
+    const rtps: ResourcePermissions | undefined = commonData.permissions!.teams!.find(
+      (resourcePermission: ResourcePermissions) => resourcePermission.organization_id === commonData.organization!.id && resourcePermission.name === router.query.teamName,
+    );
+    if (!rtps) {
+      return;
+    }
+    setSelectedTeam(rtps);
+  }, [router.query?.teamName, commonData.permissions, commonData.organization]);
 
-  if (commonData.permissions && commonData.permissions.teams) {
-    commonData
-      .permissions!.teams.filter((team) => team.organization_id === commonData.organization?.id)
-      .forEach((team) => {
-        channelSelectorItems.push(
-          new BreadcrumbItem(team.display_name, `${router.basePath}/${commonData.organization?.sluglified_name}/${team.name}/create-report-form`, commonData.team?.sluglified_name === team.name),
-        );
-      });
-  }
+  useEffect(() => {
+    if (!selectedTeam) {
+      setChannelMembers([]);
+      return;
+    }
+    const getChannelMembers = async () => {
+      try {
+        const api: Api = new Api(token, commonData.organization?.sluglified_name, selectedTeam.name);
+        const result: NormalizedResponseDTO<TeamMember[]> = await api.getTeamAssignees(selectedTeam.id! as string);
+        setChannelMembers(result.data);
+      } catch (e) {}
+    };
+    getChannelMembers();
+  }, [selectedTeam]);
 
   useEffect(() => {
     if (channelMembers) {
@@ -132,37 +168,22 @@ const CreateReport = ({ commonData }: Props) => {
 
   const setTitleDelay = (_title: string) => {
     setTitle(_title);
-    setDraftStatus('Saving ...');
-    delayedCallback('formTitle', _title);
     setShowToaster(false);
     setMessageToaster('');
   };
 
   const setDescriptionDelay = (_description: string) => {
     setDescription(_description);
-    setDraftStatus('Saving ...');
-    delayedCallback('formDescription', _description);
   };
 
   const setSelectedPeopleDelay = (newSelectedPeople: TeamMember[]) => {
     setSelectedPeople(newSelectedPeople as TeamMember[]);
-    setDraftStatus('Saving ...');
-    delayedCallback('formSelectedPeople', newSelectedPeople);
+    setMessageToaster('');
   };
 
-  const setTagsDelay = (_newTags: string[]) => {
-    // That's wrong, DOUBLE CHECK
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setTags(_newTags as any);
-    setDraftStatus('Saving ...');
-    delayedCallback('formTags', _newTags);
+  const setTagsDelay = (newTgs: string[]) => {
+    setTags(newTgs);
   };
-
-  const delayedCallback = debounce(async (key, value) => {
-    setLocalStorageItem(key, JSON.stringify(value));
-    setHasAnythingCached(true);
-    setDraftStatus('All changes saved in local storage');
-  }, 1000);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (e?: any) => {
@@ -175,7 +196,7 @@ const CreateReport = ({ commonData }: Props) => {
       setShowToaster(true);
       return;
     }
-    if (!commonData.team) {
+    if (selectedTeam === null) {
       setMessageToaster('Please select a channel.');
       setShowToaster(true);
       return;
@@ -198,9 +219,9 @@ const CreateReport = ({ commonData }: Props) => {
     setBusy(true);
     const api: Api = new Api(token);
     api.setOrganizationSlug(commonData.organization!.sluglified_name);
-    api.setTeamSlug(commonData.team.sluglified_name);
+    api.setTeamSlug(selectedTeam.name);
     try {
-      const exists: boolean = await api.reportExists(commonData.team.id as string, slugify(title));
+      const exists: boolean = await api.reportExists(selectedTeam.id, slugify(title));
       if (exists) {
         setMessageToaster('Report with this name already exists. Change the title.');
         setShowToaster(true);
@@ -219,7 +240,7 @@ const CreateReport = ({ commonData }: Props) => {
       title,
       description,
       organization: commonData.organization!.sluglified_name,
-      team: commonData.team.sluglified_name,
+      team: selectedTeam.name,
       tags: selectedTags,
       type: ReportType.Markdown,
       authors: selectedPeople.map((person) => person.email),
@@ -239,10 +260,11 @@ const CreateReport = ({ commonData }: Props) => {
       cleanStorage();
       setShowToaster(false);
       window.location.href = `/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`;
+      setMessageToaster('Report uploaded successfully.');
     } catch (err: any) {
       setShowToaster(err.response.data.message);
+      setBusy(false);
     }
-    setBusy(false);
   };
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -256,10 +278,17 @@ const CreateReport = ({ commonData }: Props) => {
         newFiles.push(file);
       }
     }
+    if (files.length === 0) {
+      setMainFile(newFiles[0]!.name);
+    }
     setFiles([...files, ...newFiles]);
   };
 
   if (userIsLogged === null) {
+    return null;
+  }
+
+  if (hasPermissionCreateReport === null) {
     return null;
   }
 
@@ -273,46 +302,56 @@ const CreateReport = ({ commonData }: Props) => {
               <div className="flex flex-row items-center space-x-2">
                 <div className="mr-2">posting into</div>
                 <Menu as="div" className="relative w-fit inline-block text-left">
-                  <Menu.Button className="hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded">
-                    {commonData.team ? commonData.team.display_name : 'Select a channel'}
-                    <div className="pl-2">
-                      <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
-                    </div>
-                  </Menu.Button>
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <Menu.Items className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
-                      <div className="p-2">
-                        <div>
-                          <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
-                            Channels
-                          </h3>
-                          <div className="flex flex-col justify-start">
-                            {channelSelectorItems &&
-                              channelSelectorItems.map((item: BreadcrumbItem) => (
-                                <a
-                                  key={item.href}
-                                  href={item.href}
-                                  className={classNames(
-                                    item.current ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-                                    'flex items-center px-3 py-2 text-sm font-medium rounded-md',
-                                  )}
-                                >
-                                  {item.name}
-                                </a>
+                  <React.Fragment>
+                    <Menu.Button className="hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded">
+                      {selectedTeam ? selectedTeam.display_name : 'Select a channel'}
+                      <div className="pl-2">
+                        <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
+                      </div>
+                    </Menu.Button>
+                    <Transition
+                      as={Fragment}
+                      enter="transition ease-out duration-100"
+                      enterFrom="transform opacity-0 scale-95"
+                      enterTo="transform opacity-100 scale-100"
+                      leave="transition ease-in duration-75"
+                      leaveFrom="transform opacity-100 scale-100"
+                      leaveTo="transform opacity-0 scale-95"
+                    >
+                      <Menu.Items
+                        static
+                        className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none"
+                      >
+                        <div className="p-2">
+                          <div>
+                            <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
+                              Channels
+                            </h3>
+                            <div className="flex flex-col justify-start">
+                              {teamsResourcePermissions.map((teamResourcePermissions: ResourcePermissions) => (
+                                <Menu.Item key={teamResourcePermissions.id}>
+                                  <span
+                                    onClick={() => {
+                                      setSelectedTeam(teamResourcePermissions);
+                                      setShowToaster(false);
+                                      setMessageToaster('');
+                                      setSelectedPeople([]);
+                                    }}
+                                    className={classNames(
+                                      teamResourcePermissions.name === selectedTeam?.name ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                                      'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer',
+                                    )}
+                                  >
+                                    {teamResourcePermissions.display_name}
+                                  </span>
+                                </Menu.Item>
                               ))}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </Menu.Items>
-                  </Transition>
+                      </Menu.Items>
+                    </Transition>
+                  </React.Fragment>
                 </Menu>
               </div>
             </div>
@@ -369,7 +408,7 @@ const CreateReport = ({ commonData }: Props) => {
                       setShowToaster(true);
                     }
                   }}
-                  emptyMessage={commonData.team ? 'No authors' : 'First select a channel to add authors'}
+                  emptyMessage={selectedTeam !== null ? 'No authors' : 'First select a channel to add authors'}
                 />
                 <TagsFilterSelector
                   filter={(query) => {
@@ -390,40 +429,24 @@ const CreateReport = ({ commonData }: Props) => {
                 ))}
               </div>
             </div>
-            <div className="flex flex-row justify-end my-2">
-              {draftStatus && <h6 className="pt-2 text-gray-500 text-xs">{draftStatus}</h6>}
-              {hasAnythingCached && (
-                <PureKysoButton
-                  type={KysoButton.SECONDARY}
-                  className="ml-2"
-                  onClick={() => {
-                    cleanStorage();
-                    router.reload();
-                  }}
-                >
-                  Reset
-                </PureKysoButton>
-              )}
-            </div>
           </div>
         </div>
         <div className="flex flex-row items-center">
           <div className="w-1/6"></div>
           <div className="w-4/6">
-            <div className="px-4 sm:px-6 lg:px-8 my-4">
+            <div className="my-4">
               <div className="sm:flex sm:items-center">
                 <div className="sm:flex-auto">
                   <h1 className="text-xl font-semibold text-gray-900">Files</h1>
                   <p className="mt-2 text-sm text-gray-700">list of files that make up the report.</p>
                 </div>
                 <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                  <button
-                    type="button"
-                    onClick={() => inputRef.current.click()}
-                    className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 sm:w-auto"
-                  >
-                    Add files
-                  </button>
+                  <PureKysoButton type={busy ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY} disabled={busy} onClick={() => inputRef.current.click()}>
+                    <div className="flex flex-row items-center">
+                      <FolderAddIcon className="w-4 h-4 mr-2" />
+                      <span>Add files</span>
+                    </div>
+                  </PureKysoButton>
                   <input ref={inputRef} multiple type="file" style={{ display: 'none' }} onChange={onUploadFile} />
                 </div>
               </div>
@@ -439,6 +462,9 @@ const CreateReport = ({ commonData }: Props) => {
                             </th>
                             <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
                               Size
+                            </th>
+                            <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                              Main file
                             </th>
                             <th scope="col" className="py-3.5 pl-4 pr-3 text-right text-sm font-semibold text-gray-900 sm:pl-6">
                               Actions
@@ -457,26 +483,25 @@ const CreateReport = ({ commonData }: Props) => {
                               <tr key={file.name}>
                                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{file.name}</td>
                                 <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{Helper.parseFileSize(file.size)}</td>
+                                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                  <input
+                                    checked={file.name === mainFile}
+                                    onChange={() => setMainFile(file.name)}
+                                    name="main-file"
+                                    type="radio"
+                                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                  ></input>
+                                </td>
                                 <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                  {file.name === mainFile ? (
-                                    <button
-                                      onClick={() => setMainFile(null)}
-                                      className="inline-flex items-center rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 mr-4"
-                                    >
-                                      Remove as main
-                                    </button>
-                                  ) : (
-                                    <button
-                                      onClick={() => setMainFile(file.name)}
-                                      className="inline-flex items-center rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 mr-4"
-                                    >
-                                      Set as main
-                                    </button>
-                                  )}
                                   <button
                                     onClick={() => {
                                       const fs: File[] = [...files];
                                       fs.splice(index, 1);
+                                      if (fs.length > 0) {
+                                        setMainFile(fs[0]!.name);
+                                      } else {
+                                        setMainFile('');
+                                      }
                                       setFiles(fs);
                                     }}
                                     className="inline-flex items-center rounded border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 mr-4"
@@ -497,9 +522,11 @@ const CreateReport = ({ commonData }: Props) => {
             <div className="flex justify-end">
               <div className="flex flex-row items-center space-x-2">
                 <div className="mr-2 mt-2">
-                  <PureKysoButton type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY} onClick={handleSubmit} className="ml-2">
-                    {busy && <PureSpinner size={5} />}
-                    Post <ArrowRightIcon className="ml-2 w-4 h-4" />
+                  <PureKysoButton type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY} disabled={busy} onClick={handleSubmit} className="ml-2">
+                    <div className="flex flex-row items-center">
+                      {busy && <PureSpinner size={5} />}
+                      Post <ArrowRightIcon className="ml-2 w-4 h-4" />
+                    </div>
                   </PureKysoButton>
                 </div>
               </div>

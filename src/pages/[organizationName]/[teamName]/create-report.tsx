@@ -122,7 +122,12 @@ const CreateReport = ({ commonData }: Props) => {
   const [selectedFile, setSelectedFile] = useState<FilesystemItem>(new FilesystemItem(mainfile[0]!, [], 1));
   const [files, setFiles] = useState<CreationReportFileSystemObject[]>(mainfile);
 
-  const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionCreateReport: boolean | null = useMemo(() => {
+    if (!commonData.permissions) {
+      return null;
+    }
+    return checkPermissions(commonData, ReportPermissionsEnum.CREATE);
+  }, [commonData.permissions]);
 
   const cleanStorage = () => {
     removeLocalStorageItem('formTitle');
@@ -417,6 +422,10 @@ const CreateReport = ({ commonData }: Props) => {
   }, []);
 
   if (userIsLogged === null) {
+    return null;
+  }
+
+  if (hasPermissionCreateReport === null) {
     return null;
   }
 

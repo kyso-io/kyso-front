@@ -3,6 +3,7 @@ import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon, ChevronUpIcon, ClipboardCopyIcon, ExclamationCircleIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
+import { UploadIcon } from '@heroicons/react/solid';
 import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -30,10 +31,11 @@ const PureNewReportPopover = (props: Props) => {
   const kysoYamlContent = `organization: ${commonData.organization?.sluglified_name}\nchannel: ${
     commonData.team?.sluglified_name || 'channel-name'
   }\ntype: markdown\ntitle: "Add your title"\nmain: Readme.md`;
-  let createLink = `/${commonData.organization?.sluglified_name}/create-report-form`;
-
+  let createLink = `/${commonData.organization?.sluglified_name}/create-report`;
+  let createLinkForm = `/${commonData.organization?.sluglified_name}/create-report-form`;
   if (commonData.team) {
-    createLink = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form`;
+    createLink = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report`;
+    createLinkForm = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form`;
   }
 
   return (
@@ -82,6 +84,30 @@ const PureNewReportPopover = (props: Props) => {
                         <div className="text-md font-medium">Create new report in UI</div>
                       </div>
                       <div className="text-sm">Create a report in Kyso{"'s"} web editor.</div>
+                    </a>
+                  </div>
+                  <div className="p-4 border-b cursor-pointer">
+                    <a
+                      onClick={() => {
+                        if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                          setShowToaster(true);
+                          setMessageToaster('Please verify the captcha');
+                          setTimeout(() => {
+                            setShowToaster(false);
+                            sessionStorage.setItem('redirectUrl', createLinkForm);
+                            router.push('/captcha');
+                          }, 2000);
+                          return;
+                        }
+                        router.push(createLinkForm);
+                      }}
+                      className="hover:text-indigo-700"
+                    >
+                      <div className=" flex flex-row items-center space-x-2">
+                        <UploadIcon className="w-5 h-5" />
+                        <div className="text-md font-medium">Upload report files</div>
+                      </div>
+                      <div className="text-sm">Create a report in Kyso uploading your files.</div>
                     </a>
                   </div>
 
