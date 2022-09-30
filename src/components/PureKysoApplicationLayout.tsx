@@ -1,4 +1,3 @@
-import { useUser } from '@/hooks/use-user';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
@@ -24,7 +23,6 @@ type IPureKysoApplicationLayoutProps = {
 
 const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): ReactElement => {
   const router = useRouter();
-  const user = useUser();
   const { children, report, commonData, basePath, userNavigation } = props;
   const [focusOnSearchInput, setFocusOnSearchInput] = useState<boolean>(false);
   const [query, setQuery] = useState<string>('');
@@ -52,7 +50,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                   <div className="flex items-center">
                     <div className="shrink-0">
                       {/* This always must redirect to the homepage */}
-                      <a href={user ? '/' : 'https://about.kyso.io/'}>
+                      <a href={commonData.user !== null ? '/' : 'https://about.kyso.io/'}>
                         <img className="h-8 w-8" src={`/assets/images/kyso-logo-white.svg`} alt="Kyso" />
                       </a>
                     </div>

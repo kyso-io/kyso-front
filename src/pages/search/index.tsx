@@ -1,37 +1,42 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint no-nested-ternary: "off" */
 import SearchItem from '@/components/search-item';
 import SearchNavigation from '@/components/search-navigation';
 import SearchPagination from '@/components/search-pagination';
-import { useAppDispatch } from '@/hooks/redux-hooks';
-import { useCommonData } from '@/hooks/use-common-data';
 import type { FullTextSearchParams } from '@/interfaces/full-text-search-params';
 import type { SearchNavItem } from '@/interfaces/search-nav-item';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { FullTextSearchDTO, FullTextSearchResult, FullTextSearchResultType } from '@kyso-io/kyso-model';
+import type { FullTextSearchDTO, FullTextSearchResult, FullTextSearchResultType, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { ElasticSearchIndex } from '@kyso-io/kyso-model';
-import { fullTextSearchAction } from '@kyso-io/kyso-store';
-import { unwrapResult } from '@reduxjs/toolkit';
+import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
+import type { CommonData } from '../../types/common-data';
 
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-const fetchData = async (params: FullTextSearchParams, dispatch: any, cb: (fullTextSearchDTO: FullTextSearchDTO | null) => void) => {
-  const resultFullTextSearch = await dispatch(fullTextSearchAction({ ...params, terms: encodeURIComponent(params.terms) }));
-  const fullTextSearchDTO: FullTextSearchDTO | null = unwrapResult(resultFullTextSearch);
-  cb(fullTextSearchDTO);
+const fetchData = async (commonData: CommonData, params: FullTextSearchParams, cb: (fullTextSearchDTO: FullTextSearchDTO | null) => void) => {
+  try {
+    const api: Api = new Api(commonData.token);
+    const resultFullTextSearchDto: NormalizedResponseDTO<FullTextSearchDTO> = await api.fullTextSearch({ ...params, terms: encodeURIComponent(params.terms) });
+    cb(resultFullTextSearchDto.data);
+  } catch (e: any) {
+    console.log(e.response.data);
+    cb(null);
+  }
 };
 
 /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-const debouncedFetchData = debounce((params: FullTextSearchParams, dispatch: any, cb: (result: any) => void) => {
-  fetchData(params, dispatch, cb);
+const debouncedFetchData = debounce((commonData: CommonData, params: FullTextSearchParams, cb: (result: any) => void) => {
+  fetchData(commonData, params, cb);
 }, 750);
 
-const SearchIndex = () => {
+interface Props {
+  commonData: CommonData;
+}
+
+const SearchIndex = ({ commonData }: Props) => {
   const router = useRouter();
-  const commonData = useCommonData();
   const { q } = router.query;
-  const dispatch = useAppDispatch();
   const [requesting, setRequesting] = useState<boolean>(false);
   const [fullTextSearchDTO, setFullTextSearchDTO] = useState<FullTextSearchDTO | null>(null);
   const [fullTextSearchParams, setFullTextSearchParams] = useState<FullTextSearchParams>({
@@ -116,12 +121,18 @@ const SearchIndex = () => {
   }, [router.isReady, q]);
 
   useEffect(() => {
+    if (commonData.token) {
+      refreshData();
+    }
+  }, [commonData.token]);
+
+  useEffect(() => {
+    refreshData();
+  }, [fullTextSearchParams]);
+
+  const refreshData = () => {
     setRequesting(true);
-
-    fullTextSearchParams.filterOrgs = commonData.permissions?.organizations?.map((x) => x.name);
-    fullTextSearchParams.filterTeams = commonData.permissions?.teams?.map((x) => x.name);
-
-    debouncedFetchData(fullTextSearchParams, dispatch, (result: FullTextSearchDTO | null) => {
+    debouncedFetchData(commonData, fullTextSearchParams, (result: FullTextSearchDTO | null) => {
       setFullTextSearchDTO(result);
       if (result) {
         setNavigation([
@@ -138,7 +149,7 @@ const SearchIndex = () => {
       }
       setRequesting(false);
     });
-  }, [fullTextSearchParams]);
+  };
 
   return (
     <div className="grid grid-cols-4 gap-4 m-4">
