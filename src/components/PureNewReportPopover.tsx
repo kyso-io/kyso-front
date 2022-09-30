@@ -70,30 +70,6 @@ const PureNewReportPopover = (props: Props) => {
                           setMessageToaster('Please verify the captcha');
                           setTimeout(() => {
                             setShowToaster(false);
-                            sessionStorage.setItem('redirectUrl', createLink);
-                            router.push('/captcha');
-                          }, 2000);
-                          return;
-                        }
-                        router.push(createLink);
-                      }}
-                      className="hover:text-indigo-700"
-                    >
-                      <div className=" flex flex-row items-center space-x-2">
-                        <PencilAltIcon className="w-5 h-5" />
-                        <div className="text-md font-medium">Create new report in UI</div>
-                      </div>
-                      <div className="text-sm">Create a report in Kyso{"'s"} web editor.</div>
-                    </a>
-                  </div>
-                  <div className="p-4 border-b cursor-pointer">
-                    <a
-                      onClick={() => {
-                        if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                          setShowToaster(true);
-                          setMessageToaster('Please verify the captcha');
-                          setTimeout(() => {
-                            setShowToaster(false);
                             sessionStorage.setItem('redirectUrl', createLinkForm);
                             router.push('/captcha');
                           }, 2000);
@@ -108,6 +84,30 @@ const PureNewReportPopover = (props: Props) => {
                         <div className="text-md font-medium">Upload report files</div>
                       </div>
                       <div className="text-sm">Create a report in Kyso uploading your files.</div>
+                    </a>
+                  </div>
+                  <div className="p-4 border-b cursor-pointer">
+                    <a
+                      onClick={() => {
+                        if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                          setShowToaster(true);
+                          setMessageToaster('Please verify the captcha');
+                          setTimeout(() => {
+                            setShowToaster(false);
+                            sessionStorage.setItem('redirectUrl', createLink);
+                            router.push('/captcha');
+                          }, 2000);
+                          return;
+                        }
+                        router.push(createLink);
+                      }}
+                      className="hover:text-indigo-700"
+                    >
+                      <div className=" flex flex-row items-center space-x-2">
+                        <PencilAltIcon className="w-5 h-5" />
+                        <div className="text-md font-medium">Create new report in UI</div>
+                      </div>
+                      <div className="text-sm">Create a report in Kyso{"'s"} web editor.</div>
                     </a>
                   </div>
 

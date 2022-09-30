@@ -1,3 +1,3 @@
-import Page from './[teamName]/create-report-form';
+import Page from './[teamName]/create-report';
 
 export default Page;
