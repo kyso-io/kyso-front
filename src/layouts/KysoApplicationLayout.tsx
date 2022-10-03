@@ -99,7 +99,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       }
     };
     getData();
-  }, [router.asPath]);
+  }, [router?.isReady, router.asPath]);
 
   const setUser = (user: UserDTO): void => {
     setCommonData({
