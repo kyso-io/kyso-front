@@ -49,13 +49,13 @@ const Index = () => {
   const [rightLogo, setRightLogo] = useState(null);
   const [leftLogo, setLeftLogo] = useState('/assets/images/kyso-logo-and-name-dark.svg');
 
-  // const [globalCss, setglobalCss] = useState(false);
-  // const [headerCss, setHeaderCss] = useState(false);
-  // const [buttonCss, setButtonCss] = useState(false);
-  // const [buttonHoverCss, setButtonHoverCss] = useState(false);
-  // const [linkCss, setLinkCss] = useState(false);
-  // const [showdivCss, setShowdivCss] = useState(false);
-  // const [hiddendivCss, setHiddendivCss] = useState(false);
+  const [globalCss, setglobalCss] = useState(false);
+  const [headerCss, setHeaderCss] = useState(false);
+  const [buttonCss, setButtonCss] = useState(false);
+  const [buttonHoverCss, setButtonHoverCss] = useState(false);
+  const [linkCss, setLinkCss] = useState(false);
+  const [showdivCss, setShowdivCss] = useState(false);
+  const [hiddendivCss, setHiddendivCss] = useState(false);
 
   useEffect(() => {
     const getOrganizationOptions = async () => {
@@ -116,20 +116,20 @@ const Index = () => {
         setRightLogo(custumizeRightLogo);
       }
 
-      // const customizeGlobalCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_CSS_STYLES).value;
-      // const customizeHeaderCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HEADER_CSS_STYLES)?.value;
-      // const customizeButtonCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_CSS_STYLES)?.value;
-      // const customizeButtonHoverCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_HOVER_CSS_STYLES)?.value;
-      // const customizeLinkCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LINK_CSS_STYLES)?.value;
-      // const customizeShowdivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES)?.value;
-      // const customizeHiddendivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES)?.value;
-      // setglobalCss(customizeGlobalCss);
-      // setHeaderCss(customizeHeaderCss);
-      // setButtonCss(customizeButtonCss);
-      // setButtonHoverCss(customizeButtonHoverCss);
-      // setLinkCss(customizeLinkCss);
-      // setShowdivCss(customizeShowdivCss);
-      // setHiddendivCss(customizeHiddendivCss);
+      const customizeGlobalCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_CSS_STYLES).value;
+      const customizeHeaderCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HEADER_CSS_STYLES)?.value;
+      const customizeButtonCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_CSS_STYLES)?.value;
+      const customizeButtonHoverCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_HOVER_CSS_STYLES)?.value;
+      const customizeLinkCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LINK_CSS_STYLES)?.value;
+      const customizeShowdivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES)?.value;
+      const customizeHiddendivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES)?.value;
+      setglobalCss(customizeGlobalCss);
+      setHeaderCss(customizeHeaderCss);
+      setButtonCss(customizeButtonCss);
+      setButtonHoverCss(customizeButtonHoverCss);
+      setLinkCss(customizeLinkCss);
+      setShowdivCss(customizeShowdivCss);
+      setHiddendivCss(customizeHiddendivCss);
 
       const captchaEnabledValue: string = publicKeys.find((x) => x.key === KysoSettingsEnum.HCAPTCHA_ENABLED).value;
       setCaptchaEnabled(captchaEnabledValue === 'true');
@@ -233,7 +233,7 @@ const Index = () => {
         <div className="text-right">{error && <ErrorNotification message={error} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col mt-20 items-center mx-auto max-w-[1400px] space-x-10">
           <div className="prose grow max-w-none px-6 m-0">
-            <h1>Kyso.io</h1>
+            <h1 className="login-header">Kyso.io</h1>
             <p>Kyso.io offers free unlimited (private) repositories and unlimited collaborators.</p>
             <ul>
               <li>
@@ -252,20 +252,23 @@ const Index = () => {
                 </a>
               </li>
             </ul>
-
-            <p>By signing up for and by signing in to this service you accept our:</p>
-            <ul>
-              <li>
-                <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
-                  Terms of service
-                </a>
-              </li>
-              <li>
-                <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
-                  Privacy statement
-                </a>
-              </li>
-            </ul>
+            <div className="hidden-div">
+              <div>
+                <p>By signing up for and by signing in to this service you accept our:</p>
+                <ul>
+                  <li>
+                    <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
+                      Terms of service
+                    </a>
+                  </li>
+                  <li>
+                    <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
+                      Privacy statement
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
           </div>
 
           <div className="prose min-w-[400px] flex flex-col space-y-2 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
@@ -312,7 +315,7 @@ const Index = () => {
                     }}
                   />
                 </div>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between hidden-div">
                   <a className="text-xs no-underline hover:none  text-gray-900 hover:text-indigo-600" href="/reset-password">
                     Forgot your password?
                   </a>
@@ -322,7 +325,7 @@ const Index = () => {
                 </div>
                 <button
                   type="submit"
-                  className="shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
+                  className="login-btn shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
                 >
                   Sign in
                 </button>
@@ -389,6 +392,29 @@ const Index = () => {
             {error && <div className="text-red-500 text-center p-2">{error}</div>}
           </div>
         </main>
+        <style jsx global>{`
+          html * {
+            ${globalCss}
+          }
+          .login-header {
+            ${headerCss}
+          }
+          .login-btn {
+            ${buttonCss}
+          }
+          .login-btn:hover {
+            ${buttonHoverCss}
+          }
+          .login-link {
+            ${linkCss};
+          }
+          .shown-div {
+            ${showdivCss}
+          }
+          .hidden-div {
+            ${hiddendivCss}
+          }
+        `}</style>
       </div>
     </>
   );

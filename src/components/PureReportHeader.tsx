@@ -1,9 +1,7 @@
-import type { ReactElement } from 'react';
-import { useMemo } from 'react';
 import PureShareButton from '@/components/PureShareButton';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import PureVersionsDropdown from '@/components/PureVersionsDropdown';
 import classNames from '@/helpers/class-names';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import UnpureCloneDropdown from '@/unpure-components/UnpureCloneDropdown';
 import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDropdown';
@@ -11,10 +9,12 @@ import { ExternalLinkIcon, ThumbUpIcon } from '@heroicons/react/solid';
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import format from 'date-fns/format';
 import router from 'next/router';
+import type { ReactElement } from 'react';
+import { useMemo } from 'react';
 
+import type { FileToRender } from '@/hooks/use-file-to-render';
 import type { Version } from '@/hooks/use-versions';
 import clsx from 'clsx';
-import type { FileToRender } from '@/hooks/use-file-to-render';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureTagGroup from './PureTagGroup';
 
@@ -50,7 +50,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
     <div className="w-full flex 2xl:flex-row lg:flex-col justify-between p-2">
       <div className="2xl:w-4/6 flex flex-col justify-between">
         <h1 className="text-2xl font-medium">{report?.title}</h1>
-        {description && <div className="text-sm">{description}</div>}
+        {description && <div className="text-sm break-words">{description}</div>}
 
         <div className="mt-3 flex text-sm flex-col lg:flex-row lg:items-top text-gray-500 font-light space-x-2 min-h-min">
           <div className="flex">

@@ -5,7 +5,7 @@ import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { InlineCommentDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Mention } from 'primereact/mention';
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 type IPureCommentForm = {
   comment?: InlineCommentDto;
@@ -133,12 +133,12 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
         <div>{/* <p className="text-xs text-gray-500">Use @ to mention people</p> */}</div>
 
         <div className="flex flex-row space-x-2">
-          {comment?.id && (
+          {comment !== null && (
             <button className="hover:underline text-gray-500 text-sm" onClick={onCancel}>
               Cancel
             </button>
           )}
-          {hasPermissionCreateComment && value !== '' && (
+          {comment === null && hasPermissionCreateComment && value !== '' && (
             <button
               onClick={(e) => {
                 e.preventDefault();
@@ -158,7 +158,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
               )}
             >
               {isLoading && <PureSpinner size={5} />}
-              Post
+              {comment !== null ? 'Save' : 'Post'}
             </button>
           )}
         </div>
