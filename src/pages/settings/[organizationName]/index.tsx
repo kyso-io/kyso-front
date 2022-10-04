@@ -358,8 +358,6 @@ const Index = ({ commonData }: Props) => {
     return null;
   }
 
-  console.log({ organization: commonData.organization });
-
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
