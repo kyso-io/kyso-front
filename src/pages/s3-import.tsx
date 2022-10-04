@@ -20,19 +20,19 @@ const MetadataImport = () => {
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
 
-  const [awsKey, setAWSKey] = useState<string>('AKIA4P2GVSUVON2MHX6I');
-  const [awsSecretKey, setAwsSecretKey] = useState<string>('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');
-  const [s3Region, setS3Region] = useState<string>('eu-north-1');
-  const [s3Bucket, setS3Bucket] = useState<string>('kyso-s3fs-test');
-  const [s3Path, setS3Path] = useState<string>('s3/immunology');
+  const [awsKey, setAWSKey] = useState<string>('');
+  const [awsSecretKey, setAwsSecretKey] = useState<string>('');
+  const [s3Region, setS3Region] = useState<string>('');
+  const [s3Bucket, setS3Bucket] = useState<string>('');
+  const [s3Path, setS3Path] = useState<string>('');
 
   const [author, setAuthor] = useState<string>('');
   const [organization, setOrganization] = useState<string>('');
   const [channel, setChannel] = useState<string>('');
   const [force, setForce] = useState<boolean>(false);
 
-  const [userEmail, setUserEmail] = useState<string>('francisco@kyso.io');
-  const [userAccessToken, setUserAccessToken] = useState<string>('98cb659c-4d1f-4f25-85de-2b3b2ee4c30c');
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [userAccessToken, setUserAccessToken] = useState<string>('');
 
   const [mappings, setMappings] = useState<string>('Company:organization,creator:author,category:team,Title:title,subject:description');
 
