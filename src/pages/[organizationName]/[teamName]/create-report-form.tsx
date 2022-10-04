@@ -122,14 +122,16 @@ const CreateReport = ({ commonData }: Props) => {
   }, [selectedTeam]);
 
   useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
     if (channelMembers) {
-      const currentUser = channelMembers.filter((x) => x.id === commonData.user?.id)[0];
-
-      if (currentUser && !selectedPeople) {
+      const currentUser: TeamMember | undefined = channelMembers.find((x: TeamMember) => x.id === commonData.user?.id);
+      if (currentUser) {
         setSelectedPeople([currentUser]);
       }
     }
-  }, [channelMembers]);
+  }, [channelMembers, commonData.user]);
 
   const cleanStorage = () => {
     removeLocalStorageItem('formTitle');
