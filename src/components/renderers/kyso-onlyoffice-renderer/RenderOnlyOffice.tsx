@@ -29,7 +29,7 @@ const RenderOnlyOffice = (props: Props) => {
         width="100%"
         style={{
           border: 'none 0px',
-          height: '65vh',
+          height: '70vh',
         }}
         src={`/onlyoffice-render.html?file=${parameters}`}
       />
