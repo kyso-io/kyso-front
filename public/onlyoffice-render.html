@@ -148,10 +148,6 @@ div {
   const fileParam = urlParams.get('file');
   const tokenParam = urlParams.get('token');
 
-  console.log(fileParam);
-  console.log(tokenParam);
-
-  debugger;
   function initEditor(docKey, mode, type) {
     //mode for editor
     window.mode = window.mode || mode || "view";
@@ -208,7 +204,7 @@ div {
                 coEditing: { change: false },
                 mode: mode,
                 customization: {
-					anonymous: {
+					          anonymous: {
                         request: false,
                         label: "User"
                     },
@@ -225,7 +221,7 @@ div {
                     hideRightMenu: true,
                     hideRulers: true,
                     macros: false,
-					macrosMode: "disable",
+					          macrosMode: "disable",
                     mentionShare: false,
                     plugins: false,
                     review: {
@@ -238,7 +234,9 @@ div {
                     toolbarNoTabs: true,
                 },
                 embedded: {
-					toolbarDocked: "bottom"
+					        toolbarDocked: "bottom",
+                  fullscreenUrl: docUrl,
+
                 },
 				plugins: {
 				}
