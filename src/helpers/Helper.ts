@@ -66,4 +66,8 @@ export class Helper {
     }
     return Math.round(fileSize * 100) / 100 + units[power]!;
   };
+
+  public static ucFirst = (str: string): string => {
+    return str && str.length > 0 ? str.charAt(0).toUpperCase() + str.slice(1) : '';
+  };
 }

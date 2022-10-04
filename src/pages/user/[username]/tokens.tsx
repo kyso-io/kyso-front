@@ -4,16 +4,18 @@ import type { CommonData } from '@/types/common-data';
 import { Dialog, Transition } from '@headlessui/react';
 import { TrashIcon } from '@heroicons/react/outline';
 import { CheckIcon, ClipboardIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { KysoSetting, CreateKysoAccessTokenDto, KysoUserAccessToken, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import type { CreateKysoAccessTokenDto, KysoSetting, KysoUserAccessToken, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useState } from 'react';
-import ToasterNotification from '../../../../components/ToasterNotification';
-import { useRedirectIfNoJWT } from '../../../../hooks/use-redirect-if-no-jwt';
-import { TailwindColor } from '../../../../tailwind/enum/tailwind-color.enum';
+import SettingsAside from '../../../components/SettingsAside';
+import ToasterNotification from '../../../components/ToasterNotification';
+import { Helper } from '../../../helpers/Helper';
+import { useRedirectIfNoJWT } from '../../../hooks/use-redirect-if-no-jwt';
+import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
 
 interface Props {
   commonData: CommonData;
@@ -48,6 +50,13 @@ const Index = ({ commonData }: Props) => {
         console.error(errorHttp.response.data);
       }
     };
+    getData();
+  }, []);
+
+  useEffect(() => {
+    if (!commonData.token) {
+      return;
+    }
     const getKysoUserAccessTokens = async () => {
       setRequesting(true);
       try {
@@ -60,15 +69,13 @@ const Index = ({ commonData }: Props) => {
         setRequesting(false);
       }
     };
-    getData();
     getKysoUserAccessTokens();
-  }, []);
+  }, [commonData.token]);
 
   const createKysoAccessToken = async () => {
     setRequesting(true);
     setMessageToaster('');
     setShowToaster(false);
-
     const index: number = kysoUserAccessTokens.findIndex((item: KysoUserAccessToken) => item.name === kysoAccessTokenName);
     if (index !== -1) {
       setMessageToaster('You already have a token with this name');
@@ -76,7 +83,12 @@ const Index = ({ commonData }: Props) => {
       setRequesting(false);
       return;
     }
-
+    if (commonData.user?.email_verified === false) {
+      setShowToaster(true);
+      setMessageToaster('Please verify your email');
+      setRequesting(false);
+      return;
+    }
     try {
       const api: Api = new Api(commonData.token);
       const createKysoAccessTokenDto: CreateKysoAccessTokenDto = {
@@ -124,7 +136,9 @@ const Index = ({ commonData }: Props) => {
 
   return (
     <div className="flex flex-row space-x-8 p-2">
-      <div className="w-1/6"></div>
+      <div className="w-1/6">
+        <SettingsAside commonData={commonData} />
+      </div>
       <div className="w-4/6">
         <div className="py-8">
           <div className="sm:flex sm:items-center">
@@ -227,10 +241,12 @@ const Index = ({ commonData }: Props) => {
                               <span
                                 className={clsx(
                                   'inline-flex rounded-full px-2 text-xs font-semibold leading-5',
-                                  kysoUserAccessToken.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800',
+                                  kysoUserAccessToken.status === 'active' ? 'bg-green-100 text-green-800' : '',
+                                  kysoUserAccessToken.status === 'revoked' ? 'bg-orange-100 text-orange-800' : '',
+                                  kysoUserAccessToken.status === 'expired' ? 'bg-red-100 text-red-800' : '',
                                 )}
                               >
-                                {kysoUserAccessToken.status}
+                                {Helper.ucFirst(kysoUserAccessToken.status)}
                               </span>
                             </td>
                             <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">{moment(kysoUserAccessToken.created_at).format('MMM D, YYYY')}</td>

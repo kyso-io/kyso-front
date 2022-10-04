@@ -9,8 +9,8 @@ import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import SettingsAside from '../../../components/SettingsAside';
 import PureAvatar from '../../../components/PureAvatar';
+import SettingsAside from '../../../components/SettingsAside';
 import ToasterNotification from '../../../components/ToasterNotification';
 import checkPermissions from '../../../helpers/check-permissions';
 import { Helper } from '../../../helpers/Helper';
@@ -65,6 +65,7 @@ const Index = ({ commonData }: Props) => {
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+  const [editing, setEditing] = useState<boolean>(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -277,6 +278,30 @@ const Index = ({ commonData }: Props) => {
       <div className="w-4/6">
         <div className="py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="space-y-5 sm:max-w-xl sm:space-y-4 lg:max-w-5xl">
+              <div className="flex">
+                <h2 className="grow text-3xl font-bold tracking-tight sm:text-4xl">{commonData.organization?.display_name}</h2>
+                {isOrgAdmin && (
+                  <button
+                    className="rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    onClick={() => setEditing(true)}
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
+              {editing ? (
+                <p>hola</p>
+              ) : (
+                <React.Fragment>
+                  <a href={commonData.organization?.link} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+                    {commonData.organization?.link}
+                  </a>
+                  <p className="text-sm text-gray-500">{commonData.organization?.location}</p>
+                  <p className="text-md text-gray-500">{commonData.organization?.bio}</p>
+                </React.Fragment>
+              )}
+            </div>
             {isOrgAdmin && (
               <React.Fragment>
                 {/* SEARCH USERS */}
@@ -341,7 +366,7 @@ const Index = ({ commonData }: Props) => {
               </React.Fragment>
             )}
             {/* ORGANIZATION MEMBERS */}
-            <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members:</h3>
+            <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({members.length}):</h3>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {members.map((member: Member) => {
                 const labelRole: string = member.organization_roles.length > 0 && OrganizationRoleToLabel[member.organization_roles[0]!] ? OrganizationRoleToLabel[member.organization_roles[0]!]! : '';

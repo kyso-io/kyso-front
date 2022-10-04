@@ -14,19 +14,32 @@ const SettingsAside = ({ commonData }: Props) => {
         Settings
       </h3>
       <div className="flex flex-col justify-start">
+        {commonData.user !== null && (
+          <a
+            href={`/user/${commonData.user?.username}/settings`}
+            className={classNames(
+              router.route.startsWith('/user/[username]/settings') ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              'flex items-center px-3 py-2 text-sm font-medium rounded-md',
+            )}
+          >
+            User
+          </a>
+        )}
+        {commonData.user !== null && (
+          <a
+            href={`/user/${commonData.user?.username}/tokens`}
+            className={classNames(
+              router.route.startsWith('/user/[username]/tokens') ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              'flex items-center px-3 py-2 text-sm font-medium rounded-md',
+            )}
+          >
+            Tokens
+          </a>
+        )}
         <a
-          href={`/user/${commonData.user?.username}/settings`}
+          href={`/settings`}
           className={classNames(
-            router.route.startsWith('/user/[username]/settings') ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
-            'flex items-center px-3 py-2 text-sm font-medium rounded-md',
-          )}
-        >
-          User
-        </a>
-        <a
-          href={`/settings/${commonData.organization?.sluglified_name}`}
-          className={classNames(
-            router.route.startsWith('/settings/[organizationName]') ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+            router.route.startsWith('/settings') ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
             'flex items-center px-3 py-2 text-sm font-medium rounded-md',
           )}
         >
