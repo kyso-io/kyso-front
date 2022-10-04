@@ -204,7 +204,7 @@ const CreateReport = ({ commonData }: Props) => {
       return;
     }
     if (files.length === 0) {
-      setMessageToaster('Please select at least one file.');
+      setMessageToaster('Please upload at least one file.');
       setShowToaster(true);
       return;
     }
@@ -378,7 +378,6 @@ const CreateReport = ({ commonData }: Props) => {
                 />
                 <textarea
                   style={{
-                    height: '38px',
                     border: 'none',
                     resize: 'none',
                     outline: 'none',
@@ -391,6 +390,7 @@ const CreateReport = ({ commonData }: Props) => {
                   onChange={(e) => {
                     setDescriptionDelay(e.target.value);
                   }}
+                  rows={5}
                   className="p-0 focus:shadow-sm 0  block  w-full h-full focus:w-full  border-white border-0 text-gray-500 sm:text-sm rounded-md"
                 />
               </div>
