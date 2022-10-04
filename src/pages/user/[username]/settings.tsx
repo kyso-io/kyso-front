@@ -261,9 +261,9 @@ const Index = ({ commonData }: Props) => {
                 <div className="mt-2 text-sm text-yellow-700">
                   <p>
                     This page is not available. Go to your{' '}
-                    <a href={`/user/${username}`} className="font-bold">
+                    <a href={`/user/${commonData.user?.username}/settings`} className="font-bold">
                       profile
-                    </a>{' '}
+                    </a>
                     .
                   </p>
                 </div>

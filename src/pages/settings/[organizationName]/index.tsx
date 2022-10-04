@@ -6,12 +6,14 @@ import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, UserDTO } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
-import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import PureAvatar from '../../../components/PureAvatar';
 import SettingsAside from '../../../components/SettingsAside';
 import ToasterNotification from '../../../components/ToasterNotification';
+import { checkJwt } from '../../../helpers/check-jwt';
 import checkPermissions from '../../../helpers/check-permissions';
 import { Helper } from '../../../helpers/Helper';
 import { useRedirectIfNoJWT } from '../../../hooks/use-redirect-if-no-jwt';
@@ -39,6 +41,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
+  const ref = useRef<any>(null);
   const [query, setQuery] = useState<string>('');
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -66,8 +69,16 @@ const Index = ({ commonData }: Props) => {
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [editing, setEditing] = useState<boolean>(false);
+  const [bio, setBio] = useState<string>('');
+  const [link, setLink] = useState<string>('');
+  const [location, setLocation] = useState<string>('');
+  const [file, setFile] = useState<File | null>(null);
+  const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
+  const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
 
   useEffect(() => {
+    const result: boolean = checkJwt();
+    setUserIsLogged(result);
     const getData = async () => {
       try {
         const api: Api = new Api();
@@ -82,6 +93,18 @@ const Index = ({ commonData }: Props) => {
     };
     getData();
   }, []);
+
+  useEffect(() => {
+    if (editing && commonData.organization) {
+      setBio(commonData.organization!.bio);
+      setLink(commonData.organization!.link);
+      setLocation(commonData.organization!.location);
+    } else {
+      setBio('');
+      setLink('');
+      setLocation('');
+    }
+  }, [editing, commonData?.organization]);
 
   useEffect(() => {
     if (!commonData.organization) {
@@ -101,6 +124,52 @@ const Index = ({ commonData }: Props) => {
       searchUsers(query);
     });
   }, [query]);
+
+  const onChangeInputFile = (e: any) => {
+    if (e.target.files.length > 0) {
+      setFile(e.target.files[0]);
+      setUrlLocalFile(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+
+  const submit = async () => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
+        router.push('/captcha');
+      }, 2000);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShowToaster(true);
+      setMessageToaster('Please verify your email');
+      return;
+    }
+    try {
+      setMessageToaster('Updating organization profile...');
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
+      if (file !== null) {
+        setShowToaster(true);
+        setRequesting(true);
+        await api.updateOrganizationImage(commonData.organization!.id!, file);
+      }
+      await api.updateOrganization(commonData.organization!.id!, {
+        bio,
+        link,
+        location,
+      } as any);
+      router.reload();
+    } catch (e: any) {
+      console.log(e.response.data);
+    } finally {
+      setRequesting(false);
+      setShowToaster(false);
+      setMessageToaster('');
+    }
+  };
 
   const getOrganizationMembers = async () => {
     setRequesting(true);
@@ -270,6 +339,10 @@ const Index = ({ commonData }: Props) => {
     setRequesting(false);
   };
 
+  if (userIsLogged === null) {
+    return null;
+  }
+
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
@@ -278,8 +351,15 @@ const Index = ({ commonData }: Props) => {
       <div className="w-4/6">
         <div className="py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="space-y-5 sm:max-w-xl sm:space-y-4 lg:max-w-5xl">
-              <div className="flex">
+            <div className="space-y-5">
+              <div className="flex items-center">
+                <PureAvatar
+                  src={commonData.organization?.avatar_url || ''}
+                  title={commonData.organization?.display_name || ''}
+                  size={TailwindHeightSizeEnum.H16}
+                  textSize={TailwindFontSizeEnum.XS}
+                  className="mr-4"
+                />
                 <h2 className="grow text-3xl font-bold tracking-tight sm:text-4xl">{commonData.organization?.display_name}</h2>
                 {isOrgAdmin && (
                   <button
@@ -291,21 +371,150 @@ const Index = ({ commonData }: Props) => {
                 )}
               </div>
               {editing ? (
-                <p>hola</p>
+                <div className="sm:space-y-5">
+                  <div>
+                    <h3 className="text-lg font-medium leading-6 text-gray-900">Organization Information</h3>
+                    {/* <p className="mt-1 max-w-2xl text-sm text-gray-500">Use a permanent address where you can receive mail.</p> */}
+                  </div>
+                  <div className="space-y-6 sm:space-y-5">
+                    <div className="sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label className="block text-sm font-medium text-gray-700">Photo</label>
+                      <div className="mt-1 sm:col-span-2 sm:mt-0">
+                        <div className="flex items-center">
+                          {(commonData.organization?.avatar_url === null || commonData.organization?.avatar_url === '') && file === null && (
+                            <span className="h-12 w-12 overflow-hidden rounded-full bg-gray-100">
+                              <svg className="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                              </svg>
+                            </span>
+                          )}
+                          {commonData.organization?.avatar_url && file === null && (
+                            <PureAvatar
+                              src={commonData.organization.avatar_url}
+                              title={`${commonData.organization.display_name} avatar`}
+                              size={TailwindHeightSizeEnum.H12}
+                              textSize={TailwindFontSizeEnum.XS}
+                            />
+                          )}
+                          {urlLocalFile !== null && (
+                            <PureAvatar src={urlLocalFile} title={`${commonData.organization?.display_name} avatar`} size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XS} />
+                          )}
+                          <button
+                            disabled={requesting}
+                            onClick={() => ref.current.click()}
+                            className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          >
+                            {commonData.organization?.avatar_url !== null ? 'Change' : 'Select'}
+                          </button>
+                          {urlLocalFile !== null && (
+                            <button
+                              disabled={requesting}
+                              onClick={() => {
+                                setFile(null);
+                                setUrlLocalFile(null);
+                              }}
+                              className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            >
+                              Remove
+                            </button>
+                          )}
+                          <input
+                            ref={ref}
+                            type="file"
+                            accept="image/*"
+                            onClick={(event: any) => {
+                              event.target.value = null;
+                            }}
+                            onChange={onChangeInputFile}
+                            className="hidden"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Bio:</label>
+                      <div className="mt-1 sm:col-span-2 sm:mt-0">
+                        <textarea
+                          value={bio}
+                          onChange={(e: any) => setBio(e.target.value)}
+                          name="bio"
+                          rows={3}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        ></textarea>
+                        {/* {showErrorBio && <p className="mt-2 text-sm text-red-500">This field is mandatory.</p>} */}
+                      </div>
+                    </div>
+                    <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Link:</label>
+                      <div className="mt-1 sm:col-span-2 sm:mt-0">
+                        <input
+                          value={link}
+                          onChange={(e: any) => setLink(e.target.value)}
+                          type="text"
+                          name="link"
+                          className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                        />
+                        {/* {showErrorLink && <p className="mt-2 text-sm text-red-500">This field is mandatory.</p>} */}
+                      </div>
+                    </div>
+                    <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Location:</label>
+                      <div className="mt-1 sm:col-span-2 sm:mt-0">
+                        <input
+                          value={location}
+                          onChange={(e: any) => setLocation(e.target.value)}
+                          type="text"
+                          name="link"
+                          className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                        />
+                        {/* {showErrorLocation && <p className="mt-2 text-sm text-red-500">This field is mandatory.</p>} */}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="pt-5  sm:border-t sm:border-gray-200">
+                    <div className="flex justify-end">
+                      <button
+                        disabled={requesting}
+                        onClick={() => {
+                          setLink('');
+                          setBio('');
+                          setLocation('');
+                          setFile(null);
+                          setEditing(false);
+                        }}
+                        type="button"
+                        className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        disabled={requesting}
+                        onClick={submit}
+                        type="submit"
+                        className={clsx(
+                          'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                          requesting && 'opacity-50 cursor-not-allowed',
+                        )}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <React.Fragment>
+                <div className="py-3">
                   <a href={commonData.organization?.link} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
                     {commonData.organization?.link}
                   </a>
-                  <p className="text-sm text-gray-500">{commonData.organization?.location}</p>
+                  {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
                   <p className="text-md text-gray-500">{commonData.organization?.bio}</p>
-                </React.Fragment>
+                </div>
               )}
             </div>
             {isOrgAdmin && (
-              <React.Fragment>
+              <div className="mt-4">
                 {/* SEARCH USERS */}
-                <h3 className="text-lg font-medium leading-6 text-gray-900">Add users to the organization:</h3>
+                <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Add users to the organization:</h3>
                 <div className="my-8 sm:col-span-2">
                   <input
                     type="text"
@@ -363,7 +572,7 @@ const Index = ({ commonData }: Props) => {
                     );
                   })}
                 </div>
-              </React.Fragment>
+              </div>
             )}
             {/* ORGANIZATION MEMBERS */}
             <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({members.length}):</h3>
