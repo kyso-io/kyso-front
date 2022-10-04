@@ -82,6 +82,12 @@ const Index = ({ commonData }: Props) => {
   const [emailsCentralizedNotifications, setEmailsCentralizedNotifications] = useState<string[]>([]);
   const [newEmailCentralizedNotifications, setNewEmailCentralizedNotifications] = useState<string>('');
   const [errorNewEmail, setErrorNewEmail] = useState<string>('');
+  const [loginKyso, setLoginKyso] = useState<boolean>(false);
+  const [loginGoogle, setLoginGoogle] = useState<boolean>(false);
+  const [loginGithub, setLoginGithub] = useState<boolean>(false);
+  const [loginBitbucket, setLoginBitbucket] = useState<boolean>(false);
+  const [loginGitlab, setLoginGitlab] = useState<boolean>(false);
+  // const [showOpenPingIdModal, setShowOpenPingIdModal] = useState<boolean>(true);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -102,7 +108,10 @@ const Index = ({ commonData }: Props) => {
   }, []);
 
   useEffect(() => {
-    if (editing && commonData.organization) {
+    if (!isOrgAdmin) {
+      return;
+    }
+    if (commonData.organization) {
       setBio(commonData.organization!.bio);
       setLink(commonData.organization!.link);
       setLocation(commonData.organization!.location);
@@ -112,14 +121,28 @@ const Index = ({ commonData }: Props) => {
           setCentralizedNotifications(commonData.organization.options.notifications.centralized);
           setEmailsCentralizedNotifications(commonData.organization.options.notifications.emails || []);
         }
+        if (commonData.organization.options?.auth) {
+          setLoginKyso(commonData.organization.options.auth.allow_login_with_kyso || false);
+          setLoginGoogle(commonData.organization.options.auth.allow_login_with_google || false);
+          setLoginGithub(commonData.organization.options.auth.allow_login_with_github || false);
+          setLoginBitbucket(commonData.organization.options.auth.allow_login_with_bitbucket || false);
+          setLoginGitlab(commonData.organization.options.auth.allow_login_with_gitlab || false);
+        }
       }
     } else {
       setBio('');
       setLink('');
       setLocation('');
       setAllowedAccessDomains([]);
+      setCentralizedNotifications(false);
+      setEmailsCentralizedNotifications([]);
+      setLoginKyso(false);
+      setLoginGoogle(false);
+      setLoginGithub(false);
+      setLoginBitbucket(false);
+      setLoginGitlab(false);
     }
-  }, [editing, commonData?.organization]);
+  }, [isOrgAdmin, commonData?.organization]);
 
   useEffect(() => {
     if (!commonData.organization) {
@@ -175,6 +198,59 @@ const Index = ({ commonData }: Props) => {
         bio,
         link,
         location,
+      } as any);
+      router.reload();
+    } catch (e: any) {
+      console.log(e.response.data);
+    } finally {
+      setRequesting(false);
+      setShowToaster(false);
+      setMessageToaster('');
+    }
+  };
+
+  const submitAccess = async () => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
+        router.push('/captcha');
+      }, 2000);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShowToaster(true);
+      setMessageToaster('Please verify your email');
+      return;
+    }
+    if (centralizedNotifications && emailsCentralizedNotifications.length === 0) {
+      setShowToaster(true);
+      setErrorNewEmail('Please enter at least one valid email');
+      return;
+    }
+    try {
+      setRequesting(true);
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
+      if (JSON.stringify(commonData.organization!.allowed_access_domains) !== JSON.stringify(allowedAccessDomains)) {
+        await api.updateOrganization(commonData.organization!.id!, {
+          allowed_access_domains: allowedAccessDomains,
+        } as any);
+      }
+      await api.updateOrganizationOptions(commonData.organization!.id!, {
+        auth: {
+          allow_login_with_kyso: loginKyso,
+          allow_login_with_google: loginGoogle,
+          allow_login_with_github: loginGithub,
+          allow_login_with_bitbucket: loginBitbucket,
+          allow_login_with_gitlab: loginGitlab,
+          otherProviders: [],
+        },
+        notifications: {
+          centralized: centralizedNotifications,
+          emails: emailsCentralizedNotifications,
+        },
       } as any);
       router.reload();
     } catch (e: any) {
@@ -598,7 +674,6 @@ const Index = ({ commonData }: Props) => {
                     </React.Fragment>
                   )}
                   <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
-
                   <div className="mt-4 space-y-4">
                     <div className="relative flex items-start">
                       <div className="flex h-5 items-center">
@@ -645,6 +720,7 @@ const Index = ({ commonData }: Props) => {
                             }
                             setEmailsCentralizedNotifications([...emailsCentralizedNotifications, newEmailCentralizedNotifications]);
                             setNewEmailCentralizedNotifications('');
+                            setErrorNewEmail('');
                           }}
                           className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                         >
@@ -684,7 +760,74 @@ const Index = ({ commonData }: Props) => {
                       )}
                     </React.Fragment>
                   )}
-
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Configure your custom login page</h3>
+                  <div className="mt-4 space-y-4">
+                    <div className="relative flex items-start">
+                      <div className="flex h-5 items-center">
+                        <input
+                          checked={loginKyso}
+                          onChange={(e: any) => setLoginKyso(e.target.checked)}
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label className="font-medium text-gray-700">Allow login with Kyso local users</label>
+                      </div>
+                    </div>
+                    <div className="relative flex items-start">
+                      <div className="flex h-5 items-center">
+                        <input
+                          checked={loginGithub}
+                          onChange={(e: any) => setLoginGithub(e.target.checked)}
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label className="font-medium text-gray-700">Allow login with Github</label>
+                      </div>
+                    </div>
+                    <div className="relative flex items-start">
+                      <div className="flex h-5 items-center">
+                        <input
+                          checked={loginBitbucket}
+                          onChange={(e: any) => setLoginBitbucket(e.target.checked)}
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label className="font-medium text-gray-700">Allow login with Bitbucket</label>
+                      </div>
+                    </div>
+                    <div className="relative flex items-start">
+                      <div className="flex h-5 items-center">
+                        <input
+                          checked={loginGitlab}
+                          onChange={(e: any) => setLoginGitlab(e.target.checked)}
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label className="font-medium text-gray-700">Allow login with Gitlab</label>
+                      </div>
+                    </div>
+                    <div className="relative flex items-start">
+                      <div className="flex h-5 items-center">
+                        <input
+                          checked={loginGoogle}
+                          onChange={(e: any) => setLoginGoogle(e.target.checked)}
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label className="font-medium text-gray-700">Allow login with Google</label>
+                      </div>
+                    </div>
+                  </div>
                   <div className="pt-5 sm:border-t sm:border-gray-200">
                     <div className="flex justify-end">
                       <button
@@ -697,7 +840,7 @@ const Index = ({ commonData }: Props) => {
                       </button>
                       <button
                         disabled={requesting}
-                        onClick={() => console.log('hola')}
+                        onClick={submitAccess}
                         type="submit"
                         className={clsx(
                           'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
@@ -1095,6 +1238,7 @@ const Index = ({ commonData }: Props) => {
         message={messageToaster}
         backgroundColor={TailwindColor.SLATE_50}
       />
+      {/* <PingIdModal open={showOpenPingIdModal} setOpen={setShowOpenPingIdModal} /> */}
     </div>
   );
 };
