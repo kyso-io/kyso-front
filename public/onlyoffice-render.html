@@ -1,0 +1,271 @@
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+<!--
+    *
+    * (c) Copyright Ascensio System SIA 2021
+    *
+    * Licensed under the Apache License, Version 2.0 (the "License");
+    * you may not use this file except in compliance with the License.
+    * You may obtain a copy of the License at
+    *
+    *     http://www.apache.org/licenses/LICENSE-2.0
+    *
+    * Unless required by applicable law or agreed to in writing, software
+    * distributed under the License is distributed on an "AS IS" BASIS,
+    * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    * See the License for the specific language governing permissions and
+    * limitations under the License.
+    *
+-->
+<title>ONLYOFFICE</title>
+
+<style>
+/**
+ *
+ * (c) Copyright Ascensio System SIA 2021
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+html {
+    height: 100%;
+    width: 100%;
+}
+body {
+    background: #fff;
+    color: #333;
+    font-family: Arial, Tahoma,sans-serif;
+    font-size: 12px;
+    font-weight: normal;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+}
+form {
+    height: 100%;
+}
+div {
+    margin: 0;
+    padding: 0;
+}
+.top-panel {
+    background: #3D4A6B;
+    height: 80px;
+    width: 100%;
+}
+.top-panel img{
+    margin: 12px 0 0 16px;
+}
+.main-panel {
+    margin: 105px auto 0;
+    width: 350px;
+}
+.portal-name {
+    color: #3D4A6B;
+    font-size: 20px;
+}
+.portal-descr {
+    display: inline-block;
+    line-height: 20px;
+    margin-bottom: 24px;
+    width: 480px;
+}
+.document-url {
+    height: 65px;
+    resize: vertical;
+    width: 350px;
+}
+.embedded {
+    width: 100%;
+}
+.button, .button:visited, .button:hover, .button:active {
+    display: inline-block;
+    font-weight: normal;
+    text-align: center;
+    text-decoration: none;
+    vertical-align: middle;    
+    cursor:pointer;
+    border-radius: 3px;
+    -moz-border-radius: 3px;
+    -webkit-border-radius: 3px;
+    touch-callout: none;
+    -o-touch-callout: none;
+    -moz-touch-callout: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+    -o-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    font-size: 12px;
+    line-height: 16px;
+    padding: 4px 12px;
+
+    color: #fff; 
+
+    background: #3D96C6;
+
+    border-width: 1px;
+    border-style: solid;
+    border-color: #3D96C6;
+}
+</style>
+
+<script id="scriptApi" type="text/javascript"
+    src="/web-apps/apps/api/documents/api.js"></script>
+
+<script type="text/javascript">
+/**
+ *
+ * (c) Copyright Ascensio System SIA 2021
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const fileParam = urlParams.get('file');
+  const tokenParam = urlParams.get('token');
+
+  console.log(fileParam);
+  console.log(tokenParam);
+
+  debugger;
+  function initEditor(docKey, mode, type) {
+    //mode for editor
+    window.mode = window.mode || mode || "view";
+    mode = window.mode;
+    //mode for editor
+    window.type = window.type || type || "";
+    type = window.type;
+    //url for document
+    window.docUrl = fileParam
+    //key for chaching and collaborate editing
+    window.docKey = window.docKey || docKey || key(docUrl);
+    docKey = window.docKey;
+    //type for document
+  let queryIdx = docUrl.lastIndexOf("?");
+  let fileName;
+	if (queryIdx < 0) {
+	    fileName = docUrl.substring(docUrl.lastIndexOf("/") + 1).trim();
+    } else {
+	    fileName = docUrl.substring(docUrl.lastIndexOf("/") + 1, queryIdx - 1).trim();
+    }
+    let docType = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
+    //type for editor
+    let documentType = getDocumentType(docType);
+    //creating object editing
+    new DocsAPI.DocEditor("placeholder",
+        {
+            type: type,
+            width: "100%",
+            height: "100%",
+            documentType: documentType,
+            document: {
+                title: fileName,
+                url: docUrl,
+                fileType: docType,
+                key: docKey,
+                permissions: { 
+                    chat: false,
+                    comment: false,
+                    copy: false,
+                    deleteCommentAuthorOnly: false,
+                    download: true,
+                    edit: false,
+                    editCommentAuthorOnly: false,
+                    fillForms: false,
+                    modifyContentControl: false,
+                    modifyFilter: false,
+                    print: true,
+                    protect: false,
+                    review: false,
+                }
+            },
+            editorConfig: {
+                coEditing: { change: false },
+                mode: mode,
+                customization: {
+					anonymous: {
+                        request: false,
+                        label: "User"
+                    },
+                    autosave: false,
+                    comments: false,
+                    compactHeader: true,
+                    compactToolbar: true,
+                    compatibleFeatures: false,
+                    features: { spellcheck: { mode: false, change: false } },
+                    feedback: { visible: false },
+                    forcesave: false,
+                    help: false,
+                    hideNotes: true,
+                    hideRightMenu: true,
+                    hideRulers: true,
+                    macros: false,
+					macrosMode: "disable",
+                    mentionShare: false,
+                    plugins: false,
+                    review: {
+                        hideReviewDisplay: true,
+                        showReviewChanges: true,
+                        trackChanges: false,
+                        hoverMode: false,
+                    },
+                    toolbarHideFileName: true,
+                    toolbarNoTabs: true,
+                },
+                embedded: {
+					toolbarDocked: "bottom"
+                },
+				plugins: {
+				}
+            }
+        });
+}
+
+function key(k) {
+    let result = k.replace(new RegExp("[^0-9-.a-zA-Z_=]", "g"), "_") + (new Date()).getTime();
+    return result.substring(result.length - Math.min(result.length, 20));
+};
+
+let getDocumentType = function (ext) {
+    if (".doc.docx.docm.dot.dotx.dotm.odt.fodt.ott.rtf.txt.html.htm.mht.xml.pdf.djvu.fb2.epub.xps.oxps".indexOf(ext) != -1) return "word";
+    if (".xls.xlsx.xlsm.xlsb.xlt.xltx.xltm.ods.fods.ots.csv".indexOf(ext) != -1) return "cell";
+    if (".pps.ppsx.ppsm.ppt.pptx.pptm.pot.potx.potm.odp.fodp.otp".indexOf(ext) != -1) return "slide";
+    if (".pdf".indexOf(ext) != -1) return "pdf";
+    return null;
+};
+</script>
+
+</head>
+
+<body>
+    <div><div id="placeholder"></div></div>
+</body>
+
+<script type="text/javascript">
+  initEditor(null, null, 'embedded')
+</script>
+</html>

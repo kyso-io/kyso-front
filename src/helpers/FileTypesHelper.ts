@@ -99,7 +99,7 @@ export class FileTypesHelper {
   };
 
   public static isOffice365 = (name: string) => {
-    return FileTypesHelper.isPowerpoint(name) || FileTypesHelper.isExcel(name) || FileTypesHelper.isWord(name);
+    return FileTypesHelper.isPowerpoint(name) || FileTypesHelper.isExcel(name) || FileTypesHelper.isWord(name) || FileTypesHelper.isPDF(name);
   };
 
   public static isPDF = (name: string) => {
@@ -109,7 +109,6 @@ export class FileTypesHelper {
   public static isGoogleDocs = (name: string) => {
     return (
       name.toLowerCase().endsWith('.rtf') ||
-      FileTypesHelper.isPDF(name) ||
       name.toLowerCase().endsWith('.webm') ||
       name.toLowerCase().endsWith('.mpeg4') ||
       name.toLowerCase().endsWith('.3gpp') ||
