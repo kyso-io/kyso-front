@@ -449,7 +449,16 @@ const CreateReport = ({ commonData }: Props) => {
                       <span>Add files</span>
                     </div>
                   </PureKysoButton>
-                  <input ref={inputRef} multiple type="file" style={{ display: 'none' }} onChange={onUploadFile} />
+                  <input
+                    ref={inputRef}
+                    multiple
+                    type="file"
+                    style={{ display: 'none' }}
+                    onChange={onUploadFile}
+                    onClick={(e: any) => {
+                      e.target.value = null;
+                    }}
+                  />
                 </div>
               </div>
               <div className="mt-8 flex flex-col">
