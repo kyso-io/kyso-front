@@ -11,6 +11,8 @@ import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import slugify from 'slugify';
+import ListboxWithText from '@/components/PureListBoxWithText';
+import PureNotification from '@/components/PureNotification';
 import checkPermissions from '../helpers/check-permissions';
 import { Helper } from '../helpers/Helper';
 import type { Member } from '../types/member';
@@ -43,6 +45,13 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
   const [selectedOrgRole, setSelectedOrgRole] = useState<string>('');
   const [selectedTeamRole, setSelectedTeamRole] = useState<string>('');
   const [selectedMemberIndex, setSelectedMemberIndex] = useState<number>(-1);
+
+  const [selectedOrgLabel, setSelectedOrgLabel] = useState<string>('');
+  const [selectedTeamLabel, setSelectedTeamLabel] = useState<string>('');
+
+  const [notificationType, setNotificationType] = useState<string>('');
+  const [notificationMessage, setNotificationMessage] = useState<string>('');
+
   const [isEmail, setIsEmail] = useState<boolean>(false);
   const [inputDeleteUser, setInputDeleteUser] = useState<string>('');
   const [keyDeleteUser, setKeyDeleteUser] = useState<string>('');
@@ -62,48 +71,47 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     return m;
   }, [commonData?.team, members]);
 
-  const organizationRoles: { value: string; label: string }[] = useMemo(() => {
-    const data: { value: string; label: string }[] = [
-      { value: 'organization-admin', label: 'Admin of this organization' },
-      { value: 'team-admin', label: 'Full access all channels' },
-      { value: 'team-contributor', label: 'Can edit all channels' },
-      { value: 'team-reader', label: 'Can comment all channels' },
+  const organizationRoles: { value: string; label: string; description: string }[] = useMemo(() => {
+    const data: { value: string; label: string; description: string }[] = [
+      { value: 'organization-admin', label: 'Admin of this organization', description: 'Can collaborate and share with others across all channels' },
+      { value: 'team-admin', label: 'Full access all channels', description: 'Can collaborate, but cannot share with others' },
+      { value: 'team-contributor', label: 'Can edit all channels', description: 'Can collaborate, but cannot share with others' },
+      { value: 'team-reader', label: 'Can comment all channels', description: 'Can read and create comment, but cannot collaborate or share' },
     ];
     if (selectedUser) {
       if (members.length > 0) {
         const index: number = members.findIndex((member: Member) => member.id === selectedUser.id);
         if (index > -1) {
-          data.push({ value: 'remove', label: 'Remove' });
+          data.push({ value: 'remove', label: 'Remove access', description: '' });
         }
       } else if (users.length > 0) {
         const index: number = users.findIndex((user: UserDTO) => user.id === selectedUser.id);
         if (index > -1) {
-          data.push({ value: REMOVE_USER_VALUE, label: 'Remove' });
+          data.push({ value: REMOVE_USER_VALUE, label: 'Remove', description: '' });
         }
       }
     }
     return data;
   }, [selectedUser, members, users]);
 
-  const teamRoles: { value: string; label: string }[] = useMemo(() => {
-    const data: { value: string; label: string }[] = [
-      { value: 'organization-admin', label: 'Full access' },
-      { value: 'team-admin', label: 'Full access' },
-      { value: 'team-contributor', label: 'Can edit' },
-      { value: 'team-reader', label: 'Can comment' },
+  const teamRoles: { value: string; label: string; description: string }[] = useMemo(() => {
+    const data: { value: string; label: string; description: string }[] = [
+      { value: 'team-admin', label: 'Full access', description: 'Can collaborate and share with others on this channel' },
+      { value: 'team-contributor', label: 'Can edit', description: 'Can collaborate, but cannot share' },
+      { value: 'team-reader', label: 'Can comment', description: 'Can comment, but cannot collaborate or share' },
     ];
     if (selectedUser) {
       if (filteredMembers.length > 0) {
         const member: Member | undefined = filteredMembers.find((m: Member) => m.id === selectedUser.id);
         if (member) {
           if (member?.membership_origin === TeamMembershipOriginEnum.TEAM) {
-            data.push({ value: 'remove', label: 'Remove' });
+            data.push({ value: 'remove', label: 'Remove', description: '' });
           }
         }
       } else if (users.length > 0) {
         const index: number = users.findIndex((user: UserDTO) => user.id === selectedUser.id);
         if (index > -1) {
-          data.push({ value: REMOVE_USER_VALUE, label: 'Remove' });
+          data.push({ value: REMOVE_USER_VALUE, label: 'Remove', description: '' });
         }
       }
     }
@@ -139,6 +147,8 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     setSelectedUser(null);
     setSelectedMemberIndex(-1);
     setSelectedOrgRole('');
+    setSelectedOrgLabel('');
+    setSelectedTeamLabel('');
     setSelectedTeamRole('');
     setInputDeleteUser('');
     setKeyDeleteUser('');
@@ -150,8 +160,14 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     plusMembers = filteredMembers.length - MAX_USERS_TO_SHOW;
   }
 
+  const delayedCallback = debounce(async () => {
+    setNotificationType('');
+    setNotificationMessage('');
+  }, 3000);
+
   return (
     <React.Fragment>
+      <div className="text-left">{notificationMessage && <PureNotification message={notificationMessage} type={notificationType} />}</div>
       <Menu as="div" className="ml-2 relative inline-block text-left">
         <div>
           <Menu.Button
@@ -183,7 +199,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
           leaveTo="transform opacity-0 scale-95"
         >
           <Menu.Items
-            className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity/5 focus:outline-none"
+            className="origin-top-right absolute right-0 mt-2 px-4 py-2 min-w-max rounded-md shadow-lg bg-white ring-1 ring-gray-200 ring-opacity/5 focus:outline-none"
             style={{ zIndex: 100, width: showTeamRoles ? 380 : selectedUser ? 380 : 280 }}
           >
             <div className="py-2 px-4">
@@ -222,6 +238,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                   </div>
                 </div>
               )}
+              {/* show current org/channel users and roles */}
               {(!query || query.length === 0) && !selectedUser && (
                 <React.Fragment>
                   <span className="my-4 text-xs font-medium text-gray-600">Members:</span>
@@ -244,11 +261,38 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                             commonData.user?.id === member.id ? 'border rounded' : '',
                           )}
                           onClick={() => {
+                            console.log('!commonData.user || isOrgAdmin', !commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles));
+                            if (!(!commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles))) {
+                              setNotificationMessage('You need admin permission to continue');
+                              setNotificationType('warning');
+                              delayedCallback();
+                            }
+
                             if (!commonData.user) {
                               router.push(`/user/${member.username}`);
                             } else if (isOrgAdmin || (isTeamAdmin && showTeamRoles)) {
+                              let orgLabel = 'Admin of this organization';
+                              if (member.organization_roles[0]! === 'team-admin') {
+                                orgLabel = 'Full access all channels';
+                              }
+                              if (member.organization_roles[0]! === 'team-contributor') {
+                                orgLabel = 'Can edit all channels';
+                              }
+                              if (member.organization_roles[0]! === 'team-reader') {
+                                orgLabel = 'Can comment all channels';
+                              }
+                              setSelectedOrgLabel(orgLabel);
                               setSelectedOrgRole(member.organization_roles[0]!);
+
                               if (member.team_roles && member.team_roles.length > 0) {
+                                let teamLabel = 'Full access';
+                                if (member.organization_roles[0]! === 'team-contributor') {
+                                  teamLabel = 'Can edit';
+                                }
+                                if (member.organization_roles[0]! === 'team-reader') {
+                                  teamLabel = 'Can comment';
+                                }
+                                setSelectedTeamLabel(teamLabel);
                                 setSelectedTeamRole(member.team_roles[0]!);
                               }
                               setSelectedUser({ ...member });
@@ -280,42 +324,45 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
               )}
               {query && !requesting && users.length === 0 && !isEmail && <span className="my-4 text-xs font-medium text-gray-600">There are no users...</span>}
               {query && !requesting && users.length === 0 && isEmail && !isOrgAdmin && <span className="my-4 text-xs font-medium text-gray-600">There are no users...</span>}
+              {/* new kyso user with email */}
               {query && !requesting && users.length === 0 && isEmail && isOrgAdmin && (
                 <React.Fragment>
-                  <div className="flex items-center space-x-4 mt-4">
+                  <div className="flex items-top space-x-4 mt-4">
                     <div className="shrink-0">
                       <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-gray-500">
                         <span className="text-xs font-medium leading-none text-white">{query[0]?.toUpperCase()}</span>
                       </span>
                     </div>
                     <div className="flex-1" style={{ marginLeft: 10 }}>
-                      <p className="text-xs font-medium text-gray-900 truncate">{query}</p>
+                      <p className="text-xs font-medium text-gray-900 truncate mt-1">{query}</p>
                       <div className="flex flex-row">
-                        <select
-                          value={selectedOrgRole}
-                          onChange={(e) => setSelectedOrgRole(e.target.value)}
-                          className="mt-1 mr-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                        >
-                          <option>Select a role</option>
-                          {organizationRoles.map((role: { value: string; label: string }) => (
-                            <option key={role.value} value={role.value}>
-                              {role.label}
-                            </option>
-                          ))}
-                        </select>
-                        {showTeamRoles && (
-                          <select
-                            value={selectedTeamRole}
-                            onChange={(e) => setSelectedTeamRole(e.target.value)}
-                            className="mt-1 ml-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                          >
-                            <option>Select a role</option>
-                            {teamRoles.map((role: { value: string; label: string }) => (
-                              <option key={role.value} value={role.value}>
-                                {role.label}
-                              </option>
-                            ))}
-                          </select>
+                        {organizationRoles && (
+                          <div>
+                            <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
+                            <ListboxWithText
+                              selectedLabel={selectedOrgLabel || 'Admin of this organization'}
+                              isOrgAdmin={isOrgAdmin}
+                              roles={organizationRoles}
+                              setSelectedRole={(value) => {
+                                setSelectedOrgRole(value);
+                              }}
+                              setSelectedLabel={(label) => setSelectedOrgLabel(label)}
+                            />
+                          </div>
+                        )}
+                        {showTeamRoles && teamRoles && (
+                          <div className="ml-4">
+                            <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
+                            <ListboxWithText
+                              selectedLabel={selectedTeamLabel || 'Full access'}
+                              isOrgAdmin={isOrgAdmin}
+                              roles={teamRoles}
+                              setSelectedRole={(value) => {
+                                setSelectedTeamRole(value);
+                              }}
+                              setSelectedLabel={(label) => setSelectedTeamLabel(label)}
+                            />
+                          </div>
                         )}
                       </div>
                     </div>
@@ -327,7 +374,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
                           onUpdateRoleMember(selectedUser.id, selectedOrgRole, selectedTeamRole);
@@ -343,7 +390,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
                           onInviteNewUser(query, selectedOrgRole, selectedTeamRole);
@@ -433,41 +480,43 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                   </ul>
                 </React.Fragment>
               )}
+              {/* user is selected and part of kyso in a channel page and org page */}
               {selectedUser && (
                 <React.Fragment>
-                  <div className="flex items-center space-x-4 mt-4">
+                  <div className="flex items-top space-x-4 mt-4">
                     <div className="shrink-0">
                       <PureAvatar src={selectedUser.avatar_url} title={selectedUser.display_name} size={TailwindHeightSizeEnum.H6} textSize={TailwindFontSizeEnum.XS}></PureAvatar>
                     </div>
                     <div className="flex-1" style={{ marginLeft: 10 }}>
-                      <p className="text-xs font-medium text-gray-900 truncate">{(selectedUser as UserDTO).display_name || selectedUser.username}</p>
+                      <p className="text-xs font-medium text-gray-900 truncate mt-1">{(selectedUser as UserDTO).display_name || selectedUser.username}</p>
                       <div className="flex flex-row">
-                        <select
-                          disabled={!isOrgAdmin}
-                          value={selectedOrgRole}
-                          onChange={(e) => setSelectedOrgRole(e.target.value)}
-                          className="mt-1 mr-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                        >
-                          <option>Select a role</option>
-                          {organizationRoles.map((role: { value: string; label: string }) => (
-                            <option key={role.value} value={role.value}>
-                              {role.label}
-                            </option>
-                          ))}
-                        </select>
-                        {showTeamRoles && (
-                          <select
-                            value={selectedTeamRole}
-                            onChange={(e) => setSelectedTeamRole(e.target.value)}
-                            className="mt-1 ml-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                          >
-                            <option>Select a role</option>
-                            {teamRoles.map((role: { value: string; label: string }) => (
-                              <option key={role.value} value={role.value}>
-                                {role.label}
-                              </option>
-                            ))}
-                          </select>
+                        {organizationRoles && (
+                          <div>
+                            <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
+                            <ListboxWithText
+                              selectedLabel={selectedOrgLabel}
+                              isOrgAdmin={isOrgAdmin}
+                              roles={organizationRoles}
+                              setSelectedRole={(value) => {
+                                setSelectedOrgRole(value);
+                              }}
+                              setSelectedLabel={(label) => setSelectedOrgLabel(label)}
+                            />
+                          </div>
+                        )}
+                        {showTeamRoles && teamRoles && (
+                          <div className="ml-4">
+                            <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
+                            <ListboxWithText
+                              selectedLabel={selectedTeamLabel}
+                              isOrgAdmin={isOrgAdmin}
+                              roles={teamRoles}
+                              setSelectedRole={(value) => {
+                                setSelectedTeamRole(value);
+                              }}
+                              setSelectedLabel={(label) => setSelectedTeamLabel(label)}
+                            />
+                          </div>
                         )}
                       </div>
                     </div>
@@ -515,7 +564,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
                           onUpdateRoleMember(selectedUser.id, selectedOrgRole, selectedTeamRole);
@@ -531,7 +580,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
                         className={clsx(
                           'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                          !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500' : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                         )}
                         onClick={() => {
                           onInviteNewUser(query, selectedOrgRole, selectedTeamRole);
