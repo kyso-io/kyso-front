@@ -73,6 +73,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   const organizationRoles: { value: string; label: string; description: string }[] = useMemo(() => {
     const data: { value: string; label: string; description: string }[] = [
+      { value: '', label: '', description: '' },
       { value: 'organization-admin', label: 'Admin of this organization', description: 'Can collaborate and share with others across all channels' },
       { value: 'team-admin', label: 'Full access all channels', description: 'Can collaborate, but cannot share with others' },
       { value: 'team-contributor', label: 'Can edit all channels', description: 'Can collaborate, but cannot share with others' },
@@ -96,6 +97,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   const teamRoles: { value: string; label: string; description: string }[] = useMemo(() => {
     const data: { value: string; label: string; description: string }[] = [
+      { value: '', label: '', description: '' },
       { value: 'team-admin', label: 'Full access', description: 'Can collaborate and share with others on this channel' },
       { value: 'team-contributor', label: 'Can edit', description: 'Can collaborate, but cannot share' },
       { value: 'team-reader', label: 'Can comment', description: 'Can comment, but cannot collaborate or share' },
@@ -262,6 +264,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           )}
                           onClick={() => {
                             console.log('!commonData.user || isOrgAdmin', !commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles));
+
                             if (!(!commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles))) {
                               setNotificationMessage('You need admin permission to continue');
                               setNotificationType('warning');
