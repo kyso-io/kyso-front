@@ -247,11 +247,21 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                   <ul role="list" className="mt-1" style={{ maxHeight: 200, overflowY: 'scroll' }}>
                     {filteredMembers.map((member: Member, index: number) => {
                       let roles: string | undefined = '';
+                      let fromOrganization = true;
 
                       if (member.team_roles && member.team_roles.length > 0) {
                         roles = `${teamRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
+                        fromOrganization = false;
                       } else {
                         roles = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
+                      }
+
+                      if (roles === 'undefined' && !fromOrganization) {
+                        // If it's undefined, probably means that it's an organization admin, because that role
+                        // is only in organizationRoles, and not in teamRoles.
+
+                        // So in this case, just assign it directly
+                        roles = 'Admin of this organization';
                       }
 
                       return (
@@ -439,6 +449,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                     {users.map((user: UserDTO) => {
                       const member: Member | undefined = members.find((m: Member) => m.id === user.id);
                       let roles: string | undefined = '';
+
                       if (member) {
                         roles = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
                         if (member.team_roles && member.team_roles.length > 0) {
