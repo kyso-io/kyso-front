@@ -7,7 +7,6 @@ import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import ToasterNotification from '../components/ToasterNotification';
-import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 import type { CommonData } from '../types/common-data';
 
 interface Props {
@@ -146,7 +145,6 @@ const Index = ({ commonData }: Props) => {
         setShow={setShow}
         icon={alertIsError ? <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" /> : <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />}
         message={alertText}
-        backgroundColor={TailwindColor.SLATE_50}
       />
     </div>
   );

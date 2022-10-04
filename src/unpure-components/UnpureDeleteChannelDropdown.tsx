@@ -6,7 +6,6 @@ import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { Fragment, useState } from 'react';
 import ToasterNotification from '../components/ToasterNotification';
-import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 
 interface Props {
   commonData: CommonData;
@@ -128,13 +127,7 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
           </Transition>
         </div>
       </div>
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
+      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
     </>
   );
 };

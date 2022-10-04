@@ -16,7 +16,6 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
-import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 60;
@@ -368,13 +367,7 @@ const Index = ({ commonData, setUser }: Props) => {
 
   return (
     <div className="p-2">
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-        icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />}
-      />
+      <ToasterNotification show={showToaster} setShow={setShowToaster} message={messageToaster} icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />} />
       <UserProfileInfo commonData={commonData} onChangeBackgroundImage={onChangeBackgroundImage} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfileData.userProfile!} />
       <div className="flex flex-row space-x-8">
         <div className="w-1/6" />

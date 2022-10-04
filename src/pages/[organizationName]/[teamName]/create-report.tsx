@@ -36,7 +36,6 @@ import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
-import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -713,7 +712,7 @@ const CreateReport = ({ commonData }: Props) => {
               </>
             )}
 
-            <div className="text-right">{error && <ErrorNotification message={error} />}</div>
+            <div>{error && <ErrorNotification message={error} />}</div>
           </div>
         </div>
         <div className="flex flex-row items-center">
@@ -736,13 +735,7 @@ const CreateReport = ({ commonData }: Props) => {
             </div>
           </div>
         </div>
-        <ToasterNotification
-          show={showToaster}
-          setShow={setShowToaster}
-          icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-          message={messageToaster}
-          backgroundColor={TailwindColor.SLATE_50}
-        />
+        <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
       </div>
     ) : (
       <div className="flex flex-row space-x-8 p-2">

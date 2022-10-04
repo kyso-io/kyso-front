@@ -20,7 +20,6 @@ import clsx from 'clsx';
 import router from 'next/router';
 import { useEffect, useState } from 'react';
 import ToasterNotification from '../components/ToasterNotification';
-import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 
 // const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
@@ -255,13 +254,7 @@ const UnpureReportRender = (props: Props) => {
           </div>
         </div>
       )}
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
+      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
     </>
   );
 };

@@ -8,7 +8,6 @@ import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import ToasterNotification from '../components/ToasterNotification';
-import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 import type { CommonData } from '../types/common-data';
 
 const DEFAULT_CAPTCHA_SITE_KEY = '22';
@@ -111,13 +110,7 @@ const Index = ({ commonData }: Props) => {
           )}
         </div>
       </div>
-      <ToasterNotification
-        show={show}
-        setShow={setShow}
-        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={alertText}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
+      <ToasterNotification show={show} setShow={setShow} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={alertText} />
     </div>
   );
 };
