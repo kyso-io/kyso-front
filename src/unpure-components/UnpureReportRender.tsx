@@ -4,10 +4,10 @@ import { PureSpinner } from '@/components/PureSpinner';
 import { RenderJupyter } from '@/components/renderers/kyso-jupyter-renderer';
 import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
 import type { ReportContext } from '@/components/renderers/kyso-markdown-renderer/interfaces/context';
+import RenderOnlyOffice from '@/components/renderers/kyso-onlyoffice-renderer/RenderOnlyOffice';
 import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 import RenderCode from '@/components/renderers/RenderCode';
 import RenderGoogleDocs from '@/components/renderers/RenderGoogleDocs';
-import RenderOffice365 from '@/components/renderers/RenderOffice365';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
@@ -200,7 +200,7 @@ const UnpureReportRender = (props: Props) => {
       render = <RenderCode code={fileToRender.content} showFileNumbers={true} />;
     } else if (FileTypesHelper.isOffice365(fileToRender.path) && frontEndUrl) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-      render = <RenderOffice365 fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
+      render = <RenderOnlyOffice fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
     } else if (FileTypesHelper.isGoogleDocs(fileToRender.path) && frontEndUrl) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
       render = <RenderGoogleDocs fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;

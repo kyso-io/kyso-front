@@ -66,7 +66,7 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
         <div className="flex-1 min-w-0 py-3 pr-3 relative">
           <a href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
             <h3 className="text-lg leading-6 font-medium text-gray-900">{report.title}</h3>
-            <p className="text-sm text-gray-500 pt-3">{description}</p>
+            <p className="text-sm text-gray-500 pt-3 break-words">{description}</p>
           </a>
           <div className="absolute bottom-2 right-0">
             {report.report_type && (
