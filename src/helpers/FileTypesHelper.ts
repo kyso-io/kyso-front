@@ -98,8 +98,47 @@ export class FileTypesHelper {
     return name.toLowerCase().endsWith('.docx') || name.toLowerCase().endsWith('.doc');
   };
 
-  public static isOffice365 = (name: string) => {
-    return FileTypesHelper.isPowerpoint(name) || FileTypesHelper.isExcel(name) || FileTypesHelper.isWord(name) || FileTypesHelper.isPDF(name);
+  public static isOnlyOffice = (name: string) => {
+    return (
+      FileTypesHelper.isPowerpoint(name) ||
+      FileTypesHelper.isExcel(name) ||
+      FileTypesHelper.isWord(name) ||
+      FileTypesHelper.isPDF(name) ||
+      // More word-related
+      name.toLowerCase().endsWith('.docm') ||
+      name.toLowerCase().endsWith('.dot') ||
+      name.toLowerCase().endsWith('.dotx') ||
+      name.toLowerCase().endsWith('.dotm') ||
+      name.toLowerCase().endsWith('.odt') ||
+      name.toLowerCase().endsWith('.fodt') ||
+      name.toLowerCase().endsWith('.ott') ||
+      name.toLowerCase().endsWith('.rtf') ||
+      name.toLowerCase().endsWith('.djvu') ||
+      name.toLowerCase().endsWith('.fb2') ||
+      name.toLowerCase().endsWith('.epub') ||
+      name.toLowerCase().endsWith('.xps') ||
+      name.toLowerCase().endsWith('.oxps') ||
+      // More powerpoint-related
+      name.toLowerCase().endsWith('.pps') ||
+      name.toLowerCase().endsWith('.ppsx') ||
+      name.toLowerCase().endsWith('.ppsm') ||
+      name.toLowerCase().endsWith('.pptm') ||
+      name.toLowerCase().endsWith('.pot') ||
+      name.toLowerCase().endsWith('.potx') ||
+      name.toLowerCase().endsWith('.potm') ||
+      name.toLowerCase().endsWith('.odp') ||
+      name.toLowerCase().endsWith('.fodp') ||
+      name.toLowerCase().endsWith('.otp') ||
+      // More excel-related
+      name.toLowerCase().endsWith('.xlsm') ||
+      name.toLowerCase().endsWith('.xlsb') ||
+      name.toLowerCase().endsWith('.xlt') ||
+      name.toLowerCase().endsWith('.xltx') ||
+      name.toLowerCase().endsWith('.ods') ||
+      name.toLowerCase().endsWith('.fods') ||
+      name.toLowerCase().endsWith('.ots') ||
+      name.toLowerCase().endsWith('.csv')
+    );
   };
 
   public static isPDF = (name: string) => {
@@ -136,7 +175,7 @@ export class FileTypesHelper {
       FileTypesHelper.isCode(name) ||
       FileTypesHelper.isTextBasedFiled(name) ||
       FileTypesHelper.isJupyterNotebook(name) ||
-      FileTypesHelper.isOffice365(name) ||
+      FileTypesHelper.isOnlyOffice(name) ||
       FileTypesHelper.isGoogleDocs(name)
     );
   };

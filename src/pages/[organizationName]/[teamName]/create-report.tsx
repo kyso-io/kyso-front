@@ -695,7 +695,7 @@ const CreateReport = ({ commonData }: Props) => {
               </>
             )}
 
-            {FileTypesHelper.isOffice365(selectedFile.file.path) && (
+            {FileTypesHelper.isOnlyOffice(selectedFile.file.path) && (
               <>
                 <RenderError message="Microsoft Office content only can be displayed when the report is created." />
               </>
