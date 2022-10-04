@@ -170,11 +170,12 @@ div {
 	if (queryIdx < 0) {
 	    fileName = docUrl.substring(docUrl.lastIndexOf("/") + 1).trim();
     } else {
-	    fileName = docUrl.substring(docUrl.lastIndexOf("/") + 1, queryIdx - 1).trim();
+	    fileName = docUrl.substring(docUrl.lastIndexOf("/") + 1, queryIdx).trim();
     }
     let docType = fileName.substring(fileName.lastIndexOf(".") + 1).toLowerCase();
     //type for editor
     let documentType = getDocumentType(docType);
+    
     //creating object editing
     new DocsAPI.DocEditor("placeholder",
         {
@@ -185,7 +186,7 @@ div {
             document: {
                 title: fileName,
                 url: docUrl,
-                fileType: documentType,
+                fileType: docType,
                 key: docKey,
                 permissions: { 
                     chat: false,
