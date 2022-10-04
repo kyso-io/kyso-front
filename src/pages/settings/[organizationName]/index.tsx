@@ -2,7 +2,7 @@
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
+import { ExclamationCircleIcon, LinkIcon, MailIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, UserDTO } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -75,6 +75,13 @@ const Index = ({ commonData }: Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
+  const [newDomain, setNewDomain] = useState<string>('');
+  const [allowedAccessDomains, setAllowedAccessDomains] = useState<string[]>([]);
+  const [errorNewDomain, setErrorNewDomain] = useState<string>('');
+  const [centralizedNotifications, setCentralizedNotifications] = useState<boolean>(false);
+  const [emailsCentralizedNotifications, setEmailsCentralizedNotifications] = useState<string[]>([]);
+  const [newEmailCentralizedNotifications, setNewEmailCentralizedNotifications] = useState<string>('');
+  const [errorNewEmail, setErrorNewEmail] = useState<string>('');
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -99,10 +106,18 @@ const Index = ({ commonData }: Props) => {
       setBio(commonData.organization!.bio);
       setLink(commonData.organization!.link);
       setLocation(commonData.organization!.location);
+      setAllowedAccessDomains(commonData.organization!.allowed_access_domains);
+      if (commonData.organization?.options) {
+        if (commonData.organization.options?.notifications) {
+          setCentralizedNotifications(commonData.organization.options.notifications.centralized);
+          setEmailsCentralizedNotifications(commonData.organization.options.notifications.emails || []);
+        }
+      }
     } else {
       setBio('');
       setLink('');
       setLocation('');
+      setAllowedAccessDomains([]);
     }
   }, [editing, commonData?.organization]);
 
@@ -343,6 +358,8 @@ const Index = ({ commonData }: Props) => {
     return null;
   }
 
+  console.log({ organization: commonData.organization });
+
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
@@ -361,12 +378,12 @@ const Index = ({ commonData }: Props) => {
                   className="mr-4"
                 />
                 <h2 className="grow text-3xl font-bold tracking-tight sm:text-4xl">{commonData.organization?.display_name}</h2>
-                {isOrgAdmin && (
+                {isOrgAdmin && !editing && (
                   <button
                     className="rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     onClick={() => setEditing(true)}
                   >
-                    Edit
+                    {editing ? 'Cancel' : 'Edit'}
                   </button>
                 )}
               </div>
@@ -471,7 +488,7 @@ const Index = ({ commonData }: Props) => {
                       </div>
                     </div>
                   </div>
-                  <div className="pt-5  sm:border-t sm:border-gray-200">
+                  <div className="pt-5 sm:border-t sm:border-gray-200">
                     <div className="flex justify-end">
                       <button
                         disabled={requesting}
@@ -512,10 +529,195 @@ const Index = ({ commonData }: Props) => {
               )}
             </div>
             {isOrgAdmin && (
+              <React.Fragment>
+                <div className="space-y-6 sm:space-y-5 mt-8">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Access</h3>
+                  <p className="text-sm text-gray-500">Restrict access to a specific email domain. Only users with matching domain will be able to join the organization.</p>
+                  <div className="flex items-center">
+                    <input
+                      value={newDomain}
+                      type="text"
+                      placeholder="Write an access domain. e.g. example.com"
+                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                      onChange={(e: any) => {
+                        if (e.target.value) {
+                          setNewDomain(e.target.value.toLowerCase());
+                        } else {
+                          setNewDomain('');
+                        }
+                        setErrorNewDomain('');
+                      }}
+                    />
+                    <button
+                      disabled={!newDomain || requesting}
+                      onClick={() => {
+                        const index: number = allowedAccessDomains.indexOf(newDomain);
+                        if (index !== -1) {
+                          setErrorNewDomain('Domain already registered');
+                          return;
+                        }
+                        if (!Helper.isValidUrl(newDomain)) {
+                          setErrorNewDomain('Invalid domain');
+                          return;
+                        }
+                        setAllowedAccessDomains([...allowedAccessDomains, newDomain]);
+                        setNewDomain('');
+                      }}
+                      className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                      Add
+                    </button>
+                  </div>
+                  {errorNewDomain && (
+                    <p className="text-sm text-red-500" style={{ marginTop: 10 }}>
+                      {errorNewDomain}
+                    </p>
+                  )}
+                  {allowedAccessDomains.length > 0 && (
+                    <React.Fragment>
+                      <dt className="text-sm font-medium text-gray-500">Valid domains:</dt>
+                      <ul role="list" className="divide-y divide-gray-200 rounded-md border border-gray-200 block w-full max-w-lg">
+                        {allowedAccessDomains.map((domain: string, index: number) => (
+                          <li key={index} className="flex items-center justify-between py-3 pl-3 pr-4 text-sm">
+                            <div className="flex w-0 flex-1 items-center">
+                              <LinkIcon className="h-5 w-5 shrink-0 text-gray-400" />
+                              <span className="ml-2 w-0 flex-1 truncate">{domain}</span>
+                            </div>
+                            <div className="ml-4 shrink-0">
+                              <span
+                                onClick={() => {
+                                  const newDomains: string[] = allowedAccessDomains.filter((d: string) => d !== domain);
+                                  setAllowedAccessDomains(newDomains);
+                                }}
+                                className="font-medium text-red-600 hover:text-red-500 cursor-pointer"
+                              >
+                                Remove
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </React.Fragment>
+                  )}
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
+
+                  <div className="mt-4 space-y-4">
+                    <div className="relative flex items-start">
+                      <div className="flex h-5 items-center">
+                        <input
+                          checked={centralizedNotifications}
+                          onChange={(e: any) => setCentralizedNotifications(e.target.checked)}
+                          type="checkbox"
+                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label className="font-medium text-gray-700">Centralized comunication</label>
+                      </div>
+                    </div>
+                  </div>
+                  {centralizedNotifications && (
+                    <React.Fragment>
+                      <div className="flex items-center">
+                        <input
+                          value={newEmailCentralizedNotifications}
+                          type="email"
+                          placeholder="Enter an email"
+                          className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                          onChange={(e: any) => {
+                            if (e.target.value) {
+                              setNewEmailCentralizedNotifications(e.target.value);
+                            } else {
+                              setNewEmailCentralizedNotifications('');
+                            }
+                            setErrorNewEmail('');
+                          }}
+                        />
+                        <button
+                          disabled={!newEmailCentralizedNotifications || requesting}
+                          onClick={() => {
+                            const index: number = emailsCentralizedNotifications.indexOf(newEmailCentralizedNotifications);
+                            if (index !== -1) {
+                              setErrorNewEmail('Email already registered');
+                              return;
+                            }
+                            if (!Helper.isEmail(newEmailCentralizedNotifications)) {
+                              setErrorNewEmail('Invalid email');
+                              return;
+                            }
+                            setEmailsCentralizedNotifications([...emailsCentralizedNotifications, newEmailCentralizedNotifications]);
+                            setNewEmailCentralizedNotifications('');
+                          }}
+                          className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        >
+                          Add
+                        </button>
+                      </div>
+                      {errorNewEmail && (
+                        <p className="text-sm text-red-500" style={{ marginTop: 10 }}>
+                          {errorNewEmail}
+                        </p>
+                      )}
+                      {emailsCentralizedNotifications.length > 0 && (
+                        <React.Fragment>
+                          <dt className="text-sm font-medium text-gray-500">Emails:</dt>
+                          <ul role="list" className="divide-y divide-gray-200 rounded-md border border-gray-200 block w-full max-w-lg">
+                            {emailsCentralizedNotifications.map((email: string, index: number) => (
+                              <li key={index} className="flex items-center justify-between py-3 pl-3 pr-4 text-sm">
+                                <div className="flex w-0 flex-1 items-center">
+                                  <MailIcon className="h-5 w-5 shrink-0 text-gray-400" />
+                                  <span className="ml-2 w-0 flex-1 truncate">{email}</span>
+                                </div>
+                                <div className="ml-4 shrink-0">
+                                  <span
+                                    onClick={() => {
+                                      const newEmails: string[] = emailsCentralizedNotifications.filter((e: string) => e !== email);
+                                      setEmailsCentralizedNotifications(newEmails);
+                                    }}
+                                    className="font-medium text-red-600 hover:text-red-500 cursor-pointer"
+                                  >
+                                    Remove
+                                  </span>
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </React.Fragment>
+                      )}
+                    </React.Fragment>
+                  )}
+
+                  <div className="pt-5 sm:border-t sm:border-gray-200">
+                    <div className="flex justify-end">
+                      <button
+                        disabled={requesting}
+                        onClick={() => router.reload()}
+                        type="button"
+                        className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        disabled={requesting}
+                        onClick={() => console.log('hola')}
+                        type="submit"
+                        className={clsx(
+                          'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                          requesting && 'opacity-50 cursor-not-allowed',
+                        )}
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </React.Fragment>
+            )}
+            {isOrgAdmin && (
               <div className="mt-4">
                 {/* SEARCH USERS */}
-                <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Add users to the organization:</h3>
-                <div className="my-8 sm:col-span-2">
+                <h3 className="text-lg font-medium leading-6 text-gray-900 my-4">Add users to the organization:</h3>
+                <div className="my-4 sm:col-span-2">
                   <input
                     type="text"
                     value={query}
