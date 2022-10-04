@@ -251,7 +251,7 @@ function key(k) {
 };
 
 let getDocumentType = function (ext) {
-    if (".doc.docx.docm.dot.dotx.dotm.odt.fodt.ott.rtf.txt.html.htm.mht.xml.pdf.djvu.fb2.epub.xps.oxps".indexOf(ext) != -1) return "word";
+    if (".doc.docx.docm.dot.dotx.dotm.odt.fodt.ott.rtf.txt.html.htm.mht.xml.djvu.fb2.epub.xps.oxps".indexOf(ext) != -1) return "word";
     if (".xls.xlsx.xlsm.xlsb.xlt.xltx.xltm.ods.fods.ots.csv".indexOf(ext) != -1) return "cell";
     if (".pps.ppsx.ppsm.ppt.pptx.pptm.pot.potx.potm.odp.fodp.otp".indexOf(ext) != -1) return "slide";
     if (".pdf".indexOf(ext) != -1) return "pdf";
