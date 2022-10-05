@@ -73,10 +73,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   const organizationRoles: { value: string; label: string; description: string }[] = useMemo(() => {
     const data: { value: string; label: string; description: string }[] = [
-      { value: 'organization-admin', label: 'Admin of this organization', description: 'Can collaborate and share with others across all channels' },
-      { value: 'team-admin', label: 'Full access all channels', description: 'Can collaborate, but cannot share with others' },
-      { value: 'team-contributor', label: 'Can edit all channels', description: 'Can collaborate, but cannot share with others' },
-      { value: 'team-reader', label: 'Can comment all channels', description: 'Can read and create comment, but cannot collaborate or share' },
+      { value: 'organization-admin', label: 'Admin of this organization', description: 'Can collaborate and manage at organization level' },
+      { value: 'team-admin', label: 'Full access all channels', description: 'Can collaborate and manage across channels' },
+      { value: 'team-contributor', label: 'Can edit all channels', description: 'Can collaborate across channels' },
+      { value: 'team-reader', label: 'Can comment all channels', description: 'Can read and create comment, but cannot collaborate' },
     ];
     if (selectedUser) {
       if (members.length > 0) {
@@ -96,9 +96,9 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   const teamRoles: { value: string; label: string; description: string }[] = useMemo(() => {
     const data: { value: string; label: string; description: string }[] = [
-      { value: 'team-admin', label: 'Full access', description: 'Can collaborate and share with others on this channel' },
-      { value: 'team-contributor', label: 'Can edit', description: 'Can collaborate, but cannot share' },
-      { value: 'team-reader', label: 'Can comment', description: 'Can comment, but cannot collaborate or share' },
+      { value: 'team-admin', label: 'Full access', description: 'Can collaborate and invite others on this channel' },
+      { value: 'team-contributor', label: 'Can edit', description: 'Can collaborate, but cannot invite others on this channel' },
+      { value: 'team-reader', label: 'Can comment', description: 'Can comment, but cannot collaborate or invite' },
     ];
     if (selectedUser) {
       if (filteredMembers.length > 0) {

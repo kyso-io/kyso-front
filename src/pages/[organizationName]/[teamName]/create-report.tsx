@@ -600,13 +600,7 @@ const CreateReport = ({ commonData }: Props) => {
                   <div>
                     <label
                       htmlFor="formFileLg"
-                      className=" 
-                    text-left p-1 hover:cursor-pointer hover:bg-gray-100
-                    rounded text-sm font-medium
-                    block
-                    
-                    form-label relative items-center  
-                    focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="text-left p-1 hover:cursor-pointer hover:bg-gray-100 rounded text-sm font-medium block form-label relative items-center focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                     >
                       <UploadIcon className="h-5 w-5 text-gray-600" aria-hidden="true" />
                       <input
@@ -615,8 +609,11 @@ const CreateReport = ({ commonData }: Props) => {
                         id="formFileLg"
                         type="file"
                         multiple
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => onUploadFile(e)}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                          onUploadFile(e);
+                        }}
                       />
+                      {/* no working  */}
                     </label>
                   </div>
                 </div>
@@ -651,6 +648,7 @@ const CreateReport = ({ commonData }: Props) => {
                       }
                     }}
                     onAddNewFile={(newFile: CreationReportFileSystemObject) => {
+                      console.log('newFile', newFile);
                       addNewFile(newFile);
                     }}
                     onRemoveFile={(fileToRemove: CreationReportFileSystemObject) => {

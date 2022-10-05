@@ -84,7 +84,6 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                       onCreate={(newFile: CreationReportFileSystemObject) => {
                         if (newFile) {
                           newFile.path = `${item.file.path}/${newFile.name}`;
-
                           onAddNewFile(newFile);
                           setOpen(false);
                         }
@@ -100,7 +99,6 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                       onCreate={(newFile: CreationReportFileSystemObject) => {
                         if (newFile) {
                           newFile.path = `${item.file.path}/${newFile.name}`;
-
                           onAddNewFile(newFile);
                           setOpen(false);
                         }
@@ -149,8 +147,6 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                   onCreate={(newFile: CreationReportFileSystemObject) => {
                     if (newFile) {
                       item.file.name = newFile.name;
-                      item.file.path = newFile.path;
-
                       onAddNewFile(item.file);
                     }
                   }}

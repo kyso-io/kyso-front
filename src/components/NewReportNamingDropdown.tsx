@@ -88,6 +88,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                           onKeyDown={(e) => {
                             if (e.key === 'Enter') {
                               handleCreation(newName, computedIsFolder, onCreate, parent);
+                              onHandleName('');
                             }
                             if (e.code === 'Space') {
                               onHandleName(`${e.target.value} `);
@@ -118,6 +119,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                         disabled={!(newName.length > 0)}
                         onClick={() => {
                           handleCreation(newName, computedIsFolder, onCreate, parent);
+                          onHandleName('');
                         }}
                       >
                         {props.okButtonLabel ? props.okButtonLabel : 'Create'}
