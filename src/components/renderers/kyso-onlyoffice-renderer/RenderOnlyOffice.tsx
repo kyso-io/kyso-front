@@ -20,6 +20,8 @@ const RenderOnlyOffice = (props: Props) => {
     parameters += `?token=${props.token}`;
   }
 
+  const encodedParameters = encodeURIComponent(parameters);
+
   return (
     <>
       <iframe
@@ -31,7 +33,7 @@ const RenderOnlyOffice = (props: Props) => {
           border: 'none 0px',
           height: '74vh',
         }}
-        src={`/onlyoffice-render.html?file=${parameters}`}
+        src={`/onlyoffice-render.html?file=${encodedParameters}`}
       />
     </>
   );
