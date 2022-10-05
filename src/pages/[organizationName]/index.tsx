@@ -4,6 +4,7 @@ import ChannelList from '@/components/ChannelList';
 import Pagination from '@/components/Pagination';
 import PureAvatar from '@/components/PureAvatar';
 import PureNewReportPopover from '@/components/PureNewReportPopover';
+import { useCommonData } from '@/hooks/use-common-data';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
@@ -51,6 +52,9 @@ const Index = ({ commonData }: Props) => {
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
 
+  // Forcing reload of commonData because if not a wrong behavior happens when creating a new channel
+  commonData = useCommonData();
+
   useEffect(() => {
     const getData = async () => {
       try {
@@ -70,6 +74,7 @@ const Index = ({ commonData }: Props) => {
   useEffect(() => {
     if (commonData.permissions?.organizations) {
       const index: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
+
       if (index === -1) {
         router.replace('/');
       }

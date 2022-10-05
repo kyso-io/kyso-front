@@ -31,6 +31,15 @@ const Index = ({ commonData }: Props) => {
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const hasPermissionCreateChannel: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
+  const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setWaitForLogging(true);
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -272,7 +281,32 @@ const Index = ({ commonData }: Props) => {
               </div>
             </form>
           ) : (
-            <div className="rounded-md bg-yellow-50 p-4 mt-8">
+            waitForLogging && (
+              <div className="rounded-md bg-yellow-50 p-4 mt-8">
+                <div className="flex">
+                  <div className="shrink-0">
+                    <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-yellow-800">Forbidden resource</h3>
+                    <div className="mt-2 text-sm text-yellow-700">
+                      <p>
+                        You don&apos;t have permissions to create channels. Come back to
+                        <a href={`/${commonData.organization?.sluglified_name}`} className="font-bold">
+                          {' '}
+                          {commonData.organization?.display_name}{' '}
+                        </a>
+                        page or select a channel.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )
+          )
+        ) : (
+          waitForLogging && (
+            <div className="rounded-md bg-yellow-50 p-4">
               <div className="flex">
                 <div className="shrink-0">
                   <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
@@ -281,38 +315,17 @@ const Index = ({ commonData }: Props) => {
                   <h3 className="text-sm font-medium text-yellow-800">Forbidden resource</h3>
                   <div className="mt-2 text-sm text-yellow-700">
                     <p>
-                      You don&apos;t have permissions to create channels. Come back to
-                      <a href={`/${commonData.organization?.sluglified_name}`} className="font-bold">
-                        {' '}
-                        {commonData.organization?.display_name}{' '}
-                      </a>
-                      page or select a channel.
+                      This page is only available to registered users.{' '}
+                      <a href="/login" className="font-bold">
+                        Sign in
+                      </a>{' '}
+                      now.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
           )
-        ) : (
-          <div className="rounded-md bg-yellow-50 p-4">
-            <div className="flex">
-              <div className="shrink-0">
-                <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">Forbidden resource</h3>
-                <div className="mt-2 text-sm text-yellow-700">
-                  <p>
-                    This page is only available to registered users.{' '}
-                    <a href="/login" className="font-bold">
-                      Sign in
-                    </a>{' '}
-                    now.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
         )}
       </div>
       <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />

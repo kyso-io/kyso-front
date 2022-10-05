@@ -64,7 +64,11 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
 
   return (
     <Link href={href || `/${treeItem.path}`}>
-      <a className={classNames('p-2 text-sm w-full group flex items-center justify-between  overflow-x-auto', current ? 'bg-gray-200' : 'hover:bg-gray-100')} onClick={onNavigation}>
+      <a
+        className={classNames('p-2 text-sm w-full group flex items-center justify-between  overflow-x-auto', current ? 'bg-gray-200' : 'hover:bg-gray-100')}
+        onClick={onNavigation}
+        style={{ overflow: 'unset' }}
+      >
         <div className={classNames('group flex items-center font-medium text-slate-500', 'hover:text-gray-900', 'font-normal')}>
           <span className="w-6 text-blue-400">
             {extension === 'ipynb' && (

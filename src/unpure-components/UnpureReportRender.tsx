@@ -7,7 +7,6 @@ import type { ReportContext } from '@/components/renderers/kyso-markdown-rendere
 import RenderOnlyOffice from '@/components/renderers/kyso-onlyoffice-renderer/RenderOnlyOffice';
 import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 import RenderCode from '@/components/renderers/RenderCode';
-import RenderGoogleDocs from '@/components/renderers/RenderGoogleDocs';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
@@ -197,13 +196,13 @@ const UnpureReportRender = (props: Props) => {
       );
     } else if (FileTypesHelper.isCode(fileToRender.path)) {
       render = <RenderCode code={fileToRender.content} showFileNumbers={true} />;
-    } else if (FileTypesHelper.isOffice365(fileToRender.path) && frontEndUrl) {
+    } else if (FileTypesHelper.isOnlyOffice(fileToRender.path) && frontEndUrl) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
       render = <RenderOnlyOffice fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
-    } else if (FileTypesHelper.isGoogleDocs(fileToRender.path) && frontEndUrl) {
+    } /* else if (FileTypesHelper.isGoogleDocs(fileToRender.path) && frontEndUrl) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
       render = <RenderGoogleDocs fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
-    } else {
+    } */ else {
       render = (
         <div className="prose p-3">
           Kyso cannot render this type of file. Do you need it? Give us{' '}

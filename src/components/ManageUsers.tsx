@@ -245,11 +245,21 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                   <ul role="list" className="mt-1" style={{ maxHeight: 200, overflowY: 'scroll' }}>
                     {filteredMembers.map((member: Member, index: number) => {
                       let roles: string | undefined = '';
+                      let fromOrganization = true;
 
                       if (member.team_roles && member.team_roles.length > 0) {
                         roles = `${teamRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
+                        fromOrganization = false;
                       } else {
                         roles = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
+                      }
+
+                      if (roles === 'undefined' && !fromOrganization) {
+                        // If it's undefined, probably means that it's an organization admin, because that role
+                        // is only in organizationRoles, and not in teamRoles.
+
+                        // So in this case, just assign it directly
+                        roles = 'Admin of this organization';
                       }
 
                       return (
@@ -262,6 +272,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           )}
                           onClick={() => {
                             console.log('!commonData.user || isOrgAdmin', !commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles));
+
                             if (!(!commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles))) {
                               setNotificationMessage('You need admin permission to continue');
                               setNotificationType('warning');
@@ -352,7 +363,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         )}
                         {showTeamRoles && teamRoles && (
                           <div className="ml-4">
-                            <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
+                            <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Channel Role</p>
                             <ListboxWithText
                               selectedLabel={selectedTeamLabel || 'Full access'}
                               isOrgAdmin={isOrgAdmin}
@@ -436,6 +447,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                     {users.map((user: UserDTO) => {
                       const member: Member | undefined = members.find((m: Member) => m.id === user.id);
                       let roles: string | undefined = '';
+
                       if (member) {
                         roles = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
                         if (member.team_roles && member.team_roles.length > 0) {
@@ -506,7 +518,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         )}
                         {showTeamRoles && teamRoles && (
                           <div className="ml-4">
-                            <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
+                            <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Channel Role</p>
                             <ListboxWithText
                               selectedLabel={selectedTeamLabel}
                               isOrgAdmin={isOrgAdmin}
