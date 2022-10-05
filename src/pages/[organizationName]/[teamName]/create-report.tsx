@@ -332,8 +332,13 @@ const CreateReport = ({ commonData }: Props) => {
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });
     for (const file of files) {
-      const blob = await (await fetch(getLocalStorageItem(file.id) as string)).blob();
-
+      const fileContent: string | null = getLocalStorageItem(file.id);
+      let blob: Blob;
+      if (fileContent) {
+        blob = await (await fetch(fileContent)).blob();
+      } else {
+        blob = new Blob([''], { type: 'plain/text' });
+      }
       if (file.type === 'folder') {
         zip.folder(file.path);
       } else {
