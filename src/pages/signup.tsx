@@ -351,7 +351,7 @@ const Index = () => {
                       setError('');
                       setNotification('');
                       dispatch(storeSetError(''));
-                      setNickname(e.target.value);
+                      setNickname(e.target.value.toLowerCase());
                     }}
                   />
                 </div>

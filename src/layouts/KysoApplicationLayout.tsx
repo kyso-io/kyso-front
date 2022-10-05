@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
-import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import type { ReportData } from '@/types/report-data';
@@ -31,13 +30,8 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const dispatch = useAppDispatch();
 
-  let slugifiedName = '';
-  if (commonData?.user && commonData?.user?.username) {
-    slugifiedName = Helper.slugify(commonData?.user?.username);
-  }
-
   const userNavigation = [
-    { name: 'My profile', href: `${router.basePath}/user/${slugifiedName}`, newTab: false },
+    { name: 'My profile', href: `${router.basePath}/user/${commonData?.user?.username}`, newTab: false },
     {
       name: 'Settings',
       href: `${router.basePath}/in/settings`,
@@ -55,7 +49,6 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       callback: async () => {
         localStorage.removeItem('jwt');
         localStorage.removeItem('shownVerifiedAlert');
-        sessionStorage.setItem('redirectUrl', router.asPath);
         await dispatch(logoutAction());
         router.replace(`/login`);
       },

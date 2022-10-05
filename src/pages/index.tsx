@@ -39,10 +39,10 @@ const Index = ({ commonData }: Props) => {
   }, []);
 
   useEffect(() => {
+    if (!commonData.permissions) {
+      return;
+    }
     const redirectUserToOrganization = async () => {
-      if (!commonData.user) {
-        return;
-      }
       let lastOrganizationDict: { [userId: string]: string } = {};
       const lastOrganizationStr: string | null = getLocalStorageItem('last_organization');
       if (lastOrganizationStr) {
@@ -50,7 +50,7 @@ const Index = ({ commonData }: Props) => {
           lastOrganizationDict = JSON.parse(lastOrganizationStr);
         } catch (e) {}
       }
-      if (lastOrganizationDict[commonData.user.id]) {
+      if (commonData?.user !== null && lastOrganizationDict[commonData.user!.id]) {
         router.push(`${lastOrganizationDict[commonData.user!.id]}`);
       } else if (commonData.permissions) {
         const orgs = commonData.permissions?.organizations;
@@ -60,7 +60,7 @@ const Index = ({ commonData }: Props) => {
       }
     };
     redirectUserToOrganization();
-  }, [commonData]);
+  }, [commonData?.permissions, commonData?.user]);
 
   return (
     <div className="flex flex-row space-x-8">

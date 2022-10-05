@@ -33,6 +33,14 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
     }
   };
 
+  const jwtToken = localStorage.getItem('jwt');
+
+  let parameters = `${'/scs'}${file.path_scs}`;
+
+  if (jwtToken) {
+    parameters += `?token=${jwtToken}`;
+  }
+
   if (!file || !file.path_scs || file.path_scs.length === 0) {
     return <div>Invalid path</div>;
   }
@@ -50,7 +58,7 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
           height,
           overflow: 'hidden',
         }}
-        src={`${'/scs'}${file.path_scs}`}
+        src={parameters}
         onLoad={onInitializedIframe}
       />
     </>

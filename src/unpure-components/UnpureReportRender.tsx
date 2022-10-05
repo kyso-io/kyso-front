@@ -197,7 +197,10 @@ const UnpureReportRender = (props: Props) => {
     } else if (FileTypesHelper.isCode(fileToRender.path)) {
       render = <RenderCode code={fileToRender.content} showFileNumbers={true} />;
     } else if (FileTypesHelper.isOnlyOffice(fileToRender.path) && frontEndUrl) {
-      const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
+      // const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
+
+      // To use internal URLs as is rendered by document-server
+      const fileUrl = `http://kyso-scs/scs${fileToRender.path_scs}`;
       render = <RenderOnlyOffice fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
     } /* else if (FileTypesHelper.isGoogleDocs(fileToRender.path) && frontEndUrl) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
