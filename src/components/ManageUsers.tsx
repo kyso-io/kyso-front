@@ -73,10 +73,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   const organizationRoles: { value: string; label: string; description: string }[] = useMemo(() => {
     const data: { value: string; label: string; description: string }[] = [
-      { value: 'organization-admin', label: 'Admin of this organization', description: 'Can collaborate and manage at organization level' },
-      { value: 'team-admin', label: 'Full access all channels', description: 'Can collaborate and manage across channels' },
-      { value: 'team-contributor', label: 'Can edit all channels', description: 'Can collaborate across channels' },
-      { value: 'team-reader', label: 'Can comment all channels', description: 'Can read and create comment, but cannot collaborate' },
+      { value: 'organization-admin', label: 'Admin of this organization', description: `Can change organization's settings` },
+      { value: 'team-admin', label: 'Full access all channels', description: `Can change channels' settings` },
+      { value: 'team-contributor', label: 'Can edit all channels', description: 'Can create new reports across channels' },
+      { value: 'team-reader', label: 'Can comment all channels', description: 'Can read and create comment, but cannot create new reports' },
     ];
     if (selectedUser) {
       if (members.length > 0) {
@@ -96,22 +96,22 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   const teamRoles: { value: string; label: string; description: string }[] = useMemo(() => {
     const data: { value: string; label: string; description: string }[] = [
-      { value: 'team-admin', label: 'Full access', description: 'Can collaborate and invite others on this channel' },
-      { value: 'team-contributor', label: 'Can edit', description: 'Can collaborate, but cannot invite others on this channel' },
-      { value: 'team-reader', label: 'Can comment', description: 'Can comment, but cannot collaborate or invite' },
+      { value: 'team-admin', label: 'Full access', description: `Can change this channel's settings` },
+      { value: 'team-contributor', label: 'Can edit', description: 'Can create new reports in this channels' },
+      { value: 'team-reader', label: 'Can comment', description: 'Can read and create comment, but cannot create new reports' },
     ];
     if (selectedUser) {
       if (filteredMembers.length > 0) {
         const member: Member | undefined = filteredMembers.find((m: Member) => m.id === selectedUser.id);
         if (member) {
           if (member?.membership_origin === TeamMembershipOriginEnum.TEAM) {
-            data.push({ value: 'remove', label: 'Remove', description: '' });
+            data.push({ value: 'remove', label: 'Remove access', description: '' });
           }
         }
       } else if (users.length > 0) {
         const index: number = users.findIndex((user: UserDTO) => user.id === selectedUser.id);
         if (index > -1) {
-          data.push({ value: REMOVE_USER_VALUE, label: 'Remove', description: '' });
+          data.push({ value: REMOVE_USER_VALUE, label: 'Remove access', description: '' });
         }
       }
     }
@@ -271,8 +271,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                             commonData.user?.id === member.id ? 'border rounded' : '',
                           )}
                           onClick={() => {
-                            console.log('!commonData.user || isOrgAdmin', !commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles));
-
                             if (!(!commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles))) {
                               setNotificationMessage('You need admin permission to continue');
                               setNotificationType('warning');
@@ -512,7 +510,9 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                               setSelectedRole={(value) => {
                                 setSelectedOrgRole(value);
                               }}
-                              setSelectedLabel={(label) => setSelectedOrgLabel(label)}
+                              setSelectedLabel={(label) => {
+                                setSelectedOrgLabel(label);
+                              }}
                             />
                           </div>
                         )}
