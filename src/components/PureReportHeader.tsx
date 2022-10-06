@@ -12,6 +12,8 @@ import router from 'next/router';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
+import { FileTypesHelper } from '@/helpers/FileTypesHelper';
+
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import type { Version } from '@/hooks/use-versions';
 import clsx from 'clsx';
@@ -34,6 +36,13 @@ type IPureReportHeaderProps = {
   children?: ReactElement;
 };
 
+declare global {
+  interface Window {
+    htmlFileUrl: string | null;
+    onlyofficeFileParam: string | null;
+  }
+}
+
 const PureReportHeader = (props: IPureReportHeaderProps) => {
   const { report, frontEndUrl, children, fileToRender, versions, authors, version, reportUrl, onUpvoteReport, openMetadata, commonData, hasPermissionEditReport, hasPermissionDeleteReport } = props;
 
@@ -46,12 +55,22 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
     return report?.description ? report.description : '';
   }, [report.description]);
 
+  if (fileToRender && fileToRender.path.endsWith('.html')) {
+    window.htmlFileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
+  } else {
+    window.htmlFileUrl = null;
+  }
+  if (fileToRender && FileTypesHelper.isOnlyOffice(fileToRender.path)) {
+    window.onlyofficeFileParam = encodeURIComponent(`http://kyso-scs/scs${fileToRender.path_scs}`);
+  } else {
+    window.onlyofficeFileParam = null;
+  }
+
   return (
     <div className="w-full flex 2xl:flex-row lg:flex-col justify-between p-2">
       <div className="2xl:w-4/6 flex flex-col justify-between">
         <h1 className="text-2xl font-medium">{report?.title}</h1>
         {description && <div className="text-sm break-words">{description}</div>}
-
         <div className="mt-3 flex text-sm flex-col lg:flex-row lg:items-top text-gray-500 font-light space-x-2 min-h-min">
           <div className="flex">
             <PureAvatarGroup data={authors} size={TailwindHeightSizeEnum.H8} tooltip={true}></PureAvatarGroup>
@@ -64,7 +83,6 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               <span className="text-gray-800 ml-1 mr-2">{report?.updated_at && format(new Date(report.updated_at), 'MMM dd, yyyy')}.</span>
             </p>
           </div>
-
           {report?.tags && (
             <div
               className="min-h-min"
@@ -81,7 +99,6 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
       <div className="flex 2xl:w-2/6 flex-col justify-between items-start space-y-8">
         <div className="flex flex-row w-full justify-end space-x-4">
           {children}
-
           {report?.id && (
             <button
               type="button"
@@ -103,17 +120,29 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
           )}
           <PureShareButton report={report} basePath={router.basePath} commonData={commonData} withText={true} color={'text-indigo-600 hover:text-indigo-700'} />
         </div>
-
         <div className="flex flex-row items-center justify-end w-full">
           <div className="flex flex-row border rounded divide-x items-center">
-            {fileToRender?.path.endsWith('.html') && fileToRender && (
-              <a href={`${'/scs'}${fileToRender.path_scs}`} target="_blank" rel="noreferrer">
-                <button className="inline-flex w-38 items-center  hover:bg-gray-100 p-1.5 px-2 font-medium text-sm text-gray-700 focus:ring-0 focus:outline-none">
-                  {/* <ArrowsExpandIcon className="-ml-0.5 mr-2 h-4 w-4" aria-hidden="true" /> */}
-                  Open in Full screen
-                  <ExternalLinkIcon className="ml-1 h-4 w-4" aria-hidden="true" />
-                </button>
-              </a>
+            {window.htmlFileUrl && window.htmlFileUrl !== '' && (
+              <button
+                className="inline-flex w-38 items-center  hover:bg-gray-100 p-1.5 px-2 font-medium text-sm text-gray-700 focus:ring-0 focus:outline-none"
+                onClick={() => {
+                  window.open(`/html-render.html`, 'htmlViewer', 'fullscreen=yes');
+                }}
+              >
+                Open in Window
+                <ExternalLinkIcon className="ml-1 h-4 w-4" aria-hidden="true" />
+              </button>
+            )}
+            {window.onlyofficeFileParam && window.onlyofficeFileParam !== '' && (
+              <button
+                className="inline-flex w-38 items-center  hover:bg-gray-100 p-1.5 px-2 font-medium text-sm text-gray-700 focus:ring-0 focus:outline-none"
+                onClick={() => {
+                  window.open(`/onlyoffice-render.html`, 'onlyofficeViewer', 'fullscreen=yes');
+                }}
+              >
+                Open in Window
+                <ExternalLinkIcon className="ml-1 h-4 w-4" aria-hidden="true" />
+              </button>
             )}
             <UnpureCloneDropdown
               reportUrl={`${frontEndUrl}${reportUrl}`}
@@ -122,7 +151,6 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               hasPermissionEditReport={hasPermissionEditReport}
               hasPermissionDeleteReport={hasPermissionDeleteReport}
             />
-
             <PureVersionsDropdown versions={versions} version={version} reportUrl={reportUrl} />
             <UnpureReportActionDropdown
               report={report}
