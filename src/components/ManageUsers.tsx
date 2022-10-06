@@ -1,3 +1,5 @@
+import ListboxWithText from '@/components/PureListBoxWithText';
+import PureNotification from '@/components/PureNotification';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
@@ -11,8 +13,6 @@ import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import slugify from 'slugify';
-import ListboxWithText from '@/components/PureListBoxWithText';
-import PureNotification from '@/components/PureNotification';
 import checkPermissions from '../helpers/check-permissions';
 import { Helper } from '../helpers/Helper';
 import type { Member } from '../types/member';
@@ -46,8 +46,8 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
   const [selectedTeamRole, setSelectedTeamRole] = useState<string>('');
   const [selectedMemberIndex, setSelectedMemberIndex] = useState<number>(-1);
 
-  const [selectedOrgLabel, setSelectedOrgLabel] = useState<string>('');
-  const [selectedTeamLabel, setSelectedTeamLabel] = useState<string>('');
+  const [selectedOrgLabel, setSelectedOrgLabel] = useState<string>('Select an option');
+  const [selectedTeamLabel, setSelectedTeamLabel] = useState<string>('Select an option');
 
   const [notificationType, setNotificationType] = useState<string>('');
   const [notificationMessage, setNotificationMessage] = useState<string>('');
@@ -149,8 +149,8 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     setSelectedUser(null);
     setSelectedMemberIndex(-1);
     setSelectedOrgRole('');
-    setSelectedOrgLabel('');
-    setSelectedTeamLabel('');
+    setSelectedOrgLabel('Select an option');
+    setSelectedTeamLabel('Select an option');
     setSelectedTeamRole('');
     setInputDeleteUser('');
     setKeyDeleteUser('');
@@ -353,7 +353,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           <div>
                             <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
                             <ListboxWithText
-                              selectedLabel={selectedOrgLabel || 'Admin of this organization'}
+                              selectedLabel={selectedOrgLabel}
                               isOrgAdmin={isOrgAdmin}
                               roles={organizationRoles}
                               setSelectedRole={(value) => {
@@ -367,7 +367,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           <div className="ml-4">
                             <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Channel Role</p>
                             <ListboxWithText
-                              selectedLabel={selectedTeamLabel || 'Full access'}
+                              selectedLabel={selectedTeamLabel}
                               isOrgAdmin={isOrgAdmin}
                               roles={teamRoles}
                               setSelectedRole={(value) => {
