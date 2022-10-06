@@ -44,7 +44,7 @@ const Index = ({ commonData }: Props) => {
     getData();
   }, []);
 
-  const createOrganization = async (orgName: string, bio: string): Promise<void> => {
+  const createOrganization = async (orgName: string, bio: string, link: string, location: string, file: File | null): Promise<void> => {
     if (commonData.user?.email_verified === false) {
       setShowToaster(true);
       setMessageToaster('Your account is not verified. Please check your email before creating an organization.');
@@ -71,11 +71,17 @@ const Index = ({ commonData }: Props) => {
       return;
     }
     setBusy(true);
+    if (file !== null) {
+      console.log(link, location, file);
+    }
     try {
       const api: Api = new Api(commonData.token);
       const result: NormalizedResponseDTO<Organization> = await api.createOrganization({
         display_name: orgName,
         bio,
+        // link,
+        // location,
+        // file,
       });
       const organization: Organization = result.data;
       router.push(`/${organization.sluglified_name}`);
@@ -95,7 +101,12 @@ const Index = ({ commonData }: Props) => {
       <div className="w-2/12"></div>
       <div className="w-8/12 flex flex-col space-y-8">
         {userIsLogged && (
-          <PureOrgInfoSettings isBusy={isBusy} onCreateOrganization={(orgName: string, bio: string) => createOrganization(orgName, bio)} setError={(arg: string) => setError(arg)} error={error} />
+          <PureOrgInfoSettings
+            isBusy={isBusy}
+            onCreateOrganization={(orgName: string, bio: string, link: string, location: string, file: File | null) => createOrganization(orgName, bio, link, location, file)}
+            setError={(arg: string) => setError(arg)}
+            error={error}
+          />
         )}
         {!userIsLogged && (
           <div className="rounded-md bg-yellow-50 p-4">
