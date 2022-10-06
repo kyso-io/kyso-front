@@ -273,8 +273,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                             commonData.user?.id === member.id ? 'border rounded' : '',
                           )}
                           onClick={() => {
-                            console.log('!commonData.user || isOrgAdmin', !commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles));
-
                             if (!(!commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles))) {
                               setNotificationMessage('You need admin permission to continue');
                               setNotificationType('warning');
@@ -299,10 +297,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
                               if (member.team_roles && member.team_roles.length > 0) {
                                 let teamLabel = 'Full access';
-                                if (member.organization_roles[0]! === 'team-contributor') {
+                                if (member.team_roles[0]! === 'team-contributor') {
                                   teamLabel = 'Can edit';
                                 }
-                                if (member.organization_roles[0]! === 'team-reader') {
+                                if (member.team_roles[0]! === 'team-reader') {
                                   teamLabel = 'Can comment';
                                 }
                                 setSelectedTeamLabel(teamLabel);
