@@ -1,7 +1,7 @@
-import { Fragment } from 'react';
+import classNames from '@/helpers/class-names';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import classNames from '@/helpers/class-names';
+import { Fragment } from 'react';
 
 interface Props {
   selectedLabel: string;
@@ -46,17 +46,14 @@ const ListboxWithText = ({ selectedLabel, isOrgAdmin, roles, setSelectedRole, se
             {roles.map((role: { value: string; label: string; description?: string }) => (
               <Menu.Item key={role.value}>
                 {({ active }) => (
-                  <div className={classNames('relative cursor-default select-none')}>
-                    <a
-                      href="#"
-                      className={classNames(active ? 'bg-gray-100  text-gray-900' : 'text-gray-700', 'block px-4 pt-2 text-sm')}
-                      onClick={() => {
-                        setSelectedRole(role.value);
-                        setSelectedLabel(role.label);
-                      }}
-                    >
-                      {role.label}
-                    </a>
+                  <div
+                    onClick={() => {
+                      setSelectedRole(role.value);
+                      setSelectedLabel(role.label);
+                    }}
+                    className={classNames('relative cursor-default select-none')}
+                  >
+                    <span className={classNames(active ? 'bg-gray-100  text-gray-900' : 'text-gray-700', 'block px-4 pt-2 text-sm')}>{role.label}</span>
                     <p className={classNames(active ? 'bg-gray-100 text-gray-500' : 'text-gray-400', 'block px-4 pb-2 text-sm')}>{role.description}</p>
                   </div>
                 )}
