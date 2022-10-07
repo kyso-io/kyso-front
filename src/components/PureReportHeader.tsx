@@ -8,7 +8,6 @@ import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDr
 import { ExternalLinkIcon, ThumbUpIcon } from '@heroicons/react/solid';
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import format from 'date-fns/format';
-import router from 'next/router';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
@@ -118,7 +117,14 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               <span className="sr-only">upvotes</span>
             </button>
           )}
-          <PureShareButton report={report} basePath={router.basePath} commonData={commonData} withText={true} color={'text-indigo-600 hover:text-indigo-700'} />
+          <PureShareButton
+            iconClasses="h-5 w-5 text-indigo-600 hover:text-indigo-700"
+            buttonClasses="hover:bg-gray-100"
+            title="Share report"
+            description="Send this url to someone to share this report"
+            withText={true}
+            url={`${window.location.origin}/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`}
+          />
         </div>
         <div className="flex flex-row items-center justify-end w-full">
           <div className="flex flex-row border rounded divide-x items-center">
