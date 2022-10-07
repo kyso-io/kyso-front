@@ -114,8 +114,8 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
         <Mention
           suggestions={suggestions}
           className="relative"
-          inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm "
-          panelClassName="absolute bg-white border rounded w-full mb-4"
+          inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm"
+          panelClassName="w-full absolute bg-white border rounded"
           autoHighlight
           onSearch={onSearch}
           name="input"
@@ -129,18 +129,22 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
         <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
       )}
 
-      <div className="flex justify-between">
+      <div className="flex justify-between pt-4">
         <div>{/* <p className="text-xs text-gray-500">Use @ to mention people</p> */}</div>
 
         <div className="flex flex-row space-x-2">
-          {value && (
+          {comment !== null && (
+            <button className="hover:underline text-gray-500 text-sm" onClick={onCancel}>
+              Cancel
+            </button>
+          )}
+          {comment === null && hasPermissionCreateComment && value !== '' && (
             <button
-              className="hover:underline text-gray-500 text-sm"
-              onClick={(e: any) => {
+              onClick={(e) => {
                 e.preventDefault();
                 setValue('');
-                onCancel();
               }}
+              className={classNames('inline-flex items-center px-2 py-1 text-xs text-gray-500 hover:underline font-medium focus:outline-none focus:ring-0')}
             >
               Cancel
             </button>
