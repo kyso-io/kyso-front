@@ -122,6 +122,9 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
           value={value}
           onChange={(e) => setValue((e.target as HTMLInputElement).value)}
           field="nameSlug"
+          style={{
+            width: '100%',
+          }}
           placeholder={message}
           itemTemplate={itemTemplate}
         />
