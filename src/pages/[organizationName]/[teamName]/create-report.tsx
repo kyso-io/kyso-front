@@ -235,22 +235,23 @@ const CreateReport = ({ commonData }: Props) => {
 
   const addNewFile = (newFile: CreationReportFileSystemObject) => {
     // Search for a file with the same ID --> THAT MEANS IS A RENAME
-    const existingFileIndex = files.findIndex((x) => x.id === newFile.id);
-
-    if (existingFileIndex < 0) {
+    const fs: CreationReportFileSystemObject[] = [...files];
+    const existingFileIndex = fs.findIndex((x) => x.id === newFile.id);
+    if (existingFileIndex === -1) {
       // Does not exist, so it's a new file
-      files.push(newFile);
+      fs.push(newFile);
     } else {
       // Already exists, so we just need to change the name
-      files[existingFileIndex]!.name = newFile.name;
-      files[existingFileIndex]!.path = newFile.path;
-      files[existingFileIndex]!.type = newFile.type;
+      fs[existingFileIndex]!.name = newFile.name;
+      fs[existingFileIndex]!.path = newFile.path;
+      fs[existingFileIndex]!.type = newFile.type;
     }
-
-    setFiles([...files]);
+    setFiles(fs);
     setDraftStatus('Saving ...');
-    delayedCallback('formFile', files);
+    delayedCallback('formFile', fs);
   };
+
+  console.log({ files });
 
   const delayedCallback = debounce(async (key, value) => {
     setLocalStorageItem(key, JSON.stringify(value));

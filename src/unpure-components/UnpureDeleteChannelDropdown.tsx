@@ -60,7 +60,7 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
 
   return (
     <>
-      <Menu as="div" className="p-1.5 px-2 font-medium text-sm z-50 relative inline-block">
+      <Menu as="div" className="p-1.5 px-2 font-medium text-sm relative inline-block">
         <Menu.Button className="rounded flex p-2 items-center hover:bg-gray-200 focus:outline-none">
           <span className="sr-only">Open options</span>
           <DotsVerticalIcon className="h-5 w-5" aria-hidden="true" />

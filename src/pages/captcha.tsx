@@ -8,6 +8,8 @@ import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import ToasterNotification from '../components/ToasterNotification';
+import { checkJwt } from '../helpers/check-jwt';
+import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 import type { CommonData } from '../types/common-data';
 
 const DEFAULT_CAPTCHA_SITE_KEY = '22';
@@ -31,18 +33,30 @@ const Index = ({ commonData }: Props) => {
   const [alertText, setAlertText] = useState<string>('');
   const [show, setShow] = useState<boolean>(false);
   const [requesting, setRequesting] = useState<boolean>(false);
+  const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (commonData !== null && commonData.token === null) {
+    const result: boolean = checkJwt();
+    setUserIsLogged(result);
+  }, []);
+
+  useEffect(() => {
+    if (userIsLogged === null) {
+      return;
+    }
+    if (userIsLogged === false) {
       // An unautenticated user is trying to access
       router.replace('/');
     }
-  }, [commonData]);
+  }, [userIsLogged]);
 
   useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
     const redirectUrl: string | null = sessionStorage.getItem('redirectUrl') || '/';
-    if (!commonData.user || !commonData.user!.show_captcha) {
-      setTimeout(() => router.replace(redirectUrl), 200);
+    if (!commonData.user!.show_captcha) {
+      setTimeout(() => router.replace(redirectUrl), 500);
       return;
     }
     const getData = async () => {

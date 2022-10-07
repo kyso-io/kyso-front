@@ -1,7 +1,7 @@
-import { Fragment } from 'react';
+import classNames from '@/helpers/class-names';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import classNames from '@/helpers/class-names';
+import { Fragment } from 'react';
 
 interface Props {
   selectedLabel: string;
