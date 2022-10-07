@@ -7,6 +7,12 @@ export type Props = {
   token?: string | null;
 };
 
+declare global {
+  interface Window {
+    onlyofficeFileParam: string | null;
+  }
+}
+
 const RenderOnlyOffice = (props: Props) => {
   const id = v4();
 
@@ -20,18 +26,21 @@ const RenderOnlyOffice = (props: Props) => {
     parameters += `?token=${props.token}`;
   }
 
+  // Set global value
+  window.onlyofficeFileParam = parameters;
+
   return (
     <>
       <iframe
         title={id}
         id={`iframe-${id}`}
-        sandbox={`allow-scripts allow-same-origin allow-forms allow-modals allow-popups`}
+        sandbox={`allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-downloads`}
         width="100%"
         style={{
           border: 'none 0px',
           height: '74vh',
         }}
-        src={`/onlyoffice-render.html?file=${parameters}`}
+        src={`/onlyoffice-render.html`}
       />
     </>
   );

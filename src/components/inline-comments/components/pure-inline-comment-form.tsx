@@ -133,18 +133,14 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
         <div>{/* <p className="text-xs text-gray-500">Use @ to mention people</p> */}</div>
 
         <div className="flex flex-row space-x-2">
-          {comment !== null && (
-            <button className="hover:underline text-gray-500 text-sm" onClick={onCancel}>
-              Cancel
-            </button>
-          )}
-          {comment === null && hasPermissionCreateComment && value !== '' && (
+          {value && (
             <button
-              onClick={(e) => {
+              className="hover:underline text-gray-500 text-sm"
+              onClick={(e: any) => {
                 e.preventDefault();
                 setValue('');
+                onCancel();
               }}
-              className={classNames('inline-flex items-center px-2 py-1 text-xs text-gray-500 hover:underline font-medium focus:outline-none focus:ring-0')}
             >
               Cancel
             </button>

@@ -1,16 +1,17 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable no-restricted-globals */
-
-import React, { useState } from 'react';
-import type { CommonData } from '@/types/common-data';
-import moment from 'moment';
-import type { ReportDTO, TeamMember, InlineCommentDto } from '@kyso-io/kyso-model';
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
+
 import PureAvatar from '@/components/PureAvatar';
+import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { CommonData } from '@/types/common-data';
+import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import { GlobalPermissionsEnum, OrganizationPermissionsEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
+import moment from 'moment';
+import { useMemo, useState } from 'react';
+import checkPermissions from '../../../helpers/check-permissions';
 import PureInlineCommentForm from './pure-inline-comment-form';
 
 function classNames(...classes: string[]) {
@@ -32,14 +33,13 @@ type IPureInlineComment = {
 
 const PureInlineComment = (props: IPureInlineComment) => {
   const { commonData, submitComment, channelMembers, onDeleteComment, hasPermissionDeleteComment, hasPermissionCreateComment, comment } = props;
-
   const [isEditing, setIsEditing] = useState(false);
-
-  let isUserAuthor = false;
-
-  if (commonData.user && commonData.user.id === comment?.user_id) {
-    isUserAuthor = true;
-  }
+  const isOrgAdmin: boolean = useMemo(() => {
+    const copyCommonData: CommonData = { ...commonData, team: null };
+    return checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
+  }, [commonData]);
+  const isTeamAdmin: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
+  const isUserAuthor: boolean = commonData.user !== undefined && commonData.user !== null && comment !== null && commonData.user.id === comment.user_id;
 
   if (comment.markedAsDeleted) {
     return <></>;
@@ -60,12 +60,12 @@ const PureInlineComment = (props: IPureInlineComment) => {
       ) : (
         <div className={classNames('flex py-2 border rounded my-1 px-4 flex-col')}>
           <div className="flex flex-row justify-end space-x-2 text-xs font-light text-gray-400">
-            {isUserAuthor && hasPermissionCreateComment && (
+            {((isUserAuthor && hasPermissionCreateComment) || isOrgAdmin || isTeamAdmin) && (
               <button className="hover:underline" onClick={() => setIsEditing(!isEditing)}>
                 Edit
               </button>
             )}
-            {isUserAuthor && hasPermissionDeleteComment && (
+            {((isUserAuthor && hasPermissionDeleteComment) || isOrgAdmin || isTeamAdmin) && (
               <button
                 className="hover:underline"
                 onClick={() => {
