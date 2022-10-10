@@ -37,11 +37,6 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
       setShowToaster(true);
       return;
     }
-    if (!newName.includes('.')) {
-      setMessageToaster('Missing extension in file');
-      setShowToaster(true);
-      return;
-    }
     const fileType: string = newName.split('.').length > 1 ? newName.split('.').pop()! : 'file';
     const fileObject = new CreationReportFileSystemObject(v4(), newName, newName, isFolder ? 'folder' : fileType, '', parent?.id);
     onCreate(fileObject);
