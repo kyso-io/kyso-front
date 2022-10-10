@@ -1,43 +1,31 @@
-import React, { Fragment, useEffect, useState } from 'react';
-
 import classNames from '@/helpers/class-names';
-import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Dialog, Transition } from '@headlessui/react';
 import { ShareIcon } from '@heroicons/react/solid';
-import type { ReportDTO } from '@kyso-io/kyso-model';
+import React, { Fragment, useState } from 'react';
 import PureKysoButton from './PureKysoButton';
 
 type Props = {
-  commonData: CommonData;
-  report: ReportDTO;
-  basePath: string;
-  color: string | 'text-indigo-500';
+  iconClasses: string;
+  buttonClasses: string;
   withText?: boolean;
+  url: string;
+  title: string;
+  description: string;
 };
 
-const PureShareButton = (props: Props) => {
-  const { color, withText } = props;
+const PureShareButton = ({ iconClasses, buttonClasses, withText, url, title, description }: Props) => {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [url, setUrl] = useState('');
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setUrl(window.location.href);
-    }
-  }, [window?.location?.href]);
 
   return (
     <React.Fragment>
       <button
         type="button"
-        className="inline-flex space-x-2 text-sm font-small rounded-md text-gray-500 items-center focus:outline-none focus:ring-0 border border-transparent bg-white hover:bg-gray-100 px-2.5 py-1.5"
-        onClick={() => {
-          setOpen(true);
-        }}
+        className={classNames('inline-flex space-x-2 text-sm font-small rounded-md text-gray-500 items-center focus:outline-none focus:ring-0 border border-transparent px-2.5 py-1.5', buttonClasses)}
+        onClick={() => setOpen(true)}
       >
-        <ShareIcon className={classNames('h-5 w-5', color)} aria-hidden="true" />
+        <ShareIcon className={iconClasses} aria-hidden="true" />
         {withText && (
           <React.Fragment>
             <span className="text-gray-900">Share</span>
@@ -50,12 +38,14 @@ const PureShareButton = (props: Props) => {
           as="div"
           className="relative z-10"
           onClose={() => {
-            setCopied(false);
             setOpen(false);
+            setTimeout(() => {
+              setCopied(false);
+            }, 1000);
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-100 bg-opacity-50 transition-opacity" />
           </Transition.Child>
 
           <div className="fixed z-10 inset-0 overflow-y-auto">
@@ -76,9 +66,9 @@ const PureShareButton = (props: Props) => {
                     </div>
                     <div className="mt-3 text-center sm:mt-5">
                       <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900">
-                        Share report
+                        {title}
                       </Dialog.Title>
-                      <div className="py-3 sm:col-span-2 text-sm font-light text-gray-700">Send this url to someone to share this report</div>
+                      <div className="py-3 sm:col-span-2 text-sm font-light text-gray-700">{description}</div>
                       <div className="py-3 sm:col-span-2">
                         <input readOnly className="p-4 block w-full text-center border shadow-sm outline-none sm:text-sm border-gray-300 rounded-md" defaultValue={url}></input>
                       </div>

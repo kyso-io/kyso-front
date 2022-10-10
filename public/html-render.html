@@ -1,0 +1,30 @@
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+<title>Kyso HTML Renderer</title>
+<script type="text/javascript">
+const urlParams = new URLSearchParams(window.location.search);
+function loadHTML() {
+    window.docUrl = ""
+    if (urlParams) { docUrl = urlParams.get('file'); }
+    if (docUrl == null || docUrl == "") {
+        if (window.parent) { docUrl = window.parent.htmlFileUrl }
+    }
+    if (docUrl == null || docUrl == "") {
+        if (window.opener) { docUrl = window.opener.htmlFileUrl }
+    }
+    if (docUrl == null || docUrl == "") {
+        document.getElementById("noUrl").removeAttribute("hidden");
+    } else {
+        window.location.assign(docUrl);
+    }
+}
+</script>
+</head>
+<body>
+<div id="noUrl" hidden>Missing URL, nothing to display!</div>
+</body>
+<script type="text/javascript">
+    loadHTML();
+</script>
+</html>
