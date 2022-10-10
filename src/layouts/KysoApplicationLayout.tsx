@@ -36,7 +36,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     { name: 'My profile', href: `${router.basePath}/user/${commonData?.user?.username}`, newTab: false },
     {
       name: 'Settings',
-      href: `${router.basePath}/in/settings`,
+      href: `/user/${commonData.user?.username}/settings`,
       newTab: false,
     },
     { name: 'Feedback', href: `${router.basePath}/in/feedback`, newTab: false },

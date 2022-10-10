@@ -4,6 +4,7 @@ import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import type {
   ActivityFeed,
+  InviteUserDto,
   KysoSetting,
   NormalizedResponseDTO,
   Organization,
@@ -332,14 +333,19 @@ const Index = ({ commonData }: Props) => {
     getTeamMembers();
   };
 
-  const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
+  const inviteNewUser = async (email: string, organizationRole: string, teamRole?: string): Promise<void> => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-      await api.inviteNewUser({
+      const inviteUserDto: InviteUserDto = {
         email,
         organizationSlug: commonData.organization!.sluglified_name,
         organizationRole,
-      });
+      };
+      if (teamRole) {
+        inviteUserDto.teamSlug = commonData.team!.sluglified_name;
+        inviteUserDto.teamRole = teamRole;
+      }
+      await api.inviteNewUser(inviteUserDto);
       getTeamMembers();
     } catch (e) {
       console.error(e);
