@@ -378,6 +378,7 @@ const Index = ({ commonData }: Props) => {
           allAuthorsData.push(result.relations.user[authorId]);
         }
       }
+      report.authors = allAuthorsData;
       const { results: reports } = reportsResponse!.data;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
       // Sort by global_pin and user_pin
@@ -408,6 +409,7 @@ const Index = ({ commonData }: Props) => {
           allAuthorsData.push(result.relations.user[authorId]);
         }
       }
+      report.authors = allAuthorsData;
       const { results: reports } = reportsResponse!.data;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
       // Sort by global_pin and user_pin
@@ -438,6 +440,7 @@ const Index = ({ commonData }: Props) => {
           allAuthorsData.push(result.relations.user[authorId]);
         }
       }
+      report.authors = allAuthorsData;
       const { results: reports } = reportsResponse!.data;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
       // Sort by global_pin and user_pin
