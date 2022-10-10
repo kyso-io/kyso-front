@@ -13,6 +13,7 @@ import BreadcrumbNavbar from './BreadcrumbNavbar';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
 import PureShareButton from './PureShareButton';
+import SettingsBreadcrumbNavbar from './SettingsBreadcrumbNavbar';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -41,6 +42,8 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
   if (router.query.username) {
     userProfile = true;
   }
+
+  const settings: boolean = router.pathname.includes('/settings');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -200,9 +203,14 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
             </>
           )}
         </Disclosure>
-        {!userProfile && (
+        {!userProfile && !settings && router.query.organizationName && (
           <div className="p-2 z-40 bg-white">
             <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
+          </div>
+        )}
+        {!userProfile && settings && router.query.organizationName && (
+          <div className="p-2 z-40 bg-white">
+            <SettingsBreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
           </div>
         )}
       </div>
