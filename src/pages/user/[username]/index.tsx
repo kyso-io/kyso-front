@@ -5,7 +5,6 @@ import ReportBadge from '@/components/ReportBadge';
 import UserProfileInfo from '@/components/UserProfileInfo';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useInterval } from '@/hooks/use-interval';
-import { useUser } from '@/hooks/use-user';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { InformationCircleIcon } from '@heroicons/react/solid';
@@ -77,7 +76,6 @@ interface Props {
 }
 
 const Index = ({ commonData, setUser }: Props) => {
-  const user: UserDTO | null = useUser();
   const router = useRouter();
   const { username } = router.query;
   const [userProfileData, setUserProfileData] = useState<UserProfileData | null>(null);
@@ -136,7 +134,7 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   const refreshLastActivityFeed = useCallback(async () => {
-    if (!user) {
+    if (!commonData.user) {
       return;
     }
     const api: Api = new Api(token);
@@ -144,7 +142,7 @@ const Index = ({ commonData, setUser }: Props) => {
       const result: NormalizedResponseDTO<ActivityFeed[]> = await api.getUserActivityFeed(username as string, {
         start_datetime: moment().add(-DAYS_ACTIVITY_FEED, 'days').toDate(),
         end_datetime: moment().toDate(),
-        user_id: user.id,
+        user_id: commonData.user.id,
       });
 
       result.data = result.data.slice(0, MAX_ACTIVITY_FEED_ITEMS);
@@ -176,7 +174,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setActivityFeed(newActivityFeed);
       setHasMore(result.data.length > 0);
     } catch (e) {}
-  }, [user, userProfileData]);
+  }, [commonData.user, userProfileData]);
 
   useInterval(refreshLastActivityFeed, ACTIVITY_FEED_POOLING_MS);
 

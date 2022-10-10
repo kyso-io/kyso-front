@@ -6,7 +6,7 @@ import type { ReportDTO } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ChannelSelector } from './ChannelSelector';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,27 +21,21 @@ const BreadcrumbNavbar = (props: Props) => {
   const { basePath, report, commonData } = props;
   const router = useRouter();
 
-  const organizationSelectorItems: BreadcrumbItem[] = [];
-  if (commonData.permissions && commonData.permissions.organizations) {
-    commonData.permissions!.organizations.forEach((organization) => {
-      organizationSelectorItems.push(new BreadcrumbItem(organization.display_name, `${basePath}/${organization.name}`, commonData.organization?.sluglified_name === organization.name));
+  const organizationSelectorItems: BreadcrumbItem[] = useMemo(() => {
+    if (!commonData.permissions || !commonData.permissions.organizations) {
+      return [];
+    }
+    return commonData.permissions!.organizations.map((organization) => {
+      return new BreadcrumbItem(organization.display_name, `${basePath}/${organization.name}`, commonData.organization?.sluglified_name === organization.name);
     });
-  }
+  }, [commonData.permissions, commonData.organization]);
 
-  const channelSelectorItems: BreadcrumbItem[] = [];
-
-  if (commonData.permissions && commonData.permissions.teams) {
-    commonData
-      .permissions!.teams.filter((team) => team.organization_id === commonData.organization?.id)
-      .forEach((team) => {
-        channelSelectorItems.push(new BreadcrumbItem(team.display_name, `${basePath}/${commonData.organization?.sluglified_name}/${team.name}`, commonData.team?.sluglified_name === team.name));
-      });
-  }
-
-  const breadcrumb: BreadcrumbItem[] = [];
-
-  if (report) {
-    breadcrumb.push(
+  const breadcrumb: BreadcrumbItem[] = useMemo(() => {
+    const data: BreadcrumbItem[] = [];
+    if (!report) {
+      return data;
+    }
+    data.push(
       new BreadcrumbItem(
         report?.title,
         `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`,
@@ -57,12 +51,13 @@ const BreadcrumbNavbar = (props: Props) => {
         .map((p, index) => {
           return new BreadcrumbItem(p, `${reportUrl}/${paths.slice(0, index + 1).join('/')}${version ? `?version=${version}` : ''}`, false);
         });
-      breadcrumb.push(...crumbs);
+      data.push(...crumbs);
     } else if (report.main_file) {
       const breadcrumItem: BreadcrumbItem = new BreadcrumbItem(report.main_file, `${reportUrl}/${report.main_file}${version ? `?version=${version}` : ''}`, false);
-      breadcrumb.push(breadcrumItem);
+      data.push(breadcrumItem);
     }
-  }
+    return data;
+  }, [commonData.organization, commonData.team, report]);
 
   return (
     <div>

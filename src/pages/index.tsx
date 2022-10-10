@@ -2,10 +2,12 @@
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import type { KeyValue } from '@/model/key-value.model';
 import type { CommonData } from '@/types/common-data';
+import type { ResourcePermissions } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import ChannelList from '../components/ChannelList';
+import { checkJwt } from '../helpers/check-jwt';
 import { Helper } from '../helpers/Helper';
 import KysoApplicationLayout from '../layouts/KysoApplicationLayout';
 
@@ -32,8 +34,8 @@ const Index = ({ commonData }: Props) => {
         console.log(e.response.data);
       }
     };
-    const jwt: string | null = localStorage.getItem('jwt') as string;
-    if (!jwt) {
+    const result: boolean = checkJwt();
+    if (!result) {
       checkUserLogged();
     }
   }, []);
@@ -51,9 +53,17 @@ const Index = ({ commonData }: Props) => {
         } catch (e) {}
       }
       if (commonData?.user !== null && lastOrganizationDict[commonData.user!.id]) {
-        router.push(`${lastOrganizationDict[commonData.user!.id]}`);
-      } else if (commonData.permissions) {
-        const orgs = commonData.permissions?.organizations;
+        const indexOrg: number = commonData.permissions!.organizations!.findIndex((x: ResourcePermissions) => x.name === lastOrganizationDict[commonData.user!.id]);
+        if (indexOrg !== -1) {
+          router.push(`${lastOrganizationDict[commonData.user!.id]}`);
+        } else {
+          const orgs: ResourcePermissions[] | undefined = commonData.permissions?.organizations;
+          if (orgs && orgs.length > 0) {
+            router.push(`${orgs[0]?.name}`);
+          }
+        }
+      } else {
+        const orgs: ResourcePermissions[] | undefined = commonData.permissions?.organizations;
         if (orgs && orgs.length > 0) {
           router.push(`${orgs[0]?.name}`);
         }
