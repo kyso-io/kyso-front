@@ -252,8 +252,6 @@ const CreateReport = ({ commonData }: Props) => {
     delayedCallback('formFile', fs);
   };
 
-  console.log({ files });
-
   const delayedCallback = debounce(async (key, value) => {
     setLocalStorageItem(key, JSON.stringify(value));
     setHasAnythingCached(true);
@@ -325,10 +323,12 @@ const CreateReport = ({ commonData }: Props) => {
       description,
       organization: commonData.organization!.sluglified_name,
       team: commonData.team.sluglified_name,
+      channel: commonData.team.sluglified_name,
       tags: selectedTags,
       type: ReportType.Markdown,
       authors: selectedPeople.map((person) => person.email),
     };
+    delete (kysoConfigFile as any).team;
 
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });

@@ -243,10 +243,12 @@ const CreateReport = ({ commonData }: Props) => {
       description,
       organization: commonData.organization!.sluglified_name,
       team: selectedTeam.name,
+      channel: commonData.team!.sluglified_name,
       tags: selectedTags,
       type: ReportType.Markdown,
       authors: selectedPeople.map((person) => person.email),
     };
+    delete (kysoConfigFile as any).team;
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });
     for (const file of files) {
