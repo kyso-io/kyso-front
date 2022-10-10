@@ -114,14 +114,17 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
         <Mention
           suggestions={suggestions}
           className="relative"
-          inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm "
-          panelClassName="absolute bg-white border rounded"
+          inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm"
+          panelClassName="w-full absolute bg-white border rounded"
           autoHighlight
           onSearch={onSearch}
           name="input"
           value={value}
           onChange={(e) => setValue((e.target as HTMLInputElement).value)}
           field="nameSlug"
+          style={{
+            width: '100%',
+          }}
           placeholder={message}
           itemTemplate={itemTemplate}
         />
@@ -129,7 +132,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
         <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
       )}
 
-      <div className="flex justify-between">
+      <div className="flex justify-between pt-4">
         <div>{/* <p className="text-xs text-gray-500">Use @ to mention people</p> */}</div>
 
         <div className="flex flex-row space-x-2">

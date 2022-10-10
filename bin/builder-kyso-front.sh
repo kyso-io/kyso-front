@@ -129,9 +129,9 @@ EOF
   WORKDIR="-w /app"
   DOCKER_COMMAND="$(
     printf "%s" \
-      "docker run -d --user '$(id -u):$(id -g)' --name '$CONTAINER_NAME' " \
-      "$CONTAINER_VARS $PUBLISH_PORTS $HOSTS $VOLUMES $WORKDIR " \
-      "'$BUILDER_TAG' /bin/sh -c 'npm install && npm run dev'"
+      "docker run -d --restart always --user '$(id -u):$(id -g)' " \
+      "--name '$CONTAINER_NAME' $CONTAINER_VARS $PUBLISH_PORTS $HOSTS " \
+      "$VOLUMES $WORKDIR '$BUILDER_TAG' /bin/sh -c 'npm install && npm run dev'"
   )"
   eval "$DOCKER_COMMAND"
 }

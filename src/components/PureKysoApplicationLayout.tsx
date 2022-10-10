@@ -12,6 +12,8 @@ import { Fragment, useState } from 'react';
 import BreadcrumbNavbar from './BreadcrumbNavbar';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
+import PureShareButton from './PureShareButton';
+import SettingsBreadcrumbNavbar from './SettingsBreadcrumbNavbar';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -26,6 +28,8 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
   const { children, report, commonData, basePath, userNavigation } = props;
   const [focusOnSearchInput, setFocusOnSearchInput] = useState<boolean>(false);
   const [query, setQuery] = useState<string>('');
+  const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : '';
+  const currentUrl = `${origin}${router.asPath}`;
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const navigation: any[] = [];
@@ -38,6 +42,8 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
   if (router.query.username) {
     userProfile = true;
   }
+
+  const settings: boolean = router.pathname.includes('/settings');
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -81,7 +87,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                       </div>
                     </div>
                     {/* End Search input */}
-                    <div className="hidden md:block">
+                    <div className="md:block">
                       <div className="flex items-center ml-6">
                         {/* Profile dropdown */}
                         {!commonData.user && (
@@ -135,6 +141,9 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                             </Transition>
                           </Menu>
                         )}
+                        <div className="flex items-center px-5 cursor-pointer">
+                          <PureShareButton title="Share page" description="Send this url to someone to share this page" iconClasses={'text-white h-6 w-6'} buttonClasses="" url={currentUrl} />
+                        </div>
                       </div>
                     </div>
                     <div className="-mr-2 flex md:hidden">
@@ -144,7 +153,6 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         {open ? <XIcon className="block h-6 w-6" aria-hidden="true" /> : <MenuIcon className="block h-6 w-6" aria-hidden="true" />}
                       </Disclosure.Button>
                     </div>
-                    {/* <ShareIcon className={classNames('h-6 w-6', 'mx-6', 'text-white')} aria-hidden="true" /> */}
                   </div>
                 </div>
               </div>
@@ -195,9 +203,14 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
             </>
           )}
         </Disclosure>
-        {!userProfile && (
+        {!userProfile && !settings && router.query.organizationName && (
           <div className="p-2 z-40 bg-white">
             <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
+          </div>
+        )}
+        {!userProfile && settings && router.query.organizationName && (
+          <div className="p-2 z-40 bg-white">
+            <SettingsBreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
           </div>
         )}
       </div>

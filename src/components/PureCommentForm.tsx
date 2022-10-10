@@ -1,10 +1,10 @@
+import { PureSpinner } from '@/components/PureSpinner';
+import classNames from '@/helpers/class-names';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Mention } from 'primereact/mention';
 import { useState } from 'react';
-import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import classNames from '@/helpers/class-names';
-import { PureSpinner } from '@/components/PureSpinner';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import PureAvatar from './PureAvatar';
 
 type IPureCommentForm = {
@@ -158,6 +158,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
         <div className="flex flex-row space-x-2">
           {(comment?.id || parentComment?.id) && (
             <button
+              type="button"
               className="inline-flex items-center px-2 py-1 mr-2 text-sm font-small rounded-md shadow-sm text-gray-500 focus:outline-none focus:ring-0 bg-white hover:bg-gray-100 border border-gray-500"
               onClick={onCancel}
             >
@@ -167,6 +168,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
 
           {!comment?.id && !parentComment?.id && value !== '' && (
             <button
+              type="button"
               onClick={(e) => {
                 e.preventDefault();
                 setValue('');

@@ -3,13 +3,15 @@ import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import type { ReportData } from '@/types/report-data';
-import type { UserDTO } from '@kyso-io/kyso-model';
-import { logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
+import type { NormalizedResponseDTO, Organization, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
+import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
+import { checkJwt } from '../helpers/check-jwt';
 import { getCommonData } from '../helpers/get-common-data';
 import { getReport } from '../helpers/get-report';
+import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
 import { useAppDispatch } from '../hooks/redux-hooks';
 
 type IUnpureKysoApplicationLayoutProps = {
@@ -34,10 +36,10 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     { name: 'My profile', href: `${router.basePath}/user/${commonData?.user?.username}`, newTab: false },
     {
       name: 'Settings',
-      href: `${router.basePath}/in/settings`,
+      href: `/user/${commonData.user?.username}/settings`,
       newTab: false,
     },
-    { name: 'Feedback', href: `${router.basePath}/in/feedback`, newTab: false },
+    { name: 'Feedback', href: `${router.basePath}/feedback`, newTab: false },
     {
       name: 'Documentation',
       href: `https://docs.kyso.io/`,
@@ -56,6 +58,37 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   ];
 
   useEffect(() => {
+    checkJwt();
+    const getData = async () => {
+      const token: string | null = getLocalStorageItem('jwt');
+      // TODO: remove use of store in the near future
+      dispatch(setTokenAuthAction(token));
+      const api: Api = new Api(token);
+      let permissions: TokenPermissions | null = null;
+      let user: UserDTO | null = null;
+      if (token) {
+        api.setToken(token);
+        try {
+          const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+          user = responseUserDto.data;
+          const response: NormalizedResponseDTO<TokenPermissions> = await api.getUserPermissions(user!.username);
+          permissions = response.data;
+        } catch (e) {}
+      } else {
+        try {
+          const response: NormalizedResponseDTO<TokenPermissions> = await api.getPublicPermissions();
+          permissions = response.data;
+        } catch (e) {}
+      }
+      setCommonData({ ...commonData, user, permissions, token });
+    };
+    getData();
+  }, []);
+
+  useEffect(() => {
+    if (!commonData.permissions) {
+      return;
+    }
     if (!router.isReady) {
       return;
     }
@@ -68,13 +101,14 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       dispatch(setTeamAuthAction(teamName));
     }
     const getData = async () => {
-      const cd: CommonData = await getCommonData({
+      const cd: { organization: Organization | null; team: Team | null; errorOrganization: string | null; errorTeam: string | null } = await getCommonData({
+        token: commonData.token,
+        permissions: commonData.permissions!,
+        user: commonData.user!,
         organizationName: organizationName as string,
         teamName: teamName as string,
       });
-      // TODO: remove use of store in the near future
-      dispatch(setTokenAuthAction(cd.token));
-      setCommonData(cd);
+      setCommonData({ ...commonData, ...cd });
       let version: number = 0;
       if (router.query.version && !Number.isNaN(router.query.version as any)) {
         version = parseInt(router.query.version as string, 10);
@@ -82,7 +116,8 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       if (router.query.reportName) {
         const getReportData = async () => {
           const data: ReportData = await getReport({
-            commonData: cd,
+            token: commonData.token,
+            team: cd.team,
             reportName: router.query.reportName as string,
             version,
           });
@@ -92,7 +127,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       }
     };
     getData();
-  }, [router?.isReady, router.asPath]);
+  }, [commonData.permissions, router?.isReady, router.query?.organizationName, router.query?.teamName, router.query?.reportName, router.query?.version]);
 
   const setUser = (user: UserDTO): void => {
     setCommonData({

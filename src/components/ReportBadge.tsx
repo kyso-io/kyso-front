@@ -8,7 +8,6 @@ import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
 import { Fragment, useMemo } from 'react';
-import router from 'next/router';
 import checkPermissions from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureShareButton from './PureShareButton';
@@ -136,7 +135,13 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
           <span>{report.comments.length}</span>
         </div>
         <div className="flex flex-row items-center text-gray-500 text-xs space-x-4">
-          <PureShareButton report={report} basePath={router.basePath} commonData={commonData} color={'text-gray-500'} />
+          <PureShareButton
+            iconClasses="h-5 w-5 text-gray-500"
+            buttonClasses="hover:bg-gray-100"
+            title="Share report"
+            description="Send this url to someone to share this report"
+            url={`${window.location.origin}/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`}
+          />
           <div className="flex flex-row items-center space-x-2 bg-white hover:bg-gray-100 p-2  rounded-md">
             <span>{report.stars}</span>
             <ThumbUpIcon

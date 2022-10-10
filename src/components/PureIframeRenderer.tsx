@@ -33,13 +33,13 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
     }
   };
 
+  const parameters = `${'/scs'}${file.path_scs}`;
+
+  /*
+  // Don't pass the token, kyso-api sets a HttpOnly cookie with it for '/scs'
   const jwtToken = localStorage.getItem('jwt');
-
-  let parameters = `${'/scs'}${file.path_scs}`;
-
-  if (jwtToken) {
-    parameters += `?token=${jwtToken}`;
-  }
+  if (jwtToken) { parameters += `?token=${jwtToken}`; }
+  */
 
   if (!file || !file.path_scs || file.path_scs.length === 0) {
     return <div>Invalid path</div>;

@@ -1,19 +1,22 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import ErrorNotification from '@/components/ErrorNotification';
 import { Helper } from '@/helpers/Helper';
 import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
+import type { Token, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
-import { Api, loginAction, setError as storeSetError } from '@kyso-io/kyso-store';
+import { Api, setError as storeSetError, setTokenAuthAction } from '@kyso-io/kyso-store';
+import decode from 'jwt-decode';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import uuid from 'uuid';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
+import type { DecodedToken } from '../types/decoded-token';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -29,7 +32,6 @@ const Index = () => {
   const { redirect } = router.query;
 
   const [email, setEmail] = useState(getLocalStorageItem('email') || '');
-  // const [error, setError] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const dispatch = useDispatch<AppDispatch>();
@@ -80,11 +82,11 @@ const Index = () => {
 
       const tmpEnableGitlabAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
 
-      const tmpEnableBitbucketAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET).value === 'true';
+      const tmpEnableBitbucketAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
 
-      const tmpEnableKysoAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO).value === 'true';
+      const tmpEnableKysoAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
 
-      const tmpEnablePingSamlAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML).value === 'true';
+      const tmpEnablePingSamlAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
 
       setGoogleUrl(
         `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&response_type=code&redirect_uri=${encodeURIComponent(
@@ -164,16 +166,17 @@ const Index = () => {
       return;
     }
 
-    const loginData: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
-    const result = await dispatch(loginAction(loginData));
-    if (result?.payload) {
+    try {
+      const api: Api = new Api();
+      const login: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
+      const response: NormalizedResponseDTO<string> = await api.login(login);
       localStorage.removeItem('email');
-      const token: string = result.payload;
+      const token: string = response.data;
+      dispatch(setTokenAuthAction(token));
       localStorage.setItem('jwt', token);
       // Get user info to check if has completed the captcha challenge
-      const api: Api = new Api(token);
-      const resultUser: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      const user: UserDTO = resultUser.data;
+      const jwtToken: DecodedToken = decode<DecodedToken>(token);
+      const user: Token = jwtToken.payload;
       setTimeout(() => {
         if (captchaEnabled && user.show_captcha) {
           if (redirect) {
@@ -186,8 +189,9 @@ const Index = () => {
           router.push('/');
         }
       }, 200);
-    } else {
-      setError('Invalid credentials');
+    } catch (e: any) {
+      const errorResponse: { statusCode: number; message: string; error: string } = e.response.data;
+      setError(errorResponse.message);
     }
   };
 
