@@ -1,10 +1,10 @@
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { ChatAltIcon, ChatIcon, TagIcon, DocumentReportIcon, ChatAlt2Icon, UserGroupIcon } from '@heroicons/react/solid';
+import { ChatAlt2Icon, ChatAltIcon, ChatIcon, DocumentReportIcon, TagIcon, UserGroupIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, Comment, Discussion, NormalizedResponseDTO, Organization, Relations, Report, Tag, Team, User } from '@kyso-io/kyso-model';
 import { ActionEnum, EntityEnum } from '@kyso-io/kyso-model';
 import moment from 'moment';
-import React from 'react';
+import React, { useMemo } from 'react';
 import PureAvatar from './PureAvatar';
 
 interface ActivityFeedProps {
@@ -273,28 +273,33 @@ interface Props {
   getMore: () => void;
 }
 
+const NUM_ITEMS_ACTIVITY_FEED = 6;
+
 const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
-  if (!activityFeed) {
-    return null;
-  }
+  const data: ActivityFeed[] = useMemo(() => {
+    if (!activityFeed) {
+      return [];
+    }
+    return activityFeed.data.slice(0, NUM_ITEMS_ACTIVITY_FEED);
+  }, [activityFeed]);
   return (
     <React.Fragment>
       <div className="flow-root">
         <ul role="list" className="-mb-8">
-          {activityFeed.data.map((af: ActivityFeed, index: number) => {
+          {data.map((af: ActivityFeed, index: number) => {
             switch (af.entity) {
               case EntityEnum.COMMENT:
-                if (!activityFeed.relations!.comment[af.entity_id!]) {
+                if (!activityFeed!.relations!.comment[af.entity_id!]) {
                   return null;
                 }
                 break;
               case EntityEnum.DISCUSSION:
-                if (!activityFeed.relations!.discussion[af.entity_id!]) {
+                if (!activityFeed!.relations!.discussion[af.entity_id!]) {
                   return null;
                 }
                 break;
               case EntityEnum.ORGANIZATION:
-                if (!activityFeed.relations!.organization[af.entity_id!]) {
+                if (!activityFeed!.relations!.organization[af.entity_id!]) {
                   return null;
                 }
                 if (af.action !== ActionEnum.ADD_MEMBER && af.action !== ActionEnum.REMOVE_MEMBER && af.action !== ActionEnum.CREATE) {
@@ -302,17 +307,17 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
                 }
                 break;
               case EntityEnum.REPORT:
-                if (!activityFeed.relations!.report[af.entity_id!]) {
+                if (!activityFeed!.relations!.report[af.entity_id!]) {
                   return null;
                 }
                 break;
               case EntityEnum.TAG:
-                if (!activityFeed.relations!.tag[af.entity_id!]) {
+                if (!activityFeed!.relations!.tag[af.entity_id!]) {
                   return null;
                 }
                 break;
               case EntityEnum.TEAM:
-                if (!activityFeed.relations!.team[af.entity_id!]) {
+                if (!activityFeed!.relations!.team[af.entity_id!]) {
                   return null;
                 }
                 if (af.action !== ActionEnum.ADD_MEMBER && af.action !== ActionEnum.REMOVE_MEMBER && af.action !== ActionEnum.CREATE) {
@@ -325,14 +330,14 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
             return (
               <li key={af.id}>
                 <div className="relative pb-8">
-                  {index < activityFeed.data.length - 1 && <span className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-300" aria-hidden="true" />}
+                  {index < activityFeed!.data.length - 1 && <span className="absolute top-5 left-5 -ml-px h-full w-0.5 bg-gray-300" aria-hidden="true" />}
                   <div className="relative flex items-start space-x-3">
-                    {af.entity === EntityEnum.COMMENT && <ActivityFeedComment activityFeed={af} relations={activityFeed.relations!} />}
-                    {af.entity === EntityEnum.DISCUSSION && <ActivityFeedDiscussion activityFeed={af} relations={activityFeed.relations!} />}
-                    {af.entity === EntityEnum.ORGANIZATION && <ActivityFeedOrganization activityFeed={af} relations={activityFeed.relations!} />}
-                    {af.entity === EntityEnum.REPORT && <ActivityFeedReport activityFeed={af} relations={activityFeed.relations!} />}
-                    {af.entity === EntityEnum.TAG && <ActivityFeedTag activityFeed={af} relations={activityFeed.relations!} />}
-                    {af.entity === EntityEnum.TEAM && <ActivityFeedTeam activityFeed={af} relations={activityFeed.relations!} />}
+                    {af.entity === EntityEnum.COMMENT && <ActivityFeedComment activityFeed={af} relations={activityFeed!.relations!} />}
+                    {af.entity === EntityEnum.DISCUSSION && <ActivityFeedDiscussion activityFeed={af} relations={activityFeed!.relations!} />}
+                    {af.entity === EntityEnum.ORGANIZATION && <ActivityFeedOrganization activityFeed={af} relations={activityFeed!.relations!} />}
+                    {af.entity === EntityEnum.REPORT && <ActivityFeedReport activityFeed={af} relations={activityFeed!.relations!} />}
+                    {af.entity === EntityEnum.TAG && <ActivityFeedTag activityFeed={af} relations={activityFeed!.relations!} />}
+                    {af.entity === EntityEnum.TEAM && <ActivityFeedTeam activityFeed={af} relations={activityFeed!.relations!} />}
                   </div>
                 </div>
               </li>
