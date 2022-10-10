@@ -31,7 +31,7 @@ const UnpureReportActionDropdown = (props: Props) => {
   const deleteReport = async () => {
     if (!hasPermissionDeleteReport) {
       setShowToaster(true);
-      setMessageToaster('Unsudicient permission');
+      setMessageToaster('Insufficient permissions');
       return;
     }
     if (typeof window !== 'undefined' && !window.confirm('Are you sure you want to delete this report?')) {

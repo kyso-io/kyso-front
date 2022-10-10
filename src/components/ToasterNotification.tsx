@@ -2,7 +2,7 @@ import { Transition } from '@headlessui/react';
 import { XIcon } from '@heroicons/react/solid';
 import type { ReactElement } from 'react';
 import { Fragment } from 'react';
-import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
+import type { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 
 type Props = {
   show: boolean;
@@ -13,7 +13,6 @@ type Props = {
 };
 
 const ToasterNotification = ({ show, setShow, icon, message, backgroundColor }: Props) => {
-  console.log('TailwindColor', TailwindColor);
   return (
     <div key={message} aria-live="assertive" className="z-50 fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start">
       <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
