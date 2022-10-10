@@ -127,7 +127,7 @@ const CreateReport = ({ commonData }: Props) => {
       return null;
     }
     return checkPermissions(commonData, ReportPermissionsEnum.CREATE);
-  }, [commonData.permissions]);
+  }, [commonData.permissions, commonData.organization, commonData.team]);
 
   const cleanStorage = () => {
     removeLocalStorageItem('formTitle');
@@ -332,33 +332,33 @@ const CreateReport = ({ commonData }: Props) => {
 
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });
+    let numFiles = 0;
     for (const file of files) {
       const fileContent: string | null = getLocalStorageItem(file.id);
-      let blob: Blob;
-      if (fileContent) {
-        blob = await (await fetch(fileContent)).blob();
-      } else {
-        blob = new Blob([''], { type: 'plain/text' });
+      if (!fileContent && file.type !== 'folder') {
+        setBusy(false);
+        setError(`File ${file.name} is empty.`);
+        return;
       }
       if (file.type === 'folder') {
         zip.folder(file.path);
       } else {
+        const blob: Blob = await (await fetch(fileContent!)).blob();
         zip.file(file.path, blob, { createFolders: true });
+        numFiles += 1;
       }
     }
-    const blobZip = await zip.generateAsync({ type: 'blob' });
-
-    // testing: to download generated zip file
-    // saveAs(blobZip)
-
-    const formData = new FormData();
+    if (numFiles === 0) {
+      setBusy(false);
+      setError('You need to add at least one file.');
+      return;
+    }
+    const blobZip: Blob = await zip.generateAsync({ type: 'blob' });
+    const formData: FormData = new FormData();
     formData.append('file', blobZip);
-
     try {
       const { data: newReport }: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
-
       cleanStorage();
-
       for (const file of files) {
         removeLocalStorageItem(file.id);
       }

@@ -598,7 +598,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                       </PureReportHeader>
                     </div>
 
-                    <div className="border-y p-0">
+                    <div className="border-y p-0 mx-4">
                       {fileToRender && onlyVisibleCell && (
                         <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
                           Showing only this cell.

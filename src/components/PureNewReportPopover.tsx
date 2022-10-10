@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
