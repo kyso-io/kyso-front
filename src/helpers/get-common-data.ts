@@ -1,19 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
-import type { CommonData } from '@/types/common-data';
 import type { NormalizedResponseDTO, Organization, ResourcePermissions, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { getLocalStorageItem } from './isomorphic-local-storage';
 
 interface Props {
+  token: string | null;
   permissions: TokenPermissions;
   user: UserDTO | null;
   organizationName?: string;
   teamName?: string;
 }
 
-export const getCommonData = async ({ permissions, user, organizationName, teamName }: Props): Promise<CommonData> => {
-  const token: string | null = getLocalStorageItem('jwt');
+export const getCommonData = async ({
+  token,
+  permissions,
+  user,
+  organizationName,
+  teamName,
+}: Props): Promise<{ organization: Organization | null; team: Team | null; errorOrganization: string | null; errorTeam: string | null }> => {
   const api: Api = new Api(token);
   let organizationResourcePermissions: ResourcePermissions | undefined;
   if (permissions) {
@@ -100,5 +105,5 @@ export const getCommonData = async ({ permissions, user, organizationName, teamN
       }
     }
   }
-  return { token, user, permissions, organization, errorOrganization, team, errorTeam };
+  return { organization, errorOrganization, team, errorTeam };
 };
