@@ -595,6 +595,7 @@ const CreateReport = ({ commonData }: Props) => {
                     onCreate={(newFile: CreationReportFileSystemObject) => {
                       addNewFile(newFile);
                     }}
+                    files={files}
                   />
                   <NewReportNamingDropdown
                     label="Create new folder"
@@ -603,6 +604,7 @@ const CreateReport = ({ commonData }: Props) => {
                     onCreate={(n: CreationReportFileSystemObject) => {
                       addNewFile(n);
                     }}
+                    files={files}
                   />
                   <div>
                     <label

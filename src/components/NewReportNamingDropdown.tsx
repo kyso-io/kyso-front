@@ -14,31 +14,91 @@ type INewReportNamingDropdown = {
   label: string;
   icon: ElementType;
   isFolder?: boolean;
-  parent?: CreationReportFileSystemObject;
+  parent?: CreationReportFileSystemObject | null;
   showLabel?: boolean;
   value?: string;
   className?: string;
   okButtonLabel?: string;
   cancelButtonLabel?: string;
   onCreate: (newName: CreationReportFileSystemObject) => void;
+  files: CreationReportFileSystemObject[];
 };
 
+const FORBIDDEN_FILES: string[] = ['kyso.json', 'kyso.yaml', 'kyso.yml'];
+
 const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
-  const { label, icon: NewIcon, onCreate, isFolder, parent, showLabel, value } = props;
+  const { label, icon: NewIcon, onCreate, isFolder, parent, showLabel, value, files } = props;
   const [newName, setNewName] = useState(value || '');
   const inputRef: any = useRef<any>(null);
   const refMenuButton = useRef<HTMLButtonElement>(null);
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
+  const [errorMessageInput, setErrorMessageInput] = useState<string>('');
 
-  const handleCreation = (): void => {
+  const handleCreation = (e: any): void => {
     if (!newName) {
       setMessageToaster('Please enter a name');
       setShowToaster(true);
+      e.preventDefault();
       return;
     }
-    const fileType: string = newName.split('.').length > 1 ? newName.split('.').pop()! : 'file';
-    const fileObject = new CreationReportFileSystemObject(v4(), newName, newName, isFolder ? 'folder' : fileType, '', parent?.id);
+    const formattedName: string = newName.trim().toLowerCase();
+    if (FORBIDDEN_FILES.includes(formattedName)) {
+      setErrorMessageInput(`${formattedName} is a self-generated configuration file`);
+      e.preventDefault();
+      return;
+    }
+    if (formattedName.includes(' ')) {
+      setErrorMessageInput('Spaces are not allowed');
+      e.preventDefault();
+      return;
+    }
+    if (formattedName.includes('/')) {
+      setErrorMessageInput('Slashes are not allowed');
+      e.preventDefault();
+      return;
+    }
+    if (formattedName.includes('\\')) {
+      setErrorMessageInput('Backslashes are not allowed');
+      e.preventDefault();
+      return;
+    }
+    if (formattedName.startsWith('.')) {
+      setErrorMessageInput('File names cannot start with a dot');
+      e.preventDefault();
+      return;
+    }
+    if (formattedName.endsWith('.')) {
+      setErrorMessageInput('File names cannot end with a dot');
+      e.preventDefault();
+      return;
+    }
+    if (formattedName.length > 50) {
+      setErrorMessageInput('File names cannot be longer than 50 characters');
+      e.preventDefault();
+      return;
+    }
+
+    const parentId: string | null = parent ? parent.id : null;
+    console.log({ parent, files });
+    if (parentId) {
+      const existingItem: CreationReportFileSystemObject | undefined = files.find((item: CreationReportFileSystemObject) => item.parentId === parentId && item.name === formattedName);
+      if (existingItem) {
+        setErrorMessageInput('A file with this name already exists');
+        e.preventDefault();
+        return;
+      }
+    } else {
+      const existingItem: CreationReportFileSystemObject | undefined = files.find((item: CreationReportFileSystemObject) => item.name === formattedName);
+      if (existingItem) {
+        setErrorMessageInput('A file with this name already exists');
+        e.preventDefault();
+        return;
+      }
+    }
+
+    const fileType: string = formattedName.split('.').length > 1 ? formattedName.split('.').pop()! : 'file';
+    const fileObject: CreationReportFileSystemObject = new CreationReportFileSystemObject(v4(), formattedName, formattedName, isFolder ? 'folder' : fileType, '', parentId);
     onCreate(fileObject);
     setNewName('');
     setMessageToaster('');
@@ -87,13 +147,15 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                             value={newName}
                             className="w-full rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                             onChange={(event) => {
-                              setNewName(event.target.value);
+                              const name: string = event.target.value || '';
+                              setErrorMessageInput('');
+                              setNewName(name);
                               setMessageToaster('');
                               setShowToaster(false);
                             }}
                             onKeyDown={(e) => {
                               if (e.key === 'Enter') {
-                                handleCreation();
+                                handleCreation(e);
                               }
                               if (e.code === 'Space') {
                                 setNewName(`${e.target.value} `);
@@ -103,8 +165,9 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                             ref={inputRef}
                           />
                         </div>
+                        {errorMessageInput && <p className="text-red-500 my-2">{errorMessageInput}</p>}
                       </div>
-                      <div className="w-full sm:max-w-xs mt-6 text-right">
+                      <div className="w-full sm:max-w-xs mt-2 text-right">
                         <Menu.Button
                           type="reset"
                           className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-blue-gray-900 hover:bg-blue-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"

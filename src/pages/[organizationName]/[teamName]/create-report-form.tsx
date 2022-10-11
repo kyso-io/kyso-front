@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-continue */
 import MemberFilterSelector from '@/components/MemberFilterSelector';
 import PureKysoButton from '@/components/PureKysoButton';
 import { PureSpinner } from '@/components/PureSpinner';
@@ -285,7 +286,13 @@ const CreateReport = ({ commonData }: Props) => {
       return;
     }
     const newFiles: File[] = [];
+    const forbiddenFiles: string[] = ['kyso.json', 'kyso.yaml', 'kyso.yml'];
+    const ignoredFiles: string[] = [];
     for (const file of event.target.files) {
+      if (forbiddenFiles.includes(file.name)) {
+        ignoredFiles.push(file.name);
+        continue;
+      }
       const index: number = files.findIndex((f: File) => f.name === file.name);
       if (index === -1) {
         newFiles.push(file);
@@ -295,6 +302,14 @@ const CreateReport = ({ commonData }: Props) => {
       setMainFile(newFiles[0]!.name);
     }
     setFiles([...files, ...newFiles]);
+    if (ignoredFiles.length > 0) {
+      setMessageToaster(
+        ignoredFiles.length === 1
+          ? `${ignoredFiles[0]} is a self-generated configuration file. It is not possible to upload it.`
+          : `The following files ${ignoredFiles.join(', ')} will not be uploaded. The system will generate a configuration file.`,
+      );
+      setShowToaster(true);
+    }
   };
 
   if (userIsLogged === null) {
