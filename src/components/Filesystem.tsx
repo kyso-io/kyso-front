@@ -55,6 +55,7 @@ const Filesystem = (props: Props) => {
           onSelectedFile={(selectedItem: FilesystemItem) => {
             props.onSelectedFile!(selectedItem);
           }}
+          files={props.files}
         />
       ))}
     </>
