@@ -172,7 +172,6 @@ const Index = ({ commonData }: Props) => {
         setShow={setShow}
         icon={alertIsError ? <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" /> : <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />}
         message={alertText}
-        backgroundColor={TailwindColor.SLATE_50}
       />
     </div>
   );

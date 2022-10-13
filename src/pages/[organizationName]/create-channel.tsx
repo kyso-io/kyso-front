@@ -13,7 +13,6 @@ import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import ToasterNotification from '../../components/ToasterNotification';
 import { checkJwt } from '../../helpers/check-jwt';
-import { TailwindColor } from '../../tailwind/enum/tailwind-color.enum';
 
 interface Props {
   commonData: CommonData;
@@ -329,13 +328,7 @@ const Index = ({ commonData }: Props) => {
           )
         )}
       </div>
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
+      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
     </div>
   );
 };

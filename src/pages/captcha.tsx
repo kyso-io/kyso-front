@@ -124,13 +124,7 @@ const Index = ({ commonData }: Props) => {
           )}
         </div>
       </div>
-      <ToasterNotification
-        show={show}
-        setShow={setShow}
-        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={alertText}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
+      <ToasterNotification show={show} setShow={setShow} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={alertText} />
     </div>
   );
 };

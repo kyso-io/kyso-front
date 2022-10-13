@@ -47,13 +47,21 @@ const ListboxWithText = ({ selectedLabel, isOrgAdmin, roles, setSelectedRole, se
               <Menu.Item key={role.value}>
                 {({ active }) => (
                   <div
+                    className={classNames('relative cursor-default select-none')}
                     onClick={() => {
                       setSelectedRole(role.value);
                       setSelectedLabel(role.label);
                     }}
-                    className={classNames('relative cursor-default select-none')}
                   >
-                    <span className={classNames(active ? 'bg-gray-100  text-gray-900' : 'text-gray-700', 'block px-4 pt-2 text-sm')}>{role.label}</span>
+                    {role.label === 'Remove access' ? (
+                      <a href="#" className={classNames(active ? 'bg-gray-100  text-red-900' : 'text-red-700', 'block px-4 mt-2 text-sm border-t pt-3')}>
+                        {role.label}
+                      </a>
+                    ) : (
+                      <a href="#" className={classNames(active ? 'bg-gray-100  text-gray-900' : 'text-gray-700', 'block px-4 pt-2 text-sm')}>
+                        {role.label}
+                      </a>
+                    )}
                     <p className={classNames(active ? 'bg-gray-100 text-gray-500' : 'text-gray-400', 'block px-4 pb-2 text-sm')}>{role.description}</p>
                   </div>
                 )}

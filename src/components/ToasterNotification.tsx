@@ -2,17 +2,15 @@ import { Transition } from '@headlessui/react';
 import { XIcon } from '@heroicons/react/solid';
 import type { ReactElement } from 'react';
 import { Fragment } from 'react';
-import type { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 
 type Props = {
   show: boolean;
   setShow: (show: boolean) => void;
   icon: ReactElement;
   message: string;
-  backgroundColor: TailwindColor;
 };
 
-const ToasterNotification = ({ show, setShow, icon, message, backgroundColor }: Props) => {
+const ToasterNotification = ({ show, setShow, icon, message }: Props) => {
   return (
     <div key={message} aria-live="assertive" className="z-50 fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start">
       <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
@@ -32,7 +30,7 @@ const ToasterNotification = ({ show, setShow, icon, message, backgroundColor }: 
               <div className="flex items-start">
                 <div className="shrink-0">{icon}</div>
                 <div className="ml-3 w-0 flex-1 pt-0.5">
-                  <p className="text-sm font-medium text-gray-900">{message}</p>
+                  <p className="text-sm font-medium text-gray-300">{message}</p>
                 </div>
                 <div className="ml-4 shrink-0 flex">
                   <button

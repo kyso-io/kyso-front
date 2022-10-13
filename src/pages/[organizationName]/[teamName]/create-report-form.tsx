@@ -26,7 +26,6 @@ import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { Helper } from '../../../helpers/Helper';
-import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
 
 const token: string | null = getLocalStorageItem('jwt');
 
@@ -580,7 +579,6 @@ const CreateReport = ({ commonData }: Props) => {
           setShow={setShowToaster}
           icon={busy ? <InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" /> : <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
           message={messageToaster}
-          backgroundColor={TailwindColor.SLATE_50}
         />
       </div>
     ) : (

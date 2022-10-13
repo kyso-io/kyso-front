@@ -36,7 +36,6 @@ import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
-import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -609,13 +608,7 @@ const CreateReport = ({ commonData }: Props) => {
                   <div>
                     <label
                       htmlFor="formFileLg"
-                      className=" 
-                    text-left p-1 hover:cursor-pointer hover:bg-gray-100
-                    rounded text-sm font-medium
-                    block
-                    
-                    form-label relative items-center  
-                    focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
+                      className="text-left p-1 hover:cursor-pointer hover:bg-gray-100 rounded text-sm font-medium block form-label relative items-center focus:z-10 focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
                     >
                       <UploadIcon className="h-5 w-5 text-gray-600" aria-hidden="true" />
                       <input
@@ -624,8 +617,11 @@ const CreateReport = ({ commonData }: Props) => {
                         id="formFileLg"
                         type="file"
                         multiple
-                        onChange={(e: ChangeEvent<HTMLInputElement>) => onUploadFile(e)}
+                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                          onUploadFile(e);
+                        }}
                       />
+                      {/* no working  */}
                     </label>
                   </div>
                 </div>
@@ -660,6 +656,7 @@ const CreateReport = ({ commonData }: Props) => {
                       }
                     }}
                     onAddNewFile={(newFile: CreationReportFileSystemObject) => {
+                      console.log('newFile', newFile);
                       addNewFile(newFile);
                     }}
                     onRemoveFile={(fileToRemove: CreationReportFileSystemObject) => {
@@ -721,7 +718,7 @@ const CreateReport = ({ commonData }: Props) => {
               </>
             )}
 
-            <div className="text-right">{error && <ErrorNotification message={error} />}</div>
+            <div>{error && <ErrorNotification message={error} />}</div>
           </div>
         </div>
         <div className="flex flex-row items-center">
@@ -744,13 +741,7 @@ const CreateReport = ({ commonData }: Props) => {
             </div>
           </div>
         </div>
-        <ToasterNotification
-          show={showToaster}
-          setShow={setShowToaster}
-          icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-          message={messageToaster}
-          backgroundColor={TailwindColor.SLATE_50}
-        />
+        <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
       </div>
     ) : (
       <div className="flex flex-row space-x-8 p-2">

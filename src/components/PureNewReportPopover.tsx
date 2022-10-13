@@ -8,7 +8,6 @@ import { UploadIcon } from '@heroicons/react/solid';
 import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
-import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 import ToasterNotification from './ToasterNotification';
 
 const TIMEOUT_MS = 5000;
@@ -187,13 +186,7 @@ const PureNewReportPopover = (props: Props) => {
           );
         }}
       </Popover>
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
+      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
     </React.Fragment>
   );
 };

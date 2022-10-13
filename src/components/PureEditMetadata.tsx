@@ -9,7 +9,6 @@ import { InformationCircleIcon, PlusSmIcon as PlusSmIconSolid } from '@heroicons
 import { toSvg } from 'jdenticon';
 // import PureNotification from '@/components/PureNotification';
 // import { useRouter } from 'next/router';
-import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import 'primeicons/primeicons.css'; // icons
@@ -116,13 +115,7 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
 
   return (
     <>
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-        icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />}
-      />
+      <ToasterNotification show={showToaster} setShow={setShowToaster} message={messageToaster} icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />} />
 
       <Transition.Root show={isOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={setOpen}>
