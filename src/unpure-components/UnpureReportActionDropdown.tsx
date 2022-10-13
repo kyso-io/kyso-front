@@ -1,7 +1,5 @@
-import PureKysoButton from '@/components/PureKysoButton';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
-import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { DotsVerticalIcon, FolderDownloadIcon, InformationCircleIcon, PencilIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
@@ -54,10 +52,11 @@ const UnpureReportActionDropdown = (props: Props) => {
         icon={<InformationCircleIcon className="h-6 w-6 text-rose-700" aria-hidden="true" />}
       />
       {/* <PureEditMetadata isOpen={isEditOpen} setOpen={() => openEdit(!isEditOpen)} report={report} commonData={commonData} authors={authors} /> */}
-      <PureKysoButton type={KysoButton.TERCIARY} onClick={() => deleteReport()} className={'relative inline-block text-rose-700 rounded-none  border border-r-0 border-y-0 border-gray-300 p-2'}>
+      {/* There is a option to delete in the "dots menu". Hiding this one */}
+      {/* <PureKysoButton type={KysoButton.TERCIARY} onClick={() => deleteReport()} className={'relative inline-block text-rose-700 rounded-none  border border-r-0 border-y-0 border-gray-300 p-2'}>
         <TrashIcon className="mr-1 h-5 w-5 text-rose-700" aria-hidden="true" />
         Delete
-      </PureKysoButton>
+      </PureKysoButton> */}
 
       <Menu as="div" className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm relative inline-block" style={{ zIndex: 1 }}>
         <Menu.Button className="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
