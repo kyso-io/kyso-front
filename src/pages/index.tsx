@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { getLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import type { KeyValue } from '@/model/key-value.model';
 import type { CommonData } from '@/types/common-data';
 import type { ResourcePermissions } from '@kyso-io/kyso-model';
@@ -57,6 +57,8 @@ const Index = ({ commonData }: Props) => {
         if (indexOrg !== -1) {
           router.push(`${lastOrganizationDict[commonData.user!.id]}`);
         } else {
+          delete lastOrganizationDict[commonData.user!.id];
+          setLocalStorageItem('last_organization', JSON.stringify(lastOrganizationDict));
           const orgs: ResourcePermissions[] | undefined = commonData.permissions?.organizations;
           if (orgs && orgs.length > 0) {
             router.push(`${orgs[0]?.name}`);
