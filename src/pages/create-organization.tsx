@@ -92,10 +92,10 @@ const Index = ({ commonData }: Props) => {
       if (file) {
         await api.updateOrganizationImage(organization!.id!, file);
       }
-      router.push(`/${organization.sluglified_name}`);
+      window.location.href = `/${organization.sluglified_name}`;
+      setBusy(false);
     } catch (er: any) {
       setError(er.response.data.message);
-    } finally {
       setBusy(false);
     }
   };
@@ -116,7 +116,7 @@ const Index = ({ commonData }: Props) => {
       <div className="w-2/12"></div>
       <div className="w-8/12 flex flex-col space-y-8">
         {userIsLogged ? (
-          <form className="space-y-8 divide-y divide-gray-200" onSubmit={createOrganization}>
+          <form className="space-y-8 divide-y divide-gray-200">
             <div className="space-y-8 divide-y divide-gray-200 sm:space-y-5">
               <div>
                 <div>
@@ -256,7 +256,8 @@ const Index = ({ commonData }: Props) => {
                 <div className="max-w-lg flex w-full justify-between items-center">
                   <div className="text-red-500 text-sm">{error}</div>
                   <button
-                    type="submit"
+                    type="button"
+                    onClick={createOrganization}
                     className={classNames(
                       error ? 'opacity-75 cursor-not-allowed' : 'hover:bg-kyso-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
                       'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-kyso-600 ',
