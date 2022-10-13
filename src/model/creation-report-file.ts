@@ -13,7 +13,7 @@ export class CreationReportFileSystemObject {
 
   public main?: boolean;
 
-  constructor(id: string, path: string, name: string, type: string, text: string, parentId?: string, main?: boolean) {
+  constructor(id: string, path: string, name: string, type: string, text: string, parentId?: string | null, main?: boolean) {
     this.id = id;
     this.name = name;
     this.path = path;
