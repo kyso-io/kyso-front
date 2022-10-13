@@ -114,7 +114,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                               leaveFrom="transform opacity-100 scale-100"
                               leaveTo="transform opacity-0 scale-95"
                             >
-                              <Menu.Items className="z-[100] absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
+                              <Menu.Items className="z-50 absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
                                 {userNavigation.map((item) => (
                                   <Menu.Item key={item.name}>
                                     {({ active }) => {

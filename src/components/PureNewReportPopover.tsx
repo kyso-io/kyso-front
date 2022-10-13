@@ -40,7 +40,7 @@ const PureNewReportPopover = (props: Props) => {
 
   return (
     <React.Fragment>
-      <Popover as="div" className="relative inline-block z-10">
+      <Popover as="div" className="relative inline-block z-[5]">
         {({ open }) => {
           useEffect(() => {
             if (!open) {
