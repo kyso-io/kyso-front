@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-continue */
 import MemberFilterSelector from '@/components/MemberFilterSelector';
 import PureKysoButton from '@/components/PureKysoButton';
 import { PureSpinner } from '@/components/PureSpinner';
@@ -46,16 +47,20 @@ const CreateReport = ({ commonData }: Props) => {
   const [channelMembers, setChannelMembers] = useState<TeamMember[]>([]);
   const [selectedPeople, setSelectedPeople] = useState<TeamMember[]>(channelMembers);
   const [allowedTags, setAllowedTags] = useState<string[]>([]);
+  const [selectedTeam, setSelectedTeam] = useState<ResourcePermissions | null>(null);
   const hasPermissionCreateReport: boolean | null = useMemo(() => {
     if (!commonData.permissions) {
       return null;
     }
-    return checkPermissions(commonData, ReportPermissionsEnum.CREATE);
-  }, [commonData.permissions]);
+    if (!selectedTeam) {
+      return checkPermissions(commonData, ReportPermissionsEnum.CREATE);
+    }
+    const cd: any = { ...commonData, team: selectedTeam };
+    return checkPermissions(cd, ReportPermissionsEnum.CREATE);
+  }, [commonData.permissions, commonData.organization, commonData.team, selectedTeam]);
   const [files, setFiles] = useState<File[]>([]);
   const [mainFile, setMainFile] = useState<string | null>(null);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
-  const [selectedTeam, setSelectedTeam] = useState<ResourcePermissions | null>(null);
   const teamsResourcePermissions: ResourcePermissions[] = useMemo(() => {
     if (!commonData.organization) {
       return [];
@@ -63,7 +68,12 @@ const CreateReport = ({ commonData }: Props) => {
     if (!commonData.permissions || !commonData.permissions.teams) {
       return [];
     }
-    return commonData.permissions.teams.filter((teamResourcePermissions: ResourcePermissions) => teamResourcePermissions.organization_id === commonData.organization!.id);
+    return commonData.permissions.teams.filter((teamResourcePermissions: ResourcePermissions) => {
+      const sameOrg: boolean = teamResourcePermissions.organization_id === commonData.organization!.id;
+      const cd: any = { ...commonData, team: teamResourcePermissions };
+      const hasPermissionInOrg: boolean = checkPermissions(cd, ReportPermissionsEnum.CREATE);
+      return sameOrg && hasPermissionInOrg;
+    });
   }, [commonData.permissions, commonData.organization]);
 
   useEffect(() => {
@@ -243,7 +253,7 @@ const CreateReport = ({ commonData }: Props) => {
       description,
       organization: commonData.organization!.sluglified_name,
       team: selectedTeam.name,
-      channel: commonData.team!.sluglified_name,
+      channel: selectedTeam.name,
       tags: selectedTags,
       type: ReportType.Markdown,
       authors: selectedPeople.map((person) => person.email),
@@ -276,7 +286,13 @@ const CreateReport = ({ commonData }: Props) => {
       return;
     }
     const newFiles: File[] = [];
+    const forbiddenFiles: string[] = ['kyso.json', 'kyso.yaml', 'kyso.yml'];
+    const ignoredFiles: string[] = [];
     for (const file of event.target.files) {
+      if (forbiddenFiles.includes(file.name)) {
+        ignoredFiles.push(file.name);
+        continue;
+      }
       const index: number = files.findIndex((f: File) => f.name === file.name);
       if (index === -1) {
         newFiles.push(file);
@@ -286,6 +302,14 @@ const CreateReport = ({ commonData }: Props) => {
       setMainFile(newFiles[0]!.name);
     }
     setFiles([...files, ...newFiles]);
+    if (ignoredFiles.length > 0) {
+      setMessageToaster(
+        ignoredFiles.length === 1
+          ? `${ignoredFiles[0]} is a self-generated configuration file. It is not possible to upload it.`
+          : `The following files ${ignoredFiles.join(', ')} will not be uploaded. The system will generate a configuration file.`,
+      );
+      setShowToaster(true);
+    }
   };
 
   if (userIsLogged === null) {
@@ -487,7 +511,7 @@ const CreateReport = ({ commonData }: Props) => {
                         <tbody className="divide-y divide-gray-200 bg-white">
                           {files.length === 0 ? (
                             <tr className="text-center">
-                              <td colSpan={3} className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                              <td colSpan={4} className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                                 No files selected
                               </td>
                             </tr>
@@ -535,7 +559,12 @@ const CreateReport = ({ commonData }: Props) => {
             <div className="flex justify-end">
               <div className="flex flex-row items-center space-x-2">
                 <div className="mr-2 mt-2">
-                  <PureKysoButton type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY} disabled={busy} onClick={handleSubmit} className="ml-2">
+                  <PureKysoButton
+                    type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY}
+                    disabled={!hasPermissionCreateReport || busy}
+                    onClick={handleSubmit}
+                    className="ml-2"
+                  >
                     <div className="flex flex-row items-center">
                       {busy && <PureSpinner size={5} />}
                       Post <ArrowRightIcon className="ml-2 w-4 h-4" />

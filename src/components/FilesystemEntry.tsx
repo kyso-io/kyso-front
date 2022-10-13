@@ -1,12 +1,12 @@
+import NewReportNamingDropdown from '@/components/NewReportNamingDropdown';
+import classNames from '@/helpers/class-names';
 import type { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import type { FilesystemItem } from '@/model/filesystem-item.model';
-import NewReportNamingDropdown from '@/components/NewReportNamingDropdown';
 import { Menu, Transition } from '@headlessui/react';
-import { DocumentAddIcon, DocumentIcon, UploadIcon, FolderAddIcon } from '@heroicons/react/outline';
+import { DocumentAddIcon, DocumentIcon, FolderAddIcon, UploadIcon } from '@heroicons/react/outline';
 import { DotsVerticalIcon, FolderIcon, FolderOpenIcon, PencilAltIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
 import type { ChangeEvent } from 'react';
-import React, { Fragment, useState } from 'react';
-import classNames from '@/helpers/class-names';
+import { Fragment, useMemo, useState } from 'react';
 
 interface FilesystemEntryProps {
   item: FilesystemItem;
@@ -16,10 +16,11 @@ interface FilesystemEntryProps {
   onSelectedFile?: (selectedFile: FilesystemItem) => void;
   onUploadFile: (event: ChangeEvent<HTMLInputElement>, parent: FilesystemItem) => void;
   selectedFileId: string;
+  files: CreationReportFileSystemObject[];
 }
 
 const FilesystemEntry = (props: FilesystemEntryProps) => {
-  const { onRemoveFile, item, onAddNewFile, onUploadFile, onSelectedFile, selectedFileId } = props;
+  const { onRemoveFile, item, onAddNewFile, onUploadFile, onSelectedFile, selectedFileId, files } = props;
   const [open, setOpen] = useState(false);
 
   const appliedPadding = item.level * 15;
@@ -33,6 +34,18 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
   if (fileType === 'folder') {
     NewIcon = FolderIcon;
   }
+
+  const parent: CreationReportFileSystemObject | null = useMemo(() => {
+    if (item.file.type === 'folder') {
+      const itemCRFSO = files.find((x: CreationReportFileSystemObject) => x.id === item.file.id)!;
+      return itemCRFSO;
+    }
+    const itemCRFSO = files.find((x: CreationReportFileSystemObject) => x.id === item.file.id)!;
+    if (!itemCRFSO.parentId) {
+      return null;
+    }
+    return files.find((x: CreationReportFileSystemObject) => x.id === itemCRFSO.parentId) || null;
+  }, [item]);
 
   return (
     <>
@@ -80,7 +93,6 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                       label="New file"
                       showLabel={true}
                       icon={DocumentAddIcon}
-                      parent={item.file}
                       onCreate={(newFile: CreationReportFileSystemObject) => {
                         if (newFile) {
                           newFile.path = `${item.file.path}/${newFile.name}`;
@@ -89,6 +101,8 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                           setOpen(false);
                         }
                       }}
+                      files={files}
+                      parent={parent}
                     />
 
                     <NewReportNamingDropdown
@@ -96,7 +110,6 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                       showLabel={true}
                       isFolder={true}
                       icon={FolderAddIcon}
-                      parent={item.file}
                       onCreate={(newFile: CreationReportFileSystemObject) => {
                         if (newFile) {
                           newFile.path = `${item.file.path}/${newFile.name}`;
@@ -105,6 +118,8 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                           setOpen(false);
                         }
                       }}
+                      files={files}
+                      parent={parent}
                     />
 
                     <label
@@ -152,6 +167,8 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                       onAddNewFile(item.file);
                     }
                   }}
+                  parent={parent}
+                  files={files}
                 />
 
                 <button
@@ -186,6 +203,7 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
           onSelectedFile={(selectedItem: FilesystemItem) => {
             props.onSelectedFile!(selectedItem);
           }}
+          files={files}
         />
       ))}
     </>

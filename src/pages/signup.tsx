@@ -200,7 +200,7 @@ const Index = () => {
       };
       await api.signup(signUpDto);
       setNotificationType('success');
-      setNotification('User registered successfully.');
+      setNotification('You have been registered successfully. A verification link has been sent to your email account.');
       localStorage.setItem('email', email);
       setError('');
       setEmail('');
