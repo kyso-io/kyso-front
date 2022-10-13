@@ -119,7 +119,7 @@ const Index = ({ commonData }: Props) => {
         setBusy(false);
         return;
       }
-      router.push(`/${commonData.organization!.sluglified_name}/${team.sluglified_name}`);
+      window.location.href = `/${commonData.organization!.sluglified_name}/${team.sluglified_name}`;
     } catch (er: any) {
       setError(er.response.data.message);
     } finally {
