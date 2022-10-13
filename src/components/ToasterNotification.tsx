@@ -1,3 +1,4 @@
+import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
 import { Transition } from '@headlessui/react';
 import { XIcon } from '@heroicons/react/solid';
 import type { ReactElement } from 'react';
@@ -8,9 +9,14 @@ type Props = {
   setShow: (show: boolean) => void;
   icon: ReactElement;
   message: string;
+  backgroundColor?: TailwindColor;
 };
 
-const ToasterNotification = ({ show, setShow, icon, message }: Props) => {
+const ToasterNotification = ({ show, setShow, icon, message, backgroundColor }: Props) => {
+  if (!backgroundColor) {
+    backgroundColor = TailwindColor.SLATE_50;
+  }
+
   return (
     <div key={message} aria-live="assertive" className="z-50 fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start">
       <div className="w-full flex flex-col items-center space-y-4 sm:items-end">

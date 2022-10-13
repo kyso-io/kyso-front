@@ -7,7 +7,6 @@ import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { ElementType } from 'react';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { v4 } from 'uuid';
-import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 import ToasterNotification from './ToasterNotification';
 
 type INewReportNamingDropdown = {
@@ -193,13 +192,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
           );
         }}
       </Menu>
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
+      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
     </React.Fragment>
   );
 };

@@ -9,7 +9,6 @@ import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import ToasterNotification from '../components/ToasterNotification';
 import { checkJwt } from '../helpers/check-jwt';
-import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 import type { CommonData } from '../types/common-data';
 
 const DEFAULT_CAPTCHA_SITE_KEY = '22';

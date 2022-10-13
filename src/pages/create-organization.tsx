@@ -12,7 +12,6 @@ import React, { useEffect, useRef, useState } from 'react';
 import PureAvatar from '../components/PureAvatar';
 import ToasterNotification from '../components/ToasterNotification';
 import { checkJwt } from '../helpers/check-jwt';
-import { TailwindColor } from '../tailwind/enum/tailwind-color.enum';
 import { TailwindFontSizeEnum } from '../tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '../tailwind/enum/tailwind-height.enum';
 
