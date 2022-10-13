@@ -4,11 +4,10 @@ import ChannelList from '@/components/ChannelList';
 import Pagination from '@/components/Pagination';
 import PureAvatar from '@/components/PureAvatar';
 import PureNewReportPopover from '@/components/PureNewReportPopover';
-import { useCommonData } from '@/hooks/use-common-data';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO, ResourcePermissions } from '@kyso-io/kyso-model';
+import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -51,9 +50,6 @@ const Index = ({ commonData }: Props) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
-
-  // Forcing reload of commonData because if not a wrong behavior happens when creating a new channel
-  commonData = useCommonData();
 
   useEffect(() => {
     const getData = async () => {
@@ -209,6 +205,7 @@ const Index = ({ commonData }: Props) => {
           allAuthorsData.push(result.relations.user[authorId]);
         }
       }
+      report.authors = allAuthorsData;
       const { results: reports } = paginatedResponseDto!;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
       // Sort by global_pin and user_pin
@@ -239,6 +236,7 @@ const Index = ({ commonData }: Props) => {
           allAuthorsData.push(result.relations.user[authorId]);
         }
       }
+      report.authors = allAuthorsData;
       const { results: reports } = paginatedResponseDto!;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
       // Sort by global_pin and user_pin
@@ -269,6 +267,7 @@ const Index = ({ commonData }: Props) => {
           allAuthorsData.push(result.relations.user[authorId]);
         }
       }
+      report.authors = allAuthorsData;
       const { results: reports } = paginatedResponseDto!;
       const newReports: ReportDTO[] = reports.map((r: ReportDTO) => (r.id === report.id ? report : r));
       // Sort by global_pin and user_pin

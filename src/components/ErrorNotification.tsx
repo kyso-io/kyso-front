@@ -23,7 +23,7 @@ const ErrorNotification = (props: Props) => {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="max-w-sm w-full bg-gray-50 shadow-lg rounded-lg pointer-events-auto ring-1 ring-gray-300 ring-opacity/5 overflow-hidden">
+          <div className="max-w-sm w-full bg-red-100 shadow-lg rounded-lg pointer-events-auto ring-1 ring-gray-300 ring-opacity/5 overflow-hidden">
             <div className="p-4">
               <div className="flex items-start">
                 <div className="shrink-0">

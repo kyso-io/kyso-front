@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PureSpinner } from '@/components/PureSpinner';
-import classNames from '@/helpers/class-names';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
@@ -8,6 +7,7 @@ import type { KysoSetting, NormalizedResponseDTO, Organization } from '@kyso-io/
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
+import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import PureAvatar from '../components/PureAvatar';
 import ToasterNotification from '../components/ToasterNotification';
@@ -54,9 +54,7 @@ const Index = ({ commonData }: Props) => {
     getData();
   }, []);
 
-  const createOrganization = async (ev: any) => {
-    ev.preventDefault();
-
+  const createOrganization = async (): Promise<void> => {
     if (commonData.user?.email_verified === false) {
       setShowToaster(true);
       setMessageToaster('Your account is not verified. Please check your email before creating an organization.');
@@ -115,7 +113,7 @@ const Index = ({ commonData }: Props) => {
   }
 
   return (
-    <div className="flex flex-row space-x-8 p-2 pt-10">
+    <div className="flex flex-row space-x-8 p-2 pt-5">
       <div className="w-2/12"></div>
       <div className="w-8/12 flex flex-col space-y-8">
         {userIsLogged ? (

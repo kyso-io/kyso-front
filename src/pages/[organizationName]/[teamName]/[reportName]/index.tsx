@@ -21,7 +21,7 @@ import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO, ResourcePermissions } from '@kyso-io/kyso-model';
+import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, ResourcePermissions, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import { CommentPermissionsEnum, GithubFileHash, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -104,7 +104,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     if (version && !Number.isNaN(version as any)) {
       versionNum = parseInt(version as string, 10);
     }
-    const rd: ReportData = await getReport({ commonData, reportName: router.query.reportName as string, version: versionNum });
+    const rd: ReportData = await getReport({ token: commonData.token, team: commonData.team, reportName: router.query.reportName as string, version: versionNum });
     setReportData(rd);
   };
 
@@ -597,7 +597,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                       </PureReportHeader>
                     </div>
 
-                    <div className="border-y p-0">
+                    <div className="border-y p-0 mx-4">
                       {fileToRender && onlyVisibleCell && (
                         <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
                           Showing only this cell.

@@ -1,10 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { KysoSetting, LoginProviderEnum, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
+import type { KysoSetting, LoginProviderEnum, NormalizedResponseDTO, Token } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import decode from 'jwt-decode';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import type { DecodedToken } from '../../../types/decoded-token';
 
 const Page = () => {
   const router = useRouter();
@@ -44,10 +46,8 @@ const Page = () => {
         const token: string = resultLogin.data;
         localStorage.setItem('jwt', token);
         // Get user info to check if has completed the captcha challenge
-        api.setToken(token);
-        const resultUser: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-        const user: UserDTO = resultUser.data;
-        console.log({ user, captchaIsEnabled });
+        const jwtToken: DecodedToken = decode<DecodedToken>(token);
+        const user: Token = jwtToken.payload;
         setTimeout(() => {
           if (captchaIsEnabled && user.show_captcha) {
             router.push('/captcha');

@@ -1,44 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { setLocalStorageItem } from '@/helpers/set-local-storage-item';
-import type { CommonData } from '@/types/common-data';
 import type { NormalizedResponseDTO, Organization, ResourcePermissions, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
-import decode from 'jwt-decode';
-import type { DecodedToken } from '../types/decoded-token';
 import { getLocalStorageItem } from './isomorphic-local-storage';
 
 interface Props {
+  token: string | null;
+  permissions: TokenPermissions;
+  user: UserDTO | null;
   organizationName?: string;
   teamName?: string;
 }
 
-export const getCommonData = async ({ organizationName, teamName }: Props): Promise<CommonData> => {
-  let token: string | null = getLocalStorageItem('jwt');
-  if (token) {
-    const jwtToken: DecodedToken = decode<DecodedToken>(token);
-    if (new Date(jwtToken.exp * 1000) <= new Date()) {
-      // token is out of date
-      localStorage.removeItem('jwt');
-      token = null;
-    }
-  }
-  const api: Api = new Api();
-  let user: UserDTO | null = null;
-  let permissions: TokenPermissions | null = null;
-  if (token) {
-    api.setToken(token);
-    try {
-      const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      user = responseUserDto.data;
-      const response: NormalizedResponseDTO<TokenPermissions> = await api.getUserPermissions(user!.username);
-      permissions = response.data;
-    } catch (e) {}
-  } else {
-    try {
-      const response: NormalizedResponseDTO<TokenPermissions> = await api.getPublicPermissions();
-      permissions = response.data;
-    } catch (e) {}
-  }
+export const getCommonData = async ({
+  token,
+  permissions,
+  user,
+  organizationName,
+  teamName,
+}: Props): Promise<{ organization: Organization | null; team: Team | null; errorOrganization: string | null; errorTeam: string | null }> => {
+  const api: Api = new Api(token);
   let organizationResourcePermissions: ResourcePermissions | undefined;
   if (permissions) {
     organizationResourcePermissions = permissions!.organizations!.find((org: ResourcePermissions) => org.name === organizationName);
@@ -124,5 +105,5 @@ export const getCommonData = async ({ organizationName, teamName }: Props): Prom
       }
     }
   }
-  return { token, user, permissions, organization, errorOrganization, team, errorTeam };
+  return { organization, errorOrganization, team, errorTeam };
 };

@@ -3,11 +3,13 @@ import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
-import { DotsVerticalIcon, FolderDownloadIcon, PencilIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
+import { DotsVerticalIcon, FolderDownloadIcon, InformationCircleIcon, PencilIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
-import { deleteReportAction } from '@kyso-io/kyso-store';
 import { classNames } from 'primereact/utils';
 import { Fragment, useState } from 'react';
+import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
+import { deleteReportAction } from '@kyso-io/kyso-store';
+import ToasterNotification from '@/components/ToasterNotification';
 
 interface Props {
   report: ReportDTO;
@@ -21,11 +23,15 @@ const UnpureReportActionDropdown = (props: Props) => {
   const { report, commonData, hasPermissionDeleteReport, hasPermissionEditReport, openMetadata } = props;
   const dispatch = useAppDispatch();
   const [show, setShow] = useState(false);
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
 
   const [alertText, setAlertText] = useState('Creating zip, this may take a moment...');
 
   const deleteReport = async () => {
     if (!hasPermissionDeleteReport) {
+      setShowToaster(true);
+      setMessageToaster('Insufficient permissions');
       return;
     }
     if (typeof window !== 'undefined' && !window.confirm('Are you sure you want to delete this report?')) {
@@ -40,6 +46,13 @@ const UnpureReportActionDropdown = (props: Props) => {
 
   return (
     <>
+      <ToasterNotification
+        show={showToaster}
+        setShow={setShowToaster}
+        message={messageToaster}
+        backgroundColor={TailwindColor.SLATE_50}
+        icon={<InformationCircleIcon className="h-6 w-6 text-rose-700" aria-hidden="true" />}
+      />
       {/* <PureEditMetadata isOpen={isEditOpen} setOpen={() => openEdit(!isEditOpen)} report={report} commonData={commonData} authors={authors} /> */}
       <PureKysoButton type={KysoButton.TERCIARY} onClick={() => deleteReport()} className={'relative inline-block text-rose-700 rounded-none  border border-r-0 border-y-0 border-gray-300 p-2'}>
         <TrashIcon className="mr-1 h-5 w-5 text-rose-700" aria-hidden="true" />
