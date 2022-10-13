@@ -1,5 +1,4 @@
 import type { CommonData } from '@/types/common-data';
-import { Menu, Transition } from '@headlessui/react';
 import { BookmarkIcon, ChatIcon } from '@heroicons/react/outline';
 import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ThumbUpIcon } from '@heroicons/react/solid';
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
@@ -7,7 +6,7 @@ import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
-import { Fragment, useMemo } from 'react';
+import { useMemo } from 'react';
 import checkPermissions from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureShareButton from './PureShareButton';
@@ -77,51 +76,28 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
         </div>
         {commonData.user && (
           <div className="absolute top-0 right-0">
-            <Menu as="div" className="relative inline-block text-left">
-              <Menu.Button>
-                {report.pin || report.user_pin ? (
-                  <BookmarkIconSolid className="h-7 w-7 text-indigo-600 -mt-1 hover:text-indigo-700" />
-                ) : (
-                  <BookmarkIcon className="h-7 w-10 text-indigo-600 -mt-1 hover:text-indigo-700" />
-                )}
-              </Menu.Button>
-              {toggleUserPinReport && toggleGlobalPinReport && (
-                <Transition
-                  as={Fragment}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <Menu.Items className="origin-top-right absolute right-0 w-48 rounded-md shadow-lg bg-white ring-1 ring-gray-200 ring-opacity/5 focus:outline-none">
-                    {hasPermissionReportGlobalPin && (
-                      <Menu.Item>
-                        {({ active }) => (
-                          <div onClick={toggleGlobalPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-50': active })}>
-                            <button className={classNames(active ? 'bg-gray-50 text-gray-700' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
-                              {report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
-                            </button>
-                          </div>
-                        )}
-                      </Menu.Item>
-                    )}
-                    {!report.pin && (
-                      <Menu.Item>
-                        {({ active }) => (
-                          <div onClick={toggleUserPinReport} className={clsx('py-1 pointer rounded-md ', { 'bg-gray-50': active })}>
-                            <button className={classNames(active ? 'bg-gray-50 text-gray-700' : 'text-gray-900', 'block px-4 py-2 text-sm')}>
-                              {report.user_pin ? 'Remove pin from the top' : 'Pin to the top'}
-                            </button>
-                          </div>
-                        )}
-                      </Menu.Item>
-                    )}
-                  </Menu.Items>
-                </Transition>
+            <div className="flex flex-row">
+              {/* USER PIN */}
+              {toggleUserPinReport && (
+                <div title={report.user_pin ? 'Remove pin from the top' : 'Pin to the top'} onClick={toggleUserPinReport}>
+                  {report.user_pin ? (
+                    <BookmarkIconSolid className="cursor-pointer h-7 w-7 text-indigo-600 -mt-1 hover:text-indigo-600" />
+                  ) : (
+                    <BookmarkIcon className="cursor-pointer h-7 w-7 text-indigo-600 -mt-1 hover:text-indigo-600" />
+                  )}
+                </div>
               )}
-            </Menu>
+              {/* GLOBAL */}
+              {hasPermissionReportGlobalPin && toggleGlobalPinReport && (
+                <div title={report.pin ? 'Remove pin for everyone' : 'Pin for everyone'} onClick={toggleGlobalPinReport}>
+                  {report.pin ? (
+                    <BookmarkIconSolid className="cursor-pointer h-7 w-7 text-orange-500 -mt-1 hover:text-orange-500" />
+                  ) : (
+                    <BookmarkIcon className="cursor-pointer h-7 w-7 text-orange-500 -mt-1 hover:text-orange-500" />
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
