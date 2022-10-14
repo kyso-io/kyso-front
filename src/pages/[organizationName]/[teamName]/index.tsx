@@ -578,9 +578,7 @@ const Index = ({ commonData }: Props) => {
                 onInviteNewUser={inviteNewUser}
                 onRemoveUser={removeUser}
               />
-
-              <UnpureDeleteChannelDropdown commonData={commonData} hasPermissionDeleteChannel={hasPermissionDeleteChannel} captchaIsEnabled={captchaIsEnabled} />
-
+              {hasPermissionDeleteChannel && <UnpureDeleteChannelDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} />}
               {commonData?.user && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} />}
             </div>
           </div>

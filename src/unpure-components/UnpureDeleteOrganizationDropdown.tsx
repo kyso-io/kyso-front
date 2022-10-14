@@ -13,7 +13,7 @@ interface Props {
   captchaIsEnabled: boolean;
 }
 
-const UnpureDeleteChannelDropdown = (props: Props) => {
+const UnpureDeleteOrganizationDropdown = (props: Props) => {
   const { commonData, captchaIsEnabled } = props;
   const router = useRouter();
   const [showToaster, setShowToaster] = useState<boolean>(false);
@@ -22,28 +22,28 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
   const [open, setOpen] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
 
-  const deleteTeam = async () => {
+  const deleteOrganization = async () => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
       setShowToaster(true);
       setMessageToaster('Please verify the captcha');
       setTimeout(() => {
         setShowToaster(false);
-        sessionStorage.setItem('redirectUrl', `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
+        sessionStorage.setItem('redirectUrl', `/${commonData.organization?.sluglified_name}`);
         router.push('/captcha');
       }, 2000);
       return;
     }
     setRequesting(true);
     try {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      await api.deleteTeam(commonData.team!.id!);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
+      await api.deleteOrganization(commonData.organization!.id!);
     } catch (error: any) {
       console.log(error.response.data.message);
       setOpen(false);
       setInput('');
       setRequesting(false);
     }
-    window.location.href = `/${commonData.organization?.sluglified_name}`;
+    window.location.href = '/';
   };
 
   return (
@@ -67,7 +67,7 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
               <Menu.Item>
                 <span onClick={() => setOpen(true)} className="cursor-pointer text-gray-700 px-4 py-2 text-sm hover:bg-gray-50 group flex items-center">
                   <TrashIcon className="mr-1 h-5 w-5 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
-                  Delete Channel
+                  Delete Organization
                 </span>
               </Menu.Item>
             </div>
@@ -97,14 +97,14 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
                     </div>
                     <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                       <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                        Delete channel
+                        Delete organization
                       </Dialog.Title>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500">
-                          The channel <strong>{commonData.team?.display_name}</strong> will be removed. This action cannot be undone.
+                          The organization <strong>{commonData.organization?.display_name}</strong> will be removed. This action cannot be undone.
                         </p>
                         <p className="text-sm text-gray-500 my-3">
-                          Please type <strong>{commonData.team?.sluglified_name}</strong> in the text box before confirming.
+                          Please type <strong>{commonData.organization?.sluglified_name}</strong> in the text box before confirming.
                         </p>
                         <input
                           value={input}
@@ -118,12 +118,12 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
                   <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                     <button
                       type="button"
-                      disabled={input !== commonData.team?.sluglified_name || requesting}
+                      disabled={input !== commonData.organization?.sluglified_name || requesting}
                       className={clsx(
                         'inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm',
-                        input !== commonData.team?.sluglified_name || requesting ? 'cursor-not-allowed bg-gray-500' : 'bg-red-600 hover:bg-red-700',
+                        input !== commonData.organization?.sluglified_name || requesting ? 'cursor-not-allowed bg-gray-500' : 'bg-red-600 hover:bg-red-700',
                       )}
-                      onClick={deleteTeam}
+                      onClick={deleteOrganization}
                     >
                       Delete
                     </button>
@@ -149,4 +149,4 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
   );
 };
 
-export default UnpureDeleteChannelDropdown;
+export default UnpureDeleteOrganizationDropdown;
