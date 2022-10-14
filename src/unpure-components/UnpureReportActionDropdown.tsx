@@ -1,30 +1,45 @@
+import ToasterNotification from '@/components/ToasterNotification';
 import { useAppDispatch } from '@/hooks/redux-hooks';
+import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
-import { DotsVerticalIcon, FolderDownloadIcon, InformationCircleIcon, PencilIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
+import { DotsVerticalIcon, FolderDownloadIcon, InformationCircleIcon, PencilIcon, StarIcon, TrashIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
-import { classNames } from 'primereact/utils';
-import { Fragment, useState } from 'react';
-import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
 import { deleteReportAction } from '@kyso-io/kyso-store';
-import ToasterNotification from '@/components/ToasterNotification';
+import { classNames } from 'primereact/utils';
+import { Fragment, useMemo, useState } from 'react';
+import type { FileToRender } from '../hooks/use-file-to-render';
 
 interface Props {
   report: ReportDTO;
+  fileToRender: FileToRender | null;
   commonData: CommonData;
   hasPermissionDeleteReport: boolean;
   hasPermissionEditReport: boolean;
   openMetadata: () => void;
+  onSetFileAsMainFile: () => void;
+  version?: string;
 }
 
 const UnpureReportActionDropdown = (props: Props) => {
-  const { report, commonData, hasPermissionDeleteReport, hasPermissionEditReport, openMetadata } = props;
+  const { report, fileToRender, commonData, hasPermissionDeleteReport, hasPermissionEditReport, openMetadata, onSetFileAsMainFile, version } = props;
   const dispatch = useAppDispatch();
   const [show, setShow] = useState(false);
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
-
   const [alertText, setAlertText] = useState('Creating zip, this may take a moment...');
+  const canChangeReportMainFile: boolean = useMemo(() => {
+    if (!hasPermissionEditReport || !report || !fileToRender) {
+      return false;
+    }
+    let versionNumber: number | null = null;
+    if (version) {
+      try {
+        versionNumber = parseInt(version, 10);
+      } catch (e) {}
+    }
+    return (versionNumber === null || versionNumber === report.last_version) && report.main_file_id !== fileToRender.id;
+  }, [hasPermissionEditReport, report, fileToRender]);
 
   const deleteReport = async () => {
     if (!hasPermissionDeleteReport) {
@@ -83,7 +98,14 @@ const UnpureReportActionDropdown = (props: Props) => {
                   </a>
                 </Menu.Item>
               )}
-
+              {canChangeReportMainFile && (
+                <Menu.Item>
+                  <span onClick={onSetFileAsMainFile} className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-100 group flex items-center cursor-pointer')}>
+                    <StarIcon className="mr-2 h-5 w-5 text-gray-700" />
+                    Set this file as main
+                  </span>
+                </Menu.Item>
+              )}
               {hasPermissionDeleteReport && (
                 <Menu.Item>
                   <a href="#" onClick={() => deleteReport()} className="text-rose-700 ', 'block px-4 py-2 text-sm hover:bg-gray-100 group flex items-center">

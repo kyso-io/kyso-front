@@ -33,6 +33,7 @@ type IPureReportHeaderProps = {
   hasPermissionEditReport: boolean;
   hasPermissionDeleteReport: boolean;
   children?: ReactElement;
+  onSetFileAsMainFile: () => void;
 };
 
 declare global {
@@ -42,10 +43,25 @@ declare global {
   }
 }
 
-const PureReportHeader = (props: IPureReportHeaderProps) => {
-  const { report, frontEndUrl, children, fileToRender, versions, authors, version, reportUrl, onUpvoteReport, openMetadata, commonData, hasPermissionEditReport, hasPermissionDeleteReport } = props;
+const MAX_LENGTH_DESCRIPTION: number = 400;
 
-  const MAX_LENGTH_DESCRIPTION: number = 400;
+const PureReportHeader = (props: IPureReportHeaderProps) => {
+  const {
+    report,
+    frontEndUrl,
+    children,
+    fileToRender,
+    versions,
+    authors,
+    version,
+    reportUrl,
+    onUpvoteReport,
+    openMetadata,
+    commonData,
+    hasPermissionEditReport,
+    hasPermissionDeleteReport,
+    onSetFileAsMainFile,
+  } = props;
 
   const description: string = useMemo(() => {
     if (report?.description && report.description.length > MAX_LENGTH_DESCRIPTION) {
@@ -164,6 +180,9 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               hasPermissionDeleteReport={hasPermissionDeleteReport}
               hasPermissionEditReport={hasPermissionEditReport}
               openMetadata={openMetadata}
+              fileToRender={fileToRender}
+              onSetFileAsMainFile={onSetFileAsMainFile}
+              version={version}
             />
           </div>
         </div>

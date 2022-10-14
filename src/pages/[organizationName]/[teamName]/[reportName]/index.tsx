@@ -108,6 +108,14 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     setReportData(rd);
   };
 
+  const setReportFileAsMainFile = async () => {
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+      await api.updateReport(report!.id!, { main_file: fileToRender!.path } as any);
+      refreshReport();
+    } catch (e: any) {}
+  };
+
   const getTree = async (args: { path: string; report: ReportDTO | null | undefined; version?: string; commonData: CommonData }): Promise<GithubFileHash[]> => {
     const { report, version: v, commonData: cd } = args;
     let { path } = args;
@@ -583,6 +591,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                         }
                         hasPermissionDeleteReport={hasPermissionDeleteReport}
                         commonData={commonData}
+                        onSetFileAsMainFile={setReportFileAsMainFile}
                       >
                         <ManageUsers
                           commonData={commonData}
