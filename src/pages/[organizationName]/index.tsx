@@ -18,18 +18,13 @@ import InfoActivity from '../../components/InfoActivity';
 import ManageUsers from '../../components/ManageUsers';
 import ReportBadge from '../../components/ReportBadge';
 import { useInterval } from '../../hooks/use-interval';
+import type { PaginationParams } from '../../interfaces/pagination-params';
 import type { CommonData } from '../../types/common-data';
 import type { Member } from '../../types/member';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
-
-interface PaginationParams {
-  page: number;
-  limit: number;
-  sort: string;
-}
 
 interface Props {
   commonData: CommonData;
