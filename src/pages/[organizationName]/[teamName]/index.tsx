@@ -11,13 +11,13 @@ import type {
   OrganizationMember,
   PaginatedResponseDto,
   ReportDTO,
+  ResourcePermissions,
   SearchUser,
   SearchUserDto,
   Team,
   TeamInfoDto,
   TeamMember,
   UserDTO,
-  ResourcePermissions,
 } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -124,18 +124,19 @@ const Index = ({ commonData }: Props) => {
   }, []);
 
   useEffect(() => {
-    if (commonData.permissions?.organizations && commonData.permissions?.teams) {
-      const indexOrganization: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
-      if (indexOrganization === -1) {
-        router.replace('/');
-        return;
-      }
-      const indexTeam: number = commonData.permissions.teams.findIndex((item: ResourcePermissions) => item.name === router.query.teamName);
-      if (indexTeam === -1) {
-        router.replace(`/${router.query.organizationName}`);
-      }
+    if (!commonData.permissions || !commonData.permissions.organizations || !commonData.permissions.teams || !router.query.organizationName || !router.query.teamName) {
+      return;
     }
-  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams]);
+    const indexOrganization: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
+    if (indexOrganization === -1) {
+      router.replace('/');
+      return;
+    }
+    const indexTeam: number = commonData.permissions.teams.findIndex((item: ResourcePermissions) => item.name === router.query.teamName);
+    if (indexTeam === -1) {
+      router.replace(`/${router.query.organizationName}`);
+    }
+  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
 
   useEffect(() => {
     if (!commonData.team) {
@@ -635,11 +636,9 @@ const Index = ({ commonData }: Props) => {
             <p>No reports found</p>
           ))}
       </div>
-      {commonData.user && (
-        <div className="w-1/6">
-          <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
-        </div>
-      )}
+      <div className="w-1/6">
+        <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+      </div>
     </div>
   );
 };

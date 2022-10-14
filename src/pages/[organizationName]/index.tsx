@@ -68,14 +68,14 @@ const Index = ({ commonData }: Props) => {
   }, []);
 
   useEffect(() => {
-    if (commonData.permissions?.organizations) {
-      const index: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
-
-      if (index === -1) {
-        router.replace('/');
-      }
+    if (!commonData.permissions || !commonData.permissions.organizations || !router.query.organizationName) {
+      return;
     }
-  }, [commonData?.permissions?.organizations]);
+    const index: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
+    if (index === -1) {
+      router.replace('/');
+    }
+  }, [commonData?.permissions?.organizations, router.query?.organizationName]);
 
   useEffect(() => {
     if (!commonData.organization) {
