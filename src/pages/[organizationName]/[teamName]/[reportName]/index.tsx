@@ -7,7 +7,6 @@ import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import checkPermissions from '@/helpers/check-permissions';
-import classNames from '@/helpers/class-names';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import type { FileToRender } from '@/hooks/use-file-to-render';
@@ -20,16 +19,19 @@ import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
+import { ArrowSmDownIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, ResourcePermissions, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import { CommentPermissionsEnum, GithubFileHash, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import ToasterNotification from '../../../../components/ToasterNotification';
+import classNames from '../../../../helpers/class-names';
 import { getReport } from '../../../../helpers/get-report';
+import useIsInViewport from '../../../../hooks/use-is-in-viewport';
+import { ScrollDirection, useScrollDirection } from '../../../../hooks/use-scroll-direction';
 
 interface Props {
   commonData: CommonData;
@@ -59,6 +61,9 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
+  const refComments = useRef<any>(null);
+  const isInViewport = useIsInViewport(refComments);
+  const scrollDirection: ScrollDirection | null = useScrollDirection();
 
   useEffect(() => {
     const getData = async () => {
@@ -484,7 +489,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   });
 
   const hasPermissionCreateComment: boolean = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.CREATE), [commonData]);
-  const hasPermissionReadComment: boolean = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.READ), [commonData]);
+  const hasPermissionReadComment: boolean = useMemo(() => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : checkPermissions(commonData, CommentPermissionsEnum.READ)), [commonData]);
   const hasPermissionDeleteComment: boolean = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.DELETE), [commonData]);
   const hasPermissionReadReport: boolean = useMemo(() => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : checkPermissions(commonData, ReportPermissionsEnum.READ)), [commonData]);
   const hasPermissionDeleteReport: boolean = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.DELETE), [commonData]);
@@ -652,7 +657,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                     </div>
 
                     {hasPermissionReadComment && (
-                      <div className="block pb-44 w-full p-4 pl-8">
+                      <div ref={refComments} className="block pb-44 w-full p-4 pl-8">
                         <div className="prose max-w-none ">
                           <h2>Comments</h2>
                         </div>
@@ -707,6 +712,18 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
           </div>
         </main>
       </div>
+      {scrollDirection === ScrollDirection.Down && !isInViewport && (
+        <div className="sticky bottom-20 text-center">
+          <button
+            type="button"
+            onClick={() => refComments.current?.scrollIntoView({ behavior: 'smooth' })}
+            className="inline-flex items-center rounded-full border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none "
+          >
+            <ArrowSmDownIcon className="mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+            Go to comments
+          </button>
+        </div>
+      )}
       <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
     </div>
   );
