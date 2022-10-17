@@ -89,6 +89,7 @@ const Index = ({ commonData }: Props) => {
         link,
       });
       const organization: Organization = result.data;
+      api.setOrganizationSlug(organization.sluglified_name);
       if (file) {
         await api.updateOrganizationImage(organization!.id!, file);
       }
@@ -141,6 +142,7 @@ const Index = ({ commonData }: Props) => {
                         {urlLocalFile !== null && <PureAvatar src={urlLocalFile} title="Organiztion avatar" size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XS} />}
                         <button
                           disabled={isBusy}
+                          type="button"
                           onClick={() => ref.current.click()}
                           className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                         >
