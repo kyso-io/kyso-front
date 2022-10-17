@@ -174,16 +174,18 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               hasPermissionDeleteReport={hasPermissionDeleteReport}
             />
             <PureVersionsDropdown versions={versions} version={version} reportUrl={reportUrl} />
-            <UnpureReportActionDropdown
-              report={report}
-              commonData={commonData}
-              hasPermissionDeleteReport={hasPermissionDeleteReport}
-              hasPermissionEditReport={hasPermissionEditReport}
-              openMetadata={openMetadata}
-              fileToRender={fileToRender}
-              onSetFileAsMainFile={onSetFileAsMainFile}
-              version={version}
-            />
+            {(hasPermissionEditReport || hasPermissionDeleteReport) && (
+              <UnpureReportActionDropdown
+                report={report}
+                commonData={commonData}
+                hasPermissionDeleteReport={hasPermissionDeleteReport}
+                hasPermissionEditReport={hasPermissionEditReport}
+                openMetadata={openMetadata}
+                fileToRender={fileToRender}
+                onSetFileAsMainFile={onSetFileAsMainFile}
+                version={version}
+              />
+            )}
           </div>
         </div>
       </div>
