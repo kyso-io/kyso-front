@@ -9,10 +9,7 @@ import type { KysoUserAccessToken } from '@kyso-io/kyso-model';
 import { createAccessTokenAction, deleteAccessTokenAction, getAccessTokensAction, revokeAllAccessTokenAction } from '@kyso-io/kyso-store';
 import format from 'date-fns/format';
 import { useEffect, useState } from 'react';
-
-export const ucFirst = (str: string) => {
-  return str && str.length > 0 ? str.charAt(0).toUpperCase() + str.slice(1) : '';
-};
+import { Helper } from '../helpers/Helper';
 
 interface Props {
   commonData: CommonData;
@@ -193,7 +190,7 @@ const Index = ({ commonData }: Props) => {
                         accessToken.status === 'expired' ? 'bg-red-500' : '',
                       )}
                     >
-                      {ucFirst(accessToken.status)}
+                      {Helper.ucFirst(accessToken.status)}
                     </div>
                   </div>
                   <div>

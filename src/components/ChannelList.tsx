@@ -6,6 +6,8 @@ import { PlusCircleIcon } from '@heroicons/react/outline';
 import type { ResourcePermissions } from '@kyso-io/kyso-model';
 import { TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import { useMemo } from 'react';
+import { TailwindWidthSizeEnum } from '../tailwind/enum/tailwind-width.enum';
+import ChannelVisibility from './ChannelVisibility';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props {
@@ -25,6 +27,7 @@ const ChannelList = (props: Props) => {
             teamResourcePermissions.display_name,
             `${basePath}/${commonData.organization?.sluglified_name}/${teamResourcePermissions.name}`,
             commonData.team?.sluglified_name === teamResourcePermissions.name,
+            teamResourcePermissions.team_visibility,
           );
         });
       breadcrumbItems.sort((a: BreadcrumbItem, b: BreadcrumbItem) => {
@@ -51,11 +54,21 @@ const ChannelList = (props: Props) => {
       <div className="flex flex-col justify-start">
         {channelSelectorItems.map((item: BreadcrumbItem) => (
           <a
-            key={item.href}
+            key={item.name}
             href={item.href}
-            className={classNames(item.current ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm font-medium rounded-md')}
+            className={classNames(
+              item.current ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              'flex items-center justify-between px-3 py-2 text-sm font-medium rounded-md',
+            )}
           >
-            {item.name}
+            <span>{item.name}</span>
+            <ChannelVisibility
+              containerClasses="ml-3"
+              teamVisibility={item.team_visibility!}
+              imageWidth={TailwindWidthSizeEnum.W3}
+              imageMarginX={TailwindWidthSizeEnum.W3}
+              imageMarginY={TailwindWidthSizeEnum.W1}
+            />
           </a>
         ))}
 

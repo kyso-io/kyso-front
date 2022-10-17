@@ -27,6 +27,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import ActivityFeedComponent from '../../../components/ActivityFeed';
 import ChannelList from '../../../components/ChannelList';
+import ChannelVisibility from '../../../components/ChannelVisibility';
 import InfoActivity from '../../../components/InfoActivity';
 import ManageUsers from '../../../components/ManageUsers';
 import Pagination from '../../../components/Pagination';
@@ -37,6 +38,7 @@ import ReportsSearchBar from '../../../components/ReportsSearchBar';
 import type { PaginationParams } from '../../../interfaces/pagination-params';
 import type { ReportsFilter } from '../../../interfaces/reports-filter';
 import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
+import { TailwindWidthSizeEnum } from '../../../tailwind/enum/tailwind-width.enum';
 import type { Member } from '../../../types/member';
 
 const DAYS_ACTIVITY_FEED: number = 14;
@@ -564,8 +566,17 @@ const Index = ({ commonData }: Props) => {
         {commonData.team && (
           <div className="flex flex-row w-full justify-between space-x-2">
             <div className="w-3/6 flex flex-col justify-between">
-              <div className="text-xl font-medium">{commonData.team.display_name}</div>
-              <div className="text-md">{commonData.team.bio}</div>
+              <div className="flex justify-start content-center items-center">
+                <div className="text-xl font-medium">{commonData.team.display_name}</div>
+                <ChannelVisibility
+                  containerClasses="ml-10"
+                  teamVisibility={commonData.team.visibility}
+                  imageWidth={TailwindWidthSizeEnum.W4}
+                  imageMarginX={TailwindWidthSizeEnum.W4}
+                  imageMarginY={TailwindWidthSizeEnum.W1}
+                />
+              </div>
+              <div className="mt-2 text-md">{commonData.team.bio}</div>
             </div>
             <div className="w-3/6 flex flex-row justify-end items-center space-x-2">
               <ManageUsers
