@@ -1,8 +1,10 @@
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
-import { SelectorIcon, ViewListIcon } from '@heroicons/react/outline';
+import { SelectorIcon } from '@heroicons/react/outline';
 import { Fragment } from 'react';
+import { TailwindWidthSizeEnum } from '../tailwind/enum/tailwind-width.enum';
 import ChannelList from './ChannelList';
+import ChannelVisibility from './ChannelVisibility';
 
 type IChannelSelectorProps = {
   commonData: CommonData;
@@ -23,8 +25,14 @@ const ChannelSelector = (props: IChannelSelectorProps) => {
           href={`/${commonData.organization?.sluglified_name}/${commonData.team.sluglified_name}`}
           className="hover:bg-gray-100 border-y border-l rounded-l p-2 p-x-4 flex items-center w-fit text-sm text-left font-medium text-gray-700"
         >
-          <ViewListIcon className="shrink-0 h-5 w-5 text-gray-700 mr-2 group-hover:text-gray-500" aria-hidden="true" />
           {commonData.team?.display_name}
+          <ChannelVisibility
+            containerClasses="ml-3"
+            teamVisibility={commonData.team?.visibility}
+            imageWidth={TailwindWidthSizeEnum.W3}
+            imageMarginX={TailwindWidthSizeEnum.W3}
+            imageMarginY={TailwindWidthSizeEnum.W1}
+          />
         </a>
       )}
       <Menu as="div" className="relative w-fit inline-block text-left">
