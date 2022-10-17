@@ -254,7 +254,7 @@ const CreateReport = ({ commonData }: Props) => {
   const delayedCallback = debounce(async (key, value) => {
     setLocalStorageItem(key, JSON.stringify(value));
     setHasAnythingCached(true);
-    setDraftStatus('All changes saved in local storage');
+    setDraftStatus('All changes saved in local storage. Max memory 5MB. Go to upload page to create a bigger report.');
   }, 1000);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -423,7 +423,7 @@ const CreateReport = ({ commonData }: Props) => {
     setSelectedFileValue(value);
     setLocalStorageItem(fileId, `data:text/plain;base64,${btoa(value)}`);
     setHasAnythingCached(true);
-    setDraftStatus('All changes saved in local storage');
+    setDraftStatus('saved');
   }, []);
 
   if (userIsLogged === null) {
@@ -432,6 +432,11 @@ const CreateReport = ({ commonData }: Props) => {
 
   if (hasPermissionCreateReport === null) {
     return null;
+  }
+
+  let createLinkForm = `/${commonData.organization?.sluglified_name}/create-report-form`;
+  if (commonData.team) {
+    createLinkForm = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form`;
   }
 
   return userIsLogged ? (
@@ -566,7 +571,15 @@ const CreateReport = ({ commonData }: Props) => {
             </div>
 
             <div className="flex flex-row justify-end my-2">
-              {draftStatus && <h6 className="pt-2 text-gray-500 text-xs">{draftStatus}</h6>}
+              {draftStatus !== 'saved' && <h6 className="pt-2 text-gray-500 text-xs">{draftStatus}</h6>}
+              {draftStatus === 'saved' && (
+                <h6 className="pt-2 text-gray-500 text-xs">
+                  All changes saved in local storage.
+                  <a className="text-indigo-700 hover:text-indigo-900" href={createLinkForm}>
+                    {` `}Upload more than 5MB here.
+                  </a>
+                </h6>
+              )}
 
               {hasAnythingCached && (
                 <PureKysoButton
@@ -621,7 +634,6 @@ const CreateReport = ({ commonData }: Props) => {
                           onUploadFile(e);
                         }}
                       />
-                      {/* no working  */}
                     </label>
                   </div>
                 </div>
