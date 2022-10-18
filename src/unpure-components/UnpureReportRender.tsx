@@ -233,6 +233,7 @@ const UnpureReportRender = (props: Props) => {
         <div className="flex flex-col">
           <div className="flex flex-row">
             <div className={clsx('w-9/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
+            {/* here is to hide if report is not JN */}
             <div className="w-3/12 p-2 border-l">
               <PureInlineComments
                 commonData={commonData}
