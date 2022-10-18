@@ -27,11 +27,14 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import ToasterNotification from '../../../../components/ToasterNotification';
-import classNames from '../../../../helpers/class-names';
-import { getReport } from '../../../../helpers/get-report';
-import useIsInViewport from '../../../../hooks/use-is-in-viewport';
-import { ScrollDirection, useScrollDirection } from '../../../../hooks/use-scroll-direction';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
+import ToasterNotification from '@/components/ToasterNotification';
+import classNames from '@/helpers/class-names';
+import { getReport } from '@/helpers/get-report';
+import useIsInViewport from '@/hooks/use-is-in-viewport';
+import { ScrollDirection, useScrollDirection } from '@/hooks/use-scroll-direction';
+import { Tooltip } from 'primereact/tooltip';
 
 interface Props {
   commonData: CommonData;
@@ -659,7 +662,16 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                     {hasPermissionReadComment && (
                       <div ref={refComments} className="block pb-44 w-full p-4 pl-8">
                         <div className="prose max-w-none ">
-                          <h2>Comments</h2>
+                          <Tooltip target=".comments-info" />
+                          <h2>
+                            Report{`'`}s Comments{' '}
+                            <FontAwesomeIcon
+                              className="comments-info"
+                              data-pr-tooltip="These comments remain over the report's files and versions"
+                              style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
+                              icon={faCircleInfo}
+                            />
+                          </h2>
                         </div>
                         <PureComments
                           report={report}

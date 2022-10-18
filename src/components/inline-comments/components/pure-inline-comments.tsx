@@ -2,6 +2,9 @@
 import type { CommonData } from '@/types/common-data';
 import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import React from 'react';
+import { Tooltip } from 'primereact/tooltip';
+import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PureInlineComment from './pure-inline-comment';
 import PureInlineCommentForm from './pure-inline-comment-form';
 
@@ -26,6 +29,18 @@ const PureComments = (props: IPureComments) => {
 
   return (
     <div className={classNames('w-full flex flex-col')}>
+      <div className="prose max-w-none ">
+        <Tooltip target=".inline-comments-info" />
+        <h4>
+          File{`'`}s comments{' '}
+          <FontAwesomeIcon
+            className="inline-comments-info"
+            data-pr-tooltip="These comments remain only for this files"
+            style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
+            icon={faCircleInfo}
+          />
+        </h4>
+      </div>
       <div className="flex flex-col">
         {comments &&
           comments.map((comment) => (
