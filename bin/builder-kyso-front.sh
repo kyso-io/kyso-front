@@ -101,6 +101,11 @@ docker_rm() {
 }
 
 docker_run() {
+  if [ -n "$*" ]; then
+    CONTAINER_COMMAND="$*"
+  else
+    CONTAINER_COMMAND="npm install && npm run dev"
+  fi
   if [ ! -f "./.npmrc.kyso" ]; then
     echo "Missing file '.npmrc.kyso', call $0 init to create it"
     exit 1
@@ -131,16 +136,26 @@ EOF
     printf "%s" \
       "docker run -d --restart always --user '$(id -u):$(id -g)' " \
       "--name '$CONTAINER_NAME' $CONTAINER_VARS $PUBLISH_PORTS $HOSTS " \
-      "$VOLUMES $WORKDIR '$BUILDER_TAG' /bin/sh -c 'npm install && npm run dev'"
+      "$VOLUMES $WORKDIR '$BUILDER_TAG' /bin/sh -c '$CONTAINER_COMMAND'"
   )"
   eval "$DOCKER_COMMAND"
 }
 
 docker_sh() {
-  if [ "$1" = "root" ]; then
-    docker exec -u 0:0 -ti "$CONTAINER_NAME" /bin/bash
+  _user="$1"
+  shift
+  if [ "$_user" = "root" ]; then
+    if [ -z "$*" ]; then
+      docker exec -u 0:0 -ti "$CONTAINER_NAME" /bin/bash
+    else
+      docker exec -u 0:0 -ti "$CONTAINER_NAME" /bin/sh -c "$*"
+    fi
   else
-    docker exec -ti "$CONTAINER_NAME" /bin/bash
+    if [ -z "$*" ]; then
+      docker exec -ti "$CONTAINER_NAME" /bin/bash
+    else
+      docker exec -ti "$CONTAINER_NAME" /bin/sh -c "$*"
+    fi
   fi
 }
 
@@ -181,9 +196,9 @@ pull) docker_pull ;;
 logs) shift && docker_logs "$@" ;;
 rm) docker_rm ;;
 setup) docker_setup ;;
-sh) docker_sh ;;
-shr) docker_sh "root";;
-start) docker_run ;;
+sh) shift && docker_sh "" "$@" ;;
+shr) shift && docker_sh "root" "$@" ;;
+start) shift && docker_run "$@" ;;
 status) docker_status ;;
 stop) docker_stop ;;
 *) usage ;;
