@@ -6,11 +6,15 @@ import { PurePermissionDenied } from '@/components/PurePermissionDenied';
 import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
-import checkPermissions from '@/helpers/check-permissions';
+import ToasterNotification from '@/components/ToasterNotification';
+import classNames from '@/helpers/class-names';
+import { getReport } from '@/helpers/get-report';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import { isImage } from '@/hooks/use-file-to-render';
+import useIsInViewport from '@/hooks/use-is-in-viewport';
+import { ScrollDirection, useScrollDirection } from '@/hooks/use-scroll-direction';
 import { useUserEntities } from '@/hooks/use-user-entities';
 import type { Version } from '@/hooks/use-versions';
 import { useVersions } from '@/hooks/use-versions';
@@ -19,22 +23,18 @@ import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
+import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ArrowSmDownIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, ResourcePermissions, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
+import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import { CommentPermissionsEnum, GithubFileHash, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
-import ToasterNotification from '@/components/ToasterNotification';
-import classNames from '@/helpers/class-names';
-import { getReport } from '@/helpers/get-report';
-import useIsInViewport from '@/hooks/use-is-in-viewport';
-import { ScrollDirection, useScrollDirection } from '@/hooks/use-scroll-direction';
 import { Tooltip } from 'primereact/tooltip';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { HelperPermissions } from '../../../../helpers/check-permissions';
 
 interface Props {
   commonData: CommonData;
@@ -254,13 +254,11 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
 
   useEffect(() => {
     if (commonData.permissions?.organizations && commonData.permissions?.teams) {
-      const indexOrganization: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
-      if (indexOrganization === -1) {
-        router.replace('/');
+      if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizatinName as string)) {
+        router.replace('/login');
         return;
       }
-      const indexTeam: number = commonData.permissions.teams.findIndex((item: ResourcePermissions) => item.name === router.query.teamName);
-      if (indexTeam === -1) {
+      if (!HelperPermissions.belongsToTeam(commonData, router.query.organizatinName as string, router.query.teamName as string)) {
         router.replace(`/${router.query.organizationName}`);
       }
     }
@@ -491,16 +489,22 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     return '';
   });
 
-  const hasPermissionCreateComment: boolean = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.CREATE), [commonData]);
-  const hasPermissionReadComment: boolean = useMemo(() => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : checkPermissions(commonData, CommentPermissionsEnum.READ)), [commonData]);
-  const hasPermissionDeleteComment: boolean = useMemo(() => checkPermissions(commonData, CommentPermissionsEnum.DELETE), [commonData]);
-  const hasPermissionReadReport: boolean = useMemo(() => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : checkPermissions(commonData, ReportPermissionsEnum.READ)), [commonData]);
-  const hasPermissionDeleteReport: boolean = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.DELETE), [commonData]);
-  const hasPermissionEditReport: boolean = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData]);
-  const hasPermissionEditReportOnlyMine: boolean = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.EDIT_ONLY_MINE), [commonData]);
-  const hasPermissionCreateInlineComment: boolean = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.CREATE), [commonData]);
-  const hasPermissionEditInlineComment: boolean = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData]);
-  const hasPermissionDeleteInlineComment: boolean = useMemo(() => checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData]);
+  const hasPermissionCreateComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, CommentPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionReadComment: boolean = useMemo(
+    () => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : HelperPermissions.checkPermissions(commonData, CommentPermissionsEnum.READ)),
+    [commonData],
+  );
+  const hasPermissionDeleteComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, CommentPermissionsEnum.DELETE), [commonData]);
+  const hasPermissionReadReport: boolean = useMemo(
+    () => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.READ)),
+    [commonData],
+  );
+  const hasPermissionDeleteReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.DELETE), [commonData]);
+  const hasPermissionEditReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData]);
+  const hasPermissionEditReportOnlyMine: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT_ONLY_MINE), [commonData]);
+  const hasPermissionCreateInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionEditInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData]);
+  const hasPermissionDeleteInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData]);
 
   if (commonData.errorOrganization) {
     return <div className="text-center mt-4">{commonData.errorOrganization}</div>;

@@ -13,7 +13,7 @@ import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import slugify from 'slugify';
-import checkPermissions from '../helpers/check-permissions';
+import { HelperPermissions } from '../helpers/check-permissions';
 import { Helper } from '../helpers/Helper';
 import type { Member } from '../types/member';
 import PureAvatar from './PureAvatar';
@@ -59,9 +59,9 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
-    return checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
+    return HelperPermissions.checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || HelperPermissions.checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
   }, [commonData]);
-  const isTeamAdmin: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
+  const isTeamAdmin: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
 
   const filteredMembers: Member[] = useMemo(() => {
     let m: Member[] = members;

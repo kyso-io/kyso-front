@@ -4,7 +4,6 @@ import MemberFilterSelector from '@/components/MemberFilterSelector';
 import PureKysoButton from '@/components/PureKysoButton';
 import { PureSpinner } from '@/components/PureSpinner';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
-import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import { getLocalStorageItem, removeLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import slugify from '@/helpers/slugify';
@@ -25,6 +24,7 @@ import type { ChangeEvent } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
+import { HelperPermissions } from '../../../helpers/check-permissions';
 import { Helper } from '../../../helpers/Helper';
 
 const token: string | null = getLocalStorageItem('jwt');
@@ -52,10 +52,10 @@ const CreateReport = ({ commonData }: Props) => {
       return null;
     }
     if (!selectedTeam) {
-      return checkPermissions(commonData, ReportPermissionsEnum.CREATE);
+      return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
     }
     const cd: any = { ...commonData, team: selectedTeam };
-    return checkPermissions(cd, ReportPermissionsEnum.CREATE);
+    return HelperPermissions.checkPermissions(cd, ReportPermissionsEnum.CREATE);
   }, [commonData.permissions, commonData.organization, commonData.team, selectedTeam]);
   const [files, setFiles] = useState<File[]>([]);
   const [mainFile, setMainFile] = useState<string | null>(null);
@@ -70,7 +70,7 @@ const CreateReport = ({ commonData }: Props) => {
     return commonData.permissions.teams.filter((teamResourcePermissions: ResourcePermissions) => {
       const sameOrg: boolean = teamResourcePermissions.organization_id === commonData.organization!.id;
       const cd: any = { ...commonData, team: teamResourcePermissions };
-      const hasPermissionInOrg: boolean = checkPermissions(cd, ReportPermissionsEnum.CREATE);
+      const hasPermissionInOrg: boolean = HelperPermissions.checkPermissions(cd, ReportPermissionsEnum.CREATE);
       return sameOrg && hasPermissionInOrg;
     });
   }, [commonData.permissions, commonData.organization]);

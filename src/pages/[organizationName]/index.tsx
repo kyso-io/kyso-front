@@ -7,7 +7,7 @@ import PureNewReportPopover from '@/components/PureNewReportPopover';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
+import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -17,7 +17,7 @@ import ActivityFeedComponent from '../../components/ActivityFeed';
 import InfoActivity from '../../components/InfoActivity';
 import ManageUsers from '../../components/ManageUsers';
 import ReportBadge from '../../components/ReportBadge';
-import checkPermissions from '../../helpers/check-permissions';
+import { HelperPermissions } from '../../helpers/check-permissions';
 import { useInterval } from '../../hooks/use-interval';
 import type { PaginationParams } from '../../interfaces/pagination-params';
 import type { CommonData } from '../../types/common-data';
@@ -48,7 +48,7 @@ const Index = ({ commonData }: Props) => {
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const hasPermissionDeleteOrganization: boolean = useMemo(
-    () => checkPermissions(commonData, [GlobalPermissionsEnum.GLOBAL_ADMIN, OrganizationPermissionsEnum.ADMIN, OrganizationPermissionsEnum.DELETE]),
+    () => HelperPermissions.checkPermissions(commonData, [GlobalPermissionsEnum.GLOBAL_ADMIN, OrganizationPermissionsEnum.ADMIN, OrganizationPermissionsEnum.DELETE]),
     [commonData],
   );
 
@@ -69,12 +69,8 @@ const Index = ({ commonData }: Props) => {
   }, []);
 
   useEffect(() => {
-    if (!commonData.permissions || !commonData.permissions.organizations || !router.query.organizationName) {
-      return;
-    }
-    const index: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
-    if (index === -1) {
-      router.replace('/');
+    if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizationName as string)) {
+      router.replace('/login');
     }
   }, [commonData?.permissions?.organizations, router.query?.organizationName]);
 

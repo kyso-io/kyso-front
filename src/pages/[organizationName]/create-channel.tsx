@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ChannelList from '@/components/ChannelList';
 import { PureSpinner } from '@/components/PureSpinner';
-import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
@@ -13,6 +12,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
 import ToasterNotification from '../../components/ToasterNotification';
 import { checkJwt } from '../../helpers/check-jwt';
+import { HelperPermissions } from '../../helpers/check-permissions';
 
 interface Props {
   commonData: CommonData;
@@ -29,7 +29,7 @@ const Index = ({ commonData }: Props) => {
   const [isTeamAvailable, setTeamAvailable] = useState(true);
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
-  const hasPermissionCreateChannel: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
 

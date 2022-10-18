@@ -14,7 +14,7 @@ import PureAvatar from '../../../components/PureAvatar';
 import SettingsAside from '../../../components/SettingsAside';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
-import checkPermissions from '../../../helpers/check-permissions';
+import { HelperPermissions } from '../../../helpers/check-permissions';
 import { Helper } from '../../../helpers/Helper';
 import { useRedirectIfNoJWT } from '../../../hooks/use-redirect-if-no-jwt';
 import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
@@ -54,7 +54,7 @@ const Index = ({ commonData }: Props) => {
   const [organizationRole, setOrganizationRole] = useState<string>('');
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
-    return checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
+    return HelperPermissions.checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || HelperPermissions.checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
   }, [commonData]);
   const organizationsRoles: { label: string; value: string }[] = useMemo(() => {
     const data: { label: string; value: string }[] = [];

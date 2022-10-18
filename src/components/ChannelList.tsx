@@ -1,4 +1,4 @@
-import checkPermissions from '@/helpers/check-permissions';
+import { HelperPermissions } from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import type { CommonData } from '@/types/common-data';
@@ -17,7 +17,7 @@ interface Props {
 
 const ChannelList = (props: Props) => {
   const { basePath, commonData } = props;
-  const hasPermissionCreateChannel: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
   const channelSelectorItems: BreadcrumbItem[] = useMemo(() => {
     if (commonData?.permissions?.teams && commonData.permissions.teams.length > 0) {
       const breadcrumbItems: BreadcrumbItem[] = commonData.permissions.teams

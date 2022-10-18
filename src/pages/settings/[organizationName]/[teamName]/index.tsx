@@ -12,7 +12,7 @@ import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import PureAvatar from '../../../../components/PureAvatar';
 import SettingsAside from '../../../../components/SettingsAside';
 import ToasterNotification from '../../../../components/ToasterNotification';
-import checkPermissions from '../../../../helpers/check-permissions';
+import { HelperPermissions } from '../../../../helpers/check-permissions';
 import { Helper } from '../../../../helpers/Helper';
 import { useRedirectIfNoJWT } from '../../../../hooks/use-redirect-if-no-jwt';
 import { TailwindColor } from '../../../../tailwind/enum/tailwind-color.enum';
@@ -59,9 +59,9 @@ const Index = ({ commonData }: Props) => {
   const [teamRole, setTeamRole] = useState<string>('');
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
-    return checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
+    return HelperPermissions.checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || HelperPermissions.checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
   }, [commonData]);
-  const isTeamAdmin: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
+  const isTeamAdmin: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
   const organizationsRoles: { label: string; value: string }[] = useMemo(() => {
     const data: { label: string; value: string }[] = [];
     for (const orgRole in OrganizationRoleToLabel) {
@@ -83,7 +83,7 @@ const Index = ({ commonData }: Props) => {
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
-  const hasPermissionEditChannel: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.EDIT), [commonData]);
+  const hasPermissionEditChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.EDIT), [commonData]);
 
   useEffect(() => {
     const getData = async () => {
