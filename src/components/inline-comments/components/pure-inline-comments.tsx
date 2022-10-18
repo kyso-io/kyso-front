@@ -35,7 +35,7 @@ const PureComments = (props: IPureComments) => {
           File{`'`}s comments{' '}
           <FontAwesomeIcon
             className="inline-comments-info"
-            data-pr-tooltip="These comments remain only for this files"
+            data-pr-tooltip="These comments are local to the current file, and will change if you open another file"
             style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
             icon={faCircleInfo}
           />

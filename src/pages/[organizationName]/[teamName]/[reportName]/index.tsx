@@ -575,7 +575,6 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
       <div className={classNames('flex flex-1 flex-col', sidebarOpen ? 'pl-64' : 'pl-10')}>
         <main>
           <div className="w-full px-4 sm:px-6 md:px-10">
-            {/* Replace with your content */}
             <div className="py-4">
               {report && (
                 <>
@@ -663,15 +662,15 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                       <div ref={refComments} className="block pb-44 w-full p-4 pl-8">
                         <div className="prose max-w-none ">
                           <Tooltip target=".comments-info" />
-                          <h2>
+                          <h4>
                             Report{`'`}s Comments{' '}
                             <FontAwesomeIcon
                               className="comments-info"
-                              data-pr-tooltip="These comments remain over the report's files and versions"
+                              data-pr-tooltip="These comments are global to the report, and are shown in all files"
                               style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
                               icon={faCircleInfo}
                             />
-                          </h2>
+                          </h4>
                         </div>
                         <PureComments
                           report={report}
