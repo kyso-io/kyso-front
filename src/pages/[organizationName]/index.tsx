@@ -74,7 +74,7 @@ const Index = ({ commonData }: Props) => {
     }
     const index: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
     if (index === -1) {
-      router.replace('/');
+      router.replace('/login');
     }
   }, [commonData?.permissions?.organizations, router.query?.organizationName]);
 

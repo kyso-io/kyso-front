@@ -253,7 +253,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     if (commonData.permissions?.organizations && commonData.permissions?.teams) {
       const indexOrganization: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
       if (indexOrganization === -1) {
-        router.replace('/');
+        router.replace('/login');
         return;
       }
       const indexTeam: number = commonData.permissions.teams.findIndex((item: ResourcePermissions) => item.name === router.query.teamName);
