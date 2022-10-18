@@ -7,7 +7,7 @@ import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
 import { useMemo } from 'react';
-import checkPermissions from '../helpers/check-permissions';
+import { HelperPermissions } from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureShareButton from './PureShareButton';
 import PureTagGroup from './PureTagGroup';
@@ -28,9 +28,10 @@ interface Props {
 }
 
 const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
-  const hasPermissionReportGlobalPin: boolean = useMemo(() => {
-    return checkPermissions(commonData, ReportPermissionsEnum.GLOBAL_PIN);
-  }, [commonData.organization, commonData.team, commonData.user]);
+  const hasPermissionReportGlobalPin: boolean = useMemo(
+    () => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.GLOBAL_PIN),
+    [commonData.organization, commonData.team, commonData.user],
+  );
   const reportImage: string = useMemo(() => {
     if (report.preview_picture) {
       return report.preview_picture;

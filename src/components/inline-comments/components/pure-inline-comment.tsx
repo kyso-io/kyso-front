@@ -11,7 +11,7 @@ import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-mode
 import { GlobalPermissionsEnum, OrganizationPermissionsEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import moment from 'moment';
 import { useMemo, useState } from 'react';
-import checkPermissions from '../../../helpers/check-permissions';
+import { HelperPermissions } from '../../../helpers/check-permissions';
 import PureInlineCommentForm from './pure-inline-comment-form';
 
 function classNames(...classes: string[]) {
@@ -36,9 +36,9 @@ const PureInlineComment = (props: IPureInlineComment) => {
   const [isEditing, setIsEditing] = useState(false);
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
-    return checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
+    return HelperPermissions.checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || HelperPermissions.checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
   }, [commonData]);
-  const isTeamAdmin: boolean = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
+  const isTeamAdmin: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
   const isUserAuthor: boolean = commonData.user !== undefined && commonData.user !== null && comment !== null && commonData.user.id === comment.user_id;
 
   if (comment.markedAsDeleted) {

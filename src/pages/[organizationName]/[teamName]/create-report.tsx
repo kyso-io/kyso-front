@@ -9,7 +9,6 @@ import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 import RenderCode from '@/components/renderers/RenderCode';
 import RenderError from '@/components/renderers/RenderError';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
-import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
@@ -36,6 +35,7 @@ import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
+import { HelperPermissions } from '../../../helpers/check-permissions';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -125,7 +125,7 @@ const CreateReport = ({ commonData }: Props) => {
     if (!commonData.permissions) {
       return null;
     }
-    return checkPermissions(commonData, ReportPermissionsEnum.CREATE);
+    return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
   }, [commonData.permissions, commonData.organization, commonData.team]);
 
   const cleanStorage = () => {

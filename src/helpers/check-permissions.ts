@@ -1,7 +1,8 @@
 import type { CommonData } from '@/types/common-data';
 import type { KysoPermissions, ResourcePermissions } from '@kyso-io/kyso-model';
 
-/**
+export class HelperPermissions {
+  /**
  *
  * @param {*} activeOrganization const activeOrganization = useSelector((s) => selectOrganizationBySlugifiedName(s, organizationName));
  * @param {*} commonData.team const commonData.team = useSelector((s) => selectTeamBySlugifiedName(s, teamName));
@@ -61,67 +62,117 @@ import type { KysoPermissions, ResourcePermissions } from '@kyso-io/kyso-model';
  * KYSO_IO_DELETE_COMMENT
  * KYSO_IO_READ_COMMENT
  */
-const checkPermissions = (commonData: CommonData, listOfPermissionsToCheck: string | string[]) => {
-  if (!commonData.organization || !commonData.permissions) {
-    return false;
-  }
+  static checkPermissions = (commonData: CommonData, listOfPermissionsToCheck: string | string[]) => {
+    if (!commonData.organization || !commonData.permissions) {
+      return false;
+    }
 
-  let permissionInOrganization: boolean = false;
-  let permissionInTeam: boolean = false;
+    let permissionInOrganization: boolean = false;
+    let permissionInTeam: boolean = false;
 
-  /* if (!permissionsOfOrganization) {
+    /* if (!permissionsOfOrganization) {
     return false;
   } */
 
-  // Get the permissions of that user in that team
-  let permissionsInThatTeam: ResourcePermissions | undefined;
-  let permissionsInThatOrganization: ResourcePermissions | undefined;
+    // Get the permissions of that user in that team
+    let permissionsInThatTeam: ResourcePermissions | undefined;
+    let permissionsInThatOrganization: ResourcePermissions | undefined;
 
-  if (commonData.team) {
-    permissionsInThatTeam = commonData.permissions.teams?.find((x: ResourcePermissions) => x.id === commonData.team?.id);
+    if (commonData.team) {
+      permissionsInThatTeam = commonData.permissions.teams?.find((x: ResourcePermissions) => x.id === commonData.team?.id);
 
-    /*
+      /*
     console.log(
       `Permissions in that team ${
         commonData.team.sluglified_name || commonData.team.name
       }`,
       permissionsInThatTeam
     ); */
-  }
+    }
 
-  if (commonData.organization) {
-    permissionsInThatOrganization = commonData.permissions.organizations?.find((x: ResourcePermissions) => x.id === commonData.organization?.id);
+    if (commonData.organization) {
+      permissionsInThatOrganization = commonData.permissions.organizations?.find((x: ResourcePermissions) => x.id === commonData.organization?.id);
 
-    /* console.log(
+      /* console.log(
       `Permissions in that organization ${
         activeOrganization.sluglified_name || activeOrganization.name
       }`,
       permissionsInThatOrganization
     ); */
-  }
-
-  if (permissionsInThatOrganization) {
-    if (Array.isArray(listOfPermissionsToCheck)) {
-      permissionInOrganization = Boolean(permissionsInThatOrganization.permissions?.find((perm) => listOfPermissionsToCheck.includes(perm)));
-    } else {
-      permissionInOrganization = Boolean(permissionsInThatOrganization?.permissions?.includes(listOfPermissionsToCheck as KysoPermissions));
     }
-  }
 
-  if (permissionsInThatTeam && permissionsInThatTeam?.permissions) {
-    if (Array.isArray(listOfPermissionsToCheck)) {
-      permissionInTeam = Boolean(permissionsInThatTeam.permissions?.find((perm) => (listOfPermissionsToCheck as KysoPermissions[]).includes(perm)));
-    } else {
-      permissionInTeam = Boolean(permissionsInThatTeam.permissions.includes(listOfPermissionsToCheck as KysoPermissions));
+    if (permissionsInThatOrganization) {
+      if (Array.isArray(listOfPermissionsToCheck)) {
+        permissionInOrganization = Boolean(permissionsInThatOrganization.permissions?.find((perm) => listOfPermissionsToCheck.includes(perm)));
+      } else {
+        permissionInOrganization = Boolean(permissionsInThatOrganization?.permissions?.includes(listOfPermissionsToCheck as KysoPermissions));
+      }
     }
-  }
 
-  if (!permissionsInThatTeam || permissionsInThatTeam?.organization_inherited === true) {
-    // console.log(`[ORG] Has permissions returning ${permissionInOrganization}`);
-    return permissionInOrganization;
-  }
-  // console.log(`[TEAM] Has permissions returning ${permissionInTeam}`);
-  return permissionInTeam;
-};
+    if (permissionsInThatTeam && permissionsInThatTeam?.permissions) {
+      if (Array.isArray(listOfPermissionsToCheck)) {
+        permissionInTeam = Boolean(permissionsInThatTeam.permissions?.find((perm) => (listOfPermissionsToCheck as KysoPermissions[]).includes(perm)));
+      } else {
+        permissionInTeam = Boolean(permissionsInThatTeam.permissions.includes(listOfPermissionsToCheck as KysoPermissions));
+      }
+    }
 
-export default checkPermissions;
+    if (!permissionsInThatTeam || permissionsInThatTeam?.organization_inherited === true) {
+      // console.log(`[ORG] Has permissions returning ${permissionInOrganization}`);
+      return permissionInOrganization;
+    }
+    // console.log(`[TEAM] Has permissions returning ${permissionInTeam}`);
+    return permissionInTeam;
+  };
+
+  static belongsToOrganization = (commonData: CommonData, organizationName: string): boolean => {
+    if (!commonData) {
+      return false;
+    }
+    if (!commonData.permissions) {
+      return false;
+    }
+    if (!commonData.permissions.organizations) {
+      return false;
+    }
+    if (!organizationName) {
+      return false;
+    }
+    const indexOrganization: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === organizationName);
+    if (indexOrganization === -1) {
+      return false;
+    }
+    return true;
+  };
+
+  static belongsToTeam = (commonData: CommonData, organizationName: string, teamName: string): boolean => {
+    if (!commonData) {
+      return false;
+    }
+    if (!commonData.permissions) {
+      return false;
+    }
+    if (!commonData.permissions.organizations) {
+      return false;
+    }
+    if (!organizationName) {
+      return false;
+    }
+    if (!commonData.permissions.teams) {
+      return false;
+    }
+    if (!teamName) {
+      return false;
+    }
+    const indexOrganization: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === organizationName);
+    if (indexOrganization === -1) {
+      return false;
+    }
+    const organizationResourcePermission: ResourcePermissions = commonData.permissions.organizations[indexOrganization]!;
+    const indexTeam: number = commonData.permissions.teams.findIndex((item: ResourcePermissions) => organizationResourcePermission.id === item.organization_id && item.name === teamName);
+    if (indexTeam === -1) {
+      return false;
+    }
+    return true;
+  };
+}

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import type {
@@ -11,7 +10,6 @@ import type {
   OrganizationMember,
   PaginatedResponseDto,
   ReportDTO,
-  ResourcePermissions,
   SearchUser,
   SearchUserDto,
   Team,
@@ -35,6 +33,7 @@ import PureNewReportPopover from '../../../components/PureNewReportPopover';
 import { PureSpinner } from '../../../components/PureSpinner';
 import ReportBadge from '../../../components/ReportBadge';
 import ReportsSearchBar from '../../../components/ReportsSearchBar';
+import { HelperPermissions } from '../../../helpers/check-permissions';
 import type { PaginationParams } from '../../../interfaces/pagination-params';
 import type { ReportsFilter } from '../../../interfaces/reports-filter';
 import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
@@ -117,7 +116,10 @@ const Index = ({ commonData }: Props) => {
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   // PERMISSIONS
-  const hasPermissionDeleteChannel: boolean = useMemo(() => checkPermissions(commonData, [OrganizationPermissionsEnum.ADMIN, TeamPermissionsEnum.ADMIN, TeamPermissionsEnum.DELETE]), [commonData]);
+  const hasPermissionDeleteChannel: boolean = useMemo(
+    () => HelperPermissions.checkPermissions(commonData, [OrganizationPermissionsEnum.ADMIN, TeamPermissionsEnum.ADMIN, TeamPermissionsEnum.DELETE]),
+    [commonData],
+  );
   // SEARCH USER
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
@@ -142,13 +144,11 @@ const Index = ({ commonData }: Props) => {
     if (!commonData.permissions || !commonData.permissions.organizations || !commonData.permissions.teams || !router.query.organizationName || !router.query.teamName) {
       return;
     }
-    const indexOrganization: number = commonData.permissions.organizations.findIndex((item: ResourcePermissions) => item.name === router.query.organizationName);
-    if (indexOrganization === -1) {
+    if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizatinName as string)) {
       router.replace('/login');
       return;
     }
-    const indexTeam: number = commonData.permissions.teams.findIndex((item: ResourcePermissions) => item.name === router.query.teamName);
-    if (indexTeam === -1) {
+    if (!HelperPermissions.belongsToTeam(commonData, router.query.organizatinName as string, router.query.teamName as string)) {
       router.replace(`/${router.query.organizationName}`);
     }
   }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);

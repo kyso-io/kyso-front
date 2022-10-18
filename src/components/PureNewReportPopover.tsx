@@ -1,6 +1,5 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import checkPermissions from '@/helpers/check-permissions';
 import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon, ChevronUpIcon, ClipboardCopyIcon, ExclamationCircleIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
@@ -8,6 +7,7 @@ import { UploadIcon } from '@heroicons/react/solid';
 import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
+import { HelperPermissions } from '../helpers/check-permissions';
 import ToasterNotification from './ToasterNotification';
 
 const TIMEOUT_MS = 5000;
@@ -23,7 +23,7 @@ const PureNewReportPopover = (props: Props) => {
   const [messageToaster, setMessageToaster] = useState<string>('');
   const { commonData, captchaIsEnabled } = props;
 
-  const hasPermissionCreateReport = useMemo(() => checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionCreateReport = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
 
   const [copiedKysoConfigFile, setCopiedKysoConfigFile] = useState<boolean>(false);
   const [copiedKysoPush, setCopiedKysoPush] = useState<boolean>(false);

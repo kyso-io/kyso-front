@@ -1,4 +1,3 @@
-import checkPermissions from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
@@ -8,6 +7,7 @@ import { DotsVerticalIcon, PlusCircleIcon, TrashIcon } from '@heroicons/react/ou
 import { TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import { deleteTeamAction } from '@kyso-io/kyso-store';
 import { Fragment, useMemo } from 'react';
+import { HelperPermissions } from '../helpers/check-permissions';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface Props {
@@ -27,8 +27,8 @@ const ChannelList = (props: Props) => {
       });
   }
 
-  const hasPermissionCreateChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
-  const hasPermissionDeleteChannel = useMemo(() => checkPermissions(commonData, TeamPermissionsEnum.DELETE), [commonData]);
+  const hasPermissionCreateChannel = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
+  const hasPermissionDeleteChannel = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.DELETE), [commonData]);
 
   const deleteChannel = async () => {
     if (!hasPermissionDeleteChannel) {
