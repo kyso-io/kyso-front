@@ -26,8 +26,8 @@ import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ArrowSmDownIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { Comment, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
-import { CommentPermissionsEnum, GithubFileHash, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import type { Comment, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
+import { CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -89,15 +89,23 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
       return;
     }
     const getData = async () => {
+      let path = '';
+      if (router.query.path) {
+        if (Array.isArray(router.query.path)) {
+          path = (router.query.path as string[]).join('/') || '';
+        } else {
+          path = (router.query.path as string) || '';
+        }
+      }
       const t: GithubFileHash[] = await getTree({
-        path: currentPath,
+        path,
         version,
         report: reportData.report,
         commonData,
       });
       setSelfTree(t);
       const pt: GithubFileHash[] = await getTree({
-        path: dirname(currentPath),
+        path: dirname(path),
         version,
         report: reportData.report,
         commonData,
@@ -119,7 +127,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   const setReportFileAsMainFile = async () => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-      await api.updateReport(report!.id!, { main_file: fileToRender!.path } as any);
+      await api.updateReport(report!.id!, { main_file: fileToRender!.id } as any);
       refreshReport();
     } catch (e: any) {}
   };
@@ -173,10 +181,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
     }
 
     const getData = async () => {
-      const mainFile = currentPath === '' ? reportData.report!.main_file : undefined;
       const validFiles: GithubFileHash[] = selfTree.filter((item: GithubFileHash) => item.type === 'file');
-      const allowedPaths = [currentPath, mainFile];
-
       const defaultRenderFiles: string[] = [
         'Readme.md',
         'readme.md',
@@ -193,21 +198,17 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
         'index.pdf',
       ];
 
-      let validFile: GithubFileHash | undefined;
-
-      if (mainFile) {
-        validFile = new GithubFileHash(reportData.report?.main_file_id!, 'file', mainFile, '', '', reportData.report?.main_file_path_scs!, reportData.report?.main_file_version!);
-      } else {
-        validFile = validFiles?.find((item: GithubFileHash) => {
-          return allowedPaths.includes(item.path);
-        });
-
-        if (!validFile) {
-          // Check the defaults
-          validFile = validFiles?.find((item: GithubFileHash) => {
-            return defaultRenderFiles.includes(item.path);
-          });
+      let validFile: GithubFileHash | undefined = validFiles.find((item: GithubFileHash) => {
+        if (currentPath) {
+          return currentPath.endsWith(item.path);
         }
+        return false;
+      });
+      if (!validFile) {
+        // Check the defaults
+        validFile = validFiles?.find((item: GithubFileHash) => {
+          return defaultRenderFiles.includes(item.path);
+        });
       }
 
       try {

@@ -45,19 +45,20 @@ const BreadcrumbNavbar = (props: Props) => {
     const reportUrl = `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
     const version = router.query.version as string;
     if (router.query.path && Array.isArray(router.query.path)) {
-      const paths = router.query.path;
-      const crumbs = paths
-        .filter((p: string) => p !== '')
-        .map((p, index) => {
-          return new BreadcrumbItem(p, `${reportUrl}/${paths.slice(0, index + 1).join('/')}${version ? `?version=${version}` : ''}`, false);
-        });
+      const paths = router.query.path.filter((p: string) => p !== '');
+      const crumbs: BreadcrumbItem[] = paths.map(
+        (p, index) => new BreadcrumbItem(p, `${reportUrl}/${paths.slice(0, index + 1).join('/')}${version ? `?version=${version}` : ''}`, index === paths.length - 1),
+      );
       data.push(...crumbs);
     } else if (report.main_file) {
-      const breadcrumItem: BreadcrumbItem = new BreadcrumbItem(report.main_file, `${reportUrl}/${report.main_file}${version ? `?version=${version}` : ''}`, false);
-      data.push(breadcrumItem);
+      const paths: string[] = report.main_file.split('/').filter((p: string) => p !== '');
+      const crumbs: BreadcrumbItem[] = paths.map(
+        (p, index) => new BreadcrumbItem(p, `${reportUrl}/${paths.slice(0, index + 1).join('/')}${version ? `?version=${version}` : ''}`, index === paths.length - 1),
+      );
+      data.push(...crumbs);
     }
     return data;
-  }, [commonData.organization, commonData.team, report]);
+  }, [commonData.organization, commonData.team, report, router.query?.path, router.query?.version]);
 
   return (
     <div>

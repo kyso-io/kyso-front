@@ -141,7 +141,7 @@ const PureTree = (props: IPureTree) => {
       <div className="text-ellipsis overflow-hidden">
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {tree?.map((item: any) => (
-          <PureTreeItem onNavigation={onNavigation} key={item.path} treeItem={item} current={lastPathSegment === item.path} isMainFile={item.path === report.main_file} href={getNewPath(item)} />
+          <PureTreeItem onNavigation={onNavigation} key={item.path} treeItem={item} current={lastPathSegment === item.path} isMainFile={item.id === report.main_file_id} href={getNewPath(item)} />
         ))}
       </div>
     </div>
