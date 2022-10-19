@@ -69,6 +69,9 @@ const Index = ({ commonData }: Props) => {
   }, []);
 
   useEffect(() => {
+    if (!commonData.permissions || !commonData.permissions.organizations || !router.query.organizationName) {
+      return;
+    }
     if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizationName as string)) {
       router.replace('/login');
     }
