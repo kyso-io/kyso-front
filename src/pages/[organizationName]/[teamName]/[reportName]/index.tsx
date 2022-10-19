@@ -253,16 +253,17 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   }, [selfTree]);
 
   useEffect(() => {
-    if (commonData.permissions?.organizations && commonData.permissions?.teams) {
-      if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizatinName as string)) {
-        router.replace('/login');
-        return;
-      }
-      if (!HelperPermissions.belongsToTeam(commonData, router.query.organizatinName as string, router.query.teamName as string)) {
-        router.replace(`/${router.query.organizationName}`);
-      }
+    if (!commonData.permissions || !commonData.permissions.organizations || !commonData.permissions.teams || !router.query.organizationName || !router.query.teamName) {
+      return;
     }
-  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams]);
+    if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizationName as string)) {
+      router.replace('/login');
+      return;
+    }
+    if (!HelperPermissions.belongsToTeam(commonData, router.query.organizationName as string, router.query.teamName as string)) {
+      router.replace(`/${router.query.organizationName}`);
+    }
+  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
 
   // START TEAM MEMBERS
 

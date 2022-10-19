@@ -144,11 +144,11 @@ const Index = ({ commonData }: Props) => {
     if (!commonData.permissions || !commonData.permissions.organizations || !commonData.permissions.teams || !router.query.organizationName || !router.query.teamName) {
       return;
     }
-    if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizatinName as string)) {
+    if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizationName as string)) {
       router.replace('/login');
       return;
     }
-    if (!HelperPermissions.belongsToTeam(commonData, router.query.organizatinName as string, router.query.teamName as string)) {
+    if (!HelperPermissions.belongsToTeam(commonData, router.query.organizationName as string, router.query.teamName as string)) {
       router.replace(`/${router.query.organizationName}`);
     }
   }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
