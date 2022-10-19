@@ -26,21 +26,23 @@ type IPureComments = {
 
 const PureComments = (props: IPureComments) => {
   const { comments, submitComment, commonData, report, channelMembers, hasPermissionDeleteComment, hasPermissionCreateComment, onDeleteComment } = props;
-
+  console.log('comments', comments);
   return (
     <div className={classNames('w-full flex flex-col')}>
-      <div className="prose max-w-none ">
-        <Tooltip target=".inline-comments-info" />
-        <h4>
-          File{`'`}s comments{' '}
-          <FontAwesomeIcon
-            className="inline-comments-info"
-            data-pr-tooltip="These comments are local to the current file, and will change if you open another file"
-            style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
-            icon={faCircleInfo}
-          />
-        </h4>
-      </div>
+      {(comments?.length > 0 || commonData.user) && (
+        <div className="prose max-w-none ">
+          <Tooltip target=".inline-comments-info" />
+          <h4>
+            File{`'`}s comments{' '}
+            <FontAwesomeIcon
+              className="inline-comments-info"
+              data-pr-tooltip="These comments are local to the current file, and will change if you open another file"
+              style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
+              icon={faCircleInfo}
+            />
+          </h4>
+        </div>
+      )}
       <div className="flex flex-col">
         {comments &&
           comments.map((comment) => (
