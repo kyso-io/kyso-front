@@ -154,7 +154,13 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
 
           <div className="flex flex-row space-x-2">
             {comment !== null && (
-              <PureKysoButton type={KysoButton.SECONDARY} onClick={onCancel}>
+              <PureKysoButton
+                type={KysoButton.SECONDARY}
+                onClick={() => {
+                  setValue('');
+                  onCancel();
+                }}
+              >
                 Cancel
               </PureKysoButton>
             )}
@@ -165,7 +171,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
                   setValue('');
                 }}
               >
-                Cancel
+                Cancels
               </PureKysoButton>
             )}
             {hasPermissionCreateComment && (
