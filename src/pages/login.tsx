@@ -24,7 +24,7 @@ const validateEmail = (email: string) => {
   return re.test(email);
 };
 
-const githubScopes = ['read:user', 'user:email', 'read:org', 'repo', 'admin:repo_hook', 'public_repo'];
+const githubScopes = ['read:user', 'user:email'];
 const gitlabScope = 'read_user';
 
 const Index = () => {
