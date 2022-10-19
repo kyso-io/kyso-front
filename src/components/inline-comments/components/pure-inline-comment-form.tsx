@@ -1,11 +1,15 @@
 import PureAvatar from '@/components/PureAvatar';
 import { PureSpinner } from '@/components/PureSpinner';
+import PureKysoButton from '@/components/PureKysoButton';
+import ToasterNotification from '@/components/ToasterNotification';
 import classNames from '@/helpers/class-names';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { InformationCircleIcon } from '@heroicons/react/solid';
 import type { InlineCommentDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Mention } from 'primereact/mention';
 import { useState } from 'react';
+import { KysoButton } from '@/types/kyso-button.enum';
 
 type IPureCommentForm = {
   comment?: InlineCommentDto;
@@ -45,6 +49,8 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
 
   const [value, setValue] = useState<string>(initialValue);
   const [isLoading, setIsLoading] = useState(false);
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
 
   /** Assigned but never used
   let isUserAuthor = false
@@ -59,13 +65,19 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
     e.preventDefault();
     const targetValue = e.target.input.value;
 
+    if (!targetValue) {
+      setShowToaster(true);
+      setMessageToaster('Please write a comment');
+      setIsLoading(false);
+      return;
+    }
     // parse out nameSlugs
     const mentionedNameSlugs = parseMentions(targetValue);
     let userIds: string[] = [];
     if (channelMembers) {
       userIds = channelMembers.filter((mem) => mentionedNameSlugs.includes(mem.nameSlug)).map((m) => m.id);
     }
-
+    // sss
     /* eslint-disable @typescript-eslint/no-explicit-any */
     await submitComment(targetValue, userIds, comment?.id);
 
@@ -109,64 +121,69 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="my-2">
-      {hasPermissionCreateComment ? (
-        <Mention
-          suggestions={suggestions}
-          className="relative"
-          inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm"
-          panelClassName="w-full absolute bg-white border rounded"
-          autoHighlight
-          onSearch={onSearch}
-          name="input"
-          value={value}
-          onChange={(e) => setValue((e.target as HTMLInputElement).value)}
-          field="nameSlug"
-          style={{
-            width: '100%',
-          }}
-          placeholder={message}
-          itemTemplate={itemTemplate}
-        />
-      ) : (
-        <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
-      )}
+    <>
+      <ToasterNotification show={showToaster} setShow={setShowToaster} message={messageToaster} icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />} />
+      <form onSubmit={handleSubmit} className="my-2">
+        {hasPermissionCreateComment ? (
+          <Mention
+            suggestions={suggestions}
+            className="relative"
+            inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm"
+            panelClassName="w-full absolute bg-white border rounded"
+            autoHighlight
+            onSearch={onSearch}
+            name="input"
+            value={value}
+            onChange={(e) => {
+              setShowToaster(false);
+              setValue((e.target as HTMLInputElement).value);
+            }}
+            field="nameSlug"
+            style={{
+              width: '100%',
+            }}
+            placeholder={message}
+            itemTemplate={itemTemplate}
+          />
+        ) : (
+          <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
+        )}
 
-      <div className="flex justify-between pt-4">
-        <div>{/* <p className="text-xs text-gray-500">Use @ to mention people</p> */}</div>
+        <div className="flex justify-between pt-4">
+          <div>{/* <p className="text-xs text-gray-500">Use @ to mention people</p> */}</div>
 
-        <div className="flex flex-row space-x-2">
-          {comment !== null && (
-            <button className="hover:underline text-gray-500 text-sm" onClick={onCancel}>
-              Cancel
-            </button>
-          )}
-          {comment === null && hasPermissionCreateComment && value !== '' && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                setValue('');
-              }}
-              className={classNames('inline-flex items-center px-2 py-1 text-xs text-gray-500 hover:underline font-medium focus:outline-none focus:ring-0')}
-            >
-              Cancel
-            </button>
-          )}
-          {hasPermissionCreateComment && (
-            <button
-              type="submit"
-              className={classNames(
-                'inline-flex items-center px-2 py-1 border border-transparent text-sm font-small rounded-md shadow-sm text-white focus:outline-none focus:ring-0',
-                'bg-kyso-600 hover:bg-kyso-700 focus:ring-kyso-700 focus:ring-offset-2',
-              )}
-            >
-              {isLoading && <PureSpinner size={5} />}
-              {comment !== null ? 'Save' : 'Post'}
-            </button>
-          )}
+          <div className="flex flex-row space-x-2">
+            {comment !== null && (
+              <PureKysoButton type={KysoButton.SECONDARY} onClick={onCancel}>
+                Cancel
+              </PureKysoButton>
+            )}
+            {comment === null && hasPermissionCreateComment && value !== '' && (
+              <PureKysoButton
+                type={KysoButton.SECONDARY}
+                onClick={() => {
+                  setValue('');
+                }}
+              >
+                Cancel
+              </PureKysoButton>
+            )}
+            {hasPermissionCreateComment && (
+              <button
+                type="submit"
+                className={classNames(
+                  'inline-flex items-center px-2 py-1 border border-transparent text-sm font-small rounded-md shadow-sm text-white focus:outline-none focus:ring-0',
+                  'bg-kyso-600 hover:bg-kyso-700 focus:ring-kyso-700 focus:ring-offset-2',
+                )}
+              >
+                {isLoading && <PureSpinner size={5} />}
+                {comment !== null ? 'Save' : 'Post'}
+              </button>
+            )}
+          </div>
         </div>
-      </div>
-    </form>
+      </form>
+    </>
   );
 };
 
