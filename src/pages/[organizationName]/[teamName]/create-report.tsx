@@ -668,7 +668,6 @@ const CreateReport = ({ commonData }: Props) => {
                       }
                     }}
                     onAddNewFile={(newFile: CreationReportFileSystemObject) => {
-                      console.log('newFile', newFile);
                       addNewFile(newFile);
                     }}
                     onRemoveFile={(fileToRemove: CreationReportFileSystemObject) => {
