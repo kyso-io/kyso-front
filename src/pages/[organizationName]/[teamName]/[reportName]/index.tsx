@@ -202,6 +202,9 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
         if (currentPath) {
           return currentPath.endsWith(item.path);
         }
+        if (reportData.report?.main_file) {
+          return reportData.report.main_file.endsWith(item.path);
+        }
         return false;
       });
       if (!validFile) {
