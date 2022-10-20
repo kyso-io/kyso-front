@@ -3,7 +3,7 @@ import type { ReactElement, MouseEvent } from 'react';
 import { useCallback, useRef, useEffect, useState } from 'react';
 import { useEventListener } from 'usehooks-ts';
 import classNames from '@/helpers/class-names';
-import { setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { setLocalStorageItem, getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 
 type IPureSideOverlayPanel = {
   cacheKey?: string;
@@ -78,6 +78,12 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
   const hoverRef = useRef(null);
   const tooltipRef = useRef(null);
   const { width, enableResize } = useResize({ minWidth: 300 });
+
+  useEffect(() => {
+    if (getLocalStorageItem(cacheKey)) {
+      setOpen(JSON.parse(getLocalStorageItem(cacheKey)!));
+    }
+  }, []);
 
   const [isHover, setIsHover] = useState<boolean>(false);
   useEventListener('mouseenter', () => setIsHover(true), hoverRef);
