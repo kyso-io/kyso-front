@@ -1,7 +1,9 @@
 import type { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { FilesystemItem } from '@/model/filesystem-item.model';
+import PureNotification from '@/components/PureNotification';
 import type { ChangeEvent } from 'react';
 import { useEffect, useState } from 'react';
+import debounce from 'lodash.debounce';
 import FilesystemEntry from './FilesystemEntry';
 
 interface Props {
@@ -16,6 +18,9 @@ interface Props {
 
 const Filesystem = (props: Props) => {
   const [items, setItems] = useState<FilesystemItem[]>([]);
+
+  const [notificationType, setNotificationType] = useState<string>('');
+  const [notificationMessage, setNotificationMessage] = useState<string>('');
 
   useEffect(() => {
     if (!props.files) {
@@ -34,9 +39,14 @@ const Filesystem = (props: Props) => {
     addChildren(null, 1, tree);
     setItems(tree);
   }, [props.files]);
+  const delayedCallback = debounce(async () => {
+    setNotificationMessage('');
+    setNotificationType('');
+  }, 1500);
 
   return (
     <>
+      <div className="text-left">{notificationMessage && <PureNotification message={notificationMessage} type={notificationType} />}</div>
       {items.map((item: FilesystemItem) => (
         <FilesystemEntry
           onUploadFile={props.onUploadFile}
@@ -50,6 +60,12 @@ const Filesystem = (props: Props) => {
             props.onAddNewFile!(newFile);
           }}
           onRemoveFile={(newFile: CreationReportFileSystemObject) => {
+            if (item.file.id === 'Readme.md') {
+              setNotificationMessage('Reame.md file cannot be deleted. Reports must have one.');
+              setNotificationType('warning');
+              delayedCallback();
+              return;
+            }
             props.onRemoveFile!(newFile);
           }}
           onSelectedFile={(selectedItem: FilesystemItem) => {
