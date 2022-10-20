@@ -17,8 +17,10 @@ import type { InlineCommentDto, ReportDTO, TeamMember, UpdateInlineCommentDto } 
 import { createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import router from 'next/router';
+import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
 import ToasterNotification from '../components/ToasterNotification';
+import PureSideOverlayCommentsPanel from './UnpureSideOverlayCommentsPanel';
 
 // const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
@@ -44,6 +46,8 @@ const UnpureReportRender = (props: Props) => {
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const version = router.query.version ? (router.query.version as string) : undefined;
+
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (report.id) {
@@ -232,27 +236,28 @@ const UnpureReportRender = (props: Props) => {
       {!fileToRender.isLoading && !fileToRender.path.endsWith('.ipynb') && (
         <div className="flex flex-col">
           <div className="flex flex-row">
-            <div className={clsx('w-9/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
-            {/* here is to hide if report is not JN */}
-            <div className="w-3/12 p-2 border-l">
-              <PureInlineComments
-                commonData={commonData}
-                report={report}
-                channelMembers={channelMembers}
-                hasPermissionCreateComment={enabledCreateInlineComment}
-                hasPermissionDeleteComment={enabledDeleteInlineComment}
-                comments={inlineComments}
-                onDeleteComment={(commentId: string) => {
-                  deleteInlineComment(commentId);
-                }}
-                submitComment={(text?: string, user_ids?: string[], commentId?: string) => {
-                  if (!commentId) {
-                    createInlineComment(fileToRender.id, user_ids!, text!);
-                  } else {
-                    editInlineComment(commentId, user_ids!, text!);
-                  }
-                }}
-              />
+            <div className={clsx(sidebarOpen ? 'w-9/12' : 'w-11/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
+            <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'p-2 min-w-fit border-l')}>
+              <PureSideOverlayCommentsPanel key={report?.id} cacheKey={report?.id} setSidebarOpen={(p) => setSidebarOpen(p)} commonData={commonData}>
+                <PureInlineComments
+                  commonData={commonData}
+                  report={report}
+                  channelMembers={channelMembers}
+                  hasPermissionCreateComment={enabledCreateInlineComment}
+                  hasPermissionDeleteComment={enabledDeleteInlineComment}
+                  comments={inlineComments}
+                  onDeleteComment={(commentId: string) => {
+                    deleteInlineComment(commentId);
+                  }}
+                  submitComment={(text?: string, user_ids?: string[], commentId?: string) => {
+                    if (!commentId) {
+                      createInlineComment(fileToRender.id, user_ids!, text!);
+                    } else {
+                      editInlineComment(commentId, user_ids!, text!);
+                    }
+                  }}
+                />
+              </PureSideOverlayCommentsPanel>
             </div>
           </div>
         </div>
