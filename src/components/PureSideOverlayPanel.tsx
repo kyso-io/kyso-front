@@ -137,7 +137,12 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
 
         {(open || isHover) && (
           <div
-            className={classNames('bg-white px-2 py-2 min-h-[400px]', isHover && !open ? 'absolute z-50 shadow-lg border rounded-r' : '', open ? 'bg-gray-50' : '', 'text-ellipsis overflow-hidden')}
+            className={classNames(
+              'bg-white px-2 py-2 min-h-[400px]',
+              isHover && !open ? 'absolute z-50 shadow-lg border rounded-r min-w-[300px]' : '',
+              open ? 'bg-gray-50' : '',
+              'text-ellipsis overflow-hidden',
+            )}
           >
             {children}
           </div>
