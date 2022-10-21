@@ -26,7 +26,6 @@ type IPureComments = {
 
 const PureComments = (props: IPureComments) => {
   const { comments, submitComment, commonData, report, channelMembers, hasPermissionDeleteComment, hasPermissionCreateComment, onDeleteComment } = props;
-  console.log('comments', comments);
   return (
     <div className={classNames('w-full flex flex-col')}>
       {(comments?.length > 0 || commonData.user) && (

@@ -7,7 +7,7 @@ import { DotsVerticalIcon, FolderDownloadIcon, InformationCircleIcon, PencilIcon
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { deleteReportAction } from '@kyso-io/kyso-store';
 import { classNames } from 'primereact/utils';
-import { Fragment, useMemo, useState } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import type { FileToRender } from '../hooks/use-file-to-render';
 
 interface Props {
@@ -66,19 +66,11 @@ const UnpureReportActionDropdown = (props: Props) => {
         backgroundColor={TailwindColor.SLATE_50}
         icon={<InformationCircleIcon className="h-6 w-6 text-rose-700" aria-hidden="true" />}
       />
-      {/* <PureEditMetadata isOpen={isEditOpen} setOpen={() => openEdit(!isEditOpen)} report={report} commonData={commonData} authors={authors} /> */}
-      {/* There is a option to delete in the "dots menu". Hiding this one */}
-      {/* <PureKysoButton type={KysoButton.TERCIARY} onClick={() => deleteReport()} className={'relative inline-block text-rose-700 rounded-none  border border-r-0 border-y-0 border-gray-300 p-2'}>
-        <TrashIcon className="mr-1 h-5 w-5 text-rose-700" aria-hidden="true" />
-        Delete
-      </PureKysoButton> */}
-
       <Menu as="div" className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm relative inline-block" style={{ zIndex: 1 }}>
         <Menu.Button className="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
           <span className="sr-only">Open options</span>
           <DotsVerticalIcon className="h-5 w-5" aria-hidden="true" />
         </Menu.Button>
-
         <Transition
           as={Fragment}
           enter="transition ease-out duration-100"
@@ -91,12 +83,23 @@ const UnpureReportActionDropdown = (props: Props) => {
           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none">
             <div className="py-1">
               {hasPermissionEditReport && (
-                <Menu.Item>
-                  <a href="#" onClick={() => openMetadata()} className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-100 group flex items-center')}>
-                    <PencilIcon className="mr-2 h-5 w-5 text-gray-700" />
-                    Edit Report
-                  </a>
-                </Menu.Item>
+                <React.Fragment>
+                  <Menu.Item>
+                    <a
+                      href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form?reportId=${report.id}`}
+                      className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-100 group flex items-center')}
+                    >
+                      <PencilIcon className="mr-2 h-5 w-5 text-gray-700" />
+                      Edit Report
+                    </a>
+                  </Menu.Item>
+                  <Menu.Item>
+                    <a href="#" onClick={() => openMetadata()} className={classNames('text-gray-700', 'block px-4 py-2 text-sm hover:bg-gray-100 group flex items-center')}>
+                      <PencilIcon className="mr-2 h-5 w-5 text-gray-700" />
+                      Change picture
+                    </a>
+                  </Menu.Item>
+                </React.Fragment>
               )}
               {canChangeReportMainFile && (
                 <Menu.Item>
