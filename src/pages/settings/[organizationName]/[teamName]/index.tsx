@@ -6,6 +6,7 @@ import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { InviteUserDto, KysoSetting, NormalizedResponseDTO, OrganizationMember, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
@@ -84,6 +85,12 @@ const Index = ({ commonData }: Props) => {
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const hasPermissionEditChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.EDIT), [commonData]);
+  const hasPermissionDeleteChannel: boolean = useMemo(
+    () => HelperPermissions.checkPermissions(commonData, [OrganizationPermissionsEnum.ADMIN, TeamPermissionsEnum.ADMIN, TeamPermissionsEnum.DELETE]),
+    [commonData],
+  );
+  const [showDeleteTeamModal, setShowDeleteTeamModal] = useState<boolean>(false);
+  const [textTeamModal, setTextTeamModal] = useState<string>('');
 
   useEffect(() => {
     const getData = async () => {
@@ -119,6 +126,14 @@ const Index = ({ commonData }: Props) => {
       searchUsers(query);
     });
   }, [query]);
+
+  useEffect(() => {
+    if (!showDeleteTeamModal) {
+      setTimeout(() => {
+        setTextTeamModal('');
+      }, 1000);
+    }
+  }, [showDeleteTeamModal]);
 
   const getTeamMembers = async () => {
     const m: Member[] = [];
@@ -372,6 +387,30 @@ const Index = ({ commonData }: Props) => {
     setRequesting(false);
   };
 
+  const deleteTeam = async () => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowToaster(true);
+      setMessageToaster('Please verify the captcha');
+      setTimeout(() => {
+        setShowToaster(false);
+        sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
+        router.push('/captcha');
+      }, 2000);
+      return;
+    }
+    setRequesting(true);
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      await api.deleteTeam(commonData.team!.id!);
+    } catch (error: any) {
+      console.log(error.response.data.message);
+      setShowDeleteTeamModal(false);
+      setTextTeamModal('');
+      setRequesting(false);
+    }
+    window.location.href = `/settings/${commonData.organization?.sluglified_name}`;
+  };
+
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
@@ -381,11 +420,21 @@ const Index = ({ commonData }: Props) => {
         <div className="py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <div className="flex flex-row items-center">
-              <h3 className="text-lg font-medium leading-6 text-gray-900">{commonData.team?.display_name}</h3>
-              <a href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`} className="max-w-2xl text-sm text-gray-500 ml-5">
-                View channel
-                <LinkIcon className="inline-block w-4 h-4 ml-1" />
-              </a>
+              <div className="grow flex flex-row items-center">
+                <h3 className="text-lg font-medium leading-6 text-gray-900">{commonData.team?.display_name}</h3>
+                <a href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`} className="max-w-2xl text-sm text-gray-500 ml-5">
+                  View channel
+                  <LinkIcon className="inline-block w-4 h-4 ml-1" />
+                </a>
+              </div>
+              {hasPermissionDeleteChannel && (
+                <button
+                  className="ml-2 rounded border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  onClick={() => setShowDeleteTeamModal(true)}
+                >
+                  Delete
+                </button>
+              )}
             </div>
             <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5 mb-5">
               <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Visiblity:</label>
@@ -856,6 +905,75 @@ const Index = ({ commonData }: Props) => {
         message={messageToaster}
         backgroundColor={TailwindColor.SLATE_50}
       />
+      {/* DELETE TEAM */}
+      <Transition.Root show={showDeleteTeamModal} as={Fragment}>
+        <Dialog as="div" className="relative z-10" onClose={setShowDeleteTeamModal}>
+          <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                  <div className="sm:flex sm:items-start">
+                    <div className="mx-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                      <ExclamationCircleIcon className="h-6 w-6 text-red-600" aria-hidden="true" />
+                    </div>
+                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                      <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                        Remove organization
+                      </Dialog.Title>
+                      <div className="mt-2 text-gray-500 text-sm">
+                        <p className="">
+                          The <strong>{commonData.team?.display_name}</strong> channel and all its data will be deleted. This action cannot be undone.
+                        </p>
+                        <p className="my-2">
+                          Please type <strong>&apos;{commonData.team?.sluglified_name}&apos;</strong> in the text box before confirming:
+                        </p>
+                        <input
+                          value={textTeamModal}
+                          type="text"
+                          onChange={(e) => setTextTeamModal(e.target.value)}
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
+                    <button
+                      type="button"
+                      className={clsx(
+                        'inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm',
+                        requesting || textTeamModal !== commonData.team?.sluglified_name ? 'cursor-not-allowed opacity-50' : '',
+                      )}
+                      disabled={requesting || textTeamModal !== commonData.team?.sluglified_name}
+                      onClick={deleteTeam}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      type="button"
+                      className="mt-3 inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:mt-0 sm:w-auto sm:text-sm"
+                      onClick={() => setShowDeleteTeamModal(false)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
     </div>
   );
 };
