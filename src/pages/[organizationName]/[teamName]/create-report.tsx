@@ -334,15 +334,15 @@ const CreateReport = ({ commonData }: Props) => {
     let numFiles = 0;
     for (const file of files) {
       const fileContent: string | null = getLocalStorageItem(file.id);
-      if (!fileContent && file.type !== 'folder') {
-        setBusy(false);
-        setError(`File ${file.name} is empty.`);
-        return;
-      }
       if (file.type === 'folder') {
         zip.folder(file.path);
       } else {
-        const blob: Blob = await (await fetch(fileContent!)).blob();
+        let blob: Blob;
+        if (fileContent) {
+          blob = await (await fetch(fileContent!)).blob();
+        } else {
+          blob = new Blob([''], { type: 'plain/text' });
+        }
         zip.file(file.path, blob, { createFolders: true });
         numFiles += 1;
       }
