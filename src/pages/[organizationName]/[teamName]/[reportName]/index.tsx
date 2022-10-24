@@ -551,6 +551,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
           onInviteNewUser={inviteNewUser}
           onRemoveUser={removeUser}
           authors={authors}
+          onUpdateImage={(reportDTO: ReportDTO) => setReportData({ ...reportData, report: reportDTO })}
         />
       )}
       <div className={classNames('z-0 fixed flex flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>

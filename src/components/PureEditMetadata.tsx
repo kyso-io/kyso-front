@@ -1,18 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { NormalizedResponseDTO, ReportDTO, UserDTO, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
-import { UpdateReportRequestDTO } from '@kyso-io/kyso-model';
-import { Fragment, useEffect, useRef, useState } from 'react';
-// import { CopyToClipboard } from 'react-copy-to-clipboard';
+import type { NormalizedResponseDTO, ReportDTO, TeamMembershipOriginEnum, UserDTO } from '@kyso-io/kyso-model';
+import React, { Fragment, useEffect, useRef, useState } from 'react';
 import type { CommonData } from '@/types/common-data';
 import { Dialog, Transition } from '@headlessui/react';
 import { InformationCircleIcon, PlusSmIcon as PlusSmIconSolid } from '@heroicons/react/solid';
 import { toSvg } from 'jdenticon';
-// import PureNotification from '@/components/PureNotification';
-// import { useRouter } from 'next/router';
 import { Api } from '@kyso-io/kyso-store';
-import { useRouter } from 'next/router';
+import clsx from 'clsx';
 import 'primeicons/primeicons.css'; // icons
-import { Chips } from 'primereact/chips';
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import type { Member } from '../types/member';
@@ -31,80 +26,82 @@ interface IPureEditMetadata {
   onUpdateRoleMember: (userId: string, organizationRole: string, teamRole?: string) => void;
   onInviteNewUser: (email: string, organizationRole: string, teamRole?: string) => void;
   onRemoveUser: (userId: string, type: TeamMembershipOriginEnum) => void;
+  onUpdateImage: (reportDTO: ReportDTO) => void;
 }
 
 const PureEditMetadata = (props: IPureEditMetadata) => {
-  const { isOpen, setOpen, report, authors } = props;
-  // const router = useRouter();
-  const router = useRouter();
-  const [title, setTitle] = useState(report.title || '');
-  const [description, setDescription] = useState(report.description || '');
-  const [tags, setTags] = useState(report.tags || []);
-  // const [notification, setNotification] = useState('');
-  // const [notificationType, setNotificationType] = useState('');
-  const [newAuthors, setNewAuthors] = useState(authors.map((x) => x.email) || []);
+  const { isOpen, setOpen, report, onUpdateImage } = props;
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
   const [picture, setPicture] = useState<string>();
+  const [file, setFile] = useState<File | null>();
+  const imageInputFileRef = useRef<any>(null);
+  // const router = useRouter();
+  // const [title, setTitle] = useState(report.title || '');
+  // const [description, setDescription] = useState(report.description || '');
+  // const [tags, setTags] = useState(report.tags || []);
+  // const [newAuthors, setNewAuthors] = useState(authors.map((x) => x.email) || []);
 
   useEffect(() => {
+    if (isOpen) {
+      initializePicture();
+    } else {
+      setTimeout(() => {
+        setShowToaster(false);
+        setMessageToaster('');
+        setPicture('');
+        setFile(null);
+      }, 1500);
+    }
+  }, [isOpen]);
+
+  const initializePicture = () => {
     if (report.preview_picture) {
       setPicture(report.preview_picture);
     } else {
       const svgString = toSvg(report.title, 400);
       setPicture(`data:image/svg+xml;charset=utf8,${encodeURIComponent(svgString)}`);
     }
-  }, []);
-
-  // const backgroundImage: string = report.preview_picture ? report.preview_picture : BACKGROUND_IMAGE;
-  const imageInputFileRef = useRef<any>(null);
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
-
-  const updateReportMetadata = async () => {
-    try {
-      setShowToaster(true);
-      setMessageToaster('Uploading image...');
-      const api: Api = new Api(props.commonData.token);
-
-      api.setOrganizationSlug(props.commonData.organization?.sluglified_name!);
-      api.setTeamSlug(props.commonData.team?.sluglified_name!);
-
-      const updateReportRequest: UpdateReportRequestDTO = new UpdateReportRequestDTO(title, description, report.show_code, report.show_output, report.main_file, tags, newAuthors);
-      const response: NormalizedResponseDTO<ReportDTO> = await api.updateReport(props.report.id!, updateReportRequest);
-      console.log(response.data);
-
-      setMessageToaster('Report updated successfully!');
-      setTimeout(() => {
-        setShowToaster(false);
-        router.reload();
-      }, 1500);
-    } catch (ex) {
-      setMessageToaster('An error occurred updating the report. Please try again');
-      setTimeout(() => {
-        setShowToaster(false);
-      }, 3000);
-    }
   };
 
-  const onChangeBackgroundImage = async (file: File) => {
-    if (!file) {
-      return;
-    }
+  // const updateReportMetadata = async () => {
+  //   try {
+  //     setShowToaster(true);
+  //     setMessageToaster('Uploading image...');
+  //     const api: Api = new Api(props.commonData.token);
+  //     api.setOrganizationSlug(props.commonData.organization?.sluglified_name!);
+  //     api.setTeamSlug(props.commonData.team?.sluglified_name!);
+  //     const updateReportRequest: UpdateReportRequestDTO = new UpdateReportRequestDTO(title, description, report.show_code, report.show_output, report.main_file, tags, newAuthors);
+  //     const response: NormalizedResponseDTO<ReportDTO> = await api.updateReport(props.report.id!, updateReportRequest);
+  //     setMessageToaster('Report updated successfully!');
+  //     setTimeout(() => {
+  //       setShowToaster(false);
+  //       router.reload();
+  //     }, 1500);
+  //   } catch (ex) {
+  //     setMessageToaster('An error occurred updating the report. Please try again');
+  //     setTimeout(() => {
+  //       setShowToaster(false);
+  //     }, 3000);
+  //   }
+  // };
 
+  const updateReportImage = async () => {
     try {
       setShowToaster(true);
       setMessageToaster('Uploading image...');
       const api: Api = new Api(props.commonData.token);
       api.setOrganizationSlug(props.commonData.organization?.sluglified_name!);
       api.setTeamSlug(props.commonData.team?.sluglified_name!);
-
-      const response: NormalizedResponseDTO<ReportDTO> = await api.updateReportImage(props.report.id!, file);
-      console.log(response.data);
-      setPicture(response.data.preview_picture);
-
+      const response: NormalizedResponseDTO<ReportDTO> = await api.updateReportImage(props.report.id!, file!);
+      const r: ReportDTO = response.data;
+      setPicture(r.preview_picture);
       setMessageToaster('Image uploaded successfully!');
       setTimeout(() => {
         setShowToaster(false);
       }, 3000);
+      onUpdateImage(r);
+      setOpen();
     } catch (e) {
       setMessageToaster('An error occurred uploading the image. Please try again');
       setTimeout(() => {
@@ -114,13 +111,11 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
   };
 
   return (
-    <>
+    <React.Fragment>
       <ToasterNotification show={showToaster} setShow={setShowToaster} message={messageToaster} icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />} />
-
       <Transition.Root show={isOpen} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={setOpen}>
           <div className="fixed inset-0 opacity-30 bg-slate-700" />
-
           <div className="fixed inset-0 overflow-hidden">
             <div className="absolute inset-0 overflow-hidden">
               <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
@@ -140,7 +135,7 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                         <div className="bg-gray-50 px-4 py-6 sm:px-6">
                           <div className="flex items-start justify-between space-x-3">
                             <div className="space-y-1">
-                              <Dialog.Title className="text-lg font-medium text-gray-900">Edit report metadata</Dialog.Title>
+                              <Dialog.Title className="text-lg font-medium text-gray-900">Change report&apos;s picture</Dialog.Title>
                             </div>
                             <div className="flex h-7 items-center">
                               <button type="button" className="text-gray-400 hover:text-gray-500" onClick={() => setOpen()}>
@@ -156,7 +151,6 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                             </div>
                           </div>
                         </div>
-
                         {/* Divider container */}
                         <div className="space-y-6 py-6 sm:space-y-0 sm:divide-y sm:divide-gray-200 sm:py-0">
                           <div className="pb-1 sm:pb-6">
@@ -182,7 +176,12 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                                     }}
                                     onChange={(e: any) => {
                                       if (e.target.files.length > 0) {
-                                        onChangeBackgroundImage(e.target.files[0]);
+                                        const f: File = e.target.files[0];
+                                        setPicture(URL.createObjectURL(f));
+                                        setFile(f);
+                                      } else {
+                                        initializePicture();
+                                        setFile(null);
                                       }
                                     }}
                                     style={{ display: 'none' }}
@@ -192,7 +191,7 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                             </div>
                           </div>
                           {/* Project name */}
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                          {/* <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                             <div>
                               <label htmlFor="title" className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2">
                                 Title
@@ -208,10 +207,9 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                                 className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                               />
                             </div>
-                          </div>
-
+                          </div> */}
                           {/* Project description */}
-                          <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                          {/* <div className="space-y-1 px-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                             <div>
                               <label htmlFor="description" className="block text-sm font-medium text-gray-900 sm:mt-px sm:pt-2">
                                 Description
@@ -228,10 +226,9 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                                 defaultValue={''}
                               />
                             </div>
-                          </div>
-
+                          </div> */}
                           {/* Authors */}
-                          <div className="space-y-2 px-4 sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                          {/* <div className="space-y-2 px-4 sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                             <div>
                               <h3 className="text-sm font-medium text-gray-900">Authors</h3>
                             </div>
@@ -245,10 +242,9 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                                 ></Chips>
                               </div>
                             </div>
-                          </div>
-
+                          </div> */}
                           {/* Tags */}
-                          <div className="space-y-2 px-4 sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                          {/* <div className="space-y-2 px-4 sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                             <div>
                               <h3 className="text-sm font-medium text-gray-900">Tags</h3>
                             </div>
@@ -260,10 +256,9 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                                 }}
                               ></Chips>
                             </div>
-                          </div>
-
+                          </div> */}
                           {/* Privacy */}
-                          <fieldset style={{ display: 'none' }} className="space-y-2 px-4 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
+                          {/* <fieldset style={{ display: 'none' }} className="space-y-2 px-4 sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:space-y-0 sm:px-6 sm:py-5">
                             <legend className="sr-only">Privacy</legend>
                             <div className="text-sm font-medium text-gray-900" aria-hidden="true">
                               Privacy
@@ -330,10 +325,9 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                                 </div>
                               </div>
                             </div>
-                          </fieldset>
+                          </fieldset> */}
                         </div>
                       </div>
-
                       {/* Action buttons */}
                       <div className="shrink-0 border-t border-gray-200 px-4 py-5 sm:px-6">
                         <div className="flex justify-end space-x-3">
@@ -346,8 +340,13 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
                           </button>
                           <button
                             type="button"
-                            className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                            onClick={() => updateReportMetadata()}
+                            className={clsx(
+                              'inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                              !file ? 'cursor-not-allowed opacity-50' : '',
+                            )}
+                            // onClick={() => updateReportMetadata()}
+                            disabled={!file}
+                            onClick={updateReportImage}
                           >
                             Save
                           </button>
@@ -361,7 +360,7 @@ const PureEditMetadata = (props: IPureEditMetadata) => {
           </div>
         </Dialog>
       </Transition.Root>
-    </>
+    </React.Fragment>
   );
 };
 
