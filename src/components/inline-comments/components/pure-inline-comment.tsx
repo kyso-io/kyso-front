@@ -60,7 +60,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
       ) : (
         <div className={classNames('flex py-2 border rounded my-1 px-4 flex-col')}>
           <div className="flex flex-row justify-end space-x-2 text-xs font-light text-gray-400">
-            {((isUserAuthor && hasPermissionCreateComment) || isOrgAdmin || isTeamAdmin) && (
+            {isUserAuthor && hasPermissionCreateComment && (
               <button className="hover:underline" onClick={() => setIsEditing(!isEditing)}>
                 Edit
               </button>
