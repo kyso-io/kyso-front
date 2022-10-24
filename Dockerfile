@@ -19,9 +19,6 @@ RUN npm run clean && npm run build
 # Iff we are able to use the exported application we could add the following:
 #   && npm run export
 # and use the out/ dir as the exported application.
-# Execute `npm ci` (not install) for production with an externally mounted npmrc
-RUN --mount=type=secret,id=npmrc,target=/app/.npmrc,required\
- npm ci --omit=dev --ignore-scripts
 
 ## Production image
 FROM ${SERVICE_IMG}:${SERVICE_TAG} AS service
