@@ -403,7 +403,7 @@ const CreateReport = ({ commonData }: Props) => {
       return setSelectedFileValue(base64);
     };
 
-    if (FileTypesHelper.isImage(selectedFile.file.path)) {
+    if (FileTypesHelper.isImage(selectedFile.file.name)) {
       go(false);
     } else {
       go(true);
@@ -687,43 +687,43 @@ const CreateReport = ({ commonData }: Props) => {
             </div>
           </div>
           <div className="w-4/6">
-            {FileTypesHelper.isTextBasedFiled(selectedFile.file.path) && (
+            {FileTypesHelper.isTextBasedFiled(selectedFile.file.name) && (
               <>
                 <SimpleMdeReact key="editor" options={editorOptions} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
               </>
             )}
 
-            {FileTypesHelper.isImage(selectedFile.file.path) && (
+            {FileTypesHelper.isImage(selectedFile.file.name) && (
               <div className="pl-10">
                 <RenderBase64Image base64={selectedFileValue} alt={selectedFile.file.name} />
               </div>
             )}
 
-            {FileTypesHelper.isJupyterNotebook(selectedFile.file.path) && (
+            {FileTypesHelper.isJupyterNotebook(selectedFile.file.name) && (
               <>
                 <RenderError message="Jupyter notebooks can only be displayed once the report is created." />
               </>
             )}
 
-            {FileTypesHelper.isCode(selectedFile.file.path) && (
+            {FileTypesHelper.isCode(selectedFile.file.name) && (
               <>
                 <RenderCode code={selectedFileValue} showFileNumbers={true} />
               </>
             )}
 
-            {FileTypesHelper.isOnlyOffice(selectedFile.file.path) && (
+            {FileTypesHelper.isOnlyOffice(selectedFile.file.name) && (
               <>
                 <RenderError message="Microsoft Office content only can be displayed when the report is created." />
               </>
             )}
 
-            {FileTypesHelper.isGoogleDocs(selectedFile.file.path) && (
+            {FileTypesHelper.isGoogleDocs(selectedFile.file.name) && (
               <>
-                <RenderError message={`Files of type ${FileTypesHelper.getExtension(selectedFile.file.path)} only can be displayed when the report is created`} />
+                <RenderError message={`Files of type ${FileTypesHelper.getExtension(selectedFile.file.name)} only can be displayed when the report is created`} />
               </>
             )}
 
-            {!FileTypesHelper.isSupported(selectedFile.file.path) && (
+            {!FileTypesHelper.isSupported(selectedFile.file.name) && (
               <>
                 <RenderError message={`This file can't be rendered while you create a report. Did you miss to set the extension of the file?`} />
               </>
