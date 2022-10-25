@@ -111,6 +111,11 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
                           type="text"
                           className="h-8 focus:ring-indigo-500 focus:border-indigo-500 block w-full pr-10 sm:text-sm border-gray-300 rounded-md"
                           onChange={(e) => setInput(e.target.value)}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && input === commonData.team?.sluglified_name && !requesting) {
+                              deleteTeam();
+                            }
+                          }}
                         />
                       </div>
                     </div>
@@ -121,7 +126,7 @@ const UnpureDeleteChannelDropdown = (props: Props) => {
                       disabled={input !== commonData.team?.sluglified_name || requesting}
                       className={clsx(
                         'inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm',
-                        input !== commonData.team?.sluglified_name || requesting ? 'cursor-not-allowed bg-gray-500' : 'bg-red-600 hover:bg-red-700',
+                        input !== commonData.team?.sluglified_name || requesting ? 'cursor-not-allowed bg-red-300' : 'bg-red-600 hover:bg-red-700',
                       )}
                       onClick={deleteTeam}
                     >
