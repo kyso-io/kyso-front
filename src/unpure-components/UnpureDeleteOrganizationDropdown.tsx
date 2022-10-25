@@ -101,7 +101,7 @@ const UnpureDeleteOrganizationDropdown = (props: Props) => {
                       </Dialog.Title>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500">
-                          The organization <strong>{commonData.organization?.display_name}</strong> will be removed. This action cannot be undone.
+                          The <strong>{commonData.organization?.display_name}</strong> organization and all its data will be deleted. This action cannot be undone.
                         </p>
                         <p className="text-sm text-gray-500 my-3">
                           Please type <strong>{commonData.organization?.sluglified_name}</strong> in the text box before confirming.
