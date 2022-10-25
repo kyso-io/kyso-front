@@ -138,7 +138,7 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                   </>
                 )}
 
-                {fileType !== 'folder' && (
+                {fileType !== 'folder' && !item.file.main && (
                   <button
                     className={classNames('w-full hover:cursor-pointer text-gray-700 hover:bg-gray-100', 'group flex items-center px-4 py-2 text-sm text-gray-400 group-hover:text-gray-500')}
                     onClick={() => {
