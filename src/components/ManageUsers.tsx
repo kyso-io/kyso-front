@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 import ListboxWithText from '@/components/PureListBoxWithText';
 import PureNotification from '@/components/PureNotification';
@@ -80,15 +81,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
       { value: 'team-reader', label: 'Can comment all channels', description: 'Can read and create comment, but cannot create new reports' },
     ];
     if (selectedUser) {
-      if (!showTeamRoles && members.length > 0) {
+      if (members.length > 0) {
         const index: number = members.findIndex((member: Member) => member.id === selectedUser.id);
         if (index > -1) {
           data.push({ value: REMOVE_USER_VALUE, label: 'Remove access', description: '' });
-        }
-      } else if (users.length > 0) {
-        const index: number = users.findIndex((user: UserDTO) => user.id === selectedUser.id);
-        if (index > -1) {
-          data.push({ value: REMOVE_USER_VALUE, label: 'Remove', description: '' });
         }
       }
     }
@@ -108,11 +104,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
           if (member?.membership_origin === TeamMembershipOriginEnum.TEAM) {
             data.push({ value: REMOVE_USER_VALUE, label: 'Remove access', description: '' });
           }
-        }
-      } else if (users.length > 0) {
-        const index: number = users.findIndex((user: UserDTO) => user.id === selectedUser.id);
-        if (index > -1) {
-          data.push({ value: REMOVE_USER_VALUE, label: 'Remove access', description: '' });
         }
       }
     }
@@ -197,6 +188,15 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                 <Menu.Items
                   className="origin-top-right absolute right-0 mt-2 px-4 py-2 min-w-max rounded-md shadow-lg bg-white ring-1 ring-gray-200 ring-opacity/5 focus:outline-none"
                   style={{ zIndex: 100, width: showTeamRoles ? 380 : selectedUser ? 380 : 280 }}
+                  onKeyDown={(e: any) => {
+                    if (e.key === 'Enter' && (selectedTeamRole === REMOVE_USER_VALUE || selectedOrgRole === REMOVE_USER_VALUE)) {
+                      if (inputDeleteUser === keyDeleteUser) {
+                        const member: Member = filteredMembers[selectedMemberIndex]!;
+                        onRemoveUser(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
+                        clearData();
+                      }
+                    }
+                  }}
                 >
                   <div className="py-2 px-4">
                     {!selectedUser && (
@@ -350,7 +350,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
                                   <ListboxWithText
                                     selectedLabel={selectedOrgLabel}
-                                    isOrgAdmin={isOrgAdmin}
+                                    disabled={!isOrgAdmin}
                                     roles={organizationRoles}
                                     setSelectedRole={(value) => {
                                       setSelectedOrgRole(value);
@@ -364,7 +364,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Channel Role</p>
                                   <ListboxWithText
                                     selectedLabel={selectedTeamLabel}
-                                    isOrgAdmin={isOrgAdmin}
+                                    disabled={!isOrgAdmin && !isTeamAdmin}
                                     roles={teamRoles}
                                     setSelectedRole={(value) => {
                                       setSelectedTeamRole(value);
@@ -508,10 +508,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                             <div className="flex flex-row">
                               {organizationRoles && (
                                 <div>
-                                  <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
+                                  <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role 3</p>
                                   <ListboxWithText
                                     selectedLabel={selectedOrgLabel}
-                                    isOrgAdmin={isOrgAdmin}
+                                    disabled={!isOrgAdmin || selectedTeamRole === REMOVE_USER_VALUE}
                                     roles={organizationRoles}
                                     setSelectedRole={(value) => {
                                       setSelectedOrgRole(value);
@@ -524,10 +524,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                               )}
                               {showTeamRoles && teamRoles && (
                                 <div className="ml-4">
-                                  <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Channel Role</p>
+                                  <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Channel Role 4</p>
                                   <ListboxWithText
                                     selectedLabel={selectedTeamLabel}
-                                    isOrgAdmin={isOrgAdmin}
+                                    disabled={(!isOrgAdmin && !isTeamAdmin) || selectedOrgRole === REMOVE_USER_VALUE}
                                     roles={teamRoles}
                                     setSelectedRole={(value) => {
                                       setSelectedTeamRole(value);

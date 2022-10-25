@@ -1,27 +1,27 @@
 import classNames from '@/helpers/class-names';
 import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
+import clsx from 'clsx';
 import { Fragment } from 'react';
 
 interface Props {
   selectedLabel: string;
-  isOrgAdmin: boolean;
   roles: { value: string; label: string; description?: string }[];
+  disabled: boolean;
   setSelectedRole: (value: string) => void;
   setSelectedLabel: (value: string) => void;
 }
 
-const ListboxWithText = ({ selectedLabel, isOrgAdmin, roles, setSelectedRole, setSelectedLabel }: Props) => {
+const ListboxWithText = ({ selectedLabel, roles, disabled, setSelectedRole, setSelectedLabel }: Props) => {
   return (
     <Menu as="div" className="my-2 ">
       <div>
         <Menu.Button
-          disabled={!isOrgAdmin}
-          className=" block w-full
-          px-4 pl-3 pr-10 py-2 text-base font-medium sm:text-sm 
-          rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm
-           hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 focus:border-indigo-500
-          "
+          disabled={disabled}
+          className={clsx(
+            'block w-full px-4 pl-3 pr-10 py-2 text-base font-medium sm:text-sm rounded-md border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-100 focus:border-indigo-500',
+            disabled ? 'cursor-not-allowed' : '',
+          )}
         >
           <span className="flex flex-row">
             {selectedLabel}
