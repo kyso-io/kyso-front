@@ -36,6 +36,7 @@ import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../helpers/check-permissions';
+import { Helper } from '../../../helpers/Helper';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -374,19 +375,27 @@ const CreateReport = ({ commonData }: Props) => {
     if (!event.target.files) {
       return;
     }
-    const newFiles = Array.from(event.target.files);
-
-    newFiles.forEach(async (file) => {
-      try {
-        setError(null);
-        const base64 = await blobToBase64(file);
-        setLocalStorageItem(file.name, base64);
-        const newFile = new CreationReportFileSystemObject(file.name, `${parent ? `${parent.file.path}/` : ''}${file.name}`, file.name, 'file', '', parent ? parent?.file.id : undefined);
-        addNewFile(newFile);
-      } catch (err) {
-        setError('Report exceeds 5mb limit.');
+    const newFiles: File[] = Array.from(event.target.files);
+    const ignoredFiles: string[] = [];
+    for (const file of newFiles) {
+      if (Helper.FORBIDDEN_FILES.includes(file.name.toLowerCase())) {
+        ignoredFiles.push(file.name);
+      } else {
+        try {
+          setError(null);
+          const base64 = await blobToBase64(file);
+          setLocalStorageItem(file.name, base64);
+          const newFile = new CreationReportFileSystemObject(file.name, `${parent ? `${parent.file.path}/` : ''}${file.name}`, file.name, 'file', '', parent ? parent?.file.id : undefined);
+          addNewFile(newFile);
+        } catch (err) {
+          setError('Report exceeds 5mb limit.');
+        }
       }
-    });
+    }
+    if (ignoredFiles.length > 0) {
+      setMessageToaster(ignoredFiles.length === 1 ? `File ${ignoredFiles[0]} is not allowed.` : `Files ${ignoredFiles.join(', ')} are not allowed.`);
+      setShowToaster(true);
+    }
   };
 
   useEffect(() => {

@@ -40,8 +40,6 @@ interface Props {
   commonData: CommonData;
 }
 
-const FORBIDDEN_FILES: string[] = ['kyso.json', 'kyso.yaml', 'kyso.yml'];
-
 const CreateReport = ({ commonData }: Props) => {
   const router = useRouter();
   const [showToaster, setShowToaster] = useState<boolean>(false);
@@ -143,7 +141,7 @@ const CreateReport = ({ commonData }: Props) => {
         setTags(r.tags);
         const tmpRF: TmpReportFile[] = [];
         for (const file of resultFiles.data) {
-          if (FORBIDDEN_FILES.includes(file.name)) {
+          if (Helper.FORBIDDEN_FILES.includes(file.name)) {
             continue;
           }
           tmpRF.push({
@@ -472,7 +470,7 @@ const CreateReport = ({ commonData }: Props) => {
     const copyTmpReportFiles: TmpReportFile[] = [...tmpReportFiles];
     const ignoredFiles: string[] = [];
     for (const file of event.target.files) {
-      if (FORBIDDEN_FILES.includes(file.name)) {
+      if (Helper.FORBIDDEN_FILES.includes(file.name)) {
         ignoredFiles.push(file.name);
         continue;
       }

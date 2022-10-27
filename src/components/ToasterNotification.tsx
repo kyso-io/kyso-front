@@ -36,7 +36,7 @@ const ToasterNotification = ({ show, setShow, icon, message, backgroundColor }: 
               <div className="flex items-start">
                 <div className="shrink-0">{icon}</div>
                 <div className="ml-3 w-0 flex-1 pt-0.5">
-                  <p className="text-sm font-medium text-gray-300">{message}</p>
+                  <p className="text-sm font-medium text-gray-600">{message}</p>
                 </div>
                 <div className="ml-4 shrink-0 flex">
                   <button

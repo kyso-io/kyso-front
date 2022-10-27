@@ -7,6 +7,7 @@ import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { ElementType } from 'react';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { v4 } from 'uuid';
+import { Helper } from '../helpers/Helper';
 import ToasterNotification from './ToasterNotification';
 
 type INewReportNamingDropdown = {
@@ -22,8 +23,6 @@ type INewReportNamingDropdown = {
   onCreate: (newName: CreationReportFileSystemObject) => void;
   files: CreationReportFileSystemObject[];
 };
-
-const FORBIDDEN_FILES: string[] = ['kyso.json', 'kyso.yaml', 'kyso.yml'];
 
 const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
   const { label, icon: NewIcon, onCreate, isFolder, parent, showLabel, value, files } = props;
@@ -42,7 +41,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
       return;
     }
     const formattedName: string = newName.trim().toLowerCase();
-    if (FORBIDDEN_FILES.includes(formattedName)) {
+    if (Helper.FORBIDDEN_FILES.includes(formattedName)) {
       setErrorMessageInput(`${formattedName} is a self-generated configuration file`);
       e.preventDefault();
       return;
