@@ -476,6 +476,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                       if (members[index]?.team_roles && members[index]!.team_roles.length > 0) {
                                         setSelectedTeamRole(members[index]!.team_roles[0]!);
                                       }
+                                      setSelectedMemberIndex(index);
                                     }
                                     setSelectedUser(user);
                                   }
