@@ -83,4 +83,6 @@ export class Helper {
     ); // validate fragment locator
     return !!urlPattern.test(urlString);
   };
+
+  public static FORBIDDEN_FILES: string[] = ['kyso.json', 'kyso.yaml', 'kyso.yml'];
 }
