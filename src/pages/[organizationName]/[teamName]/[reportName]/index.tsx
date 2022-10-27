@@ -738,9 +738,21 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
           <button
             type="button"
             onClick={() => refComments.current?.scrollIntoView({ behavior: 'smooth' })}
-            className="inline-flex items-center rounded-full border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none "
+            className="inline-flex items-center rounded-full border border-gray-300 bg-white px-5 py-2.5 text-xs font-medium shadow-sm hover:bg-gray-50 focus:outline-none"
+            style={{
+              fontSize: '14px',
+              color: '#234361',
+              boxShadow: 'rgb(0 0 0 / 24%) 0px 3px 8px',
+              border: 'none',
+            }}
           >
-            <ArrowSmDownIcon className="mr-1 h-5 w-5 text-gray-400" aria-hidden="true" />
+            <ArrowSmDownIcon
+              className="mr-1 h-6 w-6 text-gray-400"
+              aria-hidden="true"
+              style={{
+                color: '#234361',
+              }}
+            />
             Go to comments
           </button>
         </div>
