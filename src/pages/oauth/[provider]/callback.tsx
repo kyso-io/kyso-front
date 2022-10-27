@@ -1,15 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { KysoSetting, LoginProviderEnum, NormalizedResponseDTO, Token } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login } from '@kyso-io/kyso-model';
-import { Api } from '@kyso-io/kyso-store';
+import type { AppDispatch } from '@kyso-io/kyso-store';
+import { Api, setTokenAuthAction } from '@kyso-io/kyso-store';
 import decode from 'jwt-decode';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import MainLayout from '../../../layouts/MainLayout';
 import type { DecodedToken } from '../../../types/decoded-token';
 
 const Page = () => {
   const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
   const { code, provider } = router.query;
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean | null>(null);
 
@@ -44,6 +47,7 @@ const Page = () => {
         const login: Login = new Login(code as string, provider as LoginProviderEnum, '', `${window.location.origin}/oauth/${provider}/callback`);
         const resultLogin: NormalizedResponseDTO<string> = await api.login(login);
         const token: string = resultLogin.data;
+        dispatch(setTokenAuthAction(token));
         localStorage.setItem('jwt', token);
         // Get user info to check if has completed the captcha challenge
         const jwtToken: DecodedToken = decode<DecodedToken>(token);
@@ -70,6 +74,6 @@ const Page = () => {
   );
 };
 
-Page.layout = KysoApplicationLayout;
+Page.layout = MainLayout;
 
 export default Page;
