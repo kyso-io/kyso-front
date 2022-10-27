@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { InformationCircleIcon } from '@heroicons/react/outline';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
+import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -35,7 +35,9 @@ const Index = ({ commonData }: Props) => {
   const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
   const [requesting, setRequesting] = useState<boolean>(false);
   const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [showToasterEmailVerification, setShowToasterEmailVerification] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
+  const [sentVerificationEmail, setSentVerificationEmail] = useState<boolean>(false);
   // const [showErrorBio, setShowErrorBio] = useState<boolean>(false);
   // const [showErrorLink, setShowErrorLink] = useState<boolean>(false);
   // const [showErrorLocation, setShowErrorLocation] = useState<boolean>(false);
@@ -122,6 +124,17 @@ const Index = ({ commonData }: Props) => {
     }
   };
 
+  const sendVerificationEmail = async () => {
+    try {
+      const api: Api = new Api(commonData.token);
+      await api.sendVerificationEmail();
+      setSentVerificationEmail(true);
+      setShowToasterEmailVerification(true);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   if (userIsLogged === null) {
     return null;
   }
@@ -136,7 +149,6 @@ const Index = ({ commonData }: Props) => {
           <div className="space-y-6 pt-8 sm:space-y-5 sm:pt-10">
             <div>
               <h3 className="text-lg font-medium leading-6 text-gray-900">Personal Information</h3>
-              {/* <p className="mt-1 max-w-2xl text-sm text-gray-500">Use a permanent address where you can receive mail.</p> */}
             </div>
             <div className="space-y-6 sm:space-y-5">
               <div className="sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
@@ -226,7 +238,35 @@ const Index = ({ commonData }: Props) => {
                 </div>
               </div>
             </div>
-            <div className="pt-5  sm:border-t sm:border-gray-200">
+
+            <div className="pt-5 sm:border-t sm:border-gray-200">
+              {!commonData?.user?.email_verified && !sentVerificationEmail && (
+                <div className="rounded-md bg-yellow-50 p-4 mb-4">
+                  <div className="flex">
+                    <div className="shrink-0">
+                      <svg className="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path
+                          fillRule="evenodd"
+                          d="M8.485 3.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 3.495zM10 6a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 6zm0 9a1 1 0 100-2 1 1 0 000 2z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium text-yellow-800">Attention needed</h3>
+                      <div className="mt-2 text-sm text-yellow-700">
+                        <p>
+                          Your account is not verified. Click{' '}
+                          <span onClick={sendVerificationEmail} className="font-bold cursor-pointer underline">
+                            here
+                          </span>{' '}
+                          to receive a verification e-mail.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               <div className="flex justify-end">
                 <button
                   disabled={requesting}
@@ -277,6 +317,13 @@ const Index = ({ commonData }: Props) => {
         setShow={setShowToaster}
         icon={<InformationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
         message={messageToaster}
+        backgroundColor={TailwindColor.SLATE_50}
+      />
+      <ToasterNotification
+        show={showToasterEmailVerification}
+        setShow={setShowToasterEmailVerification}
+        icon={<CheckIcon className="h-6 w-6 text-green-400" aria-hidden="true" />}
+        message="Verification e-mail sent."
         backgroundColor={TailwindColor.SLATE_50}
       />
     </div>
