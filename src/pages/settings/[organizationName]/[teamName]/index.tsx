@@ -10,13 +10,12 @@ import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import CaptchaModal from '../../../../components/CaptchaModal';
 import PureAvatar from '../../../../components/PureAvatar';
 import SettingsAside from '../../../../components/SettingsAside';
-import ToasterNotification from '../../../../components/ToasterNotification';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 import { Helper } from '../../../../helpers/Helper';
 import { useRedirectIfNoJWT } from '../../../../hooks/use-redirect-if-no-jwt';
-import { TailwindColor } from '../../../../tailwind/enum/tailwind-color.enum';
 import { TailwindFontSizeEnum } from '../../../../tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '../../../../tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '../../../../types/common-data';
@@ -38,13 +37,14 @@ const TeamRoleToLabel: { [role: string]: string } = {
 
 interface Props {
   commonData: CommonData;
+  setUser: (user: UserDTO) => void;
 }
 
 const debouncedFetchData = debounce((cb: () => void) => {
   cb();
 }, 750);
 
-const Index = ({ commonData }: Props) => {
+const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
   const [query, setQuery] = useState<string>('');
@@ -81,8 +81,6 @@ const Index = ({ commonData }: Props) => {
     }
     return data;
   }, []);
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const hasPermissionEditChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.EDIT), [commonData]);
   const hasPermissionDeleteChannel: boolean = useMemo(
@@ -91,6 +89,7 @@ const Index = ({ commonData }: Props) => {
   );
   const [showDeleteTeamModal, setShowDeleteTeamModal] = useState<boolean>(false);
   const [textTeamModal, setTextTeamModal] = useState<string>('');
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -389,13 +388,7 @@ const Index = ({ commonData }: Props) => {
 
   const deleteTeam = async () => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
     setRequesting(true);
@@ -409,6 +402,15 @@ const Index = ({ commonData }: Props) => {
       setRequesting(false);
     }
     window.location.href = `/settings/${commonData.organization?.sluglified_name}`;
+  };
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
   };
 
   return (
@@ -500,13 +502,7 @@ const Index = ({ commonData }: Props) => {
                             disabled={requesting}
                             onClick={() => {
                               if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                setShowToaster(true);
-                                setMessageToaster('Please verify the captcha');
-                                setTimeout(() => {
-                                  setShowToaster(false);
-                                  sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
-                                  router.push('/captcha');
-                                }, 2000);
+                                setShowCaptchaModal(true);
                                 return;
                               }
                               if (requesting) {
@@ -570,13 +566,7 @@ const Index = ({ commonData }: Props) => {
                           <PencilIcon
                             onClick={() => {
                               if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                setShowToaster(true);
-                                setMessageToaster('Please verify the captcha');
-                                setTimeout(() => {
-                                  setShowToaster(false);
-                                  sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
-                                  router.push('/captcha');
-                                }, 2000);
+                                setShowCaptchaModal(true);
                                 return;
                               }
                               if (requesting) {
@@ -593,13 +583,7 @@ const Index = ({ commonData }: Props) => {
                             <TrashIcon
                               onClick={() => {
                                 if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                  setShowToaster(true);
-                                  setMessageToaster('Please verify the captcha');
-                                  setTimeout(() => {
-                                    setShowToaster(false);
-                                    sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
-                                    router.push('/captcha');
-                                  }, 2000);
+                                  setShowCaptchaModal(true);
                                   return;
                                 }
                                 if (requesting) {
@@ -898,13 +882,6 @@ const Index = ({ commonData }: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
       {/* DELETE TEAM */}
       <Transition.Root show={showDeleteTeamModal} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={setShowDeleteTeamModal}>
@@ -974,6 +951,7 @@ const Index = ({ commonData }: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

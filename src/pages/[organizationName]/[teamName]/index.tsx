@@ -94,9 +94,10 @@ const debouncedPaginatedReports = debounce(
 
 interface Props {
   commonData: CommonData;
+  setUser: (user: UserDTO) => void;
 }
 
-const Index = ({ commonData }: Props) => {
+const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   const [teamInfo, setTeamInfo] = useState<TeamInfoDto | null>(null);
   // MEMBERS
@@ -588,8 +589,8 @@ const Index = ({ commonData }: Props) => {
                 onInviteNewUser={inviteNewUser}
                 onRemoveUser={removeUser}
               />
-              {hasPermissionDeleteChannel && <UnpureDeleteChannelDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} />}
-              {commonData?.user && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} />}
+              {hasPermissionDeleteChannel && <UnpureDeleteChannelDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
+              {commonData?.user && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
             </div>
           </div>
         )}

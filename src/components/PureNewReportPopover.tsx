@@ -2,31 +2,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
-import { ChevronDownIcon, ChevronUpIcon, ClipboardCopyIcon, ExclamationCircleIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
+import { ChevronDownIcon, ChevronUpIcon, ClipboardCopyIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
 import { UploadIcon } from '@heroicons/react/solid';
+import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
+import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import { HelperPermissions } from '../helpers/check-permissions';
-import ToasterNotification from './ToasterNotification';
+import CaptchaModal from './CaptchaModal';
 
 const TIMEOUT_MS = 5000;
 
 interface Props {
   commonData: CommonData;
   captchaIsEnabled: boolean;
+  setUser: (user: UserDTO) => void;
 }
 
-const PureNewReportPopover = (props: Props) => {
+const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) => {
   const router = useRouter();
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
-  const { commonData, captchaIsEnabled } = props;
-
   const hasPermissionCreateReport = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
-
   const [copiedKysoConfigFile, setCopiedKysoConfigFile] = useState<boolean>(false);
   const [copiedKysoPush, setCopiedKysoPush] = useState<boolean>(false);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   const kysoYamlContent = `organization: ${commonData.organization?.sluglified_name}\nchannel: ${
     commonData.team?.sluglified_name || 'channel-name'
@@ -37,6 +36,15 @@ const PureNewReportPopover = (props: Props) => {
     createLink = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report`;
     createLinkForm = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form`;
   }
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
+  };
 
   return (
     <React.Fragment>
@@ -66,13 +74,7 @@ const PureNewReportPopover = (props: Props) => {
                     <a
                       onClick={() => {
                         if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                          setShowToaster(true);
-                          setMessageToaster('Please verify the captcha');
-                          setTimeout(() => {
-                            setShowToaster(false);
-                            sessionStorage.setItem('redirectUrl', createLinkForm);
-                            router.push('/captcha');
-                          }, 2000);
+                          setShowCaptchaModal(true);
                           return;
                         }
                         router.push(createLinkForm);
@@ -90,13 +92,7 @@ const PureNewReportPopover = (props: Props) => {
                     <a
                       onClick={() => {
                         if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                          setShowToaster(true);
-                          setMessageToaster('Please verify the captcha');
-                          setTimeout(() => {
-                            setShowToaster(false);
-                            sessionStorage.setItem('redirectUrl', createLink);
-                            router.push('/captcha');
-                          }, 2000);
+                          setShowCaptchaModal(true);
                           return;
                         }
                         router.push(createLink);
@@ -186,7 +182,7 @@ const PureNewReportPopover = (props: Props) => {
           );
         }}
       </Popover>
-      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} redirectUrl={createLinkForm} />}
     </React.Fragment>
   );
 };

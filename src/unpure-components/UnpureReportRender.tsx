@@ -12,14 +12,12 @@ import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { FileToRender } from '@/hooks/use-file-to-render';
 import type { CommonData } from '@/types/common-data';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { InlineCommentDto, ReportDTO, TeamMember, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
-import { createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
+import type { InlineCommentDto, NormalizedResponseDTO, ReportDTO, TeamMember, UpdateInlineCommentDto, UserDTO } from '@kyso-io/kyso-model';
+import { Api, createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
-import router from 'next/router';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
-import ToasterNotification from '../components/ToasterNotification';
+import CaptchaModal from '../components/CaptchaModal';
 import PureSideOverlayCommentsPanel from './UnpureSideOverlayCommentsPanel';
 
 // const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
@@ -35,19 +33,28 @@ interface Props {
   enabledEditInlineComment: boolean;
   enabledDeleteInlineComment: boolean;
   captchaIsEnabled: boolean;
+  setUser: (user: UserDTO) => void;
 }
 
-const UnpureReportRender = (props: Props) => {
-  const { report, onlyVisibleCell, frontEndUrl, fileToRender, commonData, channelMembers, enabledCreateInlineComment, enabledEditInlineComment, enabledDeleteInlineComment, captchaIsEnabled } = props;
+const UnpureReportRender = ({
+  report,
+  onlyVisibleCell,
+  frontEndUrl,
+  fileToRender,
+  commonData,
+  channelMembers,
+  enabledCreateInlineComment,
+  enabledEditInlineComment,
+  enabledDeleteInlineComment,
+  captchaIsEnabled,
+  setUser,
+}: Props) => {
   const dispatch = useAppDispatch();
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
-  const version = router.query.version ? (router.query.version as string) : undefined;
-
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (report.id) {
@@ -67,16 +74,7 @@ const UnpureReportRender = (props: Props) => {
 
   const createInlineComment = async (cell_id: string, user_ids: string[], text: string) => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem(
-          'redirectUrl',
-          `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}?${version ? `version=${version}` : ''}&path=${fileToRender.path}`,
-        );
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
     try {
@@ -98,16 +96,7 @@ const UnpureReportRender = (props: Props) => {
 
   const editInlineComment = async (id: string, user_ids: string[], text: string) => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem(
-          'redirectUrl',
-          `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}?${version ? `version=${version}` : ''}&path=${fileToRender.path}`,
-        );
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
     try {
@@ -135,18 +124,18 @@ const UnpureReportRender = (props: Props) => {
     }
   };
 
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
+  };
+
   const deleteInlineComment = async (id: string) => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem(
-          'redirectUrl',
-          `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}?${version ? `version=${version}` : ''}&path=${fileToRender.path}`,
-        );
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
     try {
@@ -262,7 +251,7 @@ const UnpureReportRender = (props: Props) => {
           </div>
         </div>
       )}
-      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </>
   );
 };

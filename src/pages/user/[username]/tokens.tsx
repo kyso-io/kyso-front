@@ -4,13 +4,13 @@ import type { CommonData } from '@/types/common-data';
 import { Dialog, Transition } from '@headlessui/react';
 import { TrashIcon } from '@heroicons/react/outline';
 import { CheckIcon, ClipboardIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { CreateKysoAccessTokenDto, KysoSetting, KysoUserAccessToken, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import type { CreateKysoAccessTokenDto, KysoSetting, KysoUserAccessToken, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
-import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useState } from 'react';
+import CaptchaModal from '../../../components/CaptchaModal';
 import SettingsAside from '../../../components/SettingsAside';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { Helper } from '../../../helpers/Helper';
@@ -19,10 +19,10 @@ import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
 
 interface Props {
   commonData: CommonData;
+  setUser: (user: UserDTO) => void;
 }
 
-const Index = ({ commonData }: Props) => {
-  const router = useRouter();
+const Index = ({ commonData, setUser }: Props) => {
   useRedirectIfNoJWT();
   const [requesting, setRequesting] = useState<boolean>(false);
   const [kysoUserAccessTokens, setKysoUserAccessTokens] = useState<KysoUserAccessToken[]>([]);
@@ -36,6 +36,7 @@ const Index = ({ commonData }: Props) => {
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [newKysoUserAccessToken, setNewKysoUserAccessToken] = useState<KysoUserAccessToken | null>(null);
   const [copied, setCopied] = useState<boolean>(false);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -134,6 +135,15 @@ const Index = ({ commonData }: Props) => {
     setOpenRevokeAllKysoAccessTokens(false);
   };
 
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
+  };
+
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
@@ -160,13 +170,7 @@ const Index = ({ commonData }: Props) => {
                 disabled={requesting}
                 onClick={() => {
                   if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                    setShowToaster(true);
-                    setMessageToaster('Please verify the captcha');
-                    setTimeout(() => {
-                      setShowToaster(false);
-                      sessionStorage.setItem('redirectUrl', `/user/${commonData.user?.username}/settings/tokens`);
-                      router.push('/captcha');
-                    }, 2000);
+                    setShowCaptchaModal(true);
                     return;
                   }
                   if (!commonData.user?.email_verified) {
@@ -186,13 +190,7 @@ const Index = ({ commonData }: Props) => {
                   disabled={requesting}
                   onClick={() => {
                     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                      setShowToaster(true);
-                      setMessageToaster('Please verify the captcha');
-                      setTimeout(() => {
-                        setShowToaster(false);
-                        sessionStorage.setItem('redirectUrl', `/user/${commonData.user?.username}/settings/tokens`);
-                        router.push('/captcha');
-                      }, 2000);
+                      setShowCaptchaModal(true);
                       return;
                     }
                     setOpenRevokeAllKysoAccessTokens(true);
@@ -255,13 +253,7 @@ const Index = ({ commonData }: Props) => {
                                 <TrashIcon
                                   onClick={() => {
                                     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                      setShowToaster(true);
-                                      setMessageToaster('Please verify the captcha');
-                                      setTimeout(() => {
-                                        setShowToaster(false);
-                                        sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
-                                        router.push('/captcha');
-                                      }, 2000);
+                                      setShowCaptchaModal(true);
                                       return;
                                     }
                                     if (requesting) {
@@ -525,6 +517,7 @@ const Index = ({ commonData }: Props) => {
         message={messageToaster}
         backgroundColor={TailwindColor.SLATE_50}
       />
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

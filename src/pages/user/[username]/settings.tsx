@@ -2,12 +2,13 @@
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { InformationCircleIcon } from '@heroicons/react/outline';
 import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
+import CaptchaModal from '../../../components/CaptchaModal';
 import PureAvatar from '../../../components/PureAvatar';
 import SettingsAside from '../../../components/SettingsAside';
 import ToasterNotification from '../../../components/ToasterNotification';
@@ -19,9 +20,10 @@ import type { CommonData } from '../../../types/common-data';
 
 interface Props {
   commonData: CommonData;
+  setUser: (user: UserDTO) => void;
 }
 
-const Index = ({ commonData }: Props) => {
+const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   const username: string = router.query.username as string;
   const ref = useRef<any>(null);
@@ -37,6 +39,7 @@ const Index = ({ commonData }: Props) => {
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [showToasterEmailVerification, setShowToasterEmailVerification] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [sentVerificationEmail, setSentVerificationEmail] = useState<boolean>(false);
   // const [showErrorBio, setShowErrorBio] = useState<boolean>(false);
   // const [showErrorLink, setShowErrorLink] = useState<boolean>(false);
@@ -87,13 +90,7 @@ const Index = ({ commonData }: Props) => {
 
   const submit = async () => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem('redirectUrl', `/user/${commonData.user?.username}/settings`);
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
     if (commonData.user?.email_verified === false) {
@@ -121,6 +118,15 @@ const Index = ({ commonData }: Props) => {
       setRequesting(false);
       setShowToaster(false);
       setMessageToaster('');
+    }
+  };
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
     }
   };
 
@@ -326,6 +332,7 @@ const Index = ({ commonData }: Props) => {
         message="Verification e-mail sent."
         backgroundColor={TailwindColor.SLATE_50}
       />
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };
