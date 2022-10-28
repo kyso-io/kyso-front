@@ -467,7 +467,7 @@ const Index = ({ commonData }: Props) => {
               </ul>
             </div>
             {isOrgAdmin && (
-              <React.Fragment>
+              <div className="mt-8">
                 {/* SEARCH USERS */}
                 <h3 className="text-lg font-medium leading-6 text-gray-900">Add users to the team:</h3>
                 <div className="my-8 sm:col-span-2">
@@ -528,7 +528,7 @@ const Index = ({ commonData }: Props) => {
                     );
                   })}
                 </div>
-              </React.Fragment>
+              </div>
             )}
             {/* TEAM MEMBERS */}
             <h3 className="text-lg font-medium leading-6 text-gray-900 mt-8">Team members:</h3>
