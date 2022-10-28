@@ -11,7 +11,7 @@ import RenderError from '@/components/renderers/RenderError';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
 import classNames from '@/helpers/class-names';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
-import { getLocalStorageItem, removeLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { getSessionStorageItem, removeSessionStorageItem, setSessionStorageItem } from '@/helpers/isomorphic-session-storage';
 import slugify from '@/helpers/slugify';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
@@ -40,7 +40,7 @@ import { Helper } from '../../../helpers/Helper';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
-const token: string | null = getLocalStorageItem('jwt');
+const token: string | null = getSessionStorageItem('jwt');
 
 const blobToBase64 = (blob: Blob): Promise<string> => {
   const reader = new FileReader();
@@ -130,19 +130,19 @@ const CreateReport = ({ commonData }: Props) => {
   }, [commonData.permissions, commonData.organization, commonData.team]);
 
   const cleanStorage = () => {
-    removeLocalStorageItem('formTitle');
-    removeLocalStorageItem('formDescription');
-    removeLocalStorageItem('formSelectedPeople');
-    removeLocalStorageItem('formTags');
-    removeLocalStorageItem('formFileValues');
-    removeLocalStorageItem('formFile');
+    removeSessionStorageItem('formTitle');
+    removeSessionStorageItem('formDescription');
+    removeSessionStorageItem('formSelectedPeople');
+    removeSessionStorageItem('formTags');
+    removeSessionStorageItem('formFileValues');
+    removeSessionStorageItem('formFile');
     for (const file of files) {
-      removeLocalStorageItem(file.id);
+      removeSessionStorageItem(file.id);
     }
   };
 
   const filterTags = async (query?: string) => {
-    const api: Api = new Api(token);
+    const api: Api = new Api(commonData.token);
     api.setOrganizationSlug(commonData.organization!.sluglified_name);
     if (commonData.team) {
       api.setTeamSlug(commonData.team?.sluglified_name);
@@ -162,25 +162,26 @@ const CreateReport = ({ commonData }: Props) => {
   };
 
   useEffect(() => {
-    if (commonData.organization) {
-      filterTags();
+    if (!commonData.token || !commonData.organization) {
+      return;
     }
-  }, [commonData.organization, commonData.team]);
+    filterTags();
+  }, [commonData.token, commonData.organization, commonData.team]);
 
   useEffect(() => {
     if (!commonData.user) {
       return;
     }
-    if (getLocalStorageItem('formTitle')) {
-      setTitle(JSON.parse(getLocalStorageItem('formTitle')!));
+    if (getSessionStorageItem('formTitle')) {
+      setTitle(JSON.parse(getSessionStorageItem('formTitle')!));
       setHasAnythingCached(true);
     }
-    if (getLocalStorageItem('formDescription')) {
-      setDescription(JSON.parse(getLocalStorageItem('formDescription')!));
+    if (getSessionStorageItem('formDescription')) {
+      setDescription(JSON.parse(getSessionStorageItem('formDescription')!));
       setHasAnythingCached(true);
     }
-    if (getLocalStorageItem('formSelectedPeople')) {
-      setSelectedPeople(JSON.parse(getLocalStorageItem('formSelectedPeople')!));
+    if (getSessionStorageItem('formSelectedPeople')) {
+      setSelectedPeople(JSON.parse(getSessionStorageItem('formSelectedPeople')!));
       setHasAnythingCached(true);
     } else {
       // Put current user as author
@@ -197,13 +198,13 @@ const CreateReport = ({ commonData }: Props) => {
         ),
       ]);
     }
-    if (getLocalStorageItem('formTags')) {
-      setTags(JSON.parse(getLocalStorageItem('formTags')!));
+    if (getSessionStorageItem('formTags')) {
+      setTags(JSON.parse(getSessionStorageItem('formTags')!));
       setHasAnythingCached(true);
     }
 
-    if (getLocalStorageItem('formFile')) {
-      setFiles(JSON.parse(getLocalStorageItem('formFile')!));
+    if (getSessionStorageItem('formFile')) {
+      setFiles(JSON.parse(getSessionStorageItem('formFile')!));
       setHasAnythingCached(true);
     }
   }, [commonData.user]);
@@ -253,7 +254,7 @@ const CreateReport = ({ commonData }: Props) => {
   };
 
   const delayedCallback = debounce(async (key, value) => {
-    setLocalStorageItem(key, JSON.stringify(value));
+    setSessionStorageItem(key, JSON.stringify(value));
     setHasAnythingCached(true);
     setDraftStatus('All changes saved in local storage. Max memory 5MB. Go to upload page to create a bigger report.');
   }, 1000);
@@ -334,7 +335,7 @@ const CreateReport = ({ commonData }: Props) => {
     zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });
     let numFiles = 0;
     for (const file of files) {
-      const fileContent: string | null = getLocalStorageItem(file.id);
+      const fileContent: string | null = getSessionStorageItem(file.id);
       if (file.type === 'folder') {
         zip.folder(file.path);
       } else {
@@ -360,7 +361,7 @@ const CreateReport = ({ commonData }: Props) => {
       const { data: newReport }: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
       cleanStorage();
       for (const file of files) {
-        removeLocalStorageItem(file.id);
+        removeSessionStorageItem(file.id);
       }
       setBusy(false);
       window.location.href = `/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`;
@@ -384,7 +385,7 @@ const CreateReport = ({ commonData }: Props) => {
         try {
           setError(null);
           const base64 = await blobToBase64(file);
-          setLocalStorageItem(file.name, base64);
+          setSessionStorageItem(file.name, base64);
           const newFile = new CreationReportFileSystemObject(file.name, `${parent ? `${parent.file.path}/` : ''}${file.name}`, file.name, 'file', '', parent ? parent?.file.id : undefined);
           addNewFile(newFile);
         } catch (err) {
@@ -400,7 +401,7 @@ const CreateReport = ({ commonData }: Props) => {
 
   useEffect(() => {
     const go = async (asText: boolean) => {
-      const base64 = getLocalStorageItem(selectedFile?.file.id);
+      const base64 = getSessionStorageItem(selectedFile?.file.id);
       if (!base64) {
         return setSelectedFileValue('');
       }
@@ -430,7 +431,7 @@ const CreateReport = ({ commonData }: Props) => {
   const [selectedFileValue, setSelectedFileValue] = useState('initial value');
   const handleEditorChange = useCallback((fileId: string, value: string) => {
     setSelectedFileValue(value);
-    setLocalStorageItem(fileId, `data:text/plain;base64,${btoa(value)}`);
+    setSessionStorageItem(fileId, `data:text/plain;base64,${btoa(value)}`);
     setHasAnythingCached(true);
     setDraftStatus('saved');
   }, []);
@@ -680,7 +681,7 @@ const CreateReport = ({ commonData }: Props) => {
                       addNewFile(newFile);
                     }}
                     onRemoveFile={(fileToRemove: CreationReportFileSystemObject) => {
-                      removeLocalStorageItem(fileToRemove.id);
+                      removeSessionStorageItem(fileToRemove.id);
                       const newFiles = files.filter((x) => x.id !== fileToRemove.id && x.parentId !== fileToRemove.id);
                       setFiles(newFiles);
                       setDraftStatus('Saving ...');

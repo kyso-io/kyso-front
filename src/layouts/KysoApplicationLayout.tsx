@@ -51,6 +51,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       callback: async () => {
         localStorage.removeItem('jwt');
         localStorage.removeItem('shownVerifiedAlert');
+        sessionStorage.clear();
         await dispatch(logoutAction());
         router.replace(`/login`);
       },
