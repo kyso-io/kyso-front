@@ -576,7 +576,6 @@ const Index = ({ commonData }: Props) => {
                   imageMarginY={TailwindWidthSizeEnum.W1}
                 />
               </div>
-              <div className="mt-2 text-md">{commonData.team.bio}</div>
             </div>
             <div className="w-3/6 flex flex-row justify-end items-center space-x-2">
               <ManageUsers
@@ -646,6 +645,12 @@ const Index = ({ commonData }: Props) => {
       </div>
       <div className="w-1/6">
         <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
+        {commonData.team?.bio && (
+          <div className="pt-10 border-t-gray-300 border-t-4 mt-2">
+            <h1 className="text-xl font-bold text-gray-800 mb-2">About {commonData.team?.display_name}</h1>
+            <p className="text-sm text-gray-500 pt-3">{commonData.team?.bio}</p>
+          </div>
+        )}
       </div>
     </div>
   );
