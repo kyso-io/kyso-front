@@ -13,7 +13,7 @@ import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { FolderAddIcon } from '@heroicons/react/outline';
 import { ArrowRightIcon, ExclamationCircleIcon, InformationCircleIcon, SelectorIcon } from '@heroicons/react/solid';
-import type { File as KysoFile, KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, ResourcePermissions, Tag, TeamMember } from '@kyso-io/kyso-model';
+import type { File as KysoFile, KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
@@ -23,6 +23,7 @@ import JSZip from 'jszip';
 import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import CaptchaModal from '../../../components/CaptchaModal';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../helpers/check-permissions';
@@ -38,9 +39,10 @@ interface TmpReportFile {
 
 interface Props {
   commonData: CommonData;
+  setUser: (user: UserDTO) => void;
 }
 
-const CreateReport = ({ commonData }: Props) => {
+const CreateReport = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
@@ -82,6 +84,7 @@ const CreateReport = ({ commonData }: Props) => {
   const [report, setReport] = useState<ReportDTO | null>();
   const [reportFiles, setReportFiles] = useState<KysoFile[]>([]);
   const [tmpReportFiles, setTmpReportFiles] = useState<TmpReportFile[]>([]);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -291,13 +294,7 @@ const CreateReport = ({ commonData }: Props) => {
       return;
     }
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setMessageToaster('Please verify the captcha');
-      setShowToaster(true);
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem('redirectUrl', `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form`);
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
     setBusy(true);
@@ -381,13 +378,7 @@ const CreateReport = ({ commonData }: Props) => {
       return;
     }
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setMessageToaster('Please verify the captcha');
-      setShowToaster(true);
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem('redirectUrl', `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form?reportId=${router.query.reportId}`);
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
     setBusy(true);
@@ -507,6 +498,15 @@ const CreateReport = ({ commonData }: Props) => {
           : `The following files ${ignoredFiles.join(', ')} will not be uploaded. The system will generate a configuration file.`,
       );
       setShowToaster(true);
+    }
+  };
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
     }
   };
 
@@ -793,6 +793,7 @@ const CreateReport = ({ commonData }: Props) => {
           icon={busy ? <InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" /> : <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
           message={messageToaster}
         />
+        {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       </div>
     ) : (
       <div className="flex flex-row space-x-8 p-2">

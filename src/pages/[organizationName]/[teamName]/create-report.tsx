@@ -22,7 +22,7 @@ import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { ArrowRightIcon, DocumentAddIcon, ExclamationCircleIcon, FolderAddIcon, SelectorIcon, UploadIcon } from '@heroicons/react/solid';
-import type { KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, Tag } from '@kyso-io/kyso-model';
+import type { KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, Tag, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, ReportPermissionsEnum, ReportType, TeamMember, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import 'easymde/dist/easymde.min.css';
@@ -33,6 +33,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import CaptchaModal from '../../../components/CaptchaModal';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../helpers/check-permissions';
@@ -54,14 +55,16 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
 
 interface Props {
   commonData: CommonData;
+  setUser: (user: UserDTO) => void;
 }
 
-const CreateReport = ({ commonData }: Props) => {
+const CreateReport = ({ commonData, setUser }: Props) => {
   const router = useRouter();
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
+  const [showToaster, setShowToaster] = useState<boolean>(false);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -277,13 +280,7 @@ const CreateReport = ({ commonData }: Props) => {
     }
 
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem('redirectUrl', `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report`);
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
 
@@ -434,6 +431,15 @@ const CreateReport = ({ commonData }: Props) => {
     setHasAnythingCached(true);
     setDraftStatus('saved');
   }, []);
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
+  };
 
   if (userIsLogged === null) {
     return null;
@@ -762,6 +768,7 @@ const CreateReport = ({ commonData }: Props) => {
           </div>
         </div>
         <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
+        {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       </div>
     ) : (
       <div className="flex flex-row space-x-8 p-2">

@@ -6,7 +6,6 @@ import { PurePermissionDenied } from '@/components/PurePermissionDenied';
 import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
-import ToasterNotification from '@/components/ToasterNotification';
 import classNames from '@/helpers/class-names';
 import { getReport } from '@/helpers/get-report';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
@@ -25,7 +24,7 @@ import type { ReportData } from '@/types/report-data';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ArrowSmDownIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import { ArrowSmDownIcon } from '@heroicons/react/solid';
 import type { Comment, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import { CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
@@ -34,15 +33,17 @@ import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import { Tooltip } from 'primereact/tooltip';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import CaptchaModal from '../../../../components/CaptchaModal';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 
 interface Props {
   commonData: CommonData;
   setReportData: (data: ReportData | null) => void;
   reportData: ReportData | null;
+  setUser: (user: UserDTO) => void;
 }
 
-const Index = ({ commonData, reportData, setReportData }: Props) => {
+const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [selfTree, setSelfTree] = useState<GithubFileHash[]>([]);
@@ -62,11 +63,10 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isOpenMetadata, openMetadata] = useState(false);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
   const refComments = useRef<any>(null);
   const isInViewport = useIsInViewport(refComments);
   const scrollDirection: ScrollDirection | null = useScrollDirection();
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -451,16 +451,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const submitComment = async (newComment: any, parentComment: any) => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem(
-          'redirectUrl',
-          `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${reportData?.report?.name}?${version ? `version=${version}` : ''}&path=${fileToRender?.path}`,
-        );
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
 
@@ -534,6 +525,15 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
   }
 
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
+  };
 
   return (
     <div>
@@ -609,6 +609,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                         hasPermissionDeleteReport={hasPermissionDeleteReport}
                         commonData={commonData}
                         onSetFileAsMainFile={setReportFileAsMainFile}
+                        setUser={setUser}
                       >
                         <ManageUsers
                           commonData={commonData}
@@ -655,6 +656,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                           enabledEditInlineComment={hasPermissionEditInlineComment}
                           enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
                           captchaIsEnabled={captchaIsEnabled}
+                          setUser={setUser}
                         />
                       )}
 
@@ -695,16 +697,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
                           }}
                           onDeleteComment={async (id: string) => {
                             if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                              setShowToaster(true);
-                              setMessageToaster('Please verify the captcha');
-                              setTimeout(() => {
-                                setShowToaster(false);
-                                sessionStorage.setItem(
-                                  'redirectUrl',
-                                  `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${reportData?.report?.name}${version ? `?version=${version}` : ''}`,
-                                );
-                                router.push('/captcha');
-                              }, 2000);
+                              setShowCaptchaModal(true);
                               return;
                             }
                             await dispatch(deleteCommentAction(id as string));
@@ -757,7 +750,7 @@ const Index = ({ commonData, reportData, setReportData }: Props) => {
           </button>
         </div>
       )}
-      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

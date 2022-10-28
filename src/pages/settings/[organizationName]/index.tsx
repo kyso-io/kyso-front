@@ -10,6 +10,7 @@ import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import CaptchaModal from '../../../components/CaptchaModal';
 import PureAvatar from '../../../components/PureAvatar';
 import SettingsAside from '../../../components/SettingsAside';
 import ToasterNotification from '../../../components/ToasterNotification';
@@ -32,13 +33,14 @@ const OrganizationRoleToLabel: { [role: string]: string } = {
 
 interface Props {
   commonData: CommonData;
+  setUser: (user: UserDTO) => void;
 }
 
 const debouncedFetchData = debounce((cb: () => void) => {
   cb();
 }, 750);
 
-const Index = ({ commonData }: Props) => {
+const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
   const ref = useRef<any>(null);
@@ -90,6 +92,7 @@ const Index = ({ commonData }: Props) => {
   // const [showOpenPingIdModal, setShowOpenPingIdModal] = useState<boolean>(true);
   const [showDeleteOrgModal, setShowDeleteOrgModal] = useState<boolean>(false);
   const [textOrgModal, setTextOrgModal] = useState<string>('');
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -182,13 +185,7 @@ const Index = ({ commonData }: Props) => {
 
   const submit = async () => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
     if (commonData.user?.email_verified === false) {
@@ -221,13 +218,7 @@ const Index = ({ commonData }: Props) => {
 
   const submitAccess = async () => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
     if (commonData.user?.email_verified === false) {
@@ -442,13 +433,7 @@ const Index = ({ commonData }: Props) => {
 
   const deleteOrganization = async () => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
     setRequesting(true);
@@ -462,6 +447,15 @@ const Index = ({ commonData }: Props) => {
       setRequesting(false);
     }
     window.location.href = '/';
+  };
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
   };
 
   if (userIsLogged === null) {
@@ -930,13 +924,7 @@ const Index = ({ commonData }: Props) => {
                             disabled={requesting}
                             onClick={() => {
                               if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                setShowToaster(true);
-                                setMessageToaster('Please verify the captcha');
-                                setTimeout(() => {
-                                  setShowToaster(false);
-                                  sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
-                                  router.push('/captcha');
-                                }, 2000);
+                                setShowCaptchaModal(true);
                                 return;
                               }
                               if (requesting) {
@@ -984,13 +972,7 @@ const Index = ({ commonData }: Props) => {
                           <PencilIcon
                             onClick={() => {
                               if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                setShowToaster(true);
-                                setMessageToaster('Please verify the captcha');
-                                setTimeout(() => {
-                                  setShowToaster(false);
-                                  sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
-                                  router.push('/captcha');
-                                }, 2000);
+                                setShowCaptchaModal(true);
                                 return;
                               }
                               if (requesting) {
@@ -1006,13 +988,7 @@ const Index = ({ commonData }: Props) => {
                           <TrashIcon
                             onClick={() => {
                               if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                setShowToaster(true);
-                                setMessageToaster('Please verify the captcha');
-                                setTimeout(() => {
-                                  setShowToaster(false);
-                                  sessionStorage.setItem('redirectUrl', `/settings/${commonData.organization?.sluglified_name}`);
-                                  router.push('/captcha');
-                                }, 2000);
+                                setShowCaptchaModal(true);
                                 return;
                               }
                               if (requesting) {
@@ -1350,6 +1326,7 @@ const Index = ({ commonData }: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

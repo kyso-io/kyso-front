@@ -34,6 +34,7 @@ type IPureReportHeaderProps = {
   hasPermissionDeleteReport: boolean;
   children?: ReactElement;
   onSetFileAsMainFile: () => void;
+  setUser: (user: UserDTO) => void;
 };
 
 declare global {
@@ -61,6 +62,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
     hasPermissionEditReport,
     hasPermissionDeleteReport,
     onSetFileAsMainFile,
+    setUser,
   } = props;
 
   const description: string = useMemo(() => {
@@ -172,6 +174,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               commonData={commonData}
               hasPermissionEditReport={hasPermissionEditReport}
               hasPermissionDeleteReport={hasPermissionDeleteReport}
+              setUser={setUser}
             />
             <PureVersionsDropdown versions={versions} version={version} reportUrl={reportUrl} />
             {(hasPermissionEditReport || hasPermissionDeleteReport) && (

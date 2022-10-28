@@ -3,12 +3,12 @@ import { PureSpinner } from '@/components/PureSpinner';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, Organization } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO, Organization, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
-import { useRouter } from 'next/router';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
+import CaptchaModal from '../components/CaptchaModal';
 import PureAvatar from '../components/PureAvatar';
 import ToasterNotification from '../components/ToasterNotification';
 import { checkJwt } from '../helpers/check-jwt';
@@ -17,10 +17,10 @@ import { TailwindHeightSizeEnum } from '../tailwind/enum/tailwind-height.enum';
 
 interface Props {
   commonData: CommonData;
+  setUser: (user: UserDTO) => void;
 }
 
-const Index = ({ commonData }: Props) => {
-  const router = useRouter();
+const Index = ({ commonData, setUser }: Props) => {
   const ref = useRef<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
@@ -34,6 +34,7 @@ const Index = ({ commonData }: Props) => {
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -61,13 +62,7 @@ const Index = ({ commonData }: Props) => {
     }
 
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowToaster(true);
-      setMessageToaster('Please verify the captcha');
-      setTimeout(() => {
-        setShowToaster(false);
-        sessionStorage.setItem('redirectUrl', `/create-organization`);
-        router.push('/captcha');
-      }, 2000);
+      setShowCaptchaModal(true);
       return;
     }
 
@@ -105,6 +100,15 @@ const Index = ({ commonData }: Props) => {
     if (e.target.files.length > 0) {
       setFile(e.target.files[0]);
       setUrlLocalFile(URL.createObjectURL(e.target.files[0]));
+    }
+  };
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
     }
   };
 
@@ -303,6 +307,7 @@ const Index = ({ commonData }: Props) => {
         )}
       </div>
       <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

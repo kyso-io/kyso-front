@@ -4,11 +4,12 @@ import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Popover, Transition } from '@headlessui/react';
 import { ChevronDownIcon, ClipboardCopyIcon, ExclamationCircleIcon, FolderDownloadIcon, TerminalIcon, XIcon } from '@heroicons/react/outline';
-import type { ReportDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import saveAs from 'file-saver';
 import { Fragment, useEffect, useState } from 'react';
 import slugify from 'slugify';
+import CaptchaModal from '../components/CaptchaModal';
 
 interface Props {
   reportUrl: string;
@@ -16,16 +17,16 @@ interface Props {
   commonData: CommonData;
   hasPermissionDeleteReport: boolean;
   hasPermissionEditReport: boolean;
+  setUser: (user: UserDTO) => void;
 }
 
-const UnpureCloneDropdown = (props: Props) => {
-  const { reportUrl, commonData } = props;
-  const { report } = props;
+const UnpureCloneDropdown = ({ reportUrl, commonData, report, setUser }: Props) => {
   const [show, setShow] = useState(false);
   const [copied, setCopied] = useState(false);
   const [alertText, setAlertText] = useState<string>('Creating zip, this may take a moment...');
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
   const [error, setError] = useState<boolean>(false);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (!show) {
@@ -36,6 +37,10 @@ const UnpureCloneDropdown = (props: Props) => {
   }, [show]);
 
   const downloadReport = async () => {
+    if (commonData.user && commonData.user.show_captcha) {
+      setShowCaptchaModal(true);
+      return;
+    }
     setError(false);
     setAlertText('Creating zip, this may take a moment...');
     setShow(true);
@@ -54,6 +59,15 @@ const UnpureCloneDropdown = (props: Props) => {
       setShow(false);
       setError(false);
     }, 5000);
+  };
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
   };
 
   const cloneCommand = `kyso clone ${reportUrl}`;
@@ -152,6 +166,7 @@ const UnpureCloneDropdown = (props: Props) => {
           </Transition>
         </div>
       </div>
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </>
   );
 };
