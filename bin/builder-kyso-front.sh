@@ -11,12 +11,9 @@ IMAGE_NAME="registry.kyso.io/docker/node-builder"
 IMAGE_TAG="16.16.0-bullseye-slim"
 CONTAINER_NAME="kyso-front-builder"
 BUILDER_TAG="$IMAGE_NAME:$IMAGE_TAG"
-HOSTS_FILE=".hosts.docker"
 NPMRC_KYSO=".npmrc.kyso"
-NPMRC_DOCKER=".npmrc.docker"
 ENV_DOCKER=".env.docker"
 CONTAINER_VARS=""
-PUBLISH_PORTS="--publish 0.0.0.0:3000:3000"
 
 # ---------
 # FUNCTIONS
@@ -75,8 +72,13 @@ docker_setup() {
       printf "Token value: "
       read -r PACKAGE_READER_TOKEN
     done
+    if [ -f ".npmrc" ]; then
+      cat ".npmrc" >"$NPMRC_KYSO"
+      echo "" >>"$NPMRC_KYSO"
+    else
+      : >"$NPMRC_KYSO"
+    fi
     cat >"$NPMRC_KYSO" <<EOF
-
 @kyso-io:registry=https://gitlab.kyso.io/api/v4/packages/npm/
 //gitlab.kyso.io/api/v4/packages/npm/:_authToken=${PACKAGE_READER_TOKEN}
 EOF
@@ -107,35 +109,21 @@ docker_run() {
     CONTAINER_COMMAND="npm install && npm run dev"
   fi
   if [ ! -f "./.npmrc.kyso" ]; then
-    echo "Missing file '.npmrc.kyso', call $0 init to create it"
+    echo "Missing file '.npmrc.kyso', call $0 setup to create it"
     exit 1
   fi
   if [ "$(docker_status)" ]; then
     docker rm "$CONTAINER_NAME"
   fi
-  HOSTS=""
-  if  [ -f "$HOSTS_FILE" ]; then
-    while read -r _host _ip; do
-      HOSTS="$HOSTS --add-host $_host:$_ip"
-    done <<EOF
-$(grep -v "^#" "$HOSTS_FILE")
-EOF
-  fi
-  # Prepare .npmrc.docker
-  if [ -f ".npmrc" ]; then
-    cat ".npmrc" "$NPMRC_KYSO" >"$NPMRC_DOCKER"
-  else
-    cat "$NPMRC_KYSO" >"$NPMRC_DOCKER"
-  fi
   VOLUMES="-v $(pwd)/:/app/"
   VOLUMES="$VOLUMES -v $(pwd)/$ENV_DOCKER:/app/.env"
-  VOLUMES="$VOLUMES -v $(pwd)/.npmrc.kyso:/app/.npmrc"
+  VOLUMES="$VOLUMES -v $(pwd)/$NPMRC_KYSO:/app/.npmrc"
   VOLUMES="$VOLUMES --tmpfs /data"
   WORKDIR="-w /app"
   DOCKER_COMMAND="$(
     printf "%s" \
       "docker run -d --restart always --user '$(id -u):$(id -g)' " \
-      "--name '$CONTAINER_NAME' $CONTAINER_VARS $PUBLISH_PORTS $HOSTS " \
+      "--network host --name '$CONTAINER_NAME' $CONTAINER_VARS " \
       "$VOLUMES $WORKDIR '$BUILDER_TAG' /bin/sh -c '$CONTAINER_COMMAND'"
   )"
   eval "$DOCKER_COMMAND"
