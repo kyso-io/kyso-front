@@ -1,8 +1,8 @@
-import { Popover } from '@headlessui/react';
-import { format } from 'date-fns';
-import { ViewBoardsIcon } from '@heroicons/react/outline';
-import type { Version } from '@/hooks/use-versions';
 import classNames from '@/helpers/class-names';
+import type { Version } from '@/hooks/use-versions';
+import { Popover } from '@headlessui/react';
+import { ViewBoardsIcon } from '@heroicons/react/outline';
+import { format } from 'date-fns';
 
 interface Props {
   versions: Version[];
@@ -21,20 +21,23 @@ const PureVersionsDropdown = (props: Props) => {
           {version ? `Version: #${version}` : 'Versions'}
         </Popover.Button>
 
-        <Popover.Panel className="min-w-[400px] origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none z-50">
+        <Popover.Panel className="min-w-[400px] origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none z-50 py-2">
           <div className="flex flex-col">
             {versions?.map((item) => (
               <a
                 aria-label="open"
                 key={item.version}
-                className={classNames('flex flex-row p-4 hover:bg-gray-100 items-center text-sm', item.version.toString() === version ? 'bg-gray-100' : '')}
+                className={classNames('px-4 py-2 hover:bg-gray-100 items-center text-sm', item.version.toString() === version ? 'bg-gray-100' : '')}
                 href={`${reportUrl}?version=${item.version}`}
               >
-                <div className="text-gray-800 mr-1">Version #{item.version}</div>
-                <div className="text-gray-500">
-                  <span>published on: </span>
-                  {format(new Date(item.created_at), 'HH:MM MMM d, yyyy')}
+                <div className="flex flex-row">
+                  <div className="text-gray-800 mr-1">Version #{item.version}</div>
+                  <div className="text-gray-500">
+                    <span>published on: </span>
+                    {format(new Date(item.created_at), 'HH:MM MMM d, yyyy')}
+                  </div>
                 </div>
+                {item.message && <div className="text-gray-400 pl-2 hover:bg-gray-100 items-center text-sm mt-1">{item.message}</div>}
               </a>
             ))}
           </div>
