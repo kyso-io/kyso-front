@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import type { CommonData } from '@/types/common-data';
 import type { NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
@@ -14,6 +15,7 @@ export interface Version {
   version: number;
   created_at: Date;
   num_files: number;
+  message: string;
 }
 
 const token: string | null = getLocalStorageItem('jwt');
@@ -21,7 +23,7 @@ const token: string | null = getLocalStorageItem('jwt');
 const fetcher = async (props: Props) => {
   const { commonData, report } = props;
   const api: Api = new Api(token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-  const result: NormalizedResponseDTO<Version[]> = await api.getReportVersions(report!.id as string, '-created_at');
+  const result: NormalizedResponseDTO<Version[]> = (await api.getReportVersions(report!.id as string, '-created_at')) as any;
   return result.data as Version[];
 };
 
