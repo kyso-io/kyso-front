@@ -219,7 +219,7 @@ const Index = () => {
       // toaster.danger("There was an error authenticating the user with google.");
     }
   }; */
-  console.log('buttonCss', buttonCss);
+
   return (
     <>
       <Head>
