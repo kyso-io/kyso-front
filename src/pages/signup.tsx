@@ -258,7 +258,7 @@ const Index = () => {
         <div className="text-right">{notification && <PureNotification message={notification} type={notificationType} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col mt-20 items-center mx-auto max-w-[1400px] space-x-10">
           <div className="prose grow max-w-none px-6 m-0">
-            <h1 className="login-header">Kyso.io</h1>
+            <h1 className="login-header text-2xl font-bold text">Kyso.io</h1>
             <p>Kyso.io offers free unlimited (private) repositories and unlimited collaborators.</p>
             <ul>
               <li>
@@ -403,7 +403,7 @@ const Index = () => {
             <div className="pt-5 mx-auto w-6/12 border-b" />
             <div className="pt-5 mx-auto w-12/12 " />
             {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
-              <a href={githubUrl} className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center">
+              <a href={githubUrl} className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50">
                 <FontAwesomeIcon
                   style={{
                     marginRight: 8,
@@ -415,7 +415,7 @@ const Index = () => {
             )}
 
             {enableBitbucketAuth && bitbucketUrl && bitbucketUrl.length > 0 && (
-              <a className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center" href={bitbucketUrl}>
+              <a className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50" href={bitbucketUrl}>
                 <FontAwesomeIcon
                   style={{
                     marginRight: 8,
@@ -427,7 +427,7 @@ const Index = () => {
             )}
 
             {enableGitlabAuth && gitlabUrl && gitlabUrl.length > 0 && (
-              <a className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center" href={gitlabUrl}>
+              <a className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50" href={gitlabUrl}>
                 <FontAwesomeIcon
                   style={{
                     marginRight: 8,
@@ -439,7 +439,7 @@ const Index = () => {
             )}
 
             {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
-              <a className="bg-white w-full border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center" href={googleUrl}>
+              <a className="bg-white w-full border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50" href={googleUrl}>
                 <FontAwesomeIcon
                   style={{
                     marginRight: 8,
@@ -451,17 +451,17 @@ const Index = () => {
             )}
 
             {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
-              <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
+              <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50" href={pingUrl}>
                 <img src="/pingid_logo.jpg" alt="PingID Logo" className="w-4 h-4 inline m-0 mr-1" />
                 Sign up with PingID
               </a>
             )}
 
-            {error && <div className="text-red-500 text-center p-2">{error}</div>}
+            {error && <div className="text-red-500 text-center text-xs p-2">{error}</div>}
             <div className="pt-5 flex flex-row items-center shown-div ">
               <p className="text-sm mr-5">Already have an account?</p>
-              <a className="text-sm no-underline hover:none text-gray-900 hover:text-indigo-600" href="/login">
-                Sign in
+              <a className="text-sm no-underline hover:none text-indigo-600 hover:text-indigo-700" href="/login">
+                Log in now
               </a>
             </div>
           </div>
