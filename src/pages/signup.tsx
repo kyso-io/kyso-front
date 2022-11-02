@@ -59,6 +59,7 @@ const Index = () => {
   const [linkCss, setLinkCss] = useState(false);
   const [showdivCss, setShowdivCss] = useState(false);
   const [hiddendivCss, setHiddendivCss] = useState(false);
+  const [isKysoOpen, openKysoButton] = useState(false);
 
   useEffect(() => {
     const getOrganizationOptions = async () => {
@@ -207,7 +208,8 @@ const Index = () => {
       setPassword('');
       setNickname('');
       setDisplayName('');
-      router.push('/login');
+      // user has logged in and ge need to return to their main profile, but we cannot because there is not userDTO, i think
+      // router.push('/login');
     } catch (e: any) {
       const errorData: { statusCode: number; message: string; error: string } = e.response.data;
       setNotificationType('danger');
@@ -258,7 +260,7 @@ const Index = () => {
         <div className="text-right">{notification && <PureNotification message={notification} type={notificationType} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col mt-20 items-center mx-auto max-w-[1400px] space-x-10">
           <div className="prose grow max-w-none px-6 m-0">
-            <h1 className="login-header">Kyso.io</h1>
+            <h1 className="login-header text-2xl font-bold text">Kyso.io</h1>
             <p>Kyso.io offers free unlimited (private) repositories and unlimited collaborators.</p>
             <ul>
               <li>
@@ -300,168 +302,195 @@ const Index = () => {
             <h2 className="my-0 mb-1">Sign up to Kyso</h2>
 
             {enableKysoAuth && (
-              <form className="flex flex-col space-y-2 mb-5" method="post" action={`/api/login`} onSubmit={handleSubmit}>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                    Email
-                  </label>
-                  <input
-                    className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
-                    aria-label="Email"
-                    type="text"
-                    name="email"
-                    value={email}
-                    onChange={(e) => {
-                      setError('');
-                      setNotification('');
-                      dispatch(storeSetError(''));
-                      setEmail(e.target.value);
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
-                    Full name
-                  </label>
-                  <input
-                    className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
-                    aria-label="name"
-                    type="text"
-                    name="name"
-                    value={displayName}
-                    onChange={(e) => {
-                      setError('');
-                      setNotification('');
-                      dispatch(storeSetError(''));
-                      setDisplayName(e.target.value);
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
-                    Username
-                  </label>
-                  <input
-                    className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
-                    aria-label="username"
-                    type="text"
-                    name="nickname"
-                    value={nickname}
-                    onChange={(e) => {
-                      setError('');
-                      setNotification('');
-                      dispatch(storeSetError(''));
-                      setNickname(e.target.value.toLowerCase());
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                    Password
-                  </label>
-                  <input
-                    className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
-                    value={password}
-                    name="password"
-                    type="password"
-                    autoComplete="off"
-                    onChange={(e) => {
-                      setError('');
-                      setNotification('');
-                      dispatch(storeSetError(''));
-                      setPassword(e.target.value);
-                    }}
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                    Repeat password
-                  </label>
-                  <input
-                    className="mb-5 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
-                    value={repeatPassword}
-                    name="repeatPpassword"
-                    type="password"
-                    autoComplete="off"
-                    onChange={(e) => {
-                      setError('');
-                      setNotification('');
-                      dispatch(storeSetError(''));
-                      setRepeatPassword(e.target.value);
-                    }}
-                  />
-                </div>
-                <button
-                  type="submit"
-                  className="login-btn shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
-                >
-                  Register
-                </button>
-              </form>
+              <>
+                {!isKysoOpen && (
+                  <button
+                    className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50 text-bold text-gray-900"
+                    onClick={() => openKysoButton(!isKysoOpen)}
+                  >
+                    <img src="/favicon.ico" alt="PingID Logo" className="w-4 h-4 inline m-0 mr-1" />
+                    Sign up with kyso
+                  </button>
+                )}
+                {isKysoOpen && (
+                  <form className="flex flex-col space-y-2 mb-5" method="post" action={`/api/login`} onSubmit={handleSubmit}>
+                    <div>
+                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                        Email
+                      </label>
+                      <input
+                        className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                        aria-label="Email"
+                        type="text"
+                        name="email"
+                        value={email}
+                        onChange={(e) => {
+                          setError('');
+                          setNotification('');
+                          dispatch(storeSetError(''));
+                          setEmail(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
+                        Full name
+                      </label>
+                      <input
+                        className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                        aria-label="name"
+                        type="text"
+                        name="name"
+                        value={displayName}
+                        onChange={(e) => {
+                          setError('');
+                          setNotification('');
+                          dispatch(storeSetError(''));
+                          setDisplayName(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
+                        Username
+                      </label>
+                      <input
+                        className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                        aria-label="username"
+                        type="text"
+                        name="nickname"
+                        value={nickname}
+                        onChange={(e) => {
+                          setError('');
+                          setNotification('');
+                          dispatch(storeSetError(''));
+                          setNickname(e.target.value.toLowerCase());
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                        Password
+                      </label>
+                      <input
+                        className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                        value={password}
+                        name="password"
+                        type="password"
+                        autoComplete="off"
+                        onChange={(e) => {
+                          setError('');
+                          setNotification('');
+                          dispatch(storeSetError(''));
+                          setPassword(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
+                        Repeat password
+                      </label>
+                      <input
+                        className="mb-5 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
+                        value={repeatPassword}
+                        name="repeatPpassword"
+                        type="password"
+                        autoComplete="off"
+                        onChange={(e) => {
+                          setError('');
+                          setNotification('');
+                          dispatch(storeSetError(''));
+                          setRepeatPassword(e.target.value);
+                        }}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="login-btn shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
+                    >
+                      Register
+                    </button>
+                  </form>
+                )}
+                {isKysoOpen && (
+                  <>
+                    <div className="pt-3 mx-auto w-12/12 " />
+                    <button
+                      className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50 text-bold text-gray-900"
+                      onClick={() => openKysoButton(!isKysoOpen)}
+                    >
+                      Cancel
+                    </button>
+                  </>
+                )}
+              </>
             )}
 
-            <div className="pt-5 mx-auto w-6/12 border-b" />
-            <div className="pt-5 mx-auto w-12/12 " />
-            {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
-              <a href={githubUrl} className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center">
-                <FontAwesomeIcon
-                  style={{
-                    marginRight: 8,
-                  }}
-                  icon={faGithub}
-                />
-                Sign up with Github
-              </a>
-            )}
+            {!isKysoOpen && (
+              <>
+                <div className="pt-2 mx-auto w-6/12 border-b" />
+                <div className="pt-1 mx-auto w-12/12 " />
+                {enableGithubAuth && githubUrl && githubUrl.length > 0 && (
+                  <a href={githubUrl} className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50">
+                    <FontAwesomeIcon
+                      style={{
+                        marginRight: 8,
+                      }}
+                      icon={faGithub}
+                    />
+                    Sign up with Github
+                  </a>
+                )}
 
-            {enableBitbucketAuth && bitbucketUrl && bitbucketUrl.length > 0 && (
-              <a className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center" href={bitbucketUrl}>
-                <FontAwesomeIcon
-                  style={{
-                    marginRight: 8,
-                  }}
-                  icon={faBitbucket}
-                />
-                Sign up with Bitbucket
-              </a>
-            )}
+                {enableBitbucketAuth && bitbucketUrl && bitbucketUrl.length > 0 && (
+                  <a className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50" href={bitbucketUrl}>
+                    <FontAwesomeIcon
+                      style={{
+                        marginRight: 8,
+                      }}
+                      icon={faBitbucket}
+                    />
+                    Sign up with Bitbucket
+                  </a>
+                )}
 
-            {enableGitlabAuth && gitlabUrl && gitlabUrl.length > 0 && (
-              <a className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center" href={gitlabUrl}>
-                <FontAwesomeIcon
-                  style={{
-                    marginRight: 8,
-                  }}
-                  icon={faGitlab}
-                />
-                Sign up with Gitlab
-              </a>
-            )}
+                {enableGitlabAuth && gitlabUrl && gitlabUrl.length > 0 && (
+                  <a className="bg-white border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50" href={gitlabUrl}>
+                    <FontAwesomeIcon
+                      style={{
+                        marginRight: 8,
+                      }}
+                      icon={faGitlab}
+                    />
+                    Sign up with Gitlab
+                  </a>
+                )}
 
-            {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
-              <a className="bg-white w-full border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center" href={googleUrl}>
-                <FontAwesomeIcon
-                  style={{
-                    marginRight: 8,
-                  }}
-                  icon={faGoogle}
-                />
-                Sign up with Google
-              </a>
-            )}
+                {enableGoogleAuth && googleUrl && googleUrl.length > 0 && (
+                  <a className="bg-white w-full border border-gray-400 inline-block rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50" href={googleUrl}>
+                    <FontAwesomeIcon
+                      style={{
+                        marginRight: 8,
+                      }}
+                      icon={faGoogle}
+                    />
+                    Sign up with Google
+                  </a>
+                )}
 
-            {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
-              <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center" href={pingUrl}>
-                <img src="/pingid_logo.jpg" alt="PingID Logo" className="w-4 h-4 inline m-0 mr-1" />
-                Sign up with PingID
-              </a>
+                {enablePingSamlAuth && pingUrl && pingUrl.length > 0 && (
+                  <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50" href={pingUrl}>
+                    <img src="/pingid_logo.jpg" alt="PingID Logo" className="w-4 h-4 inline m-0 mr-1" />
+                    Sign up with PingID
+                  </a>
+                )}
+              </>
             )}
-
-            {error && <div className="text-red-500 text-center p-2">{error}</div>}
+            {error && <div className="text-red-500 text-center text-xs p-2">{error}</div>}
             <div className="pt-5 flex flex-row items-center shown-div ">
               <p className="text-sm mr-5">Already have an account?</p>
-              <a className="text-sm no-underline hover:none text-gray-900 hover:text-indigo-600" href="/login">
-                Sign in
+              <a className="text-sm no-underline hover:none text-indigo-600 hover:text-indigo-700" href="/login">
+                Log in now
               </a>
             </div>
           </div>
