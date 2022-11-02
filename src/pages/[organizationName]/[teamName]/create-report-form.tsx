@@ -55,6 +55,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   const [channelMembers, setChannelMembers] = useState<TeamMember[]>([]);
   const [selectedPeople, setSelectedPeople] = useState<TeamMember[]>(channelMembers);
   const [allowedTags, setAllowedTags] = useState<string[]>([]);
+  const [openChannelDropdown, setOpenChannelDropdown] = useState<boolean>(false);
   const [selectedTeam, setSelectedTeam] = useState<ResourcePermissions | null>(null);
   const hasPermissionCreateReport: boolean | null = useMemo(() => {
     if (!commonData.permissions) {
@@ -81,10 +82,14 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       return sameOrg && hasPermissionInOrg;
     });
   }, [commonData.permissions, commonData.organization]);
-  const [report, setReport] = useState<ReportDTO | null>(ReportDTO.createEmpty());
+  const [report, setReport] = useState<ReportDTO>(ReportDTO.createEmpty());
   const [reportFiles, setReportFiles] = useState<KysoFile[]>([]);
   const [tmpReportFiles, setTmpReportFiles] = useState<TmpReportFile[]>([]);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+
+  const isEdition = () => {
+    return report.id !== null && report.id !== '';
+  };
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -103,6 +108,10 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       }
     };
     getData();
+
+    if (report && commonData.user?.id) {
+      report.author_ids = [commonData.user!.id];
+    }
   }, []);
 
   useEffect(() => {
@@ -388,7 +397,8 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     const unmodifiedFiles: string[] = [];
     const deletedFiles: string[] = [];
     let mainFile: TmpReportFile | null = null;
-    tmpReportFiles.forEach((tmpReportFile: TmpReportFile) => {
+
+    for (const tmpReportFile of tmpReportFiles) {
       if (tmpReportFile.main) {
         mainFile = tmpReportFile;
       }
@@ -398,15 +408,17 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       if (kysoFile) {
         unmodifiedFiles.push(kysoFile.id!);
       }
-    });
-    reportFiles.forEach((kysoFile: KysoFile) => {
+    }
+
+    for (const kysoFile of reportFiles) {
       const tmpReportFile: TmpReportFile | undefined = tmpReportFiles.find((trf: TmpReportFile) => {
         return trf.id === kysoFile.id;
       });
       if (!tmpReportFile) {
         deletedFiles.push(kysoFile.id!);
       }
-    });
+    }
+
     const kysoConfigFile: KysoConfigFile = {
       main: mainFile !== null ? (mainFile as TmpReportFile).name : tmpReportFiles[0]!.name,
       title,
@@ -534,11 +546,10 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                 <Menu as="div" className="relative w-fit inline-block text-left">
                   <React.Fragment>
                     <Menu.Button
-                      disabled={report !== null}
-                      className={clsx(
-                        'hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded',
-                        report !== null ? 'cursor-not-allowed bg-gray-100' : 'bg-white',
-                      )}
+                      onClick={() => {
+                        setOpenChannelDropdown(!openChannelDropdown);
+                      }}
+                      className={clsx('hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded', 'bg-white')}
                     >
                       {selectedTeam ? selectedTeam.display_name : 'Select a channel'}
                       <div className="pl-2">
@@ -546,6 +557,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                       </div>
                     </Menu.Button>
                     <Transition
+                      show={openChannelDropdown}
                       as={Fragment}
                       enter="transition ease-out duration-100"
                       enterFrom="transform opacity-0 scale-95"
@@ -572,6 +584,14 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                                       setShowToaster(false);
                                       setMessageToaster('');
                                       setSelectedPeople([]);
+
+                                      if (report && report.author_ids && report.author_ids!.length === 0) {
+                                        if (commonData.user?.id) {
+                                          report.author_ids = [commonData.user!.id];
+                                          setReport(report);
+                                        }
+                                      }
+                                      setOpenChannelDropdown(false);
                                     }}
                                     className={classNames(
                                       teamResourcePermissions.name === selectedTeam?.name ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
@@ -604,9 +624,10 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                     boxShadow: 'none',
                   }}
                   value={title || ''}
+                  disabled={isEdition()}
                   onChange={(e) => setTitleDelay(e.target.value)}
                   placeholder="Title"
-                  className="p-0 focus:shadow-sm 0 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900"
+                  className={clsx('p-0 focus:shadow-sm 0 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900', isEdition() ? 'text-slate-500' : '')}
                 />
                 <textarea
                   style={{
@@ -773,7 +794,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                     type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY}
                     disabled={!hasPermissionCreateReport || busy}
                     onClick={() => {
-                      if (report !== null) {
+                      if (isEdition()) {
                         updateReport();
                       } else {
                         createReport();
@@ -783,7 +804,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                   >
                     <div className="flex flex-row items-center">
                       {busy && <PureSpinner size={5} />}
-                      {report !== null ? 'Update' : 'Post'} <ArrowRightIcon className="ml-2 w-4 h-4" />
+                      {isEdition() ? 'Update' : 'Post'} <ArrowRightIcon className="ml-2 w-4 h-4" />
                     </div>
                   </PureKysoButton>
                 </div>
