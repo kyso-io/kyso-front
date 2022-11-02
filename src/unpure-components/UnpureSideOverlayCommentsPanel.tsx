@@ -23,8 +23,13 @@ const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
 
   useEffect(() => {
     if (!commonData.user) {
+      // Collapse by default and hide the inline comments section
+      setOpenAndCache(false);
+      setOpen(false);
+
       return;
     }
+
     if (getLocalStorageItem(cacheKey)) {
       setOpenAndCache(JSON.parse(getLocalStorageItem(cacheKey)!));
       setOpen(JSON.parse(getLocalStorageItem(cacheKey)!));
