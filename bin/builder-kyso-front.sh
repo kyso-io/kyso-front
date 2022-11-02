@@ -12,7 +12,6 @@ IMAGE_TAG="16.16.0-bullseye-slim"
 CONTAINER_NAME="kyso-front-builder"
 BUILDER_TAG="$IMAGE_NAME:$IMAGE_TAG"
 NPMRC_KYSO=".npmrc.kyso"
-ENV_DOCKER=".env.docker"
 CONTAINER_VARS=""
 
 # ---------
@@ -83,11 +82,6 @@ docker_setup() {
 //gitlab.kyso.io/api/v4/packages/npm/:_authToken=${PACKAGE_READER_TOKEN}
 EOF
   fi
-  if [ ! -f "$ENV_DOCKER" ]; then
-    echo "Copying the sample ./.env file to $ENV_DOCKER"
-    cp "./.env" "$ENV_DOCKER"
-    echo "Adjust values for your setup!!!"
-  fi
 }
 
 docker_logs() {
@@ -116,7 +110,6 @@ docker_run() {
     docker rm "$CONTAINER_NAME"
   fi
   VOLUMES="-v $(pwd)/:/app/"
-  VOLUMES="$VOLUMES -v $(pwd)/$ENV_DOCKER:/app/.env"
   VOLUMES="$VOLUMES -v $(pwd)/$NPMRC_KYSO:/app/.npmrc"
   VOLUMES="$VOLUMES --tmpfs /data"
   WORKDIR="-w /app"
@@ -163,7 +156,7 @@ Usage: $0 CMND [ARGS]
 
 Where CMND can be one of:
 - pull: pull latest version of the builder container image
-- setup: prepare local files (.npmrc.kyso & .env.docker)
+- setup: prepare local files (.npmrc.kyso)
 - start|restart: launch container in daemon mode with the right settings
 - stop|status|rm|logs: operations on the container
 - sh: execute interactive shell (/bin/bash) on the running container
