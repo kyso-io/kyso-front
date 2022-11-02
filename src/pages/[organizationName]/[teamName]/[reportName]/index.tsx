@@ -187,7 +187,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         let ftr: FileToRender | null = null;
 
         if (currentPath) {
-          const foundedFile = validFiles.find((x) => x.path === currentPath);
+          const foundedFile = validFiles.find((x) => x.path_scs.endsWith(currentPath));
 
           if (foundedFile) {
             // Trick...
@@ -260,6 +260,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         }
       } catch (e) {
         // error fetching file
+        console.error(e);
       }
     };
     getData();

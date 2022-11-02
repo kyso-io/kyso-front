@@ -154,7 +154,7 @@ const UnpureReportRender = ({
 
   let render = null;
 
-  if (fileToRender.content !== null) {
+  if (fileToRender.content) {
     if (FileTypesHelper.isTextBasedFiled(fileToRender.path)) {
       const markdownContext: ReportContext = {
         organizationSlug: commonData.organization?.sluglified_name!,
