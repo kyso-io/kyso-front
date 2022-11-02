@@ -182,51 +182,60 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 
     const getData = async () => {
       const validFiles: GithubFileHash[] = selfTree.filter((item: GithubFileHash) => item.type === 'file');
-      const defaultRenderFiles: string[] = [
-        'Readme.md',
-        'readme.md',
-        'index.md',
-        'index.html',
-        'index.ipynb',
-        'index.pptx',
-        'index.docx',
-        'index.xlsx',
-        'index.doc',
-        'index.ppt',
-        'index.xsl',
-        'index.txt',
-        'index.pdf',
-      ];
-
-      let validFile: GithubFileHash | undefined = validFiles.find((item: GithubFileHash) => {
-        if (currentPath) {
-          return currentPath.endsWith(item.path);
-        }
-        if (reportData.report?.main_file) {
-          return reportData.report.main_file.endsWith(item.path);
-        }
-        return false;
-      });
-      if (!validFile) {
-        // Check the defaults
-        validFile = validFiles?.find((item: GithubFileHash) => {
-          return defaultRenderFiles.includes(item.path);
-        });
-      }
 
       try {
         let ftr: FileToRender | null = null;
 
-        if (validFile) {
+        if (currentPath) {
+          const foundedFile = validFiles.find((x) => x.path === currentPath);
+
+          if (foundedFile) {
+            // Trick...
+            ftr = foundedFile as unknown as FileToRender;
+          } else {
+            // Look for default files
+            const defaultRenderFiles: string[] = [
+              'Readme.md',
+              'readme.md',
+              'index.md',
+              'index.html',
+              'index.ipynb',
+              'index.pptx',
+              'index.docx',
+              'index.xlsx',
+              'index.doc',
+              'index.ppt',
+              'index.xsl',
+              'index.txt',
+              'index.pdf',
+            ];
+
+            let foundedDefault: boolean = false;
+            for (const iFile of validFiles) {
+              for (const defaultFile of defaultRenderFiles) {
+                if (iFile.path.endsWith(defaultFile)) {
+                  ftr = iFile as unknown as FileToRender;
+                  foundedDefault = true;
+                  break;
+                }
+              }
+
+              if (foundedDefault) {
+                break;
+              }
+            }
+          }
+        } else if (reportData.report && reportData.report.main_file && reportData.report.main_file_id && reportData.report.main_file_path_scs) {
           ftr = {
-            path: validFile!.path,
-            id: validFile!.id,
-            path_scs: validFile!.path_scs,
+            path: reportData.report!.main_file,
+            id: reportData.report!.main_file_id,
+            path_scs: reportData.report!.main_file_path_scs,
             percentLoaded: 0,
-            isLoading: !validFile!.path.endsWith('.html'),
+            isLoading: reportData.report!.main_file.endsWith('.html'),
             content: null,
           };
         }
+
         setFileToRender(ftr);
         if (ftr && !ftr.path.endsWith('.html')) {
           setFileToRender({ ...ftr, isLoading: true });
