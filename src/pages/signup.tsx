@@ -5,10 +5,10 @@ import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { SignUpDto } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, SignUpDto } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
-import { Api, setError as storeSetError } from '@kyso-io/kyso-store';
+import { Api, setError as storeSetError, setTokenAuthAction } from '@kyso-io/kyso-store';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
@@ -202,14 +202,19 @@ const Index = () => {
       await api.signup(signUpDto);
       setNotificationType('success');
       setNotification('You have been registered successfully. A verification link has been sent to your email account.');
-      localStorage.setItem('email', email);
+      setTimeout(async () => {
+        const login: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
+        const response: NormalizedResponseDTO<string> = await api.login(login);
+        const token: string = response.data;
+        dispatch(setTokenAuthAction(token));
+        localStorage.setItem('jwt', token);
+        router.push('/captcha');
+      }, 1000);
       setError('');
       setEmail('');
       setPassword('');
       setNickname('');
       setDisplayName('');
-      // user has logged in and ge need to return to their main profile, but we cannot because there is not userDTO, i think
-      // router.push('/login');
     } catch (e: any) {
       const errorData: { statusCode: number; message: string; error: string } = e.response.data;
       setNotificationType('danger');
