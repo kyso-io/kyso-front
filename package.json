@@ -1,6 +1,6 @@
 {
-  "name": "next-js-boilerplate",
-  "version": "2.0.1",
+  "name": "kyso-front",
+  "version": "2.0.5",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -13,7 +13,8 @@
     "lint": "next lint",
     "check-types": "tsc --noEmit --pretty",
     "test": "jest --watch",
-    "prepare": "husky install"
+    "prettier": "prettier --write \"./src/**/*.{ts,js}\"",
+    "prepare": "is-ci || husky install"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
@@ -110,7 +111,8 @@
     "eslint-plugin-tailwindcss": "^3.5.0",
     "eslint-plugin-testing-library": "^5.5.1",
     "eslint-plugin-unused-imports": "^2.0.0",
-    "husky": "^7.0.4",
+    "husky": "^8.0.0",
+    "is-ci": "^3.0.1",
     "jest": "^28.1.0",
     "jest-environment-jsdom": "^28.1.0",
     "lint-staged": "^12.5.0",
