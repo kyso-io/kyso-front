@@ -231,7 +231,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
             id: reportData.report!.main_file_id,
             path_scs: reportData.report!.main_file_path_scs,
             percentLoaded: 0,
-            isLoading: reportData.report!.main_file.endsWith('.html'),
+            isLoading: false,
             content: null,
           };
         }
