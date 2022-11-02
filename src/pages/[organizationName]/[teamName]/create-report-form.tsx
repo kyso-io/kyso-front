@@ -13,8 +13,8 @@ import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { FolderAddIcon } from '@heroicons/react/outline';
 import { ArrowRightIcon, ExclamationCircleIcon, InformationCircleIcon, SelectorIcon } from '@heroicons/react/solid';
-import type { File as KysoFile, KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
+import type { File as KysoFile, KysoConfigFile, KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import { ReportDTO, KysoSettingsEnum, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import 'easymde/dist/easymde.min.css';
@@ -81,7 +81,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       return sameOrg && hasPermissionInOrg;
     });
   }, [commonData.permissions, commonData.organization]);
-  const [report, setReport] = useState<ReportDTO | null>();
+  const [report, setReport] = useState<ReportDTO | null>(ReportDTO.createEmpty());
   const [reportFiles, setReportFiles] = useState<KysoFile[]>([]);
   const [tmpReportFiles, setTmpReportFiles] = useState<TmpReportFile[]>([]);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
@@ -89,6 +89,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   useEffect(() => {
     const result: boolean = checkJwt();
     setUserIsLogged(result);
+
     const getData = async () => {
       try {
         const api: Api = new Api();
@@ -138,6 +139,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
         const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
         const result: NormalizedResponseDTO<ReportDTO> = await api.getReportById(router.query.reportId as string);
         const r: ReportDTO = result.data;
+
         const resultFiles: NormalizedResponseDTO<KysoFile[]> = await api.getReportFiles(r.id!, r.last_version);
         setTitle(r.title);
         setDescription(r.description);
@@ -207,6 +209,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       return;
     }
     const sp: TeamMember[] = [];
+
     for (const authorId of report.author_ids) {
       const author: TeamMember | undefined = channelMembers.find((x: TeamMember) => x.id === authorId);
       if (author) {
@@ -433,6 +436,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       setBusy(false);
       return;
     }
+
     const formData: FormData = new FormData();
     formData.append('file', blobZip);
     formData.append('version', report!.last_version.toString());
@@ -690,7 +694,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
               <div className="mt-8 flex flex-col">
                 <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
                   <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                    <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                    <div className="overflow-hidden shadow ring-1 ring-black ring-opacity/5 md:rounded-lg">
                       <table className="min-w-full divide-y divide-gray-300">
                         <thead className="bg-gray-50">
                           <tr>
