@@ -26,6 +26,7 @@ const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
       return;
     }
     if (getLocalStorageItem(cacheKey)) {
+      setOpenAndCache(JSON.parse(getLocalStorageItem(cacheKey)!));
       setOpen(JSON.parse(getLocalStorageItem(cacheKey)!));
     }
   }, [commonData.user]);
@@ -34,11 +35,10 @@ const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
   useEventListener('mouseenter', () => setIsHover(true), hoverRef);
   useEventListener('mouseleave', () => setIsHover(false), hoverRef);
 
-  const setOpenAndCache = () => {
-    setLocalStorageItem(cacheKey, !open);
-    console.log('open', open, cacheKey);
-    setOpen(!open);
-    setSidebarOpen(!open);
+  const setOpenAndCache = (openValue: boolean) => {
+    setLocalStorageItem(cacheKey, openValue);
+    setOpen(openValue);
+    setSidebarOpen(openValue);
     setIsHover(false);
   };
 
@@ -53,7 +53,7 @@ const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
             type="button"
             className="overlay-comments-info m-4 p-2 border h-fit rounded-md text-gray-900 hover:text-gray-700 focus:outline-none focus:ring-0 hover:bg-gray-50"
             data-pr-tooltip={open ? 'Lock closed' : 'Lock open'}
-            onClick={() => setOpenAndCache()}
+            onClick={() => setOpenAndCache(!open)}
           >
             <span className="sr-only">Close panel</span>
             <span className="flex">
