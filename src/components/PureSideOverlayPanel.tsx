@@ -81,6 +81,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
 
   useEffect(() => {
     if (getLocalStorageItem(cacheKey)) {
+      setOpenAndCache(JSON.parse(getLocalStorageItem(cacheKey)!));
       setOpen(JSON.parse(getLocalStorageItem(cacheKey)!));
     }
   }, []);
@@ -97,10 +98,10 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
   );
   useEventListener('mouseleave', () => setShowTooltip(false), tooltipRef);
 
-  const setOpenAndCache = () => {
-    setLocalStorageItem(cacheKey, !open);
-    setOpen(!open);
-    setSidebarOpen(!open);
+  const setOpenAndCache = (openValue: boolean) => {
+    setLocalStorageItem(cacheKey, openValue);
+    setOpen(openValue);
+    setSidebarOpen(openValue);
     setIsHover(false);
     setShowTooltip(false);
   };
@@ -115,7 +116,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
         }}
       >
         <div className={classNames('relative items-center flex flex-row w-full justify-end')}>
-          <button ref={tooltipRef} type="button" className="m-4 p-2 border h-fit rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-0" onClick={() => setOpenAndCache()}>
+          <button ref={tooltipRef} type="button" className="m-4 p-2 border h-fit rounded-md text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-0" onClick={() => setOpenAndCache(!open)}>
             <span className="sr-only">Close panel</span>
             {open && <ChevronDoubleLeftIcon className="h-6 w-6" aria-hidden="true" />}
             {!open && !isHover && <MenuIcon className="h-6 w-6" aria-hidden="true" />}
