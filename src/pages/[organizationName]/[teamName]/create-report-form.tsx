@@ -81,7 +81,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       return sameOrg && hasPermissionInOrg;
     });
   }, [commonData.permissions, commonData.organization]);
-  const [report, setReport] = useState<ReportDTO | null>(ReportDTO.createEmpty());
+  const [report, setReport] = useState<ReportDTO>(ReportDTO.createEmpty());
   const [reportFiles, setReportFiles] = useState<KysoFile[]>([]);
   const [tmpReportFiles, setTmpReportFiles] = useState<TmpReportFile[]>([]);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
@@ -388,7 +388,8 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     const unmodifiedFiles: string[] = [];
     const deletedFiles: string[] = [];
     let mainFile: TmpReportFile | null = null;
-    tmpReportFiles.forEach((tmpReportFile: TmpReportFile) => {
+
+    for (const tmpReportFile of tmpReportFiles) {
       if (tmpReportFile.main) {
         mainFile = tmpReportFile;
       }
@@ -398,15 +399,17 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       if (kysoFile) {
         unmodifiedFiles.push(kysoFile.id!);
       }
-    });
-    reportFiles.forEach((kysoFile: KysoFile) => {
+    }
+
+    for (const kysoFile of reportFiles) {
       const tmpReportFile: TmpReportFile | undefined = tmpReportFiles.find((trf: TmpReportFile) => {
         return trf.id === kysoFile.id;
       });
       if (!tmpReportFile) {
         deletedFiles.push(kysoFile.id!);
       }
-    });
+    }
+
     const kysoConfigFile: KysoConfigFile = {
       main: mainFile !== null ? (mainFile as TmpReportFile).name : tmpReportFiles[0]!.name,
       title,
@@ -546,6 +549,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                       </div>
                     </Menu.Button>
                     <Transition
+                      show={false}
                       as={Fragment}
                       enter="transition ease-out duration-100"
                       enterFrom="transform opacity-0 scale-95"
@@ -773,7 +777,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                     type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY}
                     disabled={!hasPermissionCreateReport || busy}
                     onClick={() => {
-                      if (report !== null) {
+                      if (report.id !== null && report.id !== '') {
                         updateReport();
                       } else {
                         createReport();
