@@ -155,6 +155,7 @@ usage() {
 Usage: $0 CMND [ARGS]
 
 Where CMND can be one of:
+- git: call git on the root of the kyso-api repository
 - pull: pull latest version of the builder container image
 - setup: prepare local files (.npmrc.kyso)
 - start|restart: launch container in daemon mode with the right settings
@@ -173,6 +174,7 @@ echo "WORKING DIRECTORY = '$(pwd)'"
 echo ""
 
 case "$1" in
+git) shift && git "$@" ;;
 pull) docker_pull ;;
 logs) shift && docker_logs "$@" ;;
 rm) docker_rm ;;
