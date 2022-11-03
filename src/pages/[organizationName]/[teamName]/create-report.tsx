@@ -41,8 +41,6 @@ import { Helper } from '../../../helpers/Helper';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
-const token: string | null = getSessionStorageItem('jwt');
-
 const blobToBase64 = (blob: Blob): Promise<string> => {
   const reader = new FileReader();
   reader.readAsDataURL(blob);
@@ -287,7 +285,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
 
     setBusy(true);
 
-    const api: Api = new Api(token);
+    const api: Api = new Api(commonData.token);
     api.setOrganizationSlug(commonData.organization!.sluglified_name);
     api.setTeamSlug(commonData.team.sluglified_name);
 
