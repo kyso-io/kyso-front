@@ -455,6 +455,8 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     createLinkForm = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form`;
   }
 
+  console.log({ selectedFile });
+
   return userIsLogged ? (
     hasPermissionCreateReport ? (
       <div className="p-4">
@@ -739,7 +741,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
               </>
             )}
 
-            {!FileTypesHelper.isSupported(selectedFile.file.name) && (
+            {selectedFile.file.type !== 'folder' && !FileTypesHelper.isSupported(selectedFile.file.name) && (
               <>
                 <RenderError message={`This file can't be rendered while you create a report. Did you miss to set the extension of the file?`} />
               </>
