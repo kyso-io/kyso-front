@@ -13,6 +13,7 @@ CONTAINER_NAME="kyso-front-builder"
 BUILDER_TAG="$IMAGE_NAME:$IMAGE_TAG"
 NPMRC_KYSO=".npmrc.kyso"
 CONTAINER_VARS=""
+RESTART_POLICY="always"
 
 # ---------
 # FUNCTIONS
@@ -115,7 +116,7 @@ docker_run() {
   WORKDIR="-w /app"
   DOCKER_COMMAND="$(
     printf "%s" \
-      "docker run -d --restart always --user '$(id -u):$(id -g)' " \
+      "docker run -d --restart '$RESTART_POLICY' --user '$(id -u):$(id -g)' " \
       "--network host --name '$CONTAINER_NAME' $CONTAINER_VARS " \
       "$VOLUMES $WORKDIR '$BUILDER_TAG' /bin/sh -c '$CONTAINER_COMMAND'"
   )"
@@ -158,7 +159,7 @@ Where CMND can be one of:
 - git: call git on the root of the kyso-api repository
 - pull: pull latest version of the builder container image
 - setup: prepare local files (.npmrc.kyso)
-- start|restart: launch container in daemon mode with the right settings
+- start|restart|run: launch container in daemon mode with the right settings
 - stop|status|rm|logs: operations on the container
 - sh: execute interactive shell (/bin/bash) on the running container
 - shr: execute interactive shell (/bin/bash) as root on the running container
@@ -189,5 +190,6 @@ restart)
   docker_stop || true
   docker_run "$@"
 ;;
+run) shift && RESTART_POLICY="no" docker_run "$@" ;;
 *) usage ;;
 esac
