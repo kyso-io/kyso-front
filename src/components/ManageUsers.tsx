@@ -509,7 +509,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                             <div className="flex flex-row">
                               {organizationRoles && (
                                 <div>
-                                  <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role 3</p>
+                                  <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
                                   <ListboxWithText
                                     selectedLabel={selectedOrgLabel}
                                     disabled={!isOrgAdmin || selectedTeamRole === REMOVE_USER_VALUE}
@@ -525,7 +525,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                               )}
                               {showTeamRoles && teamRoles && (
                                 <div className="ml-4">
-                                  <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Channel Role 4</p>
+                                  <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Channel Role</p>
                                   <ListboxWithText
                                     selectedLabel={selectedTeamLabel}
                                     disabled={(!isOrgAdmin && !isTeamAdmin) || selectedOrgRole === REMOVE_USER_VALUE}
