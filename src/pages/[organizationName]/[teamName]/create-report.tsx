@@ -737,7 +737,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
               </>
             )}
 
-            {!FileTypesHelper.isSupported(selectedFile.file.name) && (
+            {selectedFile.file.type !== 'folder' && !FileTypesHelper.isSupported(selectedFile.file.name) && (
               <>
                 <RenderError message={`This file can't be rendered while you create a report. Did you miss to set the extension of the file?`} />
               </>
