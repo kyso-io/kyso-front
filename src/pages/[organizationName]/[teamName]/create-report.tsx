@@ -22,7 +22,7 @@ import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { ArrowRightIcon, DocumentAddIcon, ExclamationCircleIcon, FolderAddIcon, SelectorIcon, UploadIcon } from '@heroicons/react/solid';
-import type { KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, Tag, UserDTO } from '@kyso-io/kyso-model';
+import type { KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, ResourcePermissions, Tag, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, ReportPermissionsEnum, ReportType, TeamMember, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import 'easymde/dist/easymde.min.css';
@@ -82,17 +82,29 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     getData();
   }, []);
 
-  const channelSelectorItems: BreadcrumbItem[] = [];
-
-  if (commonData.permissions && commonData.permissions.teams) {
-    commonData
-      .permissions!.teams.filter((team) => team.organization_id === commonData.organization?.id)
-      .forEach((team) => {
-        channelSelectorItems.push(
-          new BreadcrumbItem(team.display_name, `${router.basePath}/${commonData.organization?.sluglified_name}/${team.name}/create-report`, commonData.team?.sluglified_name === team.name),
-        );
-      });
-  }
+  const channelSelectorItems: BreadcrumbItem[] = useMemo(() => {
+    if (!commonData.organization) {
+      return [];
+    }
+    if (!commonData.permissions || !commonData.permissions.teams) {
+      return [];
+    }
+    return commonData.permissions.teams
+      .filter((teamResourcePermissions: ResourcePermissions) => {
+        const sameOrg: boolean = teamResourcePermissions.organization_id === commonData.organization!.id;
+        const cd: any = { ...commonData, team: teamResourcePermissions };
+        const hasPermissionInOrg: boolean = HelperPermissions.checkPermissions(cd, ReportPermissionsEnum.CREATE);
+        return sameOrg && hasPermissionInOrg;
+      })
+      .map(
+        (teamResourcePermissions: ResourcePermissions) =>
+          new BreadcrumbItem(
+            teamResourcePermissions.display_name,
+            `${router.basePath}/${commonData.organization?.sluglified_name}/${teamResourcePermissions.name}/create-report`,
+            commonData.team?.sluglified_name === teamResourcePermissions.name,
+          ),
+      );
+  }, [commonData.permissions, commonData.organization]);
 
   const channelMembers = useChannelMembers({ commonData });
 
@@ -123,12 +135,34 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   const [selectedFile, setSelectedFile] = useState<FilesystemItem>(new FilesystemItem(mainfile[0]!, [], 1));
   const [files, setFiles] = useState<CreationReportFileSystemObject[]>(mainfile);
 
-  const hasPermissionCreateReport: boolean | null = useMemo(() => {
+  const hasPermissionCreateReport: boolean = useMemo(() => {
     if (!commonData.permissions) {
-      return null;
+      return false;
+    }
+    if (!commonData.organization) {
+      return false;
+    }
+    const orgResourcePermissions: ResourcePermissions | undefined = commonData.permissions.organizations!.find(
+      (resourcePermissions: ResourcePermissions) => resourcePermissions.id === commonData.organization!.id,
+    );
+    if (!orgResourcePermissions) {
+      return false;
+    }
+    if (commonData.team) {
+      return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
+    }
+    const teamsResourcePermissions: ResourcePermissions[] = commonData.permissions.teams!.filter((resourcePermissions: ResourcePermissions) => {
+      const copyCommonData: any = { ...commonData };
+      copyCommonData.team = {
+        id: resourcePermissions.id,
+      };
+      return HelperPermissions.checkPermissions(copyCommonData, ReportPermissionsEnum.CREATE);
+    });
+    if (teamsResourcePermissions.length > 0) {
+      return true;
     }
     return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
-  }, [commonData.permissions, commonData.organization, commonData.team]);
+  }, [commonData.permissions, commonData.organization]);
 
   const cleanStorage = () => {
     removeSessionStorageItem('formTitle');

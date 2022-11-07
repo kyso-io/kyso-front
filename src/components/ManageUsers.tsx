@@ -473,8 +473,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                     }
                                     if (index !== -1) {
                                       setSelectedOrgRole(members[index]!.organization_roles[0]!);
+                                      setSelectedOrgLabel(organizationRoles.find((e: { value: string; label: string }) => e.value === members[index]!.organization_roles[0])!.label);
                                       if (members[index]?.team_roles && members[index]!.team_roles.length > 0) {
                                         setSelectedTeamRole(members[index]!.team_roles[0]!);
+                                        setSelectedTeamLabel(teamRoles.find((e: { value: string; label: string }) => e.value === members[index]!.team_roles[0])!.label);
                                       }
                                       setSelectedMemberIndex(index);
                                     }
@@ -645,7 +647,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                               )}
                               onClick={() => {
-                                const member: Member = filteredMembers[selectedMemberIndex]!;
+                                const member: Member = members[selectedMemberIndex]!;
                                 onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
                                 clearData();
                               }}
