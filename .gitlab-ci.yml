@@ -1,6 +1,6 @@
 include:
   - project: 'common/gitlab-ci'
-    ref: v0.4.18
+    ref: v0.4.25
     file: '/templates/npm-dockerfile-build.yml'
 
 # Update docker_build's before_script to update the public/v.html file
