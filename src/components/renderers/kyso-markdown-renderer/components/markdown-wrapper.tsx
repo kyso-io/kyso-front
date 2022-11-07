@@ -10,8 +10,10 @@ import { useHover } from 'usehooks-ts';
 import { visit } from 'unist-util-visit';
 import remarkUnwrapImages from 'remark-unwrap-images';
 import { LinkIcon } from '@heroicons/react/outline';
+import { MathJax, MathJaxContext } from 'better-react-mathjax';
 import Mermaid from './mermaid';
 import RenderCode from '../../RenderCode';
+import 'katex/dist/katex.min.css';
 
 function customDirectives() {
   return transform;
@@ -104,6 +106,10 @@ const components: any = {
 
     return <pre {...props} />;
   },
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  math: (props: any) => <MathJax>{props.value}</MathJax>,
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  inlineMath: (props: any) => <MathJax>{props.value}</MathJax>,
   h1: Heading,
   h2: Heading,
   h3: Heading,
@@ -118,9 +124,11 @@ interface Props {
 const MarkdownWrapper = ({ source }: Props) => {
   return (
     <div className="prose max-w-none break-words">
-      <ReactMarkdown remarkPlugins={[gfm, remarkMath, directive, customDirectives, remarkUnwrapImages]} rehypePlugins={[rehypeSlug, rehypeKatex, rehypeRaw]} components={components}>
-        {source}
-      </ReactMarkdown>
+      <MathJaxContext>
+        <ReactMarkdown remarkPlugins={[gfm, remarkMath, directive, customDirectives, remarkUnwrapImages]} rehypePlugins={[rehypeSlug, rehypeKatex, rehypeRaw]} components={components}>
+          {source}
+        </ReactMarkdown>
+      </MathJaxContext>
     </div>
   );
 };
