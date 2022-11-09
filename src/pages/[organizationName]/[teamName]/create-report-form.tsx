@@ -14,7 +14,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { FolderAddIcon } from '@heroicons/react/outline';
 import { ArrowRightIcon, ExclamationCircleIcon, InformationCircleIcon, SelectorIcon } from '@heroicons/react/solid';
 import type { File as KysoFile, KysoConfigFile, KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { ReportDTO, KysoSettingsEnum, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import 'easymde/dist/easymde.min.css';
@@ -57,16 +57,34 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   const [allowedTags, setAllowedTags] = useState<string[]>([]);
   const [openChannelDropdown, setOpenChannelDropdown] = useState<boolean>(false);
   const [selectedTeam, setSelectedTeam] = useState<ResourcePermissions | null>(null);
-  const hasPermissionCreateReport: boolean | null = useMemo(() => {
+  const hasPermissionCreateReport: boolean = useMemo(() => {
     if (!commonData.permissions) {
-      return null;
+      return false;
     }
-    if (!selectedTeam) {
+    if (!commonData.organization) {
+      return false;
+    }
+    const orgResourcePermissions: ResourcePermissions | undefined = commonData.permissions.organizations!.find(
+      (resourcePermissions: ResourcePermissions) => resourcePermissions.id === commonData.organization!.id,
+    );
+    if (!orgResourcePermissions) {
+      return false;
+    }
+    if (commonData.team) {
       return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
     }
-    const cd: any = { ...commonData, team: selectedTeam };
-    return HelperPermissions.checkPermissions(cd, ReportPermissionsEnum.CREATE);
-  }, [commonData.permissions, commonData.organization, commonData.team, selectedTeam]);
+    const teamsResourcePermissions: ResourcePermissions[] = commonData.permissions.teams!.filter((resourcePermissions: ResourcePermissions) => {
+      const copyCommonData: any = { ...commonData };
+      copyCommonData.team = {
+        id: resourcePermissions.id,
+      };
+      return HelperPermissions.checkPermissions(copyCommonData, ReportPermissionsEnum.CREATE);
+    });
+    if (teamsResourcePermissions.length > 0) {
+      return true;
+    }
+    return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
+  }, [commonData.permissions, commonData.organization]);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const teamsResourcePermissions: ResourcePermissions[] = useMemo(() => {
     if (!commonData.organization) {

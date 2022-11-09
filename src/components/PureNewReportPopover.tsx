@@ -5,11 +5,9 @@ import { Popover } from '@headlessui/react';
 import { ChevronDownIcon, ChevronUpIcon, ClipboardCopyIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
 import { UploadIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
-import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import React, { useEffect, useMemo, useState } from 'react';
-import { HelperPermissions } from '../helpers/check-permissions';
+import React, { useEffect, useState } from 'react';
 import CaptchaModal from './CaptchaModal';
 
 const TIMEOUT_MS = 5000;
@@ -22,7 +20,6 @@ interface Props {
 
 const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) => {
   const router = useRouter();
-  const hasPermissionCreateReport = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData]);
   const [copiedKysoConfigFile, setCopiedKysoConfigFile] = useState<boolean>(false);
   const [copiedKysoPush, setCopiedKysoPush] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
@@ -56,10 +53,6 @@ const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) 
               setCopiedKysoPush(false);
             }
           }, [open]);
-
-          if (!hasPermissionCreateReport) {
-            return <></>;
-          }
 
           return (
             <React.Fragment>

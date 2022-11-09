@@ -17,7 +17,7 @@ import type {
   TeamMember,
   UserDTO,
 } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
@@ -121,6 +121,15 @@ const Index = ({ commonData, setUser }: Props) => {
     () => HelperPermissions.checkPermissions(commonData, [OrganizationPermissionsEnum.ADMIN, TeamPermissionsEnum.ADMIN, TeamPermissionsEnum.DELETE]),
     [commonData],
   );
+  const hasPermissionCreateReport: boolean = useMemo(() => {
+    if (!commonData.permissions) {
+      return false;
+    }
+    if (!commonData.organization) {
+      return false;
+    }
+    return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
+  }, [commonData.permissions, commonData.organization]);
   // SEARCH USER
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
@@ -590,7 +599,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 onRemoveUser={removeUser}
               />
               {hasPermissionDeleteChannel && <UnpureDeleteChannelDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
-              {commonData?.user && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
+              {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
             </div>
           </div>
         )}

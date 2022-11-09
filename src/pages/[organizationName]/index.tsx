@@ -7,8 +7,8 @@ import PureNewReportPopover from '@/components/PureNewReportPopover';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
-import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
+import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
+import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -52,6 +52,31 @@ const Index = ({ commonData, setUser }: Props) => {
     () => HelperPermissions.checkPermissions(commonData, [GlobalPermissionsEnum.GLOBAL_ADMIN, OrganizationPermissionsEnum.ADMIN, OrganizationPermissionsEnum.DELETE]),
     [commonData],
   );
+  const hasPermissionCreateReport: boolean = useMemo(() => {
+    if (!commonData.permissions) {
+      return false;
+    }
+    if (!commonData.organization) {
+      return false;
+    }
+    const orgResourcePermissions: ResourcePermissions | undefined = commonData.permissions.organizations!.find(
+      (resourcePermissions: ResourcePermissions) => resourcePermissions.id === commonData.organization!.id,
+    );
+    if (!orgResourcePermissions) {
+      return false;
+    }
+    const teamsResourcePermissions: ResourcePermissions[] = commonData.permissions.teams!.filter((resourcePermissions: ResourcePermissions) => {
+      const copyCommonData: any = { ...commonData };
+      copyCommonData.team = {
+        id: resourcePermissions.id,
+      };
+      return HelperPermissions.checkPermissions(copyCommonData, ReportPermissionsEnum.CREATE);
+    });
+    if (teamsResourcePermissions.length > 0) {
+      return true;
+    }
+    return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
+  }, [commonData.permissions, commonData.organization]);
 
   useEffect(() => {
     const getData = async () => {
@@ -468,7 +493,7 @@ const Index = ({ commonData, setUser }: Props) => {
               onRemoveUser={removeUser}
             />
             {hasPermissionDeleteOrganization && <UnpureDeleteOrganizationDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
-            {commonData?.user && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
+            {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
           </div>
         </div>
         {organizationInfo && (
