@@ -565,9 +565,15 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                   <React.Fragment>
                     <Menu.Button
                       onClick={() => {
+                        if (isEdition()) {
+                          return;
+                        }
                         setOpenChannelDropdown(!openChannelDropdown);
                       }}
-                      className={clsx('hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded', 'bg-white')}
+                      className={clsx(
+                        'border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded',
+                        isEdition() ? 'bg-slate-300' : 'bg-white hover:bg-gray-100',
+                      )}
                     >
                       {selectedTeam ? selectedTeam.display_name : 'Select a channel'}
                       <div className="pl-2">
@@ -586,7 +592,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                     >
                       <Menu.Items
                         static
-                        className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none"
+                        className={`z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none`}
                       >
                         <div className="p-2">
                           <div>
@@ -594,8 +600,15 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                               Channels
                             </h3>
                             <div className="flex flex-col justify-start">
+                              {teamsResourcePermissions.length === 0 && (
+                                <Menu.Item disabled={isEdition()} key={`empty-channel-${Math.random()}`}>
+                                  <span className={classNames('text-gray-600 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer')}>
+                                    No channels available
+                                  </span>
+                                </Menu.Item>
+                              )}
                               {teamsResourcePermissions.map((teamResourcePermissions: ResourcePermissions) => (
-                                <Menu.Item key={teamResourcePermissions.id}>
+                                <Menu.Item disabled={isEdition()} key={teamResourcePermissions.id}>
                                   <span
                                     onClick={() => {
                                       setSelectedTeam(teamResourcePermissions);
@@ -645,7 +658,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                   disabled={isEdition()}
                   onChange={(e) => setTitleDelay(e.target.value)}
                   placeholder="Title"
-                  className={clsx('p-0 focus:shadow-sm 0 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900', isEdition() ? 'text-slate-500' : '')}
+                  className={clsx('p-0 focus:shadow-sm 0 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900')}
                 />
                 <textarea
                   style={{
