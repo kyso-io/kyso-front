@@ -33,6 +33,7 @@ import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import { Tooltip } from 'primereact/tooltip';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { uuid } from 'uuidv4';
 import CaptchaModal from '../../../../components/CaptchaModal';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 
@@ -495,22 +496,26 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
     return '';
   });
 
-  const hasPermissionCreateComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, CommentPermissionsEnum.CREATE), [commonData]);
+  // Edge case in which when someone removes himself as author, as the commonData is still the same, continue having visibility about the actions he/her
+  // could do as author. For that a random ID is placed, to force the useMemo to reload the data
+  const random: string = uuid();
+
+  const hasPermissionCreateComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, CommentPermissionsEnum.CREATE), [commonData, random]);
   const hasPermissionReadComment: boolean = useMemo(
     () => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : HelperPermissions.checkPermissions(commonData, CommentPermissionsEnum.READ)),
-    [commonData],
+    [commonData, random],
   );
-  const hasPermissionDeleteComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, CommentPermissionsEnum.DELETE), [commonData]);
+  const hasPermissionDeleteComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, CommentPermissionsEnum.DELETE), [commonData, random]);
   const hasPermissionReadReport: boolean = useMemo(
     () => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.READ)),
-    [commonData],
+    [commonData, random],
   );
-  const hasPermissionDeleteReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.DELETE), [commonData]);
-  const hasPermissionEditReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData]);
-  const hasPermissionEditReportOnlyMine: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT_ONLY_MINE), [commonData]);
-  const hasPermissionCreateInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.CREATE), [commonData]);
-  const hasPermissionEditInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData]);
-  const hasPermissionDeleteInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData]);
+  const hasPermissionDeleteReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.DELETE), [commonData, random]);
+  const hasPermissionEditReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData, random]);
+  const hasPermissionEditReportOnlyMine: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT_ONLY_MINE), [commonData, random]);
+  const hasPermissionCreateInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.CREATE), [commonData, random]);
+  const hasPermissionEditInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData, random]);
+  const hasPermissionDeleteInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData, random]);
 
   if (commonData.errorOrganization) {
     return <div className="text-center mt-4">{commonData.errorOrganization}</div>;
