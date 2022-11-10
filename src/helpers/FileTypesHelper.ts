@@ -25,6 +25,10 @@ export class FileTypesHelper {
     return 'browser.svg';
   }
 
+  public static isAdoc = (name: string) => {
+    return name.toLowerCase().endsWith('.adoc') || name.toLowerCase().endsWith('.asciidoc') || name.toLowerCase().endsWith('.asc');
+  };
+
   public static isImage = (name: string) => {
     return name != null && (name.toLowerCase().endsWith('.png') || name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.jpeg') || name.toLowerCase().endsWith('.gif'));
   };

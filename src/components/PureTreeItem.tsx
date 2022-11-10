@@ -1,5 +1,6 @@
 import { faChrome, faJediOrder, faJs, faLinux, faMarkdown, faPython } from '@fortawesome/free-brands-svg-icons';
 import { faFile, faFileCsv, faFileImage, faFilePdf, faText } from '@fortawesome/pro-light-svg-icons';
+import { Asciidoctor } from '@icons-pack/react-simple-icons';
 import { StarIcon } from '@heroicons/react/solid';
 import { faFolder } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -99,7 +100,8 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
                 </svg>
               </span>
             )}
-            {extension !== 'ipynb' && <FontAwesomeIcon style={{ marginRight: 8 }} icon={icon} />}
+            {extension !== 'ipynb' && extension !== 'adoc' && <FontAwesomeIcon style={{ marginRight: 8 }} icon={icon} />}
+            {extension === 'adoc' && <Asciidoctor className="svg-inline--fa" size={16} style={{ marginRight: 8 }} />}
           </span>
           <span className="text-gray-500  break-all">{treeItem.path.split('/').reverse()[0]}</span>
         </div>
