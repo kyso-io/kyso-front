@@ -601,7 +601,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                             </h3>
                             <div className="flex flex-col justify-start">
                               {teamsResourcePermissions.length === 0 && (
-                                <Menu.Item disabled={isEdition()} key={`empty_channel`}>
+                                <Menu.Item disabled={isEdition()} key={`empty-channel-${Math.random()}`}>
                                   <span className={classNames('text-gray-600 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer')}>
                                     No channels available
                                   </span>
