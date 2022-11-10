@@ -658,7 +658,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                   disabled={isEdition()}
                   onChange={(e) => setTitleDelay(e.target.value)}
                   placeholder="Title"
-                  className={clsx('p-0 focus:shadow-sm 0 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900', isEdition() ? 'text-slate-500' : '')}
+                  className={clsx('p-0 focus:shadow-sm 0 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900')}
                 />
                 <textarea
                   style={{
