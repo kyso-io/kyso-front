@@ -100,7 +100,13 @@ const components: any = {
 
     // we want its child to get the value
     const { children } = codeChild[0];
+
     if (children.length > 0) {
+      // return mermaid if the code type is identified as such
+      if (codeChild[0].properties.className[0] === 'language-mermaid') {
+        return <Mermaid source={children[0].value} />;
+      }
+      // return the render code in other cases
       return <RenderCode code={children[0].value} />;
     }
 
