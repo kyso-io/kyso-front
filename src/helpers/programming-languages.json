@@ -375,7 +375,6 @@
   { "name": "SQL", "type": "data", "extensions": [".sql", ".cql", ".ddl", ".inc", ".prc", ".tab", ".udf", ".viw"] },
   { "name": "SQLPL", "type": "programming", "extensions": [".sql", ".db2"] },
   { "name": "STON", "type": "data", "extensions": [".ston"] },
-  { "name": "SVG", "type": "data", "extensions": [".svg"] },
   { "name": "Sage", "type": "programming", "extensions": [".sage", ".sagews"] },
   { "name": "SaltStack", "type": "programming", "extensions": [".sls"] },
   { "name": "Sass", "type": "markup", "extensions": [".sass"] },

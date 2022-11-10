@@ -26,10 +26,7 @@ export class FileTypesHelper {
   }
 
   public static isImage = (name: string) => {
-    return (
-      name != null &&
-      (name.toLowerCase().endsWith('.png') || name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.jpeg') || name.toLowerCase().endsWith('.gif') || name.toLowerCase().endsWith('.svg'))
-    );
+    return name != null && (name.toLowerCase().endsWith('.png') || name.toLowerCase().endsWith('.jpg') || name.toLowerCase().endsWith('.jpeg') || name.toLowerCase().endsWith('.gif'));
   };
 
   public static isYAML = (name: string) => {
@@ -161,7 +158,6 @@ export class FileTypesHelper {
       name.toLowerCase().endsWith('.psd') ||
       name.toLowerCase().endsWith('.tiff') ||
       name.toLowerCase().endsWith('.dxf') ||
-      name.toLowerCase().endsWith('.svg') ||
       name.toLowerCase().endsWith('.eps') ||
       name.toLowerCase().endsWith('.ps') ||
       name.toLowerCase().endsWith('.ttf') ||
