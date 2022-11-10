@@ -5,7 +5,6 @@ import { RenderJupyter } from '@/components/renderers/kyso-jupyter-renderer';
 import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
 import type { ReportContext } from '@/components/renderers/kyso-markdown-renderer/interfaces/context';
 import RenderOnlyOffice from '@/components/renderers/kyso-onlyoffice-renderer/RenderOnlyOffice';
-import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 import RenderCode from '@/components/renderers/RenderCode';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
@@ -165,9 +164,9 @@ const UnpureReportRender = ({
 
       render = <RenderMarkdown source={fileToRender.content} context={markdownContext} />;
     } else if (FileTypesHelper.isImage(fileToRender.path)) {
-      render = <RenderBase64Image base64={fileToRender.content as string} />;
-    } else if (fileToRender.path.toLowerCase().endsWith('.webp')) {
-      render = <img src={`${frontEndUrl}/scs${fileToRender.path_scs}`} alt={'An image'} />;
+      render = <img src={`${frontEndUrl}/scs${fileToRender.path_scs}`} alt={fileToRender.path} />;
+    } else if (fileToRender.path.toLowerCase().endsWith('.webp') || fileToRender.path.toLowerCase().endsWith('.svg')) {
+      render = <img src={`${frontEndUrl}/scs${fileToRender.path_scs}`} alt={fileToRender.path} />;
     } else if (FileTypesHelper.isJupyterNotebook(fileToRender.path)) {
       render = (
         <RenderJupyter
