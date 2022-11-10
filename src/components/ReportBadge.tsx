@@ -89,8 +89,15 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
                 </div>
               )}
               {/* GLOBAL */}
-              {hasPermissionReportGlobalPin && toggleGlobalPinReport && (
-                <div title={report.pin ? 'Remove pin for everyone' : 'Pin for everyone'} onClick={toggleGlobalPinReport}>
+              {toggleGlobalPinReport && (
+                <div
+                  title={report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
+                  onClick={() => {
+                    if (hasPermissionReportGlobalPin) {
+                      toggleGlobalPinReport();
+                    }
+                  }}
+                >
                   {report.pin ? (
                     <BookmarkIconSolid className="cursor-pointer h-7 w-7 text-orange-500 -mt-1 hover:text-orange-500" />
                   ) : (
