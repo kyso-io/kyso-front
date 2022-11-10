@@ -273,11 +273,13 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   const addNewFile = (newFile: CreationReportFileSystemObject) => {
     // Search for a file with the same ID --> THAT MEANS IS A RENAME
     const fs: CreationReportFileSystemObject[] = [...files];
-    const existingFileIndex = fs.findIndex((x) => x.id === newFile.id);
+    const existingFileIndex = fs.findIndex((x) => x.id === newFile.id || x.path === newFile.path);
     if (existingFileIndex === -1) {
       // Does not exist, so it's a new file
       fs.push(newFile);
     } else {
+      setMessageToaster(`${newFile.name} already exists`);
+      setShowToaster(true);
       // Already exists, so we just need to change the name
       fs[existingFileIndex]!.name = newFile.name;
       fs[existingFileIndex]!.path = newFile.path;
@@ -370,7 +372,11 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       } else {
         let blob: Blob;
         if (fileContent) {
-          blob = await (await fetch(fileContent!)).blob();
+          try {
+            blob = await (await fetch(fileContent!)).blob();
+          } catch (ex) {
+            blob = new Blob([''], { type: 'plain/text' });
+          }
         } else {
           blob = new Blob([''], { type: 'plain/text' });
         }
