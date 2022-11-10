@@ -520,6 +520,13 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                             Channels
                           </h3>
                           <div className="flex flex-col justify-start">
+                            {channelSelectorItems.length === 0 && (
+                              <Menu.Item key={`empty_channel`}>
+                                <span className={classNames('text-gray-600 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer')}>
+                                  No channels available
+                                </span>
+                              </Menu.Item>
+                            )}
                             {channelSelectorItems &&
                               channelSelectorItems.map((item: BreadcrumbItem) => (
                                 <a
