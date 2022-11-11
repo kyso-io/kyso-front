@@ -1,35 +1,42 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import NoLayout from '@/layouts/NoLayout';
-import { useRouter } from 'next/router';
-import { selectUser, verifyEmailAction } from '@kyso-io/kyso-store';
+import MainLayout from '@/layouts/MainLayout';
+import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { VerifyEmailRequestDTO } from '@kyso-io/kyso-model';
-import React, { useEffect, useState } from 'react';
+import type { AppDispatch } from '@kyso-io/kyso-store';
+import { Api, selectUser, setTokenAuthAction } from '@kyso-io/kyso-store';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Index = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { email, token } = router.query;
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  const { text: errorText } = useSelector((state: any) => state.error);
   const user = useSelector(selectUser);
-  const [verified, setVerified] = useState(false);
 
   useEffect(() => {
-    if (user?.email_verified || verified) {
+    if (user?.email_verified) {
       setTimeout(() => {
         router.push('/');
-      }, 3000);
+      }, 2000);
     }
-  }, [user, verified]);
+  }, [user]);
 
   useEffect(() => {
-    verifyEmailAction(new VerifyEmailRequestDTO(email as string, token as string));
     const verifyEmail = async () => {
-      const result = await dispatch(verifyEmailAction(new VerifyEmailRequestDTO(email as string, token as string)) as any);
-      if (result?.payload) {
-        setVerified(true);
+      try {
+        const api: Api = new Api();
+        const verifyEmailRequestDTO: VerifyEmailRequestDTO = new VerifyEmailRequestDTO(email as string, token as string);
+        const response: NormalizedResponseDTO<string> = await api.verifyEmail(verifyEmailRequestDTO);
+        const jwtToken: string = response.data;
+        dispatch(setTokenAuthAction(jwtToken));
+        localStorage.setItem('jwt', jwtToken);
+      } catch (e) {
+        console.error(e);
       }
+      setTimeout(() => {
+        router.push('/');
+      }, 2000);
     };
 
     if (email && email.length > 0 && token && token.length > 0) {
@@ -37,17 +44,9 @@ const Index = () => {
     }
   }, [email, token]);
 
-  useEffect(() => {
-    if (errorText) {
-      setTimeout(() => {
-        router.push('/');
-      }, 3000);
-    }
-  }, [errorText, user]);
-
   return <>Verifying...</>;
 };
 
-Index.layout = NoLayout;
+Index.layout = MainLayout;
 
 export default Index;
