@@ -69,11 +69,11 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
     /* eslint-disable @typescript-eslint/no-explicit-any */
     await submitComment(targetValue, userIds, comment?.id);
 
+    setValue('');
     setTimeout(() => {
       setIsLoading(false);
-      setValue('');
+      onSubmitted();
     }, 500);
-    onSubmitted();
   };
 
   let message = 'Write a new comment';
@@ -136,12 +136,12 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
         <div>{/* <p className="text-xs text-gray-500">Use @ to mention people</p> */}</div>
 
         <div className="flex flex-row space-x-2">
-          {comment !== null && (
+          {comment && (
             <button className="hover:underline text-gray-500 text-sm" onClick={onCancel}>
               Cancel
             </button>
           )}
-          {comment === null && hasPermissionCreateComment && value !== '' && (
+          {!comment && hasPermissionCreateComment && value !== '' && (
             <button
               onClick={(e) => {
                 e.preventDefault();
