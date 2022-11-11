@@ -1,6 +1,7 @@
 import PureInlineComments from '@/components/inline-comments/components/pure-inline-comments';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { PureSpinner } from '@/components/PureSpinner';
+import { RenderAsciidoc } from '@/components/renderers/kyso-asciidoc-renderer';
 import { RenderJupyter } from '@/components/renderers/kyso-jupyter-renderer';
 import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
 import type { ReportContext } from '@/components/renderers/kyso-markdown-renderer/interfaces/context';
@@ -186,6 +187,10 @@ const UnpureReportRender = ({
           enabledDeleteInlineComment={enabledDeleteInlineComment}
         />
       );
+    } else if (FileTypesHelper.isAdoc(fileToRender.path)) {
+      const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
+      const source = fileToRender.content;
+      render = <RenderAsciidoc fileUrl={fileUrl} source={source} />;
     } else if (FileTypesHelper.isCode(fileToRender.path)) {
       render = <RenderCode code={fileToRender.content} showFileNumbers={true} />;
     } else if (FileTypesHelper.isOnlyOffice(fileToRender.path) && frontEndUrl) {
