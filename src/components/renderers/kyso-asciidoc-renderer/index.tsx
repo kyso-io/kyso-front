@@ -20,20 +20,32 @@ export const RenderAsciidoc = (props: Props) => {
     const urlElements = props.fileUrl.split('/');
     urlElements.pop();
     const baseUrl = urlElements.join('/');
-    // Adjust imagesDir
-    let imagesDir: string = baseUrl;
+    // Adjust imagesDir & tocAttribute
+    let imagesDir: string | undefined;
+    let tocAttribute: string | undefined;
+    // Get the attributes from the document, reading it line by line
     const source = props.source.toString();
-    // If there is a value on the document, add it to the baseUrl
     const sourceLines: string[] = source.split(/\r?\n/);
     for (let i = 0; i < sourceLines.length; i += 1) {
       const line: string = sourceLines[i] || '';
-      if (line.indexOf(':imagesdir:') === 0) {
+      if (!imagesDir && line.indexOf(':imagesdir:') === 0) {
         const iDir = line.replace(':imagesdir:', '').trim();
         if (iDir.indexOf('http://') !== 0 && iDir.indexOf('https://') !== 0) {
           imagesDir = `${baseUrl}/${iDir}`;
-          break;
         }
       }
+      if (!tocAttribute && line.indexOf(':toc:') === 0) {
+        tocAttribute = line.replace(':toc:', '').trim();
+      }
+      // FIXME: Probably we can stop processing the document early if we know
+      // how to detect that the document header is already parsed (:imagesdir:
+      // and :toc: are Header Only attributes).
+      if (tocAttribute && imagesDir) {
+        break;
+      }
+    }
+    if (!imagesDir) {
+      imagesDir = baseUrl;
     }
     const options = {
       safe: 'secure',
@@ -42,6 +54,7 @@ export const RenderAsciidoc = (props: Props) => {
         imagesdir: imagesDir,
         showtitle: true,
         'source-highlighter': 'highlightjs-ext',
+        toc: tocAttribute,
       },
     };
     const html = asciidoctor.convert(source, options);
