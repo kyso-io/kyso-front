@@ -1,21 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PureSpinner } from '@/components/PureSpinner';
-import Head from 'next/head';
 import classNames from '@/helpers/class-names';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import MainLayout from '@/layouts/MainLayout';
-import type { CommonData } from '@/types/common-data';
-import { ArrowRightIcon } from '@heroicons/react/solid';
 import { Switch } from '@headlessui/react';
+import { ArrowRightIcon } from '@heroicons/react/solid';
+import Head from 'next/head';
 // import type { NormalizedResponseDTO, Organization } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import React, { useState } from 'react';
-import { useCommonData } from '@/hooks/use-common-data';
+import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
 
 const MetadataImport = () => {
   useRedirectIfNoJWT();
-
-  const commonData: CommonData = useCommonData();
 
   const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
@@ -79,18 +76,6 @@ const MetadataImport = () => {
     }
 
     setBusy(true);
-    try {
-      // const api: Api = new Api(commonData.token);
-      // const result: NormalizedResponseDTO<Organization> = await api.importBucket({
-      //   display_name: s3,
-      //   bio,
-      // });
-      // router.push(`/${report.name}`);
-    } catch (er: any) {
-      setError(er.message);
-    } finally {
-      setBusy(false);
-    }
   };
 
   return (
@@ -102,7 +87,7 @@ const MetadataImport = () => {
       {!importing && !imported && (
         <div className="grow w-full rounded">
           <div className="flex flex-row space-x-8 p-2 pt-12 pb-10">
-            <div className="w-2/12">{/* <ChannelList basePath={router.basePath} commonData={commonData} /> */}</div>
+            <div className="w-2/12"></div>
             <div className="w-8/12 flex flex-col space-y-8">
               <form className="space-y-8 divide-y divide-gray-200" onSubmit={importBucket}>
                 {/* S3 button */}
@@ -412,7 +397,8 @@ const MetadataImport = () => {
                         type="submit"
                         onClick={async () => {
                           setImporting(true);
-                          const api: Api = new Api(commonData.token, organization, channel);
+                          const token: string | null = getLocalStorageItem('jwt');
+                          const api: Api = new Api(token, organization, channel);
 
                           const result = await api.importS3Bucket({
                             aws: {

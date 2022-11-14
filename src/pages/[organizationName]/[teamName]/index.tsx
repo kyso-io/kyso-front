@@ -34,6 +34,7 @@ import { PureSpinner } from '../../../components/PureSpinner';
 import ReportBadge from '../../../components/ReportBadge';
 import ReportsSearchBar from '../../../components/ReportsSearchBar';
 import { HelperPermissions } from '../../../helpers/check-permissions';
+import { checkReportAuthors } from '../../../helpers/check-report-authors';
 import type { PaginationParams } from '../../../interfaces/pagination-params';
 import type { ReportsFilter } from '../../../interfaces/reports-filter';
 import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
@@ -59,31 +60,7 @@ const debouncedPaginatedReports = debounce(
         query += `&${queryParams}`;
       }
       const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getPaginatedReports(query);
-      // Sort by global_pin and user_pin
-      result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
-        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
-          return -1;
-        }
-        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
-          return 1;
-        }
-        return 0;
-      });
-      const dataWithAuthors: ReportDTO[] = [];
-      for (const x of result.data.results) {
-        const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
-        const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
-        const allAuthorsData: UserDTO[] = [];
-        for (const authorId of uniqueAllAuthorsId) {
-          /* eslint-disable no-await-in-loop */
-          if (result.relations?.user[authorId]) {
-            allAuthorsData.push(result.relations.user[authorId]);
-          }
-        }
-        x.authors = allAuthorsData;
-        dataWithAuthors.push(x);
-      }
-      result.data.results = dataWithAuthors;
+      checkReportAuthors(result);
       cb(result);
     } catch (e) {
       cb(null);

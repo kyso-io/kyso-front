@@ -1,21 +1,19 @@
 import PureShareButton from '@/components/PureShareButton';
 import PureVersionsDropdown from '@/components/PureVersionsDropdown';
 import classNames from '@/helpers/class-names';
+import { FileTypesHelper } from '@/helpers/FileTypesHelper';
+import type { Version } from '@/hooks/use-versions';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import UnpureCloneDropdown from '@/unpure-components/UnpureCloneDropdown';
 import UnpureReportActionDropdown from '@/unpure-components/UnpureReportActionDropdown';
 import { ExternalLinkIcon, ThumbUpIcon } from '@heroicons/react/solid';
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import clsx from 'clsx';
 import format from 'date-fns/format';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
-
-import { FileTypesHelper } from '@/helpers/FileTypesHelper';
-
-import type { FileToRender } from '@/hooks/use-file-to-render';
-import type { Version } from '@/hooks/use-versions';
-import clsx from 'clsx';
+import type { FileToRender } from '../types/file-to-render';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureTagGroup from './PureTagGroup';
 

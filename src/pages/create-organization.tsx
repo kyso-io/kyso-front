@@ -10,6 +10,7 @@ import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import CaptchaModal from '../components/CaptchaModal';
 import PureAvatar from '../components/PureAvatar';
+import { RegisteredUsersAlert } from '../components/RegisteredUsersAlert';
 import ToasterNotification from '../components/ToasterNotification';
 import { checkJwt } from '../helpers/check-jwt';
 import { TailwindFontSizeEnum } from '../tailwind/enum/tailwind-font-size.enum';
@@ -34,7 +35,16 @@ const Index = ({ commonData, setUser }: Props) => {
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
+  const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setWaitForLogging(true);
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -285,25 +295,7 @@ const Index = ({ commonData, setUser }: Props) => {
             </div>
           </form>
         ) : (
-          <div className="rounded-md bg-yellow-50 p-4">
-            <div className="flex">
-              <div className="shrink-0">
-                <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-              </div>
-              <div className="ml-3">
-                <h3 className="text-sm font-medium text-yellow-800">Forbidden resource</h3>
-                <div className="mt-2 text-sm text-yellow-700">
-                  <p>
-                    This page is only available to registered users.{' '}
-                    <a href="/login" className="font-bold">
-                      Sign in
-                    </a>{' '}
-                    now.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          waitForLogging && <RegisteredUsersAlert />
         )}
       </div>
       <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />

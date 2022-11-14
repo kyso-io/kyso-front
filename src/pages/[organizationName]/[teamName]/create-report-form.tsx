@@ -24,6 +24,8 @@ import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import CaptchaModal from '../../../components/CaptchaModal';
+import { ForbiddenCreateReport } from '../../../components/ForbiddenCreateReport';
+import { RegisteredUsersAlert } from '../../../components/RegisteredUsersAlert';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../helpers/check-permissions';
@@ -104,10 +106,19 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   const [reportFiles, setReportFiles] = useState<KysoFile[]>([]);
   const [tmpReportFiles, setTmpReportFiles] = useState<TmpReportFile[]>([]);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
 
   const isEdition = () => {
     return report.id !== null && report.id !== '';
   };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setWaitForLogging(true);
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -618,8 +629,9 @@ const CreateReport = ({ commonData, setUser }: Props) => {
 
                                       if (report && report.author_ids && report.author_ids!.length === 0) {
                                         if (commonData.user?.id) {
-                                          report.author_ids = [commonData.user!.id];
-                                          setReport(report);
+                                          const copyReport: any = { ...report };
+                                          copyReport.author_ids = [commonData.user!.id];
+                                          setReport(copyReport);
                                         }
                                       }
                                       setOpenChannelDropdown(false);
@@ -852,54 +864,12 @@ const CreateReport = ({ commonData, setUser }: Props) => {
         {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       </div>
     ) : (
-      <div className="flex flex-row space-x-8 p-2">
-        <div className="w-2/12"></div>
-        <div className="rounded-md bg-yellow-50 p-4 mt-8">
-          <div className="flex">
-            <div className="shrink-0">
-              <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">Forbidden resource</h3>
-              <div className="mt-2 text-sm text-yellow-700">
-                <p>
-                  You don&apos;t have permissions to create reports. Come back to
-                  <a href={commonData.team ? `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}` : `/${commonData.organization?.sluglified_name}`} className="font-bold">
-                    {' '}
-                    {commonData.team ? commonData.team?.display_name : commonData.organization?.display_name}{' '}
-                  </a>
-                  page.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <ForbiddenCreateReport commonData={commonData} />
     )
   ) : (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-2/12"></div>
-      <div className="w-8/12 flex flex-col space-y-8">
-        <div className="rounded-md bg-yellow-50 p-4">
-          <div className="flex">
-            <div className="shrink-0">
-              <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-yellow-800">Forbidden resource</h3>
-              <div className="mt-2 text-sm text-yellow-700">
-                <p>
-                  This page is only available to registered users.{' '}
-                  <a href="/login" className="font-bold">
-                    Sign in
-                  </a>{' '}
-                  now.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <div className="w-8/12 flex flex-col space-y-8">{waitForLogging && <RegisteredUsersAlert />}</div>
     </div>
   );
 };

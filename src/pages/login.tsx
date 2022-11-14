@@ -5,7 +5,7 @@ import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { Token, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, Token } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
 import { Api, setError as storeSetError, setTokenAuthAction } from '@kyso-io/kyso-store';
@@ -15,6 +15,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import uuid from 'uuid';
+import { KysoDescription } from '../components/KysoDescription';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
 import type { DecodedToken } from '../types/decoded-token';
 
@@ -195,31 +196,6 @@ const Index = () => {
     }
   };
 
-  /* const responseGoogle = async (response: any) => {
-    if (!response) {
-      // toaster.danger("There was an error authenticating the user with Google.");
-      return;
-    }
-    if (response?.error) {
-      // toaster.danger(response.details || response.error);
-      return;
-    }
-
-    const result = await dispatch(
-      loginAction({
-        email: "",
-        password: response.tokenId,
-        provider: "google",
-        payload: { ...response },
-      })
-    );
-    if (result?.payload) {
-      localStorage.setItem("jwt", result.payload);
-    } else {
-      // toaster.danger("There was an error authenticating the user with google.");
-    }
-  }; */
-
   return (
     <>
       <Head>
@@ -236,44 +212,7 @@ const Index = () => {
         )}
         <div className="text-right">{error && <ErrorNotification message={error} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col mt-20 items-center mx-auto max-w-[1400px] space-x-10">
-          <div className="prose grow max-w-none px-6 m-0">
-            <h1 className="login-header">Kyso.io</h1>
-            <p>Kyso.io offers free unlimited (private) repositories and unlimited collaborators.</p>
-            <ul>
-              <li>
-                <a className="login-link" href="https://docs.kyso.io" aria-label="docs" target="_blank" rel="noopener noreferrer">
-                  Read Kyso documentation
-                </a>
-              </li>
-              <li style={{ paddingTop: '5px' }}>
-                <a className="login-link" href="https://docs.kyso.io/posting-to-kyso/kyso-command-line-tool/installation" aria-label="cli" target="_blank" rel="noopener noreferrer">
-                  Install Kyso CLI
-                </a>
-              </li>
-              <li style={{ paddingTop: '5px' }}>
-                <a className="login-link" href="https://about.kyso.io/about" aria-label="about" target="_blank" rel="noopener noreferrer">
-                  More information about Kyso
-                </a>
-              </li>
-            </ul>
-            <div className="hidden-div">
-              <div>
-                <p>By signing up for and by signing in to this service you accept our:</p>
-                <ul>
-                  <li>
-                    <a className="login-link" href="https://about.kyso.io/terms" aria-label="terms" target="_blank" rel="noopener noreferrer">
-                      Terms of service
-                    </a>
-                  </li>
-                  <li>
-                    <a className="login-link" href="https://about.kyso.io/privacy" aria-label="privacy" target="_blank" rel="noopener noreferrer">
-                      Privacy statement
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
+          <KysoDescription />
 
           <div className="prose min-w-[400px] flex flex-col space-y-2 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
             <h2 className="my-0 mb-1">Sign in to Kyso</h2>
