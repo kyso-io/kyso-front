@@ -10,8 +10,6 @@ import classNames from '@/helpers/class-names';
 import { getReport } from '@/helpers/get-report';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useChannelMembers } from '@/hooks/use-channel-members';
-import type { FileToRender } from '@/hooks/use-file-to-render';
-import { isImage } from '@/hooks/use-file-to-render';
 import useIsInViewport from '@/hooks/use-is-in-viewport';
 import { ScrollDirection, useScrollDirection } from '@/hooks/use-scroll-direction';
 import { useUserEntities } from '@/hooks/use-user-entities';
@@ -36,6 +34,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { uuid } from 'uuidv4';
 import CaptchaModal from '../../../../components/CaptchaModal';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
+import { FileTypesHelper } from '../../../../helpers/FileTypesHelper';
+import type { FileToRender } from '../../../../types/file-to-render';
 
 interface Props {
   commonData: CommonData;
@@ -252,7 +252,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
             },
           });
           let content = null;
-          if (data && isImage(ftr.path)) {
+          if (data && FileTypesHelper.isImage(ftr.path)) {
             content = Buffer.from(data).toString('base64');
           } else if (data) {
             content = Buffer.from(data).toString('utf-8');

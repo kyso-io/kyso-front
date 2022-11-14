@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { BookOpenIcon, ChatAlt2Icon, ExclamationCircleIcon, UserGroupIcon } from '@heroicons/react/solid';
+import { BookOpenIcon, ChatAlt2Icon, UserGroupIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, OrganizationInfoDto, ResourcePermissions } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import PureAvatar from '../../components/PureAvatar';
+import { RegisteredUsersAlert } from '../../components/RegisteredUsersAlert';
 import SettingsAside from '../../components/SettingsAside';
 import { checkJwt } from '../../helpers/check-jwt';
 import { TailwindFontSizeEnum } from '../../tailwind/enum/tailwind-font-size.enum';
@@ -146,27 +147,7 @@ const Index = ({ commonData }: Props) => {
             </div>
           </div>
         ) : (
-          <div className="space-y-8">
-            <div className="rounded-md bg-yellow-50 p-4">
-              <div className="flex">
-                <div className="shrink-0">
-                  <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-yellow-800">Forbidden resource</h3>
-                  <div className="mt-2 text-sm text-yellow-700">
-                    <p>
-                      This page is only available to registered users.{' '}
-                      <a href="/login" className="font-bold">
-                        Sign in
-                      </a>{' '}
-                      now.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <RegisteredUsersAlert />
         )}
       </div>
     </div>

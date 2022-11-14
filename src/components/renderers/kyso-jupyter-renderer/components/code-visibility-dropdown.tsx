@@ -1,7 +1,7 @@
-import React, { Fragment, useState } from 'react';
 import { Menu, Switch, Transition } from '@headlessui/react';
-import type { ReactNode } from 'react';
 import { CodeIcon } from '@heroicons/react/solid';
+import type { ReactNode } from 'react';
+import { Fragment, useState } from 'react';
 
 type ICodeVisibilityDropdownProps = {
   inputShown: boolean;

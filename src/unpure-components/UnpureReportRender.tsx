@@ -10,7 +10,6 @@ import RenderCode from '@/components/renderers/RenderCode';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import type { FileToRender } from '@/hooks/use-file-to-render';
 import type { CommonData } from '@/types/common-data';
 import type { InlineCommentDto, NormalizedResponseDTO, ReportDTO, TeamMember, UpdateInlineCommentDto, UserDTO } from '@kyso-io/kyso-model';
 import { Api, createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
@@ -18,6 +17,7 @@ import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
 import CaptchaModal from '../components/CaptchaModal';
+import type { FileToRender } from '../types/file-to-render';
 import PureSideOverlayCommentsPanel from './UnpureSideOverlayCommentsPanel';
 
 // const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;

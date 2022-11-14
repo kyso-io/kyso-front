@@ -15,6 +15,7 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
+import { checkReportAuthors } from '../../../helpers/check-report-authors';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 60;
@@ -31,30 +32,7 @@ const debouncedPaginatedReports = debounce(
         query += `&${queryParams}`;
       }
       const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getUserReports(userId, query);
-      result.data.results.sort((a: ReportDTO, b: ReportDTO) => {
-        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
-          return -1;
-        }
-        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
-          return 1;
-        }
-        return 0;
-      });
-      const dataWithAuthors: ReportDTO[] = [];
-      for (const x of result.data.results) {
-        const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
-        const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
-        const allAuthorsData: UserDTO[] = [];
-        for (const authorId of uniqueAllAuthorsId) {
-          /* eslint-disable no-await-in-loop */
-          if (result.relations?.user[authorId]) {
-            allAuthorsData.push(result.relations.user[authorId]);
-          }
-        }
-        x.authors = allAuthorsData;
-        dataWithAuthors.push(x);
-      }
-      result.data.results = dataWithAuthors;
+      checkReportAuthors(result);
       cb(result);
     } catch (e) {
       console.log(e);
@@ -187,40 +165,44 @@ const Index = ({ commonData, setUser }: Props) => {
     });
   };
 
+  const updateReportsResponse = (result: NormalizedResponseDTO<ReportDTO>) => {
+    const { data: report } = result;
+    const allAuthorsId: string[] = [report.user_id, ...report.author_ids];
+    const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
+    const allAuthorsData: UserDTO[] = [];
+    for (const authorId of uniqueAllAuthorsId) {
+      /* eslint-disable no-await-in-loop */
+      if (result.relations?.user[authorId]) {
+        allAuthorsData.push(result.relations.user[authorId]);
+      }
+    }
+    report.authors = allAuthorsData;
+    const copyPaginatedReponse: PaginatedResponseDto<ReportDTO> = { ...reportsResponse!.data };
+    const newReports: ReportDTO[] = copyPaginatedReponse.results.map((r: ReportDTO) => (r.id === report.id ? report : r));
+    // Sort by global_pin and user_pin
+    newReports.sort((a: ReportDTO, b: ReportDTO) => {
+      if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
+        return -1;
+      }
+      if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
+        return 1;
+      }
+      return 0;
+    });
+    setReportsResponse({
+      ...reportsResponse!,
+      data: {
+        ...copyPaginatedReponse,
+        results: newReports,
+      },
+    });
+  };
+
   const toggleUserStarReport = async (reportDto: ReportDTO) => {
     const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportDto.id!);
-      const { data: report } = result;
-      const allAuthorsId: string[] = [report.user_id, ...report.author_ids];
-      const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
-      const allAuthorsData: UserDTO[] = [];
-      for (const authorId of uniqueAllAuthorsId) {
-        /* eslint-disable no-await-in-loop */
-        if (result.relations?.user[authorId]) {
-          allAuthorsData.push(result.relations.user[authorId]);
-        }
-      }
-      report.authors = allAuthorsData;
-      const copyPaginatedReponse: PaginatedResponseDto<ReportDTO> = { ...reportsResponse!.data };
-      const newReports: ReportDTO[] = copyPaginatedReponse.results.map((r: ReportDTO) => (r.id === report.id ? report : r));
-      // Sort by global_pin and user_pin
-      newReports.sort((a: ReportDTO, b: ReportDTO) => {
-        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
-          return -1;
-        }
-        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
-          return 1;
-        }
-        return 0;
-      });
-      setReportsResponse({
-        ...reportsResponse!,
-        data: {
-          ...copyPaginatedReponse,
-          results: newReports,
-        },
-      });
+      updateReportsResponse(result);
     } catch (e) {}
   };
 
@@ -228,36 +210,7 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportDto.id!);
-      const { data: report } = result;
-      const allAuthorsId: string[] = [report.user_id, ...report.author_ids];
-      const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
-      const allAuthorsData: UserDTO[] = [];
-      for (const authorId of uniqueAllAuthorsId) {
-        /* eslint-disable no-await-in-loop */
-        if (result.relations?.user[authorId]) {
-          allAuthorsData.push(result.relations.user[authorId]);
-        }
-      }
-      report.authors = allAuthorsData;
-      const copyPaginatedReponse: PaginatedResponseDto<ReportDTO> = { ...reportsResponse!.data };
-      const newReports: ReportDTO[] = copyPaginatedReponse.results.map((r: ReportDTO) => (r.id === report.id ? report : r));
-      // Sort by global_pin and user_pin
-      newReports.sort((a: ReportDTO, b: ReportDTO) => {
-        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
-          return -1;
-        }
-        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
-          return 1;
-        }
-        return 0;
-      });
-      setReportsResponse({
-        ...reportsResponse!,
-        data: {
-          ...copyPaginatedReponse,
-          results: newReports,
-        },
-      });
+      updateReportsResponse(result);
     } catch (e) {}
   };
 
@@ -265,36 +218,7 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportDto.id!);
-      const { data: report } = result;
-      const allAuthorsId: string[] = [report.user_id, ...report.author_ids];
-      const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
-      const allAuthorsData: UserDTO[] = [];
-      for (const authorId of uniqueAllAuthorsId) {
-        /* eslint-disable no-await-in-loop */
-        if (result.relations?.user[authorId]) {
-          allAuthorsData.push(result.relations.user[authorId]);
-        }
-      }
-      report.authors = allAuthorsData;
-      const copyPaginatedReponse: PaginatedResponseDto<ReportDTO> = { ...reportsResponse!.data };
-      const newReports: ReportDTO[] = copyPaginatedReponse.results.map((r: ReportDTO) => (r.id === report.id ? report : r));
-      // Sort by global_pin and user_pin
-      newReports.sort((a: ReportDTO, b: ReportDTO) => {
-        if ((a.pin || a.user_pin) && !(b.pin || b.user_pin)) {
-          return -1;
-        }
-        if ((b.pin || b.user_pin) && !(a.pin || a.user_pin)) {
-          return 1;
-        }
-        return 0;
-      });
-      setReportsResponse({
-        ...reportsResponse!,
-        data: {
-          ...copyPaginatedReponse,
-          results: newReports,
-        },
-      });
+      updateReportsResponse(result);
     } catch (e) {}
   };
 

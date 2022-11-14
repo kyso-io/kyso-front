@@ -157,6 +157,49 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     setNotificationMessage('');
   }, 3000);
 
+  const getInviteButton = () => {
+    return (
+      <React.Fragment>
+        {selectedMemberIndex === -1 && selectedUser && (
+          <button
+            type="button"
+            disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
+            className={clsx(
+              'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
+              !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
+                ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
+                : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
+            )}
+            onClick={() => {
+              onUpdateRoleMember(selectedUser.id, selectedOrgRole, selectedTeamRole);
+              clearData();
+            }}
+          >
+            Invite
+          </button>
+        )}
+        {selectedMemberIndex === -1 && !selectedUser && isEmail && (
+          <button
+            type="button"
+            disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
+            className={clsx(
+              'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
+              !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
+                ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
+                : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
+            )}
+            onClick={() => {
+              onInviteNewUser(query, selectedOrgRole, selectedTeamRole);
+              clearData();
+            }}
+          >
+            Invite
+          </button>
+        )}
+      </React.Fragment>
+    );
+  };
+
   return (
     <React.Fragment>
       <div className="text-left">{notificationMessage && <PureNotification message={notificationMessage} type={notificationType} />}</div>
@@ -377,42 +420,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           </div>
                         </div>
                         <div className="flex flex-row-reverse">
-                          {selectedMemberIndex === -1 && selectedUser && (
-                            <button
-                              type="button"
-                              disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
-                              className={clsx(
-                                'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                                !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
-                                  ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                                  : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
-                              )}
-                              onClick={() => {
-                                onUpdateRoleMember(selectedUser.id, selectedOrgRole, selectedTeamRole);
-                                clearData();
-                              }}
-                            >
-                              Invite
-                            </button>
-                          )}
-                          {selectedMemberIndex === -1 && !selectedUser && isEmail && (
-                            <button
-                              type="button"
-                              disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
-                              className={clsx(
-                                'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                                !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
-                                  ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                                  : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
-                              )}
-                              onClick={() => {
-                                onInviteNewUser(query, selectedOrgRole, selectedTeamRole);
-                                clearData();
-                              }}
-                            >
-                              Invite
-                            </button>
-                          )}
+                          {getInviteButton()}
                           {selectedMemberIndex !== -1 && (
                             <button
                               type="button"
@@ -579,42 +587,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                         )}
                         {errorMessage && <p className="text-sm text-red-500 my-2">{errorMessage}</p>}
                         <div className="flex flex-row-reverse">
-                          {selectedMemberIndex === -1 && selectedUser && (
-                            <button
-                              type="button"
-                              disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
-                              className={clsx(
-                                'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                                !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
-                                  ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                                  : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
-                              )}
-                              onClick={() => {
-                                onUpdateRoleMember(selectedUser.id, selectedOrgRole, selectedTeamRole);
-                                clearData();
-                              }}
-                            >
-                              Invite
-                            </button>
-                          )}
-                          {selectedMemberIndex === -1 && !selectedUser && isEmail && (
-                            <button
-                              type="button"
-                              disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
-                              className={clsx(
-                                'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                                !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
-                                  ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                                  : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
-                              )}
-                              onClick={() => {
-                                onInviteNewUser(query, selectedOrgRole, selectedTeamRole);
-                                clearData();
-                              }}
-                            >
-                              Invite
-                            </button>
-                          )}
+                          {getInviteButton()}
                           {(selectedOrgRole === REMOVE_USER_VALUE || selectedTeamRole === REMOVE_USER_VALUE) && selectedMemberIndex !== -1 && (
                             <button
                               type="button"
