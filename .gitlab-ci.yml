@@ -17,12 +17,12 @@ docker-build:
       REF_TYPE="Branch"
       GIT_REF="$CI_COMMIT_BRANCH"
     fi
-    sed -i \
+    sed \
       -e "s%__BUILD_DATE__%$BUILD_DATE%g" \
       -e "s%__GIT_SHA__%$CI_COMMIT_SHA%g" \
       -e "s%__REF_TYPE__%$REF_TYPE%g" \
       -e "s%__GIT_REF__%$GIT_REF%g" \
-      public/v.html
+      tmpl/v.html > public/v.html
 
 variables:
   DOCKER_BUILDKIT: 1

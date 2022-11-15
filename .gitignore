@@ -38,3 +38,6 @@ local
 
 # vercel
 .vercel
+
+# v.html
+/public/v.html
