@@ -78,16 +78,18 @@ const Index = () => {
       const pingIdSamlSSOUrl = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_PINGID_SAML_SSO_URL).value;
 
       const tmpEnableGoogleAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GOOGLE).value === 'true';
-
       const tmpEnableGithubAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITHUB).value === 'true';
-
       const tmpEnableGitlabAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
+      const tmpEnableBitbucketAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET).value === 'true';
+      const tmpEnableKysoAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO).value === 'true';
+      const tmpEnablePingSamlAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML).value === 'true';
 
-      const tmpEnableBitbucketAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
-
-      const tmpEnableKysoAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
-
-      const tmpEnablePingSamlAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
+      setEnableGoogleAuth(tmpEnableGoogleAuth);
+      setEnableGitlabAuth(tmpEnableGitlabAuth);
+      setEnableGithubAuth(tmpEnableGithubAuth);
+      setEnableBitbucketAuth(tmpEnableBitbucketAuth);
+      setEnableKysoAuth(tmpEnableKysoAuth);
+      setEnablePingSamlAuth(tmpEnablePingSamlAuth);
 
       setGoogleUrl(
         `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&response_type=code&redirect_uri=${encodeURIComponent(
@@ -101,13 +103,6 @@ const Index = () => {
       setGitlabUrl(`https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&scope=${gitlabScope}&redirect_uri=${gitlabRedirectURI}&response_type=code`);
 
       setPingUrl(pingIdSamlSSOUrl);
-
-      setEnableGoogleAuth(tmpEnableGoogleAuth);
-      setEnableGitlabAuth(tmpEnableGitlabAuth);
-      setEnableGithubAuth(tmpEnableGithubAuth);
-      setEnableBitbucketAuth(tmpEnableBitbucketAuth);
-      setEnableKysoAuth(tmpEnableKysoAuth);
-      setEnablePingSamlAuth(tmpEnablePingSamlAuth);
 
       const custumizeLeftLogo = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LEFT_LOGO_URL).value;
       const custumizeRightLogo = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_RIGHT_LOGO_URL).value;
