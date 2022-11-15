@@ -101,7 +101,7 @@ docker_run() {
   if [ -n "$*" ]; then
     CONTAINER_COMMAND="$*"
   else
-    CONTAINER_COMMAND="npm install && npm run dev"
+    CONTAINER_COMMAND="npm install && ./bin/version-update.sh && npm run dev"
   fi
   if [ ! -f "./.npmrc.kyso" ]; then
     echo "Missing file '.npmrc.kyso', call $0 setup to create it"
