@@ -12,6 +12,7 @@ import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
 import type { InlineCommentDto, NormalizedResponseDTO, ReportDTO, TeamMember, UpdateInlineCommentDto, UserDTO } from '@kyso-io/kyso-model';
+import { CreateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api, createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
@@ -78,14 +79,8 @@ const UnpureReportRender = ({
       return;
     }
     try {
-      const data = await dispatch(
-        createInlineCommentAction({
-          report_id: report.id as string,
-          cell_id,
-          mentions: user_ids,
-          text,
-        }),
-      );
+      const createInlineCommentDto: CreateInlineCommentDto = new CreateInlineCommentDto(report.id as string, cell_id, text, user_ids);
+      const data = await dispatch(createInlineCommentAction(createInlineCommentDto));
       if (data?.payload) {
         setInlineComments([...inlineComments, data.payload]);
       }
@@ -231,7 +226,7 @@ const UnpureReportRender = ({
           <div className="flex flex-row">
             <div className={clsx(sidebarOpen ? 'w-9/12' : 'w-11/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
             <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'p-2 min-w-fit border-l')}>
-              <PureSideOverlayCommentsPanel key={report?.id} cacheKey={report?.id} setSidebarOpen={(p) => setSidebarOpen(p)} commonData={commonData}>
+              <PureSideOverlayCommentsPanel key={report?.id!} cacheKey={report?.id!} setSidebarOpen={(p) => setSidebarOpen(p)} commonData={commonData}>
                 <PureInlineComments
                   commonData={commonData}
                   report={report}

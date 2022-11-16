@@ -24,7 +24,19 @@ import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ArrowSmDownIcon } from '@heroicons/react/solid';
 import type { Comment, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
-import { CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import {
+  AddUserOrganizationDto,
+  CommentPermissionsEnum,
+  InlineCommentPermissionsEnum,
+  InviteUserDto,
+  KysoSettingsEnum,
+  ReportPermissionsEnum,
+  TeamMembershipOriginEnum,
+  TeamVisibilityEnum,
+  UpdateOrganizationMembersDTO,
+  UpdateTeamMembersDTO,
+  UserRoleDTO,
+} from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -291,7 +303,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
       resultOrgMembers.data.forEach((organizationMember: OrganizationMember) => {
         if (organizationMember.id === commonData.user?.id) {
           userMember = {
-            id: organizationMember.id,
+            id: organizationMember.id!,
             nickname: organizationMember.nickname,
             username: organizationMember.username,
             display_name: organizationMember.nickname,
@@ -302,7 +314,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
           };
         } else {
           m.push({
-            id: organizationMember.id,
+            id: organizationMember.id!,
             nickname: organizationMember.nickname,
             username: organizationMember.username,
             display_name: organizationMember.nickname,
@@ -326,7 +338,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
           member.membership_origin = teamMember.membership_origin;
         } else {
           m.push({
-            id: teamMember.id,
+            id: teamMember.id!,
             nickname: teamMember.nickname,
             username: teamMember.username,
             display_name: teamMember.nickname,
@@ -368,11 +380,8 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
     if (index === -1) {
       try {
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-        await api.addUserToOrganization({
-          organizationId: commonData.organization!.id!,
-          userId,
-          role: organizationRole,
-        });
+        const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
+        await api.addUserToOrganization(addUserOrganizationDto);
       } catch (e) {
         console.error(e);
       }
@@ -380,14 +389,9 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
       if (!members[index]!.organization_roles.includes(organizationRole)) {
         try {
           const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-          await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
-            members: [
-              {
-                userId,
-                role: organizationRole,
-              },
-            ],
-          });
+          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, organizationRole);
+          const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
+          await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
         } catch (e) {
           console.error(e);
         }
@@ -395,14 +399,9 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
       if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
         try {
           const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-          await api.updateTeamMemberRoles(commonData.team!.id!, {
-            members: [
-              {
-                userId,
-                role: teamRole,
-              },
-            ],
-          });
+          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
+          const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
+          await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
         } catch (e) {
           console.error(e);
         }
@@ -414,11 +413,8 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-      await api.inviteNewUser({
-        email,
-        organizationSlug: commonData.organization!.sluglified_name,
-        organizationRole,
-      });
+      const inviteUserDto: InviteUserDto = new InviteUserDto(email, organizationRole, organizationRole);
+      await api.inviteNewUser(inviteUserDto);
       getTeamMembers();
     } catch (e) {
       console.error(e);

@@ -1,16 +1,16 @@
 import PureKysoButton from '@/components/PureKysoButton';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
-import Head from 'next/head';
-import { Helper } from '@/helpers/Helper';
 import PureNotification from '@/components/PureNotification';
+import { Helper } from '@/helpers/Helper';
+import { useAppDispatch } from '@/hooks/redux-hooks';
 import MainLayout from '@/layouts/MainLayout';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { EmailUserChangePasswordDTO, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { emailRecoveryPasswordAction } from '@kyso-io/kyso-store';
+import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useEffect, useState, useRef } from 'react';
-import { useAppDispatch } from '@/hooks/redux-hooks';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import { useEffect, useRef, useState } from 'react';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -79,7 +79,8 @@ const ResetPassword = (props: IResetPassword) => {
     }
     setRequesting(true);
 
-    const result = await dispatch(emailRecoveryPasswordAction({ email, captchaToken }));
+    const emailUserChangePasswordDTO: EmailUserChangePasswordDTO = new EmailUserChangePasswordDTO(email, captchaToken);
+    const result = await dispatch(emailRecoveryPasswordAction(emailUserChangePasswordDTO));
 
     if (result?.payload) {
       setNotificationType('success');

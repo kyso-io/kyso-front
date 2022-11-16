@@ -5,6 +5,7 @@ import MainLayout from '@/layouts/MainLayout';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import { UserChangePasswordDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -29,7 +30,8 @@ const ChangePassword = () => {
     setRequesting(true);
     try {
       const api: Api = new Api();
-      const response: NormalizedResponseDTO<boolean> = await api.changePassword({ email: email!, token: token!, password });
+      const userChangePasswordDto: UserChangePasswordDTO = new UserChangePasswordDTO(email!, token!, password);
+      const response: NormalizedResponseDTO<boolean> = await api.changePassword(userChangePasswordDto);
       if (response.data) {
         setTimeout(() => {
           router.replace('/');

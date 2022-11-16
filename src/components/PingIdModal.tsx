@@ -39,13 +39,12 @@ const PingIdModal = ({ open, setOpen, onClose }: Props) => {
       setErrorEntityId('Entity ID is required');
       return;
     }
-    onClose(
-      new AuthProviderSpec(LoginProviderEnum.PING_ID_SAML, {
-        sso_url: url,
-        environment_code: environtmentCode,
-        sp_entity_id: entityId,
-      }),
-    );
+    const authProviderSpec: AuthProviderSpec = new AuthProviderSpec(LoginProviderEnum.PING_ID_SAML, {
+      sso_url: url,
+      environment_code: environtmentCode,
+      sp_entity_id: entityId,
+    });
+    onClose(authProviderSpec);
     setOpen(false);
     clearData();
   };

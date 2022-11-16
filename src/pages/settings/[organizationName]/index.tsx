@@ -3,8 +3,8 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { ExclamationCircleIcon, LinkIcon, MailIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, UserDTO } from '@kyso-io/kyso-model';
-import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO, OrganizationMember } from '@kyso-io/kyso-model';
+import { AddUserOrganizationDto, GlobalPermissionsEnum, InviteUserDto, KysoSettingsEnum, OrganizationPermissionsEnum, UpdateOrganizationMembersDTO, UserDTO, UserRoleDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
@@ -273,7 +273,7 @@ const Index = ({ commonData, setUser }: Props) => {
       result.data.forEach((organizationMember: OrganizationMember) => {
         if (organizationMember.id === commonData!.user?.id) {
           userMember = {
-            id: organizationMember.id,
+            id: organizationMember.id!,
             nickname: organizationMember.nickname,
             username: organizationMember.username,
             display_name: organizationMember.nickname,
@@ -284,7 +284,7 @@ const Index = ({ commonData, setUser }: Props) => {
           };
         } else {
           m.push({
-            id: organizationMember.id,
+            id: organizationMember.id!,
             nickname: organizationMember.nickname,
             username: organizationMember.username,
             display_name: organizationMember.nickname,
@@ -323,25 +323,17 @@ const Index = ({ commonData, setUser }: Props) => {
     if (index === -1) {
       try {
         const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
-        await api.addUserToOrganization({
-          organizationId: commonData!.organization!.id!,
-          userId: selectedMember?.id!,
-          role: organizationRole,
-        });
+        const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, selectedMember!.id!, organizationRole);
+        await api.addUserToOrganization(addUserOrganizationDto);
       } catch (e) {
         console.error(e);
       }
     } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
         const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
-        await api.updateOrganizationMemberRoles(commonData!.organization!.id!, {
-          members: [
-            {
-              userId: selectedMember?.id!,
-              role: organizationRole,
-            },
-          ],
-        });
+        const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, organizationRole);
+        const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
+        await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
       } catch (e) {
         console.error(e);
       }
@@ -385,23 +377,8 @@ const Index = ({ commonData, setUser }: Props) => {
         return !members.find((member: Member) => member.id === user.id);
       });
       if (usersNotInOrg.length === 0 && Helper.isEmail(term)) {
-        usersNotInOrg.push({
-          id: term,
-          email: term,
-          username: term,
-          name: term,
-          display_name: term,
-          bio: '',
-          plan: '',
-          avatar_url: '',
-          background_image_url: '',
-          location: '',
-          link: '',
-          created_at: new Date(),
-          accounts: [],
-          email_verified: true,
-          show_captcha: false,
-        });
+        const userDTO: UserDTO = new UserDTO(term, term, term, term, term, '', '', '', '', '', '', new Date(), [], true, false);
+        usersNotInOrg.push(userDTO);
       }
       setUsers(usersNotInOrg);
     } catch (e) {
@@ -414,11 +391,8 @@ const Index = ({ commonData, setUser }: Props) => {
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
-      await api.inviteNewUser({
-        email: selectedUser?.email!,
-        organizationSlug: commonData!.organization!.sluglified_name,
-        organizationRole,
-      });
+      const inviteUserDto: InviteUserDto = new InviteUserDto(selectedUser?.email!, commonData.organization!.sluglified_name, organizationRole);
+      await api.inviteNewUser(inviteUserDto);
       getOrganizationMembers();
       setOrganizationRole('');
       setQuery('');

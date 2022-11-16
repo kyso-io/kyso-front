@@ -6,6 +6,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { TrashIcon } from '@heroicons/react/outline';
 import type { KysoUserAccessToken } from '@kyso-io/kyso-model';
+import { CreateKysoAccessTokenDto } from '@kyso-io/kyso-model';
 import { createAccessTokenAction, deleteAccessTokenAction, getAccessTokensAction, revokeAllAccessTokenAction } from '@kyso-io/kyso-store';
 import format from 'date-fns/format';
 import { useEffect, useState } from 'react';
@@ -50,11 +51,8 @@ const Index = ({ commonData }: Props) => {
     }
 
     setRequesting(true);
-    const { payload }: { payload: KysoUserAccessToken } = await dispatch(
-      createAccessTokenAction({
-        name: accessTokenName,
-      }),
-    );
+    const createKysoAccessTokenDto: CreateKysoAccessTokenDto = new CreateKysoAccessTokenDto(accessTokenName);
+    const { payload }: { payload: KysoUserAccessToken } = await dispatch(createAccessTokenAction(createKysoAccessTokenDto));
     if (payload) {
       setNewAccessToken(payload);
       setAccessTokens([...accessTokens, payload]);

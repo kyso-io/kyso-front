@@ -3,7 +3,6 @@ import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import type {
   ActivityFeed,
-  InviteUserDto,
   KysoSetting,
   NormalizedResponseDTO,
   Organization,
@@ -11,13 +10,24 @@ import type {
   PaginatedResponseDto,
   ReportDTO,
   SearchUser,
-  SearchUserDto,
   Team,
   TeamInfoDto,
   TeamMember,
   UserDTO,
 } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
+import {
+  AddUserOrganizationDto,
+  InviteUserDto,
+  KysoSettingsEnum,
+  OrganizationPermissionsEnum,
+  ReportPermissionsEnum,
+  SearchUserDto,
+  TeamMembershipOriginEnum,
+  TeamPermissionsEnum,
+  UpdateOrganizationMembersDTO,
+  UpdateTeamMembersDTO,
+  UserRoleDTO,
+} from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
@@ -177,7 +187,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const getTeamsInfo = async () => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-      const result: NormalizedResponseDTO<TeamInfoDto[]> = await api.getTeamsInfo(commonData!.team!.id);
+      const result: NormalizedResponseDTO<TeamInfoDto[]> = await api.getTeamsInfo(commonData!.team!.id!);
       if (result?.data?.length > 0) {
         setTeamInfo(result.data[0]!);
       }
@@ -195,7 +205,7 @@ const Index = ({ commonData, setUser }: Props) => {
       resultOrgMembers.data.forEach((organizationMember: OrganizationMember) => {
         if (organizationMember.id === commonData.user?.id) {
           userMember = {
-            id: organizationMember.id,
+            id: organizationMember.id!,
             nickname: organizationMember.nickname,
             username: organizationMember.username,
             display_name: organizationMember.nickname,
@@ -206,7 +216,7 @@ const Index = ({ commonData, setUser }: Props) => {
           };
         } else {
           m.push({
-            id: organizationMember.id,
+            id: organizationMember.id!,
             nickname: organizationMember.nickname,
             username: organizationMember.username,
             display_name: organizationMember.nickname,
@@ -235,7 +245,7 @@ const Index = ({ commonData, setUser }: Props) => {
           member.membership_origin = teamMember.membership_origin;
         } else {
           m.push({
-            id: teamMember.id,
+            id: teamMember.id!,
             nickname: teamMember.nickname,
             username: teamMember.username,
             display_name: teamMember.nickname,
@@ -277,25 +287,17 @@ const Index = ({ commonData, setUser }: Props) => {
     if (index === -1) {
       try {
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-        await api.addUserToOrganization({
-          organizationId: commonData.organization!.id!,
-          userId,
-          role: organizationRole,
-        });
+        const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
+        await api.addUserToOrganization(addUserOrganizationDto);
       } catch (e) {
         console.error(e);
       }
       if (teamRole) {
         try {
           const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-          await api.updateTeamMemberRoles(commonData.team!.id!, {
-            members: [
-              {
-                userId,
-                role: teamRole,
-              },
-            ],
-          });
+          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
+          const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
+          await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
         } catch (e) {
           console.error(e);
         }
@@ -304,14 +306,9 @@ const Index = ({ commonData, setUser }: Props) => {
       if (!members[index]!.organization_roles.includes(organizationRole)) {
         try {
           const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-          await api.updateOrganizationMemberRoles(commonData.organization!.id!, {
-            members: [
-              {
-                userId,
-                role: organizationRole,
-              },
-            ],
-          });
+          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, organizationRole);
+          const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
+          await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
         } catch (e) {
           console.error(e);
         }
@@ -319,14 +316,9 @@ const Index = ({ commonData, setUser }: Props) => {
       if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
         try {
           const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-          await api.updateTeamMemberRoles(commonData.team!.id!, {
-            members: [
-              {
-                userId,
-                role: teamRole,
-              },
-            ],
-          });
+          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
+          const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
+          await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
         } catch (e) {
           console.error(e);
         }
@@ -338,11 +330,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const inviteNewUser = async (email: string, organizationRole: string, teamRole?: string): Promise<void> => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-      const inviteUserDto: InviteUserDto = {
-        email,
-        organizationSlug: commonData.organization!.sluglified_name,
-        organizationRole,
-      };
+      const inviteUserDto: InviteUserDto = new InviteUserDto(email, commonData.organization!.sluglified_name, organizationRole);
       if (teamRole) {
         inviteUserDto.teamSlug = commonData.team!.sluglified_name;
         inviteUserDto.teamRole = teamRole;
@@ -399,7 +387,7 @@ const Index = ({ commonData, setUser }: Props) => {
         }
         return 0;
       });
-      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
+      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports } as any);
     } catch (e) {}
   };
 
@@ -430,7 +418,7 @@ const Index = ({ commonData, setUser }: Props) => {
         }
         return 0;
       });
-      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
+      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports } as any);
     } catch (e) {}
   };
 
@@ -461,7 +449,7 @@ const Index = ({ commonData, setUser }: Props) => {
         }
         return 0;
       });
-      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
+      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports } as any);
     } catch (e) {}
   };
 
@@ -507,7 +495,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const getSearchUser = async () => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization!.id!, commonData.team!.id);
+      const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization!.id!, commonData.team!.id!);
       if (result.data) {
         setSearchUser(result.data);
       } else {
@@ -519,12 +507,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const createSearchUser = async (query: string, payload: ReportsFilter[]) => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      const searchUserDto: SearchUserDto = {
-        organization_id: commonData.organization!.id!,
-        team_id: commonData.team!.id!,
-        query,
-        payload,
-      };
+      const searchUserDto: SearchUserDto = new SearchUserDto(commonData.organization!.id!, commonData.team!.id!, query, payload);
       const result: NormalizedResponseDTO<SearchUser> = await api.createSearchUser(searchUserDto);
       setSearchUser(result.data);
     } catch (e) {}

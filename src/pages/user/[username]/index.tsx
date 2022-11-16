@@ -177,7 +177,7 @@ const Index = ({ commonData, setUser }: Props) => {
       }
     }
     report.authors = allAuthorsData;
-    const copyPaginatedReponse: PaginatedResponseDto<ReportDTO> = { ...reportsResponse!.data };
+    const copyPaginatedReponse: PaginatedResponseDto<ReportDTO> = { ...reportsResponse!.data } as any;
     const newReports: ReportDTO[] = copyPaginatedReponse.results.map((r: ReportDTO) => (r.id === report.id ? report : r));
     // Sort by global_pin and user_pin
     newReports.sort((a: ReportDTO, b: ReportDTO) => {
@@ -195,7 +195,7 @@ const Index = ({ commonData, setUser }: Props) => {
         ...copyPaginatedReponse,
         results: newReports,
       },
-    });
+    } as any);
   };
 
   const toggleUserStarReport = async (reportDto: ReportDTO) => {

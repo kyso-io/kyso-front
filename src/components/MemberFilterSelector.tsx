@@ -1,10 +1,10 @@
-import type { TeamMember } from '@kyso-io/kyso-model';
 import classNames from '@/helpers/class-names';
-import { Combobox } from '@headlessui/react';
-import { SelectorIcon, CheckIcon } from '@heroicons/react/solid';
-import { useState } from 'react';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { Combobox } from '@headlessui/react';
+import { CheckIcon, SelectorIcon } from '@heroicons/react/solid';
+import type { TeamMember } from '@kyso-io/kyso-model';
+import { useState } from 'react';
 import PureAvatar from './PureAvatar';
 
 type IMemberFilterSelector = {
@@ -21,7 +21,7 @@ const MemberFilterSelector = (props: IMemberFilterSelector) => {
   const filteredPeople =
     query === ''
       ? initial
-      : initial.filter((person) => {
+      : initial.filter((person: TeamMember) => {
           return person.nickname.toLowerCase().includes(query.toLowerCase());
         });
 
@@ -35,7 +35,7 @@ const MemberFilterSelector = (props: IMemberFilterSelector) => {
       <Combobox
         value={selected.map((s) => s.id)}
         onChange={(newlySelectedIds: string[]) => {
-          setSelected(initial.filter((m) => newlySelectedIds.includes(m.id!)));
+          setSelected(initial.filter((m: TeamMember) => newlySelectedIds.includes(m.id!)));
         }}
         multiple
       >

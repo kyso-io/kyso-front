@@ -64,7 +64,7 @@ const Index = ({ commonData }: Props) => {
             name: organizationResourcePermissions.name,
             role_names: organizationResourcePermissions.role_names || [],
             ...organizationInfoDto,
-          });
+          } as any);
         });
         setOrganizationsInfoDtoExtended(data);
       } catch (e: any) {
