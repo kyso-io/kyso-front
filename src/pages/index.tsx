@@ -7,7 +7,6 @@ import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import ChannelList from '../components/ChannelList';
-import { checkJwt } from '../helpers/check-jwt';
 import { Helper } from '../helpers/Helper';
 import KysoApplicationLayout from '../layouts/KysoApplicationLayout';
 
@@ -17,28 +16,6 @@ interface Props {
 
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
-
-  useEffect(() => {
-    const checkUserLogged = async () => {
-      try {
-        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        if (publicKeys !== null && publicKeys.length > 0) {
-          let unauthorizedRedirectUrl = '/login';
-          const settingsUnauthRedirect: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
-          if (settingsUnauthRedirect) {
-            unauthorizedRedirectUrl = settingsUnauthRedirect.value;
-          }
-          router.replace(unauthorizedRedirectUrl);
-        }
-      } catch (e: any) {
-        console.log(e.response.data);
-      }
-    };
-    const result: boolean = checkJwt();
-    if (!result) {
-      checkUserLogged();
-    }
-  }, []);
 
   useEffect(() => {
     if (!commonData.permissions) {
@@ -65,9 +42,30 @@ const Index = ({ commonData }: Props) => {
           }
         }
       } else {
-        const orgs: ResourcePermissions[] | undefined = commonData.permissions?.organizations;
-        if (orgs && orgs.length > 0) {
-          router.push(`${orgs[0]?.name}`);
+        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
+        const settingsDefaultRedirectOrganization: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.DEFAULT_REDIRECT_ORGANIZATION);
+        const settingsUnauthRedirect: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
+        if (publicKeys !== null && publicKeys.length > 0) {
+          let unauthorizedRedirectUrl = '/login';
+          if (
+            settingsDefaultRedirectOrganization !== undefined &&
+            settingsDefaultRedirectOrganization.value &&
+            commonData.permissions?.organizations &&
+            commonData.permissions!.organizations.length > 0
+          ) {
+            unauthorizedRedirectUrl = `/${settingsDefaultRedirectOrganization.value}`;
+            const organizationResourcePermissions: ResourcePermissions | undefined = commonData.permissions?.organizations?.find(
+              (x: ResourcePermissions) => x.name === settingsDefaultRedirectOrganization.value,
+            );
+            if (!organizationResourcePermissions) {
+              unauthorizedRedirectUrl = `/${commonData.permissions.organizations[0]!.name}`;
+            }
+          } else if (commonData.permissions?.organizations && commonData.permissions!.organizations.length > 0) {
+            unauthorizedRedirectUrl = `/${commonData.permissions.organizations[0]!.name}`;
+          } else if (settingsUnauthRedirect?.value) {
+            unauthorizedRedirectUrl = settingsUnauthRedirect.value;
+          }
+          router.replace(unauthorizedRedirectUrl);
         }
       }
     };
