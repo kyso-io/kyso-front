@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { FeedbackDto, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import { FeedbackDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
@@ -45,10 +46,7 @@ const Index = ({ commonData }: Props) => {
     }
     setRequesting(true);
     const api: Api = new Api(commonData.token);
-    const feedbackDto: FeedbackDto = {
-      subject,
-      message,
-    };
+    const feedbackDto: FeedbackDto = new FeedbackDto(subject, message);
     const response: NormalizedResponseDTO<boolean> = await api.createFeedback(feedbackDto);
     setShow(true);
     if (response?.data) {

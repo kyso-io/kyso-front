@@ -13,8 +13,8 @@ import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { FolderAddIcon } from '@heroicons/react/outline';
 import { ArrowRightIcon, ExclamationCircleIcon, InformationCircleIcon, SelectorIcon } from '@heroicons/react/solid';
-import type { File as KysoFile, KysoConfigFile, KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
+import type { File as KysoFile, KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import { KysoConfigFile, KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import 'easymde/dist/easymde.min.css';
@@ -355,17 +355,16 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       return;
     }
     const mainFile: TmpReportFile | undefined = tmpReportFiles.find((x: any) => x.main);
-    const kysoConfigFile: KysoConfigFile = {
-      main: mainFile?.name || tmpReportFiles[0]!.name,
+    const kysoConfigFile: KysoConfigFile = new KysoConfigFile(
+      mainFile?.name || tmpReportFiles[0]!.name,
       title,
       description,
-      organization: commonData.organization!.sluglified_name,
-      team: selectedTeam.name,
-      channel: selectedTeam.name,
-      tags: selectedTags,
-      type: ReportType.Markdown,
-      authors: selectedPeople.map((person: TeamMember) => person.email),
-    };
+      commonData.organization!.sluglified_name,
+      selectedTeam.name,
+      selectedTags,
+      ReportType.Markdown,
+    );
+    kysoConfigFile.authors = selectedPeople.map((person: TeamMember) => person.email);
     delete (kysoConfigFile as any).team;
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     const zip = new JSZip();
@@ -447,17 +446,16 @@ const CreateReport = ({ commonData, setUser }: Props) => {
         deletedFiles.push(kysoFile.id!);
       }
     }
-
-    const kysoConfigFile: KysoConfigFile = {
-      main: mainFile !== null ? (mainFile as TmpReportFile).name : tmpReportFiles[0]!.name,
+    const kysoConfigFile: KysoConfigFile = new KysoConfigFile(
+      mainFile !== null ? (mainFile as TmpReportFile).name : tmpReportFiles[0]!.name,
       title,
       description,
-      organization: commonData.organization!.sluglified_name,
-      team: selectedTeam.name,
-      channel: selectedTeam.name,
-      tags: selectedTags,
-      authors: selectedPeople.map((person: TeamMember) => person.email),
-    };
+      commonData.organization!.sluglified_name,
+      selectedTeam.name,
+      selectedTags,
+      ReportType.Markdown,
+    );
+    kysoConfigFile.authors = selectedPeople.map((person: TeamMember) => person.email);
     delete (kysoConfigFile as any).team;
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     const zip: JSZip = new JSZip();

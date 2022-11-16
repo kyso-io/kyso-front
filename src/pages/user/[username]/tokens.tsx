@@ -4,8 +4,8 @@ import type { CommonData } from '@/types/common-data';
 import { Dialog, Transition } from '@headlessui/react';
 import { TrashIcon } from '@heroicons/react/outline';
 import { CheckIcon, ClipboardIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { CreateKysoAccessTokenDto, KysoSetting, KysoUserAccessToken, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import type { KysoSetting, KysoUserAccessToken, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
+import { CreateKysoAccessTokenDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
@@ -92,9 +92,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     try {
       const api: Api = new Api(commonData.token);
-      const createKysoAccessTokenDto: CreateKysoAccessTokenDto = {
-        name: kysoAccessTokenName,
-      };
+      const createKysoAccessTokenDto: CreateKysoAccessTokenDto = new CreateKysoAccessTokenDto(kysoAccessTokenName);
       const resultKysoUserAccessToken: NormalizedResponseDTO<KysoUserAccessToken> = await api.createAccessToken(createKysoAccessTokenDto);
       setNewKysoUserAccessToken(resultKysoUserAccessToken.data);
       setKysoUserAccessTokens([...kysoUserAccessTokens, resultKysoUserAccessToken.data]);

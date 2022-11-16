@@ -4,7 +4,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, Organization, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import { CreateOrganizationDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
@@ -87,12 +87,8 @@ const Index = ({ commonData, setUser }: Props) => {
     setBusy(true);
     try {
       const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<Organization> = await api.createOrganization({
-        display_name: displayName,
-        bio,
-        location,
-        link,
-      });
+      const createOrganizationDto: CreateOrganizationDto = new CreateOrganizationDto(displayName, bio, location, link);
+      const result: NormalizedResponseDTO<Organization> = await api.createOrganization(createOrganizationDto);
       const organization: Organization = result.data;
       api.setOrganizationSlug(organization.sluglified_name);
       if (file) {

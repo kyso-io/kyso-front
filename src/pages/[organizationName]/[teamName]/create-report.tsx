@@ -22,8 +22,8 @@ import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { ArrowRightIcon, DocumentAddIcon, ExclamationCircleIcon, FolderAddIcon, SelectorIcon, UploadIcon } from '@heroicons/react/solid';
-import type { KysoConfigFile, KysoSetting, NormalizedResponseDTO, ReportDTO, ResourcePermissions, Tag, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, ReportPermissionsEnum, ReportType, TeamMember, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO, ReportDTO, ResourcePermissions, Tag, UserDTO } from '@kyso-io/kyso-model';
+import { KysoConfigFile, KysoSettingsEnum, ReportPermissionsEnum, ReportType, TeamMember, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import 'easymde/dist/easymde.min.css';
 import FormData from 'form-data';
@@ -350,19 +350,17 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     }
 
     const zip = new JSZip();
-    const kysoConfigFile: KysoConfigFile = {
-      main: mainFile,
+    const kysoConfigFile: KysoConfigFile = new KysoConfigFile(
+      mainFile,
       title,
       description,
-      organization: commonData.organization!.sluglified_name,
-      team: commonData.team.sluglified_name,
-      channel: commonData.team.sluglified_name,
-      tags: selectedTags,
-      type: ReportType.Markdown,
-      authors: selectedPeople.map((person) => person.email),
-    };
+      commonData.organization!.sluglified_name,
+      commonData.team.sluglified_name,
+      selectedTags,
+      ReportType.Markdown,
+    );
+    kysoConfigFile.authors = selectedPeople.map((person: TeamMember) => person.email);
     delete (kysoConfigFile as any).team;
-
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });
     let numFiles = 0;

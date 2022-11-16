@@ -63,7 +63,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
     const mentionedNameSlugs = parseMentions(targetValue);
     let userIds: string[] = [];
     if (channelMembers) {
-      userIds = channelMembers.filter((mem) => mentionedNameSlugs.includes(mem.nameSlug)).map((m) => m.id);
+      userIds = channelMembers.filter((mem: TeamMember) => mentionedNameSlugs.includes(mem.nameSlug)).map((m: TeamMember) => m.id!);
     }
 
     /* eslint-disable @typescript-eslint/no-explicit-any */

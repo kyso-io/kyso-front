@@ -1,7 +1,7 @@
-import { Fragment } from 'react';
-import { PlusIcon } from '@heroicons/react/solid';
 import { Menu, Transition } from '@headlessui/react';
+import { PlusIcon } from '@heroicons/react/solid';
 import type { TeamMember } from '@kyso-io/kyso-model';
+import { Fragment } from 'react';
 import UnPureSuggestUserCombobox from './UnPureSuggestUserCombobox';
 
 type IUnPureSuggestContentDropdown = {
@@ -37,7 +37,18 @@ const UnPureSuggestContentDropdown = (props: IUnPureSuggestContentDropdown) => {
               <div className="px-4 py-5 sm:p-6">
                 <form className="mt-1 sm:items-center">
                   <div className="w-full sm:max-w-s">
-                    <UnPureSuggestUserCombobox label={label} suggestions={channelMembers} selectedPeople={selectedPeople} setSelectedPeople={setSelectedPeople} />
+                    <UnPureSuggestUserCombobox
+                      label={label}
+                      suggestions={channelMembers.map((teamMember: TeamMember) => {
+                        return {
+                          id: teamMember.id!,
+                          nickname: teamMember.nickname,
+                          avatar_url: teamMember.avatar_url,
+                        };
+                      })}
+                      selectedPeople={selectedPeople}
+                      setSelectedPeople={setSelectedPeople}
+                    />
                   </div>
                   {/* <div className="w-full sm:max-w-xs mt-10 text-right">
                     <button

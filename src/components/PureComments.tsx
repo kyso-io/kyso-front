@@ -23,7 +23,7 @@ type IPureComments = {
 
 const PureComments = (props: IPureComments) => {
   const { commentSelectorHook, submitComment, parentComment, commonData, report, channelMembers, hasPermissionDeleteComment, hasPermissionCreateComment, userSelectorHook, onDeleteComment } = props;
-  let comments = commentSelectorHook(parentComment?.id);
+  let comments = commentSelectorHook(parentComment?.id!);
 
   comments = comments.filter((x) => x.mark_delete_at === null || x.mark_delete_at === undefined);
 

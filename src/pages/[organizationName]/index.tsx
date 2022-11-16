@@ -8,7 +8,17 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
-import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
+import {
+  AddUserOrganizationDto,
+  GlobalPermissionsEnum,
+  KysoSettingsEnum,
+  OrganizationPermissionsEnum,
+  ReportPermissionsEnum,
+  TeamMembershipOriginEnum,
+  UpdateOrganizationMembersDTO,
+  InviteUserDto,
+  UserRoleDTO,
+} from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -187,7 +197,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const getOrganizationsInfo = async () => {
     try {
       const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<OrganizationInfoDto[]> = await api.getOrganizationsInfo(commonData!.organization!.id);
+      const result: NormalizedResponseDTO<OrganizationInfoDto[]> = await api.getOrganizationsInfo(commonData!.organization!.id!);
       if (result?.data?.length > 0) {
         setOrganizationInfo(result.data[0]!);
       }
@@ -221,7 +231,7 @@ const Index = ({ commonData, setUser }: Props) => {
         }
         return 0;
       });
-      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
+      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports } as any);
     } catch (e) {}
   };
 
@@ -252,7 +262,7 @@ const Index = ({ commonData, setUser }: Props) => {
         }
         return 0;
       });
-      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
+      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports } as any);
     } catch (e) {}
   };
 
@@ -283,7 +293,7 @@ const Index = ({ commonData, setUser }: Props) => {
         }
         return 0;
       });
-      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports });
+      setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports } as any);
     } catch (e) {}
   };
 
@@ -331,7 +341,7 @@ const Index = ({ commonData, setUser }: Props) => {
       result.data.forEach((organizationMember: OrganizationMember) => {
         if (organizationMember.id === commonData!.user?.id) {
           userMember = {
-            id: organizationMember.id,
+            id: organizationMember.id!,
             nickname: organizationMember.nickname,
             username: organizationMember.username,
             display_name: organizationMember.nickname,
@@ -342,7 +352,7 @@ const Index = ({ commonData, setUser }: Props) => {
           };
         } else {
           m.push({
-            id: organizationMember.id,
+            id: organizationMember.id!,
             nickname: organizationMember.nickname,
             username: organizationMember.username,
             display_name: organizationMember.nickname,
@@ -383,25 +393,17 @@ const Index = ({ commonData, setUser }: Props) => {
     if (index === -1) {
       try {
         const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
-        await api.addUserToOrganization({
-          organizationId: commonData!.organization!.id!,
-          userId,
-          role: organizationRole,
-        });
+        const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData!.organization!.id!, userId, organizationRole);
+        await api.addUserToOrganization(addUserOrganizationDto);
       } catch (e) {
         console.error(e);
       }
     } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
         const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
-        await api.updateOrganizationMemberRoles(commonData!.organization!.id!, {
-          members: [
-            {
-              userId,
-              role: organizationRole,
-            },
-          ],
-        });
+        const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, organizationRole);
+        const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
+        await api.updateOrganizationMemberRoles(commonData!.organization!.id!, updateOrganizationMembersDTO);
       } catch (e) {
         console.error(e);
       }
@@ -412,11 +414,8 @@ const Index = ({ commonData, setUser }: Props) => {
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
     try {
       const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
-      await api.inviteNewUser({
-        email,
-        organizationSlug: commonData!.organization!.sluglified_name,
-        organizationRole,
-      });
+      const inviteUserDto: InviteUserDto = new InviteUserDto(email, commonData!.organization!.sluglified_name, organizationRole);
+      await api.inviteNewUser(inviteUserDto);
       getOrganizationMembers();
     } catch (e) {
       console.error(e);

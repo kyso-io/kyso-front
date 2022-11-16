@@ -3,7 +3,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { InformationCircleIcon } from '@heroicons/react/outline';
 import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
@@ -106,11 +106,8 @@ const Index = ({ commonData, setUser }: Props) => {
         setRequesting(true);
         await api.updateUserProfileImage(file);
       }
-      await api.updateUser(commonData.user!.id!, {
-        bio,
-        link,
-        location,
-      });
+      const updateUserRequestDto: UpdateUserRequestDTO = new UpdateUserRequestDTO(location, link, bio);
+      await api.updateUser(commonData.user!.id!, updateUserRequestDto);
       router.reload();
     } catch (e: any) {
       console.log(e.response.data);

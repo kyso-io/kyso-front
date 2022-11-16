@@ -5,8 +5,8 @@ import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { NormalizedResponseDTO, SignUpDto } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, Login, LoginProviderEnum, SignUpDto } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
 import { Api, setError as storeSetError, setTokenAuthAction } from '@kyso-io/kyso-store';
 import Head from 'next/head';
@@ -194,12 +194,7 @@ const Index = () => {
     }
     try {
       const api: Api = new Api();
-      const signUpDto: SignUpDto = {
-        email,
-        username: nickname,
-        display_name: displayName,
-        password,
-      };
+      const signUpDto: SignUpDto = new SignUpDto(email, nickname, displayName, password);
       await api.signup(signUpDto);
       setNotificationType('success');
       setNotification('You have been registered successfully. A verification link has been sent to your email account.');
