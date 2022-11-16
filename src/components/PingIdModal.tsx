@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Dialog, Transition } from '@headlessui/react';
-import type { AuthProviderSpec } from '@kyso-io/kyso-model';
-import { LoginProviderEnum } from '@kyso-io/kyso-model';
+import { AuthProviderSpec, LoginProviderEnum } from '@kyso-io/kyso-model';
 import { Fragment, useState } from 'react';
 
 interface Props {
@@ -40,14 +39,13 @@ const PingIdModal = ({ open, setOpen, onClose }: Props) => {
       setErrorEntityId('Entity ID is required');
       return;
     }
-    onClose({
-      type: LoginProviderEnum.PING_ID_SAML,
-      options: {
+    onClose(
+      new AuthProviderSpec(LoginProviderEnum.PING_ID_SAML, {
         sso_url: url,
         environment_code: environtmentCode,
         sp_entity_id: entityId,
-      },
-    });
+      }),
+    );
     setOpen(false);
     clearData();
   };
