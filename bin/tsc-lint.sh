@@ -16,5 +16,6 @@ cat >>"$TMP" <<EOF
   ]
 }
 EOF
+npm run build
 tsc --project "$TMP" --skipLibCheck --noEmit
 rm -f "$TMP"
