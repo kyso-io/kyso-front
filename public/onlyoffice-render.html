@@ -1,8 +1,7 @@
-<!DOCTYPE html>
-<html lang="EN" xml:lang="en">
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <!--
+<html>
+<head>
+<meta http-equiv='Content-Type' content='text/html; charset=utf-8'>
+<!--
  * Code based on files taken from the ONLYOFFICE document-server-integration
  * javascript examples:
  *
@@ -25,153 +24,148 @@
  * limitations under the License.
  *
  -->
-    <title>Kyso OnlyOffice Renderer</title>
-    <script id="scriptApi" type="text/javascript" src="/web-apps/apps/api/documents/api.js"></script>
-    <script type="text/javascript">
-      const urlParams = new URLSearchParams(window.location.search);
-      function initEditor() {
-        // editor mode
-        const mode = 'view';
-        // document url
-        window.docUrl = '';
-        if (urlParams) {
-          docUrl = urlParams.get('file');
-        }
-        if (docUrl == null || docUrl == '') {
-          if (window.parent) {
-            docUrl = window.parent.onlyofficeFileParam;
-          }
-        }
-        if (docUrl == null || docUrl == '') {
-          if (window.opener) {
-            docUrl = window.opener.onlyofficeFileParam;
-          }
-        }
-        if (docUrl == null || docUrl == '') {
-          document.getElementById('noUrl').removeAttribute('hidden');
-          return;
-        }
-        // key for caching and collaborate editing (not in use right now)
-        const docKey = key(docUrl);
-        // get filename to compute fileType, documentType and viewer type
-        const qIdx = docUrl.lastIndexOf('?');
-        let fName;
-        if (qIdx < 0) {
-          fName = docUrl.substring(docUrl.lastIndexOf('/') + 1).trim();
-        } else {
-          fName = docUrl.substring(docUrl.lastIndexOf('/') + 1, qIdx).trim();
-        }
-        // fileType
-        const fileType = fName.substring(fName.lastIndexOf('.') + 1).toLowerCase();
-        // documentType
-        const documentType = getDocumentType(fileType);
-        // editor type
-        const type = getViewerType(fileType);
-        // define configuration
-        let config = {
-          type: type,
-          width: '100%',
-          height: '100%',
-          documentType: documentType,
-          document: {
+<title>Kyso OnlyOffice Renderer</title>
+<script id="scriptApi" type="text/javascript"
+        src="/web-apps/apps/api/documents/api.js"></script>
+<script type="text/javascript">
+const urlParams = new URLSearchParams(window.location.search);
+function initEditor() {
+    // editor mode
+    const mode = "view";
+    // document url
+    window.docUrl = ""
+    if (urlParams) { docUrl = urlParams.get('file'); }
+    if (docUrl == null || docUrl == "") {
+        if (window.parent) { docUrl = window.parent.onlyofficeFileParam }
+    }
+    if (docUrl == null || docUrl == "") {
+        if (window.opener) { docUrl = window.opener.onlyofficeFileParam }
+    }
+    if (docUrl == null || docUrl == "") {
+        document.getElementById("noUrl").removeAttribute("hidden");
+        return
+    }
+    // key for caching and collaborate editing (not in use right now)
+    const docKey = key(docUrl);
+    // get filename to compute fileType, documentType and viewer type
+    const qIdx = docUrl.lastIndexOf("?");
+    let fName;
+    if (qIdx < 0) {
+        fName = docUrl.substring(docUrl.lastIndexOf("/") + 1).trim();
+    } else {
+        fName = docUrl.substring(docUrl.lastIndexOf("/") + 1, qIdx).trim();
+    }
+    // fileType
+    const fileType = fName.substring(fName.lastIndexOf(".") + 1).toLowerCase();
+    // documentType
+    const documentType = getDocumentType(fileType);
+    // editor type
+    const type = getViewerType(fileType);
+    // define configuration
+    let config = {
+        type: type,
+        width: "100%",
+        height: "100%",
+        documentType: documentType,
+        document: {
             title: fName,
             url: docUrl,
             fileType: fileType,
             key: docKey,
             permissions: {
-              chat: false,
-              comment: false,
-              copy: false,
-              deleteCommentAuthorOnly: false,
-              download: true,
-              edit: false,
-              editCommentAuthorOnly: false,
-              fillForms: false,
-              modifyContentControl: false,
-              modifyFilter: false,
-              print: true,
-              protect: false,
-              review: false,
-            },
-          },
-          editorConfig: {
+                chat: false,
+                comment: false,
+                copy: false,
+                deleteCommentAuthorOnly: false,
+                download: true,
+                edit: false,
+                editCommentAuthorOnly: false,
+                fillForms: false,
+                modifyContentControl: false,
+                modifyFilter: false,
+                print: true,
+                protect: false,
+                review: false,
+            }
+        },
+        editorConfig: {
             coEditing: { change: false },
             mode: mode,
             customization: {
-              anonymous: {
-                request: false,
-                label: 'User',
-              },
-              autosave: false,
-              comments: false,
-              compactHeader: true,
-              compactToolbar: true,
-              compatibleFeatures: false,
-              features: { spellcheck: { mode: false, change: false } },
-              feedback: { visible: false },
-              forcesave: false,
-              help: false,
-              hideNotes: true,
-              hideRightMenu: true,
-              hideRulers: true,
-              macros: false,
-              macrosMode: 'disable',
-              mentionShare: false,
-              plugins: false,
-              review: {
-                hideReviewDisplay: true,
-                showReviewChanges: true,
-                trackChanges: false,
-                hoverMode: false,
-              },
-              toolbarHideFileName: true,
-              toolbarNoTabs: true,
+                anonymous: {
+                    request: false,
+                    label: "User"
+                },
+                autosave: false,
+                comments: false,
+                compactHeader: true,
+                compactToolbar: true,
+                compatibleFeatures: false,
+                features: { spellcheck: { mode: false, change: false } },
+                feedback: { visible: false },
+                forcesave: false,
+                help: false,
+                hideNotes: true,
+                hideRightMenu: true,
+                hideRulers: true,
+                macros: false,
+                macrosMode: "disable",
+                mentionShare: false,
+                plugins: false,
+                review: {
+                    hideReviewDisplay: true,
+                    showReviewChanges: true,
+                    trackChanges: false,
+                    hoverMode: false,
+                 },
+                toolbarHideFileName: true,
+                toolbarNoTabs: true,
             },
             embedded: {
-              toolbarDocked: 'bottom',
+                toolbarDocked: "bottom"
             },
-            plugins: {},
-          },
-        };
-        ////
-        // TODO
-        //
-        // If the ONLYOFFICE JWS token is enabled, call the kyso-api to create it
-        // and add it to the config, will be something like:
-        //
-        //   config.token = create_onlyoffice_jwt_token(config)
-        //
-        // where the create_onlyoffice_jwt_token calls the API with our user token
-        // and we get it signed with the proper secret from the kyso-api server so
-        // no secret is seen by the browser.
-        ////
-        // Create editor
-        new DocsAPI.DocEditor('placeholder', config);
-      }
-      function key(k) {
-        let result = k.replace(new RegExp('[^0-9-.a-zA-Z_=]', 'g'), '_') + new Date().getTime();
-        return result.substring(result.length - Math.min(result.length, 20));
-      }
-      let getDocumentType = function (ext) {
-        if ('.doc.docx.docm.dot.dotx.dotm.odt.fodt.ott.rtf.txt.html.htm.mht.xml.pdf.djvu.fb2.epub.xps.oxps'.indexOf(ext) != -1) return 'word';
-        if ('.xls.xlsx.xlsm.xlsb.xlt.xltx.xltm.ods.fods.ots.csv'.indexOf(ext) != -1) return 'cell';
-        if ('.pps.ppsx.ppsm.ppt.pptx.pptm.pot.potx.potm.odp.fodp.otp'.indexOf(ext) != -1) return 'slide';
-        return null;
-      };
-      let getViewerType = function (ext) {
-        if ('.pps.ppsx.ppsm.ppt.pptx.pptm.pot.potx.potm.odp.fodp.otp'.indexOf(ext) != -1) return 'desktop';
-        return 'embedded';
-      };
-    </script>
-  </head>
-  <body>
+            plugins: {}
+        }
+    }
+    ////
+    // TODO
+    //
+    // If the ONLYOFFICE JWS token is enabled, call the kyso-api to create it
+    // and add it to the config, will be something like:
+    //
+    //   config.token = create_onlyoffice_jwt_token(config)
+    //
+    // where the create_onlyoffice_jwt_token calls the API with our user token
+    // and we get it signed with the proper secret from the kyso-api server so
+    // no secret is seen by the browser.
+    ////
+    // Create editor
+    new DocsAPI.DocEditor("placeholder", config);
+};
+ function key(k) {
+     let result = k.replace(new RegExp("[^0-9-.a-zA-Z_=]", "g"), "_") + (new Date()).getTime();
+     return result.substring(result.length - Math.min(result.length, 20));
+ };
+let getDocumentType = function (ext) {
+    if (".doc.docx.docm.dot.dotx.dotm.odt.fodt.ott.rtf.txt.html.htm.mht.xml.pdf.djvu.fb2.epub.xps.oxps".indexOf(ext) != -1) return "word";
+    if (".xls.xlsx.xlsm.xlsb.xlt.xltx.xltm.ods.fods.ots.csv".indexOf(ext) != -1) return "cell";
+    if (".pps.ppsx.ppsm.ppt.pptx.pptm.pot.potx.potm.odp.fodp.otp".indexOf(ext) != -1) return "slide";
+    return null;
+};
+let getViewerType = function (ext) {
+    if (".pps.ppsx.ppsm.ppt.pptx.pptm.pot.potx.potm.odp.fodp.otp".indexOf(ext) != -1) return "desktop";
+    return "embedded";
+};
+</script>
+</head>
+<body>
     <div>
-      <div id="placeholder">
-        <div id="noUrl" hidden>Missing URL, nothing to display!</div>
-      </div>
+        <div id="placeholder">
+            <div id="noUrl" hidden>Missing URL, nothing to display!</div>
+        </div>
     </div>
-  </body>
-  <script type="text/javascript">
-    initEditor();
-  </script>
+</body>
+<script type="text/javascript">
+    initEditor()
+</script>
 </html>
