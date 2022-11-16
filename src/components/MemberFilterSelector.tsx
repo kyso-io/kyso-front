@@ -35,7 +35,7 @@ const MemberFilterSelector = (props: IMemberFilterSelector) => {
       <Combobox
         value={selected.map((s) => s.id)}
         onChange={(newlySelectedIds: string[]) => {
-          setSelected(initial.filter((m) => newlySelectedIds.includes(m.id)));
+          setSelected(initial.filter((m) => newlySelectedIds.includes(m.id!)));
         }}
         multiple
       >
