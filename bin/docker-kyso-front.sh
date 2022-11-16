@@ -16,6 +16,7 @@ BUILD_TAG="$IMAGE_NAME:$IMAGE_TAG"
 NPMRC_KYSO=".npmrc.kyso"
 NPMRC_DOCKER=".npmrc.docker"
 PUBLISH_PORTS="--publish=0.0.0.0:3000:3000"
+VERSION_UPDATE="./bin/version-update.sh"
 
 # ---------
 # FUNCTIONS
@@ -93,7 +94,6 @@ docker_build() {
   else
     cat "$NPMRC_KYSO" >"$NPMRC_DOCKER"
   fi
-
   # Compute build args
   if [ -f "./.build-args" ]; then
     BUILD_ARGS="$(
@@ -111,6 +111,8 @@ docker_build() {
 EOF
     )"
   fi
+  # Update version file
+  $VERSION_UPDATE
   DOCKER_COMMAND="$(
     printf "%s" \
       "DOCKER_BUILDKIT=1 docker build${BUILD_ARGS}${BUILD_SECRETS}" \
