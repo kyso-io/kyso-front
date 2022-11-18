@@ -540,10 +540,14 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const onCloseCaptchaModal = async (refreshUser: boolean) => {
     setShowCaptchaModal(false);
     if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
+      refreshUserData();
     }
+  };
+
+  const refreshUserData = async () => {
+    const api: Api = new Api(commonData.token);
+    const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+    setUser(result.data);
   };
 
   return (
@@ -631,6 +635,8 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
                           onUpdateRoleMember={updateMemberRole}
                           onInviteNewUser={inviteNewUser}
                           onRemoveUser={removeUser}
+                          captchaIsEnabled={captchaIsEnabled}
+                          onCaptchaSuccess={refreshUserData}
                         />
                       </PureReportHeader>
                     </div>

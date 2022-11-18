@@ -3,7 +3,7 @@
 import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon, ChevronUpIcon, ClipboardCopyIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
-import { UploadIcon } from '@heroicons/react/solid';
+import { LinkIcon, UploadIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
@@ -29,9 +29,11 @@ const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) 
   }\ntype: markdown\ntitle: "Add your title"\nmain: Readme.md`;
   let createLink = `/${commonData.organization?.sluglified_name}/create-report`;
   let createLinkForm = `/${commonData.organization?.sluglified_name}/create-report-form`;
+  let createLinkEmbedded = `/${commonData.organization?.sluglified_name}/create-embedded-report`;
   if (commonData.team) {
     createLink = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report`;
     createLinkForm = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form`;
+    createLinkEmbedded = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-embedded-report`;
   }
 
   const onCloseCaptchaModal = async (refreshUser: boolean) => {
@@ -99,7 +101,24 @@ const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) 
                       <div className="text-sm">Create a report in Kyso{"'s"} web editor. (5 MB limit)</div>
                     </a>
                   </div>
-
+                  <div className="p-4 border-b cursor-pointer">
+                    <a
+                      onClick={() => {
+                        if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                          setShowCaptchaModal(true);
+                          return;
+                        }
+                        router.push(createLinkEmbedded);
+                      }}
+                      className="hover:text-indigo-700"
+                    >
+                      <div className=" flex flex-row items-center space-x-2">
+                        <LinkIcon className="w-5 h-5" />
+                        <div className="text-md font-medium">Create embedded report</div>
+                      </div>
+                      <div className="text-sm">Create a report in Kyso{"'s"} given an external url.</div>
+                    </a>
+                  </div>
                   <div className="p-4 flex flex-col space-y-2">
                     <div className="flex flex-row items-center space-x-2">
                       <TerminalIcon className="w-5 h-5" />

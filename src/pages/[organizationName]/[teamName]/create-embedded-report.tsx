@@ -11,9 +11,8 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
-import { FolderAddIcon } from '@heroicons/react/outline';
 import { ArrowRightIcon, ExclamationCircleIcon, InformationCircleIcon, SelectorIcon } from '@heroicons/react/solid';
-import type { File as KysoFile, KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { KysoConfigFile, KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
@@ -21,8 +20,7 @@ import 'easymde/dist/easymde.min.css';
 import FormData from 'form-data';
 import JSZip from 'jszip';
 import { useRouter } from 'next/router';
-import type { ChangeEvent } from 'react';
-import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import CaptchaModal from '../../../components/CaptchaModal';
 import { ForbiddenCreateReport } from '../../../components/ForbiddenCreateReport';
 import { RegisteredUsersAlert } from '../../../components/RegisteredUsersAlert';
@@ -31,29 +29,21 @@ import { checkJwt } from '../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import { Helper } from '../../../helpers/Helper';
 
-interface TmpReportFile {
-  id: string | null;
-  name: string;
-  size: number;
-  main: boolean;
-  file: File | null;
-}
-
 interface Props {
   commonData: CommonData;
   setUser: (user: UserDTO) => void;
 }
 
-const CreateReport = ({ commonData, setUser }: Props) => {
+const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
-  const inputRef = useRef<any>(null);
   const [title, setTitle] = useState('');
   const [busy, setBusy] = useState<boolean>(false);
   const [description, setDescription] = useState('');
   const [selectedTags, setTags] = useState<string[]>([]);
+  const [url, setUrl] = useState<string>('');
   const [channelMembers, setChannelMembers] = useState<TeamMember[]>([]);
   const [selectedPeople, setSelectedPeople] = useState<TeamMember[]>(channelMembers);
   const [allowedTags, setAllowedTags] = useState<string[]>([]);
@@ -103,8 +93,6 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     });
   }, [commonData.permissions, commonData.organization]);
   const [report, setReport] = useState<ReportDTO>(ReportDTO.createEmpty());
-  const [reportFiles, setReportFiles] = useState<KysoFile[]>([]);
-  const [tmpReportFiles, setTmpReportFiles] = useState<TmpReportFile[]>([]);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
 
@@ -164,46 +152,6 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     }
     setSelectedTeam(rtps);
   }, [router.query?.teamName, commonData.permissions, commonData.organization]);
-
-  useEffect(() => {
-    if (!commonData.token) {
-      return;
-    }
-    if (!router.query.reportId) {
-      return;
-    }
-    const getReport = async () => {
-      try {
-        const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-        const result: NormalizedResponseDTO<ReportDTO> = await api.getReportById(router.query.reportId as string);
-        const r: ReportDTO = result.data;
-
-        const resultFiles: NormalizedResponseDTO<KysoFile[]> = await api.getReportFiles(r.id!, r.last_version);
-        setTitle(r.title);
-        setDescription(r.description);
-        setTags(r.tags);
-        const tmpRF: TmpReportFile[] = [];
-        for (const file of resultFiles.data) {
-          if (Helper.FORBIDDEN_FILES.includes(file.name)) {
-            continue;
-          }
-          tmpRF.push({
-            id: file.id!,
-            name: file.name,
-            size: file.size,
-            main: r.main_file_id === file.id,
-            file: null,
-          });
-        }
-        setTmpReportFiles(tmpRF);
-        setReport(r);
-        setReportFiles(resultFiles.data);
-      } catch (e) {
-        console.error(e);
-      }
-    };
-    getReport();
-  }, [commonData.token, router.query.reportId]);
 
   useEffect(() => {
     if (!selectedTeam) {
@@ -271,7 +219,6 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     if (commonData.team) {
       api.setTeamSlug(commonData.team?.sluglified_name);
     }
-
     interface QueryInterface {
       filter?: {};
     }
@@ -279,10 +226,8 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     if (query) {
       queryObj.filter = { search: query };
     }
-
     const result: NormalizedResponseDTO<Tag[]> = await api.getTags(queryObj);
-
-    setAllowedTags(result.data.map((t) => t.name));
+    setAllowedTags(result.data.map((t: Tag) => t.name));
   };
 
   useEffect(() => {
@@ -314,6 +259,35 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     setTags(newTgs);
   };
 
+  const getEmbeddedReportHTML = (htmlTitle: string, htmlUrl: string): string => {
+    return `
+      <!DOCTYPE html>
+      <html lang="EN" xml:lang="en">
+        <head>
+          <meta charset="utf-8">
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono:400,500&amp;amp;display=swap">
+          <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+          <title>${htmlTitle}</title>
+          <script type="text/javascript"></script>
+        </head>
+        <body>
+          <iframe title="${htmlTitle}" id="theframe" style="width: 100%; height: 950px; border: none;" sandbox="allow-scripts allow-same-origin allow-forms allow-modals allow-popups" src="${htmlUrl}"></iframe>
+          <script type="text/javascript">
+            function onInitIFrame() {
+              try {
+                const myIframe = document.getElementById('theframe');
+                setTimeout(() => {
+                    setHeight(myIframe.contentWindow.document.body.scrollHeight + 20px");
+                }, 1500);
+              } catch (ex) {
+              }
+            }
+          </script>
+        </body>
+      </html>
+    `;
+  };
+
   const createReport = async (e?: any) => {
     if (e) {
       e.preventDefault();
@@ -329,8 +303,13 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       setShowToaster(true);
       return;
     }
-    if (tmpReportFiles.length === 0) {
-      setMessageToaster('Please upload at least one file.');
+    if (!url || url.trim().length === 0) {
+      setMessageToaster('URL is required.');
+      setShowToaster(true);
+      return;
+    }
+    if (!Helper.isValidUrlWithProtocol(url)) {
+      setMessageToaster('URL is not valid.');
       setShowToaster(true);
       return;
     }
@@ -354,33 +333,16 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       setBusy(false);
       return;
     }
-    const mainFile: TmpReportFile | undefined = tmpReportFiles.find((x: any) => x.main);
-    const kysoConfigFile: KysoConfigFile = new KysoConfigFile(
-      mainFile?.name || tmpReportFiles[0]!.name,
-      title,
-      description,
-      commonData.organization!.sluglified_name,
-      selectedTeam.name,
-      selectedTags,
-      ReportType.Markdown,
-    );
+    const kysoConfigFile: KysoConfigFile = new KysoConfigFile('index.html', title, description, commonData.organization!.sluglified_name, selectedTeam.name, selectedTags, ReportType.Markdown);
     kysoConfigFile.authors = selectedPeople.map((person: TeamMember) => person.email);
+    kysoConfigFile.url = url;
     delete (kysoConfigFile as any).team;
-    const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     const zip = new JSZip();
-    zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });
-    for (const tmpReportFile of tmpReportFiles) {
-      zip.file(tmpReportFile.name, tmpReportFile.file!);
-    }
+    const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
+    zip.file('kyso.json', blobKysoConfigFile);
+    const blobIndexHtml: Blob = new Blob([getEmbeddedReportHTML(title, url)], { type: 'plain/text' });
+    zip.file('index.html', blobIndexHtml);
     const blobZip: Blob = await zip.generateAsync({ type: 'blob' });
-    const resultKysoSettings: NormalizedResponseDTO<string> = await api.getSettingValue(KysoSettingsEnum.MAX_FILE_SIZE);
-    const maxFileSize: number = Helper.parseFileSizeStr(resultKysoSettings.data);
-    if (blobZip.size > maxFileSize) {
-      setMessageToaster(`You exceeded the maximum upload size permitted (${resultKysoSettings.data})`);
-      setShowToaster(true);
-      setBusy(false);
-      return;
-    }
     const formData: FormData = new FormData();
     formData.append('file', blobZip);
     setMessageToaster('Uploading report. Please wait ...');
@@ -394,153 +356,6 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     } catch (err: any) {
       setShowToaster(err.response.data.message);
       setBusy(false);
-    }
-  };
-
-  const updateReport = async (e?: any) => {
-    if (e) {
-      e.preventDefault();
-    }
-    setShowToaster(false);
-    if (!title || title.trim().length === 0) {
-      setMessageToaster('Title is required.');
-      setShowToaster(true);
-      return;
-    }
-    if (selectedTeam === null) {
-      setMessageToaster('Please select a channel.');
-      setShowToaster(true);
-      return;
-    }
-    if (tmpReportFiles.length === 0) {
-      setMessageToaster('Please upload at least one file.');
-      setShowToaster(true);
-      return;
-    }
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
-      return;
-    }
-    setBusy(true);
-    const unmodifiedFiles: string[] = [];
-    const deletedFiles: string[] = [];
-    let mainFile: TmpReportFile | null = null;
-
-    for (const tmpReportFile of tmpReportFiles) {
-      if (tmpReportFile.main) {
-        mainFile = tmpReportFile;
-      }
-      const kysoFile: KysoFile | undefined = reportFiles.find((kf: KysoFile) => {
-        return kf.id === tmpReportFile.id;
-      });
-      if (kysoFile) {
-        unmodifiedFiles.push(kysoFile.id!);
-      }
-    }
-
-    for (const kysoFile of reportFiles) {
-      const tmpReportFile: TmpReportFile | undefined = tmpReportFiles.find((trf: TmpReportFile) => {
-        return trf.id === kysoFile.id;
-      });
-      if (!tmpReportFile) {
-        deletedFiles.push(kysoFile.id!);
-      }
-    }
-    const kysoConfigFile: KysoConfigFile = new KysoConfigFile(
-      mainFile !== null ? (mainFile as TmpReportFile).name : tmpReportFiles[0]!.name,
-      title,
-      description,
-      commonData.organization!.sluglified_name,
-      selectedTeam.name,
-      selectedTags,
-      ReportType.Markdown,
-    );
-    kysoConfigFile.authors = selectedPeople.map((person: TeamMember) => person.email);
-    delete (kysoConfigFile as any).team;
-    const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
-    const zip: JSZip = new JSZip();
-    zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });
-    for (const tmpReportFile of tmpReportFiles) {
-      if (tmpReportFile.id === null) {
-        zip.file(tmpReportFile.name, tmpReportFile.file!);
-      }
-    }
-    const blobZip: Blob = await zip.generateAsync({ type: 'blob' });
-    const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, selectedTeam.name);
-    const resultKysoSettings: NormalizedResponseDTO<string> = await api.getSettingValue(KysoSettingsEnum.MAX_FILE_SIZE);
-    const maxFileSize: number = Helper.parseFileSizeStr(resultKysoSettings.data);
-    if (blobZip.size > maxFileSize) {
-      setMessageToaster(`You exceeded the maximum upload size permitted (${resultKysoSettings.data})`);
-      setShowToaster(true);
-      setBusy(false);
-      return;
-    }
-
-    const formData: FormData = new FormData();
-    formData.append('file', blobZip);
-    formData.append('version', report!.last_version.toString());
-    formData.append('unmodifiedFiles', JSON.stringify(unmodifiedFiles));
-    formData.append('deletedFiles', JSON.stringify(deletedFiles));
-    setMessageToaster('Updating report. Please wait ...');
-    setShowToaster(true);
-    try {
-      const responseUpdateReport: NormalizedResponseDTO<ReportDTO> = await api.updateUiReport(report!.id!, formData);
-      cleanStorage();
-      setShowToaster(false);
-      const updatedReport: ReportDTO = responseUpdateReport.data;
-      window.location.href = `/${updatedReport.organization_sluglified_name}/${updatedReport.team_sluglified_name}/${updatedReport.name}`;
-      setMessageToaster('Report updated successfully.');
-    } catch (err: any) {
-      console.log(err);
-      setShowToaster(err.response.data.message);
-      setBusy(false);
-    }
-  };
-
-  const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (!event.target.files) {
-      return;
-    }
-    const copyTmpReportFiles: TmpReportFile[] = [...tmpReportFiles];
-    const ignoredFiles: string[] = [];
-    for (const file of event.target.files) {
-      if (Helper.FORBIDDEN_FILES.includes(file.name)) {
-        ignoredFiles.push(file.name);
-        continue;
-      }
-      const index: number = tmpReportFiles.findIndex((f: TmpReportFile) => f.name === file.name);
-      if (index === -1) {
-        copyTmpReportFiles.push({
-          id: null,
-          name: file.name,
-          size: file.size,
-          main: false,
-          file,
-        });
-      } else {
-        copyTmpReportFiles[index] = {
-          id: null,
-          name: file.name,
-          size: file.size,
-          main: copyTmpReportFiles[index]!.main,
-          file,
-        };
-      }
-    }
-    if (copyTmpReportFiles.length > 0) {
-      const hasMainFile: boolean = copyTmpReportFiles.some((f: TmpReportFile) => f.main);
-      if (!hasMainFile) {
-        copyTmpReportFiles[0]!.main = true;
-      }
-    }
-    setTmpReportFiles(copyTmpReportFiles);
-    if (ignoredFiles.length > 0) {
-      setMessageToaster(
-        ignoredFiles.length === 1
-          ? `${ignoredFiles[0]} is a self-generated configuration file. It is not possible to upload it.`
-          : `The following files ${ignoredFiles.join(', ')} will not be uploaded. The system will generate a configuration file.`,
-      );
-      setShowToaster(true);
     }
   };
 
@@ -672,6 +487,22 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                 />
                 <textarea
                   style={{
+                    height: '55px',
+                    border: 'none',
+                    resize: 'none',
+                    outline: 'none',
+                    overflow: 'auto',
+                    WebkitBoxShadow: 'none',
+                    boxShadow: 'none',
+                  }}
+                  value={url || ''}
+                  disabled={isEdition()}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="Url"
+                  className={clsx('p-0 focus:shadow-sm 0 block w-full border-white border-0 rounded-md text-xl font-medium focus:text-gray-500 text-gray-900')}
+                />
+                <textarea
+                  style={{
                     border: 'none',
                     resize: 'none',
                     outline: 'none',
@@ -728,117 +559,17 @@ const CreateReport = ({ commonData, setUser }: Props) => {
         <div className="flex flex-row items-center">
           <div className="w-1/6"></div>
           <div className="w-4/6">
-            <div className="my-4">
-              <div className="sm:flex sm:items-center">
-                <div className="sm:flex-auto">
-                  <h1 className="text-xl font-semibold text-gray-900">Files</h1>
-                  <p className="mt-2 text-sm text-gray-700">list of files that make up the report.</p>
-                </div>
-                <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-                  <PureKysoButton type={busy ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY} disabled={busy} onClick={() => inputRef.current.click()}>
-                    <div className="flex flex-row items-center">
-                      <FolderAddIcon className="w-4 h-4 mr-2" />
-                      <span>Add files</span>
-                    </div>
-                  </PureKysoButton>
-                  <input
-                    ref={inputRef}
-                    multiple
-                    type="file"
-                    style={{ display: 'none' }}
-                    onChange={onUploadFile}
-                    onClick={(e: any) => {
-                      e.target.value = null;
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="mt-8 flex flex-col">
-                <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                  <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                    <div className="overflow-hidden shadow ring-1 ring-black ring-opacity/5 md:rounded-lg">
-                      <table className="min-w-full divide-y divide-gray-300">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                              Name
-                            </th>
-                            <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                              Size
-                            </th>
-                            <th scope="col" className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
-                              Main file
-                            </th>
-                            <th scope="col" className="py-3.5 pl-4 pr-3 text-right text-sm font-semibold text-gray-900 sm:pl-6">
-                              Actions
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-200 bg-white">
-                          {tmpReportFiles.length === 0 ? (
-                            <tr className="text-center">
-                              <td colSpan={4} className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                No files selected
-                              </td>
-                            </tr>
-                          ) : (
-                            tmpReportFiles.map((tmpReportFile: TmpReportFile, index: number) => (
-                              <tr key={tmpReportFile.name}>
-                                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{tmpReportFile.name}</td>
-                                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">{Helper.parseFileSize(tmpReportFile.size)}</td>
-                                <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                                  <input
-                                    checked={tmpReportFile.main}
-                                    onChange={() => {
-                                      const newTmpReportFiles: TmpReportFile[] = [...tmpReportFiles];
-                                      newTmpReportFiles.forEach((newTmpReportFile: TmpReportFile) => {
-                                        newTmpReportFile.main = false;
-                                      });
-                                      newTmpReportFiles[index]!.main = true;
-                                      setTmpReportFiles(newTmpReportFiles);
-                                    }}
-                                    name="main-file"
-                                    type="radio"
-                                    className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                  ></input>
-                                </td>
-                                <td className="whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                                  <button
-                                    onClick={() => {
-                                      const fs: TmpReportFile[] = [...tmpReportFiles];
-                                      fs.splice(index, 1);
-                                      if (tmpReportFile.main && fs.length > 0) {
-                                        // The user removed the main, file, we set as main the first one
-                                        fs[0]!.main = true;
-                                      }
-                                      setTmpReportFiles(fs);
-                                    }}
-                                    className="inline-flex items-center rounded border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 mr-4"
-                                  >
-                                    Remove
-                                  </button>
-                                </td>
-                              </tr>
-                            ))
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
             <div className="flex justify-end">
               <div className="flex flex-row items-center space-x-2">
                 <div className="mr-2 mt-2">
                   <PureKysoButton
                     type={KysoButton.SECONDARY}
                     onClick={() => {
-                      let url = `/${router.query.organizationName}`;
+                      let redirectUrl = `/${router.query.organizationName}`;
                       if (router.query.teamName) {
-                        url += `/${router.query.teamName}`;
+                        redirectUrl += `/${router.query.teamName}`;
                       }
-                      router.replace(url);
+                      router.replace(redirectUrl);
                     }}
                   >
                     <div className="flex flex-row items-center">Cancel</div>
@@ -850,13 +581,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                   <PureKysoButton
                     type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY}
                     disabled={!hasPermissionCreateReport || busy}
-                    onClick={() => {
-                      if (isEdition()) {
-                        updateReport();
-                      } else {
-                        createReport();
-                      }
-                    }}
+                    onClick={() => createReport()}
                     className="ml-2"
                   >
                     <div className="flex flex-row items-center">
@@ -888,6 +613,6 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   );
 };
 
-CreateReport.layout = KysoApplicationLayout;
+CreateEmbeddedReport.layout = KysoApplicationLayout;
 
-export default CreateReport;
+export default CreateEmbeddedReport;

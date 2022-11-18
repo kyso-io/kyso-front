@@ -523,6 +523,12 @@ const Index = ({ commonData, setUser }: Props) => {
 
   // END SEARCH USER
 
+  const onCaptchaSuccess = async () => {
+    const api: Api = new Api(commonData.token);
+    const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+    setUser(result.data);
+  };
+
   if (commonData.errorTeam) {
     return <div className="text-center mt-4">{commonData.errorTeam}</div>;
   }
@@ -557,6 +563,8 @@ const Index = ({ commonData, setUser }: Props) => {
                 onUpdateRoleMember={updateMemberRole}
                 onInviteNewUser={inviteNewUser}
                 onRemoveUser={removeUser}
+                captchaIsEnabled={captchaIsEnabled}
+                onCaptchaSuccess={onCaptchaSuccess}
               />
               {hasPermissionDeleteChannel && <UnpureDeleteChannelDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
               {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}

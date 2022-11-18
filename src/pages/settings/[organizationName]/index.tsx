@@ -120,7 +120,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setBio(commonData.organization!.bio);
       setLink(commonData.organization!.link);
       setLocation(commonData.organization!.location);
-      setAllowedAccessDomains(commonData.organization!.allowed_access_domains);
+      setAllowedAccessDomains(commonData.organization!.allowed_access_domains || []);
       if (commonData.organization?.options) {
         if (commonData.organization.options?.notifications) {
           setCentralizedNotifications(commonData.organization.options.notifications.centralized);
