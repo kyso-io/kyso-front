@@ -11,12 +11,12 @@ import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfo
 import {
   AddUserOrganizationDto,
   GlobalPermissionsEnum,
+  InviteUserDto,
   KysoSettingsEnum,
   OrganizationPermissionsEnum,
   ReportPermissionsEnum,
   TeamMembershipOriginEnum,
   UpdateOrganizationMembersDTO,
-  InviteUserDto,
   UserRoleDTO,
 } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -438,9 +438,16 @@ const Index = ({ commonData, setUser }: Props) => {
 
   // END ORGANIZATION MEMBERS
 
+  const onCaptchaSuccess = async () => {
+    const api: Api = new Api(commonData.token);
+    const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+    setUser(result.data);
+  };
+
   if (commonData.errorOrganization) {
     return <div className="text-center mt-4">{commonData.errorOrganization}</div>;
   }
+
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
@@ -467,6 +474,8 @@ const Index = ({ commonData, setUser }: Props) => {
               onUpdateRoleMember={updateMemberRole}
               onInviteNewUser={inviteNewUser}
               onRemoveUser={removeUser}
+              captchaIsEnabled={captchaIsEnabled}
+              onCaptchaSuccess={onCaptchaSuccess}
             />
             {hasPermissionDeleteOrganization && <UnpureDeleteOrganizationDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
             {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
