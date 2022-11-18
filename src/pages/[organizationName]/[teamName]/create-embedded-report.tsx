@@ -563,6 +563,22 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
               <div className="flex flex-row items-center space-x-2">
                 <div className="mr-2 mt-2">
                   <PureKysoButton
+                    type={KysoButton.SECONDARY}
+                    onClick={() => {
+                      let redirectUrl = `/${router.query.organizationName}`;
+                      if (router.query.teamName) {
+                        redirectUrl += `/${router.query.teamName}`;
+                      }
+                      router.replace(redirectUrl);
+                    }}
+                  >
+                    <div className="flex flex-row items-center">Cancel</div>
+                  </PureKysoButton>
+                </div>
+              </div>
+              <div className="flex flex-row items-center space-x-2">
+                <div className="mr-2 mt-2">
+                  <PureKysoButton
                     type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY}
                     disabled={!hasPermissionCreateReport || busy}
                     onClick={() => createReport()}
