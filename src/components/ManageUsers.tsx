@@ -18,6 +18,7 @@ import slugify from 'slugify';
 import { HelperPermissions } from '../helpers/check-permissions';
 import { Helper } from '../helpers/Helper';
 import type { Member } from '../types/member';
+import CaptchaModal from './CaptchaModal';
 import PureAvatar from './PureAvatar';
 import PureAvatarGroup from './PureAvatarGroup';
 
@@ -37,9 +38,11 @@ interface Props {
   onUpdateRoleMember: (userId: string, organizationRole: string, teamRole?: string) => void;
   onInviteNewUser: (email: string, organizationRole: string, teamRole?: string) => void;
   onRemoveUser: (userId: string, type: TeamMembershipOriginEnum) => void;
+  captchaIsEnabled: boolean;
+  onCaptchaSuccess: () => void;
 }
 
-const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles, onUpdateRoleMember, onInviteNewUser, onRemoveUser }: Props) => {
+const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles, onUpdateRoleMember, onInviteNewUser, onRemoveUser, captchaIsEnabled, onCaptchaSuccess }: Props) => {
   const router = useRouter();
   const [query, setQuery] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<UserDTO | Member | null>(null);
@@ -47,24 +50,19 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
   const [selectedOrgRole, setSelectedOrgRole] = useState<string>('');
   const [selectedTeamRole, setSelectedTeamRole] = useState<string>('');
   const [selectedMemberIndex, setSelectedMemberIndex] = useState<number>(-1);
-
   const [selectedOrgLabel, setSelectedOrgLabel] = useState<string>('Select an option');
   const [selectedTeamLabel, setSelectedTeamLabel] = useState<string>('Select an option');
-
   const [notificationType, setNotificationType] = useState<string>('');
   const [notificationMessage, setNotificationMessage] = useState<string>('');
-
   const [isEmail, setIsEmail] = useState<boolean>(false);
   const [inputDeleteUser, setInputDeleteUser] = useState<string>('');
   const [keyDeleteUser, setKeyDeleteUser] = useState<string>('');
   const [errorMessage, setErrorMessage] = useState<string>('');
-
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
     return HelperPermissions.checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || HelperPermissions.checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
   }, [commonData]);
   const isTeamAdmin: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
-
   const filteredMembers: Member[] = useMemo(() => {
     let m: Member[] = members;
     if (commonData?.team && commonData.team.visibility === TeamVisibilityEnum.PRIVATE) {
@@ -72,7 +70,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     }
     return m;
   }, [commonData?.team, members]);
-
   const organizationRoles: { value: string; label: string; description: string }[] = useMemo(() => {
     const data: { value: string; label: string; description: string }[] = [
       { value: 'organization-admin', label: 'Admin of this organization', description: `Can change organization's settings` },
@@ -90,7 +87,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     }
     return data;
   }, [selectedUser, members, users]);
-
   const teamRoles: { value: string; label: string; description: string }[] = useMemo(() => {
     const data: { value: string; label: string; description: string }[] = [
       { value: 'team-admin', label: 'Full access', description: `Can change this channel's settings` },
@@ -109,6 +105,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     }
     return data;
   }, [selectedUser, filteredMembers, users]);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (!query || query.length === 0) {
@@ -157,6 +154,13 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     setNotificationMessage('');
   }, 3000);
 
+  const onCloseCaptchaModal = (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      onCaptchaSuccess();
+    }
+  };
+
   const getInviteButton = () => {
     return (
       <React.Fragment>
@@ -171,6 +175,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                 : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
             )}
             onClick={() => {
+              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                setShowCaptchaModal(true);
+                return;
+              }
               onUpdateRoleMember(selectedUser.id, selectedOrgRole, selectedTeamRole);
               clearData();
             }}
@@ -189,6 +197,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                 : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
             )}
             onClick={() => {
+              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                setShowCaptchaModal(true);
+                return;
+              }
               onInviteNewUser(query, selectedOrgRole, selectedTeamRole);
               clearData();
             }}
@@ -432,6 +444,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                               )}
                               onClick={() => {
+                                if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                  setShowCaptchaModal(true);
+                                  return;
+                                }
                                 const member: Member = filteredMembers[selectedMemberIndex]!;
                                 onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
                                 clearData();
@@ -620,6 +636,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
                               )}
                               onClick={() => {
+                                if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                  setShowCaptchaModal(true);
+                                  return;
+                                }
                                 const member: Member = members[selectedMemberIndex]!;
                                 onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
                                 clearData();
@@ -647,6 +667,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
           );
         }}
       </Menu>
+      <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />
     </React.Fragment>
   );
 };
