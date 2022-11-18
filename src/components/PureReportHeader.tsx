@@ -84,7 +84,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
   return (
     <div className="w-full flex 2xl:flex-row lg:flex-col justify-between p-2">
       <div className="2xl:w-4/6 flex flex-col justify-between">
-        <h1 className="text-2xl font-medium">{report?.title}</h1>
+        <h1 className="text-2xl font-medium break-words">{report?.title}</h1>
         {description && <div className="text-sm break-words">{description}</div>}
         <div className="mt-3 flex text-sm flex-col lg:flex-row lg:items-top text-gray-500 font-light space-x-2 min-h-min">
           <div className="flex">
