@@ -1,3 +1,4 @@
+/* eslint no-new: "off" */
 import { KeyValue } from '@/model/key-value.model';
 import { fetchPublicKysoSettings, store } from '@kyso-io/kyso-store';
 import slugify from 'slugify';
@@ -85,4 +86,13 @@ export class Helper {
   };
 
   public static FORBIDDEN_FILES: string[] = ['kyso.json', 'kyso.yaml', 'kyso.yml'];
+
+  public static isValidUrlWithProtocol = (string: string): boolean => {
+    try {
+      new URL(string);
+      return true;
+    } catch (err) {
+      return false;
+    }
+  };
 }
