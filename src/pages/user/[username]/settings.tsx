@@ -142,6 +142,11 @@ const Index = ({ commonData, setUser }: Props) => {
     return null;
   }
 
+  let userpage = '/';
+  if (commonData.user?.username) {
+    userpage = commonData.user?.username;
+  }
+
   return (
     <div className="flex flex-row space-x-8 p-2 pt-10">
       <div className="w-2/12">
@@ -150,8 +155,13 @@ const Index = ({ commonData, setUser }: Props) => {
       <div className="w-8/12 flex flex-col space-y-8">
         {isCurrentUser ? (
           <div className="space-y-6 pt-8 sm:space-y-5 sm:pt-10">
-            <div>
+            <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4">
               <h3 className="text-lg font-medium leading-6 text-gray-900">Personal Information</h3>
+              <div className="mt-1 sm:col-span-2 sm:mt-0">
+                <a href={`/user/${userpage}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                  /user/{userpage}
+                </a>
+              </div>
             </div>
             <div className="space-y-6 sm:space-y-5">
               <div className="sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
