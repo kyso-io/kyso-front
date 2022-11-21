@@ -7,6 +7,8 @@ import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
 import { useMemo } from 'react';
+import { uuid } from 'uuidv4';
+import PureChangeReportImage from '@/components/PureChangeReportImage';
 import { HelperPermissions } from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureShareButton from './PureShareButton';
@@ -28,10 +30,15 @@ interface Props {
 }
 
 const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
+  const random: string = uuid();
+
   const hasPermissionReportGlobalPin: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.GLOBAL_PIN),
     [commonData.organization, commonData.team, commonData.user],
   );
+
+  const hasPermissionEditReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData, random]);
+
   const reportImage: string = useMemo(() => {
     if (report.preview_picture) {
       return report.preview_picture;
@@ -58,9 +65,7 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
     <div className={classNames(report.pin || report.user_pin ? ' border border-indigo-600' : '', 'bg-white rounded border')}>
       <div className="relative flex space-x-2">
         <div className="shrink-0">
-          <div className="bg-stripes-sky-blue rounded-tl-lg text-center overflow-hidden mx-auto border-r border-r-gray-200">
-            <img className="object-cover" style={{ width: 200, height: 200 }} src={reportImage} alt="report preview image" />
-          </div>
+          <PureChangeReportImage commonData={commonData} hasPermissionEditReport={hasPermissionEditReport} reportImage={reportImage} report={report} />
         </div>
         <div className="flex-1 min-w-0 py-3 pr-3 relative">
           <a href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
