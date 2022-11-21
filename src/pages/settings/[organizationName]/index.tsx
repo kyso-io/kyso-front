@@ -228,7 +228,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (centralizedNotifications && emailsCentralizedNotifications.length === 0) {
       setShowToaster(true);
-      setErrorNewEmail('Please enter at least one valid email');
+      setMessageToaster('Please enter at least one valid email for centralized notifications');
       return;
     }
     try {
@@ -770,7 +770,7 @@ const Index = ({ commonData, setUser }: Props) => {
                       )}
                     </React.Fragment>
                   )}
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Configure your custom login page</h3>
+                  {/* <h3 className="text-lg font-medium leading-6 text-gray-900">Configure your custom login page</h3>
                   <div className="mt-4 space-y-4">
                     <div className="relative flex items-start">
                       <div className="flex h-5 items-center">
@@ -837,7 +837,7 @@ const Index = ({ commonData, setUser }: Props) => {
                         <label className="font-medium text-gray-700">Allow login with Google</label>
                       </div>
                     </div>
-                  </div>
+                  </div> */}
                   <div className="pt-5 sm:border-t sm:border-gray-200">
                     <div className="flex justify-end">
                       <button
