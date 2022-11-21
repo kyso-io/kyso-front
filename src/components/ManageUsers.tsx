@@ -107,6 +107,24 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
   }, [selectedUser, filteredMembers, users]);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
+  const showErrorDomain: boolean = useMemo(() => {
+    if (query && isEmail && isOrgAdmin && commonData.organization) {
+      let showError = true;
+      if (commonData.organization?.allowed_access_domains && commonData.organization.allowed_access_domains.length > 0) {
+        for (const domain of commonData.organization.allowed_access_domains) {
+          if (query.endsWith(domain)) {
+            showError = false;
+            break;
+          }
+        }
+      } else {
+        showError = false;
+      }
+      return showError;
+    }
+    return false;
+  }, [query, isEmail, isOrgAdmin, commonData.organization]);
+
   useEffect(() => {
     if (!query || query.length === 0) {
       setRequesting(false);
@@ -399,36 +417,40 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           </div>
                           <div className="flex-1" style={{ marginLeft: 10 }}>
                             <p className="text-xs font-medium text-gray-900 truncate mt-1">{query}</p>
-                            <div className="flex flex-row">
-                              {organizationRoles && (
-                                <div>
-                                  <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
-                                  <ListboxWithText
-                                    selectedLabel={selectedOrgLabel}
-                                    disabled={!isOrgAdmin}
-                                    roles={organizationRoles}
-                                    setSelectedRole={(value) => {
-                                      setSelectedOrgRole(value);
-                                    }}
-                                    setSelectedLabel={(label) => setSelectedOrgLabel(label)}
-                                  />
-                                </div>
-                              )}
-                              {showTeamRoles && teamRoles && (
-                                <div className="ml-4">
-                                  <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Channel Role</p>
-                                  <ListboxWithText
-                                    selectedLabel={selectedTeamLabel}
-                                    disabled={!isOrgAdmin && !isTeamAdmin}
-                                    roles={teamRoles}
-                                    setSelectedRole={(value) => {
-                                      setSelectedTeamRole(value);
-                                    }}
-                                    setSelectedLabel={(label) => setSelectedTeamLabel(label)}
-                                  />
-                                </div>
-                              )}
-                            </div>
+                            {showErrorDomain ? (
+                              <p className="truncate text-sm text-red-500 mt-2">User email domain is not allowed</p>
+                            ) : (
+                              <div className="flex flex-row">
+                                {organizationRoles && (
+                                  <div>
+                                    <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Organization Role</p>
+                                    <ListboxWithText
+                                      selectedLabel={selectedOrgLabel}
+                                      disabled={!isOrgAdmin}
+                                      roles={organizationRoles}
+                                      setSelectedRole={(value) => {
+                                        setSelectedOrgRole(value);
+                                      }}
+                                      setSelectedLabel={(label) => setSelectedOrgLabel(label)}
+                                    />
+                                  </div>
+                                )}
+                                {showTeamRoles && teamRoles && (
+                                  <div className="ml-4">
+                                    <p className="mt-1 mr-1 block w-full pl-1 pr-10 pt-3 text-xs font-medium text-gray-600 truncate ">Channel Role</p>
+                                    <ListboxWithText
+                                      selectedLabel={selectedTeamLabel}
+                                      disabled={!isOrgAdmin && !isTeamAdmin}
+                                      roles={teamRoles}
+                                      setSelectedRole={(value) => {
+                                        setSelectedTeamRole(value);
+                                      }}
+                                      setSelectedLabel={(label) => setSelectedTeamLabel(label)}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                         <div className="flex flex-row-reverse">
