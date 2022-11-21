@@ -228,7 +228,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (centralizedNotifications && emailsCentralizedNotifications.length === 0) {
       setShowToaster(true);
-      setMessageToaster('Please enter at least one valid email for centrilized notifications');
+      setMessageToaster('Please enter at least one valid email for centralized notifications');
       return;
     }
     try {
