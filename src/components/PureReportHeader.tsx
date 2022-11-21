@@ -26,7 +26,6 @@ type IPureReportHeaderProps = {
   version?: string;
   versions: Version[];
   onUpvoteReport: () => void;
-  openMetadata: () => void;
   commonData: CommonData;
   hasPermissionEditReport: boolean;
   hasPermissionDeleteReport: boolean;
@@ -55,7 +54,6 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
     version,
     reportUrl,
     onUpvoteReport,
-    openMetadata,
     commonData,
     hasPermissionEditReport,
     hasPermissionDeleteReport,
@@ -181,7 +179,6 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
                 commonData={commonData}
                 hasPermissionDeleteReport={hasPermissionDeleteReport}
                 hasPermissionEditReport={hasPermissionEditReport}
-                openMetadata={openMetadata}
                 fileToRender={fileToRender}
                 onSetFileAsMainFile={onSetFileAsMainFile}
                 version={version}
