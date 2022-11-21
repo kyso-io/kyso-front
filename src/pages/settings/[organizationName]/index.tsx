@@ -414,13 +414,13 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       await api.deleteOrganization(commonData.organization!.id!);
+      window.location.href = '/settings';
     } catch (error: any) {
       console.log(error.response.data.message);
       setShowDeleteOrgModal(false);
       setTextOrgModal('');
       setRequesting(false);
     }
-    window.location.href = '/';
   };
 
   const onCloseCaptchaModal = async (refreshUser: boolean) => {
@@ -1270,6 +1270,11 @@ const Index = ({ commonData, setUser }: Props) => {
                           type="text"
                           onChange={(e) => setTextOrgModal(e.target.value)}
                           className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter' && textOrgModal === commonData.organization?.sluglified_name && !requesting) {
+                              deleteOrganization();
+                            }
+                          }}
                         />
                       </div>
                     </div>
