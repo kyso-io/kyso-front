@@ -147,7 +147,9 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
                 e.preventDefault();
                 setValue('');
               }}
-              className={classNames('inline-flex items-center px-2 py-1 text-xs text-gray-500 hover:underline font-medium focus:outline-none focus:ring-0')}
+              className={classNames(
+                'mr-2 inline-flex items-center px-2.5 py-1.5 border border-gray-500 text-xs font-medium rounded shadow-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white hover:bg-gray-100 focus:ring-gray-100',
+              )}
             >
               Cancel
             </button>
