@@ -49,18 +49,8 @@ const Index = () => {
   const [enableKysoAuth, setEnableKysoAuth] = useState(true);
   const [enablePingSamlAuth, setEnablePingSamlAuth] = useState(true);
   const [pingUrl, setPingUrl] = useState('');
-
-  const [rightLogo, setRightLogo] = useState(null);
-  const [leftLogo, setLeftLogo] = useState('/assets/images/kyso-logo-and-name-dark.svg');
-
-  const [globalCss, setglobalCss] = useState(false);
-  const [headerCss, setHeaderCss] = useState(false);
-  const [buttonCss, setButtonCss] = useState(false);
-  const [buttonHoverCss, setButtonHoverCss] = useState(false);
-  const [linkCss, setLinkCss] = useState(false);
-  const [showdivCss, setShowdivCss] = useState(false);
-  const [hiddendivCss, setHiddendivCss] = useState(false);
   const [isKysoOpen, openKysoButton] = useState(false);
+  const [theme, setTheme] = useState<string>('default');
 
   useEffect(() => {
     const getOrganizationOptions = async () => {
@@ -111,30 +101,8 @@ const Index = () => {
       setEnableKysoAuth(tmpEnableKysoAuth);
       setEnablePingSamlAuth(tmpEnablePingSamlAuth);
 
-      const custumizeLeftLogo = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LEFT_LOGO_URL).value;
-      const custumizeRightLogo = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_RIGHT_LOGO_URL).value;
-
-      if (custumizeLeftLogo) {
-        setLeftLogo(custumizeLeftLogo);
-      }
-      if (custumizeRightLogo) {
-        setRightLogo(custumizeRightLogo);
-      }
-
-      const customizeGlobalCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_CSS_STYLES).value;
-      const customizeHeaderCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HEADER_CSS_STYLES)?.value;
-      const customizeButtonCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_CSS_STYLES)?.value;
-      const customizeButtonHoverCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_BUTTON_HOVER_CSS_STYLES)?.value;
-      const customizeLinkCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_LINK_CSS_STYLES)?.value;
-      const customizeShowdivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_SHOWDIV_CSS_STYLES)?.value;
-      const customizeHiddendivCss = publicKeys.find((x) => x.key === KysoSettingsEnum.CUSTOMIZE_LOGIN_HIDDENDIV_CSS_STYLES)?.value;
-      setglobalCss(customizeGlobalCss);
-      setHeaderCss(customizeHeaderCss);
-      setButtonCss(customizeButtonCss);
-      setButtonHoverCss(customizeButtonHoverCss);
-      setLinkCss(customizeLinkCss);
-      setShowdivCss(customizeShowdivCss);
-      setHiddendivCss(customizeHiddendivCss);
+      const themeValue: string = publicKeys.find((x) => x.key === KysoSettingsEnum.THEME).value;
+      setTheme(themeValue ?? 'default');
 
       return '';
     };
@@ -227,12 +195,10 @@ const Index = () => {
       </Head>
 
       <div className="w-full min-h-full flex flex-col">
-        {(leftLogo || rightLogo) && (
-          <div className="border-b p-4 flex flex-row items-center justify-between">
-            {leftLogo && <img src={leftLogo} className="h-8" alt="logo" />}
-            {rightLogo && <img src={rightLogo} className="h-8" alt="logo" />}
-          </div>
-        )}
+        <div className="border-b p-4 flex flex-row items-center justify-between">
+          <img className="h-8 theme-left-logo" alt="Left logo" />
+          <img className="h-8 theme-right-logo" alt="Right logo" />
+        </div>
         <div className="text-right">{notification && <PureNotification message={notification} type={notificationType} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col mt-20 items-center mx-auto max-w-[1400px] space-x-10">
           <KysoDescription />
@@ -434,29 +400,7 @@ const Index = () => {
             </div>
           </div>
         </main>
-        <style jsx global>{`
-          html * {
-            ${globalCss};
-          }
-          .login-header {
-            ${headerCss}
-          }
-          .login-btn {
-            ${buttonCss};
-          }
-          .login-btn:hover {
-            ${buttonHoverCss}
-          }
-          .login-link {
-            ${linkCss};
-          }
-          .shown-div {
-            ${showdivCss}
-          }
-          .hidden-div {
-            ${hiddendivCss}
-          }
-        `}</style>
+        <link rel="stylesheet" href={`/pub/themes/${theme}/styles.css`}></link>
       </div>
     </>
   );
