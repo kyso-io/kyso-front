@@ -7,6 +7,8 @@ import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import classNames from '@/helpers/class-names';
 import { getReport } from '@/helpers/get-report';
+import { v4 as uuidv4 } from 'uuid';
+// import { uuid } from 'uuidv4'; -> gives me a console.log error
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import useIsInViewport from '@/hooks/use-is-in-viewport';
@@ -42,7 +44,6 @@ import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import { Tooltip } from 'primereact/tooltip';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { uuid } from 'uuidv4';
 import CaptchaModal from '../../../../components/CaptchaModal';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 import { FileTypesHelper } from '../../../../helpers/FileTypesHelper';
@@ -492,7 +493,8 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 
   // Edge case in which when someone removes himself as author, as the commonData is still the same, continue having visibility about the actions he/her
   // could do as author. For that a random ID is placed, to force the useMemo to reload the data
-  const random: string = uuid();
+  // const random: string = uuid();
+  const random: string = uuidv4();
 
   const hasPermissionCreateComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, CommentPermissionsEnum.CREATE), [commonData, random]);
   const hasPermissionReadComment: boolean = useMemo(
