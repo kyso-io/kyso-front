@@ -50,7 +50,6 @@ const Index = () => {
   const [enablePingSamlAuth, setEnablePingSamlAuth] = useState(true);
   const [pingUrl, setPingUrl] = useState('');
   const [isKysoOpen, openKysoButton] = useState(false);
-  const [theme, setTheme] = useState<string>('default');
 
   useEffect(() => {
     const getOrganizationOptions = async () => {
@@ -100,9 +99,6 @@ const Index = () => {
       setEnableBitbucketAuth(tmpEnableBitbucketAuth);
       setEnableKysoAuth(tmpEnableKysoAuth);
       setEnablePingSamlAuth(tmpEnablePingSamlAuth);
-
-      const themeValue: string = publicKeys.find((x) => x.key === KysoSettingsEnum.THEME).value;
-      setTheme(themeValue ?? 'default');
 
       return '';
     };
@@ -400,7 +396,6 @@ const Index = () => {
             </div>
           </div>
         </main>
-        <link rel="stylesheet" href={`/pub/themes/${theme}/styles.css`}></link>
       </div>
     </>
   );
