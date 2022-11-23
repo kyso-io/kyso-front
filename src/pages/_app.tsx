@@ -1,4 +1,5 @@
 import '../styles/globals.css';
+import '../styles/styles.css';
 
 import type { ReactNode } from 'react';
 import { store } from '@kyso-io/kyso-store';

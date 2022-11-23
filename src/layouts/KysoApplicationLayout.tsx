@@ -4,6 +4,7 @@ import type { CommonData } from '@/types/common-data';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import type { ReportData } from '@/types/report-data';
 import type { NormalizedResponseDTO, Organization, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
@@ -11,8 +12,10 @@ import React, { useEffect, useState } from 'react';
 import { checkJwt } from '../helpers/check-jwt';
 import { getCommonData } from '../helpers/get-common-data';
 import { getReport } from '../helpers/get-report';
+import { Helper } from '../helpers/Helper';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
 import { useAppDispatch } from '../hooks/redux-hooks';
+import type { KeyValue } from '../model/key-value.model';
 
 type IUnpureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -20,6 +23,7 @@ type IUnpureKysoApplicationLayoutProps = {
 
 const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplicationLayoutProps) => {
   const router = useRouter();
+  const [theme, setTheme] = useState<string | null>(null);
   const [commonData, setCommonData] = useState<CommonData>({
     permissions: null,
     token: null,
@@ -60,6 +64,13 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
 
   useEffect(() => {
     checkJwt();
+    const getTheme = async () => {
+      const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
+      const keyValue: KeyValue | undefined = publicKeys.find((x) => x.key === KysoSettingsEnum.THEME);
+      if (keyValue && keyValue.value) {
+        setTheme(keyValue.value);
+      }
+    };
     const getData = async () => {
       const token: string | null = getLocalStorageItem('jwt');
       // TODO: remove use of store in the near future
@@ -84,6 +95,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       setCommonData({ ...commonData, user, permissions, token });
     };
     getData();
+    getTheme();
   }, []);
 
   useEffect(() => {
@@ -138,9 +150,12 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   };
 
   return (
-    <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
-      {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
-    </PureKysoApplicationLayout>
+    <React.Fragment>
+      <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
+        {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
+      </PureKysoApplicationLayout>
+      {theme && <link rel="stylesheet" href={`/pub/themes/${theme}/styles.css`}></link>}
+    </React.Fragment>
   );
 };
 export default KysoApplicationLayout;
