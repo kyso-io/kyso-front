@@ -18,7 +18,10 @@ type AppLayoutProps = AppProps & {
 };
 
 function MyApp({ Component, pageProps }: AppLayoutProps) {
+  // Added theme management
   const [theme, setTheme] = useState<string | null>(null);
+
+  const Layout = Component.layout || ((children: ReactNode) => <>{children}</>);
 
   useEffect(() => {
     const getTheme = async () => {
@@ -31,7 +34,6 @@ function MyApp({ Component, pageProps }: AppLayoutProps) {
     getTheme();
   }, []);
 
-  const Layout = Component.layout || ((children: ReactNode) => <>{children}</>);
   return (
     <>
       <Provider store={store}>
@@ -39,6 +41,7 @@ function MyApp({ Component, pageProps }: AppLayoutProps) {
           <Component {...pageProps} />
         </Layout>
       </Provider>
+
       {theme && <link rel="stylesheet" href={`/pub/themes/${theme}/styles.css`}></link>}
     </>
   );
