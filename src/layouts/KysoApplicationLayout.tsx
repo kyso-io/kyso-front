@@ -138,9 +138,11 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   };
 
   return (
-    <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
-      {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
-    </PureKysoApplicationLayout>
+    <React.Fragment>
+      <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
+        {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
+      </PureKysoApplicationLayout>
+    </React.Fragment>
   );
 };
 export default KysoApplicationLayout;

@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { LayoutProps } from '@/types/pageWithLayout';
 
 import { Meta } from './Meta';
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const AdminLayout: LayoutProps = ({ children }: any) => {
   return (
     <>

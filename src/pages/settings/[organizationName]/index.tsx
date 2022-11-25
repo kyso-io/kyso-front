@@ -438,6 +438,26 @@ const Index = ({ commonData, setUser }: Props) => {
     }
   };
 
+  const exportMembersInCsv = async () => {
+    setRequesting(true);
+    try {
+      const api: Api = new Api(commonData.token);
+      const result: Buffer = await api.exportOrganizationMembers(commonData.organization!.id!);
+      const blob: Blob = new Blob([result], { type: 'text/csv;charset=utf-8;' });
+      const url: string = URL.createObjectURL(blob);
+      const aLink = document.createElement('a');
+      aLink.setAttribute('href', url);
+      aLink.setAttribute('download', `${commonData.organization?.sluglified_name}-members.csv`);
+      aLink.style.visibility = 'hidden';
+      document.body.appendChild(aLink);
+      aLink.click();
+      document.body.removeChild(aLink);
+    } catch (e) {
+      console.error(e);
+    }
+    setRequesting(false);
+  };
+
   if (userIsLogged === null) {
     return null;
   }
@@ -951,7 +971,21 @@ const Index = ({ commonData, setUser }: Props) => {
               </div>
             )}
             {/* ORGANIZATION MEMBERS */}
-            <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({members.length}):</h3>
+            <div className="flex justify-between items-center">
+              <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({members.length}):</h3>
+              {isOrgAdmin && (
+                <button
+                  className={clsx(
+                    'rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                    requesting ? 'opacity-50 cursor-not-allowed' : '',
+                  )}
+                  disabled={requesting}
+                  onClick={exportMembersInCsv}
+                >
+                  Export members
+                </button>
+              )}
+            </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               {members.map((member: Member) => {
                 const labelRole: string = member.organization_roles.length > 0 && OrganizationRoleToLabel[member.organization_roles[0]!] ? OrganizationRoleToLabel[member.organization_roles[0]!]! : '';

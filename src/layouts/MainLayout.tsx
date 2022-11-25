@@ -1,8 +1,8 @@
-import type { LayoutProps } from '@/types/pageWithLayout';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Footer } from '@/components/Footer';
+import type { LayoutProps } from '@/types/pageWithLayout';
 import { Disclosure } from '@headlessui/react';
 
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
 const MainLayout: LayoutProps = ({ children }: any) => {
   return (
     <div className="flex flex-col min-h-screen">
