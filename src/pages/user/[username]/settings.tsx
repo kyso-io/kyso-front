@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { InformationCircleIcon } from '@heroicons/react/outline';
-import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
+import type { ReactElement } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import CaptchaModal from '../../../components/CaptchaModal';
 import PureAvatar from '../../../components/PureAvatar';
@@ -39,6 +40,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [showToasterEmailVerification, setShowToasterEmailVerification] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
+  const [toasterIcon, setIcon] = useState<ReactElement>(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [sentVerificationEmail, setSentVerificationEmail] = useState<boolean>(false);
   // const [showErrorBio, setShowErrorBio] = useState<boolean>(false);
@@ -95,10 +97,12 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (commonData.user?.email_verified === false) {
       setShowToaster(true);
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster('Please verify your email');
       return;
     }
     try {
+      setIcon(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
       setMessageToaster('Updating profile...');
       const api: Api = new Api(commonData.token);
       if (file !== null) {
@@ -325,17 +329,11 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         )}
       </div>
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        icon={<InformationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
+      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={toasterIcon} message={messageToaster} backgroundColor={TailwindColor.SLATE_50} />
       <ToasterNotification
         show={showToasterEmailVerification}
         setShow={setShowToasterEmailVerification}
-        icon={<CheckIcon className="h-6 w-6 text-green-400" aria-hidden="true" />}
+        icon={toasterIcon}
         message="Verification e-mail sent."
         backgroundColor={TailwindColor.SLATE_50}
       />

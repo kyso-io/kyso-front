@@ -18,18 +18,8 @@
     // Configuration for TypeScript files
     {
       "files": ["**/*.ts", "**/*.tsx"],
-      "plugins": [
-        "@typescript-eslint",
-        "unused-imports",
-        "tailwindcss",
-        "simple-import-sort"
-      ],
-      "extends": [
-        "plugin:tailwindcss/recommended",
-        "airbnb-typescript",
-        "next/core-web-vitals",
-        "plugin:prettier/recommended"
-      ],
+      "plugins": ["@typescript-eslint", "unused-imports", "tailwindcss", "simple-import-sort"],
+      "extends": ["plugin:tailwindcss/recommended", "airbnb-typescript", "next/core-web-vitals", "plugin:prettier/recommended"],
       "parserOptions": {
         "project": "./tsconfig.json"
       },
@@ -75,22 +65,14 @@
         "@typescript-eslint/no-unused-vars": "off",
         "@next/next/no-html-link-for-pages": "off",
         "unused-imports/no-unused-imports": "error",
-        "unused-imports/no-unused-vars": [
-          "error",
-          { "argsIgnorePattern": "^_" }
-        ]
+        "unused-imports/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }]
       }
     },
     // Configuration for testing
     {
       "files": ["**/*.test.ts", "**/*.test.tsx"],
       "plugins": ["jest", "jest-formatting", "testing-library", "jest-dom"],
-      "extends": [
-        "plugin:jest/recommended",
-        "plugin:jest-formatting/recommended",
-        "plugin:testing-library/react",
-        "plugin:jest-dom/recommended"
-      ]
+      "extends": ["plugin:jest/recommended", "plugin:jest-formatting/recommended", "plugin:testing-library/react", "plugin:jest-dom/recommended"]
     }
   ]
 }

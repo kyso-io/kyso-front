@@ -50,7 +50,6 @@
     "lodash.debounce": "^4.0.8",
     "mermaid": "^9.1.6",
     "moment": "^2.29.4",
-    "next": "^12.1.6",
     "next-seo": "^5.4.0",
     "plotly": "^1.0.6",
     "primereact": "^8.7.2",

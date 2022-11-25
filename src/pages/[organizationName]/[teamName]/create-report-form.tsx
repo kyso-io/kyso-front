@@ -21,7 +21,7 @@ import 'easymde/dist/easymde.min.css';
 import FormData from 'form-data';
 import JSZip from 'jszip';
 import { useRouter } from 'next/router';
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, ReactElement } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import CaptchaModal from '../../../components/CaptchaModal';
 import { ForbiddenCreateReport } from '../../../components/ForbiddenCreateReport';
@@ -48,6 +48,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
+  const [toasterIcon, setIcon] = useState<ReactElement>(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const inputRef = useRef<any>(null);
   const [title, setTitle] = useState('');
@@ -320,16 +321,19 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     }
     setShowToaster(false);
     if (!title || title.trim().length === 0) {
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster('Title is required.');
       setShowToaster(true);
       return;
     }
     if (selectedTeam === null) {
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster('Please select a channel.');
       setShowToaster(true);
       return;
     }
     if (tmpReportFiles.length === 0) {
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster('Please upload at least one file.');
       setShowToaster(true);
       return;
@@ -343,6 +347,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     try {
       const exists: boolean = await api.reportExists(selectedTeam.id, slugify(title));
       if (exists) {
+        setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
         setMessageToaster('Report with this name already exists. Change the title.');
         setShowToaster(true);
         setBusy(false);
@@ -376,6 +381,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     const resultKysoSettings: NormalizedResponseDTO<string> = await api.getSettingValue(KysoSettingsEnum.MAX_FILE_SIZE);
     const maxFileSize: number = Helper.parseFileSizeStr(resultKysoSettings.data);
     if (blobZip.size > maxFileSize) {
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster(`You exceeded the maximum upload size permitted (${resultKysoSettings.data})`);
       setShowToaster(true);
       setBusy(false);
@@ -383,6 +389,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     }
     const formData: FormData = new FormData();
     formData.append('file', blobZip);
+    setIcon(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
     setMessageToaster('Uploading report. Please wait ...');
     setShowToaster(true);
     try {
@@ -403,16 +410,19 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     }
     setShowToaster(false);
     if (!title || title.trim().length === 0) {
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster('Title is required.');
       setShowToaster(true);
       return;
     }
     if (selectedTeam === null) {
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster('Please select a channel.');
       setShowToaster(true);
       return;
     }
     if (tmpReportFiles.length === 0) {
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster('Please upload at least one file.');
       setShowToaster(true);
       return;
@@ -470,6 +480,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     const resultKysoSettings: NormalizedResponseDTO<string> = await api.getSettingValue(KysoSettingsEnum.MAX_FILE_SIZE);
     const maxFileSize: number = Helper.parseFileSizeStr(resultKysoSettings.data);
     if (blobZip.size > maxFileSize) {
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster(`You exceeded the maximum upload size permitted (${resultKysoSettings.data})`);
       setShowToaster(true);
       setBusy(false);
@@ -481,6 +492,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     formData.append('version', report!.last_version.toString());
     formData.append('unmodifiedFiles', JSON.stringify(unmodifiedFiles));
     formData.append('deletedFiles', JSON.stringify(deletedFiles));
+    setIcon(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
     setMessageToaster('Updating report. Please wait ...');
     setShowToaster(true);
     try {
@@ -535,6 +547,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     }
     setTmpReportFiles(copyTmpReportFiles);
     if (ignoredFiles.length > 0) {
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster(
         ignoredFiles.length === 1
           ? `${ignoredFiles[0]} is a self-generated configuration file. It is not possible to upload it.`
@@ -698,6 +711,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                       setSelectedPeopleDelay(newSelectedPeople);
                       setShowToaster(false);
                     } else {
+                      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
                       setMessageToaster('At least one author is required');
                       setShowToaster(true);
                     }
@@ -872,7 +886,8 @@ const CreateReport = ({ commonData, setUser }: Props) => {
         <ToasterNotification
           show={showToaster}
           setShow={setShowToaster}
-          icon={busy ? <InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" /> : <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
+          // icon={busy ? <InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" /> : <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
+          icon={toasterIcon}
           message={messageToaster}
         />
         {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
