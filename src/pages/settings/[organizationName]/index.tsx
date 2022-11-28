@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint no-prototype-builtins: "off" */
+/* eslint no-continue: "off" */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
-import { ExclamationCircleIcon, LinkIcon, MailIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, OrganizationMember } from '@kyso-io/kyso-model';
+import { BookOpenIcon, ChatAlt2Icon, ExclamationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
+import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, Team, TeamInfoDto } from '@kyso-io/kyso-model';
 import { AddUserOrganizationDto, GlobalPermissionsEnum, InviteUserDto, KysoSettingsEnum, OrganizationPermissionsEnum, UpdateOrganizationMembersDTO, UserDTO, UserRoleDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
@@ -15,6 +16,7 @@ import CaptchaModal from '../../../components/CaptchaModal';
 import PureAvatar from '../../../components/PureAvatar';
 import SettingsAside from '../../../components/SettingsAside';
 import ToasterNotification from '../../../components/ToasterNotification';
+import { OrganizationSettingsTab } from '../../../enums/organization-settings-tab';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import { Helper } from '../../../helpers/Helper';
@@ -37,26 +39,7 @@ interface Props {
   setUser: (user: UserDTO) => void;
 }
 
-enum Tab {
-  Members = 'members',
-  Access = 'access',
-  Notifications = 'notifications',
-}
-
-const tabs: { key: Tab; name: string }[] = [
-  {
-    key: Tab.Members,
-    name: 'Members',
-  },
-  {
-    key: Tab.Access,
-    name: 'Access',
-  },
-  {
-    key: Tab.Notifications,
-    name: 'Notifications',
-  },
-];
+type TeamInfo = Team & TeamInfoDto;
 
 const debouncedFetchData = debounce((cb: () => void) => {
   cb();
@@ -65,6 +48,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
 const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
+  const { tab, edit } = router.query;
   const ref = useRef<any>(null);
   const [query, setQuery] = useState<string>('');
   const [users, setUsers] = useState<UserDTO[]>([]);
@@ -115,7 +99,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [showDeleteOrgModal, setShowDeleteOrgModal] = useState<boolean>(false);
   const [textOrgModal, setTextOrgModal] = useState<string>('');
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
-  const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Access);
+  const [selectedTab, setSelectedTab] = useState<OrganizationSettingsTab>(OrganizationSettingsTab.Channels);
   const notificationsChanged: boolean = useMemo(() => {
     if (!commonData.organization) {
       return false;
@@ -137,6 +121,36 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     return !Helper.arrayEquals(commonData.organization!.allowed_access_domains, allowedAccessDomains);
   }, [commonData.organization, allowedAccessDomains]);
+  const [teamsInfo, setTeamsInfo] = useState<TeamInfo[]>([]);
+
+  useEffect(() => {
+    if (!edit) {
+      return;
+    }
+    setEditing(edit === 'true');
+  }, [edit]);
+
+  useEffect(() => {
+    if (!tab) {
+      return;
+    }
+    switch (tab) {
+      case OrganizationSettingsTab.Channels:
+        setSelectedTab(OrganizationSettingsTab.Channels);
+        break;
+      case OrganizationSettingsTab.Members:
+        setSelectedTab(OrganizationSettingsTab.Members);
+        break;
+      case OrganizationSettingsTab.Access:
+        setSelectedTab(OrganizationSettingsTab.Access);
+        break;
+      case OrganizationSettingsTab.Notifications:
+        setSelectedTab(OrganizationSettingsTab.Notifications);
+        break;
+      default:
+        break;
+    }
+  }, [tab]);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -219,6 +233,31 @@ const Index = ({ commonData, setUser }: Props) => {
       }, 1000);
     }
   }, [showDeleteOrgModal]);
+
+  useEffect(() => {
+    if (!commonData.organization || !commonData.permissions || !commonData.permissions.teams) {
+      return;
+    }
+    const getTeamsInfo = async () => {
+      try {
+        const api: Api = new Api(commonData.token);
+        const result: NormalizedResponseDTO<TeamInfoDto[]> = await api.getTeamsInfo();
+        const data: TeamInfo[] = [];
+        for (const teamInfoDto of result.data) {
+          const team: Team | null = result.relations?.team && result.relations.team[teamInfoDto.team_id] ? result.relations.team[teamInfoDto.team_id] : null;
+          if (!team) {
+            continue;
+          }
+          if (team.organization_id !== commonData.organization!.id!) {
+            continue;
+          }
+          data.push({ ...teamInfoDto, ...team } as any);
+        }
+        setTeamsInfo(data);
+      } catch (e) {}
+    };
+    getTeamsInfo();
+  }, [commonData.permissions, commonData.organization]);
 
   const onChangeInputFile = (e: any) => {
     if (e.target.files.length > 0) {
@@ -704,32 +743,97 @@ const Index = ({ commonData, setUser }: Props) => {
             </div>
 
             {/* TABS */}
-            <div className="hidden sm:block">
-              <div className="border-b border-gray-200">
-                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                  {tabs.map((tab: { key: Tab; name: string }) => (
-                    <a
-                      key={tab.name}
-                      href="#"
-                      onClick={(e: any) => {
-                        e.preventDefault();
-                        setSelectedTab(tab.key);
-                      }}
-                      className={clsx(
-                        tab.key === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                        'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
-                      )}
-                      aria-current={tab.key === selectedTab ? 'page' : undefined}
-                    >
-                      {tab.name}
-                    </a>
-                  ))}
-                </nav>
+            {!editing && (
+              <div className="hidden sm:block">
+                <div className="border-b border-gray-200">
+                  <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                    {Helper.organizationSettingsTabs.map((organizationSettingsTab: { key: OrganizationSettingsTab; name: string }) => (
+                      <a
+                        key={organizationSettingsTab.name}
+                        href="#"
+                        onClick={(e: any) => {
+                          e.preventDefault();
+                          setSelectedTab(organizationSettingsTab.key);
+                        }}
+                        className={clsx(
+                          organizationSettingsTab.key === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                          'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+                        )}
+                        aria-current={organizationSettingsTab.key === selectedTab ? 'page' : undefined}
+                      >
+                        {organizationSettingsTab.name}
+                      </a>
+                    ))}
+                  </nav>
+                </div>
               </div>
-            </div>
+            )}
+
+            {/* TAB CHANNELS */}
+            {!editing && selectedTab === OrganizationSettingsTab.Channels && (
+              <div className="mt-6 text-center">
+                <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
+                  {teamsInfo.map((teamInfo: TeamInfo) => {
+                    const resourcePermissions: ResourcePermissions | undefined = commonData.permissions!.teams!.find((rp: ResourcePermissions) => rp.id === teamInfo.id);
+                    if (!resourcePermissions) {
+                      return null;
+                    }
+                    if (!resourcePermissions.role_names) {
+                      return null;
+                    }
+                    const role: string = OrganizationRoleToLabel.hasOwnProperty(resourcePermissions.role_names[0]!)
+                      ? OrganizationRoleToLabel[resourcePermissions.role_names[0]!]!
+                      : resourcePermissions.role_names[0]!;
+                    return (
+                      <li
+                        key={teamInfo.organization_id}
+                        className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
+                        onClick={() => router.push(`/settings/${commonData.organization!.sluglified_name}/${teamInfo.sluglified_name}`)}
+                      >
+                        <div className="space-y-1 text-lg font-medium leading-6 mt-5">
+                          <h3 style={{ color: '#234361' }}>{teamInfo.display_name}</h3>
+                          <span className="text-sm font-normal">{role}</span>
+                        </div>
+                        <div className="my-10">
+                          <PureAvatar src={teamInfo.avatar_url} title={teamInfo.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
+                        </div>
+                        <div className="space-y-2 border-t py-4 px-2">
+                          <ul role="list" className="flex justify-between space-x-5 cursor-pointer">
+                            <li title="Reports">
+                              <div className="flex items-center">
+                                <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
+                                <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                  {teamInfo.reports} reports
+                                </span>
+                              </div>
+                            </li>
+                            <li title="Members">
+                              <div className="flex items-center">
+                                <UserGroupIcon className="h-6 w-6 mr-1" fill="#F1AB7A" aria-hidden="true" />
+                                <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                  {teamInfo.members}
+                                </span>
+                              </div>
+                            </li>
+                            <li title="Comments">
+                              <div className="flex items-center">
+                                <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
+                                <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                  {teamInfo.comments} comments
+                                </span>
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            )}
 
             {/* TAB MEMBERS */}
-            {selectedTab === Tab.Members && (
+            {!editing && selectedTab === OrganizationSettingsTab.Members && (
               <React.Fragment>
                 <div className="flex justify-between items-center">
                   <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({members.length}):</h3>
@@ -888,7 +992,7 @@ const Index = ({ commonData, setUser }: Props) => {
             )}
 
             {/* TAB ACCESS */}
-            {selectedTab === Tab.Access && (
+            {!editing && selectedTab === OrganizationSettingsTab.Access && (
               <React.Fragment>
                 {/* INVITATION LINKS */}
                 <div className="space-y-6 sm:space-y-5 mt-8">
@@ -994,7 +1098,7 @@ const Index = ({ commonData, setUser }: Props) => {
             )}
 
             {/* TAB NOTIFICATIONS */}
-            {selectedTab === Tab.Notifications && (
+            {!editing && selectedTab === OrganizationSettingsTab.Notifications && (
               <React.Fragment>
                 <div className="space-y-6 sm:space-y-5 mt-8">
                   <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>

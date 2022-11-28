@@ -13,7 +13,6 @@ import BreadcrumbNavbar from './BreadcrumbNavbar';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
 import PureShareButton from './PureShareButton';
-import SettingsBreadcrumbNavbar from './SettingsBreadcrumbNavbar';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -206,11 +205,6 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
         {!userProfile && !settings && router.query.organizationName && (
           <div className="p-2 z-40 bg-white">
             <BreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
-          </div>
-        )}
-        {!userProfile && settings && router.query.organizationName && (
-          <div className="p-2 z-40 bg-white">
-            <SettingsBreadcrumbNavbar basePath={basePath} commonData={commonData} report={report} />
           </div>
         )}
       </div>

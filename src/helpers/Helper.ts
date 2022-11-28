@@ -1,7 +1,9 @@
 /* eslint no-new: "off" */
 import { KeyValue } from '@/model/key-value.model';
+import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { fetchPublicKysoSettings, store } from '@kyso-io/kyso-store';
 import slugify from 'slugify';
+import { OrganizationSettingsTab } from '../enums/organization-settings-tab';
 
 export class Helper {
   /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -107,4 +109,25 @@ export class Helper {
     }
     return a.length === b.length && a.every((val: any, index: number) => val === b[index]);
   };
+
+  public static organizationSettingsTabs: { key: OrganizationSettingsTab; name: string }[] = [
+    {
+      key: OrganizationSettingsTab.Channels,
+      name: 'Channels',
+    },
+    {
+      key: OrganizationSettingsTab.Members,
+      name: 'Members',
+    },
+    {
+      key: OrganizationSettingsTab.Access,
+      name: 'Access',
+    },
+    {
+      key: OrganizationSettingsTab.Notifications,
+      name: 'Notifications',
+    },
+  ];
+
+  public static teamVisibilityValues: TeamVisibilityEnum[] = [TeamVisibilityEnum.PROTECTED, TeamVisibilityEnum.PRIVATE, TeamVisibilityEnum.PUBLIC];
 }
