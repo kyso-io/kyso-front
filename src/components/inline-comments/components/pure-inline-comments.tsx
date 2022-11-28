@@ -3,6 +3,8 @@ import type { CommonData } from '@/types/common-data';
 import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import React from 'react';
 import { Tooltip } from 'primereact/tooltip';
+import 'primereact/resources/primereact.min.css'; // core css
+import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PureInlineComment from './pure-inline-comment';

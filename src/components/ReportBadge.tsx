@@ -7,6 +7,7 @@ import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
 import { useMemo } from 'react';
+import { Tooltip } from 'primereact/tooltip';
 import { uuid } from 'uuidv4';
 import PureChangeReportImage from '@/components/PureChangeReportImage';
 import { HelperPermissions } from '../helpers/check-permissions';
@@ -82,10 +83,11 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
         </div>
         {commonData.user && (
           <div className="absolute top-0 right-0">
+            <Tooltip target=".pin-tooltip" />
             <div className="flex flex-row">
               {/* USER PIN */}
               {toggleUserPinReport && (
-                <div title={report.user_pin ? 'Remove pin from the top' : 'Pin to the top'} onClick={toggleUserPinReport}>
+                <div className="pin-tooltip" onClick={toggleUserPinReport} data-pr-tooltip={report.user_pin ? 'Remove personal pin from the top' : 'Pin personally to the top'} data-pr-position="top">
                   {report.user_pin ? (
                     <BookmarkIconSolid className="cursor-pointer h-7 w-7 text-indigo-600 -mt-1 hover:text-indigo-600" />
                   ) : (
@@ -96,7 +98,9 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
               {/* GLOBAL */}
               {toggleGlobalPinReport && (
                 <div
-                  title={report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
+                  className="pin-tooltip"
+                  data-pr-tooltip={report.pin ? 'Remove global pin for everyone' : 'Pin globaly for everyone'}
+                  data-pr-position="top"
                   onClick={() => {
                     if (hasPermissionReportGlobalPin) {
                       toggleGlobalPinReport();
