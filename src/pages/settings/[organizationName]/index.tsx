@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint no-prototype-builtins: "off" */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
@@ -35,6 +36,27 @@ interface Props {
   commonData: CommonData;
   setUser: (user: UserDTO) => void;
 }
+
+enum Tab {
+  Members = 'members',
+  Access = 'access',
+  Notifications = 'notifications',
+}
+
+const tabs: { key: Tab; name: string }[] = [
+  {
+    key: Tab.Members,
+    name: 'Members',
+  },
+  {
+    key: Tab.Access,
+    name: 'Access',
+  },
+  {
+    key: Tab.Notifications,
+    name: 'Notifications',
+  },
+];
 
 const debouncedFetchData = debounce((cb: () => void) => {
   cb();
@@ -93,6 +115,28 @@ const Index = ({ commonData, setUser }: Props) => {
   const [showDeleteOrgModal, setShowDeleteOrgModal] = useState<boolean>(false);
   const [textOrgModal, setTextOrgModal] = useState<string>('');
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Access);
+  const notificationsChanged: boolean = useMemo(() => {
+    if (!commonData.organization) {
+      return false;
+    }
+    if (commonData.organization && commonData.organization.options && commonData.organization.options.notifications && commonData.organization.options.notifications.hasOwnProperty('centralized')) {
+      if (commonData.organization!.options!.notifications!.centralized !== centralizedNotifications) {
+        return true;
+      }
+      return !Helper.arrayEquals(commonData.organization!.options!.notifications!.emails, emailsCentralizedNotifications);
+    }
+    if (centralizedNotifications) {
+      return true;
+    }
+    return false;
+  }, [commonData.organization, centralizedNotifications, emailsCentralizedNotifications]);
+  const accessChanged: boolean = useMemo(() => {
+    if (!commonData.organization) {
+      return false;
+    }
+    return !Helper.arrayEquals(commonData.organization!.allowed_access_domains, allowedAccessDomains);
+  }, [commonData.organization, allowedAccessDomains]);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -234,11 +278,37 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       setRequesting(true);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
-      if (JSON.stringify(commonData.organization!.allowed_access_domains) !== JSON.stringify(allowedAccessDomains)) {
-        await api.updateOrganization(commonData.organization!.id!, {
-          allowed_access_domains: allowedAccessDomains,
-        } as any);
-      }
+      await api.updateOrganization(commonData.organization!.id!, {
+        allowed_access_domains: allowedAccessDomains,
+      } as any);
+      router.reload();
+    } catch (e: any) {
+      console.log(e.response.data);
+    } finally {
+      setRequesting(false);
+      setShowToaster(false);
+      setMessageToaster('');
+    }
+  };
+
+  const submitNotifications = async () => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShowToaster(true);
+      setMessageToaster('Please verify your email');
+      return;
+    }
+    if (centralizedNotifications && emailsCentralizedNotifications.length === 0) {
+      setShowToaster(true);
+      setMessageToaster('Please enter at least one valid email for centralized notifications');
+      return;
+    }
+    try {
+      setRequesting(true);
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
       await api.updateOrganizationOptions(commonData.organization!.id!, {
         auth: {
           allow_login_with_kyso: loginKyso,
@@ -632,151 +702,257 @@ const Index = ({ commonData, setUser }: Props) => {
                 </div>
               )}
             </div>
-            {isOrgAdmin && (
-              <React.Fragment>
-                <div className="space-y-6 sm:space-y-5 mt-8">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Access</h3>
-                  <p className="text-sm text-gray-500">Restrict access to a specific email domain. Only users with matching domain will be able to join the organization.</p>
-                  <div className="flex items-center">
-                    <input
-                      value={newDomain}
-                      type="text"
-                      placeholder="Write an access domain. e.g. example.com"
-                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      onChange={(e: any) => {
-                        if (e.target.value) {
-                          setNewDomain(e.target.value.toLowerCase());
-                        } else {
-                          setNewDomain('');
-                        }
-                        setErrorNewDomain('');
+
+            {/* TABS */}
+            <div className="hidden sm:block">
+              <div className="border-b border-gray-200">
+                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                  {tabs.map((tab: { key: Tab; name: string }) => (
+                    <a
+                      key={tab.name}
+                      href="#"
+                      onClick={(e: any) => {
+                        e.preventDefault();
+                        setSelectedTab(tab.key);
                       }}
-                    />
-                    <button
-                      disabled={!newDomain || requesting}
-                      onClick={() => {
-                        const index: number = allowedAccessDomains.indexOf(newDomain);
-                        if (index !== -1) {
-                          setErrorNewDomain('Domain already registered');
-                          return;
-                        }
-                        if (!Helper.isValidUrl(newDomain)) {
-                          setErrorNewDomain('Invalid domain');
-                          return;
-                        }
-                        setAllowedAccessDomains([...allowedAccessDomains, newDomain]);
-                        setNewDomain('');
-                      }}
-                      className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      className={clsx(
+                        tab.key === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                        'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+                      )}
+                      aria-current={tab.key === selectedTab ? 'page' : undefined}
                     >
-                      Add
+                      {tab.name}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </div>
+
+            {/* TAB MEMBERS */}
+            {selectedTab === Tab.Members && (
+              <React.Fragment>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({members.length}):</h3>
+                  {isOrgAdmin && (
+                    <button
+                      className={clsx(
+                        'rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                        requesting ? 'opacity-50 cursor-not-allowed' : '',
+                      )}
+                      disabled={requesting}
+                      onClick={exportMembersInCsv}
+                    >
+                      Export members
                     </button>
-                  </div>
-                  {errorNewDomain && (
-                    <p className="text-sm text-red-500" style={{ marginTop: 10 }}>
-                      {errorNewDomain}
-                    </p>
                   )}
-                  {allowedAccessDomains.length > 0 && (
-                    <React.Fragment>
-                      <dt className="text-sm font-medium text-gray-500">Valid domains:</dt>
-                      <ul role="list" className="divide-y divide-gray-200 rounded-md border border-gray-200 block w-full max-w-lg">
-                        {allowedAccessDomains.map((domain: string, index: number) => (
-                          <li key={index} className="flex items-center justify-between py-3 pl-3 pr-4 text-sm">
-                            <div className="flex w-0 flex-1 items-center">
-                              <LinkIcon className="h-5 w-5 shrink-0 text-gray-400" />
-                              <span className="ml-2 w-0 flex-1 truncate">{domain}</span>
-                            </div>
-                            <div className="ml-4 shrink-0">
-                              <span
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {members.map((member: Member) => {
+                    const labelRole: string =
+                      member.organization_roles.length > 0 && OrganizationRoleToLabel[member.organization_roles[0]!] ? OrganizationRoleToLabel[member.organization_roles[0]!]! : '';
+                    return (
+                      <div
+                        key={member.id}
+                        className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
+                      >
+                        <div className="shrink-0">
+                          <PureAvatar src={member.avatar_url} title={member.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <a href={`/user/${member.username}`} className="focus:outline-none">
+                            <p className="text-sm font-medium text-gray-900">{member.display_name}</p>
+                            <p className="truncate text-sm text-gray-500">{labelRole}</p>
+                          </a>
+                        </div>
+                        {isOrgAdmin && (
+                          <div className="flex flex-row">
+                            <div title="Edit member role in the organization">
+                              <PencilIcon
                                 onClick={() => {
-                                  const newDomains: string[] = allowedAccessDomains.filter((d: string) => d !== domain);
-                                  setAllowedAccessDomains(newDomains);
+                                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                    setShowCaptchaModal(true);
+                                    return;
+                                  }
+                                  if (requesting) {
+                                    return;
+                                  }
+                                  editMember(member);
                                 }}
-                                className="font-medium text-red-600 hover:text-red-500 cursor-pointer"
-                              >
-                                Remove
-                              </span>
+                                className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer"
+                                aria-hidden="true"
+                              />
                             </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </React.Fragment>
-                  )}
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
-                  <div className="mt-4 space-y-4">
-                    <div className="relative flex items-start">
-                      <div className="flex h-5 items-center">
-                        <input
-                          checked={centralizedNotifications}
-                          onChange={(e: any) => setCentralizedNotifications(e.target.checked)}
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
+                            <div title="Remove member from the organization">
+                              <TrashIcon
+                                onClick={() => {
+                                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                    setShowCaptchaModal(true);
+                                    return;
+                                  }
+                                  if (requesting) {
+                                    return;
+                                  }
+                                  deleteMember(member);
+                                }}
+                                className="mr-1 h-5 w-5 text-red-400 group-hover:text-gray-500 cursor-pointer"
+                                aria-hidden="true"
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
-                      <div className="ml-3 text-sm">
-                        <label className="font-medium text-gray-700">Centralized comunication</label>
-                      </div>
+                    );
+                  })}
+                </div>
+                {isOrgAdmin && (
+                  <div className="mt-4">
+                    {/* SEARCH USERS */}
+                    <h3 className="text-lg font-medium leading-6 text-gray-900 my-4">Add users to the organization:</h3>
+                    <div className="my-4 sm:col-span-2">
+                      <input
+                        type="text"
+                        value={query}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+                        placeholder="Search users"
+                        className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {users.map((userDto: UserDTO) => {
+                        let showErrorDomain = true;
+                        if (commonData.organization?.allowed_access_domains && commonData.organization.allowed_access_domains.length > 0) {
+                          for (const domain of commonData.organization.allowed_access_domains) {
+                            if (userDto.email.endsWith(domain)) {
+                              showErrorDomain = false;
+                              break;
+                            }
+                          }
+                        } else {
+                          showErrorDomain = false;
+                        }
+                        return (
+                          <div
+                            key={userDto.email}
+                            className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
+                          >
+                            <div className="shrink-0">
+                              <PureAvatar src={userDto.avatar_url} title={userDto.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <a
+                                href={userDto.id ? `/user/${userDto.username}` : ''}
+                                onClick={(e) => {
+                                  if (!userDto.id) {
+                                    e.preventDefault();
+                                  }
+                                }}
+                                className={clsx('focus:outline-none', userDto.id ? 'cursor-pointer' : 'cursor-default')}
+                              >
+                                <p className="text-sm font-medium text-gray-900">{userDto.display_name}</p>
+                                <p className="truncate text-sm text-gray-500">{userDto.email}</p>
+                                {showErrorDomain && <p className="truncate text-sm text-red-500 mt-2">User email domain is not allowed</p>}
+                              </a>
+                            </div>
+                            <div className="flex flex-row">
+                              <button
+                                disabled={requesting || showErrorDomain}
+                                onClick={() => {
+                                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                    setShowCaptchaModal(true);
+                                    return;
+                                  }
+                                  if (requesting) {
+                                    return;
+                                  }
+                                  setOrganizationRole('organization-admin');
+                                  setSelectedUser(userDto);
+                                  setSelectedMember(userDto as any);
+                                  setOpenInviteUserModal(true);
+                                }}
+                                type="button"
+                                className={clsx(
+                                  'inline-flex items-center rounded border border-transparent bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                                  requesting || showErrorDomain ? 'opacity-50 cursor-not-allowed' : '',
+                                )}
+                              >
+                                Invite
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                  {centralizedNotifications && (
-                    <React.Fragment>
+                )}
+              </React.Fragment>
+            )}
+
+            {/* TAB ACCESS */}
+            {selectedTab === Tab.Access && (
+              <React.Fragment>
+                {/* INVITATION LINKS */}
+                <div className="space-y-6 sm:space-y-5 mt-8">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Invitation Links</h3>
+                </div>
+                {isOrgAdmin && (
+                  <React.Fragment>
+                    <div className="space-y-6 sm:space-y-5 mt-8">
+                      <h3 className="text-lg font-medium leading-6 text-gray-900">Access</h3>
+                      <p className="text-sm text-gray-500">Restrict access to a specific email domain. Only users with matching domain will be able to join the organization.</p>
                       <div className="flex items-center">
                         <input
-                          value={newEmailCentralizedNotifications}
-                          type="email"
-                          placeholder="Enter an email"
+                          value={newDomain}
+                          type="text"
+                          placeholder="Write an access domain. e.g. example.com"
                           className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                           onChange={(e: any) => {
                             if (e.target.value) {
-                              setNewEmailCentralizedNotifications(e.target.value);
+                              setNewDomain(e.target.value.toLowerCase());
                             } else {
-                              setNewEmailCentralizedNotifications('');
+                              setNewDomain('');
                             }
-                            setErrorNewEmail('');
+                            setErrorNewDomain('');
                           }}
                         />
                         <button
-                          disabled={!newEmailCentralizedNotifications || requesting}
+                          disabled={!newDomain || requesting || !Helper.isValidUrl(newDomain)}
                           onClick={() => {
-                            const index: number = emailsCentralizedNotifications.indexOf(newEmailCentralizedNotifications);
+                            const index: number = allowedAccessDomains.indexOf(newDomain);
                             if (index !== -1) {
-                              setErrorNewEmail('Email already registered');
+                              setErrorNewDomain('Domain already registered');
                               return;
                             }
-                            if (!Helper.isEmail(newEmailCentralizedNotifications)) {
-                              setErrorNewEmail('Invalid email');
-                              return;
-                            }
-                            setEmailsCentralizedNotifications([...emailsCentralizedNotifications, newEmailCentralizedNotifications]);
-                            setNewEmailCentralizedNotifications('');
-                            setErrorNewEmail('');
+                            setAllowedAccessDomains([...allowedAccessDomains, newDomain]);
+                            setNewDomain('');
                           }}
-                          className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          className={clsx(
+                            'ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                            !newDomain || requesting || !Helper.isValidUrl(newDomain) ? 'opacity-50 cursor-not-allowed' : '',
+                          )}
                         >
                           Add
                         </button>
                       </div>
-                      {errorNewEmail && (
+                      {errorNewDomain && (
                         <p className="text-sm text-red-500" style={{ marginTop: 10 }}>
-                          {errorNewEmail}
+                          {errorNewDomain}
                         </p>
                       )}
-                      {emailsCentralizedNotifications.length > 0 && (
+                      {allowedAccessDomains.length > 0 && (
                         <React.Fragment>
-                          <dt className="text-sm font-medium text-gray-500">Emails:</dt>
+                          <dt className="text-sm font-medium text-gray-500">Valid domains:</dt>
                           <ul role="list" className="divide-y divide-gray-200 rounded-md border border-gray-200 block w-full max-w-lg">
-                            {emailsCentralizedNotifications.map((email: string, index: number) => (
+                            {allowedAccessDomains.map((domain: string, index: number) => (
                               <li key={index} className="flex items-center justify-between py-3 pl-3 pr-4 text-sm">
                                 <div className="flex w-0 flex-1 items-center">
-                                  <MailIcon className="h-5 w-5 shrink-0 text-gray-400" />
-                                  <span className="ml-2 w-0 flex-1 truncate">{email}</span>
+                                  <LinkIcon className="h-5 w-5 shrink-0 text-gray-400" />
+                                  <span className="ml-2 w-0 flex-1 truncate">{domain}</span>
                                 </div>
                                 <div className="ml-4 shrink-0">
                                   <span
                                     onClick={() => {
-                                      const newEmails: string[] = emailsCentralizedNotifications.filter((e: string) => e !== email);
-                                      setEmailsCentralizedNotifications(newEmails);
+                                      const newDomains: string[] = allowedAccessDomains.filter((d: string) => d !== domain);
+                                      setAllowedAccessDomains(newDomains);
                                     }}
                                     className="font-medium text-red-600 hover:text-red-500 cursor-pointer"
                                   >
@@ -788,255 +964,155 @@ const Index = ({ commonData, setUser }: Props) => {
                           </ul>
                         </React.Fragment>
                       )}
-                    </React.Fragment>
-                  )}
-                  {/* <h3 className="text-lg font-medium leading-6 text-gray-900">Configure your custom login page</h3>
-                  <div className="mt-4 space-y-4">
-                    <div className="relative flex items-start">
-                      <div className="flex h-5 items-center">
-                        <input
-                          checked={loginKyso}
-                          onChange={(e: any) => setLoginKyso(e.target.checked)}
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label className="font-medium text-gray-700">Allow login with Kyso local users</label>
-                      </div>
-                    </div>
-                    <div className="relative flex items-start">
-                      <div className="flex h-5 items-center">
-                        <input
-                          checked={loginGithub}
-                          onChange={(e: any) => setLoginGithub(e.target.checked)}
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label className="font-medium text-gray-700">Allow login with Github</label>
+                      <div className="pt-5 sm:border-t sm:border-gray-200">
+                        <div className="flex justify-end">
+                          <button
+                            disabled={requesting}
+                            onClick={() => router.reload()}
+                            type="button"
+                            className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            disabled={requesting || !accessChanged}
+                            onClick={submitAccess}
+                            type="submit"
+                            className={clsx(
+                              'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                              requesting || !accessChanged ? 'opacity-50 cursor-not-allowed' : '',
+                            )}
+                          >
+                            Save
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <div className="relative flex items-start">
-                      <div className="flex h-5 items-center">
-                        <input
-                          checked={loginBitbucket}
-                          onChange={(e: any) => setLoginBitbucket(e.target.checked)}
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label className="font-medium text-gray-700">Allow login with Bitbucket</label>
-                      </div>
+                  </React.Fragment>
+                )}
+              </React.Fragment>
+            )}
+
+            {/* TAB NOTIFICATIONS */}
+            {selectedTab === Tab.Notifications && (
+              <React.Fragment>
+                <div className="space-y-6 sm:space-y-5 mt-8">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
+                </div>
+                <div className="my-4 space-y-4">
+                  <div className="relative flex items-start">
+                    <div className="flex h-5 items-center">
+                      <input
+                        checked={centralizedNotifications}
+                        onChange={(e: any) => setCentralizedNotifications(e.target.checked)}
+                        type="checkbox"
+                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      />
                     </div>
-                    <div className="relative flex items-start">
-                      <div className="flex h-5 items-center">
-                        <input
-                          checked={loginGitlab}
-                          onChange={(e: any) => setLoginGitlab(e.target.checked)}
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label className="font-medium text-gray-700">Allow login with Gitlab</label>
-                      </div>
+                    <div className="ml-3 text-sm">
+                      <label className="font-medium text-gray-700">Centralized comunication</label>
                     </div>
-                    <div className="relative flex items-start">
-                      <div className="flex h-5 items-center">
-                        <input
-                          checked={loginGoogle}
-                          onChange={(e: any) => setLoginGoogle(e.target.checked)}
-                          type="checkbox"
-                          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label className="font-medium text-gray-700">Allow login with Google</label>
-                      </div>
-                    </div>
-                  </div> */}
-                  <div className="pt-5 sm:border-t sm:border-gray-200">
-                    <div className="flex justify-end">
+                  </div>
+                </div>
+                {centralizedNotifications && (
+                  <React.Fragment>
+                    <div className="my-4 flex items-center">
+                      <input
+                        value={newEmailCentralizedNotifications}
+                        type="email"
+                        placeholder="Enter an email"
+                        className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        onChange={(e: any) => {
+                          if (e.target.value) {
+                            setNewEmailCentralizedNotifications(e.target.value);
+                          } else {
+                            setNewEmailCentralizedNotifications('');
+                          }
+                          setErrorNewEmail('');
+                        }}
+                      />
                       <button
-                        disabled={requesting}
-                        onClick={() => router.reload()}
-                        type="button"
-                        className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        disabled={requesting}
-                        onClick={submitAccess}
-                        type="submit"
+                        disabled={!newEmailCentralizedNotifications || requesting || !Helper.isEmail(newEmailCentralizedNotifications)}
+                        onClick={() => {
+                          const index: number = emailsCentralizedNotifications.indexOf(newEmailCentralizedNotifications);
+                          if (index !== -1) {
+                            setErrorNewEmail('Email already registered');
+                            return;
+                          }
+                          if (!Helper.isEmail(newEmailCentralizedNotifications)) {
+                            setErrorNewEmail('Invalid email');
+                            return;
+                          }
+                          setEmailsCentralizedNotifications([...emailsCentralizedNotifications, newEmailCentralizedNotifications]);
+                          setNewEmailCentralizedNotifications('');
+                          setErrorNewEmail('');
+                        }}
                         className={clsx(
-                          'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-                          requesting && 'opacity-50 cursor-not-allowed',
+                          'ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                          !newEmailCentralizedNotifications || requesting || !Helper.isEmail(newEmailCentralizedNotifications) ? 'opacity-50 cursor-not-allowed' : '',
                         )}
                       >
-                        Save
+                        Add
                       </button>
                     </div>
+                    {errorNewEmail && (
+                      <p className="text-sm text-red-500" style={{ marginTop: 10 }}>
+                        {errorNewEmail}
+                      </p>
+                    )}
+                    {emailsCentralizedNotifications.length > 0 && (
+                      <div className="my-4">
+                        <dt className="text-sm font-medium text-gray-500 mb-4">Emails:</dt>
+                        <ul role="list" className="divide-y divide-gray-200 rounded-md border border-gray-200 block w-full max-w-lg my-2">
+                          {emailsCentralizedNotifications.map((email: string, index: number) => (
+                            <li key={index} className="flex items-center justify-between py-3 pl-3 pr-4 text-sm">
+                              <div className="flex w-0 flex-1 items-center">
+                                <MailIcon className="h-5 w-5 shrink-0 text-gray-400" />
+                                <span className="ml-2 w-0 flex-1 truncate">{email}</span>
+                              </div>
+                              <div className="ml-4 shrink-0">
+                                <span
+                                  onClick={() => {
+                                    const newEmails: string[] = emailsCentralizedNotifications.filter((e: string) => e !== email);
+                                    setEmailsCentralizedNotifications(newEmails);
+                                  }}
+                                  className="font-medium text-red-600 hover:text-red-500 cursor-pointer"
+                                >
+                                  Remove
+                                </span>
+                              </div>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </React.Fragment>
+                )}
+                <div className="pt-5 sm:border-t sm:border-gray-200">
+                  <div className="flex justify-end">
+                    <button
+                      disabled={requesting}
+                      onClick={() => router.reload()}
+                      type="button"
+                      className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      disabled={requesting || !notificationsChanged}
+                      onClick={submitNotifications}
+                      type="submit"
+                      className={clsx(
+                        'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                        requesting || !notificationsChanged ? 'opacity-50 cursor-not-allowed' : '',
+                      )}
+                    >
+                      Save
+                    </button>
                   </div>
                 </div>
               </React.Fragment>
             )}
-            {isOrgAdmin && (
-              <div className="mt-4">
-                {/* SEARCH USERS */}
-                <h3 className="text-lg font-medium leading-6 text-gray-900 my-4">Add users to the organization:</h3>
-                <div className="my-4 sm:col-span-2">
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-                    placeholder="Search users"
-                    className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
-                </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {users.map((userDto: UserDTO) => {
-                    let showErrorDomain = true;
-                    if (commonData.organization?.allowed_access_domains && commonData.organization.allowed_access_domains.length > 0) {
-                      for (const domain of commonData.organization.allowed_access_domains) {
-                        if (userDto.email.endsWith(domain)) {
-                          showErrorDomain = false;
-                          break;
-                        }
-                      }
-                    } else {
-                      showErrorDomain = false;
-                    }
-                    return (
-                      <div
-                        key={userDto.email}
-                        className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
-                      >
-                        <div className="shrink-0">
-                          <PureAvatar src={userDto.avatar_url} title={userDto.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <a
-                            href={userDto.id ? `/user/${userDto.username}` : ''}
-                            onClick={(e) => {
-                              if (!userDto.id) {
-                                e.preventDefault();
-                              }
-                            }}
-                            className={clsx('focus:outline-none', userDto.id ? 'cursor-pointer' : 'cursor-default')}
-                          >
-                            <p className="text-sm font-medium text-gray-900">{userDto.display_name}</p>
-                            <p className="truncate text-sm text-gray-500">{userDto.email}</p>
-                            {showErrorDomain && <p className="truncate text-sm text-red-500 mt-2">User email domain is not allowed</p>}
-                          </a>
-                        </div>
-                        <div className="flex flex-row">
-                          <button
-                            disabled={requesting || showErrorDomain}
-                            onClick={() => {
-                              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                setShowCaptchaModal(true);
-                                return;
-                              }
-                              if (requesting) {
-                                return;
-                              }
-                              setOrganizationRole('organization-admin');
-                              setSelectedUser(userDto);
-                              setSelectedMember(userDto as any);
-                              setOpenInviteUserModal(true);
-                            }}
-                            type="button"
-                            className={clsx(
-                              'inline-flex items-center rounded border border-transparent bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-                              requesting || showErrorDomain ? 'opacity-50 cursor-not-allowed' : '',
-                            )}
-                          >
-                            Invite
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-            {/* ORGANIZATION MEMBERS */}
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({members.length}):</h3>
-              {isOrgAdmin && (
-                <button
-                  className={clsx(
-                    'rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-                    requesting ? 'opacity-50 cursor-not-allowed' : '',
-                  )}
-                  disabled={requesting}
-                  onClick={exportMembersInCsv}
-                >
-                  Export members
-                </button>
-              )}
-            </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {members.map((member: Member) => {
-                const labelRole: string = member.organization_roles.length > 0 && OrganizationRoleToLabel[member.organization_roles[0]!] ? OrganizationRoleToLabel[member.organization_roles[0]!]! : '';
-                return (
-                  <div
-                    key={member.id}
-                    className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
-                  >
-                    <div className="shrink-0">
-                      <PureAvatar src={member.avatar_url} title={member.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <a href={`/user/${member.username}`} className="focus:outline-none">
-                        <p className="text-sm font-medium text-gray-900">{member.display_name}</p>
-                        <p className="truncate text-sm text-gray-500">{labelRole}</p>
-                      </a>
-                    </div>
-                    {isOrgAdmin && (
-                      <div className="flex flex-row">
-                        <div title="Edit member role in the organization">
-                          <PencilIcon
-                            onClick={() => {
-                              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                setShowCaptchaModal(true);
-                                return;
-                              }
-                              if (requesting) {
-                                return;
-                              }
-                              editMember(member);
-                            }}
-                            className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer"
-                            aria-hidden="true"
-                          />
-                        </div>
-                        <div title="Remove member from the organization">
-                          <TrashIcon
-                            onClick={() => {
-                              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                setShowCaptchaModal(true);
-                                return;
-                              }
-                              if (requesting) {
-                                return;
-                              }
-                              deleteMember(member);
-                            }}
-                            className="mr-1 h-5 w-5 text-red-400 group-hover:text-gray-500 cursor-pointer"
-                            aria-hidden="true"
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </div>
       </div>
