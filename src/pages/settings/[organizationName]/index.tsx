@@ -2,17 +2,29 @@
 /* eslint no-prototype-builtins: "off" */
 /* eslint no-continue: "off" */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Switch, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
-import { BookOpenIcon, ChatAlt2Icon, ExclamationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
+import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, Team, TeamInfoDto } from '@kyso-io/kyso-model';
-import { AddUserOrganizationDto, GlobalPermissionsEnum, InviteUserDto, KysoSettingsEnum, OrganizationPermissionsEnum, UpdateOrganizationMembersDTO, UserDTO, UserRoleDTO } from '@kyso-io/kyso-model';
+import {
+  AddUserOrganizationDto,
+  GlobalPermissionsEnum,
+  InviteUserDto,
+  KysoSettingsEnum,
+  OrganizationPermissionsEnum,
+  UpdateJoinCodesDto,
+  UpdateOrganizationMembersDTO,
+  UserDTO,
+  UserRoleDTO,
+} from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
+import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import CaptchaModal from '../../../components/CaptchaModal';
+import ExpirationDateModal from '../../../components/ExpirationDateModal';
 import PureAvatar from '../../../components/PureAvatar';
 import SettingsAside from '../../../components/SettingsAside';
 import ToasterNotification from '../../../components/ToasterNotification';
@@ -76,6 +88,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+  const [invitationsLinksGloballyEnabled, setInvitationsLinksGloballyEnabled] = useState<boolean>(false);
   const [editing, setEditing] = useState<boolean>(false);
   const [bio, setBio] = useState<string>('');
   const [link, setLink] = useState<string>('');
@@ -122,6 +135,17 @@ const Index = ({ commonData, setUser }: Props) => {
     return !Helper.arrayEquals(commonData.organization!.allowed_access_domains, allowedAccessDomains);
   }, [commonData.organization, allowedAccessDomains]);
   const [teamsInfo, setTeamsInfo] = useState<TeamInfo[]>([]);
+  const enabledInvitationLinks: boolean = useMemo(() => {
+    if (!isOrgAdmin) {
+      return false;
+    }
+    if (!commonData.organization) {
+      return false;
+    }
+    return commonData.organization.join_codes !== null && commonData.organization.join_codes.enabled;
+  }, [isOrgAdmin, commonData.organization]);
+  const [isOpenExpirationDateModal, setIsOpenExpirationDateModal] = useState<boolean>(false);
+  const [validUntil, setValidUntil] = useState<Date | null>(null);
 
   useEffect(() => {
     if (!edit) {
@@ -155,19 +179,23 @@ const Index = ({ commonData, setUser }: Props) => {
   useEffect(() => {
     const result: boolean = checkJwt();
     setUserIsLogged(result);
-    const getData = async () => {
+    const getKysoSettings = async () => {
       try {
         const api: Api = new Api();
         const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        const indexCatpcha: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (indexCatpcha !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[indexCatpcha]!.value === 'true');
+        }
+        const indexInvitationLinks: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.ENABLE_INVITATION_LINKS_GLOBALLY);
+        if (indexInvitationLinks !== -1) {
+          setInvitationsLinksGloballyEnabled(resultKysoSetting.data[indexInvitationLinks]!.value === 'true');
         }
       } catch (errorHttp: any) {
         console.error(errorHttp.response.data);
       }
     };
-    getData();
+    getKysoSettings();
   }, []);
 
   useEffect(() => {
@@ -210,6 +238,9 @@ const Index = ({ commonData, setUser }: Props) => {
   useEffect(() => {
     if (!commonData.organization) {
       return;
+    }
+    if (commonData.organization.join_codes?.valid_until) {
+      setValidUntil(commonData.organization.join_codes.valid_until);
     }
     getOrganizationMembers();
   }, [commonData?.organization]);
@@ -559,6 +590,39 @@ const Index = ({ commonData, setUser }: Props) => {
       console.error(e);
     }
     setRequesting(false);
+  };
+
+  const onChangeJoinCodes = async (result: boolean) => {
+    setRequesting(true);
+    try {
+      const api: Api = new Api(commonData.token);
+      const updateJoinCodesDto: UpdateJoinCodesDto = new UpdateJoinCodesDto(result, commonData.organization!.join_codes!.valid_until);
+      await api.updateJoinCodes(commonData.organization!.id!, updateJoinCodesDto);
+      window.location.href = `/settings/${commonData.organization!.sluglified_name}?tab=access`;
+    } catch (e) {
+      setRequesting(false);
+    }
+  };
+
+  const onCloseExpirationDateModal = async (date: Date | null) => {
+    if (!date) {
+      setIsOpenExpirationDateModal(false);
+      return;
+    }
+    setRequesting(true);
+    try {
+      const api: Api = new Api(commonData.token);
+      const updateJoinCodesDto: UpdateJoinCodesDto = new UpdateJoinCodesDto(true, date);
+      if (commonData.organization?.join_codes) {
+        await api.updateJoinCodes(commonData.organization!.id!, updateJoinCodesDto);
+      } else {
+        await api.createJoinCodes(commonData.organization!.id!, updateJoinCodesDto);
+      }
+      window.location.href = `/settings/${commonData.organization!.sluglified_name}?tab=access`;
+    } catch (e) {
+      setRequesting(false);
+      setIsOpenExpirationDateModal(false);
+    }
   };
 
   if (userIsLogged === null) {
@@ -995,9 +1059,111 @@ const Index = ({ commonData, setUser }: Props) => {
             {!editing && selectedTab === OrganizationSettingsTab.Access && (
               <React.Fragment>
                 {/* INVITATION LINKS */}
-                <div className="space-y-6 sm:space-y-5 mt-8">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Invitation Links</h3>
-                </div>
+                {invitationsLinksGloballyEnabled ? (
+                  <div className="space-y-6 sm:space-y-5 mt-8">
+                    <div className="flex items-center">
+                      <h3 className="grow text-lg font-medium leading-6 text-gray-900">Invitation Links:</h3>
+                      {commonData.organization?.join_codes && (
+                        <Switch
+                          disabled={requesting}
+                          checked={enabledInvitationLinks}
+                          onChange={onChangeJoinCodes}
+                          className={clsx(
+                            enabledInvitationLinks ? 'bg-indigo-600' : 'bg-gray-200',
+                            'ml-5 relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                          )}
+                        >
+                          <span className="sr-only">Use setting</span>
+                          <span
+                            aria-hidden="true"
+                            className={clsx(
+                              enabledInvitationLinks ? 'translate-x-5' : 'translate-x-0',
+                              'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                            )}
+                          />
+                        </Switch>
+                      )}
+                    </div>
+                    {commonData.organization?.join_codes ? (
+                      commonData.organization.join_codes.enabled ? (
+                        <React.Fragment>
+                          <p className="text-sm text-gray-500">
+                            Share these links to invite users to your organization. These links will{' '}
+                            <strong>expire on {moment(commonData.organization!.join_codes.valid_until).format('Do MMM YYYY')},</strong> and will be replaced by new ones for security reasons, or you
+                            can{' '}
+                            <span className="text-blue-500 underline cursor-pointer" onClick={() => setIsOpenExpirationDateModal(true)}>
+                              update the expiration date
+                            </span>
+                            .
+                          </p>
+                          <div>
+                            <p className="text-sm">For channel readers / can comment all channels:</p>
+                            <div className="flex items-center">
+                              <p className="text-normal text-gray-500 my-1">{`${window.location.origin}/${commonData.organization!.sluglified_name}?join=${
+                                commonData.organization!.join_codes!.reader
+                              }`}</p>
+                              <button
+                                type="button"
+                                title="Copy to clipboard"
+                                className="ml-4 inline-flex items-center rounded border border-gray-300 bg-white px-1 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(`${window.location.origin}/${commonData.organization!.sluglified_name}?join=${commonData.organization!.join_codes!.reader}`);
+                                  setMessageToaster('Copied to clipboard');
+                                  setShowToaster(true);
+                                  setTimeout(() => {
+                                    setShowToaster(false);
+                                  }, 3000);
+                                }}
+                              >
+                                <DocumentDuplicateIcon className="w-5 h-5"></DocumentDuplicateIcon>
+                              </button>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-sm">For channel contributos / can edit all channels:</p>
+                            <div className="flex items-center">
+                              <p className="text-normal text-gray-500 my-1">{`${window.location.origin}/${commonData.organization!.sluglified_name}?join=${
+                                commonData.organization!.join_codes!.contributor
+                              }`}</p>
+                              <button
+                                type="button"
+                                title="Copy to clipboard"
+                                className="ml-4 inline-flex items-center rounded border border-gray-300 bg-white px-1 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                onClick={() => {
+                                  navigator.clipboard.writeText(`${window.location.origin}/${commonData.organization!.sluglified_name}?join=${commonData.organization!.join_codes!.contributor}`);
+                                  setMessageToaster('Copied to clipboard');
+                                  setShowToaster(true);
+                                  setTimeout(() => {
+                                    setShowToaster(false);
+                                  }, 3000);
+                                }}
+                              >
+                                <DocumentDuplicateIcon className="w-5 h-5"></DocumentDuplicateIcon>
+                              </button>
+                            </div>
+                          </div>
+                        </React.Fragment>
+                      ) : (
+                        <p className="text-sm text-gray-500">Invitation links are disabled in this organization.</p>
+                      )
+                    ) : (
+                      <p className="text-sm text-gray-500">
+                        Share these links to invite users to your organization. You have not active links for now. Please, create your links{' '}
+                        <span className="text-blue-500 underline cursor-pointer" onClick={() => setIsOpenExpirationDateModal(true)}>
+                          here
+                        </span>
+                        .
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-6 sm:space-y-5 mt-8">
+                    <div className="flex items-center">
+                      <h3 className="grow text-lg font-medium leading-6 text-gray-900">Invitation Links:</h3>
+                    </div>
+                    <p className="text-sm text-gray-500">Invitation links are disabled globally.</p>
+                  </div>
+                )}
                 {isOrgAdmin && (
                   <React.Fragment>
                     <div className="space-y-6 sm:space-y-5 mt-8">
@@ -1543,6 +1709,7 @@ const Index = ({ commonData, setUser }: Props) => {
         </Dialog>
       </Transition.Root>
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
+      <ExpirationDateModal date={validUntil} isOpen={isOpenExpirationDateModal} onClose={onCloseExpirationDateModal} requesting={requesting} />
     </div>
   );
 };
