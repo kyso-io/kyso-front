@@ -7,6 +7,9 @@ import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
 import { useMemo } from 'react';
+import { Tooltip } from 'primereact/tooltip';
+import { uuid } from 'uuidv4';
+import PureChangeReportImage from '@/components/PureChangeReportImage';
 import { HelperPermissions } from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureShareButton from './PureShareButton';
@@ -28,10 +31,15 @@ interface Props {
 }
 
 const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
+  const random: string = uuid();
+
   const hasPermissionReportGlobalPin: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.GLOBAL_PIN),
     [commonData.organization, commonData.team, commonData.user],
   );
+
+  const hasPermissionEditReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData, random]);
+
   const reportImage: string = useMemo(() => {
     if (report.preview_picture) {
       return report.preview_picture;
@@ -58,9 +66,7 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
     <div className={classNames(report.pin || report.user_pin ? ' border border-indigo-600' : '', 'bg-white rounded border')}>
       <div className="relative flex space-x-2">
         <div className="shrink-0">
-          <div className="bg-stripes-sky-blue rounded-tl-lg text-center overflow-hidden mx-auto border-r border-r-gray-200">
-            <img className="object-cover" style={{ width: 200, height: 200 }} src={reportImage} alt="report preview image" />
-          </div>
+          <PureChangeReportImage commonData={commonData} hasPermissionEditReport={hasPermissionEditReport} reportImage={reportImage} report={report} />
         </div>
         <div className="flex-1 min-w-0 py-3 pr-3 relative">
           <a href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
@@ -77,10 +83,11 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
         </div>
         {commonData.user && (
           <div className="absolute top-0 right-0">
+            <Tooltip target=".pin-tooltip" />
             <div className="flex flex-row">
               {/* USER PIN */}
               {toggleUserPinReport && (
-                <div title={report.user_pin ? 'Remove pin from the top' : 'Pin to the top'} onClick={toggleUserPinReport}>
+                <div className="pin-tooltip" onClick={toggleUserPinReport} data-pr-tooltip={report.user_pin ? 'Remove personal pin from the top' : 'Pin personally to the top'} data-pr-position="top">
                   {report.user_pin ? (
                     <BookmarkIconSolid className="cursor-pointer h-7 w-7 text-indigo-600 -mt-1 hover:text-indigo-600" />
                   ) : (
@@ -91,7 +98,9 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
               {/* GLOBAL */}
               {toggleGlobalPinReport && (
                 <div
-                  title={report.pin ? 'Remove pin for everyone' : 'Pin for everyone'}
+                  className="pin-tooltip"
+                  data-pr-tooltip={report.pin ? 'Remove global pin for everyone' : 'Pin globaly for everyone'}
+                  data-pr-position="top"
                   onClick={() => {
                     if (hasPermissionReportGlobalPin) {
                       toggleGlobalPinReport();

@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import { Fragment, useState } from 'react';
+import 'primereact/resources/primereact.min.css'; // core css
+import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import BreadcrumbNavbar from './BreadcrumbNavbar';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';

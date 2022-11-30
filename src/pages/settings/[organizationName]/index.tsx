@@ -4,7 +4,7 @@
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Switch, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
-import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
+import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, InformationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, Team, TeamInfoDto } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -22,6 +22,7 @@ import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
+import type { ReactElement } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import CaptchaModal from '../../../components/CaptchaModal';
 import ExpirationDateModal from '../../../components/ExpirationDateModal';
@@ -87,6 +88,7 @@ const Index = ({ commonData, setUser }: Props) => {
   }, []);
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
+  const [toasterIcon, setIcon] = useState<ReactElement>(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [invitationsLinksGloballyEnabled, setInvitationsLinksGloballyEnabled] = useState<boolean>(false);
   const [editing, setEditing] = useState<boolean>(false);
@@ -304,10 +306,12 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (commonData.user?.email_verified === false) {
       setShowToaster(true);
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster('Please verify your email');
       return;
     }
     try {
+      setIcon(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
       setMessageToaster('Updating organization profile...');
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
       if (file !== null) {
@@ -337,11 +341,13 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (commonData.user?.email_verified === false) {
       setShowToaster(true);
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster('Please verify your email');
       return;
     }
     if (centralizedNotifications && emailsCentralizedNotifications.length === 0) {
       setShowToaster(true);
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       setMessageToaster('Please enter at least one valid email for centralized notifications');
       return;
     }
@@ -1626,13 +1632,7 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
+      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={toasterIcon} message={messageToaster} backgroundColor={TailwindColor.SLATE_50} />
       {/* <PingIdModal open={showOpenPingIdModal} setOpen={setShowOpenPingIdModal} /> */}
       {/* DELETE ORGANIZATION */}
       <Transition.Root show={showDeleteOrgModal} as={Fragment}>
