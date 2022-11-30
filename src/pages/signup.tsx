@@ -13,7 +13,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import uuid from 'uuid';
 import { KysoDescription } from '../components/KysoDescription';
 
 const validateEmail = (email: string) => {
@@ -22,11 +21,12 @@ const validateEmail = (email: string) => {
   return re.test(email);
 };
 
-const githubScopes = ['read:user', 'user:email', 'read:org', 'repo', 'admin:repo_hook', 'public_repo'];
+const githubScopes = ['read:user', 'user:email'];
+const gitlabScope = 'read_user';
 
 const Index = () => {
   const router = useRouter();
-
+  const { invitation } = router.query;
   const [email, setEmail] = useState<string>('');
   const [nickname, setNickname] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -52,6 +52,9 @@ const Index = () => {
   const [isKysoOpen, openKysoButton] = useState(false);
 
   useEffect(() => {
+    if (!router.isReady) {
+      return;
+    }
     const getOrganizationOptions = async () => {
       /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
       const publicKeys: any[] = await Helper.getKysoPublicSettings();
@@ -83,13 +86,17 @@ const Index = () => {
       setGoogleUrl(
         `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&response_type=code&redirect_uri=${encodeURIComponent(
           `${window.location.origin}/oauth/google/callback`,
-        )}&scope=${encodeURIComponent('https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.emails.read')}`,
+        )}&scope=${encodeURIComponent('https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.emails.read')}${
+          invitation ? `&state=${invitation}` : ''
+        }`,
       );
-      setBitbucketUrl(`https://bitbucket.org/site/oauth2/authorize?client_id=${bitbucketClientId}&response_type=code`);
+      setBitbucketUrl(`https://bitbucket.org/site/oauth2/authorize?client_id=${bitbucketClientId}&response_type=code${invitation ? `&state=${invitation}` : ''}`);
 
-      setGithubUrl(`https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(',')}&state=${uuid ? uuid.v4() : ''}`);
+      setGithubUrl(`https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(',')}${invitation ? `&state=${invitation}` : ''}`);
 
-      setGitlabUrl(`https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&redirect_uri=${gitlabRedirectURI}&response_type=code`);
+      setGitlabUrl(
+        `https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&scope=${gitlabScope}&redirect_uri=${gitlabRedirectURI}&response_type=code${invitation ? `&state=${invitation}` : ''}`,
+      );
 
       setPingUrl(pingIdSamlSSOUrl);
 
@@ -103,7 +110,7 @@ const Index = () => {
       return '';
     };
     getOrganizationOptions();
-  }, []);
+  }, [router.isReady]);
 
   useEffect(() => {
     if (router.query.error) {
@@ -168,7 +175,7 @@ const Index = () => {
         const token: string = response.data;
         dispatch(setTokenAuthAction(token));
         localStorage.setItem('jwt', token);
-        router.push('/captcha');
+        router.push(`/captcha${invitation ? `?invitation=${invitation as string}` : ''}`);
       }, 1000);
       setError('');
       setEmail('');
@@ -390,7 +397,7 @@ const Index = () => {
             {error && <div className="text-red-500 text-center text-xs p-2">{error}</div>}
             <div className="pt-5 flex flex-row items-center shown-div ">
               <p className="text-sm mr-5">Already have an account?</p>
-              <a className="text-sm no-underline hover:none text-indigo-600 hover:text-indigo-700" href="/login">
+              <a className="text-sm no-underline hover:none text-indigo-600 hover:text-indigo-700" href={`/login${invitation ? `?invitation=${invitation}` : ''}`}>
                 Log in now
               </a>
             </div>
