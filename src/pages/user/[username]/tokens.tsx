@@ -65,7 +65,7 @@ const Index = ({ commonData, setUser }: Props) => {
         const resultKysoUserAccessTokens: NormalizedResponseDTO<KysoUserAccessToken[]> = await api.getAccessTokens();
         setKysoUserAccessTokens(resultKysoUserAccessTokens.data);
       } catch (e: any) {
-        console.log(e.response.data);
+        console.error(e.response.data);
       } finally {
         setRequesting(false);
       }
@@ -97,7 +97,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setNewKysoUserAccessToken(resultKysoUserAccessToken.data);
       setKysoUserAccessTokens([...kysoUserAccessTokens, resultKysoUserAccessToken.data]);
     } catch (e: any) {
-      console.log(e.response.data);
+      console.error(e.response.data);
     } finally {
       setRequesting(false);
     }
@@ -111,7 +111,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setKysoUserAccessTokens(kysoUserAccessTokens.filter((item: KysoUserAccessToken) => item.id !== selectedKysoAccessToken!.id));
       setSelectedKysoAccessToken(null);
     } catch (e: any) {
-      console.log(e.response);
+      console.error(e.response);
     } finally {
       setRequesting(false);
     }
@@ -126,7 +126,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setKysoUserAccessTokens(resultKysoUserAccessToken.data);
       setSelectedKysoAccessToken(null);
     } catch (e: any) {
-      console.log(e.response.data);
+      console.error(e.response.data);
     } finally {
       setRequesting(false);
     }

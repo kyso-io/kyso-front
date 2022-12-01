@@ -78,7 +78,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
     }
 
     const parentId: string | null = parent ? parent.id : null;
-    console.log({ parent, files });
+
     if (parentId) {
       const existingItem: CreationReportFileSystemObject | undefined = files.find((item: CreationReportFileSystemObject) => item.parentId === parentId && item.name === formattedName);
       if (existingItem) {

@@ -30,7 +30,7 @@ const UnpureDeleteChannelDropdown = ({ commonData, captchaIsEnabled, setUser }: 
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       await api.deleteTeam(commonData.team!.id!);
     } catch (error: any) {
-      console.log(error.response.data.message);
+      console.error(error.response.data.message);
       setOpen(false);
       setInput('');
       setRequesting(false);

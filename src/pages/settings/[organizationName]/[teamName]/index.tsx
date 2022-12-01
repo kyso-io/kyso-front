@@ -321,7 +321,7 @@ const Index = ({ commonData, setUser }: Props) => {
       }
       setUsers(usersNotInOrg);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
     setRequesting(false);
   };
@@ -357,7 +357,7 @@ const Index = ({ commonData, setUser }: Props) => {
       await api.updateTeam(commonData.team?.id!, { visibility: teamVisiblityEnum } as any);
       router.reload();
     } catch (e: any) {
-      console.log(e.response.data);
+      console.error(e.response.data);
     }
     setRequesting(false);
   };
@@ -372,7 +372,7 @@ const Index = ({ commonData, setUser }: Props) => {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       await api.deleteTeam(commonData.team!.id!);
     } catch (error: any) {
-      console.log(error.response.data.message);
+      console.error(error.response.data.message);
       setShowDeleteTeamModal(false);
       setTextTeamModal('');
       setRequesting(false);

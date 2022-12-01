@@ -384,7 +384,7 @@ const Index = ({ commonData, setUser }: Props) => {
       });
       setUsers(result.data);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 

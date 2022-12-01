@@ -10,7 +10,6 @@ interface Props {
 }
 
 const SearchPagination = ({ goToPage, fullTextSearchMetadata }: Props) => {
-  console.log(fullTextSearchMetadata);
   const onPreviousPage = () => {
     if (fullTextSearchMetadata.page - 1 > 0) {
       goToPage(fullTextSearchMetadata.page - 1);

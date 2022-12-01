@@ -30,7 +30,7 @@ const UnpureDeleteOrganizationDropdown = ({ commonData, captchaIsEnabled, setUse
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       await api.deleteOrganization(commonData.organization!.id!);
     } catch (error: any) {
-      console.log(error.response.data.message);
+      console.error(error.response.data.message);
       setOpen(false);
       setInput('');
       setRequesting(false);
