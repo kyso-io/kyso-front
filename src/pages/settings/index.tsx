@@ -68,7 +68,7 @@ const Index = ({ commonData }: Props) => {
         });
         setOrganizationsInfoDtoExtended(data);
       } catch (e: any) {
-        console.log(e.response.data);
+        console.error(e.response.data);
       }
     };
     getData();

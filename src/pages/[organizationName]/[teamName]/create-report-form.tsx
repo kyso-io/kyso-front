@@ -503,7 +503,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       window.location.href = `/${updatedReport.organization_sluglified_name}/${updatedReport.team_sluglified_name}/${updatedReport.name}`;
       setMessageToaster('Report updated successfully.');
     } catch (err: any) {
-      console.log(err);
+      console.error(err);
       setShowToaster(err.response.data.message);
       setBusy(false);
     }

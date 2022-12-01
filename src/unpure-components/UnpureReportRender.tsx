@@ -7,6 +7,7 @@ import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
 import type { ReportContext } from '@/components/renderers/kyso-markdown-renderer/interfaces/context';
 import RenderOnlyOffice from '@/components/renderers/kyso-onlyoffice-renderer/RenderOnlyOffice';
 import RenderCode from '@/components/renderers/RenderCode';
+import RenderMicroscopeSVS from '@/components/renderers/RenderMicroscopeSVS';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
@@ -194,6 +195,10 @@ const UnpureReportRender = ({
       // To use internal URLs as is rendered by document-server
       const fileUrl = `http://kyso-scs/scs${fileToRender.path_scs}`;
       render = <RenderOnlyOffice fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
+    } else if (FileTypesHelper.isSVS(fileToRender.path) && frontEndUrl) {
+      const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
+
+      render = <RenderMicroscopeSVS fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
     } /* else if (FileTypesHelper.isGoogleDocs(fileToRender.path) && frontEndUrl) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
       render = <RenderGoogleDocs fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;

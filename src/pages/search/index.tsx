@@ -20,7 +20,7 @@ const fetchData = async (commonData: CommonData, params: FullTextSearchParams, c
     const resultFullTextSearchDto: NormalizedResponseDTO<FullTextSearchDTO> = await api.fullTextSearch({ ...params, terms: encodeURIComponent(params.terms) });
     cb(resultFullTextSearchDto.data);
   } catch (e: any) {
-    console.log(e.response.data);
+    console.error(e.response.data);
     cb(null);
   }
 };

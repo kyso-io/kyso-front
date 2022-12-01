@@ -35,7 +35,7 @@ const debouncedPaginatedReports = debounce(
       checkReportAuthors(result);
       cb(result);
     } catch (e) {
-      console.log(e);
+      console.error(e);
       cb(null);
     }
   },
