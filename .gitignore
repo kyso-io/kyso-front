@@ -3,6 +3,7 @@
 # env
 .npmrc*
 .env
+.tsconfig-lint.json
 
 # dependencies
 /node_modules
