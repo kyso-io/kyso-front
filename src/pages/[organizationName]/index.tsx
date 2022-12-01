@@ -7,6 +7,7 @@ import PureNewReportPopover from '@/components/PureNewReportPopover';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { XCircleIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -22,7 +23,7 @@ import {
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ActivityFeedComponent from '../../components/ActivityFeed';
 import InfoActivity from '../../components/InfoActivity';
 import ManageUsers from '../../components/ManageUsers';
@@ -46,6 +47,7 @@ interface Props {
 
 const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
+  const { join, organizationName } = router.query;
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
   const [organizationInfo, setOrganizationInfo] = useState<OrganizationInfoDto | null>(null);
   const [paginationParams, setPaginationParams] = useState<PaginationParams>({
@@ -88,6 +90,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
   }, [commonData.permissions, commonData.organization]);
+  const [invitationError, setInvitationError] = useState<string>('');
 
   useEffect(() => {
     const getData = async () => {
@@ -106,13 +109,41 @@ const Index = ({ commonData, setUser }: Props) => {
   }, []);
 
   useEffect(() => {
-    if (!commonData.permissions || !commonData.permissions.organizations || !router.query.organizationName) {
+    if (!commonData.permissions || !commonData.permissions.organizations || !organizationName) {
       return;
     }
-    if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizationName as string)) {
-      router.replace('/login');
+    // A user is trying to access the organization page with an invitation link
+    if (join) {
+      // The user is...
+      if (!commonData.token) {
+        // Unauthorized, redirect to SignUp page
+        window.location.href = `/signup?invitation=/${organizationName}?join=${join as string}`;
+        return;
+      }
+      // Authorized
+      if (HelperPermissions.belongsToOrganization(commonData, organizationName as string)) {
+        // User already belongs to the organization, skipping the invitation process
+        return;
+      }
+      // User doesn't belong to the organization, accepting the invitation
+      const joinUserToOrganization = async () => {
+        try {
+          const api: Api = new Api(commonData.token);
+          await api.joinUserToOrganization(organizationName as string, join as string);
+          window.location.href = `/${organizationName}`;
+        } catch (e: any) {
+          const errorData: { statusCode: number; message: string; error: string } = e.response.data;
+          console.log(errorData);
+          setInvitationError(errorData.message);
+        }
+      };
+      joinUserToOrganization();
+      return;
     }
-  }, [commonData?.permissions?.organizations, router.query?.organizationName]);
+    if (!HelperPermissions.belongsToOrganization(commonData, organizationName as string)) {
+      window.location.href = '/';
+    }
+  }, [commonData?.permissions?.organizations, organizationName, join]);
 
   useEffect(() => {
     if (!commonData.organization) {
@@ -454,63 +485,83 @@ const Index = ({ commonData, setUser }: Props) => {
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
       <div className="w-4/6">
-        <div className="flex items-center w justify-between p-2">
-          <div className="shrink-0 flex flex-row items-end space-x-2">
-            <PureAvatar
-              src={commonData.organization?.avatar_url ? commonData.organization?.avatar_url : ''}
-              title={commonData.organization?.display_name ? commonData.organization?.display_name : ''}
-              size={TailwindHeightSizeEnum.H16}
-              textSize={TailwindFontSizeEnum.XXL}
-            />
-            <h1 className="ml-12 mb-4 text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
-          </div>
-          <div className="flex items-center space-x-2">
-            <ManageUsers
-              commonData={commonData}
-              members={members}
-              onInputChange={(query: string) => searchUsers(query)}
-              users={users}
-              showTeamRoles={false}
-              onUpdateRoleMember={updateMemberRole}
-              onInviteNewUser={inviteNewUser}
-              onRemoveUser={removeUser}
-              captchaIsEnabled={captchaIsEnabled}
-              onCaptchaSuccess={onCaptchaSuccess}
-            />
-            {hasPermissionDeleteOrganization && <UnpureDeleteOrganizationDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
-            {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
-          </div>
-        </div>
-        {organizationInfo && (
-          <div className="flex items-center justify-between p-2">
-            <div className="mb-10">
-              <InfoActivity info={organizationInfo} />
+        {invitationError ? (
+          <div className="rounded-md bg-red-50 p-4">
+            <div className="flex">
+              <div className="shrink-0">
+                <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
+              </div>
+              <div className="ml-3">
+                <h3 className="text-sm font-medium text-red-800">There was an error in the invitation process</h3>
+                <div className="mt-2 text-sm text-red-700">
+                  <ul role="list" className="list-disc space-y-1 pl-5">
+                    <li>{invitationError}</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
-        )}
-        <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
-          {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
-          {paginatedResponseDto?.results &&
-            paginatedResponseDto.results.length > 0 &&
-            paginatedResponseDto?.results.map((report: ReportDTO) => (
-              <ReportBadge
-                commonData={commonData}
-                key={report.id}
-                report={report}
-                authors={report.authors ? report.authors : []}
-                toggleUserStarReport={() => toggleUserStarReport(report)}
-                toggleUserPinReport={() => toggleUserPinReport(report)}
-                toggleGlobalPinReport={() => toggleGlobalPinReport(report)}
-              />
-            ))}
-        </div>
-        {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
-          <div className="pt-10">
-            <Pagination page={paginatedResponseDto.currentPage} numPages={paginatedResponseDto.totalPages} onPageChange={(page: number) => setPaginationParams({ ...paginationParams, page })} />
-          </div>
+        ) : (
+          <React.Fragment>
+            <div className="flex items-center w justify-between p-2">
+              <div className="shrink-0 flex flex-row items-end space-x-2">
+                <PureAvatar
+                  src={commonData.organization?.avatar_url ? commonData.organization?.avatar_url : ''}
+                  title={commonData.organization?.display_name ? commonData.organization?.display_name : ''}
+                  size={TailwindHeightSizeEnum.H16}
+                  textSize={TailwindFontSizeEnum.XXL}
+                />
+                <h1 className="ml-12 mb-4 text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
+              </div>
+              <div className="flex items-center space-x-2">
+                <ManageUsers
+                  commonData={commonData}
+                  members={members}
+                  onInputChange={(query: string) => searchUsers(query)}
+                  users={users}
+                  showTeamRoles={false}
+                  onUpdateRoleMember={updateMemberRole}
+                  onInviteNewUser={inviteNewUser}
+                  onRemoveUser={removeUser}
+                  captchaIsEnabled={captchaIsEnabled}
+                  onCaptchaSuccess={onCaptchaSuccess}
+                />
+                {hasPermissionDeleteOrganization && <UnpureDeleteOrganizationDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
+                {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
+              </div>
+            </div>
+            {organizationInfo && (
+              <div className="flex items-center justify-between p-2">
+                <div className="mb-10">
+                  <InfoActivity info={organizationInfo} />
+                </div>
+              </div>
+            )}
+            <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
+              {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
+              {paginatedResponseDto?.results &&
+                paginatedResponseDto.results.length > 0 &&
+                paginatedResponseDto?.results.map((report: ReportDTO) => (
+                  <ReportBadge
+                    commonData={commonData}
+                    key={report.id}
+                    report={report}
+                    authors={report.authors ? report.authors : []}
+                    toggleUserStarReport={() => toggleUserStarReport(report)}
+                    toggleUserPinReport={() => toggleUserPinReport(report)}
+                    toggleGlobalPinReport={() => toggleGlobalPinReport(report)}
+                  />
+                ))}
+            </div>
+            {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
+              <div className="pt-10">
+                <Pagination page={paginatedResponseDto.currentPage} numPages={paginatedResponseDto.totalPages} onPageChange={(page: number) => setPaginationParams({ ...paginationParams, page })} />
+              </div>
+            )}
+          </React.Fragment>
         )}
       </div>
-      {commonData.user && (
+      {!invitationError && commonData.user && (
         <div className="w-1/6">
           <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
           {commonData.organization?.bio && (

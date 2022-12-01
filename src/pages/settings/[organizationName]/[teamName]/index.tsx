@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Listbox, Transition } from '@headlessui/react';
 import { LinkIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, TeamMember } from '@kyso-io/kyso-model';
+import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, TeamMember, ResourcePermissions } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   GlobalPermissionsEnum,
@@ -24,13 +24,16 @@ import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import CaptchaModal from '../../../../components/CaptchaModal';
+import ChannelVisibility from '../../../../components/ChannelVisibility';
 import PureAvatar from '../../../../components/PureAvatar';
 import SettingsAside from '../../../../components/SettingsAside';
+import { OrganizationSettingsTab } from '../../../../enums/organization-settings-tab';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 import { Helper } from '../../../../helpers/Helper';
 import { useRedirectIfNoJWT } from '../../../../hooks/use-redirect-if-no-jwt';
 import { TailwindFontSizeEnum } from '../../../../tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '../../../../tailwind/enum/tailwind-height.enum';
+import { TailwindWidthSizeEnum } from '../../../../tailwind/enum/tailwind-width.enum';
 import type { CommonData } from '../../../../types/common-data';
 import type { Member } from '../../../../types/member';
 
@@ -60,6 +63,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
 const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
+  const { teamName } = router.query;
   const [query, setQuery] = useState<string>('');
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -103,6 +107,25 @@ const Index = ({ commonData, setUser }: Props) => {
   const [showDeleteTeamModal, setShowDeleteTeamModal] = useState<boolean>(false);
   const [textTeamModal, setTextTeamModal] = useState<string>('');
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const teams: ResourcePermissions[] = useMemo(() => {
+    let data: ResourcePermissions[] = [];
+    if (!commonData.organization || !commonData.permissions || !commonData.permissions.teams) {
+      return data;
+    }
+    data = commonData.permissions.teams.filter((resourcePermissions: ResourcePermissions) => resourcePermissions.organization_id === commonData.organization!.id);
+    data.sort((a: ResourcePermissions, b: ResourcePermissions) => {
+      const displayNameA: string = a.display_name.toLowerCase();
+      const displayNameB: string = b.display_name.toLowerCase();
+      if (displayNameA < displayNameB) {
+        return -1;
+      }
+      if (displayNameA > displayNameB) {
+        return 1;
+      }
+      return 0;
+    });
+    return data;
+  }, [commonData.permissions, commonData.organization]);
 
   useEffect(() => {
     const getData = async () => {
@@ -417,10 +440,123 @@ const Index = ({ commonData, setUser }: Props) => {
       <div className="w-4/6">
         <div className="py-8">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-row items-center">
+            {/* ORGANIZATION HEADER */}
+            <div className="space-y-5">
+              <div className="flex items-center">
+                <PureAvatar
+                  src={commonData.organization?.avatar_url || ''}
+                  title={commonData.organization?.display_name || ''}
+                  size={TailwindHeightSizeEnum.H16}
+                  textSize={TailwindFontSizeEnum.XS}
+                  className="mr-4"
+                />
+                <h2 className="grow text-3xl font-bold tracking-tight sm:text-4xl">{commonData.organization?.display_name}</h2>
+                <button
+                  className="rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  onClick={() => {
+                    window.location.href = `/settings/${commonData.organization?.sluglified_name}?edit=true`;
+                  }}
+                >
+                  Edit
+                </button>
+              </div>
+              <div className="py-3">
+                <a href={commonData.organization?.link} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+                  {commonData.organization?.link}
+                </a>
+                {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
+                <p className="text-md text-gray-500">{commonData.organization?.bio}</p>
+              </div>
+            </div>
+
+            {/* TABS */}
+            <div className="hidden sm:block">
+              <div className="border-b border-gray-200">
+                <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                  {Helper.organizationSettingsTabs.map((tab: { key: OrganizationSettingsTab; name: string }) => (
+                    <a
+                      key={tab.name}
+                      href={`/settings/${commonData.organization?.sluglified_name}?tab=${tab.key}`}
+                      className={clsx(
+                        tab.key === OrganizationSettingsTab.Channels ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                        'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+                      )}
+                      aria-current={tab.key === OrganizationSettingsTab.Channels ? 'page' : undefined}
+                    >
+                      {tab.name}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </div>
+
+            {/* TEAM HEADER */}
+            <div className="flex flex-row items-center mt-6">
               <div className="grow flex flex-row items-center">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">{commonData.team?.display_name}</h3>
-                <a href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`} className="max-w-2xl text-sm text-gray-500 ml-5">
+                <PureAvatar src={commonData.team?.avatar_url || ''} title={commonData.team?.display_name || ''} size={TailwindHeightSizeEnum.H16} textSize={TailwindFontSizeEnum.XS} className="mr-4" />
+                <Listbox
+                  value={null}
+                  onChange={(resourcePermissions: ResourcePermissions) => {
+                    if (resourcePermissions.id !== commonData.team?.id) {
+                      window.location.href = `/settings/${commonData.organization?.sluglified_name}/${resourcePermissions.name}`;
+                    }
+                  }}
+                >
+                  {({ open }) => (
+                    <div className="relative mt-1" style={{ width: '230px' }}>
+                      <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                        <span className="inline-flex w-full">
+                          <span className="">{commonData.team?.display_name}</span>
+                          <ChannelVisibility
+                            containerClasses="ml-2"
+                            teamVisibility={commonData.team?.visibility!}
+                            imageWidth={TailwindWidthSizeEnum.W3}
+                            imageMarginX={TailwindWidthSizeEnum.W3}
+                            imageMarginY={TailwindWidthSizeEnum.W1}
+                            alwaysOnHover={true}
+                          />
+                        </span>
+                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                          </svg>
+                        </span>
+                      </Listbox.Button>
+                      <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          {teams.map((resourcePermissions: ResourcePermissions) => (
+                            <Listbox.Option
+                              key={resourcePermissions.id}
+                              className={({ active }) => clsx(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'relative cursor-default select-none py-2 pl-3 pr-9')}
+                              value={resourcePermissions}
+                            >
+                              {({ selected, active }) => (
+                                <React.Fragment>
+                                  <div className="flex">
+                                    <span className={clsx(teamName === resourcePermissions.name ? 'font-semibold' : 'font-normal')}>{resourcePermissions.display_name}</span>
+                                    <ChannelVisibility
+                                      containerClasses="ml-3"
+                                      teamVisibility={resourcePermissions.team_visibility!}
+                                      imageWidth={TailwindWidthSizeEnum.W3}
+                                      imageMarginX={TailwindWidthSizeEnum.W3}
+                                      imageMarginY={TailwindWidthSizeEnum.W1}
+                                    />
+                                  </div>
+                                  {selected ? (
+                                    <span className={clsx(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
+                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                    </span>
+                                  ) : null}
+                                </React.Fragment>
+                              )}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  )}
+                </Listbox>
+                <a href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`} className="max-w-2xl text-sm text-blue-500 ml-5">
                   View channel
                   <LinkIcon className="inline-block w-4 h-4 ml-1" />
                 </a>
@@ -434,21 +570,83 @@ const Index = ({ commonData, setUser }: Props) => {
                 </button>
               )}
             </div>
-            <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:pt-5 mb-5">
+            <div className="flex items-center my-4">
               <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Visiblity:</label>
-              <div className="mt-1 sm:col-span-2 sm:mt-0">
-                <select
-                  disabled={!hasPermissionEditChannel || requesting}
-                  value={commonData.team?.visibility}
-                  onChange={(e: any) => updateTeamVisiblity(e.target.value)}
-                  name="teamVisiblity"
-                  className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+              {hasPermissionEditChannel ? (
+                <Listbox value={null} onChange={(teamVisibilityEnum: TeamVisibilityEnum) => updateTeamVisiblity(teamVisibilityEnum)}>
+                  {({ open }) => (
+                    <div className="relative ml-6" style={{ width: '200px' }}>
+                      <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                        <span className="inline-flex w-full">
+                          <span className="">{Helper.ucFirst(commonData.team?.visibility || '')}</span>
+                          <ChannelVisibility
+                            containerClasses="ml-2"
+                            teamVisibility={commonData.team?.visibility!}
+                            imageWidth={TailwindWidthSizeEnum.W3}
+                            imageMarginX={TailwindWidthSizeEnum.W3}
+                            imageMarginY={TailwindWidthSizeEnum.W1}
+                            alwaysOnHover={true}
+                          />
+                        </span>
+                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                          </svg>
+                        </span>
+                      </Listbox.Button>
+                      <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                          {Helper.teamVisibilityValues.map((teamVisibilityEnum: TeamVisibilityEnum) => (
+                            <Listbox.Option
+                              disabled={!hasPermissionEditChannel || requesting}
+                              key={teamVisibilityEnum}
+                              className={({ active }) => clsx(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'relative cursor-pointer select-none py-2 pl-3 pr-9')}
+                              value={teamVisibilityEnum}
+                            >
+                              {({ selected, active }) => (
+                                <React.Fragment>
+                                  <div className="flex">
+                                    <span className={clsx(commonData.team?.visibility === teamVisibilityEnum ? 'font-semibold' : 'font-normal')}>{Helper.ucFirst(teamVisibilityEnum)}</span>
+                                    <ChannelVisibility
+                                      containerClasses="ml-3"
+                                      teamVisibility={teamVisibilityEnum!}
+                                      imageWidth={TailwindWidthSizeEnum.W3}
+                                      imageMarginX={TailwindWidthSizeEnum.W3}
+                                      imageMarginY={TailwindWidthSizeEnum.W1}
+                                    />
+                                  </div>
+                                  {selected ? (
+                                    <span className={clsx(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
+                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                    </span>
+                                  ) : null}
+                                </React.Fragment>
+                              )}
+                            </Listbox.Option>
+                          ))}
+                        </Listbox.Options>
+                      </Transition>
+                    </div>
+                  )}
+                </Listbox>
+              ) : (
+                <div
+                  style={{ width: '200px' }}
+                  className="ml-2 relative cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
                 >
-                  <option value={TeamVisibilityEnum.PROTECTED}>Protected</option>
-                  <option value={TeamVisibilityEnum.PRIVATE}>Private</option>
-                  <option value={TeamVisibilityEnum.PUBLIC}>Public</option>
-                </select>
-              </div>
+                  <span className="inline-flex w-full">
+                    <span className="">{Helper.ucFirst(commonData.team?.visibility || '')}</span>
+                    <ChannelVisibility
+                      containerClasses="ml-2"
+                      teamVisibility={commonData.team?.visibility!}
+                      imageWidth={TailwindWidthSizeEnum.W3}
+                      imageMarginX={TailwindWidthSizeEnum.W3}
+                      imageMarginY={TailwindWidthSizeEnum.W1}
+                      alwaysOnHover={true}
+                    />
+                  </span>
+                </div>
+              )}
             </div>
             <div className="text-sm text-gray-700">
               <ul style={{ listStyle: 'circle' }}>
@@ -464,10 +662,11 @@ const Index = ({ commonData, setUser }: Props) => {
                 </li>
               </ul>
             </div>
+
+            {/* SEARCH USERS */}
             {isOrgAdmin && (
               <div className="mt-8">
-                {/* SEARCH USERS */}
-                <h3 className="text-lg font-medium leading-6 text-gray-900">Add users to the team:</h3>
+                <h3 className="text-lg font-medium leading-6 text-gray-900">Add users to the channel:</h3>
                 <div className="my-8 sm:col-span-2">
                   <input
                     type="text"
@@ -522,9 +721,10 @@ const Index = ({ commonData, setUser }: Props) => {
                 </div>
               </div>
             )}
+
             {/* TEAM MEMBERS */}
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium leading-6 text-gray-900 mt-8">Team members ({members.length}):</h3>
+              <h3 className="text-lg font-medium leading-6 text-gray-900 mt-8">Channel members ({members.length}):</h3>
               {(isOrgAdmin || isTeamAdmin) && (
                 <button
                   className={clsx(
