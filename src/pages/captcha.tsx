@@ -26,6 +26,7 @@ function isBrowser() {
 
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
+  const { invitation } = router.query;
   const hCaptchaRef = useRef(null);
   const [captchaSiteKey, setCaptchaSiteKey] = useState<string>(DEFAULT_CAPTCHA_SITE_KEY);
   const [captchaToken, setCaptchaToken] = useState<string>('');
@@ -94,7 +95,13 @@ const Index = ({ commonData }: Props) => {
       if (isBrowser()) {
         sessionStorage.removeItem('redirectUrl');
       }
-      setTimeout(() => router.replace(redirectUrl), 200);
+      setTimeout(() => {
+        if (invitation) {
+          router.replace(invitation as string);
+        } else {
+          router.replace(redirectUrl);
+        }
+      }, 200);
     } else {
       setShow(true);
       setAlertText('Please verify that you are not a robot.');

@@ -101,43 +101,44 @@ const Index = ({ commonData }: Props) => {
                       ? OrganizationRoleToLabel[organizationInfoExtended.role_names[0]!]!
                       : '';
                   return (
-                    <li key={organizationInfoExtended.organization_id} className="cursor-pointer" onClick={() => router.push(`/settings/${organizationInfoExtended.name}`)}>
-                      {/* <img
-                          className="mx-auto h-40 w-40 rounded-full xl:h-56 xl:w-56"
-                          src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=8&amp;w=1024&amp;h=1024&amp;q=80"
-                          alt=""
-                        /> */}
-                      <PureAvatar src={organizationInfoExtended.avatar_url} title={organizationInfoExtended.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
-                      <div className="space-y-2">
-                        <div className="space-y-1 text-lg font-medium leading-6 mt-2">
-                          <h3>{organizationInfoExtended.display_name}</h3>
-                          <p className="text-indigo-600">{role}</p>
-                        </div>
-                        <ul role="list" className="flex justify-center space-x-5 cursor-pointer">
-                          {organizationInfoExtended.reports !== null && organizationInfoExtended.reports > 0 && (
-                            <li title="Reports">
-                              <div className="flex items-center">
-                                <span className="font-medium text-gray-400 mr-1">{organizationInfoExtended.reports}</span>
-                                <BookOpenIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
-                              </div>
-                            </li>
-                          )}
-                          {organizationInfoExtended.members !== null && organizationInfoExtended.members > 0 && (
-                            <li title="Members">
-                              <div className="flex items-center">
-                                <span className="font-medium text-gray-400 mr-1">{organizationInfoExtended.members}</span>
-                                <UserGroupIcon className="h-6 w-6 text-gray-400" aria-hidden="true" />
-                              </div>
-                            </li>
-                          )}
-                          {organizationInfoExtended.comments !== null && organizationInfoExtended.comments > 0 && (
-                            <li title="Comments">
-                              <div className="flex items-center">
-                                <span className="font-medium text-gray-400 mr-1">{organizationInfoExtended.comments}</span>
-                                <ChatAlt2Icon className="h-6 w-6 text-gray-400" aria-hidden="true" />
-                              </div>
-                            </li>
-                          )}
+                    <li
+                      key={organizationInfoExtended.organization_id}
+                      className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
+                      onClick={() => router.push(`/settings/${organizationInfoExtended.name}`)}
+                    >
+                      <div className="space-y-1 text-lg font-medium leading-6 mt-5">
+                        <h3 style={{ color: '#234361' }}>{organizationInfoExtended.display_name}</h3>
+                        <span className="text-sm font-normal">{role}</span>
+                      </div>
+                      <div className="my-10">
+                        <PureAvatar src={organizationInfoExtended.avatar_url} title={organizationInfoExtended.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
+                      </div>
+                      <div className="space-y-2 border-t py-4 px-2">
+                        <ul role="list" className="flex justify-between space-x-5 cursor-pointer">
+                          <li title="Reports">
+                            <div className="flex items-center">
+                              <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
+                              <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                {organizationInfoExtended.reports} reports
+                              </span>
+                            </div>
+                          </li>
+                          <li title="Members">
+                            <div className="flex items-center">
+                              <UserGroupIcon className="h-6 w-6 mr-1" fill="#F1AB7A" aria-hidden="true" />
+                              <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                {organizationInfoExtended.members}
+                              </span>
+                            </div>
+                          </li>
+                          <li title="Comments">
+                            <div className="flex items-center">
+                              <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
+                              <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                {organizationInfoExtended.comments} comments
+                              </span>
+                            </div>
+                          </li>
                         </ul>
                       </div>
                     </li>

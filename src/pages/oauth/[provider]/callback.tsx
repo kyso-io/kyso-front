@@ -13,7 +13,7 @@ import type { DecodedToken } from '../../../types/decoded-token';
 const Page = () => {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
-  const { code, provider } = router.query;
+  const { code, provider, state } = router.query;
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -54,7 +54,9 @@ const Page = () => {
         const user: Token = jwtToken.payload;
         setTimeout(() => {
           if (captchaIsEnabled && user.show_captcha) {
-            router.push('/captcha');
+            router.push(`/captcha${state ? `?invitation=${state as string}` : ''}`);
+          } else if (state) {
+            router.push(state as string);
           } else {
             router.push('/');
           }
