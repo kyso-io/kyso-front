@@ -114,7 +114,7 @@ const Index = ({ commonData, setUser }: Props) => {
       await api.updateUser(commonData.user!.id!, updateUserRequestDto);
       router.reload();
     } catch (e: any) {
-      console.log(e.response.data);
+      console.error(e.response.data);
     } finally {
       setRequesting(false);
       setShowToaster(false);
@@ -138,7 +138,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setSentVerificationEmail(true);
       setShowToasterEmailVerification(true);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     }
   };
 
