@@ -25,6 +25,10 @@ export class FileTypesHelper {
     return 'browser.svg';
   }
 
+  public static isSVS = (name: string) => {
+    return name.toLowerCase().endsWith('.svs');
+  };
+
   public static isAdoc = (name: string) => {
     return name.toLowerCase().endsWith('.adoc') || name.toLowerCase().endsWith('.asciidoc') || name.toLowerCase().endsWith('.asc');
   };
@@ -176,7 +180,8 @@ export class FileTypesHelper {
       FileTypesHelper.isTextBasedFiled(name) ||
       FileTypesHelper.isJupyterNotebook(name) ||
       FileTypesHelper.isOnlyOffice(name) ||
-      FileTypesHelper.isGoogleDocs(name)
+      FileTypesHelper.isGoogleDocs(name) ||
+      FileTypesHelper.isSVS(name)
     );
   };
 }

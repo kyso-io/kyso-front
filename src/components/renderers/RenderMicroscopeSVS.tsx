@@ -1,25 +1,40 @@
 import React from 'react';
+import { v4 } from 'uuid';
 import RenderError from './RenderError';
 
 export type Props = {
-  base64: string;
-  alt?: string;
+  fileUrl: string;
+  token?: string | null;
 };
 
 const RenderMicroscopeSVS = (props: Props) => {
-  if (!props.base64) {
-    return <RenderError message={`This image can't be rendered`} />;
+  const id = v4();
+
+  if (!props.fileUrl) {
+    return <RenderError message={`Sorry, we can't retrieve the content of this Microsoft Office file`} />;
   }
 
-  let src: string = '';
+  /* let parameters = `${props.fileUrl}`;
 
-  if (props.base64.includes('data:image')) {
-    src = props.base64;
-  } else {
-    src = `data:image/jpeg;base64,${props.base64}`;
-  }
+  if (props.token) {
+    parameters += `?token=${props.token}`;
+  } */
 
-  return <img src={src} alt={props.alt ? props.alt : 'An image'} />;
+  return (
+    <>
+      <iframe
+        title={id}
+        id={`iframe-${id}`}
+        sandbox={`allow-scripts allow-same-origin allow-forms allow-modals allow-popups allow-downloads`}
+        width="100%"
+        style={{
+          border: 'none 0px',
+          height: '74vh',
+        }}
+        src={`/microscope-svs-render.html`}
+      />
+    </>
+  );
 };
 
 export default RenderMicroscopeSVS;
