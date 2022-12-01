@@ -326,7 +326,7 @@ const Index = ({ commonData, setUser }: Props) => {
       } as any);
       router.reload();
     } catch (e: any) {
-      console.error(e.response.data);
+      console.log(e.response.data);
     } finally {
       setRequesting(false);
       setShowToaster(false);
@@ -401,7 +401,7 @@ const Index = ({ commonData, setUser }: Props) => {
       } as any);
       router.reload();
     } catch (e: any) {
-      console.error(e.response.data);
+      console.log(e.response.data);
     } finally {
       setRequesting(false);
       setShowToaster(false);
@@ -528,7 +528,7 @@ const Index = ({ commonData, setUser }: Props) => {
       }
       setUsers(usersNotInOrg);
     } catch (e) {
-      console.error(e);
+      console.log(e);
     }
     setRequesting(false);
   };
@@ -562,7 +562,7 @@ const Index = ({ commonData, setUser }: Props) => {
       await api.deleteOrganization(commonData.organization!.id!);
       window.location.href = '/settings';
     } catch (error: any) {
-      console.error(error.response.data.message);
+      console.log(error.response.data.message);
       setShowDeleteOrgModal(false);
       setTextOrgModal('');
       setRequesting(false);
