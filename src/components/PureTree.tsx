@@ -102,11 +102,11 @@ const PureTree = (props: IPureTree) => {
   };
 
   return (
-    <div className="p-2 flex flex-col space-y-2 w-full">
-      <div className="px-2 flex flex-col space-y-2 w-full">
-        <h3 className=" text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
+    <div className="flex flex-col space-y-2 w-full">
+      <div className="flex flex-col space-y-2 w-full">
+        {/* <h3 className=" text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
           Files
-        </h3>
+        </h3> */}
         {
           /* Removed crumbs with && false */
           crumbs && crumbs.length > 0 && false && (

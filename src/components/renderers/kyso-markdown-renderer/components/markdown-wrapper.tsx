@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+import { MathJax, MathJaxContext } from 'better-react-mathjax';
+import 'katex/dist/katex.min.css';
 import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
@@ -6,14 +7,10 @@ import rehypeSlug from 'rehype-slug';
 import directive from 'remark-directive';
 import gfm from 'remark-gfm';
 import remarkMath from 'remark-math';
-import { useHover } from 'usehooks-ts';
-import { visit } from 'unist-util-visit';
 import remarkUnwrapImages from 'remark-unwrap-images';
-import { LinkIcon } from '@heroicons/react/outline';
-import { MathJax, MathJaxContext } from 'better-react-mathjax';
-import Mermaid from './mermaid';
+import { visit } from 'unist-util-visit';
 import RenderCode from '../../RenderCode';
-import 'katex/dist/katex.min.css';
+import Mermaid from './mermaid';
 
 function customDirectives() {
   return transform;
@@ -33,59 +30,59 @@ function customDirectives() {
   }
 }
 
-type HeadingResolverProps = {
-  level: number;
-  children: JSX.Element[];
-};
+// type HeadingResolverProps = {
+//   level: number;
+//   children: JSX.Element[];
+// };
 
-// https://github.com/remarkjs/react-markdown/issues/358
-const Heading: React.FC<HeadingResolverProps> = ({ level, children }) => {
-  // Access actual (string) value of heading
+// // https://github.com/remarkjs/react-markdown/issues/358
+// const Heading: React.FC<HeadingResolverProps> = ({ level, children }) => {
+//   // Access actual (string) value of heading
 
-  const heading = children[0];
+//   const heading = children[0];
 
-  // If we have a heading, make it lower case
-  let anchor = typeof heading === 'string' ? heading : '';
+//   // If we have a heading, make it lower case
+//   let anchor = typeof heading === 'string' ? heading : '';
 
-  // Clean anchor (replace special characters whitespaces).
-  // Alternatively, use encodeURIComponent() if you don't care about
-  // pretty anchor links
-  anchor = anchor.replace(/[^a-zA-Z0-9 ]/g, '');
-  anchor = anchor.replace(/ /g, '-');
-  const hoverRef = useRef(null);
-  const isHover = useHover(hoverRef);
+//   // Clean anchor (replace special characters whitespaces).
+//   // Alternatively, use encodeURIComponent() if you don't care about
+//   // pretty anchor links
+//   anchor = anchor.replace(/[^a-zA-Z0-9 ]/g, '');
+//   anchor = anchor.replace(/ /g, '-');
+//   const hoverRef = useRef(null);
+//   const isHover = useHover(hoverRef);
 
-  // Utility
-  const container = (nodeChildren: React.ReactNode): JSX.Element => (
-    <a
-      ref={hoverRef}
-      id={anchor}
-      href={`#${anchor}`}
-      className="scroll-mt-20 no-underline flex items-center flex-row"
-      style={{
-        scrollMarginTop: '120px',
-      }}
-    >
-      <span>{nodeChildren}</span>
-      {isHover && <LinkIcon className="mx-2 w-5 h-5" />}
-    </a>
-  );
+//   // Utility
+//   const container = (nodeChildren: React.ReactNode): JSX.Element => (
+//     <a
+//       ref={hoverRef}
+//       id={anchor}
+//       href={`#${anchor}`}
+//       className="scroll-mt-20 no-underline flex items-center flex-row"
+//       style={{
+//         scrollMarginTop: '120px',
+//       }}
+//     >
+//       <span>{nodeChildren}</span>
+//       {isHover && <LinkIcon className="mx-2 w-5 h-5" />}
+//     </a>
+//   );
 
-  switch (level) {
-    case 1:
-      return <h1>{container(children)}</h1>;
-    case 2:
-      return <h2>{container(children)}</h2>;
-    case 3:
-      return <h3>{container(children)}</h3>;
-    case 4:
-      return <h4>{container(children)}</h4>;
-    case 5:
-      return <h5>{container(children)}</h5>;
-    default:
-      return <h6>{container(children)}</h6>;
-  }
-};
+//   switch (level) {
+//     case 1:
+//       return <h1>{container(children)}</h1>;
+//     case 2:
+//       return <h2>{container(children)}</h2>;
+//     case 3:
+//       return <h3>{container(children)}</h3>;
+//     case 4:
+//       return <h4>{container(children)}</h4>;
+//     case 5:
+//       return <h5>{container(children)}</h5>;
+//     default:
+//       return <h6>{container(children)}</h6>;
+//   }
+// };
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const components: any = {
@@ -103,7 +100,7 @@ const components: any = {
 
     if (children.length > 0) {
       // return mermaid if the code type is identified as such
-      if (codeChild[0].properties.className[0] === 'language-mermaid') {
+      if (Array.isArray(codeChild[0].properties.className) && codeChild[0].properties.className.lenght > 0 && codeChild[0].properties.className[0] === 'language-mermaid') {
         return <Mermaid source={children[0].value} />;
       }
       // return the render code in other cases
@@ -116,12 +113,12 @@ const components: any = {
   math: (props: any) => <MathJax>{props.value}</MathJax>,
   /* eslint-disable @typescript-eslint/no-explicit-any */
   inlineMath: (props: any) => <MathJax>{props.value}</MathJax>,
-  h1: Heading,
-  h2: Heading,
-  h3: Heading,
-  h4: Heading,
-  h5: Heading,
-  h6: Heading,
+  // h1: Heading,
+  // h2: Heading,
+  // h3: Heading,
+  // h4: Heading,
+  // h5: Heading,
+  // h6: Heading,
 };
 
 interface Props {

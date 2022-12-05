@@ -24,7 +24,7 @@ import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ArrowSmDownIcon } from '@heroicons/react/solid';
-import type { Comment, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
+import type { Comment, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO, File as KysoFile } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   CommentPermissionsEnum,
@@ -43,8 +43,9 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import { Tooltip } from 'primereact/tooltip';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import CaptchaModal from '../../../../components/CaptchaModal';
+import TableOfContents from '../../../../components/TableOfContents';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 import { FileTypesHelper } from '../../../../helpers/FileTypesHelper';
 import type { FileToRender } from '../../../../types/file-to-render';
@@ -54,6 +55,11 @@ interface Props {
   setReportData: (data: ReportData | null) => void;
   reportData: ReportData | null;
   setUser: (user: UserDTO) => void;
+}
+
+enum Tab {
+  Files = 'files',
+  Toc = 'toc',
 }
 
 const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
@@ -79,6 +85,30 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const isInViewport = useIsInViewport(refComments);
   const scrollDirection: ScrollDirection | null = useScrollDirection();
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Toc);
+  const tabs: { title: string; tab: Tab }[] = useMemo(() => {
+    const data: { title: string; tab: Tab }[] = [
+      {
+        title: 'Files',
+        tab: Tab.Files,
+      },
+    ];
+    if (reportData?.report && reportData.report.toc && reportData.report.toc.length > 0) {
+      data.splice(0, 0, {
+        title: 'Table of Contents',
+        tab: Tab.Toc,
+      });
+    }
+    return data;
+  }, [reportData?.report]);
+
+  useEffect(() => {
+    if (reportData?.report && reportData.report.toc && reportData.report.toc.length > 0) {
+      setSelectedTab(Tab.Toc);
+    } else {
+      setSelectedTab(Tab.Files);
+    }
+  }, [reportData?.report]);
 
   useEffect(() => {
     const getData = async () => {
@@ -245,13 +275,23 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
             percentLoaded: 0,
             isLoading: false,
             content: null,
+            toc: [],
           };
+        }
+
+        const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+        if (ftr) {
+          try {
+            const resultFile: NormalizedResponseDTO<KysoFile> = await api.getReportFile(ftr.id);
+            ftr.path = resultFile.data.name;
+            ftr.path_scs = resultFile.data.path_scs;
+            ftr.toc = resultFile.data.toc;
+          } catch (e) {}
         }
 
         setFileToRender(ftr);
         if (ftr && !ftr.path.endsWith('.html')) {
           setFileToRender({ ...ftr, isLoading: true });
-          const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
           const data: Buffer = await api.getReportFileContent(ftr.id, {
             onDownloadProgress(progressEvent) {
               if (progressEvent.lengthComputable) {
@@ -559,19 +599,42 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
               <PureSideOverlayPanel key={report?.name} cacheKey={report?.name} setSidebarOpen={(p) => setSidebarOpen(p)}>
                 <>
                   {report && (
-                    <PureTree
-                      path={currentPath}
-                      basePath={router.basePath}
-                      commonData={commonData}
-                      report={report}
-                      version={router.query.version as string}
-                      selfTree={selfTree}
-                      parentTree={parentTree}
-                      // onNavigation={(e) => {
-                      //   e.preventDefault()
-                      //   router.push(e.currentTarget.href)
-                      // }}
-                    />
+                    <React.Fragment>
+                      <div className="border-b border-gray-200">
+                        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                          {tabs.map((element: { title: string; tab: Tab }) => (
+                            <a
+                              key={element.tab}
+                              onClick={() => setSelectedTab(element.tab)}
+                              className={classNames(
+                                element.tab === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                                'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer',
+                              )}
+                            >
+                              {element.title}
+                            </a>
+                          ))}
+                        </nav>
+                      </div>
+                      <div className="py-2">
+                        {selectedTab === Tab.Toc && <TableOfContents title="" toc={report.toc} collapsible={true} openInNewTab={true} />}
+                        {selectedTab === Tab.Files && (
+                          <PureTree
+                            path={currentPath}
+                            basePath={router.basePath}
+                            commonData={commonData}
+                            report={report}
+                            version={router.query.version as string}
+                            selfTree={selfTree}
+                            parentTree={parentTree}
+                            // onNavigation={(e) => {
+                            //   e.preventDefault()
+                            //   router.push(e.currentTarget.href)
+                            // }}
+                          />
+                        )}
+                      </div>
+                    </React.Fragment>
                   )}
                 </>
               </PureSideOverlayPanel>
