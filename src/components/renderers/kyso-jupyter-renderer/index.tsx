@@ -1,7 +1,8 @@
 /* eslint-disable react/self-closing-comp */
 import type { CommonData } from '@/types/common-data';
-import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import type { TableOfContentEntryDto, InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import React from 'react';
+import TableOfContents from '../../TableOfContents';
 import CellWrapper from './components/cell-wrapper';
 import type { Cell as ICell, JupyterNotebook } from './interfaces/jupyter-notebook';
 
@@ -20,6 +21,7 @@ interface Props {
   enabledCreateInlineComment: boolean;
   enabledDeleteInlineComment: boolean;
   enabledEditInlineComment: boolean;
+  toc: TableOfContentEntryDto[];
 }
 
 export const RenderJupyter = ({
@@ -37,6 +39,7 @@ export const RenderJupyter = ({
   enabledCreateInlineComment,
   enabledDeleteInlineComment,
   enabledEditInlineComment,
+  toc,
 }: Props) => {
   if (!jupyterNotebook || !jupyterNotebook.cells || jupyterNotebook.cells.length === 0) {
     return null;
@@ -44,6 +47,7 @@ export const RenderJupyter = ({
 
   return (
     <React.Fragment>
+      {toc && toc.length > 0 && <TableOfContents title="Table of Contents" toc={toc} collapsible={false} openInNewTab={false} />}
       {jupyterNotebook.cells.map((cell: ICell, index: number) => {
         const key: string = cell?.id && cell.id.length > 0 ? cell.id : index.toString();
 

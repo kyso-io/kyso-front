@@ -1,9 +1,9 @@
 import { faChrome, faJediOrder, faJs, faLinux, faMarkdown, faPython } from '@fortawesome/free-brands-svg-icons';
 import { faFile, faFileCsv, faFileImage, faFilePdf, faText } from '@fortawesome/pro-light-svg-icons';
-import { Asciidoctor } from '@icons-pack/react-simple-icons';
-import { StarIcon } from '@heroicons/react/solid';
 import { faFolder } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { StarIcon } from '@heroicons/react/solid';
+import { Asciidoctor } from '@icons-pack/react-simple-icons';
 import Link from 'next/link';
 
 type IPureTreeItemProps = {
@@ -66,7 +66,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
   return (
     <Link href={href || `/${treeItem.path}`}>
       <a className={classNames('p-2 text-sm group flex items-center justify-between', current ? 'bg-gray-200' : 'hover:bg-gray-100')} onClick={onNavigation} style={{ overflow: 'unset' }}>
-        <div className={classNames('group font-medium text-slate-500', 'hover:text-gray-900', 'font-normal')}>
+        <div className="group font-medium text-slate-500', 'hover:text-gray-900', 'font-normal', 'flex items-center">
           <span className="w-6 text-blue-400">
             {extension === 'ipynb' && (
               <span>

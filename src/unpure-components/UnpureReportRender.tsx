@@ -19,6 +19,7 @@ import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
 import { useEffect, useState } from 'react';
 import CaptchaModal from '../components/CaptchaModal';
+import TableOfContents from '../components/TableOfContents';
 import type { FileToRender } from '../types/file-to-render';
 import PureSideOverlayCommentsPanel from './UnpureSideOverlayCommentsPanel';
 
@@ -181,6 +182,7 @@ const UnpureReportRender = ({
           enabledCreateInlineComment={enabledCreateInlineComment}
           enabledEditInlineComment={enabledEditInlineComment}
           enabledDeleteInlineComment={enabledDeleteInlineComment}
+          toc={fileToRender.toc}
         />
       );
     } else if (FileTypesHelper.isAdoc(fileToRender.path)) {
@@ -231,6 +233,7 @@ const UnpureReportRender = ({
           <div className="flex flex-row">
             <div className={clsx(sidebarOpen ? 'w-9/12' : 'w-11/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
             <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'p-2 min-w-fit border-l')}>
+              {fileToRender.toc && fileToRender.toc.length > 0 && <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} />}
               <PureSideOverlayCommentsPanel key={report?.id!} cacheKey={report?.id!} setSidebarOpen={(p) => setSidebarOpen(p)} commonData={commonData}>
                 <PureInlineComments
                   commonData={commonData}

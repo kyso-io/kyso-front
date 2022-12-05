@@ -1,3 +1,5 @@
+import type { TableOfContentEntryDto } from '@kyso-io/kyso-model';
+
 export type FileToRender = {
   path: string;
   id: string;
@@ -5,4 +7,5 @@ export type FileToRender = {
   isLoading: boolean;
   percentLoaded?: number | null;
   content?: Buffer | string | null;
+  toc: TableOfContentEntryDto[];
 };
