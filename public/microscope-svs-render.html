@@ -26,14 +26,7 @@
   </div>
 
   <script type="text/javascript">
-    window.onload = () => fetch(`./mapping.json`).then(async resp => {
-      svs.imageNameToIdMapping = await resp.json()
-      svs.validImageNames = svs.imageNameToIdMapping.map(x => x.ImageTag).sort((a, b) => b.endsWith(".svs") ? 1 : -1)
-      svs.validImageIDs = svs.imageNameToIdMapping.map(x => x["NSLC ID"])
-      svs.loadHashParams()
-      svs.populateSelects()
-    })
-    window.onhashchange = svs.loadHashParams
+    svs.loadImage("https://storage.googleapis.com/imagebox_test/Slide-0027836_Y712170_1002414.svs");
   </script>
 </body>
 </html>
