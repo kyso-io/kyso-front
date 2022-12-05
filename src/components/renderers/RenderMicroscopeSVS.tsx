@@ -4,6 +4,7 @@ import RenderError from './RenderError';
 
 export type Props = {
   fileUrl: string;
+  fileSCS: string;
   token?: string | null;
 };
 
@@ -13,12 +14,6 @@ const RenderMicroscopeSVS = (props: Props) => {
   if (!props.fileUrl) {
     return <RenderError message={`Sorry, we can't retrieve the content of this Microsoft Office file`} />;
   }
-
-  /* let parameters = `${props.fileUrl}`;
-
-  if (props.token) {
-    parameters += `?token=${props.token}`;
-  } */
 
   return (
     <>
@@ -31,7 +26,7 @@ const RenderMicroscopeSVS = (props: Props) => {
           border: 'none 0px',
           height: '74vh',
         }}
-        src={`/microscope-svs-render.html`}
+        src={`/microscope-svs-render.html?file=${props.fileUrl}&scs=${props.fileSCS}`}
       />
     </>
   );

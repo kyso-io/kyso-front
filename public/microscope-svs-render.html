@@ -10,11 +10,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/2.4.2/openseadragon.min.js"></script>
 </head>
 <body>
-  <span>Search By - </span>
-  <span><b>Image Name: </b><select id="imageSelectName" onchange="svs.selectImageByName()"></select><span>&nbsp;&nbsp; -- OR -- &nbsp;&nbsp;</span><b>Image NSLC ID: </b><select id="imageSelectId" onchange="svs.selectImageById()"></select></span>
-  <br>
-  <p id="loadingText" style="color: red">Image Loading...</p>
-  <hr>
   <div id="viewer">
       <h2 id="imageId"></h2>
       <div style ="display: flex; flex-direction: row;">
@@ -26,7 +21,10 @@
   </div>
 
   <script type="text/javascript">
-    svs.loadImage("https://storage.googleapis.com/imagebox_test/Slide-0027836_Y712170_1002414.svs");
+    const urlParams = new URLSearchParams(window.location.search);
+    const fileSCS = urlParams.get('scs');
+    const file = urlParams.get('file');
+    svs.loadImage(file, fileSCS);
   </script>
 </body>
 </html>

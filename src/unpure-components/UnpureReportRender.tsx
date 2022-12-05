@@ -197,8 +197,9 @@ const UnpureReportRender = ({
       render = <RenderOnlyOffice fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
     } else if (FileTypesHelper.isSVS(fileToRender.path) && frontEndUrl) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
+      const fileSCS = `http://kyso-scs/scs${fileToRender.path_scs}`;
 
-      render = <RenderMicroscopeSVS fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
+      render = <RenderMicroscopeSVS fileUrl={fileUrl} fileSCS={fileSCS} token={localStorage.getItem('jwt')} />;
     } /* else if (FileTypesHelper.isGoogleDocs(fileToRender.path) && frontEndUrl) {
       const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
       render = <RenderGoogleDocs fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;

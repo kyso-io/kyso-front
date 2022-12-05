@@ -3,15 +3,12 @@ svs = {};
 // svs.serverBasePath = 'https://imageboxv2-oxxe7c4jbq-uc.a.run.app/iiif';
 svs.serverBasePath = 'http://localhost:8080/iiif';
 
-svs.loadImage = async (urlInGCP) => {
-  console.log(urlInGCP);
-  // if (urlInGCP.substr(urlInGCP.length - 4, 4) === "ndpi") {
-  // 	alert("NDPI Images not yet supported!")
-  // 	return
-  // }
-  urlInGCP = urlInGCP.replace(/\s/g, '_');
-  const format = urlInGCP.endsWith('.ndpi') ? 'ndpi' : 'svs';
-  const p = `${svs.serverBasePath}/?iiif=${urlInGCP}`;
+svs.loadImage = async (file, fileSCS) => {
+  console.log(file);
+  console.log(fileSCS);
+
+  file = file.replace(/\s/g, '_');
+  const p = `${svs.serverBasePath}/?iiif=${fileSCS}`;
   const infoURL = `${p}/info.json`;
   let imageInfo;
   try {
@@ -27,24 +24,6 @@ svs.loadImage = async (urlInGCP) => {
     return;
   }
   console.log('image Info : ', imageInfo);
-
-  // const infoTable = document.getElementById("infoTable")
-  // infoTable.innerHTML = ""
-  // infoTable.style.width = '20%'
-  // infoTable.style.border = "1px solid black"
-  // infoTable.style.textAlign = "center"
-  // document.getElementById("imageInfo").appendChild(infoTable)
-  // Object.entries(imageInfo).forEach(([key, val]) => {
-  // 	if (!key.trim().startsWith("@")) {
-  // 		key = key.slice(0, 1).toUpperCase() + key.slice(1)
-  // 		infoTable.innerHTML += `<tr><td>\n${key}</td><td>${val}</td></tr>`
-  // 	}
-  // })
-  // infoTable.querySelectorAll("tr").forEach(el => {
-  // 	el.style.border = "1px solid black"
-
-  // 	el.querySelectorAll("td").forEach(el2 => el2.style.border = "1px solid black")
-  // })
 
   document.getElementById('openseadragon1').innerHTML = '';
   const viewer1 = OpenSeadragon({
