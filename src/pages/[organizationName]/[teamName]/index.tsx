@@ -1,20 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
-import type {
-  ActivityFeed,
-  KysoSetting,
-  NormalizedResponseDTO,
-  Organization,
-  OrganizationMember,
-  PaginatedResponseDto,
-  ReportDTO,
-  SearchUser,
-  Team,
-  TeamInfoDto,
-  TeamMember,
-  UserDTO,
-} from '@kyso-io/kyso-model';
+import type { ActivityFeed, NormalizedResponseDTO, Organization, OrganizationMember, PaginatedResponseDto, ReportDTO, SearchUser, Team, TeamInfoDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   InviteUserDto,
@@ -45,9 +32,11 @@ import ReportBadge from '../../../components/ReportBadge';
 import ReportsSearchBar from '../../../components/ReportsSearchBar';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import { checkReportAuthors } from '../../../helpers/check-report-authors';
+import { Helper } from '../../../helpers/Helper';
 import type { PaginationParams } from '../../../interfaces/pagination-params';
 import type { ReportsFilter } from '../../../interfaces/reports-filter';
 import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
+import type { KeyValue } from '../../../model/key-value.model';
 import { TailwindWidthSizeEnum } from '../../../tailwind/enum/tailwind-width.enum';
 import type { Member } from '../../../types/member';
 
@@ -120,15 +109,19 @@ const Index = ({ commonData, setUser }: Props) => {
   // SEARCH USER
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+  const [showEmails, setShowEmails] = useState<boolean>(false);
 
   useEffect(() => {
     const getData = async () => {
       try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
+        const indexHcaptchaEnabled: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (indexHcaptchaEnabled !== -1) {
+          setCaptchaIsEnabled(publicKeys[indexHcaptchaEnabled]!.value === 'true');
+        }
+        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
+        if (indexShowEmail !== -1) {
+          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
       } catch (errorHttp: any) {
         console.error(errorHttp.response.data);
@@ -565,6 +558,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 onRemoveUser={removeUser}
                 captchaIsEnabled={captchaIsEnabled}
                 onCaptchaSuccess={onCaptchaSuccess}
+                showEmails={showEmails}
               />
               {hasPermissionDeleteChannel && <UnpureDeleteChannelDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
               {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}

@@ -9,6 +9,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { InformationCircleIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, NormalizedResponseDTO, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
@@ -16,6 +17,8 @@ import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkReportAuthors } from '../../../helpers/check-report-authors';
+import { Helper } from '../../../helpers/Helper';
+import type { KeyValue } from '../../../model/key-value.model';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 60;
@@ -59,6 +62,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [currentTab, onChangeTab] = useState<string>('Overview');
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
+  const [showEmails, setShowEmails] = useState<boolean>(false);
   // REPORTS
   const [reportsResponse, setReportsResponse] = useState<NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null>(null);
   const [requestingReports, setRequestingReports] = useState<boolean>(true);
@@ -279,6 +283,21 @@ const Index = ({ commonData, setUser }: Props) => {
     } catch (e) {}
   };
 
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
+        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
+        if (indexShowEmail !== -1) {
+          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
+        }
+      } catch (errorHttp: any) {
+        console.error(errorHttp.response.data);
+      }
+    };
+    getData();
+  }, []);
+
   if (!userProfileData || !commonData) {
     return null;
   }
@@ -290,7 +309,14 @@ const Index = ({ commonData, setUser }: Props) => {
   return (
     <div className="p-2">
       <ToasterNotification show={showToaster} setShow={setShowToaster} message={messageToaster} icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />} />
-      <UserProfileInfo commonData={commonData} onChangeBackgroundImage={onChangeBackgroundImage} onChangeTab={onChangeTab} currentTab={currentTab} userProfile={userProfileData.userProfile!} />
+      <UserProfileInfo
+        commonData={commonData}
+        onChangeBackgroundImage={onChangeBackgroundImage}
+        onChangeTab={onChangeTab}
+        currentTab={currentTab}
+        userProfile={userProfileData.userProfile!}
+        showEmail={showEmails}
+      />
       <div className="flex flex-row space-x-8">
         <div className="w-1/6" />
         <div className="w-4/6">

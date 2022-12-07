@@ -9,7 +9,7 @@ import { PlusSmIcon as PlusSmIconSolid } from '@heroicons/react/solid';
 import type { UserDTO } from '@kyso-io/kyso-model';
 import moment from 'moment';
 import { useRouter } from 'next/router';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import type { CommonData } from '../types/common-data';
 import PureAvatar from './PureAvatar';
 
@@ -21,13 +21,23 @@ type IUserProfileInfo = {
   currentTab: string;
   userProfile: UserDTO;
   onChangeBackgroundImage: (file: File) => void;
+  showEmail: boolean;
 };
 
 const UserProfileInfo = (props: IUserProfileInfo) => {
-  const { commonData, onChangeTab, currentTab, userProfile, onChangeBackgroundImage } = props;
+  const { commonData, onChangeTab, currentTab, userProfile, onChangeBackgroundImage, showEmail } = props;
   const router = useRouter();
   const tabs = [{ name: 'Overview' }, { name: 'Activity' }];
   const imageInputFileRef = useRef<any>(null);
+  const emailIsVisible: boolean = useMemo(() => {
+    if (commonData.user) {
+      if (commonData.user.id === userProfile.id) {
+        return true;
+      }
+      return showEmail;
+    }
+    return showEmail;
+  }, [commonData?.user, userProfile, showEmail]);
 
   let isUserLoggedIn = false;
   if (commonData?.user?.id === userProfile.id) {
@@ -119,12 +129,12 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
                 <p className="text-m font-medium text-gray-600 sm:text-l">{userProfile.location}</p>
               </div>
             )}
-            {userProfile.email && userProfile.location && (
+            {userProfile.location && (
               <div className="sm:flex hidden items-center text-sm text-gray-500">
                 <FontAwesomeIcon icon={faPeriod} />
               </div>
             )}
-            {userProfile.email && (
+            {emailIsVisible && (
               <div className="mt-2 flex items-center text-sm">
                 <p className="text-m font-medium text-blue-600 sm:text-l">{userProfile.email}</p>
               </div>
