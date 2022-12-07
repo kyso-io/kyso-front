@@ -3,7 +3,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Listbox, Transition } from '@headlessui/react';
 import { LinkIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, TeamMember, ResourcePermissions } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, TeamMember } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   GlobalPermissionsEnum,
@@ -63,7 +63,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
 const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
-  const { teamName } = router.query;
+  const { organizationName, teamName } = router.query;
   const [query, setQuery] = useState<string>('');
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -431,6 +431,22 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     setRequesting(false);
   };
+
+  useEffect(() => {
+    if (!router.isReady || !commonData?.permissions) {
+      return;
+    }
+    const organizationResourcePermissions: ResourcePermissions | undefined = commonData.permissions.organizations?.find(
+      (resourcePermissions: ResourcePermissions) => resourcePermissions.name === (organizationName as string),
+    );
+    if (!organizationResourcePermissions) {
+      router.push('/settings');
+      return;
+    }
+    if (!organizationResourcePermissions.role_names!.includes('organization-admin')) {
+      router.push('/settings');
+    }
+  }, [router.isReady, commonData?.permissions]);
 
   return (
     <div className="flex flex-row space-x-8 p-2">

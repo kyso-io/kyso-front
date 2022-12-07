@@ -61,7 +61,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
 const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
-  const { tab, edit } = router.query;
+  const { tab, edit, organizationName } = router.query;
   const ref = useRef<any>(null);
   const [query, setQuery] = useState<string>('');
   const [users, setUsers] = useState<UserDTO[]>([]);
@@ -291,6 +291,22 @@ const Index = ({ commonData, setUser }: Props) => {
     };
     getTeamsInfo();
   }, [commonData.permissions, commonData.organization]);
+
+  useEffect(() => {
+    if (!router.isReady || !commonData?.permissions) {
+      return;
+    }
+    const organizationResourcePermissions: ResourcePermissions | undefined = commonData.permissions.organizations?.find(
+      (resourcePermissions: ResourcePermissions) => resourcePermissions.name === (organizationName as string),
+    );
+    if (!organizationResourcePermissions) {
+      router.push('/settings');
+      return;
+    }
+    if (!organizationResourcePermissions.role_names!.includes('organization-admin')) {
+      router.push('/settings');
+    }
+  }, [router.isReady, commonData?.permissions]);
 
   const onChangeInputFile = (e: any) => {
     if (e.target.files.length > 0) {
@@ -631,7 +647,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
   };
 
-  if (userIsLogged === null) {
+  if (userIsLogged === null || !isOrgAdmin) {
     return null;
   }
 
