@@ -141,7 +141,11 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (!HelperPermissions.belongsToOrganization(commonData, organizationName as string)) {
-      window.location.href = '/';
+      if (commonData.token) {
+        window.location.href = '/';
+      } else {
+        router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}`)}`);
+      }
     }
   }, [commonData?.permissions?.organizations, organizationName, join]);
 

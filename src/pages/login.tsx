@@ -87,14 +87,18 @@ const Index = () => {
           `${window.location.origin}/oauth/google/callback`,
         )}&scope=${encodeURIComponent('https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.emails.read')}${
           invitation ? `&state=${invitation}` : ''
-        }`,
+        }${redirect ? `&state=${redirect}` : ''}`,
       );
-      setBitbucketUrl(`https://bitbucket.org/site/oauth2/authorize?client_id=${bitbucketClientId}&response_type=code${invitation ? `&state=${invitation}` : ''}`);
-
-      setGithubUrl(`https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(',')}${invitation ? `&state=${invitation}` : ''}`);
-
+      setBitbucketUrl(
+        `https://bitbucket.org/site/oauth2/authorize?client_id=${bitbucketClientId}&response_type=code${invitation ? `&state=${invitation}` : ''}${redirect ? `&state=${redirect}` : ''}`,
+      );
+      setGithubUrl(
+        `https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(',')}${invitation ? `&state=${invitation}` : ''}${redirect ? `&state=${redirect}` : ''}`,
+      );
       setGitlabUrl(
-        `https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&scope=${gitlabScope}&redirect_uri=${gitlabRedirectURI}&response_type=code${invitation ? `&state=${invitation}` : ''}`,
+        `https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&scope=${gitlabScope}&redirect_uri=${gitlabRedirectURI}&response_type=code${invitation ? `&state=${invitation}` : ''}${
+          redirect ? `&state=${redirect}` : ''
+        }`,
       );
 
       setPingUrl(pingIdSamlSSOUrl);

@@ -24,7 +24,7 @@ import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ArrowSmDownIcon } from '@heroicons/react/solid';
-import type { Comment, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO, File as KysoFile } from '@kyso-io/kyso-model';
+import type { Comment, File as KysoFile, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   CommentPermissionsEnum,
@@ -323,11 +323,15 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
       return;
     }
     if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizationName as string)) {
-      router.replace('/login');
+      if (commonData.token) {
+        router.replace('/');
+      } else {
+        router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}/${router.query.reportName as string}`)}`);
+      }
       return;
     }
     if (!HelperPermissions.belongsToTeam(commonData, router.query.organizationName as string, router.query.teamName as string)) {
-      router.replace(`/${router.query.organizationName}`);
+      router.replace(`/${router.query.organizationName as string}`);
     }
   }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
 
