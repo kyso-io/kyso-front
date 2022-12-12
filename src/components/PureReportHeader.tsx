@@ -38,6 +38,7 @@ declare global {
   interface Window {
     htmlFileUrl: string | null;
     onlyofficeFileParam: string | null;
+    svsFileParam: string | null;
   }
 }
 
@@ -78,7 +79,11 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
   } else {
     window.onlyofficeFileParam = null;
   }
-
+  if (fileToRender && FileTypesHelper.isSVS(fileToRender.path)) {
+    window.svsFileParam = encodeURIComponent(`http://kyso-scs/scs${fileToRender.path_scs}`);
+  } else {
+    window.svsFileParam = null;
+  }
   return (
     <div className="w-full flex 2xl:flex-row lg:flex-col justify-between p-2">
       <div className="2xl:w-4/6 flex flex-col justify-between">
