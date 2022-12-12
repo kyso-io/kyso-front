@@ -40,9 +40,10 @@ interface Props {
   onRemoveUser: (userId: string, type: TeamMembershipOriginEnum) => void;
   captchaIsEnabled: boolean;
   onCaptchaSuccess: () => void;
+  showEmails: boolean;
 }
 
-const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles, onUpdateRoleMember, onInviteNewUser, onRemoveUser, captchaIsEnabled, onCaptchaSuccess }: Props) => {
+const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles, onUpdateRoleMember, onInviteNewUser, onRemoveUser, captchaIsEnabled, onCaptchaSuccess, showEmails }: Props) => {
   const router = useRouter();
   const [query, setQuery] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<UserDTO | Member | null>(null);
@@ -536,7 +537,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   </div>
                                   <div className="flex-1" style={{ marginLeft: 10 }}>
                                     <p className="text-xs font-medium text-gray-900 truncate">{user.display_name}</p>
-                                    {member ? <p className="text-xs text-gray-500 truncate">{roles}</p> : <p className="text-xs text-gray-500 truncate">{user.email}</p>}
+                                    {member ? <p className="text-xs text-gray-500 truncate">{roles}</p> : showEmails ? <p className="text-xs text-gray-500 truncate">{user.email}</p> : ''}
                                   </div>
                                 </div>
                               </li>

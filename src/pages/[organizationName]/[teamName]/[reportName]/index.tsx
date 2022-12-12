@@ -49,6 +49,8 @@ import TableOfContents from '../../../../components/TableOfContents';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 import { FileTypesHelper } from '../../../../helpers/FileTypesHelper';
 import type { FileToRender } from '../../../../types/file-to-render';
+import { Helper } from '../../../../helpers/Helper';
+import type { KeyValue } from '../../../../model/key-value.model';
 
 interface Props {
   commonData: CommonData;
@@ -86,6 +88,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const scrollDirection: ScrollDirection | null = useScrollDirection();
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Toc);
+  const [showEmails, setShowEmails] = useState<boolean>(false);
   const tabs: { title: string; tab: Tab }[] = useMemo(() => {
     const data: { title: string; tab: Tab }[] = [
       {
@@ -113,11 +116,14 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
+        const indexHcaptchaEnabled: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (indexHcaptchaEnabled !== -1) {
+          setCaptchaIsEnabled(publicKeys[indexHcaptchaEnabled]!.value === 'true');
+        }
+        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
+        if (indexShowEmail !== -1) {
+          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
       } catch (errorHttp: any) {
         console.error(errorHttp.response.data);
@@ -688,6 +694,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
                           onRemoveUser={removeUser}
                           captchaIsEnabled={captchaIsEnabled}
                           onCaptchaSuccess={refreshUserData}
+                          showEmails={showEmails}
                         />
                       </PureReportHeader>
                     </div>

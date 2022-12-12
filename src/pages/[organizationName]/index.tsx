@@ -8,7 +8,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { XCircleIcon } from '@heroicons/react/solid';
-import type { ActivityFeed, KysoSetting, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
+import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   GlobalPermissionsEnum,
@@ -30,8 +30,10 @@ import ManageUsers from '../../components/ManageUsers';
 import ReportBadge from '../../components/ReportBadge';
 import { HelperPermissions } from '../../helpers/check-permissions';
 import { checkReportAuthors } from '../../helpers/check-report-authors';
+import { Helper } from '../../helpers/Helper';
 import { useInterval } from '../../hooks/use-interval';
 import type { PaginationParams } from '../../interfaces/pagination-params';
+import type { KeyValue } from '../../model/key-value.model';
 import type { CommonData } from '../../types/common-data';
 import type { Member } from '../../types/member';
 import UnpureDeleteOrganizationDropdown from '../../unpure-components/UnpureDeleteOrganizationDropdown';
@@ -61,6 +63,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+  const [showEmails, setShowEmails] = useState<boolean>(false);
   const hasPermissionDeleteOrganization: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, [GlobalPermissionsEnum.GLOBAL_ADMIN, OrganizationPermissionsEnum.ADMIN, OrganizationPermissionsEnum.DELETE]),
     [commonData],
@@ -95,11 +98,14 @@ const Index = ({ commonData, setUser }: Props) => {
   useEffect(() => {
     const getData = async () => {
       try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
+        const indexHcaptchaEnabled: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (indexHcaptchaEnabled !== -1) {
+          setCaptchaIsEnabled(publicKeys[indexHcaptchaEnabled]!.value === 'true');
+        }
+        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
+        if (indexShowEmail !== -1) {
+          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
       } catch (errorHttp: any) {
         console.error(errorHttp.response.data);
@@ -529,6 +535,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   onRemoveUser={removeUser}
                   captchaIsEnabled={captchaIsEnabled}
                   onCaptchaSuccess={onCaptchaSuccess}
+                  showEmails={showEmails}
                 />
                 {hasPermissionDeleteOrganization && <UnpureDeleteOrganizationDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
                 {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
