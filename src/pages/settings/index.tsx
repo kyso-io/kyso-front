@@ -59,6 +59,9 @@ const Index = ({ commonData }: Props) => {
           if (!organizationResourcePermissions) {
             return;
           }
+          if (!organizationResourcePermissions.role_names!.includes('organization-admin')) {
+            return;
+          }
           data.push({
             display_name: organizationResourcePermissions.display_name,
             name: organizationResourcePermissions.name,
