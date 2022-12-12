@@ -7,18 +7,31 @@ export type Props = {
   token?: string | null;
 };
 
+declare global {
+  interface Window {
+    svsFileParam: string | null;
+  }
+}
+
 const RenderMicroscopeSVS = (props: Props) => {
   const id = v4();
 
   if (!props.fileUrl) {
-    return <RenderError message={`Sorry, we can't retrieve the content of this Microsoft Office file`} />;
+    return <RenderError message={`Sorry, we can't retrieve the content of this SVS file`} />;
   }
 
-  /* let parameters = `${props.fileUrl}`;
-
+  /* Accessing directly, no need to use token, if we use it things break */
+  /*
+  let parameters = `${props.fileUrl}`;
   if (props.token) {
     parameters += `?token=${props.token}`;
-  } */
+  }
+  // Set global value
+  window.svsFileParam = parameters;
+  */
+
+  // Set global value
+  window.svsFileParam = props.fileUrl;
 
   return (
     <>
