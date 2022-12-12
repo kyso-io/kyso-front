@@ -142,11 +142,15 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizationName as string)) {
-      router.replace('/login');
+      if (commonData.token) {
+        router.replace('/');
+      } else {
+        router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}`)}`);
+      }
       return;
     }
     if (!HelperPermissions.belongsToTeam(commonData, router.query.organizationName as string, router.query.teamName as string)) {
-      router.replace(`/${router.query.organizationName}`);
+      router.replace(`/${router.query.organizationName as string}`);
     }
   }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
 
