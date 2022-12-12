@@ -4,7 +4,6 @@ import { PureSpinner } from '@/components/PureSpinner';
 import { RenderAsciidoc } from '@/components/renderers/kyso-asciidoc-renderer';
 import { RenderJupyter } from '@/components/renderers/kyso-jupyter-renderer';
 import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
-import type { ReportContext } from '@/components/renderers/kyso-markdown-renderer/interfaces/context';
 import RenderOnlyOffice from '@/components/renderers/kyso-onlyoffice-renderer/RenderOnlyOffice';
 import RenderCode from '@/components/renderers/RenderCode';
 import RenderMicroscopeSVS from '@/components/renderers/RenderMicroscopeSVS';
@@ -17,7 +16,7 @@ import { CreateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api, createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CaptchaModal from '../components/CaptchaModal';
 import TableOfContents from '../components/TableOfContents';
 import type { FileToRender } from '../types/file-to-render';
@@ -146,92 +145,75 @@ const UnpureReportRender = ({
   };
 
   if (!fileToRender) {
-    return <div />;
+    return null;
   }
 
-  let render = null;
-
-  if (fileToRender.content) {
-    if (FileTypesHelper.isTextBasedFiled(fileToRender.path)) {
-      const markdownContext: ReportContext = {
-        organizationSlug: commonData.organization?.sluglified_name!,
-        teamSlug: commonData.team?.sluglified_name!,
-        reportSlug: Helper.slugify(report.title),
-        version: report.last_version,
-      };
-
-      render = <RenderMarkdown source={fileToRender.content} context={markdownContext} />;
-    } else if (FileTypesHelper.isImage(fileToRender.path)) {
-      render = <img src={`${frontEndUrl}/scs${fileToRender.path_scs}`} alt={fileToRender.path} />;
-    } else if (fileToRender.path.toLowerCase().endsWith('.webp') || fileToRender.path.toLowerCase().endsWith('.svg')) {
-      render = <img src={`${frontEndUrl}/scs${fileToRender.path_scs}`} alt={fileToRender.path} />;
-    } else if (FileTypesHelper.isJupyterNotebook(fileToRender.path)) {
-      render = (
-        <RenderJupyter
-          commonData={commonData}
-          report={report}
-          onlyVisibleCell={onlyVisibleCell}
-          channelMembers={channelMembers}
-          jupyterNotebook={JSON.parse(fileToRender.content as string)}
-          showInputs={false}
-          showOutputs={false}
-          inlineComments={inlineComments}
-          createInlineComment={createInlineComment}
-          deleteInlineComment={deleteInlineComment}
-          editInlineComment={editInlineComment}
-          enabledCreateInlineComment={enabledCreateInlineComment}
-          enabledEditInlineComment={enabledEditInlineComment}
-          enabledDeleteInlineComment={enabledDeleteInlineComment}
-          toc={fileToRender.toc}
-        />
-      );
-    } else if (FileTypesHelper.isAdoc(fileToRender.path)) {
-      const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-      const source = fileToRender.content;
-      render = <RenderAsciidoc fileUrl={fileUrl} source={source} />;
-    } else if (FileTypesHelper.isCode(fileToRender.path)) {
-      render = <RenderCode code={fileToRender.content} showFileNumbers={true} />;
-    } else if (FileTypesHelper.isOnlyOffice(fileToRender.path) && frontEndUrl) {
-      // const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-
-      // To use internal URLs as is rendered by document-server
-      const fileUrl = `http://kyso-scs/scs${fileToRender.path_scs}`;
-      render = <RenderOnlyOffice fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
-    } else if (FileTypesHelper.isSVS(fileToRender.path) && frontEndUrl) {
-      const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-
-      render = <RenderMicroscopeSVS fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
-    } /* else if (FileTypesHelper.isGoogleDocs(fileToRender.path) && frontEndUrl) {
-      const fileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
-      render = <RenderGoogleDocs fileUrl={fileUrl} token={localStorage.getItem('jwt')} />;
-    } */ else {
-      render = (
-        <div className="prose p-3">
-          Kyso cannot render this type of file. Do you need it? Give us{' '}
-          <a href="/feedback" className="font-medium text-indigo-600 hover:text-indigo-500">
-            feedback
-          </a>{' '}
-          and we will consider it! 🤓
-        </div>
-      );
-    }
-  } else if (fileToRender.path.endsWith('.html')) {
-    render = <PureIframeRenderer file={fileToRender} />;
+  if (fileToRender.isLoading) {
+    return (
+      <div className="prose flex justify-center p-10">
+        <PureSpinner />
+      </div>
+    );
   }
 
   return (
-    <>
-      {fileToRender.isLoading && (
-        <div className="prose flex justify-center p-10">
-          <PureSpinner />
-        </div>
-      )}
-      {!fileToRender.content && <div />}
-      {!fileToRender.isLoading && fileToRender.path.endsWith('.ipynb') && render}
-      {!fileToRender.isLoading && !fileToRender.path.endsWith('.ipynb') && (
+    <React.Fragment>
+      {FileTypesHelper.isJupyterNotebook(fileToRender.path) ? (
+        fileToRender.content && (
+          <RenderJupyter
+            commonData={commonData}
+            report={report}
+            onlyVisibleCell={onlyVisibleCell}
+            channelMembers={channelMembers}
+            jupyterNotebook={JSON.parse(fileToRender.content as string)}
+            showInputs={false}
+            showOutputs={false}
+            inlineComments={inlineComments}
+            createInlineComment={createInlineComment}
+            deleteInlineComment={deleteInlineComment}
+            editInlineComment={editInlineComment}
+            enabledCreateInlineComment={enabledCreateInlineComment}
+            enabledEditInlineComment={enabledEditInlineComment}
+            enabledDeleteInlineComment={enabledDeleteInlineComment}
+            toc={fileToRender.toc}
+          />
+        )
+      ) : (
         <div className="flex flex-col">
           <div className="flex flex-row">
-            <div className={clsx(sidebarOpen ? 'w-9/12' : 'w-11/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>{render}</div>
+            <div className={clsx(sidebarOpen ? 'w-9/12' : 'w-11/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>
+              {fileToRender.path.endsWith('.html') ? (
+                <PureIframeRenderer file={fileToRender} />
+              ) : FileTypesHelper.isTextBasedFiled(fileToRender.path) && fileToRender.content ? (
+                <RenderMarkdown
+                  source={fileToRender.content}
+                  context={{
+                    organizationSlug: commonData.organization?.sluglified_name!,
+                    teamSlug: commonData.team?.sluglified_name!,
+                    reportSlug: Helper.slugify(report.title),
+                    version: report.last_version,
+                  }}
+                />
+              ) : (FileTypesHelper.isImage(fileToRender.path) || fileToRender.path.toLowerCase().endsWith('.webp') || fileToRender.path.toLowerCase().endsWith('.svg')) && frontEndUrl ? (
+                <img src={`${frontEndUrl}/scs${fileToRender.path_scs}`} alt={fileToRender.path} />
+              ) : FileTypesHelper.isAdoc(fileToRender.path) && fileToRender.content && frontEndUrl ? (
+                <RenderAsciidoc fileUrl={`${frontEndUrl}/scs${fileToRender.path_scs}`} source={fileToRender.content} />
+              ) : FileTypesHelper.isCode(fileToRender.path) && fileToRender.content ? (
+                <RenderCode code={fileToRender.content} showFileNumbers={true} />
+              ) : FileTypesHelper.isOnlyOffice(fileToRender.path) ? (
+                <RenderOnlyOffice fileUrl={`http://kyso-scs/scs${fileToRender.path_scs}`} token={localStorage.getItem('jwt')} />
+              ) : FileTypesHelper.isSVS(fileToRender.path) && frontEndUrl ? (
+                <RenderMicroscopeSVS fileUrl={`${frontEndUrl}/scs${fileToRender.path_scs}`} token={localStorage.getItem('jwt')} />
+              ) : (
+                <div className="prose p-3">
+                  Kyso cannot render this type of file. Do you need it? Give us{' '}
+                  <a href="/feedback" className="font-medium text-indigo-600 hover:text-indigo-500">
+                    feedback
+                  </a>{' '}
+                  and we will consider it! 🤓
+                </div>
+              )}
+            </div>
             <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'p-2 min-w-fit border-l')}>
               {fileToRender.toc && fileToRender.toc.length > 0 && <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} />}
               <PureSideOverlayCommentsPanel key={report?.id!} cacheKey={report?.id!} setSidebarOpen={(p) => setSidebarOpen(p)} commonData={commonData}>
@@ -259,7 +241,7 @@ const UnpureReportRender = ({
         </div>
       )}
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
-    </>
+    </React.Fragment>
   );
 };
 

@@ -24,7 +24,7 @@ import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ArrowSmDownIcon } from '@heroicons/react/solid';
-import type { Comment, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO, File as KysoFile } from '@kyso-io/kyso-model';
+import type { Comment, File as KysoFile, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   CommentPermissionsEnum,
@@ -290,7 +290,9 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         }
 
         setFileToRender(ftr);
-        if (ftr && !ftr.path.endsWith('.html')) {
+        const validFile: boolean =
+          ftr !== null && (FileTypesHelper.isJupyterNotebook(ftr.path) || FileTypesHelper.isTextBasedFiled(ftr.path) || FileTypesHelper.isAdoc(ftr.path) || FileTypesHelper.isCode(ftr.path));
+        if (ftr && validFile) {
           setFileToRender({ ...ftr, isLoading: true });
           const data: Buffer = await api.getReportFileContent(ftr.id, {
             onDownloadProgress(progressEvent) {
