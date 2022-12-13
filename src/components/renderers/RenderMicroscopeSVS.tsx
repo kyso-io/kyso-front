@@ -20,18 +20,14 @@ const RenderMicroscopeSVS = (props: Props) => {
     return <RenderError message={`Sorry, we can't retrieve the content of this SVS file`} />;
   }
 
-  /* Accessing directly, no need to use token, if we use it things break */
-  /*
   let parameters = `${props.fileUrl}`;
+
   if (props.token) {
     parameters += `?token=${props.token}`;
   }
-  // Set global value
-  window.svsFileParam = parameters;
-  */
 
   // Set global value
-  window.svsFileParam = props.fileUrl;
+  window.svsFileParam = parameters;
 
   return (
     <>
