@@ -194,7 +194,7 @@ const Index = ({ commonData, setUser }: Props) => {
           setInvitationsLinksGloballyEnabled(resultKysoSetting.data[indexInvitationLinks]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getKysoSettings();
@@ -342,6 +342,7 @@ const Index = ({ commonData, setUser }: Props) => {
       } as any);
       router.reload();
     } catch (e: any) {
+      /* eslint-disable no-console */
       console.log(e.response.data);
     } finally {
       setRequesting(false);
@@ -375,6 +376,7 @@ const Index = ({ commonData, setUser }: Props) => {
       } as any);
       router.reload();
     } catch (e: any) {
+      /* eslint-disable no-console */
       console.log(e.response.data);
     } finally {
       setRequesting(false);
@@ -417,6 +419,7 @@ const Index = ({ commonData, setUser }: Props) => {
       } as any);
       router.reload();
     } catch (e: any) {
+      /* eslint-disable no-console */
       console.log(e.response.data);
     } finally {
       setRequesting(false);
@@ -462,7 +465,7 @@ const Index = ({ commonData, setUser }: Props) => {
       }
       setMembers(m);
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     } finally {
       setRequesting(false);
     }
@@ -488,7 +491,7 @@ const Index = ({ commonData, setUser }: Props) => {
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, selectedMember!.id!, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
       } catch (e) {
-        console.error(e);
+        Helper.logError('Unexpected error', e);
       }
     } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
@@ -497,7 +500,7 @@ const Index = ({ commonData, setUser }: Props) => {
         const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
         await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
       } catch (e) {
-        console.error(e);
+        Helper.logError('Unexpected error', e);
       }
     }
     getOrganizationMembers();
@@ -519,7 +522,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setOpenDeleteMemberModal(false);
       setSelectedMember(null);
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
     setRequesting(false);
   };
@@ -544,6 +547,7 @@ const Index = ({ commonData, setUser }: Props) => {
       }
       setUsers(usersNotInOrg);
     } catch (e) {
+      /* eslint-disable no-console */
       console.log(e);
     }
     setRequesting(false);
@@ -562,7 +566,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setSelectedMember(null);
       setOpenInviteUserModal(false);
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
     setRequesting(false);
   };
@@ -578,6 +582,7 @@ const Index = ({ commonData, setUser }: Props) => {
       await api.deleteOrganization(commonData.organization!.id!);
       window.location.href = '/settings';
     } catch (error: any) {
+      /* eslint-disable no-console */
       console.log(error.response.data.message);
       setShowDeleteOrgModal(false);
       setTextOrgModal('');
@@ -609,7 +614,7 @@ const Index = ({ commonData, setUser }: Props) => {
       aLink.click();
       document.body.removeChild(aLink);
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
     setRequesting(false);
   };
@@ -1422,7 +1427,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -1510,7 +1515,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -1591,7 +1596,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -1654,7 +1659,7 @@ const Index = ({ commonData, setUser }: Props) => {
       <Transition.Root show={showDeleteOrgModal} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={setShowDeleteOrgModal}>
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
           </Transition.Child>
 
           <div className="fixed inset-0 z-10 overflow-y-auto">

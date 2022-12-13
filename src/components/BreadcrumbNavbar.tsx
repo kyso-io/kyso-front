@@ -60,10 +60,17 @@ const BreadcrumbNavbar = (props: Props) => {
     return data;
   }, [commonData.organization, commonData.team, report, router.query?.path, router.query?.version]);
 
+  const breadcrumbItems = breadcrumb.length;
+  let hideBreadcrumbClassName = '';
+
+  if (breadcrumbItems > 0) {
+    hideBreadcrumbClassName = 'hidden lg:block';
+  }
+
   return (
-    <div>
+    <div className={hideBreadcrumbClassName}>
       {organizationSelectorItems.length > 0 && (
-        <div className="flex lg:flex-row flex-col lg:items-center space-y-2 lg:space-y-0 lg:space-x-0 p-2">
+        <div className="flex flex-row items-center space-y-0 space-x-0 p-2">
           {
             <NavigationSelector
               selectorItems={organizationSelectorItems}
@@ -71,7 +78,7 @@ const BreadcrumbNavbar = (props: Props) => {
                 commonData.user !== null ? (
                   <React.Fragment>
                     <span className="my-2 bg-gray-300 h-0.5 mx-3" />
-                    <a href={`${basePath}/create-organization`} className={clsx('text-gray-500 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm  rounded-md')}>
+                    <a href={`${basePath}/create-organization`} className={clsx('text-gray-500 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-xs lg:text-sm rounded-md')}>
                       <PlusCircleIcon className="w-5 h-5 mr-1" /> New organization
                     </a>
                   </React.Fragment>
@@ -99,7 +106,11 @@ const BreadcrumbNavbar = (props: Props) => {
                 <div className="flex items-center">
                   <a
                     href={page.href}
-                    className={page.current ? 'text-sm hover:underline font-medium text-gray-800 hover:text-black' : 'text-sm hover:underline  font-medium text-gray-500 hover:text-gray-700'}
+                    className={
+                      page.current
+                        ? 'text-xs lg:text-sm hover:underline font-medium text-gray-800 hover:text-black'
+                        : 'text-xs lg:text-sm hover:underline  font-medium text-gray-500 hover:text-gray-700'
+                    }
                     style={{
                       textOverflow: 'ellipsis',
                       maxWidth: '55vh',

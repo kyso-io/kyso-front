@@ -55,7 +55,7 @@ const UnpureReportRender = ({
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ const UnpureReportRender = ({
         setInlineComments([...inlineComments, data.payload]);
       }
     } catch (e) {
-      // console.error(e);
+      // Helper.logError("Unexpected error", e);;
     }
   };
 
@@ -116,7 +116,7 @@ const UnpureReportRender = ({
         );
       }
     } catch (e) {
-      // console.error(e);
+      // Helper.logError("Unexpected error", e);;
     }
   };
 
@@ -140,7 +140,7 @@ const UnpureReportRender = ({
         setInlineComments(inlineComments.filter((inlineComment) => inlineComment.id !== id));
       }
     } catch (e) {
-      // console.error(e);
+      // Helper.logError("Unexpected error", e);;
     }
   };
 
@@ -214,7 +214,7 @@ const UnpureReportRender = ({
                 </div>
               )}
             </div>
-            <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'p-2 min-w-fit border-l')}>
+            <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'hidden lg:block p-2 min-w-fit border-l')}>
               {fileToRender.toc && fileToRender.toc.length > 0 && <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} />}
               <PureSideOverlayCommentsPanel key={report?.id!} cacheKey={report?.id!} setSidebarOpen={(p) => setSidebarOpen(p)} commonData={commonData}>
                 <PureInlineComments

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Helper } from '@/helpers/Helper';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { InformationCircleIcon } from '@heroicons/react/outline';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
@@ -59,7 +60,7 @@ const Index = ({ commonData, setUser }: Props) => {
           setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getData();
@@ -114,7 +115,7 @@ const Index = ({ commonData, setUser }: Props) => {
       await api.updateUser(commonData.user!.id!, updateUserRequestDto);
       router.reload();
     } catch (e: any) {
-      console.error(e.response.data);
+      Helper.logError(e.response.data, e);
     } finally {
       setRequesting(false);
       setShowToaster(false);
@@ -138,7 +139,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setSentVerificationEmail(true);
       setShowToasterEmailVerification(true);
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
   };
 

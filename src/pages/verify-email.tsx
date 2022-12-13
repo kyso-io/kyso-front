@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Helper } from '@/helpers/Helper';
 import MainLayout from '@/layouts/MainLayout';
 import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { VerifyEmailRequestDTO } from '@kyso-io/kyso-model';
@@ -32,7 +33,7 @@ const Index = () => {
         dispatch(setTokenAuthAction(jwtToken));
         localStorage.setItem('jwt', jwtToken);
       } catch (e) {
-        console.error(e);
+        Helper.logError('Unexpected error', e);
       }
       setTimeout(() => {
         router.push('/');

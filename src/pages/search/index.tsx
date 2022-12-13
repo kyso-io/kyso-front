@@ -3,6 +3,7 @@
 import SearchItem from '@/components/search-item';
 import SearchNavigation from '@/components/search-navigation';
 import SearchPagination from '@/components/search-pagination';
+import { Helper } from '@/helpers/Helper';
 import type { FullTextSearchParams } from '@/interfaces/full-text-search-params';
 import type { SearchNavItem } from '@/interfaces/search-nav-item';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
@@ -20,7 +21,7 @@ const fetchData = async (commonData: CommonData, params: FullTextSearchParams, c
     const resultFullTextSearchDto: NormalizedResponseDTO<FullTextSearchDTO> = await api.fullTextSearch({ ...params, terms: encodeURIComponent(params.terms) });
     cb(resultFullTextSearchDto.data);
   } catch (e: any) {
-    console.error(e.response.data);
+    Helper.logError(e.response.data, e);
     cb(null);
   }
 };

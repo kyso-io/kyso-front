@@ -64,7 +64,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                   </div>
                   <div className="flex items-center">
                     {/* Start Search input */}
-                    <div className="mt-1 relative rounded-md shadow-sm">
+                    <div className="hidden lg:block mt-1 relative rounded-md shadow-sm">
                       <input
                         type="text"
                         name="name"

@@ -175,15 +175,17 @@ const Index = () => {
       </Head>
 
       <div className="w-full min-h-full flex flex-col">
-        <div className="border-b p-4 flex flex-row items-center justify-between">
+        <div className="hidden lg:visible border-b p-4 lg:flex lg:flex-row items-center justify-between">
           <img className="h-8 theme-left-logo" alt="Left logo" />
           <img className="h-8 theme-right-logo" alt="Right logo" />
         </div>
         <div className="text-right">{error && <ErrorNotification message={error} />}</div>
-        <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col mt-20 items-center mx-auto max-w-[1400px] space-x-10">
-          <KysoDescription />
+        <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col lg:mt-20 items-center mx-auto max-w-[1400px] lg:space-x-10">
+          <span className="hidden lg:block">
+            <KysoDescription />
+          </span>
 
-          <div className="prose min-w-[400px] flex flex-col space-y-2 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
+          <div className="prose lg:min-w-[400px] flex flex-col space-y-2 mx-auto border border-gray-400 rounded bg-gray-50 p-12">
             <h2 className="my-0 mb-1">Sign in to Kyso</h2>
 
             {enableKysoAuth && (

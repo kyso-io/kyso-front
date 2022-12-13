@@ -45,9 +45,9 @@ const PureChangeReportImage = (props: IPureChangeReportImage) => {
   return (
     <div className="bg-stripes-sky-blue rounded-tl-lg text-center overflow-hidden mx-auto border-r border-r-gray-200">
       <ToasterNotification show={showToaster} setShow={setShowToaster} message={messageToaster} icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />} />
-      <img className="object-cover" style={{ width: 200, height: 200 }} src={picture} alt="report preview image" />
+      <img className="object-cover w-24bg-opacity- lg:w-[200px]" src={picture} alt="report preview image" />
       {hasPermissionEditReport && (
-        <div className="absolute top-5 left-40">
+        <div className="hidden lg:block absolute top-5 left-40">
           <button
             type="button"
             onClick={() => imageInputFileRef.current.click()}

@@ -73,6 +73,7 @@ const Index = ({ commonData }: Props) => {
       }
       const captchaSiteKeyKysoSetting: KysoSetting | undefined = response.data.find((kysoSetting: KysoSetting) => kysoSetting.key === KysoSettingsEnum.HCAPTCHA_SITE_KEY);
       if (!captchaSiteKeyKysoSetting) {
+        /* eslint-disable no-alert */
         alert('Captcha is enabled but no site key is set. Please contact support.');
         return;
       }

@@ -18,7 +18,7 @@ type IPureCommentForm = {
   submitComment: (text: string, userIds: string[], commentId?: string) => void;
 };
 
-const parseMentions = function (str: string) {
+const parseMentions = (str: string) => {
   const re = /\B\@([\w\-]+)/gim;
   const tokens: string[] = [];
   let match;

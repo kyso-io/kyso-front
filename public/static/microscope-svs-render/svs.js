@@ -9,10 +9,11 @@ svs.loadImage = async (file) => {
   try {
     imageInfo = await (await fetch(infoURL)).json();
   } catch (e) {
+    /* eslint-disable no-alert */
     alert('An error occurred retrieving the image information. Please try again later.');
     return;
   }
-  // console.log('image Info : ', imageInfo);
+
   document.getElementById('openseadragon1').innerHTML = '';
   const viewer1 = OpenSeadragon({
     id: 'openseadragon1',

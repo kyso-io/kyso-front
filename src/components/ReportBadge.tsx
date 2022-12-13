@@ -70,10 +70,10 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
         </div>
         <div className="flex-1 min-w-0 py-3 pr-3 relative">
           <a href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
-            <h3 className="text-lg leading-6 font-medium text-gray-900 break-words">{report.title}</h3>
-            <p className="text-sm text-gray-500 pt-3 break-words">{description}</p>
+            <h3 className="text-sm lg:text-lg leading-6 font-medium text-gray-900 break-words">{report.title}</h3>
+            <p className="text-xs lg:text-sm text-gray-500 pt-3 break-words">{description}</p>
           </a>
-          <div className="absolute bottom-2 right-0">
+          <div className="hidden lg:visible absolute bottom-2 right-0">
             {report.report_type && (
               <span className="bg-orange-100 text-orange-800 text-xs font-semibold mr-2 px-2.5 py-1 rounded-xl dark:bg-orange-200 dark:text-orange-900">{report.report_type}</span>
             )}
@@ -121,11 +121,11 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
       <div className="flex items-center p-2 border-t">
         <div className="grow flex flex-row items-center text-gray-500 text-xs space-x-2">
           {authors && <PureAvatarGroup data={authors}></PureAvatarGroup>}
-          <span className="pr-3">{moment(report.created_at).format('MMMM DD, YYYY')}</span>
-          <EyeIcon className="shrink-0 h-5 w-5 text-gray-500" />
-          <span className="pr-3">{report.views}</span>
-          <ChatIcon className="shrink-0 h-5 w-5 text-orange-500" />
-          <span>{report.comments.length}</span>
+          <span className="hidden lg:block pr-3">{moment(report.created_at).format('MMMM DD, YYYY')}</span>
+          <EyeIcon className="hidden lg:block  shrink-0 h-5 w-5 text-gray-500" />
+          <span className="hidden lg:block  pr-3">{report.views}</span>
+          <ChatIcon className="hidden lg:block shrink-0 h-5 w-5 text-orange-500" />
+          <span className="hidden lg:block">{report.comments.length}</span>
         </div>
         <div className="flex flex-row items-center text-gray-500 text-xs space-x-4">
           <PureShareButton

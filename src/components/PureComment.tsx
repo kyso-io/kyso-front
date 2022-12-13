@@ -79,6 +79,7 @@ const PureComment = (props: IPureComment) => {
                     hover:bg-gray-100
                     px-2.5 py-1.5"
                     onClick={() => {
+                      /* eslint-disable no-alert */
                       if (confirm('Are you sure you want to delete this comment?')) {
                         onDeleteComment(comment.id as string);
                       }
@@ -136,6 +137,7 @@ const PureComment = (props: IPureComment) => {
                       py-1.5"
                       onClick={() => {
                         if (!hasPermissionCreateComment) {
+                          /* eslint-disable no-alert */
                           alert('Sorry, but you do not have the permission to reply to comments.');
                         } else {
                           setIsReplying(!isReplying);

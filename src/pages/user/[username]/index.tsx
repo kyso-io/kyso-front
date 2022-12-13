@@ -38,7 +38,7 @@ const debouncedPaginatedReports = debounce(
       checkReportAuthors(result);
       cb(result);
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
       cb(null);
     }
   },
@@ -292,7 +292,7 @@ const Index = ({ commonData, setUser }: Props) => {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getData();

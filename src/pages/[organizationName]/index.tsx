@@ -108,7 +108,7 @@ const Index = ({ commonData, setUser }: Props) => {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getData();
@@ -409,7 +409,7 @@ const Index = ({ commonData, setUser }: Props) => {
       }
       setMembers(m);
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
   };
 
@@ -425,7 +425,7 @@ const Index = ({ commonData, setUser }: Props) => {
       });
       setUsers(result.data);
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
   };
 
@@ -437,7 +437,7 @@ const Index = ({ commonData, setUser }: Props) => {
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData!.organization!.id!, userId, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
       } catch (e) {
-        console.error(e);
+        Helper.logError('Unexpected error', e);
       }
     } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
@@ -446,7 +446,7 @@ const Index = ({ commonData, setUser }: Props) => {
         const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
         await api.updateOrganizationMemberRoles(commonData!.organization!.id!, updateOrganizationMembersDTO);
       } catch (e) {
-        console.error(e);
+        Helper.logError('Unexpected error', e);
       }
     }
     getOrganizationMembers();
@@ -459,7 +459,7 @@ const Index = ({ commonData, setUser }: Props) => {
       await api.inviteNewUser(inviteUserDto);
       getOrganizationMembers();
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
   };
 
@@ -473,7 +473,7 @@ const Index = ({ commonData, setUser }: Props) => {
       }
       getOrganizationMembers();
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
   };
 
@@ -491,7 +491,7 @@ const Index = ({ commonData, setUser }: Props) => {
 
   return (
     <div className="flex flex-row space-x-8 p-2">
-      <div className="w-1/6">
+      <div className="hidden md:block w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
       <div className="w-4/6">
@@ -523,7 +523,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 />
                 <h1 className="ml-12 mb-4 text-2xl font-bold text-gray-900">{commonData.organization?.display_name}</h1>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="hidden lg:visible lg:flex items-center space-x-2">
                 <ManageUsers
                   commonData={commonData}
                   members={members}
@@ -573,7 +573,7 @@ const Index = ({ commonData, setUser }: Props) => {
         )}
       </div>
       {!invitationError && commonData.user && (
-        <div className="w-1/6">
+        <div className="hidden lg:block w-1/6">
           <ActivityFeedComponent activityFeed={activityFeed} hasMore={hasMore} getMore={getMoreActivityFeed} />
           {commonData.organization?.bio && (
             <div className="pt-10 border-t-gray-300 border-t-4 mt-2">
