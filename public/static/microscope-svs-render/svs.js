@@ -2,8 +2,7 @@ svs = {};
 svs.serverBasePath = '/iiif';
 
 svs.loadImage = async (file) => {
-  file = file.replace(/\s/g, '_');
-  const fileURL = `${svs.serverBasePath}/?iiif=${file}`;
+  const fileURL = `${svs.serverBasePath}/?format=svs&iiif=${file}`;
   const infoURL = `${fileURL}/info.json`;
   let imageInfo;
   try {
