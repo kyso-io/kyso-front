@@ -48,7 +48,7 @@ const Index = ({ commonData, setUser }: Props) => {
           setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getData();
@@ -65,7 +65,7 @@ const Index = ({ commonData, setUser }: Props) => {
         const resultKysoUserAccessTokens: NormalizedResponseDTO<KysoUserAccessToken[]> = await api.getAccessTokens();
         setKysoUserAccessTokens(resultKysoUserAccessTokens.data);
       } catch (e: any) {
-        console.error(e.response.data);
+        Helper.logError(e.response.data, e);
       } finally {
         setRequesting(false);
       }
@@ -97,7 +97,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setNewKysoUserAccessToken(resultKysoUserAccessToken.data);
       setKysoUserAccessTokens([...kysoUserAccessTokens, resultKysoUserAccessToken.data]);
     } catch (e: any) {
-      console.error(e.response.data);
+      Helper.logError(e.response.data, e);
     } finally {
       setRequesting(false);
     }
@@ -111,7 +111,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setKysoUserAccessTokens(kysoUserAccessTokens.filter((item: KysoUserAccessToken) => item.id !== selectedKysoAccessToken!.id));
       setSelectedKysoAccessToken(null);
     } catch (e: any) {
-      console.error(e.response);
+      Helper.logError(e.response.data, e);
     } finally {
       setRequesting(false);
     }
@@ -126,7 +126,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setKysoUserAccessTokens(resultKysoUserAccessToken.data);
       setSelectedKysoAccessToken(null);
     } catch (e: any) {
-      console.error(e.response.data);
+      Helper.logError(e.response.data, e);
     } finally {
       setRequesting(false);
     }
@@ -204,7 +204,7 @@ const Index = ({ commonData, setUser }: Props) => {
           <div className="mt-8 flex flex-col">
             <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
               <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
-                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+                <div className="overflow-hidden shadow ring-1 ring-black ring-opacity/5 md:rounded-lg">
                   <table className="min-w-full divide-y divide-gray-300">
                     <thead className="bg-gray-50">
                       <tr>
@@ -293,7 +293,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
           </Transition.Child>
 
           <div className="fixed inset-0 z-10 overflow-y-auto">
@@ -403,7 +403,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -459,7 +459,7 @@ const Index = ({ commonData, setUser }: Props) => {
       <Transition.Root show={openRevokeAllKysoAccessTokens} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={() => setOpenRevokeAllKysoAccessTokens(false)}>
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">

@@ -134,7 +134,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
           setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getData();
@@ -200,7 +200,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
         setReport(r);
         setReportFiles(resultFiles.data);
       } catch (e) {
-        console.error(e);
+        Helper.logError('Unexpected error', e);
       }
     };
     getReport();
@@ -503,7 +503,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       window.location.href = `/${updatedReport.organization_sluglified_name}/${updatedReport.team_sluglified_name}/${updatedReport.name}`;
       setMessageToaster('Report updated successfully.');
     } catch (err: any) {
-      console.error(err);
+      Helper.logError('Unexpected error', err);
       setShowToaster(err.response.data.message);
       setBusy(false);
     }

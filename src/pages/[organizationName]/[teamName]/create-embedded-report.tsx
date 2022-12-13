@@ -121,7 +121,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
           setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getData();

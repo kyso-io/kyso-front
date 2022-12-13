@@ -41,7 +41,7 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
   return (
     <div className="rounded-md flex items-center">
       {currentOrg && (
-        <a href={`${currentOrg!.href}`} className="hover:bg-gray-100 border-y border-l rounded-l p-2 p-x-4 flex items-center w-fit text-sm text-left font-medium text-gray-700">
+        <a href={`${currentOrg!.href}`} className="hover:bg-gray-100 border-y border-l rounded-l p-2 p-x-4 flex items-center w-fit text-xs lg:text-sm text-left font-medium text-gray-700">
           {selectorLabel === 'organization' ? (
             <HomeIcon className="shrink-0 h-5 w-5 text-gray-700 mr-2 group-hover:text-gray-500" aria-hidden="true" />
           ) : (
@@ -52,7 +52,7 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
       )}
       <Menu as="div" className="relative w-fit inline-block text-left">
         <Menu.Button
-          className={classNames('hover:bg-gray-100 border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none', currentOrg ? 'rounded-r' : 'rounded')}
+          className={classNames('hover:bg-gray-100 border p-2 flex items-center w-fit text-xs lg:text-sm text-left font-medium text-gray-700 hover:outline-none', currentOrg ? 'rounded-r' : 'rounded')}
         >
           {/* {currentOrg ? currentOrg.name : ''} */}
           {!currentOrg ? `Select ${selectorLabel}` : ''}

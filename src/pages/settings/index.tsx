@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Helper } from '@/helpers/Helper';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { BookOpenIcon, ChatAlt2Icon, UserGroupIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, OrganizationInfoDto, ResourcePermissions } from '@kyso-io/kyso-model';
@@ -71,7 +72,7 @@ const Index = ({ commonData }: Props) => {
         });
         setOrganizationsInfoDtoExtended(data);
       } catch (e: any) {
-        console.error(e.response.data);
+        Helper.logError(e.response.data, e);
       }
     };
     getData();

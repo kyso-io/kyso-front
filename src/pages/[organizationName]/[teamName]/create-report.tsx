@@ -77,7 +77,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
           setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getData();
@@ -372,6 +372,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
         let blob: Blob;
         if (fileContent) {
           try {
+            /* eslint-disable no-await-in-loop */
             blob = await (await fetch(fileContent!)).blob();
           } catch (ex) {
             blob = new Blob([''], { type: 'plain/text' });
@@ -418,6 +419,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       } else {
         try {
           setError(null);
+          /* eslint-disable no-await-in-loop */
           const base64 = await blobToBase64(file);
           setSessionStorageItem(file.name, base64);
           const newFile = new CreationReportFileSystemObject(file.name, `${parent ? `${parent.file.path}/` : ''}${file.name}`, file.name, 'file', '', parent ? parent?.file.id : undefined);

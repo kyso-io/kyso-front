@@ -35,6 +35,7 @@ const ChannelList = (props: Props) => {
       return;
     }
 
+    /* eslint-disable no-alert */
     if (typeof window !== 'undefined' && !window.confirm('Are you sure you want to delete this report?')) {
       return;
     }

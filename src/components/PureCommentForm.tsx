@@ -22,10 +22,11 @@ type IPureCommentForm = {
   submitComment: (newComment: any, parentComment?: any) => void;
 };
 
-const parseMentions = function (str: string) {
+const parseMentions = (str: string) => {
   const re = /\B\@([\w\-]+)/gim;
   const tokens: string[] = [];
 
+  /* eslint-disable no-constant-condition */
   while (true) {
     const match = re.exec(str);
     if (!match) {

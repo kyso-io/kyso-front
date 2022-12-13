@@ -23,7 +23,7 @@ const ChannelSelector = (props: IChannelSelectorProps) => {
       {commonData.team && (
         <a
           href={`/${commonData.organization?.sluglified_name}/${commonData.team.sluglified_name}`}
-          className="hover:bg-gray-100 border-y border-l rounded-l p-2 p-x-4 flex items-center w-fit text-sm text-left font-medium text-gray-700"
+          className="hover:bg-gray-100 border-y border-l rounded-l p-2 p-x-4 flex items-center w-fit text-xs lg:text-sm text-left font-medium text-gray-700"
         >
           {commonData.team?.display_name}
           <ChannelVisibility
@@ -37,7 +37,10 @@ const ChannelSelector = (props: IChannelSelectorProps) => {
       )}
       <Menu as="div" className="relative w-fit inline-block text-left">
         <Menu.Button
-          className={classNames('hover:bg-gray-100 border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none', commonData.team ? 'rounded-r' : 'rounded')}
+          className={classNames(
+            'hover:bg-gray-100 border p-2 flex items-center w-fit text-xs lg:text-sm text-left font-medium text-gray-700 hover:outline-none',
+            commonData.team ? 'rounded-r' : 'rounded',
+          )}
         >
           {!commonData.team ? `Select channel` : ''}
           <div className={classNames(!commonData.team ? 'pl-2' : '')}>

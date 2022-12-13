@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Helper } from '@/helpers/Helper';
 import type { KysoSetting, LoginProviderEnum, NormalizedResponseDTO, Token } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
@@ -28,7 +29,7 @@ const Page = () => {
           setCaptchaIsEnabled(false);
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getData();

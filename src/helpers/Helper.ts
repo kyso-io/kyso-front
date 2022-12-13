@@ -98,6 +98,18 @@ export class Helper {
     }
   };
 
+  public static logError = (message: string, exception?: unknown): void => {
+    if (message && message !== '') {
+      /* eslint-disable no-console */
+      console.log(message);
+    }
+
+    if (exception) {
+      /* eslint-disable no-console */
+      console.error(exception);
+    }
+  };
+
   public static arrayEquals = (a: any[], b: any[]): boolean => {
     const aIsArray: boolean = Array.isArray(a);
     const bIsArray: boolean = Array.isArray(b);

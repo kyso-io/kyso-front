@@ -81,7 +81,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const onlyVisibleCell = router.query.cell ? (router.query.cell as string) : undefined;
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const refComments = useRef<any>(null);
   const isInViewport = useIsInViewport(refComments);
@@ -126,7 +126,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getData();
@@ -320,7 +320,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         }
       } catch (e) {
         // error fetching file
-        console.error(e);
+        Helper.logError('Unexpected error', e);
       }
     };
     getData();
@@ -406,7 +406,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
       }
       setMembers(m);
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
   };
 
@@ -422,7 +422,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
       });
       setUsers(result.data);
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
   };
 
@@ -434,7 +434,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
       } catch (e) {
-        console.error(e);
+        Helper.logError('Unexpected error', e);
       }
     } else {
       if (!members[index]!.organization_roles.includes(organizationRole)) {
@@ -444,7 +444,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
           const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
           await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
         } catch (e) {
-          console.error(e);
+          Helper.logError('Unexpected error', e);
         }
       }
       if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
@@ -454,7 +454,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
           const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
           await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
         } catch (e) {
-          console.error(e);
+          Helper.logError('Unexpected error', e);
         }
       }
     }
@@ -468,7 +468,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
       await api.inviteNewUser(inviteUserDto);
       getTeamMembers();
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
   };
 
@@ -482,7 +482,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
       }
       getTeamMembers();
     } catch (e) {
-      console.error(e);
+      Helper.logError('Unexpected error', e);
     }
   };
 
@@ -604,7 +604,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 
   return (
     <div>
-      <div className={classNames('z-0 fixed flex flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
+      <div className={classNames('hidden lg:visible z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
         <div>
           <div className="flex flex-1 flex-col pt-32 mt-2">
             <nav className="flex-1 space-y-1">
@@ -655,7 +655,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         </div>
       </div>
 
-      <div className={classNames('flex flex-1 flex-col', sidebarOpen ? 'pl-64' : 'pl-10')}>
+      <div className={classNames('flex flex-1 flex-col', sidebarOpen ? 'pl-64' : 'lg:pl-10')}>
         <main>
           <div className="w-full px-4 sm:px-6 md:px-10">
             <div className="py-4">

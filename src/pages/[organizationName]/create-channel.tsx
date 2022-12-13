@@ -2,6 +2,7 @@
 import ChannelList from '@/components/ChannelList';
 import { PureSpinner } from '@/components/PureSpinner';
 import classNames from '@/helpers/class-names';
+import { Helper } from '@/helpers/Helper';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon, ExclamationCircleIcon, LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from '@heroicons/react/solid';
@@ -54,7 +55,7 @@ const Index = ({ commonData, setUser }: Props) => {
           setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        console.error(errorHttp.response.data);
+        Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
     getData();

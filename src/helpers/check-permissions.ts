@@ -80,14 +80,6 @@ export class HelperPermissions {
 
     if (commonData.team) {
       permissionsInThatTeam = commonData.permissions.teams?.find((x: ResourcePermissions) => x.id === commonData.team?.id);
-
-      /*
-    console.log(
-      `Permissions in that team ${
-        commonData.team.sluglified_name || commonData.team.name
-      }`,
-      permissionsInThatTeam
-    ); */
     }
 
     if (commonData.organization) {

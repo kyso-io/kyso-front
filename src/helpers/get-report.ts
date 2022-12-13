@@ -2,6 +2,7 @@
 import type { ReportData } from '@/types/report-data';
 import type { NormalizedResponseDTO, ReportDTO, Team, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import { Helper } from './Helper';
 
 interface Props {
   token: string | null;
@@ -26,12 +27,12 @@ export const getReport = async ({ token, team, reportName, version }: Props): Pr
     });
     return { report: result.data, authors, errorReport: null };
   } catch (e: any) {
-    console.log('errorReport', e);
+    Helper.logError('errorReport', e);
 
     let errorReport: string | null = null;
     if (!e.response) {
       errorReport = `An unkown error occurred.`;
-      console.error(e);
+      Helper.logError(errorReport, e);
     } else if (e.response.data.statusCode === 403) {
       errorReport = `You don't have permission to access this report.`;
     } else if (e.response.data.statusCode === 404) {
