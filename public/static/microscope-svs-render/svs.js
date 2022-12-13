@@ -2,8 +2,7 @@ svs = {};
 svs.serverBasePath = '/iiif';
 
 svs.loadImage = async (file) => {
-  file = file.replace(/\s/g, '_');
-  const fileURL = `${svs.serverBasePath}/?iiif=${file}`;
+  const fileURL = `${svs.serverBasePath}/?format=svs&iiif=${file}`;
   const infoURL = `${fileURL}/info.json`;
   let imageInfo;
   try {
@@ -12,7 +11,6 @@ svs.loadImage = async (file) => {
     alert('An error occurred retrieving the image information. Please try again later.');
     return;
   }
-  // console.log('image Info : ', imageInfo);
   document.getElementById('openseadragon1').innerHTML = '';
   const viewer1 = OpenSeadragon({
     id: 'openseadragon1',
