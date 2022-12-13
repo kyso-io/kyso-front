@@ -12,7 +12,6 @@ import TagsFilterSelector from '@/components/TagsFilterSelector';
 import classNames from '@/helpers/class-names';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { getSessionStorageItem, removeSessionStorageItem, setSessionStorageItem } from '@/helpers/isomorphic-session-storage';
-import slugify from '@/helpers/slugify';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
@@ -327,7 +326,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     api.setTeamSlug(commonData.team.sluglified_name);
 
     try {
-      const exists: boolean = await api.reportExists(commonData.team.id as string, slugify(title));
+      const exists: boolean = await api.reportExists(commonData.team.id as string, Helper.slugify(title));
 
       if (exists) {
         setError('Report with this name already exists.');

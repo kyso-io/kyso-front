@@ -37,6 +37,7 @@
         //     "code": 200
         //   }
         // ],
+        "no-console": "error",
         "no-useless-escape": "off",
         "no-nested-ternary": "off",
         "no-restricted-syntax": "off",

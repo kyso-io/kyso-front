@@ -139,7 +139,7 @@ const Index = ({ commonData, setUser }: Props) => {
           window.location.href = `/${organizationName}`;
         } catch (e: any) {
           const errorData: { statusCode: number; message: string; error: string } = e.response.data;
-          console.log(errorData);
+          Helper.logError('Unexpected error', errorData);
           setInvitationError(errorData.message);
         }
       };

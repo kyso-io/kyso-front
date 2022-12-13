@@ -6,7 +6,6 @@ import { PureSpinner } from '@/components/PureSpinner';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
 import classNames from '@/helpers/class-names';
 import { removeLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import slugify from '@/helpers/slugify';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
@@ -345,7 +344,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     setBusy(true);
     const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, selectedTeam.name);
     try {
-      const exists: boolean = await api.reportExists(selectedTeam.id, slugify(title));
+      const exists: boolean = await api.reportExists(selectedTeam.id, Helper.slugify(title));
       if (exists) {
         setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
         setMessageToaster('Report with this name already exists. Change the title.');
