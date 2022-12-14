@@ -273,7 +273,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setShowToaster(true);
       setMessageToaster('Uploading image...');
       const api: Api = new Api(commonData.token);
-      const response: NormalizedResponseDTO<UserDTO> = await api.updateUserBackgroundImage(file);
+      const response: NormalizedResponseDTO<UserDTO> = await api.updateUserBackgroundImage(commonData.user!.id, file);
       setUser(response.data);
       setUserProfileData({ errorUserProfile: null, userProfile: response.data });
       setMessageToaster('Image uploaded successfully!');
