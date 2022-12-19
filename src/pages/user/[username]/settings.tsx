@@ -109,9 +109,9 @@ const Index = ({ commonData, setUser }: Props) => {
       if (file !== null) {
         setShowToaster(true);
         setRequesting(true);
-        await api.updateUserProfileImage(file);
+        await api.updateUserProfileImage(commonData.user!.id, file);
       }
-      const updateUserRequestDto: UpdateUserRequestDTO = new UpdateUserRequestDTO(location, link, bio);
+      const updateUserRequestDto: UpdateUserRequestDTO = new UpdateUserRequestDTO(commonData.user!.name, commonData.user!.display_name, location, link, bio);
       await api.updateUser(commonData.user!.id!, updateUserRequestDto);
       router.reload();
     } catch (e: any) {
