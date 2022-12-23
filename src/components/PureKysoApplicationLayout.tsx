@@ -12,6 +12,7 @@ import { Fragment, useState } from 'react';
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import BreadcrumbNavbar from './BreadcrumbNavbar';
+import PureCheckListTour from './PureCheckListTour';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
 import PureShareButton from './PureShareButton';
@@ -145,6 +146,11 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         <div className="flex items-center px-5 cursor-pointer">
                           <PureShareButton title="Share page" description="Send this url to someone to share this page" iconClasses={'text-white h-6 w-6'} buttonClasses="" url={currentUrl} />
                         </div>
+                        {commonData.user && (
+                          <div className="flex items-center mr-2 cursor-pointer">
+                            <PureCheckListTour />
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="-mr-2 flex md:hidden">
