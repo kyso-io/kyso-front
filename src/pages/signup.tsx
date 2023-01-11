@@ -314,7 +314,7 @@ const Index = () => {
                     </div>
                     <button
                       type="submit"
-                      className="login-btn shadow-sm text-white bg-kyso-600 hover:bg-kyso-700 focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
+                      className="login-btn shadow-sm text-white k-bg-primary hover:k-bg-primary-hover focus:ring-indigo-900r focus:ring-offset-2 inline-block rounded p-2 text-sm no-underline text-center text-bold"
                     >
                       Register
                     </button>

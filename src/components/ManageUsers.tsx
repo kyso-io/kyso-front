@@ -191,7 +191,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
               'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
               !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
                 ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
+                : 'k-bg-primary  hover:k-bg-primary-hover focus:ring-indigo-900',
             )}
             onClick={() => {
               if (captchaIsEnabled && commonData.user?.show_captcha === true) {
@@ -213,7 +213,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
               'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
               !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
                 ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
+                : 'k-bg-primary hover:k-bg-primary-hover  focus:ring-indigo-900',
             )}
             onClick={() => {
               if (captchaIsEnabled && commonData.user?.show_captcha === true) {
@@ -464,7 +464,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                 'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
                                 !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
                                   ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                                  : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
+                                  : 'k-bg-primary hover:k-bg-primary-hover  focus:ring-indigo-900',
                               )}
                               onClick={() => {
                                 if (captchaIsEnabled && commonData.user?.show_captcha === true) {
@@ -656,7 +656,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                 'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
                                 !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
                                   ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                                  : 'bg-kyso-600  hover:bg-kyso-700  focus:ring-indigo-900',
+                                  : 'k-bg-primary hover:k-bg-primary-hover  focus:ring-indigo-900',
                               )}
                               onClick={() => {
                                 if (captchaIsEnabled && commonData.user?.show_captcha === true) {
