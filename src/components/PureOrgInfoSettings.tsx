@@ -235,7 +235,7 @@ const PureOrgInfoSettings = ({ isBusy, onCreateOrganization, setError, error }: 
             </button>
             <button
               className={classNames(
-                error ? 'opacity-75 cursor-not-allowed' : 'hover:k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
+                error ? 'opacity-75 cursor-not-allowed' : 'k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
                 'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary ',
               )}
               onClick={() => onCreateOrganization(bio, orgName, link, location, file)}
