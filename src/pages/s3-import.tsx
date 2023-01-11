@@ -428,8 +428,8 @@ const MetadataImport = () => {
                           setImportResults(result);
                         }}
                         className={classNames(
-                          error ? 'opacity-75 cursor-not-allowed' : 'hover:bg-kyso-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
-                          'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-kyso-600 ',
+                          error ? 'opacity-75 cursor-not-allowed' : 'hover:k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
+                          'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary ',
                         )}
                       >
                         {!isBusy && (
@@ -485,8 +485,8 @@ const MetadataImport = () => {
                 setImporting(false);
               }}
               className={classNames(
-                error ? 'opacity-75 cursor-not-allowed' : 'hover:bg-kyso-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
-                'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-kyso-600 ',
+                error ? 'opacity-75 cursor-not-allowed' : 'hover:k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
+                'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary',
               )}
             >
               <React.Fragment>Import another one</React.Fragment>

@@ -1,11 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* START THEME */
-img.theme-left-logo {
+img.k-left-logo {
   content: url('/assets/images/kyso-logo-and-name-dark.svg');
 }
 
-img.theme-right-logo {
+img.k-right-logo {
   display: none;
 }
+
+.k-bg-primary {
+  background-color: #244362;
+}
+
+@layer utilities{
+  .k-bg-primary-hover {
+    background-color: #162C40;
+  }
+}
+
 /* END THEME */
 
 #tooltip {
