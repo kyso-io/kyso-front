@@ -8,6 +8,7 @@ import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIco
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, Team, TeamInfoDto } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
+  AllowDownload,
   GlobalPermissionsEnum,
   InviteUserDto,
   KysoSettingsEnum,
@@ -95,6 +96,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [bio, setBio] = useState<string>('');
   const [link, setLink] = useState<string>('');
   const [location, setLocation] = useState<string>('');
+  const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.ALL);
   const [file, setFile] = useState<File | null>(null);
   const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
@@ -208,6 +210,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setBio(commonData.organization!.bio);
       setLink(commonData.organization!.link);
       setLocation(commonData.organization!.location);
+      setAllowDownload(commonData.organization!.allow_download);
       setAllowedAccessDomains(commonData.organization!.allowed_access_domains || []);
       if (commonData.organization?.options) {
         if (commonData.organization.options?.notifications) {
@@ -226,6 +229,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setBio('');
       setLink('');
       setLocation('');
+      setAllowDownload(AllowDownload.ALL);
       setAllowedAccessDomains([]);
       setCentralizedNotifications(false);
       setEmailsCentralizedNotifications([]);
@@ -339,6 +343,7 @@ const Index = ({ commonData, setUser }: Props) => {
         bio,
         link,
         location,
+        allow_download: allowDownload,
       } as any);
       router.reload();
     } catch (e: any) {
@@ -788,6 +793,23 @@ const Index = ({ commonData, setUser }: Props) => {
                           name="link"
                           className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
                         />
+                        {/* {showErrorLocation && <p className="mt-2 text-sm text-red-500">This field is mandatory.</p>} */}
+                      </div>
+                    </div>
+                    <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Download reports:</label>
+                      <div className="mt-1 sm:col-span-2 sm:mt-0">
+                        <select
+                          id="allowDownload"
+                          name="allowDownload"
+                          value={allowDownload}
+                          onChange={(e: any) => setAllowDownload(e.target.value)}
+                          className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                        >
+                          <option value={AllowDownload.ALL}>All</option>
+                          <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
+                          <option value={AllowDownload.NONE}>None</option>
+                        </select>
                         {/* {showErrorLocation && <p className="mt-2 text-sm text-red-500">This field is mandatory.</p>} */}
                       </div>
                     </div>
