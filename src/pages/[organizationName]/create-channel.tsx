@@ -7,7 +7,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon, ExclamationCircleIcon, LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, Team, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import { AllowDownload, KysoSettingsEnum, Team, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
@@ -29,6 +29,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [formDescription, setFormDescription] = useState('');
   const [isTeamAvailable, setTeamAvailable] = useState(true);
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
+  const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.ALL);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
@@ -107,7 +108,9 @@ const Index = ({ commonData, setUser }: Props) => {
         return;
       }
 
-      const result: NormalizedResponseDTO<Team> = await api.createTeam(new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions, commonData.user!.id));
+      const result: NormalizedResponseDTO<Team> = await api.createTeam(
+        new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions, commonData.user!.id, allowDownload),
+      );
       const team: Team = result.data;
 
       if (!team) {
@@ -153,7 +156,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
                     <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                        Name
+                        Name:
                       </label>
                       <div className="mt-1 sm:mt-0 sm:col-span-2">
                         <div className="max-w-lg flex rounded-md shadow-sm">
@@ -170,7 +173,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     </div>
                     <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5">
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                        Description
+                        Description:
                       </label>
                       <div className="mt-1 sm:mt-0 sm:col-span-2">
                         <div className="max-w-lg flex rounded-md shadow-sm">
@@ -192,7 +195,7 @@ const Index = ({ commonData, setUser }: Props) => {
                         <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
                           <div>
                             <div className="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-notifications">
-                              Permissions
+                              Permissions:
                             </div>
                           </div>
                           <div className="sm:col-span-2">
@@ -254,6 +257,25 @@ const Index = ({ commonData, setUser }: Props) => {
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start  sm:border-gray-200 sm:pt-5">
+                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                      Download reports:
+                    </label>
+                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                      <select
+                        id="allowDownload"
+                        name="allowDownload"
+                        value={allowDownload}
+                        onChange={(e: any) => setAllowDownload(e.target.value)}
+                        className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                      >
+                        <option value={AllowDownload.ALL}>All</option>
+                        <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
+                        <option value={AllowDownload.NONE}>None</option>
+                        <option value={AllowDownload.INHERITED}>Inherited</option>
+                      </select>
                     </div>
                   </div>
                 </div>

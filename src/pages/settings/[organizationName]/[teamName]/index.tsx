@@ -6,6 +6,7 @@ import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, TeamMember } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
+  AllowDownload,
   GlobalPermissionsEnum,
   InviteUserDto,
   KysoSettingsEnum,
@@ -373,11 +374,23 @@ const Index = ({ commonData, setUser }: Props) => {
     setRequesting(true);
   };
 
-  const updateTeamVisiblity = async (teamVisiblityEnum: TeamVisibilityEnum) => {
+  const updateTeamVisibility = async (teamVisibilityEnum: TeamVisibilityEnum) => {
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-      await api.updateTeam(commonData.team?.id!, { visibility: teamVisiblityEnum } as any);
+      await api.updateTeam(commonData.team?.id!, { visibility: teamVisibilityEnum } as any);
+      router.reload();
+    } catch (e: any) {
+      Helper.logError(e.response.data, e);
+    }
+    setRequesting(false);
+  };
+
+  const updateAllowDownload = async (allowDownload: AllowDownload) => {
+    setRequesting(true);
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+      await api.updateTeam(commonData.team?.id!, { allow_download: allowDownload } as any);
       router.reload();
     } catch (e: any) {
       Helper.logError(e.response.data, e);
@@ -587,9 +600,9 @@ const Index = ({ commonData, setUser }: Props) => {
               )}
             </div>
             <div className="flex items-center my-4">
-              <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Visiblity:</label>
+              <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Visibility:</label>
               {hasPermissionEditChannel ? (
-                <Listbox value={null} onChange={(teamVisibilityEnum: TeamVisibilityEnum) => updateTeamVisiblity(teamVisibilityEnum)}>
+                <Listbox value={null} onChange={(teamVisibilityEnum: TeamVisibilityEnum) => updateTeamVisibility(teamVisibilityEnum)}>
                   {({ open }) => (
                     <div className="relative ml-6" style={{ width: '200px' }}>
                       <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
@@ -677,6 +690,23 @@ const Index = ({ commonData, setUser }: Props) => {
                   sharing a report&apos;s shareable link.
                 </li>
               </ul>
+            </div>
+            <div className="flex items-center my-4">
+              <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Download reports:</label>
+              <div className="ml-6">
+                <select
+                  id="allowDownload"
+                  name="allowDownload"
+                  value={commonData.team?.allow_download}
+                  onChange={(e: any) => updateAllowDownload(e.target.value)}
+                  className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                >
+                  <option value={AllowDownload.ALL}>All</option>
+                  <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
+                  <option value={AllowDownload.NONE}>None</option>
+                  <option value={AllowDownload.INHERITED}>Inherited</option>
+                </select>
+              </div>
             </div>
 
             {/* SEARCH USERS */}
