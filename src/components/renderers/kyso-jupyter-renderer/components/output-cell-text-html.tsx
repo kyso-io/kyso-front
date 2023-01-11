@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface Props {
   outputs: string[];
@@ -40,11 +40,7 @@ const OutputCellHtml = ({ outputs }: Props) => {
       ></iframe>
     );
   }
-  return (
-    <React.Fragment>
-      <div className="text-center" dangerouslySetInnerHTML={{ __html: plainHtml }} />
-    </React.Fragment>
-  );
+  return <div dangerouslySetInnerHTML={{ __html: plainHtml }} />;
 };
 
 export default OutputCellHtml;

@@ -73,7 +73,7 @@ const useResize = (props: UseResizeProps): UseResizeReturn => {
 
 const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
   const { cacheKey = 'overlay-panel-state', children, setSidebarOpen } = props;
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
   const hoverRef = useRef(null);
   const tooltipRef = useRef(null);
