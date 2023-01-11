@@ -1,7 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* START THEME */
 img.k-left-logo {
   content: url('/assets/images/kyso-logo-and-name-dark.svg');
@@ -15,10 +11,8 @@ img.k-right-logo {
   background-color: #244362;
 }
 
-@layer utilities{
-  .k-bg-primary-hover {
-    background-color: #162C40;
-  }
+.k-bg-primary-hover:hover {
+  background-color: #162C40;
 }
 
 /* END THEME */
