@@ -106,6 +106,8 @@ const Index = ({ commonData, setUser }: Props) => {
   const [centralizedNotifications, setCentralizedNotifications] = useState<boolean>(false);
   const [emailsCentralizedNotifications, setEmailsCentralizedNotifications] = useState<string[]>([]);
   const [newEmailCentralizedNotifications, setNewEmailCentralizedNotifications] = useState<string>('');
+  const [slackToken, setSlackToken] = useState<string>('');
+  const [slackChannel, setSlackChannel] = useState<string>('');
   const [errorNewEmail, setErrorNewEmail] = useState<string>('');
   const [loginKyso, setLoginKyso] = useState<boolean>(false);
   const [loginGoogle, setLoginGoogle] = useState<boolean>(false);
@@ -125,9 +127,16 @@ const Index = ({ commonData, setUser }: Props) => {
       if (commonData.organization!.options!.notifications!.centralized !== centralizedNotifications) {
         return true;
       }
-      return !Helper.arrayEquals(commonData.organization!.options!.notifications!.emails, emailsCentralizedNotifications);
+      const centralizedChanged: boolean = !Helper.arrayEquals(commonData.organization!.options!.notifications!.emails, emailsCentralizedNotifications);
+      if (centralizedChanged) {
+        return true;
+      }
     }
     if (centralizedNotifications) {
+      return true;
+    }
+    const slackChanged: boolean = commonData.organization!.options!.notifications!.slackToken !== slackToken || commonData.organization!.options!.notifications!.slackChannel !== slackChannel;
+    if (slackChanged) {
       return true;
     }
     return false;
@@ -216,6 +225,8 @@ const Index = ({ commonData, setUser }: Props) => {
         if (commonData.organization.options?.notifications) {
           setCentralizedNotifications(commonData.organization.options.notifications.centralized);
           setEmailsCentralizedNotifications(commonData.organization.options.notifications.emails || []);
+          setSlackToken(commonData.organization.options.notifications.slackToken || '');
+          setSlackChannel(commonData.organization.options.notifications.slackChannel || '');
         }
         if (commonData.organization.options?.auth) {
           setLoginKyso(commonData.organization.options.auth.allow_login_with_kyso || false);
@@ -233,6 +244,8 @@ const Index = ({ commonData, setUser }: Props) => {
       setAllowedAccessDomains([]);
       setCentralizedNotifications(false);
       setEmailsCentralizedNotifications([]);
+      setSlackToken('');
+      setSlackChannel('');
       setLoginKyso(false);
       setLoginGoogle(false);
       setLoginGithub(false);
@@ -420,6 +433,8 @@ const Index = ({ commonData, setUser }: Props) => {
         notifications: {
           centralized: centralizedNotifications,
           emails: emailsCentralizedNotifications,
+          slackToken,
+          slackChannel,
         },
       } as any);
       router.reload();
@@ -1318,18 +1333,26 @@ const Index = ({ commonData, setUser }: Props) => {
                 <div className="space-y-6 sm:space-y-5 mt-8">
                   <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
                 </div>
-                <div className="my-4 space-y-4">
-                  <div className="relative flex items-start">
-                    <div className="flex h-5 items-center">
-                      <input
-                        checked={centralizedNotifications}
-                        onChange={(e: any) => setCentralizedNotifications(e.target.checked)}
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label className="font-medium text-gray-700">Centralized comunication</label>
+                <div className="pt-6 sm:pt-5 my-4">
+                  <div role="group" aria-labelledby="label-email">
+                    <div className="sm:grid sm:grid-cols-3 sm:items-baseline sm:gap-4">
+                      <div className="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-email">
+                        Centralized comunication
+                      </div>
+                      <div className="mt-4 sm:col-span-2 sm:mt-0">
+                        <div className="max-w-lg space-y-4">
+                          <div className="relative flex items-start">
+                            <div className="flex h-5 items-center">
+                              <input
+                                checked={centralizedNotifications}
+                                onChange={(e: any) => setCentralizedNotifications(e.target.checked)}
+                                type="checkbox"
+                                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1407,7 +1430,29 @@ const Index = ({ commonData, setUser }: Props) => {
                     )}
                   </React.Fragment>
                 )}
-                <div className="pt-5 sm:border-t sm:border-gray-200">
+                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack token:</label>
+                  <div className="mt-1 sm:col-span-2 sm:mt-0">
+                    <input
+                      value={slackToken}
+                      onChange={(e) => setSlackToken(e.target.value)}
+                      type="text"
+                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack channel:</label>
+                  <div className="mt-1 sm:col-span-2 sm:mt-0">
+                    <input
+                      value={slackChannel}
+                      onChange={(e) => setSlackChannel(e.target.value)}
+                      type="text"
+                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="pt-5 sm:border-t sm:border-gray-200 mt-5">
                   <div className="flex justify-end">
                     <button
                       disabled={requesting}
