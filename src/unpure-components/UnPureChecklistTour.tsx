@@ -1,4 +1,4 @@
-import { CheckCircleIcon, ChevronDoubleRightIcon } from '@heroicons/react/solid';
+import { CheckCircleIcon, ChevronDoubleRightIcon, XCircleIcon } from '@heroicons/react/solid';
 import React from 'react';
 import { ProgressBar } from 'primereact/progressbar';
 
@@ -10,7 +10,7 @@ const UnPureCheckListTour = (props: Props) => {
   const { setValue } = props;
   const progress = 100;
   return (
-    <div className="space-y-5 py-8">
+    <div className="space-y-5 pt-8">
       {/* <legend className="sr-only">Notifications</legend> */}
       <h2 className="text-xl font-medium text-gray-900 sm:pr-12 px-6 flex">
         {progress !== 100 && 'Welcome on board!'}
@@ -103,6 +103,16 @@ const UnPureCheckListTour = (props: Props) => {
         </div>
         <div className="flex h-5 items-center w-8 pt-6">
           <ChevronDoubleRightIcon className="h-8 w-8 text-gray-500 hover:text-indigo-500" aria-hidden="true" />
+        </div>
+      </div>
+      <div className="border-t">
+        <div className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3" onClick={() => setValue('cli')}>
+          <div className="flex h-5 items-center w-8">
+            <XCircleIcon className="h-6 w-6 text-red-500" aria-hidden="true" />
+          </div>
+          <div className="ml-3 text-sm w-96">
+            <label className="font-medium text-gray-700">Finish and remove.</label>
+          </div>
         </div>
       </div>
     </div>
