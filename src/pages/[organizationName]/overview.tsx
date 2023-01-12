@@ -70,7 +70,7 @@ const Index = () => {
                       <span className="relative">Publish existing work</span>
                     </a>
                   </h4>
-                  <p className="relative mt-1.5 text-xs font-medium text-slate-500">Describe what to expect after clicking this option</p>
+                  <p className="relative mt-1.5 text-xs font-medium text-slate-500">Publish and share your analysis to anyone in your organization.</p>
                 </div>
                 <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover::rounded-[20px] before:bg-gray-100 before:opacity-0 hover:before:opacity-100 mx-20">
                   <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10">
@@ -82,7 +82,7 @@ const Index = () => {
                       <span className="relative">Read a report</span>
                     </a>
                   </h4>
-                  <p className="relative mt-1.5 text-xs font-medium text-slate-500">Describe what to expect after clicking this option</p>
+                  <p className="relative mt-1.5 text-xs font-medium text-slate-500">Find understandable results on this report example.</p>
                 </div>
                 <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover::rounded-[20px] before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
                   <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10">
@@ -94,7 +94,7 @@ const Index = () => {
                       <span className="relative">Search and discover</span>
                     </a>
                   </h4>
-                  <p className="relative mt-1.5 text-xs font-medium text-slate-500">Describe what to expect after clicking this option</p>
+                  <p className="relative mt-1.5 text-xs font-medium text-slate-500">Find, navigate and stay up to date on the existing set of work on a topic.</p>
                 </div>
               </div>
             </div>
