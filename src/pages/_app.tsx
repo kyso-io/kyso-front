@@ -9,6 +9,7 @@ import { Provider } from 'react-redux';
 import { Helper } from '@/helpers/Helper';
 import type { KeyValue } from '@/model/key-value.model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import type { PageWithLayoutType } from '../types/pageWithLayout';
 
 type AppLayoutProps = AppProps & {
@@ -35,7 +36,7 @@ function MyApp({ Component, pageProps }: AppLayoutProps) {
   }, []);
 
   return (
-    <>
+    <ErrorBoundary>
       <Provider store={store}>
         <Layout>
           <Component {...pageProps} />
@@ -43,7 +44,7 @@ function MyApp({ Component, pageProps }: AppLayoutProps) {
       </Provider>
 
       {theme && <link rel="stylesheet" href={`/pub/themes/${theme}/styles.css`}></link>}
-    </>
+    </ErrorBoundary>
   );
 }
 export default MyApp;
