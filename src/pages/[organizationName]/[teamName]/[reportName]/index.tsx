@@ -48,9 +48,9 @@ import CaptchaModal from '../../../../components/CaptchaModal';
 import TableOfContents from '../../../../components/TableOfContents';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 import { FileTypesHelper } from '../../../../helpers/FileTypesHelper';
-import type { FileToRender } from '../../../../types/file-to-render';
 import { Helper } from '../../../../helpers/Helper';
 import type { KeyValue } from '../../../../model/key-value.model';
+import type { FileToRender } from '../../../../types/file-to-render';
 
 interface Props {
   commonData: CommonData;
@@ -282,6 +282,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
             isLoading: false,
             content: null,
             toc: [],
+            git_metadata: null,
           };
         }
 
@@ -292,6 +293,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
             ftr.path = resultFile.data.name;
             ftr.path_scs = resultFile.data.path_scs;
             ftr.toc = resultFile.data.toc;
+            ftr.git_metadata = resultFile.data.git_metadata;
           } catch (e) {}
         }
 
