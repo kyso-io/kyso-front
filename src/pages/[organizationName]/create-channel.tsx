@@ -35,6 +35,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [enabledPublicChannels, setEnabledPublicChannels] = useState<boolean>(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -51,9 +52,13 @@ const Index = ({ commonData, setUser }: Props) => {
       try {
         const api: Api = new Api();
         const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        const indexCaptcha: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (indexCaptcha !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[indexCaptcha]!.value === 'true');
+        }
+        const indexPublicChannels: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.ALLOW_PUBLIC_CHANNELS);
+        if (indexPublicChannels !== -1) {
+          setEnabledPublicChannels(resultKysoSetting.data[indexPublicChannels]!.value === 'true');
         }
       } catch (errorHttp: any) {
         Helper.logError(errorHttp.response.data, errorHttp);
@@ -109,7 +114,7 @@ const Index = ({ commonData, setUser }: Props) => {
       }
 
       const result: NormalizedResponseDTO<Team> = await api.createTeam(
-        new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions, commonData.user!.id, allowDownload),
+        new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions, commonData.user!.id, AllowDownload.INHERITED),
       );
       const team: Team = result.data;
 
@@ -235,23 +240,24 @@ const Index = ({ commonData, setUser }: Props) => {
                                     channel.
                                   </label>
                                 </div>
-
-                                <div className="flex items-start">
-                                  <input
-                                    id="public"
-                                    name="permissions"
-                                    type="radio"
-                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 mt-1"
-                                    onChange={() => {
-                                      setFormPermissions(TeamVisibilityEnum.PUBLIC);
-                                    }}
-                                  />
-                                  <LockOpenIcon className="w-6 h-5 ml-3" />
-                                  <label htmlFor="public" className="ml-1 block text-sm  text-gray-700">
-                                    <strong>Public:</strong>
-                                    Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url.
-                                  </label>
-                                </div>
+                                {enabledPublicChannels && (
+                                  <div className="flex items-start">
+                                    <input
+                                      id="public"
+                                      name="permissions"
+                                      type="radio"
+                                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 mt-1"
+                                      onChange={() => {
+                                        setFormPermissions(TeamVisibilityEnum.PUBLIC);
+                                      }}
+                                    />
+                                    <LockOpenIcon className="w-6 h-5 ml-3" />
+                                    <label htmlFor="public" className="ml-1 block text-sm  text-gray-700">
+                                      <strong>Public:</strong>
+                                      Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url.
+                                    </label>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>

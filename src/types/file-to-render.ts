@@ -1,4 +1,4 @@
-import type { TableOfContentEntryDto } from '@kyso-io/kyso-model';
+import type { GitMetadata, TableOfContentEntryDto } from '@kyso-io/kyso-model';
 
 export type FileToRender = {
   path: string;
@@ -8,4 +8,5 @@ export type FileToRender = {
   percentLoaded?: number | null;
   content?: Buffer | string | null;
   toc: TableOfContentEntryDto[];
+  git_metadata: GitMetadata | null;
 };

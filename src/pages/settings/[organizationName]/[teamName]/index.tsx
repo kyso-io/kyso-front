@@ -2,7 +2,7 @@
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Listbox, Transition } from '@headlessui/react';
 import { LinkIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
-import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import { CheckIcon, ExclamationCircleIcon, InformationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, TeamMember } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -28,10 +28,12 @@ import CaptchaModal from '../../../../components/CaptchaModal';
 import ChannelVisibility from '../../../../components/ChannelVisibility';
 import PureAvatar from '../../../../components/PureAvatar';
 import SettingsAside from '../../../../components/SettingsAside';
+import ToasterNotification from '../../../../components/ToasterNotification';
 import { OrganizationSettingsTab } from '../../../../enums/organization-settings-tab';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 import { Helper } from '../../../../helpers/Helper';
 import { useRedirectIfNoJWT } from '../../../../hooks/use-redirect-if-no-jwt';
+import { TailwindColor } from '../../../../tailwind/enum/tailwind-color.enum';
 import { TailwindFontSizeEnum } from '../../../../tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '../../../../tailwind/enum/tailwind-height.enum';
 import { TailwindWidthSizeEnum } from '../../../../tailwind/enum/tailwind-width.enum';
@@ -64,7 +66,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
 const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   useRedirectIfNoJWT();
-  const { organizationName, teamName } = router.query;
+  const { organizationName, teamName, tab } = router.query;
   const [query, setQuery] = useState<string>('');
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -76,6 +78,11 @@ const Index = ({ commonData, setUser }: Props) => {
   const [openDeleteMemberModal, setOpenDeleteMemberModal] = useState<boolean>(false);
   const [organizationRole, setOrganizationRole] = useState<string>('');
   const [teamRole, setTeamRole] = useState<string>('');
+  const [enabledPublicChannels, setEnabledPublicChannels] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<OrganizationSettingsTab>(OrganizationSettingsTab.Channels);
+  const [slackChannel, setSlackChannel] = useState<string>('');
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
     return HelperPermissions.checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || HelperPermissions.checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
@@ -127,15 +134,25 @@ const Index = ({ commonData, setUser }: Props) => {
     });
     return data;
   }, [commonData.permissions, commonData.organization]);
+  const notificationsChanged: boolean = useMemo(() => {
+    if (!commonData.team) {
+      return false;
+    }
+    return commonData.team.slackChannel !== slackChannel;
+  }, [commonData.team, slackChannel]);
 
   useEffect(() => {
     const getData = async () => {
       try {
         const api: Api = new Api();
         const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        const indexCaptcha: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (indexCaptcha !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[indexCaptcha]!.value === 'true');
+        }
+        const indexPublicChannels: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.ALLOW_PUBLIC_CHANNELS);
+        if (indexPublicChannels !== -1) {
+          setEnabledPublicChannels(resultKysoSetting.data[indexPublicChannels]!.value === 'true');
         }
       } catch (errorHttp: any) {
         Helper.logError(errorHttp.response.data, errorHttp);
@@ -145,9 +162,32 @@ const Index = ({ commonData, setUser }: Props) => {
   }, []);
 
   useEffect(() => {
+    if (!tab) {
+      return;
+    }
+    switch (tab) {
+      case OrganizationSettingsTab.Channels:
+        setSelectedTab(OrganizationSettingsTab.Channels);
+        break;
+      case OrganizationSettingsTab.Members:
+        setSelectedTab(OrganizationSettingsTab.Members);
+        break;
+      // case OrganizationSettingsTab.Access:
+      //   setSelectedTab(OrganizationSettingsTab.Access);
+      //   break;
+      case OrganizationSettingsTab.Notifications:
+        setSelectedTab(OrganizationSettingsTab.Notifications);
+        break;
+      default:
+        break;
+    }
+  }, [tab]);
+
+  useEffect(() => {
     if (!commonData.team) {
       return;
     }
+    setSlackChannel(commonData.team.slackChannel || '');
     getTeamMembers();
   }, [commonData.team]);
 
@@ -386,6 +426,31 @@ const Index = ({ commonData, setUser }: Props) => {
     setRequesting(false);
   };
 
+  const updateNotifications = async () => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShowToaster(true);
+      setMessageToaster('Please verify your email');
+      return;
+    }
+    try {
+      setRequesting(true);
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+      await api.updateTeam(commonData.team?.id!, { slackChannel } as any);
+      window.location.href = `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
+    } catch (e: any) {
+      /* eslint-disable no-console */
+      console.log(e.response.data);
+    } finally {
+      setRequesting(false);
+      setShowToaster(false);
+      setMessageToaster('');
+    }
+  };
+
   const updateAllowDownload = async (allowDownload: AllowDownload) => {
     setRequesting(true);
     try {
@@ -502,365 +567,451 @@ const Index = ({ commonData, setUser }: Props) => {
             <div className="hidden sm:block">
               <div className="border-b border-gray-200">
                 <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                  {Helper.organizationSettingsTabs.map((tab: { key: OrganizationSettingsTab; name: string }) => (
+                  {Helper.organizationSettingsTabs.map((element: { key: OrganizationSettingsTab; name: string }) => (
                     <a
-                      key={tab.name}
-                      href={`/settings/${commonData.organization?.sluglified_name}?tab=${tab.key}`}
+                      key={element.name}
+                      onClick={(e: any) => {
+                        e.preventDefault();
+                        switch (e.key) {
+                          case OrganizationSettingsTab.Channels:
+                            setSelectedTab(e.key);
+                            break;
+                          case OrganizationSettingsTab.Members:
+                            setSelectedTab(e.key);
+                            break;
+                          case OrganizationSettingsTab.Access:
+                            router.push(`/settings/${commonData.organization?.sluglified_name}?tab=${e.key}`);
+                            break;
+                          case OrganizationSettingsTab.Notifications:
+                            setSelectedTab(e.key);
+                            break;
+                          default:
+                            break;
+                        }
+                      }}
                       className={clsx(
-                        tab.key === OrganizationSettingsTab.Channels ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                        'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+                        element.key === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                        'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer',
                       )}
-                      aria-current={tab.key === OrganizationSettingsTab.Channels ? 'page' : undefined}
+                      aria-current={element.key === selectedTab ? 'page' : undefined}
                     >
-                      {tab.name}
+                      {element.name}
                     </a>
                   ))}
                 </nav>
               </div>
             </div>
 
-            {/* TEAM HEADER */}
-            <div className="flex flex-row items-center mt-6">
-              <div className="grow flex flex-row items-center">
-                <PureAvatar src={commonData.team?.avatar_url || ''} title={commonData.team?.display_name || ''} size={TailwindHeightSizeEnum.H16} textSize={TailwindFontSizeEnum.XS} className="mr-4" />
-                <Listbox
-                  value={null}
-                  onChange={(resourcePermissions: ResourcePermissions) => {
-                    if (resourcePermissions.id !== commonData.team?.id) {
-                      window.location.href = `/settings/${commonData.organization?.sluglified_name}/${resourcePermissions.name}`;
-                    }
-                  }}
-                >
-                  {({ open }) => (
-                    <div className="relative mt-1" style={{ width: '230px' }}>
-                      <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
-                        <span className="inline-flex w-full">
-                          <span className="">{commonData.team?.display_name}</span>
-                          <ChannelVisibility
-                            containerClasses="ml-2"
-                            teamVisibility={commonData.team?.visibility!}
-                            imageWidth={TailwindWidthSizeEnum.W3}
-                            imageMarginX={TailwindWidthSizeEnum.W3}
-                            imageMarginY={TailwindWidthSizeEnum.W1}
-                            alwaysOnHover={true}
-                          />
-                        </span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                          </svg>
-                        </span>
-                      </Listbox.Button>
-                      <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none sm:text-sm">
-                          {teams.map((resourcePermissions: ResourcePermissions) => (
-                            <Listbox.Option
-                              key={resourcePermissions.id}
-                              className={({ active }) => clsx(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'relative cursor-default select-none py-2 pl-3 pr-9')}
-                              value={resourcePermissions}
-                            >
-                              {({ selected, active }) => (
-                                <React.Fragment>
-                                  <div className="flex">
-                                    <span className={clsx(teamName === resourcePermissions.name ? 'font-semibold' : 'font-normal')}>{resourcePermissions.display_name}</span>
-                                    <ChannelVisibility
-                                      containerClasses="ml-3"
-                                      teamVisibility={resourcePermissions.team_visibility!}
-                                      imageWidth={TailwindWidthSizeEnum.W3}
-                                      imageMarginX={TailwindWidthSizeEnum.W3}
-                                      imageMarginY={TailwindWidthSizeEnum.W1}
-                                    />
-                                  </div>
-                                  {selected ? (
-                                    <span className={clsx(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
-                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                    </span>
-                                  ) : null}
-                                </React.Fragment>
-                              )}
-                            </Listbox.Option>
-                          ))}
-                        </Listbox.Options>
-                      </Transition>
-                    </div>
-                  )}
-                </Listbox>
-                <a href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`} className="max-w-2xl text-sm text-blue-500 ml-5">
-                  View channel
-                  <LinkIcon className="inline-block w-4 h-4 ml-1" />
-                </a>
-              </div>
-              {hasPermissionDeleteChannel && (
-                <button
-                  className="ml-2 rounded border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                  onClick={() => setShowDeleteTeamModal(true)}
-                >
-                  Delete
-                </button>
-              )}
-            </div>
-            <div className="flex items-center my-4">
-              <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Visibility:</label>
-              {hasPermissionEditChannel ? (
-                <Listbox value={null} onChange={(teamVisibilityEnum: TeamVisibilityEnum) => updateTeamVisibility(teamVisibilityEnum)}>
-                  {({ open }) => (
-                    <div className="relative ml-6" style={{ width: '200px' }}>
-                      <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
-                        <span className="inline-flex w-full">
-                          <span className="">{Helper.ucFirst(commonData.team?.visibility || '')}</span>
-                          <ChannelVisibility
-                            containerClasses="ml-2"
-                            teamVisibility={commonData.team?.visibility!}
-                            imageWidth={TailwindWidthSizeEnum.W3}
-                            imageMarginX={TailwindWidthSizeEnum.W3}
-                            imageMarginY={TailwindWidthSizeEnum.W1}
-                            alwaysOnHover={true}
-                          />
-                        </span>
-                        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                          </svg>
-                        </span>
-                      </Listbox.Button>
-                      <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                        <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none sm:text-sm">
-                          {Helper.teamVisibilityValues.map((teamVisibilityEnum: TeamVisibilityEnum) => (
-                            <Listbox.Option
-                              disabled={!hasPermissionEditChannel || requesting}
-                              key={teamVisibilityEnum}
-                              className={({ active }) => clsx(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'relative cursor-pointer select-none py-2 pl-3 pr-9')}
-                              value={teamVisibilityEnum}
-                            >
-                              {({ selected, active }) => (
-                                <React.Fragment>
-                                  <div className="flex">
-                                    <span className={clsx(commonData.team?.visibility === teamVisibilityEnum ? 'font-semibold' : 'font-normal')}>{Helper.ucFirst(teamVisibilityEnum)}</span>
-                                    <ChannelVisibility
-                                      containerClasses="ml-3"
-                                      teamVisibility={teamVisibilityEnum!}
-                                      imageWidth={TailwindWidthSizeEnum.W3}
-                                      imageMarginX={TailwindWidthSizeEnum.W3}
-                                      imageMarginY={TailwindWidthSizeEnum.W1}
-                                    />
-                                  </div>
-                                  {selected ? (
-                                    <span className={clsx(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
-                                      <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                    </span>
-                                  ) : null}
-                                </React.Fragment>
-                              )}
-                            </Listbox.Option>
-                          ))}
-                        </Listbox.Options>
-                      </Transition>
-                    </div>
-                  )}
-                </Listbox>
-              ) : (
-                <div
-                  style={{ width: '200px' }}
-                  className="ml-2 relative cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
-                >
-                  <span className="inline-flex w-full">
-                    <span className="">{Helper.ucFirst(commonData.team?.visibility || '')}</span>
-                    <ChannelVisibility
-                      containerClasses="ml-2"
-                      teamVisibility={commonData.team?.visibility!}
-                      imageWidth={TailwindWidthSizeEnum.W3}
-                      imageMarginX={TailwindWidthSizeEnum.W3}
-                      imageMarginY={TailwindWidthSizeEnum.W1}
-                      alwaysOnHover={true}
+            {/* TAB CHANNELS */}
+            {selectedTab === OrganizationSettingsTab.Channels && (
+              <React.Fragment>
+                {/* TEAM HEADER */}
+                <div className="flex flex-row items-center mt-6">
+                  <div className="grow flex flex-row items-center">
+                    <PureAvatar
+                      src={commonData.team?.avatar_url || ''}
+                      title={commonData.team?.display_name || ''}
+                      size={TailwindHeightSizeEnum.H16}
+                      textSize={TailwindFontSizeEnum.XS}
+                      className="mr-4"
                     />
-                  </span>
+                    <Listbox
+                      value={null}
+                      onChange={(resourcePermissions: ResourcePermissions) => {
+                        if (resourcePermissions.id !== commonData.team?.id) {
+                          window.location.href = `/settings/${commonData.organization?.sluglified_name}/${resourcePermissions.name}`;
+                        }
+                      }}
+                    >
+                      {({ open }) => (
+                        <div className="relative mt-1" style={{ width: '230px' }}>
+                          <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                            <span className="inline-flex w-full">
+                              <span className="">{commonData.team?.display_name}</span>
+                              <ChannelVisibility
+                                containerClasses="ml-2"
+                                teamVisibility={commonData.team?.visibility!}
+                                imageWidth={TailwindWidthSizeEnum.W3}
+                                imageMarginX={TailwindWidthSizeEnum.W3}
+                                imageMarginY={TailwindWidthSizeEnum.W1}
+                                alwaysOnHover={true}
+                              />
+                            </span>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                              </svg>
+                            </span>
+                          </Listbox.Button>
+                          <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none sm:text-sm">
+                              {teams.map((resourcePermissions: ResourcePermissions) => (
+                                <Listbox.Option
+                                  key={resourcePermissions.id}
+                                  className={({ active }) => clsx(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'relative cursor-default select-none py-2 pl-3 pr-9')}
+                                  value={resourcePermissions}
+                                >
+                                  {({ selected, active }) => (
+                                    <React.Fragment>
+                                      <div className="flex">
+                                        <span className={clsx(teamName === resourcePermissions.name ? 'font-semibold' : 'font-normal')}>{resourcePermissions.display_name}</span>
+                                        <ChannelVisibility
+                                          containerClasses="ml-3"
+                                          teamVisibility={resourcePermissions.team_visibility!}
+                                          imageWidth={TailwindWidthSizeEnum.W3}
+                                          imageMarginX={TailwindWidthSizeEnum.W3}
+                                          imageMarginY={TailwindWidthSizeEnum.W1}
+                                        />
+                                      </div>
+                                      {selected ? (
+                                        <span className={clsx(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
+                                          <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                        </span>
+                                      ) : null}
+                                    </React.Fragment>
+                                  )}
+                                </Listbox.Option>
+                              ))}
+                            </Listbox.Options>
+                          </Transition>
+                        </div>
+                      )}
+                    </Listbox>
+                    <a href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`} className="max-w-2xl text-sm text-blue-500 ml-5">
+                      View channel
+                      <LinkIcon className="inline-block w-4 h-4 ml-1" />
+                    </a>
+                  </div>
+                  {hasPermissionDeleteChannel && (
+                    <button
+                      className="ml-2 rounded border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={() => setShowDeleteTeamModal(true)}
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
-              )}
-            </div>
-            <div className="text-sm text-gray-700">
-              <ul style={{ listStyle: 'circle' }}>
-                <li>
-                  <strong>Protected:</strong> only members within the organization can access this channel&apos;s content.
-                </li>
-                <li>
-                  <strong>Private:</strong> only members of this channel have access to this channel&apos;s content.
-                </li>
-                <li>
-                  <strong>Public:</strong> any member of any organization can access this channel&apos;s content. Reports in this channel can also be viewed by external users with no Kyso account by
-                  sharing a report&apos;s shareable link.
-                </li>
-              </ul>
-            </div>
-            <div className="flex items-center my-4">
-              <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Download reports:</label>
-              <div className="ml-6">
-                <select
-                  id="allowDownload"
-                  name="allowDownload"
-                  value={commonData.team?.allow_download}
-                  onChange={(e: any) => updateAllowDownload(e.target.value)}
-                  className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
-                >
-                  <option value={AllowDownload.ALL}>All</option>
-                  <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
-                  <option value={AllowDownload.NONE}>None</option>
-                  <option value={AllowDownload.INHERITED}>Inherited</option>
-                </select>
-              </div>
-            </div>
+                <div className="flex items-center my-4">
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Visibility:</label>
+                  {hasPermissionEditChannel ? (
+                    <Listbox value={null} onChange={(teamVisibilityEnum: TeamVisibilityEnum) => updateTeamVisibility(teamVisibilityEnum)}>
+                      {({ open }) => (
+                        <div className="relative ml-6" style={{ width: '200px' }}>
+                          <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                            <span className="inline-flex w-full">
+                              <span className="">{Helper.ucFirst(commonData.team?.visibility || '')}</span>
+                              <ChannelVisibility
+                                containerClasses="ml-2"
+                                teamVisibility={commonData.team?.visibility!}
+                                imageWidth={TailwindWidthSizeEnum.W3}
+                                imageMarginX={TailwindWidthSizeEnum.W3}
+                                imageMarginY={TailwindWidthSizeEnum.W1}
+                                alwaysOnHover={true}
+                              />
+                            </span>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                              </svg>
+                            </span>
+                          </Listbox.Button>
+                          <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none sm:text-sm">
+                              {Helper.teamVisibilityValues.map((teamVisibilityEnum: TeamVisibilityEnum) => {
+                                if (teamVisibilityEnum === TeamVisibilityEnum.PUBLIC && !enabledPublicChannels) {
+                                  return null;
+                                }
+                                return (
+                                  <Listbox.Option
+                                    disabled={!hasPermissionEditChannel || requesting}
+                                    key={teamVisibilityEnum}
+                                    className={({ active }) => clsx(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'relative cursor-pointer select-none py-2 pl-3 pr-9')}
+                                    value={teamVisibilityEnum}
+                                  >
+                                    {({ selected, active }) => (
+                                      <React.Fragment>
+                                        <div className="flex">
+                                          <span className={clsx(commonData.team?.visibility === teamVisibilityEnum ? 'font-semibold' : 'font-normal')}>{Helper.ucFirst(teamVisibilityEnum)}</span>
+                                          <ChannelVisibility
+                                            containerClasses="ml-3"
+                                            teamVisibility={teamVisibilityEnum!}
+                                            imageWidth={TailwindWidthSizeEnum.W3}
+                                            imageMarginX={TailwindWidthSizeEnum.W3}
+                                            imageMarginY={TailwindWidthSizeEnum.W1}
+                                          />
+                                        </div>
+                                        {selected ? (
+                                          <span className={clsx(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
+                                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                          </span>
+                                        ) : null}
+                                      </React.Fragment>
+                                    )}
+                                  </Listbox.Option>
+                                );
+                              })}
+                            </Listbox.Options>
+                          </Transition>
+                        </div>
+                      )}
+                    </Listbox>
+                  ) : (
+                    <div
+                      style={{ width: '200px' }}
+                      className="ml-2 relative cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+                    >
+                      <span className="inline-flex w-full">
+                        <span className="">{Helper.ucFirst(commonData.team?.visibility || '')}</span>
+                        <ChannelVisibility
+                          containerClasses="ml-2"
+                          teamVisibility={commonData.team?.visibility!}
+                          imageWidth={TailwindWidthSizeEnum.W3}
+                          imageMarginX={TailwindWidthSizeEnum.W3}
+                          imageMarginY={TailwindWidthSizeEnum.W1}
+                          alwaysOnHover={true}
+                        />
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="text-sm text-gray-700">
+                  <ul style={{ listStyle: 'circle' }}>
+                    <li>
+                      <strong>Protected:</strong> only members within the organization can access this channel&apos;s content.
+                    </li>
+                    <li>
+                      <strong>Private:</strong> only members of this channel have access to this channel&apos;s content.
+                    </li>
+                    {enabledPublicChannels && (
+                      <li>
+                        <strong>Public:</strong> any member of any organization can access this channel&apos;s content. Reports in this channel can also be viewed by external users with no Kyso
+                        account by sharing a report&apos;s shareable link.
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                <div className="flex items-center my-4">
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Download reports:</label>
+                  <div className="ml-6">
+                    <select
+                      id="allowDownload"
+                      name="allowDownload"
+                      value={commonData.team?.allow_download}
+                      onChange={(e: any) => updateAllowDownload(e.target.value)}
+                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                    >
+                      <option value={AllowDownload.ALL}>All</option>
+                      <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
+                      <option value={AllowDownload.NONE}>None</option>
+                      <option value={AllowDownload.INHERITED}>Inherited</option>
+                    </select>
+                  </div>
+                </div>
+              </React.Fragment>
+            )}
 
-            {/* SEARCH USERS */}
-            {isOrgAdmin && (
-              <div className="mt-8">
-                <h3 className="text-lg font-medium leading-6 text-gray-900">Add users to the channel:</h3>
-                <div className="my-8 sm:col-span-2">
-                  <input
-                    type="text"
-                    value={query}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-                    placeholder="Search users"
-                    className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                  />
+            {/* TAB MEMBERS */}
+            {selectedTab === OrganizationSettingsTab.Members && (
+              <React.Fragment>
+                {/* SEARCH USERS */}
+                {isOrgAdmin && (
+                  <div className="mt-8">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900">Add users to the channel:</h3>
+                    <div className="my-8 sm:col-span-2">
+                      <input
+                        type="text"
+                        value={query}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
+                        placeholder="Search users"
+                        className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {users.map((userDto: UserDTO) => {
+                        return (
+                          <div
+                            key={userDto.id}
+                            className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
+                          >
+                            <div className="shrink-0">
+                              <PureAvatar src={userDto.avatar_url} title={userDto.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <a href={`/user/${userDto.username}`} className="focus:outline-none">
+                                <p className="text-sm font-medium text-gray-900">{userDto.display_name}</p>
+                                <p className="truncate text-sm text-gray-500">{userDto.email}</p>
+                              </a>
+                            </div>
+                            <div className="flex flex-row">
+                              <button
+                                disabled={requesting}
+                                onClick={() => {
+                                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                    setShowCaptchaModal(true);
+                                    return;
+                                  }
+                                  if (requesting) {
+                                    return;
+                                  }
+                                  setOrganizationRole('organization-admin');
+                                  setTeamRole('organization-admin');
+                                  setSelectedUser(userDto);
+                                  setSelectedMember(userDto as any);
+                                  setOpenInviteUserModal(true);
+                                }}
+                                type="button"
+                                className="inline-flex items-center rounded border border-transparent bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                              >
+                                Invite
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {/* TEAM MEMBERS */}
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900 mt-8">Channel members ({members.length}):</h3>
+                  {(isOrgAdmin || isTeamAdmin) && (
+                    <button
+                      className={clsx(
+                        'rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                        requesting ? 'opacity-50 cursor-not-allowed' : '',
+                      )}
+                      disabled={requesting}
+                      onClick={exportMembersInCsv}
+                    >
+                      Export members
+                    </button>
+                  )}
+                </div>
+                <div className="mt-4 mb-6 text-sm text-gray-600">
+                  {commonData.team?.visibility === TeamVisibilityEnum.PROTECTED && (
+                    <p>
+                      Only the following users can access to this channel. Check the members of this channel and manage them. The roles marked with a organization&apos;s tag comes from the
+                      organization&apos;s configuration, and those without tag are explicit members of the channel.
+                    </p>
+                  )}
+                  {commonData.team?.visibility === TeamVisibilityEnum.PRIVATE && <p>Only the following users can access to this channel</p>}
+                  {commonData.team?.visibility === TeamVisibilityEnum.PUBLIC && (
+                    <p>
+                      All users on Kyso can discover this channel and see its contents. Check the members of this channel and manage them. The roles marked with a organization&apos;s tag comes from
+                      the organization&apos;s configuration, and those without tag are explicit members of the channel.
+                    </p>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {users.map((userDto: UserDTO) => {
+                  {members.map((member: Member) => {
+                    const labelRole: string = member.team_roles.length > 0 && TeamRoleToLabel[member.team_roles[0]!] ? TeamRoleToLabel[member.team_roles[0]!]! : '';
                     return (
                       <div
-                        key={userDto.id}
+                        key={member.id}
                         className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
                       >
                         <div className="shrink-0">
-                          <PureAvatar src={userDto.avatar_url} title={userDto.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+                          <PureAvatar src={member.avatar_url} title={member.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <a href={`/user/${userDto.username}`} className="focus:outline-none">
-                            <p className="text-sm font-medium text-gray-900">{userDto.display_name}</p>
-                            <p className="truncate text-sm text-gray-500">{userDto.email}</p>
+                          <a href={`/user/${member.username}`} className="focus:outline-none">
+                            <p className="text-sm font-medium text-gray-900">{member.display_name}</p>
+                            <p className="truncate text-sm text-gray-500">{labelRole}</p>
                           </a>
                         </div>
-                        <div className="flex flex-row">
-                          <button
-                            disabled={requesting}
-                            onClick={() => {
-                              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                setShowCaptchaModal(true);
-                                return;
-                              }
-                              if (requesting) {
-                                return;
-                              }
-                              setOrganizationRole('organization-admin');
-                              setTeamRole('organization-admin');
-                              setSelectedUser(userDto);
-                              setSelectedMember(userDto as any);
-                              setOpenInviteUserModal(true);
-                            }}
-                            type="button"
-                            className="inline-flex items-center rounded border border-transparent bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                          >
-                            Invite
-                          </button>
-                        </div>
+                        {(isOrgAdmin || isTeamAdmin) && (
+                          <div className="flex flex-row">
+                            <div title="Edit member role in the team">
+                              <PencilIcon
+                                onClick={() => {
+                                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                    setShowCaptchaModal(true);
+                                    return;
+                                  }
+                                  if (requesting) {
+                                    return;
+                                  }
+                                  editMember(member);
+                                }}
+                                className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer"
+                                aria-hidden="true"
+                              />
+                            </div>
+                            {member.membership_origin === TeamMembershipOriginEnum.TEAM && (
+                              <div title="Remove member from the team">
+                                <TrashIcon
+                                  onClick={() => {
+                                    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                      setShowCaptchaModal(true);
+                                      return;
+                                    }
+                                    if (requesting) {
+                                      return;
+                                    }
+                                    deleteMember(member);
+                                  }}
+                                  className="mr-1 h-5 w-5 text-red-400 group-hover:text-gray-500 cursor-pointer"
+                                  aria-hidden="true"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     );
                   })}
                 </div>
-              </div>
+              </React.Fragment>
             )}
 
-            {/* TEAM MEMBERS */}
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-medium leading-6 text-gray-900 mt-8">Channel members ({members.length}):</h3>
-              {(isOrgAdmin || isTeamAdmin) && (
-                <button
-                  className={clsx(
-                    'rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-                    requesting ? 'opacity-50 cursor-not-allowed' : '',
-                  )}
-                  disabled={requesting}
-                  onClick={exportMembersInCsv}
-                >
-                  Export members
-                </button>
-              )}
-            </div>
-            <div className="mt-4 mb-6 text-sm text-gray-600">
-              {commonData.team?.visibility === TeamVisibilityEnum.PROTECTED && (
-                <p>
-                  Only the following users can access to this channel. Check the members of this channel and manage them. The roles marked with a organization&apos;s tag comes from the
-                  organization&apos;s configuration, and those without tag are explicit members of the channel.
-                </p>
-              )}
-              {commonData.team?.visibility === TeamVisibilityEnum.PRIVATE && <p>Only the following users can access to this channel</p>}
-              {commonData.team?.visibility === TeamVisibilityEnum.PUBLIC && (
-                <p>
-                  All users on Kyso can discover this channel and see its contents. Check the members of this channel and manage them. The roles marked with a organization&apos;s tag comes from the
-                  organization&apos;s configuration, and those without tag are explicit members of the channel.
-                </p>
-              )}
-            </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              {members.map((member: Member) => {
-                const labelRole: string = member.team_roles.length > 0 && TeamRoleToLabel[member.team_roles[0]!] ? TeamRoleToLabel[member.team_roles[0]!]! : '';
-                return (
-                  <div
-                    key={member.id}
-                    className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
-                  >
-                    <div className="shrink-0">
-                      <PureAvatar src={member.avatar_url} title={member.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <a href={`/user/${member.username}`} className="focus:outline-none">
-                        <p className="text-sm font-medium text-gray-900">{member.display_name}</p>
-                        <p className="truncate text-sm text-gray-500">{labelRole}</p>
-                      </a>
-                    </div>
-                    {(isOrgAdmin || isTeamAdmin) && (
-                      <div className="flex flex-row">
-                        <div title="Edit member role in the team">
-                          <PencilIcon
-                            onClick={() => {
-                              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                setShowCaptchaModal(true);
-                                return;
-                              }
-                              if (requesting) {
-                                return;
-                              }
-                              editMember(member);
-                            }}
-                            className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer"
-                            aria-hidden="true"
-                          />
-                        </div>
-                        {member.membership_origin === TeamMembershipOriginEnum.TEAM && (
-                          <div title="Remove member from the team">
-                            <TrashIcon
-                              onClick={() => {
-                                if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                  setShowCaptchaModal(true);
-                                  return;
-                                }
-                                if (requesting) {
-                                  return;
-                                }
-                                deleteMember(member);
-                              }}
-                              className="mr-1 h-5 w-5 text-red-400 group-hover:text-gray-500 cursor-pointer"
-                              aria-hidden="true"
-                            />
-                          </div>
-                        )}
-                      </div>
-                    )}
+            {/* TAB NOTIFICATIONS */}
+            {selectedTab === OrganizationSettingsTab.Notifications && (
+              <React.Fragment>
+                <div className="space-y-6 sm:space-y-5 mt-8">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
+                </div>
+                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack channel:</label>
+                  <div className="mt-1 sm:col-span-2 sm:mt-0">
+                    <input
+                      value={slackChannel}
+                      onChange={(e) => setSlackChannel(e.target.value)}
+                      type="text"
+                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                    />
                   </div>
-                );
-              })}
-            </div>
+                </div>
+                <div className="pt-5 sm:border-t sm:border-gray-200 mt-5">
+                  <div className="flex justify-end">
+                    <button
+                      disabled={requesting}
+                      onClick={() => {
+                        window.location.href = `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
+                      }}
+                      type="button"
+                      className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      disabled={requesting || !notificationsChanged}
+                      onClick={updateNotifications}
+                      type="submit"
+                      className={clsx(
+                        'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                        requesting || !notificationsChanged ? 'opacity-50 cursor-not-allowed' : '',
+                      )}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              </React.Fragment>
+            )}
           </div>
         </div>
       </div>
+
       {/* INVITE USER */}
       <Transition.Root show={openInviteUserModal} as={Fragment}>
         <Dialog
@@ -968,6 +1119,7 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
+
       {/* EDIT MEMBER ROLE */}
       <Transition.Root show={openEditMemberModal} as={Fragment}>
         <Dialog
@@ -1069,6 +1221,7 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
+
       {/* DELETE MEMBER MODAL */}
       <Transition.Root show={openDeleteMemberModal} as={Fragment}>
         <Dialog
@@ -1138,6 +1291,7 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
+
       {/* DELETE TEAM */}
       <Transition.Root show={showDeleteTeamModal} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={setShowDeleteTeamModal}>
@@ -1163,7 +1317,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     </div>
                     <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
                       <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                        Remove organization
+                        Remove channel
                       </Dialog.Title>
                       <div className="mt-2 text-gray-500 text-sm">
                         <p className="">
@@ -1208,6 +1362,13 @@ const Index = ({ commonData, setUser }: Props) => {
         </Dialog>
       </Transition.Root>
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
+      <ToasterNotification
+        show={showToaster}
+        setShow={setShowToaster}
+        icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />}
+        message={messageToaster}
+        backgroundColor={TailwindColor.SLATE_50}
+      />
     </div>
   );
 };
