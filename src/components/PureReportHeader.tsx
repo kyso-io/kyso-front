@@ -15,6 +15,7 @@ import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import { isReportDownloadable } from '../helpers/is-report-downloadable';
 import type { FileToRender } from '../types/file-to-render';
+import GitMetaDataDropdown from './GitMetaDataDropdown';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureTagGroup from './PureTagGroup';
 
@@ -183,6 +184,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
                 <ExternalLinkIcon className="ml-1 h-4 w-4" aria-hidden="true" />
               </button>
             )}
+            {fileToRender !== null && fileToRender.git_metadata !== null && <GitMetaDataDropdown fileToRender={fileToRender} />}
             {showCloneDropDown && (
               <UnpureCloneDropdown
                 reportUrl={`${frontEndUrl}${reportUrl}`}
