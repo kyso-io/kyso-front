@@ -264,7 +264,7 @@ const Index = ({ commonData, setUser }: Props) => {
             nickname: teamMember.nickname,
             username: teamMember.username,
             display_name: teamMember.nickname,
-            avatar_url: teamMember.avatar_url,
+            avatar_url: teamMember.avatar_url || '',
             email: teamMember.email,
             organization_roles: [],
             team_roles: teamMember.team_roles.filter((r) => !!r),
