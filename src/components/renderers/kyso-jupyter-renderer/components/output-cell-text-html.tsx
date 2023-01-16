@@ -40,11 +40,7 @@ const OutputCellHtml = ({ outputs }: Props) => {
       ></iframe>
     );
   }
-  return (
-    <React.Fragment>
-      <div className="text-center" dangerouslySetInnerHTML={{ __html: plainHtml }} />
-    </React.Fragment>
-  );
+  return <div dangerouslySetInnerHTML={{ __html: plainHtml }} />;
 };
 
 export default OutputCellHtml;

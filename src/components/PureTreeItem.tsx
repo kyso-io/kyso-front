@@ -65,7 +65,20 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
 
   return (
     <Link href={href || `/${treeItem.path}`}>
-      <a className={classNames('p-2 text-sm group flex items-center justify-between', current ? 'bg-gray-200' : 'hover:bg-gray-100')} onClick={onNavigation} style={{ overflow: 'unset' }}>
+      <a
+        className={classNames('p-2 text-sm group flex items-center justify-between', current ? 'bg-gray-200' : 'hover:bg-gray-100')}
+        onClick={(e) => {
+          if (onNavigation) {
+            onNavigation(e);
+          } else if (extension === 'ipynb') {
+            // To avoid conflicts between loading libraries with different versions, we reload the page completely instead of using the nextjs router
+            e.preventDefault();
+            e.stopPropagation();
+            window.location.href = href || `/${treeItem.path}`;
+          }
+        }}
+        style={{ overflow: 'unset' }}
+      >
         <div className={classNames('group font-medium text-slate-500', 'hover:text-gray-900', 'font-normal')}>
           <span className="w-6 text-blue-400">
             {extension === 'ipynb' && (

@@ -3,6 +3,7 @@ import type { DataType } from '../interfaces/data-type';
 import type { Output } from '../interfaces/jupyter-notebook';
 import OutputCellError from './output-cell-error';
 import OutputCellImage from './output-cell-image';
+import OutputCellJavaScript from './output-cell-javascript';
 import OutputCellJSON from './output-cell-json';
 import OutputCellStream from './output-cell-stream';
 import OutputCellHtml from './output-cell-text-html';
@@ -72,6 +73,12 @@ const OutputCell = ({ showOutput, output }: Props) => {
         }
         if (data.type === 'application/vnd.plotly.v1+json') {
           return <OutputCellPlotly key={index} outputs={data.outputs} />;
+        }
+        if (data.type === 'application/javascript') {
+          return <OutputCellJavaScript key={index} outputs={data.outputs} />;
+        }
+        if (data.type === 'application/vnd.bokehjs_load.v0+json') {
+          return <OutputCellJavaScript key={index} outputs={data.outputs} />;
         }
         if (showOutput) {
           return <OutputCellTextPlain key={index} outputs={data.outputs} />;
