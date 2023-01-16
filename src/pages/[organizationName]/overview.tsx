@@ -59,43 +59,45 @@ const Index = () => {
               <h2 className="text-xl font-bold tracking-tight text-gray-900 sm:text-2xl py-6">
                 <span className="block">What would you like to do?</span>
               </h2>
-              <div className="mt-22 flex justify-center rounded-[20px]bg-gray-50">
-                <div className="w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-[20px]  before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
-                  <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10">
-                    <img src="/static/create.png" alt="" className="absolute inset-0 h-full w-full" />
-                  </div>
-                  <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
-                    <a href={`/${organizationName}/create-report-form?overview`}>
-                      <span className="absolute -inset-2.5 z-10"></span>
+              <div className="mt-22 flex justify-center">
+                <a href={`/${organizationName}/create-report-form?overview`}>
+                  <div className="w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg  before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
+                    <div className="relative aspect-[2/1] overflow-hidden ">
+                      <img src="/static/publishing.png" alt="" className="mx-auto relative inset-0 h-full group-hover:opacity-0 opacity-100" />
+                      <img src="/static/publishing (1).png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-100 opacity-0" />
+                    </div>
+                    <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
                       <span className="relative">Publish existing work</span>
-                    </a>
-                  </h4>
-                  <p className="relative mt-1.5 text-xs font-medium text-slate-500">Publish and share your analysis to anyone in your organization.</p>
-                </div>
-                <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover::rounded-[20px] before:bg-gray-100 before:opacity-0 hover:before:opacity-100 mx-20">
-                  <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10">
-                    <img src="/static/read.png" alt="" className="absolute inset-0 h-full w-full" />
+                    </h4>
+                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">Publish and share your analysis to anyone in your organization.</p>
                   </div>
-                  <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
-                    <a href="/kyso-examples/life-sciences/graphing-genomic-mutation-ratios?overview">
-                      <span className="absolute -inset-2.5 z-10"></span>
+                </a>
+
+                <a href="/kyso-examples/life-sciences/graphing-genomic-mutation-ratios?overview">
+                  <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100 mx-20">
+                    <div className="relative aspect-[2/1] overflow-hidden">
+                      <img src="/static/open-book (1).png" alt="" className="absolute mx-auto inset-0 h-full group-hover:opacity-0 opacity-100" />
+                      <img src="/static/open-book.png" alt="" className="absolute mx-auto inset-0 h-full group-hover:opacity-100 opacity-0" />
+                    </div>
+                    <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
                       <span className="relative">Read a report</span>
-                    </a>
-                  </h4>
-                  <p className="relative mt-1.5 text-xs font-medium text-slate-500">Find understandable results on this report example.</p>
-                </div>
-                <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover::rounded-[20px] before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
-                  <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10">
-                    <img src="/static/search.png" alt="" className="absolute inset-0 h-full w-full" />
+                    </h4>
+                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">Find understandable results on this report example.</p>
                   </div>
-                  <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
-                    <a href="/search/?q=examples">
-                      <span className="absolute -inset-2.5 z-10"></span>
+                </a>
+
+                <a href="/search/?q=examples">
+                  <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
+                    <div className="relative aspect-[2/1] overflow-hidden">
+                      <img src="/static/search.png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-0 opacity-100" />
+                      <img src="/static/search (1).png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-100 opacity-0" />
+                    </div>
+                    <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
                       <span className="relative">Search and discover</span>
-                    </a>
-                  </h4>
-                  <p className="relative mt-1.5 text-xs font-medium text-slate-500">Find, navigate and stay up to date on the existing set of work on a topic.</p>
-                </div>
+                    </h4>
+                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">Find, navigate and stay up to date on the existing set of work on a topic.</p>
+                  </div>
+                </a>
               </div>
             </div>
           </div>
