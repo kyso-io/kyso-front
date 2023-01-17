@@ -242,7 +242,7 @@ const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
         <div className="relative">
           <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
             <div className="flex -space-x-1 overflow-hidden items-end">
-              <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+              <PureAvatar src={user?.avatar_url} title={user?.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
               <div className={`h-4 w-4 rounded-full -ml-2`}>
                 <UserGroupIcon className="h-4 w-4 text-purple-500 -ml-2 bg-white rounded-full" />
               </div>
@@ -252,8 +252,8 @@ const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
       </div>
       <div className="min-w-0 flex-1 py-1.5">
         <div className="text-sm text-gray-500">
-          <a href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
-            {user.display_name}
+          <a href={`/user/${user?.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
+            {user?.display_name}
           </a>{' '}
           {activityFeed.action === ActionEnum.ADD_MEMBER && 'was added as a member in the channel '}
           {activityFeed.action === ActionEnum.REMOVE_MEMBER && 'was removed from the channel '}
