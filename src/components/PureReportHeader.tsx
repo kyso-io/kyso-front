@@ -84,6 +84,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
   } else {
     window.svsFileParam = null;
   }
+  // <a href={`/user/${user.username}`}
   return (
     <div className="w-full flex 2xl:flex-row lg:flex-col justify-between p-2">
       <div className="2xl:w-4/6 flex flex-col justify-between">
@@ -91,7 +92,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
         {description && <div className="text-sm break-words">{description}</div>}
         <div className="mt-3 flex text-sm flex-col lg:flex-row lg:items-top text-gray-500 font-light space-x-2 min-h-min">
           <div className="flex">
-            <PureAvatarGroup data={authors} size={TailwindHeightSizeEnum.H8} tooltip={true}></PureAvatarGroup>
+            <PureAvatarGroup data={authors} size={TailwindHeightSizeEnum.H8} tooltip={true} avatarAsLink={true}></PureAvatarGroup>
           </div>
           <div className="hidden lg:block">
             <p className="mt-2 text-sm text-gray-500">

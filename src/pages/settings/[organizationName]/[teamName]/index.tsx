@@ -700,7 +700,7 @@ const Index = ({ commonData, setUser }: Props) => {
                         className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
                       >
                         <div className="shrink-0">
-                          <PureAvatar src={userDto.avatar_url} title={userDto.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+                          <PureAvatar src={userDto.avatar_url} title={userDto.display_name} username={userDto?.username} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
                         </div>
                         <div className="min-w-0 flex-1">
                           <a href={`/user/${userDto.username}`} className="focus:outline-none">
@@ -778,7 +778,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
                   >
                     <div className="shrink-0">
-                      <PureAvatar src={member.avatar_url} title={member.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+                      <PureAvatar src={member.avatar_url} title={member.display_name} username={member?.username} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <a href={`/user/${member.username}`} className="focus:outline-none">

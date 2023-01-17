@@ -118,9 +118,10 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
           </div>
         )}
       </div>
+      {/* <a href={`/user/${user.username}`}  */}
       <div className="flex items-center p-2 border-t">
         <div className="grow flex flex-row items-center text-gray-500 text-xs space-x-2">
-          {authors && <PureAvatarGroup data={authors}></PureAvatarGroup>}
+          {authors && <PureAvatarGroup data={authors} avatarAsLink={true}></PureAvatarGroup>}
           <span className="hidden lg:block pr-3">{moment(report.created_at).format('MMMM DD, YYYY')}</span>
           <EyeIcon className="hidden lg:block  shrink-0 h-5 w-5 text-gray-500" />
           <span className="hidden lg:block  pr-3">{report.views}</span>

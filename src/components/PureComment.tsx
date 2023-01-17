@@ -55,7 +55,7 @@ const PureComment = (props: IPureComment) => {
         />
       ) : (
         <div className="flex flex-row space-x-2">
-          {commentUser && <PureAvatar src={commentUser.avatar_url} title={commentUser.name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />}
+          {commentUser && <PureAvatar src={commentUser.avatar_url} title={commentUser.name} size={TailwindHeightSizeEnum.H8} username={commentUser?.username} textSize={TailwindFontSizeEnum.XS} />}
           <div className="rounded border w-full p-2">
             <div className="flex flex-row justify-between">
               <div className="pt-0 rounded-t flex flex-row items-center space-x-1 text-sm font-light text-gray-400">

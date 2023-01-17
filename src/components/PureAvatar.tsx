@@ -12,6 +12,7 @@ interface Props {
   textSize: TailwindFontSizeEnum;
   className?: string;
   tooltip?: boolean;
+  username?: string;
 }
 
 const getInitials = (str: string) => {
@@ -35,7 +36,28 @@ const PureAvatar = (props: Props) => {
   return (
     <>
       {tooltip && <Tooltip target=".avatar-tooltip" />}
-      {props.src && !isError && (
+      {props.src && !isError && props.username && (
+        <a href={`/user/${props.username}`}>
+          <img
+            key={props.title}
+            onError={() => {
+              setIsError(true);
+            }}
+            onLoad={() => {
+              setIsLoaded(true);
+            }}
+            className={clsx(
+              `avatar-tooltip object-cover inline-block text-${props.textSize} h-${props.size} w-${props.size} rounded-full ring-0 border transition duration-100 ${props.className}`,
+              isLoaded ? '' : 'invisible',
+            )}
+            src={props.src}
+            alt={props.title}
+            data-pr-tooltip={props.title}
+            data-pr-position="bottom"
+          />
+        </a>
+      )}
+      {props.src && !isError && !props.username && (
         <img
           key={props.title}
           onError={() => {
@@ -55,7 +77,18 @@ const PureAvatar = (props: Props) => {
         />
       )}
 
-      {props.src && isError && (
+      {props.src && isError && props.username && (
+        <a href={`/user/${props.username}`}>
+          <div
+            className={`avatar-tooltip bg-white text-gray-600 flex items-center justify-center text-${props.textSize} h-${props.size} w-${props.size} rounded-full border ${props.className}`}
+            data-pr-tooltip={props.title}
+            data-pr-position="bottom"
+          >
+            {getInitials(props.title)}
+          </div>
+        </a>
+      )}
+      {props.src && isError && !props.username && (
         <div
           className={`avatar-tooltip bg-white text-gray-600 flex items-center justify-center text-${props.textSize} h-${props.size} w-${props.size} rounded-full border ${props.className}`}
           data-pr-tooltip={props.title}

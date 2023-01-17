@@ -26,7 +26,6 @@ const PureComments = (props: IPureComments) => {
   let comments = commentSelectorHook(parentComment?.id!);
 
   comments = comments.filter((x) => x.mark_delete_at === null || x.mark_delete_at === undefined);
-
   return (
     <div className={classNames('w-full flex flex-col', parentComment?.id ? 'pl-10' : '')}>
       {!parentComment && commonData.user != null && (
