@@ -81,6 +81,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [enabledPublicChannels, setEnabledPublicChannels] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<OrganizationSettingsTab>(OrganizationSettingsTab.Channels);
   const [slackChannel, setSlackChannel] = useState<string>('');
+  const [teamsIncomingWebhookUrl, setTeamsIncomingWebhookUrl] = useState<string>('');
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const isOrgAdmin: boolean = useMemo(() => {
@@ -138,7 +139,7 @@ const Index = ({ commonData, setUser }: Props) => {
     if (!commonData.team) {
       return false;
     }
-    return commonData.team.slackChannel !== slackChannel;
+    return commonData.team.slackChannel !== slackChannel || commonData.team.teamsIncomingWebhookUrl !== teamsIncomingWebhookUrl;
   }, [commonData.team, slackChannel]);
 
   useEffect(() => {
@@ -188,6 +189,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     setSlackChannel(commonData.team.slackChannel || '');
+    setTeamsIncomingWebhookUrl(commonData.team.teamsIncomingWebhookUrl || '');
     getTeamMembers();
   }, [commonData.team]);
 
@@ -439,7 +441,7 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       setRequesting(true);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-      await api.updateTeam(commonData.team?.id!, { slackChannel } as any);
+      await api.updateTeam(commonData.team?.id!, { slackChannel, teamsIncomingWebhookUrl } as any);
       window.location.href = `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
     } catch (e: any) {
       /* eslint-disable no-console */
@@ -572,18 +574,18 @@ const Index = ({ commonData, setUser }: Props) => {
                       key={element.name}
                       onClick={(e: any) => {
                         e.preventDefault();
-                        switch (e.key) {
+                        switch (element.key) {
                           case OrganizationSettingsTab.Channels:
-                            setSelectedTab(e.key);
+                            setSelectedTab(element.key);
                             break;
                           case OrganizationSettingsTab.Members:
-                            setSelectedTab(e.key);
+                            setSelectedTab(element.key);
                             break;
                           case OrganizationSettingsTab.Access:
-                            router.push(`/settings/${commonData.organization?.sluglified_name}?tab=${e.key}`);
+                            router.push(`/settings/${commonData.organization?.sluglified_name}?tab=${element.key}`);
                             break;
                           case OrganizationSettingsTab.Notifications:
-                            setSelectedTab(e.key);
+                            setSelectedTab(element.key);
                             break;
                           default:
                             break;
@@ -976,6 +978,17 @@ const Index = ({ commonData, setUser }: Props) => {
                     <input
                       value={slackChannel}
                       onChange={(e) => setSlackChannel(e.target.value)}
+                      type="text"
+                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Teams Incoming Webhook Url:</label>
+                  <div className="mt-1 sm:col-span-2 sm:mt-0">
+                    <input
+                      value={teamsIncomingWebhookUrl}
+                      onChange={(e) => setTeamsIncomingWebhookUrl(e.target.value)}
                       type="text"
                       className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
                     />
