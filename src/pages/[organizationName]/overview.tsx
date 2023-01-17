@@ -13,7 +13,7 @@ const Index = () => {
   const organizationName: string | undefined = router.query.organizationName as string | undefined;
 
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
-  // const [welcomeText, setWelcomeMessage] = useState('');
+  const [welcomeMessage, setWelcomeMessage] = useState('');
   const [isOpen, setOpen] = useState(false);
 
   useEffect(() => {
@@ -30,9 +30,9 @@ const Index = () => {
       // TODO create client_welcome_message in KysoSettings
       // const welcomeMessage = publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;
 
-      const welcomeMessage = 'publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;';
+      const staticWelcomeMessage = 'publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;';
 
-      setWelcomeMessage(welcomeMessage);
+      setWelcomeMessage(staticWelcomeMessage);
 
       return '';
     };
@@ -53,7 +53,7 @@ const Index = () => {
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                   <span className="block">Welcome to Kyso!</span>
                 </h2>
-                {/* <p className="mt-6 text-lg leading-6">{welcomeText || 'A place to share, organise and discover notebooks, markdown, static HTML sites, data apps, amd more ...'}</p> */}
+                <p className="mt-6 text-lg leading-6">{welcomeMessage || 'A place to share, organise and discover notebooks, markdown, static HTML sites, data apps, amd more ...'}</p>
                 <p className="mt-6 text-lg leading-6">{'A place to share, organise and discover notebooks, markdown, static HTML sites, data apps, amd more ...'}</p>
                 <UnPureVideoModal setOpen={setOpen} isOpen={isOpen} />
                 <div className="my-11 justify-center text-center mx-auto max-w-sm" onClick={() => setOpen(!isOpen)}>
