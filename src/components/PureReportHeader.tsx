@@ -13,7 +13,9 @@ import clsx from 'clsx';
 import format from 'date-fns/format';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import { isReportDownloadable } from '../helpers/is-report-downloadable';
 import type { FileToRender } from '../types/file-to-render';
+import GitMetaDataDropdown from './GitMetaDataDropdown';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureTagGroup from './PureTagGroup';
 
@@ -68,6 +70,19 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
     }
     return report?.description ? report.description : '';
   }, [report.description]);
+
+  const showCloneDropDown: boolean = useMemo(() => {
+    if (!commonData.permissions) {
+      return false;
+    }
+    if (!commonData.organization) {
+      return false;
+    }
+    if (!commonData.team) {
+      return false;
+    }
+    return isReportDownloadable(commonData.permissions, commonData.organization, commonData.team, commonData.user);
+  }, [commonData.permissions, commonData.organization, commonData.team, commonData.user]);
 
   if (fileToRender && fileToRender.path.endsWith('.html')) {
     window.htmlFileUrl = `${frontEndUrl}/scs${fileToRender.path_scs}`;
@@ -170,14 +185,17 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
                 <ExternalLinkIcon className="ml-1 h-4 w-4" aria-hidden="true" />
               </button>
             )}
-            <UnpureCloneDropdown
-              reportUrl={`${frontEndUrl}${reportUrl}`}
-              report={report}
-              commonData={commonData}
-              hasPermissionEditReport={hasPermissionEditReport}
-              hasPermissionDeleteReport={hasPermissionDeleteReport}
-              setUser={setUser}
-            />
+            {fileToRender !== null && fileToRender.git_metadata !== null && <GitMetaDataDropdown fileToRender={fileToRender} />}
+            {showCloneDropDown && (
+              <UnpureCloneDropdown
+                reportUrl={`${frontEndUrl}${reportUrl}`}
+                report={report}
+                commonData={commonData}
+                hasPermissionEditReport={hasPermissionEditReport}
+                hasPermissionDeleteReport={hasPermissionDeleteReport}
+                setUser={setUser}
+              />
+            )}
             <PureVersionsDropdown versions={versions} version={version} reportUrl={reportUrl} />
             {(hasPermissionEditReport || hasPermissionDeleteReport) && (
               <UnpureReportActionDropdown

@@ -8,6 +8,7 @@ import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIco
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, Team, TeamInfoDto } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
+  AllowDownload,
   GlobalPermissionsEnum,
   InviteUserDto,
   KysoSettingsEnum,
@@ -95,6 +96,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [bio, setBio] = useState<string>('');
   const [link, setLink] = useState<string>('');
   const [location, setLocation] = useState<string>('');
+  const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.ALL);
   const [file, setFile] = useState<File | null>(null);
   const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
@@ -104,6 +106,8 @@ const Index = ({ commonData, setUser }: Props) => {
   const [centralizedNotifications, setCentralizedNotifications] = useState<boolean>(false);
   const [emailsCentralizedNotifications, setEmailsCentralizedNotifications] = useState<string[]>([]);
   const [newEmailCentralizedNotifications, setNewEmailCentralizedNotifications] = useState<string>('');
+  const [slackToken, setSlackToken] = useState<string>('');
+  const [slackChannel, setSlackChannel] = useState<string>('');
   const [errorNewEmail, setErrorNewEmail] = useState<string>('');
   const [loginKyso, setLoginKyso] = useState<boolean>(false);
   const [loginGoogle, setLoginGoogle] = useState<boolean>(false);
@@ -123,9 +127,16 @@ const Index = ({ commonData, setUser }: Props) => {
       if (commonData.organization!.options!.notifications!.centralized !== centralizedNotifications) {
         return true;
       }
-      return !Helper.arrayEquals(commonData.organization!.options!.notifications!.emails, emailsCentralizedNotifications);
+      const centralizedChanged: boolean = !Helper.arrayEquals(commonData.organization!.options!.notifications!.emails, emailsCentralizedNotifications);
+      if (centralizedChanged) {
+        return true;
+      }
     }
     if (centralizedNotifications) {
+      return true;
+    }
+    const slackChanged: boolean = commonData.organization!.options!.notifications!.slackToken !== slackToken || commonData.organization!.options!.notifications!.slackChannel !== slackChannel;
+    if (slackChanged) {
       return true;
     }
     return false;
@@ -208,11 +219,14 @@ const Index = ({ commonData, setUser }: Props) => {
       setBio(commonData.organization!.bio);
       setLink(commonData.organization!.link);
       setLocation(commonData.organization!.location);
+      setAllowDownload(commonData.organization!.allow_download);
       setAllowedAccessDomains(commonData.organization!.allowed_access_domains || []);
       if (commonData.organization?.options) {
         if (commonData.organization.options?.notifications) {
           setCentralizedNotifications(commonData.organization.options.notifications.centralized);
           setEmailsCentralizedNotifications(commonData.organization.options.notifications.emails || []);
+          setSlackToken(commonData.organization.options.notifications.slackToken || '');
+          setSlackChannel(commonData.organization.options.notifications.slackChannel || '');
         }
         if (commonData.organization.options?.auth) {
           setLoginKyso(commonData.organization.options.auth.allow_login_with_kyso || false);
@@ -226,9 +240,12 @@ const Index = ({ commonData, setUser }: Props) => {
       setBio('');
       setLink('');
       setLocation('');
+      setAllowDownload(AllowDownload.ALL);
       setAllowedAccessDomains([]);
       setCentralizedNotifications(false);
       setEmailsCentralizedNotifications([]);
+      setSlackToken('');
+      setSlackChannel('');
       setLoginKyso(false);
       setLoginGoogle(false);
       setLoginGithub(false);
@@ -339,6 +356,7 @@ const Index = ({ commonData, setUser }: Props) => {
         bio,
         link,
         location,
+        allow_download: allowDownload,
       } as any);
       router.reload();
     } catch (e: any) {
@@ -415,6 +433,8 @@ const Index = ({ commonData, setUser }: Props) => {
         notifications: {
           centralized: centralizedNotifications,
           emails: emailsCentralizedNotifications,
+          slackToken,
+          slackChannel,
         },
       } as any);
       router.reload();
@@ -442,7 +462,7 @@ const Index = ({ commonData, setUser }: Props) => {
             nickname: organizationMember.nickname,
             username: organizationMember.username,
             display_name: organizationMember.nickname,
-            avatar_url: organizationMember.avatar_url,
+            avatar_url: organizationMember.avatar_url ? organizationMember.avatar_url : '',
             email: organizationMember.email,
             organization_roles: organizationMember.organization_roles,
             team_roles: [],
@@ -453,7 +473,7 @@ const Index = ({ commonData, setUser }: Props) => {
             nickname: organizationMember.nickname,
             username: organizationMember.username,
             display_name: organizationMember.nickname,
-            avatar_url: organizationMember.avatar_url,
+            avatar_url: organizationMember.avatar_url ? organizationMember.avatar_url : '',
             email: organizationMember.email,
             organization_roles: organizationMember.organization_roles,
             team_roles: [],
@@ -791,6 +811,23 @@ const Index = ({ commonData, setUser }: Props) => {
                         {/* {showErrorLocation && <p className="mt-2 text-sm text-red-500">This field is mandatory.</p>} */}
                       </div>
                     </div>
+                    <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Download reports:</label>
+                      <div className="mt-1 sm:col-span-2 sm:mt-0">
+                        <select
+                          id="allowDownload"
+                          name="allowDownload"
+                          value={allowDownload}
+                          onChange={(e: any) => setAllowDownload(e.target.value)}
+                          className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                        >
+                          <option value={AllowDownload.ALL}>All</option>
+                          <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
+                          <option value={AllowDownload.NONE}>None</option>
+                        </select>
+                        {/* {showErrorLocation && <p className="mt-2 text-sm text-red-500">This field is mandatory.</p>} */}
+                      </div>
+                    </div>
                   </div>
                   <div className="pt-5 sm:border-t sm:border-gray-200">
                     <div className="flex justify-end">
@@ -886,7 +923,7 @@ const Index = ({ commonData, setUser }: Props) => {
                           <span className="text-sm font-normal">{role}</span>
                         </div>
                         <div className="my-10">
-                          <PureAvatar src={teamInfo.avatar_url} title={teamInfo.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
+                          <PureAvatar src={teamInfo.avatar_url || ''} title={teamInfo.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
                         </div>
                         <div className="space-y-2 border-t py-4 px-2">
                           <ul role="list" className="flex justify-between space-x-5 cursor-pointer">
@@ -1031,7 +1068,7 @@ const Index = ({ commonData, setUser }: Props) => {
                             className="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400"
                           >
                             <div className="shrink-0">
-                              <PureAvatar src={userDto.avatar_url} title={userDto.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+                              <PureAvatar src={userDto.avatar_url || ''} title={userDto.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
                             </div>
                             <div className="min-w-0 flex-1">
                               <a
@@ -1296,18 +1333,26 @@ const Index = ({ commonData, setUser }: Props) => {
                 <div className="space-y-6 sm:space-y-5 mt-8">
                   <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
                 </div>
-                <div className="my-4 space-y-4">
-                  <div className="relative flex items-start">
-                    <div className="flex h-5 items-center">
-                      <input
-                        checked={centralizedNotifications}
-                        onChange={(e: any) => setCentralizedNotifications(e.target.checked)}
-                        type="checkbox"
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                      />
-                    </div>
-                    <div className="ml-3 text-sm">
-                      <label className="font-medium text-gray-700">Centralized comunication</label>
+                <div className="pt-6 sm:pt-5 my-4">
+                  <div role="group" aria-labelledby="label-email">
+                    <div className="sm:grid sm:grid-cols-3 sm:items-baseline sm:gap-4">
+                      <div className="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-email">
+                        Centralized comunication
+                      </div>
+                      <div className="mt-4 sm:col-span-2 sm:mt-0">
+                        <div className="max-w-lg space-y-4">
+                          <div className="relative flex items-start">
+                            <div className="flex h-5 items-center">
+                              <input
+                                checked={centralizedNotifications}
+                                onChange={(e: any) => setCentralizedNotifications(e.target.checked)}
+                                type="checkbox"
+                                className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1385,7 +1430,29 @@ const Index = ({ commonData, setUser }: Props) => {
                     )}
                   </React.Fragment>
                 )}
-                <div className="pt-5 sm:border-t sm:border-gray-200">
+                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack token:</label>
+                  <div className="mt-1 sm:col-span-2 sm:mt-0">
+                    <input
+                      value={slackToken}
+                      onChange={(e) => setSlackToken(e.target.value)}
+                      type="text"
+                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack channel:</label>
+                  <div className="mt-1 sm:col-span-2 sm:mt-0">
+                    <input
+                      value={slackChannel}
+                      onChange={(e) => setSlackChannel(e.target.value)}
+                      type="text"
+                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="pt-5 sm:border-t sm:border-gray-200 mt-5">
                   <div className="flex justify-end">
                     <button
                       disabled={requesting}

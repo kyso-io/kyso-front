@@ -7,7 +7,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon, ExclamationCircleIcon, LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, Team, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import { AllowDownload, KysoSettingsEnum, Team, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
@@ -29,11 +29,13 @@ const Index = ({ commonData, setUser }: Props) => {
   const [formDescription, setFormDescription] = useState('');
   const [isTeamAvailable, setTeamAvailable] = useState(true);
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
+  const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.ALL);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [enabledPublicChannels, setEnabledPublicChannels] = useState<boolean>(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -50,9 +52,13 @@ const Index = ({ commonData, setUser }: Props) => {
       try {
         const api: Api = new Api();
         const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        const indexCaptcha: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (indexCaptcha !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[indexCaptcha]!.value === 'true');
+        }
+        const indexPublicChannels: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.ALLOW_PUBLIC_CHANNELS);
+        if (indexPublicChannels !== -1) {
+          setEnabledPublicChannels(resultKysoSetting.data[indexPublicChannels]!.value === 'true');
         }
       } catch (errorHttp: any) {
         Helper.logError(errorHttp.response.data, errorHttp);
@@ -107,7 +113,9 @@ const Index = ({ commonData, setUser }: Props) => {
         return;
       }
 
-      const result: NormalizedResponseDTO<Team> = await api.createTeam(new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions, commonData.user!.id));
+      const result: NormalizedResponseDTO<Team> = await api.createTeam(
+        new Team(formName, '', formDescription, '', '', [], commonData.organization!.id!, formPermissions, commonData.user!.id, AllowDownload.INHERITED),
+      );
       const team: Team = result.data;
 
       if (!team) {
@@ -153,7 +161,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
                     <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                        Name
+                        Name:
                       </label>
                       <div className="mt-1 sm:mt-0 sm:col-span-2">
                         <div className="max-w-lg flex rounded-md shadow-sm">
@@ -170,7 +178,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     </div>
                     <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5">
                       <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                        Description
+                        Description:
                       </label>
                       <div className="mt-1 sm:mt-0 sm:col-span-2">
                         <div className="max-w-lg flex rounded-md shadow-sm">
@@ -192,7 +200,7 @@ const Index = ({ commonData, setUser }: Props) => {
                         <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
                           <div>
                             <div className="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-notifications">
-                              Permissions
+                              Permissions:
                             </div>
                           </div>
                           <div className="sm:col-span-2">
@@ -232,28 +240,48 @@ const Index = ({ commonData, setUser }: Props) => {
                                     channel.
                                   </label>
                                 </div>
-
-                                <div className="flex items-start">
-                                  <input
-                                    id="public"
-                                    name="permissions"
-                                    type="radio"
-                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 mt-1"
-                                    onChange={() => {
-                                      setFormPermissions(TeamVisibilityEnum.PUBLIC);
-                                    }}
-                                  />
-                                  <LockOpenIcon className="w-6 h-5 ml-3" />
-                                  <label htmlFor="public" className="ml-1 block text-sm  text-gray-700">
-                                    <strong>Public:</strong>
-                                    Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url.
-                                  </label>
-                                </div>
+                                {enabledPublicChannels && (
+                                  <div className="flex items-start">
+                                    <input
+                                      id="public"
+                                      name="permissions"
+                                      type="radio"
+                                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 mt-1"
+                                      onChange={() => {
+                                        setFormPermissions(TeamVisibilityEnum.PUBLIC);
+                                      }}
+                                    />
+                                    <LockOpenIcon className="w-6 h-5 ml-3" />
+                                    <label htmlFor="public" className="ml-1 block text-sm  text-gray-700">
+                                      <strong>Public:</strong>
+                                      Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url.
+                                    </label>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start  sm:border-gray-200 sm:pt-5">
+                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                      Download reports:
+                    </label>
+                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                      <select
+                        id="allowDownload"
+                        name="allowDownload"
+                        value={allowDownload}
+                        onChange={(e: any) => setAllowDownload(e.target.value)}
+                        className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                      >
+                        <option value={AllowDownload.ALL}>All</option>
+                        <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
+                        <option value={AllowDownload.NONE}>None</option>
+                        <option value={AllowDownload.INHERITED}>Inherited</option>
+                      </select>
                     </div>
                   </div>
                 </div>
@@ -266,8 +294,8 @@ const Index = ({ commonData, setUser }: Props) => {
                     <button
                       type="submit"
                       className={classNames(
-                        error ? 'opacity-75 cursor-not-allowed' : 'hover:bg-kyso-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
-                        'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-kyso-600 ',
+                        error ? 'opacity-75 cursor-not-allowed' : 'k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
+                        'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary ',
                       )}
                     >
                       {!isBusy && (

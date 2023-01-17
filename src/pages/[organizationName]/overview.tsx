@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import NoLayout from '@/layouts/NoLayout';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+// import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Helper } from '@/helpers/Helper';
@@ -27,8 +27,13 @@ const Index = () => {
         // return toaster.danger("An unknown error has occurred");
         return '';
       }
-      const welcomeMessage = publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;
+      // TODO create client_welcome_message in KysoSettings
+      // const welcomeMessage = publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;
+
+      const welcomeMessage = 'publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;';
+
       setWelcomeMessage(welcomeMessage);
+
       return '';
     };
 

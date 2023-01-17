@@ -5,7 +5,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { ArrowRightIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, Organization, UserDTO } from '@kyso-io/kyso-model';
-import { CreateOrganizationDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
+import { AllowDownload, CreateOrganizationDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
@@ -30,6 +30,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [bio, setBio] = useState<string>('');
   const [link, setLink] = useState<string>('');
   const [location, setLocation] = useState<string>('');
+  const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.ALL);
   const [file, setFile] = useState<File | null>(null);
   const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
   const [showToaster, setShowToaster] = useState<boolean>(false);
@@ -88,7 +89,7 @@ const Index = ({ commonData, setUser }: Props) => {
     setBusy(true);
     try {
       const api: Api = new Api(commonData.token);
-      const createOrganizationDto: CreateOrganizationDto = new CreateOrganizationDto(displayName, bio, location, link);
+      const createOrganizationDto: CreateOrganizationDto = new CreateOrganizationDto(displayName, bio, location, link, allowDownload);
       const result: NormalizedResponseDTO<Organization> = await api.createOrganization(createOrganizationDto);
       const organization: Organization = result.data;
       api.setOrganizationSlug(organization.sluglified_name);
@@ -139,7 +140,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
                   <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start  sm:pt-5">
                     <label htmlFor="photo" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Photo
+                      Photo:
                     </label>
                     <div className="mt-1 sm:mt-0 sm:col-span-2">
                       <div className="max-w-lg flex flex-row items-center">
@@ -186,7 +187,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   </div>
                   <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Name
+                      Name:
                     </label>
                     <div className="mt-1 sm:mt-0 sm:col-span-2">
                       <div className="max-w-lg flex rounded-md shadow-sm">
@@ -207,7 +208,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   </div>
                   <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                     <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Bio
+                      Bio:
                     </label>
                     <div className="mt-1 sm:mt-0 sm:col-span-2">
                       <div className="max-w-lg flex rounded-md shadow-sm">
@@ -225,7 +226,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   </div>
                   <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                     <label htmlFor="link" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Link
+                      Link:
                     </label>
                     <div className="mt-1 sm:mt-0 sm:col-span-2">
                       <div className="max-w-lg flex rounded-md shadow-sm">
@@ -243,7 +244,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   </div>
                   <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                     <label htmlFor="location" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Location
+                      Location:
                     </label>
                     <div className="mt-1 sm:mt-0 sm:col-span-2">
                       <div className="max-w-lg flex rounded-md shadow-sm">
@@ -259,6 +260,24 @@ const Index = ({ commonData, setUser }: Props) => {
                       </div>
                     </div>
                   </div>
+                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                      Download reports:
+                    </label>
+                    <div className="mt-1 sm:col-span-2 sm:mt-0">
+                      <select
+                        id="allowDownload"
+                        name="allowDownload"
+                        value={allowDownload}
+                        onChange={(e: any) => setAllowDownload(e.target.value)}
+                        className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                      >
+                        <option value={AllowDownload.ALL}>All</option>
+                        <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
+                        <option value={AllowDownload.NONE}>None</option>
+                      </select>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -272,8 +291,8 @@ const Index = ({ commonData, setUser }: Props) => {
                     type="button"
                     onClick={createOrganization}
                     className={classNames(
-                      error ? 'opacity-75 cursor-not-allowed' : 'hover:bg-kyso-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
-                      'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-kyso-600 ',
+                      error ? 'opacity-75 cursor-not-allowed' : 'k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
+                      'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary',
                     )}
                   >
                     {!isBusy && (

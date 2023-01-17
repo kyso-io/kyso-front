@@ -2,7 +2,7 @@ import { ArrowUpIcon } from '@heroicons/react/solid';
 
 const Footer = () => {
   return (
-    <footer className="w-screen block z-40 bg-kyso-600 text-white px-8">
+    <footer className="w-screen block z-40 text-white px-8 k-bg-primary">
       <div className="flex justify-between items-center text-sm" style={{ height: '70px' }}>
         <div className="">
           <a href="https://docs.kyso.io/" target="_blank" className="mx-4" rel="noreferrer">

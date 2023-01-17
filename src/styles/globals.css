@@ -1,6 +1,6 @@
+@import 'highlight.js/styles/vs.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 @tailwind variants;
-
-@import 'highlight.js/styles/vs.css';
