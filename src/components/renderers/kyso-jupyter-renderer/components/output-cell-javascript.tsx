@@ -8,7 +8,9 @@ interface Props {
 
 const OutputCellJavaScript = ({ outputs }: Props) => {
   useEffect(() => {
-    eval(outputs.join(''));
+    if (outputs && Array.isArray(outputs)) {
+      eval(outputs.join(''));
+    }
   }, []);
   return null;
 };

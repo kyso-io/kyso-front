@@ -13,7 +13,7 @@ const Index = () => {
   const organizationName: string | undefined = router.query.organizationName as string | undefined;
 
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
-  const [welcomeText, setWelcomeMessage] = useState('');
+  // const [welcomeText, setWelcomeMessage] = useState('');
   const [isOpen, setOpen] = useState(false);
 
   useEffect(() => {
@@ -53,7 +53,8 @@ const Index = () => {
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                   <span className="block">Welcome to Kyso!</span>
                 </h2>
-                <p className="mt-6 text-lg leading-6">{welcomeText || 'A place to share, organise and discover notebooks, markdown, static HTML sites, data apps, amd more ...'}</p>
+                {/* <p className="mt-6 text-lg leading-6">{welcomeText || 'A place to share, organise and discover notebooks, markdown, static HTML sites, data apps, amd more ...'}</p> */}
+                <p className="mt-6 text-lg leading-6">{'A place to share, organise and discover notebooks, markdown, static HTML sites, data apps, amd more ...'}</p>
                 <UnPureVideoModal setOpen={setOpen} isOpen={isOpen} />
                 <div className="my-11 justify-center text-center mx-auto max-w-sm" onClick={() => setOpen(!isOpen)}>
                   <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10 hover:opacity-60 hover:cursor-pointer">
