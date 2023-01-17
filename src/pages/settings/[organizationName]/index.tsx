@@ -108,6 +108,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [newEmailCentralizedNotifications, setNewEmailCentralizedNotifications] = useState<string>('');
   const [slackToken, setSlackToken] = useState<string>('');
   const [slackChannel, setSlackChannel] = useState<string>('');
+  const [teamsIncomingWebhookUrl, setTeamsIncomingWebhookUrl] = useState<string>('');
   const [errorNewEmail, setErrorNewEmail] = useState<string>('');
   const [loginKyso, setLoginKyso] = useState<boolean>(false);
   const [loginGoogle, setLoginGoogle] = useState<boolean>(false);
@@ -137,6 +138,10 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     const slackChanged: boolean = commonData.organization!.options!.notifications!.slackToken !== slackToken || commonData.organization!.options!.notifications!.slackChannel !== slackChannel;
     if (slackChanged) {
+      return true;
+    }
+    const teamsChanged: boolean = commonData.organization!.options!.notifications!.teamsIncomingWebhookUrl !== teamsIncomingWebhookUrl;
+    if (teamsChanged) {
       return true;
     }
     return false;
@@ -227,6 +232,7 @@ const Index = ({ commonData, setUser }: Props) => {
           setEmailsCentralizedNotifications(commonData.organization.options.notifications.emails || []);
           setSlackToken(commonData.organization.options.notifications.slackToken || '');
           setSlackChannel(commonData.organization.options.notifications.slackChannel || '');
+          setTeamsIncomingWebhookUrl(commonData.organization.options.notifications.teamsIncomingWebhookUrl || '');
         }
         if (commonData.organization.options?.auth) {
           setLoginKyso(commonData.organization.options.auth.allow_login_with_kyso || false);
@@ -245,6 +251,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setCentralizedNotifications(false);
       setEmailsCentralizedNotifications([]);
       setSlackToken('');
+      setTeamsIncomingWebhookUrl('');
       setSlackChannel('');
       setLoginKyso(false);
       setLoginGoogle(false);
@@ -435,6 +442,7 @@ const Index = ({ commonData, setUser }: Props) => {
           emails: emailsCentralizedNotifications,
           slackToken,
           slackChannel,
+          teamsIncomingWebhookUrl,
         },
       } as any);
       router.reload();
@@ -1447,6 +1455,17 @@ const Index = ({ commonData, setUser }: Props) => {
                     <input
                       value={slackChannel}
                       onChange={(e) => setSlackChannel(e.target.value)}
+                      type="text"
+                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                    />
+                  </div>
+                </div>
+                <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Teams Incoming Webhook Url:</label>
+                  <div className="mt-1 sm:col-span-2 sm:mt-0">
+                    <input
+                      value={teamsIncomingWebhookUrl}
+                      onChange={(e) => setTeamsIncomingWebhookUrl(e.target.value)}
                       type="text"
                       className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
                     />
