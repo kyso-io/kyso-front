@@ -1,27 +1,24 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import NoLayout from '@/layouts/NoLayout';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-// import { KysoSettingsEnum } from '@kyso-io/kyso-model';
-import { useRouter } from 'next/router';
+import type { /* KysoSettingsEnum, */ UserDTO } from '@kyso-io/kyso-model';
 import { useEffect, useState } from 'react';
 import { Helper } from '@/helpers/Helper';
 import UnPureVideoModal from '@/unpure-components/UnPureVideoModal';
-import { checkJwt } from '../../helpers/check-jwt';
+import { checkJwt } from '@/helpers/check-jwt';
+import type { KeyValue } from '@/model/key-value.model';
+import { useUser } from '@/hooks/use-user';
 
 const Index = () => {
-  const router = useRouter();
-  const organizationName: string | undefined = router.query.organizationName as string | undefined;
-
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [welcomeMessage, setWelcomeMessage] = useState('');
   const [isOpen, setOpen] = useState(false);
+  const loggedUser: UserDTO | null = useUser();
 
   useEffect(() => {
     const result: boolean = checkJwt();
     setUserIsLogged(result);
     const getOrganizationOptions = async () => {
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const publicKeys: any[] = await Helper.getKysoPublicSettings();
+      const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
 
       if (!publicKeys || publicKeys.length === 0) {
         // return toaster.danger("An unknown error has occurred");
@@ -31,7 +28,7 @@ const Index = () => {
       // const welcomeMessage = publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;
 
       const staticWelcomeMessage = 'publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;';
-
+      // KysoSettingsEnum.ONBOARDING_MESSAGES;
       setWelcomeMessage(staticWelcomeMessage);
 
       return '';
@@ -66,7 +63,7 @@ const Index = () => {
                 <span className="block">What would you like to do?</span>
               </h2>
               <div className="mt-22 flex justify-center">
-                <a href={`/${organizationName}/create-report-form?overview`}>
+                <a href={`/${loggedUser?.username}/create-report-form?overview`}>
                   <div className="w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg  before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
                     <div className="relative aspect-[2/1] overflow-hidden ">
                       <img src="/static/publishing.png" alt="" className="mx-auto relative inset-0 h-full group-hover:opacity-0 opacity-100" />
