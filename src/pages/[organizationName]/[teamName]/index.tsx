@@ -532,7 +532,7 @@ const Index = ({ commonData, setUser }: Props) => {
 
   return (
     <div className="flex flex-row space-x-8 p-4">
-      <div className="hidden lg:visible lg:w-1/6">
+      <div className="hidden md:block md:w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
       <div className="w-4/6 flex flex-col space-y-4">
