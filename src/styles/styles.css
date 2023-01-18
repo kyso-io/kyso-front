@@ -23,6 +23,11 @@ img.k-right-logo {
   left: 78%;
   padding: 13px;
 }
+
+.read-more-button {
+  color: blue;
+  text-decoration: underline;
+}
 /* END THEME */
 
 #tooltip {

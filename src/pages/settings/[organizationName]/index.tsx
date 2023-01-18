@@ -18,6 +18,8 @@ import {
   UserDTO,
   UserRoleDTO,
 } from '@kyso-io/kyso-model';
+// @ts-ignore
+import ReadMoreReact from 'read-more-react';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
@@ -873,7 +875,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     {commonData.organization?.link}
                   </a>
                   {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
-                  <p className="text-md text-gray-500">{commonData.organization?.bio}</p>
+                  <ReadMoreReact text={commonData.organization?.bio} ideal={200} readMoreText={'Read more...'} />
                 </div>
               )}
             </div>
