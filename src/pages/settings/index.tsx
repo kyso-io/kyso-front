@@ -93,7 +93,21 @@ const Index = ({ commonData }: Props) => {
             <div className="space-y-12">
               <div className="space-y-5 sm:mx-auto sm:max-w-xl sm:space-y-4 lg:max-w-5xl">
                 <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Organizations</h2>
-                {/* <p className="text-xl text-gray-500">Ornare sagittis, suspendisse in hendrerit quis. Sed dui aliquet lectus sit pretium egestas vel mattis neque.</p> */}
+                <a
+                  href="/create-organization"
+                  className="text-gray-500 hover:bg-gray-50 hover:text-gray-900 flex items-center px-3 py-2 text-xs lg:text-sm rounded-md"
+                  role="none"
+                  style={{
+                    float: 'right',
+                    position: 'relative',
+                    bottom: '50px',
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true" className="w-5 h-5 mr-1" role="none">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" role="none"></path>
+                  </svg>
+                  Create
+                </a>
               </div>
               <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
                 {organizationsInfoDtoExtended.map((organizationInfoExtended: OrganizationInfoDtoExtended) => {

@@ -907,65 +907,78 @@ const Index = ({ commonData, setUser }: Props) => {
 
             {/* TAB CHANNELS */}
             {!editing && selectedTab === OrganizationSettingsTab.Channels && (
-              <div className="mt-6 text-center">
-                <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
-                  {teamsInfo.map((teamInfo: TeamInfo) => {
-                    const resourcePermissions: ResourcePermissions | undefined = commonData.permissions!.teams!.find((rp: ResourcePermissions) => rp.id === teamInfo.id);
-                    if (!resourcePermissions) {
-                      return null;
-                    }
-                    if (!resourcePermissions.role_names) {
-                      return null;
-                    }
-                    const role: string = OrganizationRoleToLabel.hasOwnProperty(resourcePermissions.role_names[0]!)
-                      ? OrganizationRoleToLabel[resourcePermissions.role_names[0]!]!
-                      : resourcePermissions.role_names[0]!;
-                    return (
-                      <li
-                        key={teamInfo.organization_id}
-                        className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
-                        onClick={() => router.push(`/settings/${commonData.organization!.sluglified_name}/${teamInfo.sluglified_name}`)}
-                      >
-                        <div className="space-y-1 text-lg font-medium leading-6 mt-5">
-                          <h3 style={{ color: '#234361' }}>{teamInfo.display_name}</h3>
-                          <span className="text-sm font-normal">{role}</span>
-                        </div>
-                        <div className="my-10">
-                          <PureAvatar src={teamInfo.avatar_url || ''} title={teamInfo.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
-                        </div>
-                        <div className="space-y-2 border-t py-4 px-2">
-                          <ul role="list" className="flex justify-between space-x-5 cursor-pointer">
-                            <li title="Reports">
-                              <div className="flex items-center">
-                                <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
-                                <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                  {teamInfo.reports} reports
-                                </span>
-                              </div>
-                            </li>
-                            <li title="Members">
-                              <div className="flex items-center">
-                                <UserGroupIcon className="h-6 w-6 mr-1" fill="#F1AB7A" aria-hidden="true" />
-                                <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                  {teamInfo.members}
-                                </span>
-                              </div>
-                            </li>
-                            <li title="Comments">
-                              <div className="flex items-center">
-                                <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
-                                <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                  {teamInfo.comments} comments
-                                </span>
-                              </div>
-                            </li>
-                          </ul>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
+              <>
+                <a
+                  href={`/${organizationName}/create-channel`}
+                  className="text-gray-500 hover:bg-gray-50 hover:text-gray-900 flex items-center px-3 py-2 text-xs lg:text-sm rounded-md"
+                  role="none"
+                  style={{ float: 'right' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true" className="w-5 h-5 mr-1" role="none">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" role="none"></path>
+                  </svg>
+                  Create
+                </a>
+                <div className="mt-6 text-center">
+                  <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
+                    {teamsInfo.map((teamInfo: TeamInfo) => {
+                      const resourcePermissions: ResourcePermissions | undefined = commonData.permissions!.teams!.find((rp: ResourcePermissions) => rp.id === teamInfo.id);
+                      if (!resourcePermissions) {
+                        return null;
+                      }
+                      if (!resourcePermissions.role_names) {
+                        return null;
+                      }
+                      const role: string = OrganizationRoleToLabel.hasOwnProperty(resourcePermissions.role_names[0]!)
+                        ? OrganizationRoleToLabel[resourcePermissions.role_names[0]!]!
+                        : resourcePermissions.role_names[0]!;
+                      return (
+                        <li
+                          key={teamInfo.organization_id}
+                          className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
+                          onClick={() => router.push(`/settings/${commonData.organization!.sluglified_name}/${teamInfo.sluglified_name}`)}
+                        >
+                          <div className="space-y-1 text-lg font-medium leading-6 mt-5">
+                            <h3 style={{ color: '#234361' }}>{teamInfo.display_name}</h3>
+                            <span className="text-sm font-normal">{role}</span>
+                          </div>
+                          <div className="my-10">
+                            <PureAvatar src={teamInfo.avatar_url || ''} title={teamInfo.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
+                          </div>
+                          <div className="space-y-2 border-t py-4 px-2">
+                            <ul role="list" className="flex justify-between space-x-5 cursor-pointer">
+                              <li title="Reports">
+                                <div className="flex items-center">
+                                  <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
+                                  <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                    {teamInfo.reports} reports
+                                  </span>
+                                </div>
+                              </li>
+                              <li title="Members">
+                                <div className="flex items-center">
+                                  <UserGroupIcon className="h-6 w-6 mr-1" fill="#F1AB7A" aria-hidden="true" />
+                                  <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                    {teamInfo.members}
+                                  </span>
+                                </div>
+                              </li>
+                              <li title="Comments">
+                                <div className="flex items-center">
+                                  <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
+                                  <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                    {teamInfo.comments} comments
+                                  </span>
+                                </div>
+                              </li>
+                            </ul>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </>
             )}
 
             {/* TAB MEMBERS */}
