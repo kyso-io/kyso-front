@@ -15,6 +15,14 @@ img.k-right-logo {
   background-color: #162C40;
 }
 
+.k-right-toc {
+  float: right;
+  width: '41vh';
+  position: fixed;
+  background-color: #FAFAFA;
+  left: '78%';
+  padding: '13px';
+}
 /* END THEME */
 
 #tooltip {

@@ -72,7 +72,7 @@ interface PropsTableOfContents {
 
 const TableOfContents = ({ title, toc, collapsible, openInNewTab }: PropsTableOfContents) => {
   return (
-    <div>
+    <div className=".k-right-toc">
       {title && <h3 className="text-xs font-semibold text-gray-500 uppercase">{title}</h3>}
       <div className={clsx(title ? 'my-2' : '')}>
         <LineTableOfContents toc={toc} collapsible={collapsible} openInNewTab={openInNewTab} deep={0} />
