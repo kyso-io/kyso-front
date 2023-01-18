@@ -4,6 +4,8 @@ import { Dialog, Listbox, Transition } from '@headlessui/react';
 import { LinkIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { CheckIcon, ExclamationCircleIcon, InformationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, TeamMember } from '@kyso-io/kyso-model';
+// @ts-ignore
+import ReadMoreReact from 'read-more-react';
 import {
   AddUserOrganizationDto,
   AllowDownload,
@@ -561,7 +563,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   {commonData.organization?.link}
                 </a>
                 {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
-                <p className="text-md text-gray-500">{commonData.organization?.bio}</p>
+                {Helper.isBrowser() && <ReadMoreReact text={commonData.organization?.bio} ideal={200} readMoreText={'Read more...'} />}
               </div>
             </div>
 

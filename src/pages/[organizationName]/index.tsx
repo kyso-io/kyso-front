@@ -20,6 +20,8 @@ import {
   UpdateOrganizationMembersDTO,
   UserRoleDTO,
 } from '@kyso-io/kyso-model';
+// @ts-ignore
+import ReadMoreReact from 'read-more-react';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -578,7 +580,7 @@ const Index = ({ commonData, setUser }: Props) => {
           {commonData.organization?.bio && (
             <div className="pt-10 border-t-gray-300 border-t-4 mt-2">
               <h1 className="text-xl font-bold text-gray-800 mb-2">About {commonData.organization?.display_name}</h1>
-              <p className="text-sm text-gray-500 pt-3">{commonData.organization?.bio}</p>
+              {Helper.isBrowser() && <ReadMoreReact text={commonData.organization?.bio} ideal={200} readMoreText={'Read more...'} />}
             </div>
           )}
         </div>

@@ -110,6 +110,10 @@ export class Helper {
     }
   };
 
+  public static isBrowser = (): boolean => {
+    return typeof window !== 'undefined' && window.document !== undefined;
+  };
+
   public static arrayEquals = (a: any[], b: any[]): boolean => {
     const aIsArray: boolean = Array.isArray(a);
     const bIsArray: boolean = Array.isArray(b);

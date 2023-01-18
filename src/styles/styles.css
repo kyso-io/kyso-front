@@ -24,9 +24,15 @@ img.k-right-logo {
   padding: 13px;
 }
 
+/* Read more component */
 .read-more-button {
   color: blue;
   text-decoration: underline;
+}
+
+.displayed-text {
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128 / var(--tw-text-opacity));
 }
 /* END THEME */
 
