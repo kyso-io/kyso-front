@@ -3,7 +3,7 @@ import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
-import { BellIcon, MenuIcon, XIcon } from '@heroicons/react/solid';
+import { MenuIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -12,7 +12,6 @@ import { Fragment, useState } from 'react';
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import BreadcrumbNavbar from './BreadcrumbNavbar';
-import PureCheckListTour from './PureCheckListTour';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
 import PureShareButton from './PureShareButton';
@@ -146,11 +145,11 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         <div className="flex items-center px-5 cursor-pointer">
                           <PureShareButton title="Share page" description="Send this url to someone to share this page" iconClasses={'text-white h-6 w-6'} buttonClasses="" url={currentUrl} />
                         </div>
-                        {commonData.user && (
+                        {/* commonData.user && (
                           <div className="flex items-center mr-2 cursor-pointer">
                             <PureCheckListTour />
                           </div>
-                        )}
+                        ) */}
                       </div>
                     </div>
                     <div className="-mr-2 flex md:hidden">
@@ -188,13 +187,13 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         <div className="text-base font-medium text-white">{commonData.user.display_name}</div>
                         <div className="text-sm font-medium text-indigo-300">{commonData.user.email}</div>
                       </div>
-                      <button
+                      {/* <button
                         type="button"
                         className="ml-auto shrink-0 rounded-full bg-indigo-600 p-1 text-indigo-200 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-indigo-600"
                       >
                         <span className="sr-only">View notifications</span>
                         <BellIcon className="h-6 w-6" aria-hidden="true" />
-                      </button>
+                      </button> */}
                     </div>
                   )}
 

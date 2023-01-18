@@ -382,7 +382,7 @@ const Index = ({ commonData, setUser }: Props) => {
         return !members.find((member: Member) => member.id === user.id);
       });
       if (usersNotInOrg.length === 0 && Helper.isEmail(term)) {
-        const userDTO: UserDTO = new UserDTO(term, term, term, term, term, '', '', '', '', '', '', new Date(), [], true, false);
+        const userDTO: UserDTO = new UserDTO(term, term, term, term, term, '', '', '', '', '', '', new Date(), [], true, false, true);
         usersNotInOrg.push(userDTO);
       }
       setUsers(usersNotInOrg);
