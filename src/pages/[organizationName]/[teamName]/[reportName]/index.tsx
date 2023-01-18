@@ -98,7 +98,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
     ];
     if (reportData?.report && reportData.report.toc && reportData.report.toc.length > 0) {
       data.splice(0, 0, {
-        title: 'Table of Contents',
+        title: 'Index',
         tab: Tab.Toc,
       });
     }
