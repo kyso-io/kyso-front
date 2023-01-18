@@ -550,7 +550,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 />
               </div>
             </div>
-            <div className="hidden lg:visible lg:w-3/6 lg:flex lg:flex-row justify-end items-center space-x-2">
+            <div className="invisible lg:visible lg:w-3/6 lg:flex lg:flex-row justify-end items-center space-x-2">
               <ManageUsers
                 commonData={commonData}
                 members={members}

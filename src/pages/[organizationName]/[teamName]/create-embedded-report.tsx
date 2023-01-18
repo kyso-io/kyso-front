@@ -43,10 +43,12 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
   const [description, setDescription] = useState('');
   const [selectedTags, setTags] = useState<string[]>([]);
   const [url, setUrl] = useState<string>('');
+  const [protocol, setProtocol] = useState<string>('https://');
   const [channelMembers, setChannelMembers] = useState<TeamMember[]>([]);
   const [selectedPeople, setSelectedPeople] = useState<TeamMember[]>(channelMembers);
   const [allowedTags, setAllowedTags] = useState<string[]>([]);
   const [openChannelDropdown, setOpenChannelDropdown] = useState<boolean>(false);
+  const [openProtocolDropdown, setOpenProtocolDropdown] = useState<boolean>(false);
   const [selectedTeam, setSelectedTeam] = useState<ResourcePermissions | null>(null);
   const hasPermissionCreateReport: boolean = useMemo(() => {
     if (!commonData.permissions) {
@@ -307,7 +309,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
       setShowToaster(true);
       return;
     }
-    if (!Helper.isValidUrlWithProtocol(url)) {
+    if (!Helper.isValidUrlWithProtocol(protocol + url)) {
       setMessageToaster('URL is not valid.');
       setShowToaster(true);
       return;
@@ -334,12 +336,12 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
     }
     const kysoConfigFile: KysoConfigFile = new KysoConfigFile('index.html', title, description, commonData.organization!.sluglified_name, selectedTeam.name, selectedTags, ReportType.Markdown);
     kysoConfigFile.authors = selectedPeople.map((person: TeamMember) => person.email);
-    kysoConfigFile.url = url;
+    kysoConfigFile.url = protocol + url;
     delete (kysoConfigFile as any).team;
     const zip = new JSZip();
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     zip.file('kyso.json', blobKysoConfigFile);
-    const blobIndexHtml: Blob = new Blob([getEmbeddedReportHTML(title, url)], { type: 'plain/text' });
+    const blobIndexHtml: Blob = new Blob([getEmbeddedReportHTML(title, protocol + url)], { type: 'plain/text' });
     zip.file('index.html', blobIndexHtml);
     const blobZip: Blob = await zip.generateAsync({ type: 'blob' });
     const formData: FormData = new FormData();
@@ -484,24 +486,81 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
                   disabled={isEdition()}
                   onChange={(e) => setTitleDelay(e.target.value)}
                   placeholder="Title"
-                  className={clsx('p-0 focus:shadow-sm 0 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900')}
+                  className={clsx('p-0 focus:shadow-sm block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900')}
                 />
-                <textarea
-                  style={{
-                    height: '55px',
-                    border: 'none',
-                    resize: 'none',
-                    outline: 'none',
-                    overflow: 'auto',
-                    WebkitBoxShadow: 'none',
-                    boxShadow: 'none',
-                  }}
-                  value={url || ''}
-                  disabled={isEdition()}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="Url"
-                  className={clsx('p-0 focus:shadow-sm 0 block w-full border-white border-0 rounded-md text-xl font-medium focus:text-gray-500 text-gray-900')}
-                />
+                <div>
+                  <Menu as="div" className="relative w-fit inline-block text-left mr-4" style={{ position: 'relative', bottom: '35px' }}>
+                    <Menu.Button
+                      className="hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded"
+                      onClick={() => {
+                        setOpenProtocolDropdown(!openProtocolDropdown);
+                      }}
+                    >
+                      {protocol}
+                      <div className="pl-2">
+                        <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
+                      </div>
+                    </Menu.Button>
+
+                    <Transition
+                      show={openProtocolDropdown}
+                      as={Fragment}
+                      enter="transition ease-out duration-100"
+                      enterFrom="transform opacity-0 scale-95"
+                      enterTo="transform opacity-100 scale-100"
+                      leave="transition ease-in duration-75"
+                      leaveFrom="transform opacity-100 scale-100"
+                      leaveTo="transform opacity-0 scale-95"
+                    >
+                      <Menu.Items className="bg-white z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
+                        <div className="p-2">
+                          <div>
+                            <div className="flex flex-col justify-start">
+                              <a
+                                key="https"
+                                onClick={() => {
+                                  setProtocol('https://');
+                                  setOpenProtocolDropdown(false);
+                                }}
+                                className={classNames('text-gray-600 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm font-medium rounded-md')}
+                              >
+                                https://
+                              </a>
+                              <a
+                                key="http"
+                                onClick={() => {
+                                  setProtocol('http://');
+                                  setOpenProtocolDropdown(false);
+                                }}
+                                className={classNames('text-gray-600 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm font-medium rounded-md')}
+                              >
+                                http://
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      </Menu.Items>
+                    </Transition>
+                  </Menu>
+                  <div className="relative inline-block text-left" style={{ width: '85%' }}>
+                    <textarea
+                      style={{
+                        height: '55px',
+                        border: 'none',
+                        resize: 'none',
+                        outline: 'none',
+                        overflow: 'auto',
+                        WebkitBoxShadow: 'none',
+                        boxShadow: 'none',
+                      }}
+                      value={url || ''}
+                      disabled={isEdition()}
+                      onChange={(e) => setUrl(e.target.value)}
+                      placeholder="Url"
+                      className={clsx('p-0 focus:shadow-sm w-full block border-white border-0 rounded-md text-xl font-medium focus:text-gray-500 text-gray-900')}
+                    />
+                  </div>
+                </div>
                 <textarea
                   style={{
                     border: 'none',
@@ -515,7 +574,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
                   placeholder="Description"
                   onChange={(e) => setDescriptionDelay(e.target.value)}
                   rows={5}
-                  className="p-0 focus:shadow-sm 0  block  w-full h-full focus:w-full  border-white border-0 text-gray-500 sm:text-sm rounded-md"
+                  className="p-0 focus:shadow-sm block w-full h-full focus:w-full  border-white border-0 text-gray-500 sm:text-sm rounded-md"
                 />
               </div>
             </div>

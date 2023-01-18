@@ -792,6 +792,11 @@ const Index = ({ commonData, setUser }: Props) => {
                     )}
                   </ul>
                 </div>
+
+                <div className="space-y-1 mt-8 mb-4 sm:border-b sm:border-gray-200 pb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Download reports</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">Configure if the reports of this channel would be able to download</p>
+                </div>
                 <div className="flex items-center my-4">
                   <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Download reports:</label>
                   <div className="ml-6">
@@ -969,8 +974,11 @@ const Index = ({ commonData, setUser }: Props) => {
             {/* TAB NOTIFICATIONS */}
             {selectedTab === OrganizationSettingsTab.Notifications && (
               <React.Fragment>
-                <div className="space-y-6 sm:space-y-5 mt-8">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
+                <div className="space-y-1 mt-8 mb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Slack integration</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">
+                    Configure your slack integration to receive all the updates of this channel. Slack must be configured at organization level, contact your <b>organization admin</b>.
+                  </p>
                 </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
                   <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack channel:</label>
@@ -982,6 +990,10 @@ const Index = ({ commonData, setUser }: Props) => {
                       className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
                     />
                   </div>
+                </div>
+                <div className="space-y-1 mt-8 mb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Teams integration</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">Configure your teams integration to receive all the updates of this channel</p>
                 </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
                   <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Teams Incoming Webhook Url:</label>

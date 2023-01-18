@@ -1338,14 +1338,15 @@ const Index = ({ commonData, setUser }: Props) => {
             {/* TAB NOTIFICATIONS */}
             {!editing && selectedTab === OrganizationSettingsTab.Notifications && (
               <React.Fragment>
-                <div className="space-y-6 sm:space-y-5 mt-8">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
+                <div className="space-y-1 mt-8 mb-4 sm:border-b sm:border-gray-200 pb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Centralized communications</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">Configure a shared email address to centralize Kyso communications</p>
                 </div>
                 <div className="pt-6 sm:pt-5 my-4">
                   <div role="group" aria-labelledby="label-email">
                     <div className="sm:grid sm:grid-cols-3 sm:items-baseline sm:gap-4">
                       <div className="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-email">
-                        Centralized comunication
+                        Enable Centralized Communications
                       </div>
                       <div className="mt-4 sm:col-span-2 sm:mt-0">
                         <div className="max-w-lg space-y-4">
@@ -1438,8 +1439,12 @@ const Index = ({ commonData, setUser }: Props) => {
                     )}
                   </React.Fragment>
                 )}
+                <div className="space-y-1 mt-8 mb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Slack integration</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">Configure your slack integration to receive all the updates in your organization</p>
+                </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack token:</label>
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack Token</label>
                   <div className="mt-1 sm:col-span-2 sm:mt-0">
                     <input
                       value={slackToken}
@@ -1450,7 +1455,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   </div>
                 </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
-                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack channel:</label>
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack Channel</label>
                   <div className="mt-1 sm:col-span-2 sm:mt-0">
                     <input
                       value={slackChannel}
@@ -1460,8 +1465,13 @@ const Index = ({ commonData, setUser }: Props) => {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-1 mt-8 mb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Teams integration</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">Configure your teams integration to receive all the updates in your organization</p>
+                </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
-                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Teams Incoming Webhook Url:</label>
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Teams Incoming Webhook Url</label>
                   <div className="mt-1 sm:col-span-2 sm:mt-0">
                     <input
                       value={teamsIncomingWebhookUrl}

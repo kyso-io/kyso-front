@@ -606,7 +606,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 
   return (
     <div>
-      <div className={classNames('hidden lg:visible z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
+      <div className={classNames('hidden lg:block z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
         <div>
           <div className="flex flex-1 flex-col pt-32 mt-2">
             <nav className="flex-1 space-y-1">

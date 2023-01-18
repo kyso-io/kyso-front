@@ -109,7 +109,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
           <div className="flex">
             <PureAvatarGroup data={authors} size={TailwindHeightSizeEnum.H8} tooltip={true} avatarAsLink={true}></PureAvatarGroup>
           </div>
-          <div className="hidden lg:block">
+          <div className="invisible md:visible">
             <p className="mt-2 text-sm text-gray-500">
               Created
               <span className="text-gray-800 ml-1 mr-2 ">{report?.created_at && format(new Date(report.created_at), 'MMM dd, yyyy')}.</span>
@@ -119,7 +119,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
           </div>
           {report?.tags && (
             <div
-              className="hidden lg:block min-h-min"
+              className="hidden md:block min-h-min"
               style={{
                 overflowWrap: 'break-word',
                 maxHeight: '1vh',
@@ -130,7 +130,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
           )}
         </div>
       </div>
-      <div className="hidden lg:nlock lg:flex 2xl:w-2/6 lg:flex-col justify-between items-start space-y-8">
+      <div className="invisible md:visible md:flex 2xl:w-2/6 md:flex-col justify-between items-start space-y-8">
         <div className="flex flex-row w-full justify-end space-x-4">
           {children}
           {report?.id && (
