@@ -631,7 +631,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
                         </nav>
                       </div>
                       <div className="py-2">
-                        {selectedTab === Tab.Toc && <TableOfContents title="" toc={report.toc} collapsible={true} openInNewTab={true} />}
+                        {selectedTab === Tab.Toc && <TableOfContents title="" toc={report.toc} collapsible={true} openInNewTab={false} />}
                         {selectedTab === Tab.Files && (
                           <PureTree
                             path={currentPath}

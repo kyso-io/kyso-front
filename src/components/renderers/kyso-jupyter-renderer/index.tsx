@@ -47,7 +47,7 @@ export const RenderJupyter = ({
 
   return (
     <React.Fragment>
-      {toc && toc.length > 0 && <TableOfContents title="Table of Contents" toc={toc} collapsible={false} openInNewTab={false} />}
+      {toc && toc.length > 0 && <TableOfContents title="Table of Contents" toc={toc} collapsible={false} openInNewTab={false} stickToRight={true} />}
       {jupyterNotebook.cells.map((cell: ICell, index: number) => {
         const key: string = cell?.id && cell.id.length > 0 ? cell.id : index.toString();
 

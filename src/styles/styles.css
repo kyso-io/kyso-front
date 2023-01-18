@@ -17,11 +17,12 @@ img.k-right-logo {
 
 .k-right-toc {
   float: right;
-  width: '41vh';
+  width: 41vh;
   position: fixed;
   background-color: #FAFAFA;
-  left: '78%';
-  padding: '13px';
+  left: 78%;
+  padding: 13px;;
+  z-index: 1;
 }
 /* END THEME */
 
