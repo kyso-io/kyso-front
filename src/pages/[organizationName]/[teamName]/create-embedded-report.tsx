@@ -384,7 +384,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
             <div className="flex justify-end">
               <div className="flex flex-row items-center space-x-2">
                 <div className="mr-2">Posting into</div>
-                <Menu as="div" className="relative w-fit inline-block text-left">
+                <Menu as="div" className="relative w-fit inline-block text-left bg-white">
                   <React.Fragment>
                     <Menu.Button
                       onClick={() => {
@@ -415,7 +415,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
                     >
                       <Menu.Items
                         static
-                        className={`z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none`}
+                        className={`z-50 bg-white origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none`}
                       >
                         <div className="p-2">
                           <div>
@@ -425,7 +425,9 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
                             <div className="flex flex-col justify-start">
                               {teamsResourcePermissions.length === 0 && (
                                 <Menu.Item disabled={isEdition()} key={`empty-channel-${Math.random()}`}>
-                                  <span className={classNames('text-gray-600 hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer')}>
+                                  <span
+                                    className={classNames('text-gray-600 bg-white hover:bg-gray-50 hover:text-gray-900', 'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer')}
+                                  >
                                     No channels available
                                   </span>
                                 </Menu.Item>
@@ -449,7 +451,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
                                       setOpenChannelDropdown(false);
                                     }}
                                     className={classNames(
-                                      teamResourcePermissions.name === selectedTeam?.name ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+                                      teamResourcePermissions.name === selectedTeam?.name ? 'bg-gray-200 text-gray-900' : 'text-gray-600 bg-white hover:bg-gray-50 hover:text-gray-900',
                                       'flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer',
                                     )}
                                   >

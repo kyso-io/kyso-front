@@ -613,7 +613,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                     >
                       <Menu.Items
                         static
-                        className={`z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none`}
+                        className={`z-50 bg-white origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none`}
                       >
                         <div className="p-2">
                           <div>
