@@ -1,6 +1,6 @@
 import { Transition, Menu } from '@headlessui/react';
 import { ChevronDoubleLeftIcon } from '@heroicons/react/solid';
-import UnPureVideoModal from '@/unpure-components/UnPureVideoModal';
+import UnPureVideoModal from '@/components/PureVideoModal';
 import { classNames } from 'primereact/utils';
 import React, { Fragment, useState } from 'react';
 

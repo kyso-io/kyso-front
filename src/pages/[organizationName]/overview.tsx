@@ -5,7 +5,7 @@ import { ExclamationCircleIcon } from '@heroicons/react/solid';
 // import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Helper } from '@/helpers/Helper';
-import UnPureVideoModal from '@/unpure-components/UnPureVideoModal';
+import PureVideoModal from '@/components/PureVideoModal';
 import { checkJwt } from '../../helpers/check-jwt';
 
 const Index = () => {
@@ -28,7 +28,7 @@ const Index = () => {
   const thirdCtaText = 'Find the research you’re interested in from colleagues across the organisation.';
   const thirdCtaUrl = 'Find the research you’re interested in from colleagues across the organisation.';
 
-  const demoUrl = '"https://www.loom.com/share/fa23c122402243539909f038ddef590b';
+  const demoUrl = 'https://www.loom.com/embed/fa23c122402243539909f038ddef590b';
 
   const [isOpen, setOpen] = useState(false);
 
@@ -70,7 +70,7 @@ const Index = () => {
                 </h2>
                 <p className="mt-6 text-lg leading-6">{welcomeText}</p>
 
-                <UnPureVideoModal setOpen={setOpen} isOpen={isOpen} demoUrl={demoUrl} />
+                <PureVideoModal setOpen={setOpen} isOpen={isOpen} demoUrl={demoUrl} />
                 <div className="my-11 justify-center text-center mx-auto max-w-sm" onClick={() => setOpen(!isOpen)}>
                   <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10 hover:opacity-60 hover:cursor-pointer">
                     <img src="/static/demo.png" alt="" className="absolute inset-0 h-full w-full opacity-90" />

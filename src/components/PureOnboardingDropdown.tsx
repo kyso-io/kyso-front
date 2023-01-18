@@ -11,52 +11,56 @@ const PureOnboardingDropdown = () => {
   const contentPublish = {
     title: 'Publish your work.',
     text: 'This is where you can upload existing files you might have ready to share. Post PowerPoints, notebooks, Word Docs, images & more. Make sure to upload to the correct channel and add tags to make it easier to find later.',
-    demoUrl: 'https://www.loom.com/share/55bcdb4f02f74b6590e39eae2ebb1af8?t=70',
+    demoUrl: 'https://www.loom.com/embed/55bcdb4f02f74b6590e39eae2ebb1af8',
     demoPreview: '/static/demo.png',
     cta: ' Publish my research now!',
     ctaUrl: 'https://kyso.io/kyso-examples/create-report-form/',
     docCta: 'What else can I publish?',
     docUrl: 'https://docs.kyso.io/kysos-renderer',
   };
+
   const contentRead = {
     title: 'Read a report.',
     text: 'This is an example Jupyter notebook rendered for presentation on Kyso. You can browse through files & previous versions, reveal code, interact with your colleague’s insights and make comments like you would on Google Docs.',
-    demoUrl: 'https://www.loom.com/share/db8ef30de06b4b6392bd8898cdb03f71',
+    demoUrl: 'https://www.loom.com/embed/db8ef30de06b4b6392bd8898cdb03f71',
     demoPreview: '/static/read.png',
     cta: ' Discover other reports to read!',
     ctaUrl: 'https://kyso.io/search/?q=',
     docUrl: '',
     docCta: '',
   };
+
   const contentSearch = {
     title: 'Search & discover.',
     text: 'Content published to Kyso is categorised across different Organisations, Channels and Tags, and is indexed full-text so you can be very specific when searching for research you are interested in.',
-    demoUrl: 'https://www.loom.com/share/d408c2bf05f14e1db051f85f2efcb6f5',
+    demoUrl: 'https://www.loom.com/embed/d408c2bf05f14e1db051f85f2efcb6f5',
     demoPreview: '/static/demo.png',
     cta: 'Discover other reports to read!',
     ctaUrl: 'https://kyso.io/search/?q=',
     docUrl: '',
     docCta: '',
   };
+
   const contentProfile = {
     title: 'View my profile.',
     text: 'This is the page your colleagues will see when they click on your Kyso avatar to discover & learn from your work. Be sure to keep your reports up to date. ',
-    demoUrl: 'https://www.loom.com/share/56350d3e51bb4d21a312caf94282110f',
+    demoUrl: 'https://www.loom.com/embed/56350d3e51bb4d21a312caf94282110f',
     demoPreview: '/static/profile.png',
     cta: ' Publish my research now!',
     ctaUrl: 'https://kyso.io/kyso-examples/create-report-form/',
     docCta: ' How do access controls work on Kyso?',
     docUrl: 'https://docs.kyso.io/settings-and-administration/managing-access',
   };
+
   const contentCLI = {
     title: 'Install & integrate Kyso into your workflows.',
     text: 'Install the Kyso CLI tool so you can integrate the publishing process into your data science workflows, whether that means pushing models from MLOps platforms like Domino or leveraging Git actions to maintain version control across the team.',
-    demoUrl: 'https://www.loom.com/share/5e67af40d0c948f4b3bdeb5b29b4c3a0',
+    demoUrl: 'https://www.loom.com/embed/5e67af40d0c948f4b3bdeb5b29b4c3a0',
     demoPreview: '/static/cli.png',
     cta: 'Install the Kyso CLI now! ',
     ctaUrl: 'https://docs.kyso.io/posting-to-kyso/kyso-command-line-tool',
     docCta: 'How to create an access token?',
-    docUrl: 'https://www.loom.com/share/d7d541fa44cc45cf9c8802a1168ba6d2',
+    docUrl: 'https://dev.kyso.io/kyleos/docs/getting-started-with-kyso/kyso-cli.md',
   };
 
   let valueContent = contentPublish;
