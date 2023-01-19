@@ -632,7 +632,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const exportMembersInCsv = async () => {
     setRequesting(true);
     try {
-      const api: Api = new Api(commonData.token);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       const result: Buffer = await api.exportOrganizationMembers(commonData.organization!.id!);
       const blob: Blob = new Blob([result], { type: 'text/csv;charset=utf-8;' });
       const url: string = URL.createObjectURL(blob);
