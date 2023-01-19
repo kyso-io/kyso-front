@@ -168,7 +168,7 @@ const Index = () => {
       const signUpDto: SignUpDto = new SignUpDto(email, nickname, displayName, password);
       await api.signup(signUpDto);
       setNotificationType('success');
-      setNotification('You have been registered successfully. A verification link has been sent to your email account.');
+      setNotification('You have been registered successfully. A verification link has been sent to your email account. Please wait for your first login.');
       setTimeout(async () => {
         const login: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
         const response: NormalizedResponseDTO<string> = await api.login(login);
@@ -176,7 +176,7 @@ const Index = () => {
         dispatch(setTokenAuthAction(token));
         localStorage.setItem('jwt', token);
         router.push(`/captcha${invitation ? `?invitation=${invitation as string}` : ''}`);
-      }, 1000);
+      }, 2000);
       setError('');
       setEmail('');
       setPassword('');
