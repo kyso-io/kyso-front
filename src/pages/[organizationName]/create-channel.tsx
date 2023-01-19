@@ -29,7 +29,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [formDescription, setFormDescription] = useState('');
   const [isTeamAvailable, setTeamAvailable] = useState(true);
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
-  const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.ALL);
+  const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.INHERITED);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
