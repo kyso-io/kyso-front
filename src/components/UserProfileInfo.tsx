@@ -140,8 +140,22 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
               </div>
             )}
             {emailIsVisible && (
+              <>
+                <div className="mt-2 flex items-center text-sm">
+                  <p className="text-m font-medium text-blue-600 sm:text-l">{userProfile.email}</p>
+                </div>
+                <div className="sm:flex hidden items-center text-sm text-gray-500">
+                  <FontAwesomeIcon icon={faPeriod} />
+                </div>
+              </>
+            )}
+            {userProfile.link && (
               <div className="mt-2 flex items-center text-sm">
-                <p className="text-m font-medium text-blue-600 sm:text-l">{userProfile.email}</p>
+                <p className="text-m font-medium text-gray-600 sm:text-l">
+                  <a href={userProfile.link} target="_blank" rel="noreferrer">
+                    {userProfile.link}
+                  </a>
+                </p>
               </div>
             )}
           </div>

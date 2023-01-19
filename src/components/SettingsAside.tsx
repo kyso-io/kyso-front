@@ -1,16 +1,30 @@
 import type { ResourcePermissions } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import type { CommonData } from '../types/common-data';
 
 interface Props {
   commonData: CommonData;
 }
 
+const ALL_SPECIAL_VALUE: string = 'allspecialvalue';
+
 const SettingsAside = ({ commonData }: Props) => {
   const router = useRouter();
-  const { organizationName } = router.query;
+  let { organizationName } = router.query;
+  const { all } = router.query;
+
+  if (all) {
+    organizationName = ALL_SPECIAL_VALUE;
+  }
+
+  if (!organizationName) {
+    organizationName = '';
+  }
+
+  const [organizationNameSelectValue, setOrganizationNameSelectValue] = useState<string>(organizationName as string);
+
   const organizations: ResourcePermissions[] = useMemo(() => {
     let data: ResourcePermissions[] = [];
     if (!commonData.permissions || !commonData.permissions.organizations) {
@@ -90,15 +104,22 @@ const SettingsAside = ({ commonData }: Props) => {
             <select
               onChange={(e) => {
                 if (e.target.value) {
-                  router.push(`/settings/${e.target.value}`);
+                  if (e.target.value === ALL_SPECIAL_VALUE) {
+                    setOrganizationNameSelectValue(ALL_SPECIAL_VALUE);
+                    router.push(`/settings?all=true`);
+                  } else {
+                    setOrganizationNameSelectValue(e.target.value);
+                    router.push(`/settings/${e.target.value}`);
+                  }
                 } else {
                   router.push(`/settings`);
                 }
               }}
-              value={organizationName ?? ''}
+              value={organizationNameSelectValue ?? ''}
               className="cursor-pointer mt-1 block w-full rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
             >
-              <option value="">All</option>
+              <option value=""></option>
+              <option value={ALL_SPECIAL_VALUE}>All</option>
               {organizations?.map((organization: ResourcePermissions) => (
                 <option key={organization.id} value={organization.name}>
                   {organization.display_name}
