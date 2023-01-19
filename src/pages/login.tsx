@@ -162,6 +162,7 @@ const Index = () => {
         }
       }, 200);
     } catch (e: any) {
+      setError('The server in unavailable. Try again later.');
       const errorResponse: { statusCode: number; message: string; error: string } = e.response.data;
       setError(errorResponse.message);
     }
