@@ -15,6 +15,10 @@ img.k-right-logo {
   background-color: #162C40;
 }
 
+.k-bg-primary-disabled {
+  background-color: #64748b
+}
+
 .k-right-toc {
   float: right;
   width: 41vh;

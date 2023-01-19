@@ -79,7 +79,7 @@ const UnpureDeleteOrganizationDropdown = ({ commonData, captchaIsEnabled, setUse
       <Transition.Root show={open} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={setOpen}>
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500/50 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -128,7 +128,7 @@ const UnpureDeleteOrganizationDropdown = ({ commonData, captchaIsEnabled, setUse
                       disabled={input !== commonData.organization?.sluglified_name || requesting}
                       className={clsx(
                         'inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm',
-                        input !== commonData.organization?.sluglified_name || requesting ? 'cursor-not-allowed bg-red-300' : 'bg-red-600 hover:bg-red-700',
+                        input !== commonData.organization?.sluglified_name || requesting ? 'cursor-not-allowed k-bg-primary-disabled' : 'k-bg-primary k-bg-primary-hover',
                       )}
                       onClick={deleteOrganization}
                     >
