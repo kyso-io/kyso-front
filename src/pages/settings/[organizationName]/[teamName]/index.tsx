@@ -118,6 +118,8 @@ const Index = ({ commonData, setUser }: Props) => {
   const [showDeleteTeamModal, setShowDeleteTeamModal] = useState<boolean>(false);
   const [textTeamModal, setTextTeamModal] = useState<string>('');
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [allowDownloadOptionValue, setAllowDownloadOptionValue] = useState<AllowDownload>(AllowDownload.INHERITED);
+
   const teams: ResourcePermissions[] = useMemo(() => {
     let data: ResourcePermissions[] = [];
     if (!commonData.organization || !commonData.permissions || !commonData.permissions.teams) {
@@ -190,6 +192,7 @@ const Index = ({ commonData, setUser }: Props) => {
     if (!commonData.team) {
       return;
     }
+    setAllowDownloadOptionValue(commonData.team.allow_download || AllowDownload.INHERITED);
     setSlackChannel(commonData.team.slackChannel || '');
     setTeamsIncomingWebhookUrl(commonData.team.teamsIncomingWebhookUrl || '');
     getTeamMembers();
@@ -423,7 +426,8 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
       await api.updateTeam(commonData.team?.id!, { visibility: teamVisibilityEnum } as any);
-      router.reload();
+      commonData.team!.visibility = teamVisibilityEnum;
+      // router.reload();
     } catch (e: any) {
       Helper.logError(e.response.data, e);
     }
@@ -460,7 +464,7 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
       await api.updateTeam(commonData.team?.id!, { allow_download: allowDownload } as any);
-      router.reload();
+      setAllowDownloadOptionValue(allowDownload);
     } catch (e: any) {
       Helper.logError(e.response.data, e);
     }
@@ -805,7 +809,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     <select
                       id="allowDownload"
                       name="allowDownload"
-                      value={commonData.team?.allow_download}
+                      value={allowDownloadOptionValue}
                       onChange={(e: any) => updateAllowDownload(e.target.value)}
                       className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
                     >
