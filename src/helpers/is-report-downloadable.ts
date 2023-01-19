@@ -4,6 +4,9 @@ import type { Organization, ResourcePermissions, Team, TokenPermissions, UserDTO
 import { AllowDownload } from '@kyso-io/kyso-model';
 
 export const isReportDownloadable = (permissions: TokenPermissions, organization: Organization, team: Team, userDTO: UserDTO | null | undefined): boolean => {
+  /* eslint-disable no-console */
+  console.log(team);
+  console.log(organization);
   if (team.allow_download === AllowDownload.INHERITED) {
     switch (organization.allow_download) {
       case AllowDownload.ALL:
