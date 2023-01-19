@@ -280,7 +280,15 @@ const Index = ({ commonData, setUser }: Props) => {
       setTimeout(() => {
         setShowToaster(false);
       }, 3000);
-    } catch (e) {}
+    } catch (e: any) {
+      // Default error message
+      setMessageToaster(`Image couldn't be updated`);
+
+      // Specific error message. If something fails, the first message will be shown
+      const errorData: { statusCode: number; message: string; error: string } = e.response.data;
+      Helper.logError('Error uploading user profile image', errorData);
+      setMessageToaster(`Sorry, we can't update your profile image because: ${errorData.message}`);
+    }
   };
 
   useEffect(() => {
