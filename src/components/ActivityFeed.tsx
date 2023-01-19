@@ -323,14 +323,12 @@ interface Props {
   getMore: () => void;
 }
 
-const NUM_ITEMS_ACTIVITY_FEED = 6;
-
 const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
   const data: ActivityFeed[] = useMemo(() => {
     if (!activityFeed) {
       return [];
     }
-    return activityFeed.data.slice(0, NUM_ITEMS_ACTIVITY_FEED);
+    return activityFeed.data;
   }, [activityFeed]);
   return (
     <React.Fragment>
