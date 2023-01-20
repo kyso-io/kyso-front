@@ -875,7 +875,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     {commonData.organization?.link}
                   </a>
                   {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
-                  {Helper.isBrowser() && <ReadMoreReact text={commonData.organization?.bio} ideal={200} readMoreText={'Read more...'} />}
+                  {Helper.isBrowser() && <ReadMoreReact text={commonData.organization?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
                 </div>
               )}
             </div>
@@ -936,7 +936,7 @@ const Index = ({ commonData, setUser }: Props) => {
                         : resourcePermissions.role_names[0]!;
                       return (
                         <li
-                          key={teamInfo.organization_id}
+                          key={teamInfo.team_id}
                           className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
                           onClick={() => router.push(`/settings/${commonData.organization!.sluglified_name}/${teamInfo.sluglified_name}`)}
                         >
