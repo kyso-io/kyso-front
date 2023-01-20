@@ -15,6 +15,29 @@ img.k-right-logo {
   background-color: #162C40;
 }
 
+.k-bg-primary-disabled {
+  background-color: #64748b
+}
+
+.k-right-toc {
+  float: right;
+  width: 41vh;
+  position: fixed;
+  background-color: #FAFAFA;
+  left: 78%;
+  padding: 13px;
+}
+
+/* Read more component */
+.read-more-button {
+  color: blue;
+  text-decoration: underline;
+}
+
+.displayed-text {
+  --tw-text-opacity: 1;
+  color: rgb(107 114 128 / var(--tw-text-opacity));
+}
 /* END THEME */
 
 #tooltip {

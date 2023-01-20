@@ -4,6 +4,8 @@ import { Dialog, Listbox, Transition } from '@headlessui/react';
 import { LinkIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { CheckIcon, ExclamationCircleIcon, InformationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, TeamMember } from '@kyso-io/kyso-model';
+// @ts-ignore
+import ReadMoreReact from 'read-more-react';
 import {
   AddUserOrganizationDto,
   AllowDownload,
@@ -116,6 +118,8 @@ const Index = ({ commonData, setUser }: Props) => {
   const [showDeleteTeamModal, setShowDeleteTeamModal] = useState<boolean>(false);
   const [textTeamModal, setTextTeamModal] = useState<string>('');
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [allowDownloadOptionValue, setAllowDownloadOptionValue] = useState<AllowDownload>(AllowDownload.INHERITED);
+
   const teams: ResourcePermissions[] = useMemo(() => {
     let data: ResourcePermissions[] = [];
     if (!commonData.organization || !commonData.permissions || !commonData.permissions.teams) {
@@ -188,6 +192,7 @@ const Index = ({ commonData, setUser }: Props) => {
     if (!commonData.team) {
       return;
     }
+    setAllowDownloadOptionValue(commonData.team.allow_download || AllowDownload.INHERITED);
     setSlackChannel(commonData.team.slackChannel || '');
     setTeamsIncomingWebhookUrl(commonData.team.teamsIncomingWebhookUrl || '');
     getTeamMembers();
@@ -421,7 +426,8 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
       await api.updateTeam(commonData.team?.id!, { visibility: teamVisibilityEnum } as any);
-      router.reload();
+      commonData.team!.visibility = teamVisibilityEnum;
+      // router.reload();
     } catch (e: any) {
       Helper.logError(e.response.data, e);
     }
@@ -458,7 +464,7 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
       await api.updateTeam(commonData.team?.id!, { allow_download: allowDownload } as any);
-      router.reload();
+      setAllowDownloadOptionValue(allowDownload);
     } catch (e: any) {
       Helper.logError(e.response.data, e);
     }
@@ -495,7 +501,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const exportMembersInCsv = async () => {
     setRequesting(true);
     try {
-      const api: Api = new Api(commonData.token);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const result: Buffer = await api.exportTeamMembers(commonData.team!.id!);
       const blob: Blob = new Blob([result], { type: 'text/csv;charset=utf-8;' });
       const url: string = URL.createObjectURL(blob);
@@ -561,7 +567,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   {commonData.organization?.link}
                 </a>
                 {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
-                <p className="text-md text-gray-500">{commonData.organization?.bio}</p>
+                {Helper.isBrowser() && <ReadMoreReact text={commonData.organization?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
               </div>
             </div>
 
@@ -792,13 +798,18 @@ const Index = ({ commonData, setUser }: Props) => {
                     )}
                   </ul>
                 </div>
+
+                <div className="space-y-1 mt-8 mb-4 sm:border-b sm:border-gray-200 pb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Download reports</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">Configure if the reports of this channel would be able to download</p>
+                </div>
                 <div className="flex items-center my-4">
                   <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Download reports:</label>
                   <div className="ml-6">
                     <select
                       id="allowDownload"
                       name="allowDownload"
-                      value={commonData.team?.allow_download}
+                      value={allowDownloadOptionValue}
                       onChange={(e: any) => updateAllowDownload(e.target.value)}
                       className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
                     >
@@ -969,8 +980,11 @@ const Index = ({ commonData, setUser }: Props) => {
             {/* TAB NOTIFICATIONS */}
             {selectedTab === OrganizationSettingsTab.Notifications && (
               <React.Fragment>
-                <div className="space-y-6 sm:space-y-5 mt-8">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
+                <div className="space-y-1 mt-8 mb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Slack integration</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">
+                    Configure your slack integration to receive all the updates of this channel. Slack must be configured at organization level, contact your <b>organization admin</b>.
+                  </p>
                 </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
                   <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack channel:</label>
@@ -982,6 +996,10 @@ const Index = ({ commonData, setUser }: Props) => {
                       className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
                     />
                   </div>
+                </div>
+                <div className="space-y-1 mt-8 mb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Teams integration</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">Configure your teams integration to receive all the updates of this channel</p>
                 </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
                   <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Teams Incoming Webhook Url:</label>
@@ -1040,7 +1058,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500/50 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -1147,7 +1165,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500/50 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -1248,7 +1266,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500/50 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -1309,7 +1327,7 @@ const Index = ({ commonData, setUser }: Props) => {
       <Transition.Root show={showDeleteTeamModal} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={setShowDeleteTeamModal}>
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500/50 transition-opacity" />
           </Transition.Child>
 
           <div className="fixed inset-0 z-10 overflow-y-auto">

@@ -28,19 +28,10 @@ class ErrorBoundary extends React.Component {
       // You can render any custom fallback UI
       return (
         <>
-          {/*
-          This example requires updating your template:
-  
-          ```
-          <html class="h-full">
-          <body class="h-full">
-          ```
-        */}
           <div
             className="flex flex-col bg-white lg:relative"
             style={{
-              height: '1000px',
-              marginTop: '10em',
+              height: '100vh',
             }}
           >
             <div className="flex grow flex-col">

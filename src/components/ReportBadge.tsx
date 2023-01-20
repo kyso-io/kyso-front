@@ -8,7 +8,7 @@ import { toSvg } from 'jdenticon';
 import moment from 'moment';
 import { useMemo } from 'react';
 import { Tooltip } from 'primereact/tooltip';
-import { uuid } from 'uuidv4';
+import { v4 as uuidv4 } from 'uuid';
 import PureChangeReportImage from '@/components/PureChangeReportImage';
 import { HelperPermissions } from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
@@ -31,7 +31,7 @@ interface Props {
 }
 
 const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
-  const random: string = uuid();
+  const random: string = uuidv4();
 
   const hasPermissionReportGlobalPin: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.GLOBAL_PIN),
@@ -70,10 +70,10 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
         </div>
         <div className="flex-1 min-w-0 py-3 pr-3 relative">
           <a href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
-            <h3 className="text-sm lg:text-lg leading-6 font-medium text-gray-900 break-words">{report.title}</h3>
-            <p className="text-xs lg:text-sm text-gray-500 pt-3 break-words">{description}</p>
+            <h3 className="text-sm md:text-lg leading-6 font-medium text-gray-900 break-words">{report.title}</h3>
+            <p className="text-xs md:text-sm text-gray-500 pt-3 break-words">{description}</p>
           </a>
-          <div className="hidden lg:block absolute bottom-2 right-0">
+          <div className="hidden md:block absolute bottom-2 right-0">
             {report.report_type && (
               <span className="bg-orange-100 text-orange-800 text-xs font-semibold mr-2 px-2.5 py-1 rounded-xl dark:bg-orange-200 dark:text-orange-900">{report.report_type}</span>
             )}

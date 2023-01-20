@@ -15,6 +15,8 @@ import {
   UpdateTeamMembersDTO,
   UserRoleDTO,
 } from '@kyso-io/kyso-model';
+// @ts-ignore
+import ReadMoreReact from 'read-more-react';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
@@ -532,7 +534,7 @@ const Index = ({ commonData, setUser }: Props) => {
 
   return (
     <div className="flex flex-row space-x-8 p-4">
-      <div className="hidden lg:visible lg:w-1/6">
+      <div className="hidden md:block md:w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
       <div className="w-4/6 flex flex-col space-y-4">
@@ -550,7 +552,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 />
               </div>
             </div>
-            <div className="hidden lg:visible lg:w-3/6 lg:flex lg:flex-row justify-end items-center space-x-2">
+            <div className="invisible lg:visible lg:w-3/6 lg:flex lg:flex-row justify-end items-center space-x-2">
               <ManageUsers
                 commonData={commonData}
                 members={members}
@@ -624,7 +626,7 @@ const Index = ({ commonData, setUser }: Props) => {
         {commonData.team?.bio && (
           <div className="pt-10 border-t-gray-300 border-t-4 mt-2">
             <h1 className="text-xl font-bold text-gray-800 mb-2">About {commonData.team?.display_name}</h1>
-            <p className="text-sm text-gray-500 pt-3">{commonData.team?.bio}</p>
+            {Helper.isBrowser() && <ReadMoreReact text={commonData.team?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
           </div>
         )}
       </div>

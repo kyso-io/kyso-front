@@ -103,33 +103,36 @@ const UnpureReportActionDropdown = (props: Props) => {
                       Edit Report
                     </a>
                   </Menu.Item>
-                  <Menu.Item>
-                    <div className={classNames('text-gray-700', 'cli-update px-4 py-2 text-sm hover:bg-gray-100 group items-center')} data-pr-tooltip={'copy command'} data-pr-position="bottom">
-                      <Tooltip target=".cli-update" />
-                      <a
-                        href="#"
-                        onClick={() => {
-                          navigator.clipboard.writeText('kyso update');
-                          showNotificationTrue(true);
-                          delayedCallback();
-                        }}
-                        className={classNames('text-gray-700', 'text-sm hover:bg-gray-100 group flex items-center')}
-                      >
-                        {/* <CommandLineIcon className="mr-2 h-5 w-5 text-gray-700" /> */}
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="mr-2 h-5 w-5 text-gray-700">
-                          <path
-                            fillRule="evenodd"
-                            d="M2.25 6a3 3 0 013-3h13.5a3 3 0 013 3v12a3 3 0 01-3 3H5.25a3 3 0 01-3-3V6zm3.97.97a.75.75 0 011.06 0l2.25 2.25a.75.75 0 010 1.06l-2.25 2.25a.75.75 0 01-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 010-1.06zm4.28 4.28a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        Update with CLI
-                      </a>
-                      <div className="mt-1 border ml-8 w-fit px-2 bg-gray-100 rounded-md">
-                        <p className="text-pink-500">kyso push</p>
+                  {/* This command is incorrect, and we even don't have a command to pull changes. To push is only kyso push, so I see no point to have this there */}
+                  {false && (
+                    <Menu.Item>
+                      <div className={classNames('text-gray-700', 'cli-update px-4 py-2 text-sm hover:bg-gray-100 group items-center')} data-pr-tooltip={'copy command'} data-pr-position="bottom">
+                        <Tooltip target=".cli-update" />
+                        <a
+                          href="#"
+                          onClick={() => {
+                            navigator.clipboard.writeText('kyso update');
+                            showNotificationTrue(true);
+                            delayedCallback();
+                          }}
+                          className={classNames('text-gray-700', 'text-sm hover:bg-gray-100 group flex items-center')}
+                        >
+                          {/* <CommandLineIcon className="mr-2 h-5 w-5 text-gray-700" /> */}
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="mr-2 h-5 w-5 text-gray-700">
+                            <path
+                              fillRule="evenodd"
+                              d="M2.25 6a3 3 0 013-3h13.5a3 3 0 013 3v12a3 3 0 01-3 3H5.25a3 3 0 01-3-3V6zm3.97.97a.75.75 0 011.06 0l2.25 2.25a.75.75 0 010 1.06l-2.25 2.25a.75.75 0 01-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 010-1.06zm4.28 4.28a.75.75 0 000 1.5h3a.75.75 0 000-1.5h-3z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                          Update with CLI
+                        </a>
+                        <div className="mt-1 border ml-8 w-fit px-2 bg-gray-100 rounded-md">
+                          <p className="text-pink-500">kyso push</p>
+                        </div>
                       </div>
-                    </div>
-                  </Menu.Item>
+                    </Menu.Item>
+                  )}
                 </React.Fragment>
               )}
               {canChangeReportMainFile && (

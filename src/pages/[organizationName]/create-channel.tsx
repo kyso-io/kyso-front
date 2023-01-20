@@ -29,7 +29,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [formDescription, setFormDescription] = useState('');
   const [isTeamAvailable, setTeamAvailable] = useState(true);
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
-  const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.ALL);
+  const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.INHERITED);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
@@ -253,7 +253,7 @@ const Index = ({ commonData, setUser }: Props) => {
                                     />
                                     <LockOpenIcon className="w-6 h-5 ml-3" />
                                     <label htmlFor="public" className="ml-1 block text-sm  text-gray-700">
-                                      <strong>Public:</strong>
+                                      <strong>Public: </strong>
                                       Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url.
                                     </label>
                                   </div>

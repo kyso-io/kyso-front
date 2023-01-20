@@ -215,7 +215,7 @@ const UnpureReportRender = ({
               )}
             </div>
             <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'hidden lg:block p-2 min-w-fit border-l')}>
-              {fileToRender.toc && fileToRender.toc.length > 0 && <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} />}
+              {fileToRender.toc && fileToRender.toc.length > 0 && <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} stickToRight={true} />}
               <PureSideOverlayCommentsPanel key={report?.id!} cacheKey={report?.id!} setSidebarOpen={(p) => setSidebarOpen(p)} commonData={commonData}>
                 <PureInlineComments
                   commonData={commonData}

@@ -91,7 +91,12 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
                 type="button"
                 className="inline-flex justify-center px-4 py-2 border border-indigo-700 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                <a href={`${router.basePath}/user/${userProfile.username}/settings`} className="text-indigo-700">
+                <a
+                  className="text-indigo-700"
+                  onClick={() => {
+                    router.push(`/user/${userProfile.username}/settings`);
+                  }}
+                >
                   Edit
                 </a>
               </button>
@@ -135,8 +140,22 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
               </div>
             )}
             {emailIsVisible && (
+              <>
+                <div className="mt-2 flex items-center text-sm">
+                  <p className="text-m font-medium text-blue-600 sm:text-l">{userProfile.email}</p>
+                </div>
+                <div className="sm:flex hidden items-center text-sm text-gray-500">
+                  <FontAwesomeIcon icon={faPeriod} />
+                </div>
+              </>
+            )}
+            {userProfile.link && (
               <div className="mt-2 flex items-center text-sm">
-                <p className="text-m font-medium text-blue-600 sm:text-l">{userProfile.email}</p>
+                <p className="text-m font-medium text-gray-600 sm:text-l">
+                  <a href={userProfile.link} target="_blank" rel="noreferrer">
+                    {userProfile.link}
+                  </a>
+                </p>
               </div>
             )}
           </div>

@@ -1,5 +1,5 @@
 import { Dialog, Menu, Transition } from '@headlessui/react';
-import { BellIcon, CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, MenuAlt2Icon, UsersIcon, XIcon } from '@heroicons/react/outline';
+import { CalendarIcon, ChartBarIcon, FolderIcon, HomeIcon, InboxIcon, MenuAlt2Icon, UsersIcon, XIcon } from '@heroicons/react/outline';
 import { SearchIcon } from '@heroicons/react/solid';
 import { Fragment, useState } from 'react';
 
@@ -167,10 +167,10 @@ const BrandSidebarWithLightHeader: LayoutProps = ({ children }: any) => {
                 </form>
               </div>
               <div className="ml-4 flex items-center md:ml-6">
-                <button type="button" className="rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                {/* <button type="button" className="rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                   <span className="sr-only">View notifications</span>
                   <BellIcon className="h-6 w-6" aria-hidden="true" />
-                </button>
+                </button> */}
 
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative ml-3">

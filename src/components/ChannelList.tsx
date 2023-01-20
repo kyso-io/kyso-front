@@ -18,6 +18,20 @@ interface Props {
 const ChannelList = (props: Props) => {
   const { basePath, commonData } = props;
   const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
+
+  // For the private channels, doesn't matter if they dont have permissions to create a channel at channel level, makes no sense, so
+  // we need to see as well at the organization level
+  let hasPermissionCreateChannelFromOrganization: boolean = false;
+  const organizationPermissions = commonData?.permissions?.organizations?.filter((x) => x.id === commonData.organization?.id);
+
+  if (organizationPermissions && organizationPermissions.length > 0) {
+    const createPermissions = organizationPermissions[0]?.permissions?.filter((y) => y === TeamPermissionsEnum.CREATE);
+
+    if (createPermissions && createPermissions.length > 0) {
+      hasPermissionCreateChannelFromOrganization = true;
+    }
+  }
+
   const channelSelectorItems: BreadcrumbItem[] = useMemo(() => {
     if (commonData?.permissions?.teams && commonData.permissions.teams.length > 0) {
       const breadcrumbItems: BreadcrumbItem[] = commonData.permissions.teams
@@ -72,7 +86,7 @@ const ChannelList = (props: Props) => {
           </a>
         ))}
 
-        {hasPermissionCreateChannel && (
+        {(hasPermissionCreateChannel || hasPermissionCreateChannelFromOrganization) && (
           <>
             <span className="my-2 bg-gray-300 h-0.5 mx-3" />
             <a

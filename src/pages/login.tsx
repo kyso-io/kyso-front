@@ -170,6 +170,7 @@ const Index = () => {
         }
       }, 200);
     } catch (e: any) {
+      setError('The server in unavailable. Try again later.');
       const errorResponse: { statusCode: number; message: string; error: string } = e.response.data;
       setError(errorResponse.message);
     }
@@ -183,13 +184,13 @@ const Index = () => {
       </Head>
 
       <div className="w-full min-h-full flex flex-col">
-        <div className="hidden lg:visible border-b p-4 lg:flex lg:flex-row items-center justify-between">
+        <div className="invisible lg:visible border-b p-4 lg:flex lg:flex-row items-center justify-between">
           <img className="h-8 k-left-logo" alt="Left logo" />
           <img className="h-8 k-right-logo" alt="Right logo" />
         </div>
         <div className="text-right">{error && <ErrorNotification message={error} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col lg:mt-20 items-center mx-auto max-w-[1400px] lg:space-x-10">
-          <span className="hidden lg:block">
+          <span className="invisible lg:visible">
             <KysoDescription />
           </span>
 

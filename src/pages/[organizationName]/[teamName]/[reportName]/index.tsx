@@ -98,7 +98,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
     ];
     if (reportData?.report && reportData.report.toc && reportData.report.toc.length > 0) {
       data.splice(0, 0, {
-        title: 'Table of Contents',
+        title: 'Index',
         tab: Tab.Toc,
       });
     }
@@ -606,7 +606,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 
   return (
     <div>
-      <div className={classNames('hidden lg:visible z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
+      <div className={classNames('hidden lg:block z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
         <div>
           <div className="flex flex-1 flex-col pt-32 mt-2">
             <nav className="flex-1 space-y-1">
@@ -631,7 +631,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
                         </nav>
                       </div>
                       <div className="py-2">
-                        {selectedTab === Tab.Toc && <TableOfContents title="" toc={report.toc} collapsible={true} openInNewTab={true} />}
+                        {selectedTab === Tab.Toc && <TableOfContents title="" toc={report.toc} collapsible={true} openInNewTab={false} />}
                         {selectedTab === Tab.Files && (
                           <PureTree
                             path={currentPath}

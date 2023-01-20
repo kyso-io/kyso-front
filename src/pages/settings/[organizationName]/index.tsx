@@ -18,6 +18,8 @@ import {
   UserDTO,
   UserRoleDTO,
 } from '@kyso-io/kyso-model';
+// @ts-ignore
+import ReadMoreReact from 'read-more-react';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
@@ -630,7 +632,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const exportMembersInCsv = async () => {
     setRequesting(true);
     try {
-      const api: Api = new Api(commonData.token);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       const result: Buffer = await api.exportOrganizationMembers(commonData.organization!.id!);
       const blob: Blob = new Blob([result], { type: 'text/csv;charset=utf-8;' });
       const url: string = URL.createObjectURL(blob);
@@ -873,7 +875,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     {commonData.organization?.link}
                   </a>
                   {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
-                  <p className="text-md text-gray-500">{commonData.organization?.bio}</p>
+                  {Helper.isBrowser() && <ReadMoreReact text={commonData.organization?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
                 </div>
               )}
             </div>
@@ -907,65 +909,78 @@ const Index = ({ commonData, setUser }: Props) => {
 
             {/* TAB CHANNELS */}
             {!editing && selectedTab === OrganizationSettingsTab.Channels && (
-              <div className="mt-6 text-center">
-                <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
-                  {teamsInfo.map((teamInfo: TeamInfo) => {
-                    const resourcePermissions: ResourcePermissions | undefined = commonData.permissions!.teams!.find((rp: ResourcePermissions) => rp.id === teamInfo.id);
-                    if (!resourcePermissions) {
-                      return null;
-                    }
-                    if (!resourcePermissions.role_names) {
-                      return null;
-                    }
-                    const role: string = OrganizationRoleToLabel.hasOwnProperty(resourcePermissions.role_names[0]!)
-                      ? OrganizationRoleToLabel[resourcePermissions.role_names[0]!]!
-                      : resourcePermissions.role_names[0]!;
-                    return (
-                      <li
-                        key={teamInfo.organization_id}
-                        className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
-                        onClick={() => router.push(`/settings/${commonData.organization!.sluglified_name}/${teamInfo.sluglified_name}`)}
-                      >
-                        <div className="space-y-1 text-lg font-medium leading-6 mt-5">
-                          <h3 style={{ color: '#234361' }}>{teamInfo.display_name}</h3>
-                          <span className="text-sm font-normal">{role}</span>
-                        </div>
-                        <div className="my-10">
-                          <PureAvatar src={teamInfo.avatar_url || ''} title={teamInfo.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
-                        </div>
-                        <div className="space-y-2 border-t py-4 px-2">
-                          <ul role="list" className="flex justify-between space-x-5 cursor-pointer">
-                            <li title="Reports">
-                              <div className="flex items-center">
-                                <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
-                                <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                  {teamInfo.reports} reports
-                                </span>
-                              </div>
-                            </li>
-                            <li title="Members">
-                              <div className="flex items-center">
-                                <UserGroupIcon className="h-6 w-6 mr-1" fill="#F1AB7A" aria-hidden="true" />
-                                <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                  {teamInfo.members}
-                                </span>
-                              </div>
-                            </li>
-                            <li title="Comments">
-                              <div className="flex items-center">
-                                <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
-                                <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                  {teamInfo.comments} comments
-                                </span>
-                              </div>
-                            </li>
-                          </ul>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ul>
-              </div>
+              <>
+                <a
+                  href={`/${organizationName}/create-channel`}
+                  className="text-gray-500 hover:bg-gray-50 hover:text-gray-900 flex items-center px-3 py-2 text-xs lg:text-sm rounded-md"
+                  role="none"
+                  style={{ float: 'right' }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true" className="w-5 h-5 mr-1" role="none">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" role="none"></path>
+                  </svg>
+                  Create
+                </a>
+                <div className="mt-6 text-center">
+                  <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
+                    {teamsInfo.map((teamInfo: TeamInfo) => {
+                      const resourcePermissions: ResourcePermissions | undefined = commonData.permissions!.teams!.find((rp: ResourcePermissions) => rp.id === teamInfo.id);
+                      if (!resourcePermissions) {
+                        return null;
+                      }
+                      if (!resourcePermissions.role_names) {
+                        return null;
+                      }
+                      const role: string = OrganizationRoleToLabel.hasOwnProperty(resourcePermissions.role_names[0]!)
+                        ? OrganizationRoleToLabel[resourcePermissions.role_names[0]!]!
+                        : resourcePermissions.role_names[0]!;
+                      return (
+                        <li
+                          key={teamInfo.team_id}
+                          className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
+                          onClick={() => router.push(`/settings/${commonData.organization!.sluglified_name}/${teamInfo.sluglified_name}`)}
+                        >
+                          <div className="space-y-1 text-lg font-medium leading-6 mt-5">
+                            <h3 style={{ color: '#234361' }}>{teamInfo.display_name}</h3>
+                            <span className="text-sm font-normal">{role}</span>
+                          </div>
+                          <div className="my-10">
+                            <PureAvatar src={teamInfo.avatar_url || ''} title={teamInfo.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
+                          </div>
+                          <div className="space-y-2 border-t py-4 px-2">
+                            <ul role="list" className="flex justify-between space-x-5 cursor-pointer">
+                              <li title="Reports">
+                                <div className="flex items-center">
+                                  <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
+                                  <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                    {teamInfo.reports} reports
+                                  </span>
+                                </div>
+                              </li>
+                              <li title="Members">
+                                <div className="flex items-center">
+                                  <UserGroupIcon className="h-6 w-6 mr-1" fill="#F1AB7A" aria-hidden="true" />
+                                  <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                    {teamInfo.members}
+                                  </span>
+                                </div>
+                              </li>
+                              <li title="Comments">
+                                <div className="flex items-center">
+                                  <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
+                                  <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                    {teamInfo.comments} comments
+                                  </span>
+                                </div>
+                              </li>
+                            </ul>
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              </>
             )}
 
             {/* TAB MEMBERS */}
@@ -1338,14 +1353,15 @@ const Index = ({ commonData, setUser }: Props) => {
             {/* TAB NOTIFICATIONS */}
             {!editing && selectedTab === OrganizationSettingsTab.Notifications && (
               <React.Fragment>
-                <div className="space-y-6 sm:space-y-5 mt-8">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Configure notifications</h3>
+                <div className="space-y-1 mt-8 mb-4 sm:border-b sm:border-gray-200 pb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Centralized communications</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">Configure a shared email address to centralize Kyso communications</p>
                 </div>
                 <div className="pt-6 sm:pt-5 my-4">
                   <div role="group" aria-labelledby="label-email">
                     <div className="sm:grid sm:grid-cols-3 sm:items-baseline sm:gap-4">
                       <div className="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-email">
-                        Centralized comunication
+                        Enable Centralized Communications
                       </div>
                       <div className="mt-4 sm:col-span-2 sm:mt-0">
                         <div className="max-w-lg space-y-4">
@@ -1438,8 +1454,12 @@ const Index = ({ commonData, setUser }: Props) => {
                     )}
                   </React.Fragment>
                 )}
+                <div className="space-y-1 mt-8 mb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Slack integration</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">Configure your slack integration to receive all the updates in your organization</p>
+                </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
-                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack token:</label>
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack Token</label>
                   <div className="mt-1 sm:col-span-2 sm:mt-0">
                     <input
                       value={slackToken}
@@ -1450,7 +1470,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   </div>
                 </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
-                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack channel:</label>
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Slack Channel</label>
                   <div className="mt-1 sm:col-span-2 sm:mt-0">
                     <input
                       value={slackChannel}
@@ -1460,8 +1480,13 @@ const Index = ({ commonData, setUser }: Props) => {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-1 mt-8 mb-4">
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Teams integration</h3>
+                  <p className="max-w-2xl text-sm text-gray-500">Configure your teams integration to receive all the updates in your organization</p>
+                </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
-                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Teams Incoming Webhook Url:</label>
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Teams Incoming Webhook Url</label>
                   <div className="mt-1 sm:col-span-2 sm:mt-0">
                     <input
                       value={teamsIncomingWebhookUrl}
@@ -1513,7 +1538,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500/50 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -1601,7 +1626,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500/50 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -1682,7 +1707,7 @@ const Index = ({ commonData, setUser }: Props) => {
           }}
         >
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500/50 transition-opacity" />
           </Transition.Child>
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -1745,7 +1770,7 @@ const Index = ({ commonData, setUser }: Props) => {
       <Transition.Root show={showDeleteOrgModal} as={Fragment}>
         <Dialog as="div" className="relative z-10" onClose={setShowDeleteOrgModal}>
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
+            <div className="fixed inset-0 bg-gray-500/50 transition-opacity" />
           </Transition.Child>
 
           <div className="fixed inset-0 z-10 overflow-y-auto">
