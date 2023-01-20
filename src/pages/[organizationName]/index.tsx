@@ -148,6 +148,7 @@ const Index = ({ commonData, setUser }: Props) => {
       joinUserToOrganization();
       return;
     }
+
     if (!HelperPermissions.belongsToOrganization(commonData, organizationName as string)) {
       if (commonData.token) {
         window.location.href = '/';

@@ -6,53 +6,103 @@ import { Helper } from '@/helpers/Helper';
 import PureVideoModal from '@/components/PureVideoModal';
 import { checkJwt } from '@/helpers/check-jwt';
 import type { KeyValue } from '@/model/key-value.model';
+import type { UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
+import { useUser } from '@/hooks/use-user';
+import { Api } from '@kyso-io/kyso-store';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import slugify from 'slugify';
+
+const processUrl = (url: string, loggedUser: UserDTO): string => {
+  if (!loggedUser) {
+    return url;
+  }
+
+  let processedUrl = url;
+
+  /* eslint-disable no-template-curly-in-string */
+  if (url.includes('${user}')) {
+    /* eslint-disable no-template-curly-in-string */
+    processedUrl = processedUrl.replace('${user}', slugify(loggedUser.name));
+  }
+
+  return processedUrl;
+};
 
 const Index = () => {
-  // const router = useRouter();
-  // const organizationName: string | undefined = router.query.organizationName as string | undefined;
-
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
-  const [welcomeText, setWelcomeText] = useState(
-    'A place to publish, organise & discover presentation-ready research: Jupyter notebooks, HTML, Office files, SVS images, Markdown, Data Apps & much, much more!',
-  );
-  const firstCtaTitle = 'Publish your work.';
-  const firstCtaText = 'Upload existing research - no matter the format - to be indexed & shared with colleagues.';
-  const firstCtaUrl = 'Upload existing research - no matter the format - to be indexed & shared with colleagues.';
-
-  const secondCtaTitle = 'Read a report.';
-  const secondCtaText = 'Read through a report, interact with & comment on the results.';
-  const secondCtaUrl = 'Read through a report, interact with & comment on the results.';
-
-  const thirdCtaTitle = 'Search & discover.';
-  const thirdCtaText = 'Find the research you’re interested in from colleagues across the organisation.';
-  const thirdCtaUrl = 'Find the research you’re interested in from colleagues across the organisation.';
-
-  const demoUrl = 'https://www.loom.com/embed/fa23c122402243539909f038ddef590b';
 
   const [isOpen, setOpen] = useState(false);
-  // const loggedUser: UserDTO | null = useUser();
+  const [onboardingMessages, setOnboardingMessages] = useState({
+    welcome_message: '',
+    demo_url: '',
+    first_cta: {
+      title: '',
+      text: '',
+      url: '/',
+    },
+    second_cta: {
+      title: '',
+      text: '',
+      url: '/',
+    },
+    third_cta: {
+      title: '',
+      text: '',
+      url: '/',
+    },
+  });
+  const loggedUser: UserDTO | null = useUser();
+
+  useEffect(() => {
+    const updateShowOnboarding = async () => {
+      // Update show_onboarding to false for this user
+      if (loggedUser?.show_onboarding === true) {
+        const token: string | null = getLocalStorageItem('jwt');
+        const api: Api = new Api(token);
+
+        const updateUserRequestDto: UpdateUserRequestDTO = new UpdateUserRequestDTO(
+          loggedUser!.name,
+          loggedUser!.display_name,
+          loggedUser!.location,
+          loggedUser!.link,
+          loggedUser!.bio,
+          false,
+          loggedUser!.onboarding_progress,
+        );
+
+        await api.updateUser(loggedUser!.id, updateUserRequestDto);
+      }
+      // else --> If show_onboarding is false, means that the user accessed directly to this page. In that case, we don't
+      // want to update it, so we just do nothing
+    };
+
+    if (loggedUser) {
+      updateShowOnboarding();
+    }
+  }, [loggedUser]);
 
   useEffect(() => {
     const result: boolean = checkJwt();
     setUserIsLogged(result);
+
     const getOrganizationOptions = async () => {
       const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
 
       if (!publicKeys || publicKeys.length === 0) {
-        // return toaster.danger("An unknown error has occurred");
-        return '';
+        return;
       }
-      // TODO create client_welcome_message in KysoSettings
-      // const welcomeMessage = publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;
 
-      const clientWelcomeText = 'publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;';
-      setWelcomeText(clientWelcomeText);
+      const onboardingMessagesValues = publicKeys.find((x) => x.key === KysoSettingsEnum.ONBOARDING_MESSAGES)?.value!;
 
-      return '';
+      const onboardingMessagesParsed = JSON.parse(onboardingMessagesValues);
+
+      setOnboardingMessages(onboardingMessagesParsed);
     };
 
     getOrganizationOptions();
   }, []);
+
   if (userIsLogged === null) {
     return null;
   }
@@ -67,9 +117,9 @@ const Index = () => {
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                   <span className="block">Welcome to Kyso!</span>
                 </h2>
-                <p className="mt-6 text-lg leading-6">{welcomeText}</p>
+                <p className="mt-6 text-lg leading-6">{onboardingMessages.welcome_message}</p>
 
-                <PureVideoModal setOpen={setOpen} isOpen={isOpen} demoUrl={demoUrl} />
+                <PureVideoModal setOpen={setOpen} isOpen={isOpen} demoUrl={onboardingMessages.demo_url} />
                 <div className="my-11 justify-center text-center mx-auto max-w-sm" onClick={() => setOpen(!isOpen)}>
                   <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10 hover:opacity-60 hover:cursor-pointer">
                     <img src="/static/demo.png" alt="" className="absolute inset-0 h-full w-full opacity-90" />
@@ -80,42 +130,42 @@ const Index = () => {
                 <span className="block">What would you like to do?</span>
               </h2>
               <div className="mt-22 flex justify-center">
-                <a href={firstCtaUrl}>
+                <a href={processUrl(onboardingMessages.first_cta.url, loggedUser!)}>
                   <div className="w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg  before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
                     <div className="relative aspect-[2/1] overflow-hidden ">
                       <img src="/static/publishing.png" alt="" className="mx-auto relative inset-0 h-full group-hover:opacity-0 opacity-100" />
                       <img src="/static/publishing (1).png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-100 opacity-0" />
                     </div>
                     <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
-                      <span className="relative">{firstCtaTitle}</span>
+                      <span className="relative">{onboardingMessages.first_cta.title}</span>
                     </h4>
-                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">{firstCtaText}</p>
+                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">{onboardingMessages.first_cta.text}</p>
                   </div>
                 </a>
 
-                <a href={secondCtaUrl}>
+                <a href={processUrl(onboardingMessages.second_cta.url, loggedUser!)}>
                   <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100 mx-20">
                     <div className="relative aspect-[2/1] overflow-hidden">
                       <img src="/static/open-book (1).png" alt="" className="absolute mx-auto inset-0 h-full group-hover:opacity-0 opacity-100" />
                       <img src="/static/open-book.png" alt="" className="absolute mx-auto inset-0 h-full group-hover:opacity-100 opacity-0" />
                     </div>
                     <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
-                      <span className="relative">{secondCtaTitle}</span>
+                      <span className="relative">{onboardingMessages.second_cta.title}</span>
                     </h4>
-                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">{secondCtaText}</p>
+                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">{onboardingMessages.second_cta.text}</p>
                   </div>
                 </a>
 
-                <a href={thirdCtaUrl}>
+                <a href={processUrl(onboardingMessages.third_cta.url, loggedUser!)}>
                   <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
                     <div className="relative aspect-[2/1] overflow-hidden">
                       <img src="/static/search.png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-0 opacity-100" />
                       <img src="/static/search (1).png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-100 opacity-0" />
                     </div>
                     <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
-                      <span className="relative">{thirdCtaTitle}</span>
+                      <span className="relative">{onboardingMessages.third_cta.title}</span>
                     </h4>
-                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">{thirdCtaText}</p>
+                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">{onboardingMessages.third_cta.text}</p>
                   </div>
                 </a>
               </div>

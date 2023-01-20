@@ -64,7 +64,13 @@ const Index = ({ commonData }: Props) => {
       const response: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
       const captchaEnabledKysoSetting: KysoSetting | undefined = response.data.find((kysoSetting: KysoSetting) => kysoSetting.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
       const captchaEnabled: boolean = captchaEnabledKysoSetting === undefined || captchaEnabledKysoSetting.value === 'true';
+
       if (!captchaEnabled) {
+        if (commonData.user?.show_onboarding) {
+          router.push('/overview');
+          return;
+        }
+
         if (isBrowser()) {
           sessionStorage.removeItem('redirectUrl');
         }

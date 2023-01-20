@@ -17,6 +17,7 @@ import {
   UpdateOrganizationMembersDTO,
   UserDTO,
   UserRoleDTO,
+  OnboardingProgress,
 } from '@kyso-io/kyso-model';
 // @ts-ignore
 import ReadMoreReact from 'read-more-react';
@@ -572,7 +573,7 @@ const Index = ({ commonData, setUser }: Props) => {
         return !members.find((member: Member) => member.id === user.id);
       });
       if (usersNotInOrg.length === 0 && Helper.isEmail(term)) {
-        const userDTO: UserDTO = new UserDTO('', term, term, term, term, '', '', '', '', '', '', new Date(), [], true, false, true);
+        const userDTO: UserDTO = new UserDTO('', term, term, term, term, '', '', '', '', '', '', new Date(), [], true, false, true, OnboardingProgress.createEmpty());
         usersNotInOrg.push(userDTO);
       }
       setUsers(usersNotInOrg);
