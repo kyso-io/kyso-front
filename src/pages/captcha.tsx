@@ -90,9 +90,11 @@ const Index = ({ commonData }: Props) => {
     }
     setRequesting(true);
     const api: Api = new Api(commonData.token);
+
     const response: NormalizedResponseDTO<boolean> = await api.verifyCaptcha(captchaToken);
     if (response?.data) {
       const redirectUrl: string | null = sessionStorage.getItem('redirectUrl') || '/';
+
       const showOnboarding = commonData.user?.show_onboarding ? commonData.user?.show_onboarding : false;
 
       if (isBrowser()) {

@@ -162,7 +162,14 @@ const Index = () => {
           if (redirect) {
             sessionStorage.setItem('redirectUrl', redirect as string);
           }
-          router.push(`/overview${invitation}` ? `?invitation=${invitation as string}` : '');
+
+          let toOverview = `/overview`;
+
+          if (invitation) {
+            toOverview = `/overview?invitation=${invitation as string}`;
+          }
+
+          router.push(toOverview);
         } else if (redirect) {
           router.push(redirect as string);
         } else {

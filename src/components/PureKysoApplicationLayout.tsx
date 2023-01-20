@@ -15,6 +15,7 @@ import BreadcrumbNavbar from './BreadcrumbNavbar';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
 import PureShareButton from './PureShareButton';
+import PureCheckListTour from './PureCheckListTour';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -145,11 +146,11 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         <div className="flex items-center px-5 cursor-pointer">
                           <PureShareButton title="Share page" description="Send this url to someone to share this page" iconClasses={'text-white h-6 w-6'} buttonClasses="" url={currentUrl} />
                         </div>
-                        {/* commonData.user && (
+                        {commonData.user && (
                           <div className="flex items-center mr-2 cursor-pointer">
                             <PureCheckListTour />
                           </div>
-                        ) */}
+                        )}
                       </div>
                     </div>
                     <div className="-mr-2 flex md:hidden">
