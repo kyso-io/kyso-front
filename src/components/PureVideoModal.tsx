@@ -5,10 +5,11 @@ import { XIcon } from '@heroicons/react/outline';
 interface Props {
   setOpen: (value: boolean) => void;
   isOpen: boolean;
+  demoUrl: string;
 }
 
-const UnPureVideoModal = (props: Props) => {
-  const { isOpen, setOpen } = props;
+const PureVideoModal = (props: Props) => {
+  const { isOpen, setOpen, demoUrl } = props;
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
@@ -40,10 +41,15 @@ const UnPureVideoModal = (props: Props) => {
                   </button>
                 </div>
                 <div className="my-11 max-w text-center">
-                  <video width="100%" controls>
-                    <source src="https://www.loom.com/share/fa23c122402243539909f038ddef590b" type="video/mp4" />
-                    Your browser does not support HTML video.
-                  </video>
+                  <div style={{ position: 'relative', paddingBottom: '64.90384615384616%', height: 0 }}>
+                    <iframe
+                      src={demoUrl}
+                      frameBorder="0"
+                      allowFullScreen
+                      className="abosolute t-0 l-0 w-100% h-100%"
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+                    ></iframe>
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
@@ -54,4 +60,4 @@ const UnPureVideoModal = (props: Props) => {
   );
 };
 
-export default UnPureVideoModal;
+export default PureVideoModal;

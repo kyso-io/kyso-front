@@ -1,18 +1,36 @@
 import NoLayout from '@/layouts/NoLayout';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { /* KysoSettingsEnum, */ UserDTO } from '@kyso-io/kyso-model';
+// import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { Helper } from '@/helpers/Helper';
-import UnPureVideoModal from '@/unpure-components/UnPureVideoModal';
+import PureVideoModal from '@/components/PureVideoModal';
 import { checkJwt } from '@/helpers/check-jwt';
 import type { KeyValue } from '@/model/key-value.model';
-import { useUser } from '@/hooks/use-user';
 
 const Index = () => {
+  // const router = useRouter();
+  // const organizationName: string | undefined = router.query.organizationName as string | undefined;
+
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
-  const [welcomeMessage, setWelcomeMessage] = useState('');
+  const [welcomeText, setWelcomeText] = useState(
+    'A place to publish, organise & discover presentation-ready research: Jupyter notebooks, HTML, Office files, SVS images, Markdown, Data Apps & much, much more!',
+  );
+  const firstCtaTitle = 'Publish your work.';
+  const firstCtaText = 'Upload existing research - no matter the format - to be indexed & shared with colleagues.';
+  const firstCtaUrl = 'Upload existing research - no matter the format - to be indexed & shared with colleagues.';
+
+  const secondCtaTitle = 'Read a report.';
+  const secondCtaText = 'Read through a report, interact with & comment on the results.';
+  const secondCtaUrl = 'Read through a report, interact with & comment on the results.';
+
+  const thirdCtaTitle = 'Search & discover.';
+  const thirdCtaText = 'Find the research you’re interested in from colleagues across the organisation.';
+  const thirdCtaUrl = 'Find the research you’re interested in from colleagues across the organisation.';
+
+  const demoUrl = 'https://www.loom.com/embed/fa23c122402243539909f038ddef590b';
+
   const [isOpen, setOpen] = useState(false);
-  const loggedUser: UserDTO | null = useUser();
+  // const loggedUser: UserDTO | null = useUser();
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -27,9 +45,8 @@ const Index = () => {
       // TODO create client_welcome_message in KysoSettings
       // const welcomeMessage = publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;
 
-      const staticWelcomeMessage = 'publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;';
-      // KysoSettingsEnum.ONBOARDING_MESSAGES;
-      setWelcomeMessage(staticWelcomeMessage);
+      const clientWelcomeText = 'publicKeys.find((x) => x.key === KysoSettingsEnum.CLIENT_WELCOME_MESSAGE)?.value;';
+      setWelcomeText(clientWelcomeText);
 
       return '';
     };
@@ -50,9 +67,9 @@ const Index = () => {
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
                   <span className="block">Welcome to Kyso!</span>
                 </h2>
-                <p className="mt-6 text-lg leading-6">{welcomeMessage || 'A place to share, organise and discover notebooks, markdown, static HTML sites, data apps, amd more ...'}</p>
-                <p className="mt-6 text-lg leading-6">{'A place to share, organise and discover notebooks, markdown, static HTML sites, data apps, amd more ...'}</p>
-                <UnPureVideoModal setOpen={setOpen} isOpen={isOpen} />
+                <p className="mt-6 text-lg leading-6">{welcomeText}</p>
+
+                <PureVideoModal setOpen={setOpen} isOpen={isOpen} demoUrl={demoUrl} />
                 <div className="my-11 justify-center text-center mx-auto max-w-sm" onClick={() => setOpen(!isOpen)}>
                   <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10 hover:opacity-60 hover:cursor-pointer">
                     <img src="/static/demo.png" alt="" className="absolute inset-0 h-full w-full opacity-90" />
@@ -63,42 +80,42 @@ const Index = () => {
                 <span className="block">What would you like to do?</span>
               </h2>
               <div className="mt-22 flex justify-center">
-                <a href={`/${loggedUser?.username}/create-report-form?overview`}>
+                <a href={firstCtaUrl}>
                   <div className="w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg  before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
                     <div className="relative aspect-[2/1] overflow-hidden ">
                       <img src="/static/publishing.png" alt="" className="mx-auto relative inset-0 h-full group-hover:opacity-0 opacity-100" />
                       <img src="/static/publishing (1).png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-100 opacity-0" />
                     </div>
                     <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
-                      <span className="relative">Publish existing work</span>
+                      <span className="relative">{firstCtaTitle}</span>
                     </h4>
-                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">Publish and share your analysis to anyone in your organization.</p>
+                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">{firstCtaText}</p>
                   </div>
                 </a>
 
-                <a href="/kyso-examples/life-sciences/graphing-genomic-mutation-ratios?overview">
+                <a href={secondCtaUrl}>
                   <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100 mx-20">
                     <div className="relative aspect-[2/1] overflow-hidden">
                       <img src="/static/open-book (1).png" alt="" className="absolute mx-auto inset-0 h-full group-hover:opacity-0 opacity-100" />
                       <img src="/static/open-book.png" alt="" className="absolute mx-auto inset-0 h-full group-hover:opacity-100 opacity-0" />
                     </div>
                     <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
-                      <span className="relative">Read a report</span>
+                      <span className="relative">{secondCtaTitle}</span>
                     </h4>
-                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">Find understandable results on this report example.</p>
+                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">{secondCtaText}</p>
                   </div>
                 </a>
 
-                <a href="/search/?q=examples">
+                <a href={thirdCtaUrl}>
                   <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
                     <div className="relative aspect-[2/1] overflow-hidden">
                       <img src="/static/search.png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-0 opacity-100" />
                       <img src="/static/search (1).png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-100 opacity-0" />
                     </div>
                     <h4 className="mt-4 text-sm font-medium text-slate-900 group-hover:text-indigo-600">
-                      <span className="relative">Search and discover</span>
+                      <span className="relative">{thirdCtaTitle}</span>
                     </h4>
-                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">Find, navigate and stay up to date on the existing set of work on a topic.</p>
+                    <p className="relative mt-1.5 text-xs font-medium text-slate-500">{thirdCtaText}</p>
                   </div>
                 </a>
               </div>

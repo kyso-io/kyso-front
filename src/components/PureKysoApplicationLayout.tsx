@@ -12,10 +12,10 @@ import { Fragment, useState } from 'react';
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import BreadcrumbNavbar from './BreadcrumbNavbar';
+import PureOnboardingDropdown from './PureOnboardingDropdown';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
 import PureShareButton from './PureShareButton';
-import PureCheckListTour from './PureCheckListTour';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -148,7 +148,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         </div>
                         {commonData.user && (
                           <div className="flex items-center mr-2 cursor-pointer">
-                            <PureCheckListTour />
+                            <PureOnboardingDropdown />
                           </div>
                         )}
                       </div>
