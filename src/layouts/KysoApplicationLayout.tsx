@@ -72,6 +72,14 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
         try {
           const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
           user = responseUserDto.data;
+        } catch (e) {
+          localStorage.removeItem('jwt');
+          localStorage.removeItem('shownVerifiedAlert');
+          sessionStorage.clear();
+          await dispatch(logoutAction());
+          router.replace(`/login`);
+        }
+        try {
           const response: NormalizedResponseDTO<TokenPermissions> = await api.getUserPermissions(user!.username);
           permissions = response.data;
         } catch (e) {}
