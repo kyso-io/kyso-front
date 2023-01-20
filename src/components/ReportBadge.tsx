@@ -8,7 +8,7 @@ import { toSvg } from 'jdenticon';
 import moment from 'moment';
 import { useMemo } from 'react';
 import { Tooltip } from 'primereact/tooltip';
-import { uuid } from 'uuidv4';
+import { v4 as uuidv4 } from 'uuid';
 import PureChangeReportImage from '@/components/PureChangeReportImage';
 import { HelperPermissions } from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
@@ -31,7 +31,7 @@ interface Props {
 }
 
 const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggleUserPinReport, toggleGlobalPinReport }: Props) => {
-  const random: string = uuid();
+  const random: string = uuidv4();
 
   const hasPermissionReportGlobalPin: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.GLOBAL_PIN),

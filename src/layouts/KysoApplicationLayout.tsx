@@ -110,6 +110,16 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       dispatch(setTeamAuthAction(teamName));
     }
     const getData = async () => {
+      if (!organizationName && !teamName && !commonData.token) {
+        if (commonData.permissions!.organizations!.length === 0) {
+          // No public organizations availabld
+          router.replace(`/login`);
+          return;
+        }
+        // Redirect user to the first public organization available on permissions
+        router.replace(`/${commonData.permissions!.organizations![0]!.name}`);
+        return;
+      }
       const cd: { organization: Organization | null; team: Team | null; errorOrganization: string | null; errorTeam: string | null } = await getCommonData({
         token: commonData.token,
         permissions: commonData.permissions!,
