@@ -567,7 +567,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   {commonData.organization?.link}
                 </a>
                 {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
-                {Helper.isBrowser() && <ReadMoreReact text={commonData.organization?.bio} ideal={200} readMoreText={'Read more...'} />}
+                {Helper.isBrowser() && <ReadMoreReact text={commonData.organization?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
               </div>
             </div>
 

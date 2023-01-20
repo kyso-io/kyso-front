@@ -626,7 +626,7 @@ const Index = ({ commonData, setUser }: Props) => {
         {commonData.team?.bio && (
           <div className="pt-10 border-t-gray-300 border-t-4 mt-2">
             <h1 className="text-xl font-bold text-gray-800 mb-2">About {commonData.team?.display_name}</h1>
-            {Helper.isBrowser() && <ReadMoreReact text={commonData.team?.bio} ideal={200} readMoreText={'Read more...'} />}
+            {Helper.isBrowser() && <ReadMoreReact text={commonData.team?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
           </div>
         )}
       </div>
