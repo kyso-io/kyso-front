@@ -13,13 +13,24 @@ type IPureSideOverlayCommentsPanel = {
   children: ReactElement;
   setSidebarOpen: (p: boolean) => void;
   commonData: CommonData;
+  tooltipCloseText?: string;
+  tooltipOpenText?: string;
 };
 
 const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
   const { cacheKey = 'overlay-panel-comment-state', children, setSidebarOpen, commonData } = props;
+  let { tooltipCloseText, tooltipOpenText } = props;
   const [open, setOpen] = useState(true);
   const hoverRef = useRef(null);
   const tooltipRef = useRef(null);
+
+  if (!tooltipOpenText) {
+    tooltipOpenText = 'Lock open';
+  }
+
+  if (!tooltipCloseText) {
+    tooltipCloseText = 'Lock closed';
+  }
 
   useEffect(() => {
     if (!commonData.user) {
@@ -57,7 +68,7 @@ const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
             data-pr-position="top"
             type="button"
             className="overlay-comments-info m-4 p-2 border h-fit rounded-md text-gray-900 hover:text-gray-700 focus:outline-none focus:ring-0 hover:bg-gray-50"
-            data-pr-tooltip={open ? 'Lock closed' : 'Lock open'}
+            data-pr-tooltip={open ? tooltipCloseText : tooltipOpenText}
             onClick={() => setOpenAndCache(!open)}
           >
             <span className="sr-only">Close panel</span>
