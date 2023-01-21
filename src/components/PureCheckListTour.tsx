@@ -1,6 +1,11 @@
 import { CheckCircleIcon, ChevronDoubleRightIcon, XCircleIcon } from '@heroicons/react/solid';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import type { UserDTO } from '@kyso-io/kyso-model';
+import { OnboardingProgress, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { ProgressBar } from 'primereact/progressbar';
+import { useUser } from '@/hooks/use-user';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { Api } from '@kyso-io/kyso-store';
 
 interface Props {
   setValue: (value: string) => void;
@@ -19,9 +24,86 @@ const content = {
   fifthText: 'Download & install the Kyso CLI tool so you can publish (many) results automatically from within your technical workflows: git, s3, Domino & more!',
 };
 
+enum Cta {
+  One,
+  Two,
+  Three,
+  Four,
+  Five,
+  All,
+}
+
+const markCtaDone = async (cta: Cta, loggedUser: UserDTO) => {
+  const userProgress: OnboardingProgress = loggedUser.onboarding_progress;
+
+  switch (cta) {
+    case Cta.One:
+      userProgress.step_1 = true;
+      break;
+    case Cta.Two:
+      userProgress.step_2 = true;
+      break;
+    case Cta.Three:
+      userProgress.step_3 = true;
+      break;
+    case Cta.Four:
+      userProgress.step_4 = true;
+      break;
+    case Cta.Five:
+      userProgress.step_5 = true;
+      break;
+    case Cta.All:
+      userProgress.step_1 = true;
+      userProgress.step_2 = true;
+      userProgress.step_3 = true;
+      userProgress.step_4 = true;
+      userProgress.step_5 = true;
+      break;
+    default:
+      break;
+  }
+
+  const token: string | null = getLocalStorageItem('jwt');
+  const api: Api = new Api(token);
+
+  const updateUserRequestDto: UpdateUserRequestDTO = new UpdateUserRequestDTO(
+    loggedUser!.name,
+    loggedUser!.display_name,
+    loggedUser!.location,
+    loggedUser!.link,
+    loggedUser!.bio,
+    false,
+    loggedUser!.onboarding_progress,
+  );
+
+  await api.updateUser(loggedUser!.id, updateUserRequestDto);
+};
+
 const PureCheckListTour = (props: Props) => {
+  const loggedUser: UserDTO | null = useUser();
+  const [progress, setProgress] = useState(0);
+  const [onboardingProgress, setOnboardingProgress] = useState(OnboardingProgress.createEmpty());
+
+  useEffect(() => {
+    if (loggedUser) {
+      // Necessary to access the getProgressPercentage. As the loggedUser comes from an unmarshalling process, only the data
+      // is available, but not the functions of the object. For that we create a new object that is a copy of the loggedUser.onboarding_progress
+      // property
+      const copyOnboardingProgress: OnboardingProgress = new OnboardingProgress(
+        loggedUser?.onboarding_progress.step_1!,
+        loggedUser?.onboarding_progress.step_2!,
+        loggedUser?.onboarding_progress.step_3!,
+        loggedUser?.onboarding_progress.step_4!,
+        loggedUser?.onboarding_progress.step_5!,
+      );
+
+      setOnboardingProgress(copyOnboardingProgress);
+      setProgress(copyOnboardingProgress.getProgressPercentage());
+    }
+  }, [loggedUser]);
+
   const { setValue } = props;
-  const progress = 100;
+
   return (
     <div className="space-y-5 pt-8">
       {/* <legend className="sr-only">Notifications</legend> */}
@@ -49,11 +131,11 @@ const PureCheckListTour = (props: Props) => {
         className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
         onClick={() => {
           setValue('publish');
+          markCtaDone(Cta.One, loggedUser!);
         }}
       >
         <div className="flex h-5 items-center w-8">
-          {/* <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " /> */}
-          <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" />
+          {onboardingProgress.step_1 ? <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> : <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />}
         </div>
         <div className="ml-3 text-sm w-96">
           <label className="font-medium text-gray-700">{content.firstTitle}</label>
@@ -64,10 +146,15 @@ const PureCheckListTour = (props: Props) => {
         </div>
       </div>
 
-      <div className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3" onClick={() => setValue('read')}>
+      <div
+        className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
+        onClick={() => {
+          setValue('read');
+          markCtaDone(Cta.Two, loggedUser!);
+        }}
+      >
         <div className="flex h-5 items-center w-8">
-          {/* <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " /> */}
-          <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" />
+          {onboardingProgress.step_2 ? <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> : <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />}
         </div>
         <div className="ml-3 text-sm w-96">
           <label className="font-medium text-gray-700">{content.secondTitle}</label>
@@ -78,10 +165,15 @@ const PureCheckListTour = (props: Props) => {
         </div>
       </div>
 
-      <div className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3" onClick={() => setValue('search')}>
+      <div
+        className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
+        onClick={() => {
+          setValue('search');
+          markCtaDone(Cta.Three, loggedUser!);
+        }}
+      >
         <div className="flex h-5 items-center w-8">
-          <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />
-          {/* <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> */}
+          {onboardingProgress.step_3 ? <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> : <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />}
         </div>
         <div className="ml-3 text-sm w-96">
           <label className="font-medium text-gray-700">{content.thirdTitle}</label>
@@ -92,10 +184,15 @@ const PureCheckListTour = (props: Props) => {
         </div>
       </div>
 
-      <div className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3" onClick={() => setValue('profile')}>
+      <div
+        className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
+        onClick={() => {
+          setValue('profile');
+          markCtaDone(Cta.Four, loggedUser!);
+        }}
+      >
         <div className="flex h-5 items-center w-8">
-          <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />
-          {/* <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> */}
+          {onboardingProgress.step_4 ? <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> : <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />}
         </div>
         <div className="ml-3 text-sm w-96">
           <label className="font-medium text-gray-700">{content.fourthTitle}</label>
@@ -105,10 +202,15 @@ const PureCheckListTour = (props: Props) => {
           <ChevronDoubleRightIcon className="h-8 w-8 text-gray-500 hover:text-indigo-500" aria-hidden="true" />
         </div>
       </div>
-      <div className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3" onClick={() => setValue('cli')}>
+      <div
+        className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
+        onClick={() => {
+          setValue('cli');
+          markCtaDone(Cta.Five, loggedUser!);
+        }}
+      >
         <div className="flex h-5 items-center w-8">
-          <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />
-          {/* <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> */}
+          {onboardingProgress.step_5 ? <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> : <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />}
         </div>
         <div className="ml-3 text-sm w-96">
           <label className="font-medium text-gray-700">{content.fifthTitle}</label>
@@ -119,7 +221,13 @@ const PureCheckListTour = (props: Props) => {
         </div>
       </div>
       <div className="border-t">
-        <div className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3" onClick={() => setValue('cli')}>
+        <div
+          className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
+          onClick={() => {
+            setValue('finish-and-remove');
+            markCtaDone(Cta.All, loggedUser!);
+          }}
+        >
           <div className="flex h-5 items-center w-8">
             <XCircleIcon className="h-6 w-6 text-red-500" aria-hidden="true" />
           </div>

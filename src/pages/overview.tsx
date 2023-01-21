@@ -6,12 +6,18 @@ import { Helper } from '@/helpers/Helper';
 import PureVideoModal from '@/components/PureVideoModal';
 import { checkJwt } from '@/helpers/check-jwt';
 import type { KeyValue } from '@/model/key-value.model';
-import type { UserDTO } from '@kyso-io/kyso-model';
+import type { UserDTO, OnboardingProgress } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { useUser } from '@/hooks/use-user';
 import { Api } from '@kyso-io/kyso-store';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import slugify from 'slugify';
+
+enum Cta {
+  One,
+  Two,
+  Three,
+}
 
 const processUrl = (url: string, loggedUser: UserDTO): string => {
   if (!loggedUser) {
@@ -23,10 +29,50 @@ const processUrl = (url: string, loggedUser: UserDTO): string => {
   /* eslint-disable no-template-curly-in-string */
   if (url.includes('${user}')) {
     /* eslint-disable no-template-curly-in-string */
-    processedUrl = processedUrl.replace('${user}', slugify(loggedUser.name));
+    processedUrl = processedUrl.replace('${user}', slugify(loggedUser.name.toLowerCase()));
   }
 
   return processedUrl;
+};
+
+const markCtaDone = async (cta: Cta, url: string, loggedUser: UserDTO, target?: string): Promise<void> => {
+  const userProgress: OnboardingProgress = loggedUser.onboarding_progress;
+
+  switch (cta) {
+    case Cta.One:
+      userProgress.step_1 = true;
+      break;
+    case Cta.Two:
+      userProgress.step_2 = true;
+      break;
+    case Cta.Three:
+      userProgress.step_3 = true;
+      break;
+    default:
+      break;
+  }
+
+  const token: string | null = getLocalStorageItem('jwt');
+  const api: Api = new Api(token);
+
+  const updateUserRequestDto: UpdateUserRequestDTO = new UpdateUserRequestDTO(
+    loggedUser!.name,
+    loggedUser!.display_name,
+    loggedUser!.location,
+    loggedUser!.link,
+    loggedUser!.bio,
+    false,
+    loggedUser!.onboarding_progress,
+  );
+
+  await api.updateUser(loggedUser!.id, updateUserRequestDto);
+
+  const redirectUrl: string = processUrl(url, loggedUser!);
+  if (target && target === '_blank') {
+    window.open(redirectUrl, '_blank');
+  } else {
+    window.open(redirectUrl, '_self');
+  }
 };
 
 const Index = () => {
@@ -130,7 +176,7 @@ const Index = () => {
                 <span className="block">What would you like to do?</span>
               </h2>
               <div className="mt-22 flex justify-center">
-                <a href={processUrl(onboardingMessages.first_cta.url, loggedUser!)}>
+                <a onClick={() => markCtaDone(Cta.One, onboardingMessages.first_cta.url, loggedUser!)} onAuxClick={() => markCtaDone(Cta.One, onboardingMessages.first_cta.url, loggedUser!, '_blank')}>
                   <div className="w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg  before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
                     <div className="relative aspect-[2/1] overflow-hidden ">
                       <img src="/static/publishing.png" alt="" className="mx-auto relative inset-0 h-full group-hover:opacity-0 opacity-100" />
@@ -143,7 +189,10 @@ const Index = () => {
                   </div>
                 </a>
 
-                <a href={processUrl(onboardingMessages.second_cta.url, loggedUser!)}>
+                <a
+                  onClick={() => markCtaDone(Cta.Two, onboardingMessages.second_cta.url, loggedUser!)}
+                  onAuxClick={() => markCtaDone(Cta.Two, onboardingMessages.second_cta.url, loggedUser!, '_blank')}
+                >
                   <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100 mx-20">
                     <div className="relative aspect-[2/1] overflow-hidden">
                       <img src="/static/open-book (1).png" alt="" className="absolute mx-auto inset-0 h-full group-hover:opacity-0 opacity-100" />
@@ -156,7 +205,10 @@ const Index = () => {
                   </div>
                 </a>
 
-                <a href={processUrl(onboardingMessages.third_cta.url, loggedUser!)}>
+                <a
+                  onClick={() => markCtaDone(Cta.Three, onboardingMessages.third_cta.url, loggedUser!)}
+                  onAuxClick={() => markCtaDone(Cta.Three, onboardingMessages.third_cta.url, loggedUser!, '_blank')}
+                >
                   <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
                     <div className="relative aspect-[2/1] overflow-hidden">
                       <img src="/static/search.png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-0 opacity-100" />
