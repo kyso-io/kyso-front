@@ -307,7 +307,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                 leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
               >
-                <Dialog.Panel className="relative overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+                <Dialog.Panel className="relative overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl sm:p-6">
                   <div>
                     <div className="mt-3 sm:mt-5">
                       <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
@@ -322,7 +322,7 @@ const Index = ({ commonData, setUser }: Props) => {
                             </p>
                             <div className="flex flex-row content-center my-2">
                               <code className="bg-green-100 rounded py-1 px-2">{newKysoUserAccessToken.access_token}</code>
-                              {!copied && (
+                              {
                                 <button
                                   title="Copy to clipboard"
                                   type="button"
@@ -332,11 +332,18 @@ const Index = ({ commonData, setUser }: Props) => {
                                     setCopied(true);
                                     setMessageToaster('Access token copied to clipboard');
                                     setShowToaster(true);
+                                    setOpenCreateKysoAccessToken(false);
+                                    setTimeout(() => {
+                                      setCopied(false);
+                                      setKysoAccessTokenName('');
+                                      setNewKysoUserAccessToken(null);
+                                    }, 1000);
                                   }}
                                 >
+                                  Copy & Close
                                   <ClipboardIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
                                 </button>
-                              )}
+                              }
                             </div>
                           </React.Fragment>
                         ) : (
@@ -370,7 +377,7 @@ const Index = ({ commonData, setUser }: Props) => {
                         Save
                       </button>
                     )}
-                    <button
+                    {/* <button
                       type="button"
                       className="mt-3 inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:col-start-1 sm:mt-0 sm:text-sm"
                       onClick={() => {
@@ -384,7 +391,7 @@ const Index = ({ commonData, setUser }: Props) => {
                       }}
                     >
                       {newKysoUserAccessToken !== null ? 'Close' : 'Cancel'}
-                    </button>
+                    </button> */}
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
