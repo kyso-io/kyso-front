@@ -28,6 +28,22 @@ img.k-right-logo {
   padding: 13px;
 }
 
+.k-edit-report-image:hover + .k-edit-report-badge {
+  bottom: 0px;
+  background-color: #FAFAFA;
+  display: block;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+.k-edit-report-image {
+  min-height: 200px;
+}
+
+.k-edit-report-badge {
+  display: none;
+}
+
 /* Read more component */
 .read-more-button {
   color: blue;
