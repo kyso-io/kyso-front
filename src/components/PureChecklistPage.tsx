@@ -3,6 +3,9 @@ import { ChevronDoubleLeftIcon } from '@heroicons/react/solid';
 import UnPureVideoModal from '@/components/PureVideoModal';
 import { classNames } from 'primereact/utils';
 import React, { Fragment, useState } from 'react';
+import slugify from 'slugify';
+import type { UserDTO } from '@kyso-io/kyso-model';
+import { useUser } from '@/hooks/use-user';
 
 interface Props {
   setValue: (value: string) => void;
@@ -20,7 +23,24 @@ interface Props {
   };
 }
 
+const processUrl = (url: string, loggedUser: UserDTO): string => {
+  if (!loggedUser) {
+    return url;
+  }
+
+  let processedUrl = url;
+
+  /* eslint-disable no-template-curly-in-string */
+  if (url.includes('${user}')) {
+    /* eslint-disable no-template-curly-in-string */
+    processedUrl = processedUrl.replace('${user}', slugify(loggedUser.name.toLowerCase()));
+  }
+
+  return processedUrl;
+};
+
 const PureCheckListPage = (props: Props) => {
+  const loggedUser: UserDTO | null = useUser();
   const { setValue, setOpen, open, content } = props;
   const [isModalOpen, openModal] = useState(false);
   return (
@@ -60,7 +80,7 @@ const PureCheckListPage = (props: Props) => {
             <button
               className="w-fit whitespace-nowrap p-3 font-medium text-white rounded bg-kyso-600 hover:bg-kyso-700 text-sm flex flex-row items-center focus:ring-0 focus:outline-none"
               onClick={() => {
-                window.open(content.ctaUrl);
+                window.open(processUrl(content.ctaUrl, loggedUser!));
                 setValue('');
                 setOpen();
               }}
