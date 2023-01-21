@@ -56,7 +56,7 @@ const PureChangeReportImage = (props: IPureChangeReportImage) => {
         }}
       />
       {hasPermissionEditReport && (
-        <div className="hidden md:block absolute w-24 h-24 md:w-[200px] md:h-[200px] k-edit-report-badge">
+        <div className="hidden md:block absolute w-24 h-full md:w-[200px] k-edit-report-badge">
           <button
             type="button"
             onClick={() => imageInputFileRef.current.click()}
