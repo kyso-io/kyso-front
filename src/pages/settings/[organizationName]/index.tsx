@@ -122,10 +122,26 @@ const Index = ({ commonData, setUser }: Props) => {
   const [textOrgModal, setTextOrgModal] = useState<string>('');
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<OrganizationSettingsTab>(OrganizationSettingsTab.Channels);
-  const notificationsChanged: boolean = useMemo(() => {
-    if (!commonData.organization) {
-      return false;
+
+  const checkIfSlackChanged = () => {
+    const slackChanged: boolean = commonData.organization!.options!.notifications!.slackToken !== slackToken || commonData.organization!.options!.notifications!.slackChannel !== slackChannel;
+
+    if (slackChanged) {
+      return true;
     }
+
+    return false;
+  };
+
+  const checkIfTeamsChanged = () => {
+    const teamsChanged: boolean = commonData.organization!.options!.notifications!.teamsIncomingWebhookUrl !== teamsIncomingWebhookUrl;
+    if (teamsChanged) {
+      return true;
+    }
+    return false;
+  };
+
+  const checkIfCentralizedCommunicationsChanged = () => {
     if (commonData.organization && commonData.organization.options && commonData.organization.options.notifications && commonData.organization.options.notifications.hasOwnProperty('centralized')) {
       if (commonData.organization!.options!.notifications!.centralized !== centralizedNotifications) {
         return true;
@@ -135,25 +151,28 @@ const Index = ({ commonData, setUser }: Props) => {
         return true;
       }
     }
+
     if (centralizedNotifications) {
       return true;
     }
-    const slackChanged: boolean = commonData.organization!.options!.notifications!.slackToken !== slackToken || commonData.organization!.options!.notifications!.slackChannel !== slackChannel;
-    if (slackChanged) {
-      return true;
-    }
-    const teamsChanged: boolean = commonData.organization!.options!.notifications!.teamsIncomingWebhookUrl !== teamsIncomingWebhookUrl;
-    if (teamsChanged) {
-      return true;
-    }
+
     return false;
-  }, [commonData.organization, centralizedNotifications, emailsCentralizedNotifications]);
+  };
+
+  const notificationsChanged: boolean = useMemo(() => {
+    if (!commonData.organization) {
+      return false;
+    }
+    return checkIfCentralizedCommunicationsChanged() || checkIfSlackChanged() || checkIfTeamsChanged();
+  }, [commonData.organization, centralizedNotifications, emailsCentralizedNotifications, slackChannel, slackToken, teamsIncomingWebhookUrl]);
+
   const accessChanged: boolean = useMemo(() => {
     if (!commonData.organization) {
       return false;
     }
     return !Helper.arrayEquals(commonData.organization!.allowed_access_domains, allowedAccessDomains);
   }, [commonData.organization, allowedAccessDomains]);
+
   const [teamsInfo, setTeamsInfo] = useState<TeamInfo[]>([]);
   const enabledInvitationLinks: boolean = useMemo(() => {
     if (!isOrgAdmin) {
