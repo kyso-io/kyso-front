@@ -178,8 +178,8 @@ const ActivityFeedReport = ({ activityFeed, relations }: ActivityFeedProps) => {
           {activityFeed.action === ActionEnum.NEW_VERSION && 'uploaded new version of the report '}
           {activityFeed.action === ActionEnum.DELETE && 'deleted the report '}
           {activityFeed.action === ActionEnum.UPDATE && 'updated the report '}
-          {/* {activityFeed.action === ActionEnum.PIN && 'pinned the report '}
-          {activityFeed.action === ActionEnum.UNPIN && 'unpinned the report '} */}
+          {activityFeed.action === ActionEnum.PIN && 'pinned the report '}
+          {activityFeed.action === ActionEnum.UNPIN && 'unpinned the report '}
           {activityFeed.action === ActionEnum.PIN_GLOBAL && 'pinned the report '}
           {activityFeed.action === ActionEnum.UNPIN_GLOBAL && 'unpinned the report '}
           {activityFeed.action === ActionEnum.STAR && 'liked the report '}
