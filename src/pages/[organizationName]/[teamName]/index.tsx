@@ -136,6 +136,7 @@ const Index = ({ commonData, setUser }: Props) => {
     if (!commonData.permissions || !commonData.permissions.organizations || !commonData.permissions.teams || !router.query.organizationName || !router.query.teamName) {
       return;
     }
+
     if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizationName as string)) {
       if (commonData.token) {
         router.replace('/');

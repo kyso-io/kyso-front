@@ -64,7 +64,13 @@ const Index = ({ commonData }: Props) => {
       const response: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
       const captchaEnabledKysoSetting: KysoSetting | undefined = response.data.find((kysoSetting: KysoSetting) => kysoSetting.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
       const captchaEnabled: boolean = captchaEnabledKysoSetting === undefined || captchaEnabledKysoSetting.value === 'true';
+
       if (!captchaEnabled) {
+        if (commonData.user?.show_onboarding) {
+          router.push('/overview');
+          return;
+        }
+
         if (isBrowser()) {
           sessionStorage.removeItem('redirectUrl');
         }
@@ -90,13 +96,20 @@ const Index = ({ commonData }: Props) => {
     }
     setRequesting(true);
     const api: Api = new Api(commonData.token);
+
     const response: NormalizedResponseDTO<boolean> = await api.verifyCaptcha(captchaToken);
     if (response?.data) {
       const redirectUrl: string | null = sessionStorage.getItem('redirectUrl') || '/';
+
+      const showOnboarding = commonData.user?.show_onboarding ? commonData.user?.show_onboarding : false;
+
       if (isBrowser()) {
         sessionStorage.removeItem('redirectUrl');
       }
       setTimeout(() => {
+        if (showOnboarding) {
+          router.replace('/overview');
+        }
         if (invitation) {
           router.replace(invitation as string);
         } else {

@@ -111,7 +111,15 @@ const Index = ({ commonData, setUser }: Props) => {
         setRequesting(true);
         await api.updateUserProfileImage(commonData.user!.id, file);
       }
-      const updateUserRequestDto: UpdateUserRequestDTO = new UpdateUserRequestDTO(commonData.user!.name, commonData.user!.display_name, location, link, bio);
+      const updateUserRequestDto: UpdateUserRequestDTO = new UpdateUserRequestDTO(
+        commonData.user!.name,
+        commonData.user!.display_name,
+        location,
+        link,
+        bio,
+        commonData.user!.show_onboarding,
+        commonData.user!.onboarding_progress,
+      );
       await api.updateUser(commonData.user!.id!, updateUserRequestDto);
       router.reload();
     } catch (e: any) {

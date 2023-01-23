@@ -147,7 +147,10 @@ const Index = () => {
       // Get user info to check if has completed the captcha challenge
       const jwtToken: DecodedToken = decode<DecodedToken>(token);
       const user: Token = jwtToken.payload;
+
       setTimeout(() => {
+        const showOnboarding = user.show_onboarding ? user.show_onboarding : false;
+
         if (captchaEnabled && user.show_captcha) {
           if (redirect) {
             sessionStorage.setItem('redirectUrl', redirect as string);
@@ -155,6 +158,18 @@ const Index = () => {
           router.push(`/captcha${invitation ? `?invitation=${invitation as string}` : ''}`);
         } else if (invitation) {
           router.push(invitation as string);
+        } else if (showOnboarding) {
+          if (redirect) {
+            sessionStorage.setItem('redirectUrl', redirect as string);
+          }
+
+          let toOverview = `/overview`;
+
+          if (invitation) {
+            toOverview = `/overview?invitation=${invitation as string}`;
+          }
+
+          router.push(toOverview);
         } else if (redirect) {
           router.push(redirect as string);
         } else {

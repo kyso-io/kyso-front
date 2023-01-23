@@ -15,7 +15,7 @@ const GitMetaDataDropdown = ({ fileToRender }: Props) => {
   return (
     <Popover as="div" className="relative inline-block">
       <Popover.Button className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm text-gray-700 flex flex-row items-center focus:ring-0 focus:outline-none">
-        <img src="/assets/images/git.png" width={35} />
+        <img src="/assets/images/git.png" width={35} alt="" />
       </Popover.Button>
       <Popover.Panel className="min-w-[400px] p-4 origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none" style={{ zIndex: 1 }}>
         <div className="flex flex-col space-y-8">
