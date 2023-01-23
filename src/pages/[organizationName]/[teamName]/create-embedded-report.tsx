@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-continue */
-/* eslint-disable consistent-return */
 import MemberFilterSelector from '@/components/MemberFilterSelector';
 import PureKysoButton from '@/components/PureKysoButton';
 import { PureSpinner } from '@/components/PureSpinner';
@@ -112,7 +111,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
 
   useEffect(() => {
     if (!commonData.user) {
-      return;
+      return () => {};
     }
     const interval = setInterval(() => {
       const validJwt: boolean = checkJwt();
@@ -120,7 +119,9 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
         router.replace('/logout');
       }
     }, Helper.CHECK_JWT_TOKEN_MS);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+    };
   }, [commonData.user]);
 
   useEffect(() => {
