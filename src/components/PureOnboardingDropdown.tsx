@@ -128,6 +128,7 @@ const PureOnboardingDropdown = () => {
         loggedUser?.onboarding_progress.step_3!,
         loggedUser?.onboarding_progress.step_4!,
         loggedUser?.onboarding_progress.step_5!,
+        loggedUser?.onboarding_progress.finish_and_remove!,
       );
 
       setOnboardingProgress(copyOnboardingProgress);
@@ -156,7 +157,7 @@ const PureOnboardingDropdown = () => {
     }
   }, [value]);
 
-  if (onboardingProgress.getProgressPercentage() === 100 || finishAndRemove) {
+  if (onboardingProgress.finish_and_remove || finishAndRemove) {
     return <></>;
   }
 
