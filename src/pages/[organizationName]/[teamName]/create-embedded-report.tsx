@@ -111,7 +111,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
 
   useEffect(() => {
     if (!commonData.user) {
-      return () => {};
+      return undefined;
     }
     const interval = setInterval(() => {
       const validJwt: boolean = checkJwt();
@@ -119,9 +119,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
         router.replace('/logout');
       }
     }, Helper.CHECK_JWT_TOKEN_MS);
-    return () => {
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [commonData.user]);
 
   useEffect(() => {

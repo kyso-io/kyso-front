@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable consistent-return */
 import { Helper } from '@/helpers/Helper';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { BookOpenIcon, ChatAlt2Icon, UserGroupIcon } from '@heroicons/react/solid';
@@ -44,7 +43,7 @@ const Index = ({ commonData }: Props) => {
 
   useEffect(() => {
     if (!commonData.user) {
-      return;
+      return undefined;
     }
     const interval = setInterval(() => {
       const validJwt: boolean = checkJwt();

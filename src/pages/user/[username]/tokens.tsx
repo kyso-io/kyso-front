@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable consistent-return */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { Dialog, Transition } from '@headlessui/react';
@@ -60,7 +59,7 @@ const Index = ({ commonData, setUser }: Props) => {
 
   useEffect(() => {
     if (!commonData.user) {
-      return;
+      return undefined;
     }
     const interval = setInterval(() => {
       const validJwt: boolean = checkJwt();

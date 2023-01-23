@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable consistent-return */
 import ErrorNotification from '@/components/ErrorNotification';
 import Filesystem from '@/components/Filesystem';
 import MemberFilterSelector from '@/components/MemberFilterSelector';
@@ -67,7 +66,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
 
   useEffect(() => {
     if (!commonData.user) {
-      return;
+      return undefined;
     }
     const interval = setInterval(() => {
       const validJwt: boolean = checkJwt();

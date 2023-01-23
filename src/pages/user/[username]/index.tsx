@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable consistent-return */
 import ActivityFeedComponent from '@/components/ActivityFeed';
 import { PureSpinner } from '@/components/PureSpinner';
 import ReportBadge from '@/components/ReportBadge';
@@ -75,7 +74,7 @@ const Index = ({ commonData, setUser }: Props) => {
 
   useEffect(() => {
     if (!commonData.user) {
-      return;
+      return undefined;
     }
     const interval = setInterval(() => {
       const validJwt: boolean = checkJwt();
