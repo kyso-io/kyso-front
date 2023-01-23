@@ -146,4 +146,6 @@ export class Helper {
   ];
 
   public static teamVisibilityValues: TeamVisibilityEnum[] = [TeamVisibilityEnum.PROTECTED, TeamVisibilityEnum.PRIVATE, TeamVisibilityEnum.PUBLIC];
+
+  public static CHECK_JWT_TOKEN_MS = 3000;
 }

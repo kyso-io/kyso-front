@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable consistent-return */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { Dialog, Transition } from '@headlessui/react';
@@ -9,10 +10,12 @@ import { CreateKysoAccessTokenDto, KysoSettingsEnum } from '@kyso-io/kyso-model'
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
+import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useState } from 'react';
 import CaptchaModal from '../../../components/CaptchaModal';
 import SettingsAside from '../../../components/SettingsAside';
 import ToasterNotification from '../../../components/ToasterNotification';
+import { checkJwt } from '../../../helpers/check-jwt';
 import { Helper } from '../../../helpers/Helper';
 import { useRedirectIfNoJWT } from '../../../hooks/use-redirect-if-no-jwt';
 import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
@@ -24,6 +27,7 @@ interface Props {
 
 const Index = ({ commonData, setUser }: Props) => {
   useRedirectIfNoJWT();
+  const router = useRouter();
   const [requesting, setRequesting] = useState<boolean>(false);
   const [kysoUserAccessTokens, setKysoUserAccessTokens] = useState<KysoUserAccessToken[]>([]);
   const [kysoAccessTokenName, setKysoAccessTokenName] = useState<string>('');
@@ -53,6 +57,19 @@ const Index = ({ commonData, setUser }: Props) => {
     };
     getData();
   }, []);
+
+  useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
+    const interval = setInterval(() => {
+      const validJwt: boolean = checkJwt();
+      if (!validJwt) {
+        router.replace('/logout');
+      }
+    }, Helper.CHECK_JWT_TOKEN_MS);
+    return () => clearInterval(interval);
+  }, [commonData.user]);
 
   useEffect(() => {
     if (!commonData.token) {

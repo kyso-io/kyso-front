@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable consistent-return */
 import { Helper } from '@/helpers/Helper';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { InformationCircleIcon } from '@heroicons/react/outline';
@@ -65,6 +66,19 @@ const Index = ({ commonData, setUser }: Props) => {
     };
     getData();
   }, []);
+
+  useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
+    const interval = setInterval(() => {
+      const validJwt: boolean = checkJwt();
+      if (!validJwt) {
+        router.replace('/logout');
+      }
+    }, Helper.CHECK_JWT_TOKEN_MS);
+    return () => clearInterval(interval);
+  }, [commonData.user]);
 
   useEffect(() => {
     if (!commonData.user) {

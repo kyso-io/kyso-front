@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint no-prototype-builtins: "off" */
 /* eslint no-continue: "off" */
+/* eslint-disable consistent-return */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Switch, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
@@ -185,6 +186,19 @@ const Index = ({ commonData, setUser }: Props) => {
   }, [isOrgAdmin, commonData.organization]);
   const [isOpenExpirationDateModal, setIsOpenExpirationDateModal] = useState<boolean>(false);
   const [validUntil, setValidUntil] = useState<Date | null>(null);
+
+  useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
+    const interval = setInterval(() => {
+      const validJwt: boolean = checkJwt();
+      if (!validJwt) {
+        router.replace('/logout');
+      }
+    }, Helper.CHECK_JWT_TOKEN_MS);
+    return () => clearInterval(interval);
+  }, [commonData.user]);
 
   useEffect(() => {
     if (!edit) {

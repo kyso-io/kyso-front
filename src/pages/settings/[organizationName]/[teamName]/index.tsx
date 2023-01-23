@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable consistent-return */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Listbox, Transition } from '@headlessui/react';
 import { LinkIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
@@ -41,6 +42,7 @@ import { TailwindHeightSizeEnum } from '../../../../tailwind/enum/tailwind-heigh
 import { TailwindWidthSizeEnum } from '../../../../tailwind/enum/tailwind-width.enum';
 import type { CommonData } from '../../../../types/common-data';
 import type { Member } from '../../../../types/member';
+import { checkJwt } from '../../../../helpers/check-jwt';
 
 const OrganizationRoleToLabel: { [role: string]: string } = {
   'organization-admin': 'Admin of this organization',
@@ -165,6 +167,19 @@ const Index = ({ commonData, setUser }: Props) => {
     };
     getData();
   }, []);
+
+  useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
+    const interval = setInterval(() => {
+      const validJwt: boolean = checkJwt();
+      if (!validJwt) {
+        router.replace('/logout');
+      }
+    }, Helper.CHECK_JWT_TOKEN_MS);
+    return () => clearInterval(interval);
+  }, [commonData.user]);
 
   useEffect(() => {
     if (!tab) {
