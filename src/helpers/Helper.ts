@@ -19,9 +19,11 @@ export class Helper {
     // and guide us to errors or missunderstoods. With the sessionStorage we retrieve that data once
     // in every new session, which I think is a good balance between being updated and don't overwhelm
     // the API
-    if (sessionStorage.getItem('kyso-settings')) {
+
+    // Don't save it man, just call to the fucking endpoint
+    /* if (sessionStorage.getItem('kyso-settings')) {
       return JSON.parse(sessionStorage.getItem('kyso-settings') as string);
-    }
+    } */
 
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const publicSettings: any = await store.dispatch(fetchPublicKysoSettings());
