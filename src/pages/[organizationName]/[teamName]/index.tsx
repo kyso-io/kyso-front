@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable consistent-return */
 import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import type { ActivityFeed, NormalizedResponseDTO, Organization, OrganizationMember, PaginatedResponseDto, ReportDTO, SearchUser, Team, TeamInfoDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
@@ -41,6 +42,7 @@ import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
 import type { KeyValue } from '../../../model/key-value.model';
 import { TailwindWidthSizeEnum } from '../../../tailwind/enum/tailwind-width.enum';
 import type { Member } from '../../../types/member';
+import { checkJwt } from '../../../helpers/check-jwt';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
@@ -131,6 +133,19 @@ const Index = ({ commonData, setUser }: Props) => {
     };
     getData();
   }, []);
+
+  useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
+    const interval = setInterval(() => {
+      const validJwt: boolean = checkJwt();
+      if (!validJwt) {
+        router.replace('/logout');
+      }
+    }, Helper.CHECK_JWT_TOKEN_MS);
+    return () => clearInterval(interval);
+  }, [commonData.user]);
 
   useEffect(() => {
     if (!commonData.permissions || !commonData.permissions.organizations || !commonData.permissions.teams || !router.query.organizationName || !router.query.teamName) {

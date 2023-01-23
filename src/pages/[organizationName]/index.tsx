@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint no-empty: "off" */
+/* eslint-disable consistent-return */
 import ChannelList from '@/components/ChannelList';
 import Pagination from '@/components/Pagination';
 import PureAvatar from '@/components/PureAvatar';
@@ -39,6 +40,7 @@ import type { KeyValue } from '../../model/key-value.model';
 import type { CommonData } from '../../types/common-data';
 import type { Member } from '../../types/member';
 import UnpureDeleteOrganizationDropdown from '../../unpure-components/UnpureDeleteOrganizationDropdown';
+import { checkJwt } from '../../helpers/check-jwt';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
@@ -115,6 +117,19 @@ const Index = ({ commonData, setUser }: Props) => {
     };
     getData();
   }, []);
+
+  useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
+    const interval = setInterval(() => {
+      const validJwt: boolean = checkJwt();
+      if (!validJwt) {
+        router.replace('/logout');
+      }
+    }, Helper.CHECK_JWT_TOKEN_MS);
+    return () => clearInterval(interval);
+  }, [commonData.user]);
 
   useEffect(() => {
     if (!commonData.permissions || !commonData.permissions.organizations || !organizationName) {

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-continue */
+/* eslint-disable consistent-return */
 import MemberFilterSelector from '@/components/MemberFilterSelector';
 import PureKysoButton from '@/components/PureKysoButton';
 import { PureSpinner } from '@/components/PureSpinner';
@@ -29,6 +30,7 @@ import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import { Helper } from '../../../helpers/Helper';
+import type { HttpExceptionDto } from '../../../interfaces/http-exception.dto';
 
 interface TmpReportFile {
   id: string | null;
@@ -119,6 +121,19 @@ const CreateReport = ({ commonData, setUser }: Props) => {
 
     return () => clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
+    const interval = setInterval(() => {
+      const validJwt: boolean = checkJwt();
+      if (!validJwt) {
+        router.replace('/logout');
+      }
+    }, Helper.CHECK_JWT_TOKEN_MS);
+    return () => clearInterval(interval);
+  }, [commonData.user]);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -352,8 +367,12 @@ const CreateReport = ({ commonData, setUser }: Props) => {
         setBusy(false);
         return;
       }
-    } catch (er: any) {
-      setMessageToaster(er.response.data.message);
+    } catch (error: any) {
+      const httpExceptionDto: HttpExceptionDto = error.response.data;
+      if (httpExceptionDto.statusCode === 403) {
+        return;
+      }
+      setMessageToaster(error.response.data.message);
       setShowToaster(true);
       setBusy(false);
       return;

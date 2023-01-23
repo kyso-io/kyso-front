@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable consistent-return */
 import ActivityFeedComponent from '@/components/ActivityFeed';
 import { PureSpinner } from '@/components/PureSpinner';
 import ReportBadge from '@/components/ReportBadge';
@@ -16,6 +17,7 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import ToasterNotification from '../../../components/ToasterNotification';
+import { checkJwt } from '../../../helpers/check-jwt';
 import { checkReportAuthors } from '../../../helpers/check-report-authors';
 import { Helper } from '../../../helpers/Helper';
 import type { KeyValue } from '../../../model/key-value.model';
@@ -70,6 +72,19 @@ const Index = ({ commonData, setUser }: Props) => {
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
+
+  useEffect(() => {
+    if (!commonData.user) {
+      return;
+    }
+    const interval = setInterval(() => {
+      const validJwt: boolean = checkJwt();
+      if (!validJwt) {
+        router.replace('/logout');
+      }
+    }, Helper.CHECK_JWT_TOKEN_MS);
+    return () => clearInterval(interval);
+  }, [commonData.user]);
 
   useEffect(() => {
     if (!username) {
