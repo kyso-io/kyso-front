@@ -6,6 +6,7 @@ import type { UserDTO, KysoSetting, NormalizedResponseDTO } from '@kyso-io/kyso-
 import { OnboardingProgress, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Helper } from '@/helpers/Helper';
 import { Api } from '@kyso-io/kyso-store';
+import router from 'next/router';
 import PureCheckListTour from './PureCheckListTour';
 import PureCheckListPage from './PureChecklistPage';
 
@@ -15,6 +16,7 @@ const PureOnboardingDropdown = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [onboardingProgress, setOnboardingProgress] = useState(OnboardingProgress.createEmpty());
   const [finishAndRemove, setFinishAndRemove] = useState(false);
+  const { onboarding } = router.query;
 
   // default values
   /* eslint-disable no-template-curly-in-string */
@@ -116,6 +118,13 @@ const PureOnboardingDropdown = () => {
     };
     getData();
   }, []);
+
+  useEffect(() => {
+    if (onboarding) {
+      setValue(onboarding as string);
+      setOpen(true);
+    }
+  }, [onboarding]);
 
   useEffect(() => {
     if (loggedUser) {
