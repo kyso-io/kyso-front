@@ -195,7 +195,7 @@ const Index = ({ commonData, setUser }: Props) => {
                           type="text"
                           name="displayName"
                           id="displayName"
-                          value={displayName}
+                          value={displayName || ''}
                           autoComplete="displayName"
                           onChange={(e) => {
                             setError('');
@@ -213,7 +213,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     <div className="mt-1 sm:mt-0 sm:col-span-2">
                       <div className="max-w-lg flex rounded-md shadow-sm">
                         <textarea
-                          value={bio}
+                          value={bio || ''}
                           name="bio"
                           id="bio"
                           autoComplete="bio"
@@ -234,7 +234,7 @@ const Index = ({ commonData, setUser }: Props) => {
                           type="text"
                           name="link"
                           id="link"
-                          value={link}
+                          value={link || ''}
                           autoComplete="link"
                           onChange={(e) => setLink(e.target.value)}
                           className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
@@ -252,7 +252,7 @@ const Index = ({ commonData, setUser }: Props) => {
                           type="text"
                           name="location"
                           id="location"
-                          value={location}
+                          value={location || ''}
                           autoComplete="location"
                           onChange={(e) => setLocation(e.target.value)}
                           className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"

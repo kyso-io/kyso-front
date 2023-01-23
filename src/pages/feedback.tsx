@@ -1,18 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
-import { FeedbackDto } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
+import { FeedbackDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import CaptchaModal from '../components/CaptchaModal';
 import ToasterNotification from '../components/ToasterNotification';
 import { checkJwt } from '../helpers/check-jwt';
+import { Helper } from '../helpers/Helper';
 import type { CommonData } from '../types/common-data';
 
 interface Props {
   commonData: CommonData;
+  setUser: (user: UserDTO) => void;
 }
 
 function isBrowser() {
@@ -22,7 +25,7 @@ function isBrowser() {
   return false;
 }
 
-const Index = ({ commonData }: Props) => {
+const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   const [alertText, setAlertText] = useState<string>('');
   const [show, setShow] = useState<boolean>(false);
@@ -31,25 +34,44 @@ const Index = ({ commonData }: Props) => {
   const [message, setMessage] = useState<string>('');
   const [alertIsError, setAlertIsError] = useState<boolean>(false);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
+  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     const result: boolean = checkJwt();
     setUserIsLogged(result);
+    const getData = async () => {
+      try {
+        const api: Api = new Api();
+        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
+        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (index !== -1) {
+          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
+        }
+      } catch (errorHttp: any) {
+        Helper.logError(errorHttp.response.data, errorHttp);
+      }
+    };
+    getData();
   }, []);
 
   const onSubmit = async () => {
-    if (!commonData.user?.email_verified) {
+    if (!commonData.user!.email_verified) {
       setShow(true);
       setAlertIsError(true);
       setAlertText('Please verify your email address before submitting feedback.');
       return;
     }
+    if (captchaIsEnabled && commonData.user!.show_captcha) {
+      setShowCaptchaModal(true);
+      return;
+    }
     setRequesting(true);
-    const api: Api = new Api(commonData.token);
-    const feedbackDto: FeedbackDto = new FeedbackDto(subject, message);
-    const response: NormalizedResponseDTO<boolean> = await api.createFeedback(feedbackDto);
-    setShow(true);
-    if (response?.data) {
+    try {
+      const api: Api = new Api(commonData.token);
+      const feedbackDto: FeedbackDto = new FeedbackDto(subject, message);
+      await api.createFeedback(feedbackDto);
+      setShow(true);
       setSubject('');
       setMessage('');
       setShow(true);
@@ -60,11 +82,20 @@ const Index = ({ commonData }: Props) => {
         sessionStorage.removeItem('redirectUrl');
       }
       setTimeout(() => router.push(redirectUrl), 2000);
-    } else {
+    } catch (e: any) {
       setAlertIsError(true);
-      setAlertText('Please verify that you are not a robot.');
+      setAlertText(e.response.data.message);
     }
     setRequesting(false);
+  };
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
   };
 
   const disabledButton: boolean = !subject || !message || requesting;
@@ -170,6 +201,7 @@ const Index = ({ commonData }: Props) => {
         icon={alertIsError ? <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" /> : <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />}
         message={alertText}
       />
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

@@ -234,7 +234,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Bio:</label>
                 <div className="mt-1 sm:col-span-2 sm:mt-0">
                   <textarea
-                    value={bio}
+                    value={bio || ''}
                     onChange={(e: any) => setBio(e.target.value)}
                     name="bio"
                     rows={3}
@@ -247,7 +247,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Link:</label>
                 <div className="mt-1 sm:col-span-2 sm:mt-0">
                   <input
-                    value={link}
+                    value={link || ''}
                     onChange={(e: any) => setLink(e.target.value)}
                     type="text"
                     name="link"
@@ -260,7 +260,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Location:</label>
                 <div className="mt-1 sm:col-span-2 sm:mt-0">
                   <input
-                    value={location}
+                    value={location || ''}
                     onChange={(e: any) => setLocation(e.target.value)}
                     type="text"
                     name="link"
