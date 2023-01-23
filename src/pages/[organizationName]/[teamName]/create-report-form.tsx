@@ -2,11 +2,13 @@
 /* eslint-disable no-continue */
 /* eslint-disable consistent-return */
 import MemberFilterSelector from '@/components/MemberFilterSelector';
+import { PureAlert, PureAlertTypeEnum } from '@/components/PureAlert';
 import PureKysoButton from '@/components/PureKysoButton';
 import { PureSpinner } from '@/components/PureSpinner';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
 import classNames from '@/helpers/class-names';
 import { removeLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { useUser } from '@/hooks/use-user';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
@@ -47,6 +49,10 @@ interface Props {
 
 const CreateReport = ({ commonData, setUser }: Props) => {
   const router = useRouter();
+  const loggedUser = useUser();
+
+  const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
+  const [loggedUserShowCaptcha, setLoggedUserShowCaptcha] = useState<boolean>(true);
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [toasterIcon, setIcon] = useState<ReactElement>(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
@@ -117,10 +123,17 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   useEffect(() => {
     const timeout = setTimeout(() => {
       setWaitForLogging(true);
-    }, 1000);
+    }, 2000);
 
     return () => clearTimeout(timeout);
   }, []);
+
+  useEffect(() => {
+    if (loggedUser) {
+      setLoggedUserEmailVerified(loggedUser.email_verified);
+      setLoggedUserShowCaptcha(loggedUser.show_captcha);
+    }
+  }, [loggedUser]);
 
   useEffect(() => {
     if (!commonData.user) {
@@ -595,6 +608,27 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   return userIsLogged ? (
     hasPermissionCreateReport ? (
       <div className="p-4">
+        {/* Alert section */}
+        {!loggedUserEmailVerified && (
+          <>
+            <PureAlert
+              title="Account not verified"
+              description="Your account has not been verified yet. Please check your inbox, verify your account and refresh this page"
+              type={PureAlertTypeEnum.WARNING}
+            />
+          </>
+        )}
+
+        {captchaIsEnabled && loggedUserShowCaptcha && (
+          <>
+            <PureAlert
+              title="Captcha not solved"
+              description="As far as we know, we can't differenciate you from a bot :P. Please solve the captcha before pushing new content into Kyso."
+              type={PureAlertTypeEnum.WARNING}
+            />
+          </>
+        )}
+
         <div className="flex flex-row items-center">
           <div className="w-1/6"></div>
           <div className="w-4/6">
@@ -883,6 +917,20 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                     type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY}
                     disabled={!hasPermissionCreateReport || busy}
                     onClick={() => {
+                      if (!loggedUserEmailVerified) {
+                        setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+                        setMessageToaster('Your account has not been verified yet. Please check your inbox and verify it before creating content at Kyso ;)');
+                        setShowToaster(true);
+                        return;
+                      }
+
+                      if (captchaIsEnabled && loggedUserShowCaptcha) {
+                        setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+                        setMessageToaster("Your account didn't pass the antibot process.");
+                        setShowToaster(true);
+                        return;
+                      }
+
                       if (isEdition()) {
                         updateReport();
                       } else {
