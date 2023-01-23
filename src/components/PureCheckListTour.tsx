@@ -72,6 +72,7 @@ const PureCheckListTour = (props: Props) => {
   const loggedUser: UserDTO | null = useUser();
   const [progress, setProgress] = useState(0);
   const [onboardingProgress, setOnboardingProgress] = useState(OnboardingProgress.createEmpty());
+  const { setValue } = props;
 
   // default values
   /* eslint-disable no-template-curly-in-string */
@@ -191,8 +192,6 @@ const PureCheckListTour = (props: Props) => {
       setProgress(copyOnboardingProgress.getProgressPercentage());
     }
   }, [loggedUser]);
-
-  const { setValue } = props;
 
   return (
     <div className="space-y-5 pt-8">
