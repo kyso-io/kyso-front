@@ -109,11 +109,15 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     if (teamName) {
       dispatch(setTeamAuthAction(teamName));
     }
+    const username: string | undefined = router.query.username as string | undefined;
     const getData = async () => {
       if (!organizationName && !teamName && !commonData.token) {
         if (commonData.permissions!.organizations!.length === 0) {
           // No public organizations availabld
           router.replace(`/login`);
+          return;
+        }
+        if (username) {
           return;
         }
         // Redirect user to the first public organization available on permissions
