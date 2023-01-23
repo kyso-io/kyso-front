@@ -46,6 +46,7 @@ const markCtaDone = async (cta: Cta, loggedUser: UserDTO) => {
       userProgress.step_3 = true;
       userProgress.step_4 = true;
       userProgress.step_5 = true;
+      userProgress.finish_and_remove = true;
       break;
     default:
       break;
@@ -183,6 +184,7 @@ const PureCheckListTour = (props: Props) => {
         loggedUser?.onboarding_progress.step_3!,
         loggedUser?.onboarding_progress.step_4!,
         loggedUser?.onboarding_progress.step_5!,
+        loggedUser?.onboarding_progress.finish_and_remove,
       );
 
       setOnboardingProgress(copyOnboardingProgress);
