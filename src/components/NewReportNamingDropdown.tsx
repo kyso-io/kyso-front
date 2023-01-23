@@ -80,14 +80,16 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
     const parentId: string | null = parent ? parent.id : null;
 
     if (parentId) {
-      const existingItem: CreationReportFileSystemObject | undefined = files.find((item: CreationReportFileSystemObject) => item.parentId === parentId && item.name === formattedName);
+      const existingItem: CreationReportFileSystemObject | undefined = files.find(
+        (item: CreationReportFileSystemObject) => item.parentId === parentId && item.name.toLowerCase() === formattedName.toLowerCase(),
+      );
       if (existingItem) {
         setErrorMessageInput('A file with this name already exists');
         e.preventDefault();
         return;
       }
     } else {
-      const existingItem: CreationReportFileSystemObject | undefined = files.find((item: CreationReportFileSystemObject) => item.name === formattedName);
+      const existingItem: CreationReportFileSystemObject | undefined = files.find((item: CreationReportFileSystemObject) => item.name.toLowerCase() === formattedName.toLowerCase());
       if (existingItem) {
         setErrorMessageInput('A file with this name already exists');
         e.preventDefault();
