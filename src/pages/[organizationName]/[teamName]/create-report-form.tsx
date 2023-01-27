@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-continue */
-/* eslint-disable consistent-return */
 import MemberFilterSelector from '@/components/MemberFilterSelector';
 import { PureAlert, PureAlertTypeEnum } from '@/components/PureAlert';
 import PureKysoButton from '@/components/PureKysoButton';
@@ -137,7 +136,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
 
   useEffect(() => {
     if (!commonData.user) {
-      return;
+      return undefined;
     }
     const interval = setInterval(() => {
       const validJwt: boolean = checkJwt();

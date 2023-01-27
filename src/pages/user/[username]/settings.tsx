@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable consistent-return */
 import { Helper } from '@/helpers/Helper';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { InformationCircleIcon } from '@heroicons/react/outline';
@@ -69,7 +68,7 @@ const Index = ({ commonData, setUser }: Props) => {
 
   useEffect(() => {
     if (!commonData.user) {
-      return;
+      return undefined;
     }
     const interval = setInterval(() => {
       const validJwt: boolean = checkJwt();
@@ -242,7 +241,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Bio:</label>
                 <div className="mt-1 sm:col-span-2 sm:mt-0">
                   <textarea
-                    value={bio}
+                    value={bio || ''}
                     onChange={(e: any) => setBio(e.target.value)}
                     name="bio"
                     rows={3}
@@ -255,7 +254,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Link:</label>
                 <div className="mt-1 sm:col-span-2 sm:mt-0">
                   <input
-                    value={link}
+                    value={link || ''}
                     onChange={(e: any) => setLink(e.target.value)}
                     type="text"
                     name="link"
@@ -268,7 +267,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Location:</label>
                 <div className="mt-1 sm:col-span-2 sm:mt-0">
                   <input
-                    value={location}
+                    value={location || ''}
                     onChange={(e: any) => setLocation(e.target.value)}
                     type="text"
                     name="link"
