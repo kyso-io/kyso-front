@@ -24,6 +24,7 @@ import JSZip from 'jszip';
 import { useRouter } from 'next/router';
 import type { ChangeEvent, ReactElement } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import slugify from 'slugify';
 import CaptchaModal from '../../../components/CaptchaModal';
 import { ForbiddenCreateReport } from '../../../components/ForbiddenCreateReport';
 import { RegisteredUsersAlert } from '../../../components/RegisteredUsersAlert';
@@ -900,9 +901,15 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                     type={KysoButton.SECONDARY}
                     onClick={() => {
                       let url = `/${router.query.organizationName}`;
+
                       if (router.query.teamName) {
                         url += `/${router.query.teamName}`;
                       }
+
+                      if (isEdition()) {
+                        url += `/${slugify(report.title).toLowerCase()}`;
+                      }
+
                       router.replace(url);
                     }}
                   >
