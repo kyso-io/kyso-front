@@ -335,14 +335,22 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 
     if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizationName as string)) {
       if (commonData.token) {
-        router.replace('/');
+        // If have a token, I want to show a "You have no permission" page. Because if I redirect directly the user
+        // don't know what the hell happened
+        // router.replace('/');
       } else {
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}/${router.query.reportName as string}`)}`);
       }
       return;
     }
     if (!HelperPermissions.belongsToTeam(commonData, router.query.organizationName as string, router.query.teamName as string)) {
-      router.replace(`/${router.query.organizationName as string}`);
+      if (commonData.token) {
+        // If have a token, I want to show a "You have no permission" page. Because if I redirect directly the user
+        // don't know what the hell happened
+        // router.replace(`/${router.query.organizationName as string}`);
+      } else {
+        router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}/${router.query.reportName as string}`)}`);
+      }
     }
   }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
 
@@ -569,19 +577,19 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const hasPermissionDeleteInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData, random]);
 
   if (commonData.errorOrganization) {
-    return <div className="text-center mt-4">{commonData.errorOrganization}</div>;
+    return renderSomethingHappened(commonData.errorOrganization);
   }
 
   if (commonData.errorTeam) {
-    return <div className="text-center mt-4">{commonData.errorTeam}</div>;
+    return renderSomethingHappened(commonData.errorTeam);
   }
 
   if (!reportData) {
-    return null;
+    return renderSomethingHappened("Can't retrieve report's contents");
   }
 
   if (reportData.errorReport) {
-    return <div className="text-center mt-4">{reportData.errorReport}</div>;
+    return renderSomethingHappened(reportData.errorReport);
   }
 
   const { report, authors } = reportData;
@@ -834,5 +842,39 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 };
 
 Index.layout = KysoApplicationLayout;
+
+const renderSomethingHappened = (whatHappened: string) => {
+  return (
+    <>
+      <div className="min-h-full bg-white py-16 px-6 sm:py-24 md:grid md:place-items-center lg:px-8">
+        <div className="mx-auto max-w-max">
+          <main className="sm:flex">
+            <p className="text-4xl font-bold tracking-tight text-indigo-600 sm:text-5xl">o_O</p>
+            <div className="sm:ml-6">
+              <div className="sm:border-l sm:border-gray-200 sm:pl-6">
+                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Something happened...</h1>
+                <p className="mt-1 text-base text-gray-500">{whatHappened}</p>
+              </div>
+              <div className="mt-10 flex space-x-3 sm:border-l sm:border-transparent sm:pl-6">
+                <a
+                  href="/"
+                  className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                  Go back home
+                </a>
+                <a
+                  href="/feedback"
+                  className="inline-flex items-center rounded-md border border-transparent bg-indigo-100 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                  Contact support
+                </a>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </>
+  );
+};
 
 export default Index;

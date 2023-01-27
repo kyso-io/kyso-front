@@ -678,6 +678,8 @@ const Index = ({ commonData, setUser }: Props) => {
       document.body.removeChild(aLink);
     } catch (e) {
       Helper.logError('Unexpected error', e);
+      setMessageToaster('Error exporting members to CSV');
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
     }
     setRequesting(false);
   };
@@ -685,12 +687,15 @@ const Index = ({ commonData, setUser }: Props) => {
   const onChangeJoinCodes = async (result: boolean) => {
     setRequesting(true);
     try {
-      const api: Api = new Api(commonData.token);
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
       const updateJoinCodesDto: UpdateJoinCodesDto = new UpdateJoinCodesDto(result, commonData.organization!.join_codes!.valid_until);
       await api.updateJoinCodes(commonData.organization!.id!, updateJoinCodesDto);
       window.location.href = `/settings/${commonData.organization!.sluglified_name}?tab=access`;
     } catch (e) {
       setRequesting(false);
+      Helper.logError('Error generating invitation links', e);
+      setMessageToaster('Error generating invitation links. Please review that your account is verified');
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
     }
   };
 
@@ -701,7 +706,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     setRequesting(true);
     try {
-      const api: Api = new Api(commonData.token);
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
       const updateJoinCodesDto: UpdateJoinCodesDto = new UpdateJoinCodesDto(true, date);
       if (commonData.organization?.join_codes) {
         await api.updateJoinCodes(commonData.organization!.id!, updateJoinCodesDto);
@@ -712,6 +717,10 @@ const Index = ({ commonData, setUser }: Props) => {
     } catch (e) {
       setRequesting(false);
       setIsOpenExpirationDateModal(false);
+      Helper.logError('Error generating invitation links', e);
+      setMessageToaster('Error generating invitation links. Please review that your account is verified');
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      setShowToaster(true);
     }
   };
 
