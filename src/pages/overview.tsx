@@ -12,6 +12,7 @@ import { useUser } from '@/hooks/use-user';
 import { Api } from '@kyso-io/kyso-store';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import slugify from 'slugify';
+import { getSessionStorageItem } from '@/helpers/isomorphic-session-storage';
 
 enum Cta {
   One,
@@ -77,6 +78,11 @@ const markCtaDone = async (cta: Cta, url: string, loggedUser: UserDTO, target?: 
 
 const Index = () => {
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
+  const redirectUrl: string | null = getSessionStorageItem('redirectUrl');
+
+  if (redirectUrl) {
+    window.open(redirectUrl, '_self');
+  }
 
   const [isOpen, setOpen] = useState(false);
   const [onboardingMessages, setOnboardingMessages] = useState({
