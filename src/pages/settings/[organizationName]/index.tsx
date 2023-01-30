@@ -15,6 +15,7 @@ import {
   OrganizationPermissionsEnum,
   UpdateJoinCodesDto,
   UpdateOrganizationMembersDTO,
+  UpdateOrganizationDTO,
   UserDTO,
   UserRoleDTO,
   OnboardingProgress,
@@ -431,9 +432,18 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       setRequesting(true);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
-      await api.updateOrganization(commonData.organization!.id!, {
-        allowed_access_domains: allowedAccessDomains,
-      } as any);
+
+      const updatedOrg: UpdateOrganizationDTO = new UpdateOrganizationDTO(
+        commonData.organization?.display_name!,
+        commonData.organization?.location!,
+        commonData.organization?.link!,
+        commonData.organization?.bio!,
+        allowedAccessDomains,
+        commonData.organization?.options!,
+        commonData.organization?.allow_download!,
+      );
+
+      await api.updateOrganization(commonData.organization!.id!, updatedOrg);
       router.reload();
     } catch (e: any) {
       /* eslint-disable no-console */
@@ -1147,7 +1157,12 @@ const Index = ({ commonData, setUser }: Props) => {
                               >
                                 <p className="text-sm font-medium text-gray-900">{userDto.display_name}</p>
                                 <p className="truncate text-sm text-gray-500">{userDto.email}</p>
-                                {showErrorDomain && <p className="truncate text-sm text-red-500 mt-2">User email domain is not allowed</p>}
+                                {showErrorDomain && (
+                                  <>
+                                    <p className="truncate text-sm text-red-500 mt-2">Your organization doesn&apos;t allow this domain</p>
+                                    <p className="truncate text-sm text-red-500 mt-2">Allowed domains are: {commonData.organization?.allowed_access_domains.map((x) => `${x} - `)} </p>
+                                  </>
+                                )}
                               </a>
                             </div>
                             <div className="flex flex-row">
