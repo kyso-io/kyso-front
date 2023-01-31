@@ -8,7 +8,6 @@ import PureTree from '@/components/PureTree';
 import classNames from '@/helpers/class-names';
 import { getReport } from '@/helpers/get-report';
 import { v4 as uuidv4 } from 'uuid';
-// import { uuid } from 'uuidv4'; -> gives me a console.log error
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import useIsInViewport from '@/hooks/use-is-in-viewport';
@@ -37,6 +36,7 @@ import {
   UpdateOrganizationMembersDTO,
   UpdateTeamMembersDTO,
   UserRoleDTO,
+  UpdateReportRequestDTO,
 } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -175,9 +175,23 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const setReportFileAsMainFile = async () => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-      await api.updateReport(report!.id!, { main_file: fileToRender!.id } as any);
+
+      const reportToUpdate: UpdateReportRequestDTO = new UpdateReportRequestDTO(
+        report?.title!,
+        report?.description!,
+        report?.show_code!,
+        report?.show_output!,
+        fileToRender!.id,
+        report?.tags!,
+        [], // expects array of emails, putting an empty array makes no changes
+        report?.toc!,
+      );
+
+      await api.updateReport(report!.id!, reportToUpdate);
       refreshReport();
-    } catch (e: any) {}
+    } catch (e: unknown) {
+      Helper.logError('Unexpected error setting main file', e);
+    }
   };
 
   const getTree = async (args: { path: string; report: ReportDTO | null | undefined; version?: string; commonData: CommonData }): Promise<GithubFileHash[]> => {
