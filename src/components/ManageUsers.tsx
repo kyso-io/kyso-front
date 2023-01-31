@@ -419,7 +419,10 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           <div className="flex-1" style={{ marginLeft: 10 }}>
                             <p className="text-xs font-medium text-gray-900 truncate mt-1">{query}</p>
                             {showErrorDomain ? (
-                              <p className="truncate text-sm text-red-500 mt-2">User email domain is not allowed</p>
+                              <>
+                                <p className="truncate text-sm text-red-500 mt-2">Your organization doesn&apos;t allow this domain</p>
+                                <p className="truncate text-sm text-red-500 mt-2">Allowed domains are {commonData.organization?.allowed_access_domains.map((x) => `${x} - `)} </p>
+                              </>
                             ) : (
                               <div className="flex flex-row">
                                 {organizationRoles && (
