@@ -270,6 +270,8 @@ const Index = ({ commonData, setUser }: Props) => {
           setSlackChannel(commonData.organization.options.notifications.slackChannel || '');
           setTeamsIncomingWebhookUrl(commonData.organization.options.notifications.teamsIncomingWebhookUrl || '');
         }
+        // DEPRECATED
+        /*
         if (commonData.organization.options?.auth) {
           setLoginKyso(commonData.organization.options.auth.allow_login_with_kyso || false);
           setLoginGoogle(commonData.organization.options.auth.allow_login_with_google || false);
@@ -277,6 +279,7 @@ const Index = ({ commonData, setUser }: Props) => {
           setLoginBitbucket(commonData.organization.options.auth.allow_login_with_bitbucket || false);
           setLoginGitlab(commonData.organization.options.auth.allow_login_with_gitlab || false);
         }
+        */
       }
     } else {
       setBio('');
