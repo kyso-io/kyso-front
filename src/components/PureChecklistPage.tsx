@@ -31,9 +31,10 @@ const processUrl = (url: string, loggedUser: UserDTO): string => {
   let processedUrl = url;
 
   /* eslint-disable no-template-curly-in-string */
-  if (url.includes('${user}')) {
+  if (url.includes('${user}') || url.includes('${username}')) {
     /* eslint-disable no-template-curly-in-string */
     processedUrl = processedUrl.replace('${user}', slugify(loggedUser.name.toLowerCase()));
+    processedUrl = processedUrl.replace('${username}', loggedUser.username);
   }
 
   return processedUrl;
