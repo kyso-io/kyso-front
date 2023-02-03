@@ -31,6 +31,7 @@ const processUrl = (url: string, loggedUser: UserDTO): string => {
   if (url.includes('${user}')) {
     /* eslint-disable no-template-curly-in-string */
     processedUrl = processedUrl.replace('${user}', slugify(loggedUser.name.toLowerCase()));
+    processedUrl = processedUrl.replace('${username}', loggedUser.username);
   }
 
   return processedUrl;
@@ -164,6 +165,20 @@ const Index = () => {
       <div className="mx-auto max-w-7xl py-6 px-4 text-center sm:px-6 lg:px-8">
         {userIsLogged ? (
           <div>
+            <span
+              style={{
+                float: 'right',
+                zIndex: 1,
+                position: 'relative',
+                padding: '20px',
+                cursor: 'pointer',
+              }}
+              onClick={() => window.open('/', '_self')}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-8 h-8">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </span>
             <div className="mx-auto py-16 px-4 text-center sm:py-20 sm:px-6 lg:px-8 border bg-gray-50 rounded-lg drop-shadow-2xl">
               <div className="mx-auto max-w-2xl">
                 <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
@@ -183,7 +198,7 @@ const Index = () => {
               </h2>
               <div className="mt-22 flex justify-center">
                 <a onClick={() => markCtaDone(Cta.One, onboardingMessages.first_cta.url, loggedUser!)} onAuxClick={() => markCtaDone(Cta.One, onboardingMessages.first_cta.url, loggedUser!, '_blank')}>
-                  <div className="w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg  before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
+                  <div className="cursor-pointer w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg  before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
                     <div className="relative aspect-[2/1] overflow-hidden ">
                       <img src="/static/publishing.png" alt="" className="mx-auto relative inset-0 h-full group-hover:opacity-0 opacity-100" />
                       <img src="/static/publishing (1).png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-100 opacity-0" />
@@ -199,7 +214,7 @@ const Index = () => {
                   onClick={() => markCtaDone(Cta.Two, onboardingMessages.second_cta.url, loggedUser!)}
                   onAuxClick={() => markCtaDone(Cta.Two, onboardingMessages.second_cta.url, loggedUser!, '_blank')}
                 >
-                  <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100 mx-20">
+                  <div className="cursor-pointer w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100 mx-20">
                     <div className="relative aspect-[2/1] overflow-hidden">
                       <img src="/static/open-book (1).png" alt="" className="absolute mx-auto inset-0 h-full group-hover:opacity-0 opacity-100" />
                       <img src="/static/open-book.png" alt="" className="absolute mx-auto inset-0 h-full group-hover:opacity-100 opacity-0" />
@@ -215,7 +230,7 @@ const Index = () => {
                   onClick={() => markCtaDone(Cta.Three, onboardingMessages.third_cta.url, loggedUser!)}
                   onAuxClick={() => markCtaDone(Cta.Three, onboardingMessages.third_cta.url, loggedUser!, '_blank')}
                 >
-                  <div className=" w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
+                  <div className="cursor-pointer w-64 p-2 group relative before:absolute before:-inset-2.5 group-hover:rounded-lg before:bg-gray-100 before:opacity-0 hover:before:opacity-100">
                     <div className="relative aspect-[2/1] overflow-hidden">
                       <img src="/static/search.png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-0 opacity-100" />
                       <img src="/static/search (1).png" alt="" className="mx-auto absolute inset-0 h-full group-hover:opacity-100 opacity-0" />

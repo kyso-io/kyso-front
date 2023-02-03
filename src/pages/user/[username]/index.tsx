@@ -2,6 +2,7 @@
 import ActivityFeedComponent from '@/components/ActivityFeed';
 import { PureSpinner } from '@/components/PureSpinner';
 import ReportBadge from '@/components/ReportBadge';
+import { SomethingHappened } from '@/components/SomethingHappened';
 import UserProfileInfo from '@/components/UserProfileInfo';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useInterval } from '@/hooks/use-interval';
@@ -325,7 +326,7 @@ const Index = ({ commonData, setUser }: Props) => {
   }
 
   if (userProfileData.errorUserProfile) {
-    return <div className="text-center mt-4">{userProfileData.errorUserProfile}</div>;
+    return <SomethingHappened asciiArt="ಠ_ಠ" description={userProfileData.errorUserProfile}></SomethingHappened>;
   }
 
   return (
