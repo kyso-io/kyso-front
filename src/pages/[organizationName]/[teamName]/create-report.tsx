@@ -8,6 +8,7 @@ import { PureSpinner } from '@/components/PureSpinner';
 import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 import RenderCode from '@/components/renderers/RenderCode';
 import RenderError from '@/components/renderers/RenderError';
+import { SomethingHappened } from '@/components/SomethingHappened';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
 import classNames from '@/helpers/class-names';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
@@ -33,7 +34,6 @@ import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import CaptchaModal from '../../../components/CaptchaModal';
-import { ForbiddenCreateReport } from '../../../components/ForbiddenCreateReport';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../helpers/check-permissions';
@@ -843,7 +843,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
         {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       </div>
     ) : (
-      <ForbiddenCreateReport commonData={commonData} />
+      <SomethingHappened title="Forbidden resource" description={`Sorry, but you don't have permissions to create reports`} asciiArt="ᕕ(⌐■_■)ᕗ"></SomethingHappened>
     )
   ) : (
     <div className="flex flex-row space-x-8 p-2">
