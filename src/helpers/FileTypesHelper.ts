@@ -70,9 +70,7 @@ export class FileTypesHelper {
   };
 
   public static isTextBasedFiled = (name: string) => {
-    return (
-      name != null && (name.toLowerCase().endsWith('.txt') || FileTypesHelper.isYAML(name) || FileTypesHelper.isJSON(name) || FileTypesHelper.isMarkdown(name) || name.toLowerCase().endsWith('.cfg'))
-    );
+    return name != null && (name.toLowerCase().endsWith('.txt') || FileTypesHelper.isMarkdown(name) || name.toLowerCase().endsWith('.cfg'));
   };
 
   public static isJupyterNotebook = (name: string) => {
@@ -88,7 +86,7 @@ export class FileTypesHelper {
 
     const isInExtensions: boolean = extensions.filter((x) => x === `.${FileTypesHelper.getExtension(name)}`).length > 0;
 
-    return isInExtensions;
+    return isInExtensions || FileTypesHelper.isYAML(name) || FileTypesHelper.isJSON(name);
   };
 
   public static isPowerpoint = (name: string) => {
