@@ -58,6 +58,8 @@ const Page = () => {
             router.push(`/captcha${state ? `?invitation=${state as string}` : ''}`);
           } else if (state) {
             router.push(state as string);
+          } else if (user.show_onboarding) {
+            router.push('/overview');
           } else {
             router.push('/');
           }
