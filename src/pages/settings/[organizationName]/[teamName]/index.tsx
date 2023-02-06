@@ -568,13 +568,14 @@ const Index = ({ commonData, setUser }: Props) => {
                   className="mr-4"
                 />
                 <h2 className="grow text-3xl font-bold tracking-tight sm:text-4xl">{commonData.organization?.display_name}</h2>
+
                 <button
                   className="rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   onClick={() => {
-                    window.location.href = `/settings/${commonData.organization?.sluglified_name}?edit=true`;
+                    window.location.href = `/settings/${commonData.organization?.sluglified_name}`;
                   }}
                 >
-                  Edit
+                  Back to organization settings
                 </button>
               </div>
               <div className="py-3">
@@ -602,9 +603,9 @@ const Index = ({ commonData, setUser }: Props) => {
                           case OrganizationSettingsTab.Members:
                             setSelectedTab(element.key);
                             break;
-                          case OrganizationSettingsTab.Access:
+                          /* case OrganizationSettingsTab.Access:
                             router.push(`/settings/${commonData.organization?.sluglified_name}?tab=${element.key}`);
-                            break;
+                            break; */
                           case OrganizationSettingsTab.Notifications:
                             setSelectedTab(element.key);
                             break;
@@ -614,11 +615,12 @@ const Index = ({ commonData, setUser }: Props) => {
                       }}
                       className={clsx(
                         element.key === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                        element.key === OrganizationSettingsTab.Access ? 'hidden' : '',
                         'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer',
                       )}
                       aria-current={element.key === selectedTab ? 'page' : undefined}
                     >
-                      {element.name}
+                      {element.key === OrganizationSettingsTab.Channels ? `Channel: ${commonData.team?.display_name}` : element.name}
                     </a>
                   ))}
                 </nav>
@@ -844,7 +846,7 @@ const Index = ({ commonData, setUser }: Props) => {
                 {/* SEARCH USERS */}
                 {isOrgAdmin && (
                   <div className="mt-8">
-                    <h3 className="text-lg font-medium leading-6 text-gray-900">Add users to the channel:</h3>
+                    <h3 className="text-lg font-medium leading-6 text-gray-900">Add users to the channel {commonData.team?.display_name}:</h3>
                     <div className="my-8 sm:col-span-2">
                       <input
                         type="text"
@@ -901,7 +903,9 @@ const Index = ({ commonData, setUser }: Props) => {
                 )}
                 {/* TEAM MEMBERS */}
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900 mt-8">Channel members ({members.length}):</h3>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900 mt-8">
+                    Members of {commonData.team?.display_name} ({members.length}):
+                  </h3>
                   {(isOrgAdmin || isTeamAdmin) && (
                     <button
                       className={clsx(
@@ -996,7 +1000,7 @@ const Index = ({ commonData, setUser }: Props) => {
             {selectedTab === OrganizationSettingsTab.Notifications && (
               <React.Fragment>
                 <div className="space-y-1 mt-8 mb-4">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Slack integration</h3>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Slack integration for channel {commonData.team?.display_name}</h3>
                   <p className="max-w-2xl text-sm text-gray-500">
                     Configure your slack integration to receive all the updates of this channel. Slack must be configured at organization level, contact your <b>organization admin</b>.
                   </p>
@@ -1013,7 +1017,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   </div>
                 </div>
                 <div className="space-y-1 mt-8 mb-4">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Teams integration</h3>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">Teams integration for channel {commonData.team?.display_name}</h3>
                   <p className="max-w-2xl text-sm text-gray-500">Configure your teams integration to receive all the updates of this channel</p>
                 </div>
                 <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5 mt-5">
