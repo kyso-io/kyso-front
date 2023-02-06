@@ -74,10 +74,6 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
             <p className="text-xs md:text-sm text-gray-500 pt-3 break-words">{description}</p>
           </a>
           <div className="hidden md:block absolute bottom-2 right-0">
-            {report.report_type && (
-              <span className="bg-orange-100 text-orange-800 text-xs font-semibold mr-2 px-2.5 py-1 rounded-xl dark:bg-orange-200 dark:text-orange-900">{report.report_type}</span>
-            )}
-
             <PureTagGroup tags={report.tags} />
           </div>
         </div>
