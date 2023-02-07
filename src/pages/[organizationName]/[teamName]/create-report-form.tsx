@@ -8,7 +8,6 @@ import { SomethingHappened } from '@/components/SomethingHappened';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
 import classNames from '@/helpers/class-names';
 import { removeLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import { useUser } from '@/hooks/use-user';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
@@ -49,8 +48,6 @@ interface Props {
 
 const CreateReport = ({ commonData, setUser }: Props) => {
   const router = useRouter();
-  const loggedUser = useUser();
-
   const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
   const [loggedUserShowCaptcha, setLoggedUserShowCaptcha] = useState<boolean>(true);
   const [showToaster, setShowToaster] = useState<boolean>(false);
@@ -129,11 +126,11 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   }, []);
 
   useEffect(() => {
-    if (loggedUser) {
-      setLoggedUserEmailVerified(loggedUser.email_verified);
-      setLoggedUserShowCaptcha(loggedUser.show_captcha);
+    if (commonData.user) {
+      setLoggedUserEmailVerified(commonData.user.email_verified);
+      setLoggedUserShowCaptcha(commonData.user.show_captcha);
     }
-  }, [loggedUser]);
+  }, [commonData.user]);
 
   useEffect(() => {
     if (!commonData.user) {

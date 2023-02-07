@@ -205,7 +205,7 @@ const PureOnboardingDropdown = ({ user }: Props) => {
             </Menu.Items>
           </Transition>
         )}
-        {value !== '' && <PureCheckListPage setValue={setValue} setOpen={() => setOpen(!open)} open={open} content={valueContent} />}
+        {value !== '' && <PureCheckListPage setValue={setValue} setOpen={() => setOpen(!open)} open={open} content={valueContent} user={user} />}
       </div>
     </Menu>
   );
