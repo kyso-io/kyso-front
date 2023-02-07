@@ -153,7 +153,8 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                               setMessageToaster('');
                               setShowToaster(false);
                             }}
-                            onKeyDown={(e) => {
+                            /* eslint-disable @typescript-eslint/no-explicit-any */
+                            onKeyDown={(e: any) => {
                               if (e.key === 'Enter') {
                                 handleCreation(e);
                               }

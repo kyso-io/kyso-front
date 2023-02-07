@@ -516,7 +516,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
               <div className="flex flex-row items-center space-x-2">
                 <div className="mr-2">posting into</div>
                 <Menu as="div" className="relative w-fit inline-block text-left">
-                  <Menu.Button className="hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded">
+                  <Menu.Button className="hover:bg-gray-100 border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded">
                     {commonData.team ? commonData.team.display_name : 'Select a channel'}
                     <div className="pl-2">
                       <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
@@ -765,7 +765,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
           <div className="w-4/6">
             {FileTypesHelper.isTextBasedFiled(selectedFile.file.name) && (
               <>
-                <SimpleMdeReact key="editor" options={editorOptions} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
+                <SimpleMdeReact key="editor" options={editorOptions as any} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
               </>
             )}
 
