@@ -1,16 +1,18 @@
-import { Menu, Transition } from '@headlessui/react';
-import React, { useState, Fragment, useEffect } from 'react';
-import { useUser } from '@/hooks/use-user';
-import type { UserDTO, KysoSetting, NormalizedResponseDTO } from '@kyso-io/kyso-model';
-import { OnboardingProgress, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Helper } from '@/helpers/Helper';
+import { Menu, Transition } from '@headlessui/react';
+import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, OnboardingProgress } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import router from 'next/router';
-import PureCheckListTour from './PureCheckListTour';
+import { Fragment, useEffect, useState } from 'react';
 import PureCheckListPage from './PureChecklistPage';
+import PureCheckListTour from './PureCheckListTour';
 
-const PureOnboardingDropdown = () => {
-  const loggedUser: UserDTO | null = useUser();
+interface Props {
+  user: UserDTO;
+}
+
+const PureOnboardingDropdown = ({ user }: Props) => {
   const [value, setValue] = useState('');
   const [open, setOpen] = useState<boolean>(false);
   const [onboardingProgress, setOnboardingProgress] = useState(OnboardingProgress.createEmpty());
@@ -126,22 +128,22 @@ const PureOnboardingDropdown = () => {
   }, [onboarding]);
 
   useEffect(() => {
-    if (loggedUser) {
+    if (user) {
       // Necessary to access the getProgressPercentage. As the loggedUser comes from an unmarshalling process, only the data
       // is available, but not the functions of the object. For that we create a new object that is a copy of the loggedUser.onboarding_progress
       // property
       const copyOnboardingProgress: OnboardingProgress = new OnboardingProgress(
-        loggedUser?.onboarding_progress.step_1!,
-        loggedUser?.onboarding_progress.step_2!,
-        loggedUser?.onboarding_progress.step_3!,
-        loggedUser?.onboarding_progress.step_4!,
-        loggedUser?.onboarding_progress.step_5!,
-        loggedUser?.onboarding_progress.finish_and_remove!,
+        user.onboarding_progress.step_1!,
+        user.onboarding_progress.step_2!,
+        user.onboarding_progress.step_3!,
+        user.onboarding_progress.step_4!,
+        user.onboarding_progress.step_5!,
+        user.onboarding_progress.finish_and_remove!,
       );
 
       setOnboardingProgress(copyOnboardingProgress);
     }
-  }, [loggedUser]);
+  }, [user]);
 
   useEffect(() => {
     if (value === 'publish') {
@@ -199,7 +201,7 @@ const PureOnboardingDropdown = () => {
             leaveTo="transform opacity-0 scale-95"
           >
             <Menu.Items className="z-50 absolute right-0 mt-2 h-auto w-max origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
-              <PureCheckListTour setValue={setValue} />
+              <PureCheckListTour user={user} setValue={setValue} />
             </Menu.Items>
           </Transition>
         )}

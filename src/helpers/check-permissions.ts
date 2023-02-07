@@ -135,11 +135,6 @@ export class HelperPermissions {
       return false;
     }
 
-    // Check that the user has permissions. If has no permissions, then doesn't belong to the organization.
-    if (commonData.permissions.organizations[indexOrganization]?.permissions?.length! === 0) {
-      return false;
-    }
-
     return true;
   };
 
