@@ -24,6 +24,21 @@ docker-build:
       -e "s%__GIT_REF__%$GIT_REF%g" \
       tmpl/v.html > public/v.html
 
+dtrack-check:
+  stage: source_qa
+  image: registry.kyso.io/docker/node-builder:16.15.1-alpine3.16
+
+  before_script:
+  - !reference [.docker-config, before_script]
+  - !reference [.npm-config, before_script]
+  
+  script:
+  - npm install -g @fjbarrena/dtrack-cli
+  - npm install --global @cyclonedx/cyclonedx-npm
+  - npm install
+  - cyclonedx-npm --output-file bom.xml
+  - dtrack-cli --server https://dtrack.dev.kyso.io --bom-path bom.xml --api-key mhJ7ZcJylUH2WY5cFsU2zs87kH9wLABu --project-name kyso-front --project-version latest --auto-create true
+
 variables:
   DOCKER_BUILDKIT: 1
   # Disable SAST until someone looks at it, for now it is expensive and
