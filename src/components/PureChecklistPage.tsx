@@ -1,13 +1,13 @@
-import { Transition, Menu } from '@headlessui/react';
-import { ChevronDoubleLeftIcon } from '@heroicons/react/solid';
 import UnPureVideoModal from '@/components/PureVideoModal';
-import { classNames } from 'primereact/utils';
-import React, { Fragment, useState } from 'react';
-import slugify from 'slugify';
+import { Menu, Transition } from '@headlessui/react';
+import { ChevronDoubleLeftIcon } from '@heroicons/react/solid';
 import type { UserDTO } from '@kyso-io/kyso-model';
-import { useUser } from '@/hooks/use-user';
+import { classNames } from 'primereact/utils';
+import { Fragment, useState } from 'react';
+import slugify from 'slugify';
 
 interface Props {
+  user: UserDTO;
   setValue: (value: string) => void;
   setOpen: () => void;
   open: boolean;
@@ -41,8 +41,7 @@ const processUrl = (url: string, loggedUser: UserDTO): string => {
 };
 
 const PureCheckListPage = (props: Props) => {
-  const loggedUser: UserDTO | null = useUser();
-  const { setValue, setOpen, open, content } = props;
+  const { setValue, setOpen, open, content, user } = props;
   const [isModalOpen, openModal] = useState(false);
   return (
     <Transition
@@ -81,7 +80,7 @@ const PureCheckListPage = (props: Props) => {
             <button
               className="w-fit whitespace-nowrap p-3 font-medium text-white rounded bg-kyso-600 hover:bg-kyso-700 text-sm flex flex-row items-center focus:ring-0 focus:outline-none"
               onClick={() => {
-                window.open(processUrl(content.ctaUrl, loggedUser!));
+                window.open(processUrl(content.ctaUrl, user));
                 setValue('');
                 setOpen();
               }}

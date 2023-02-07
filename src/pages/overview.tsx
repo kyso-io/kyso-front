@@ -1,18 +1,17 @@
-import NoLayout from '@/layouts/NoLayout';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
-// import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import { Helper } from '@/helpers/Helper';
 import PureVideoModal from '@/components/PureVideoModal';
 import { checkJwt } from '@/helpers/check-jwt';
-import type { KeyValue } from '@/model/key-value.model';
-import type { UserDTO, OnboardingProgress } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
-import { useUser } from '@/hooks/use-user';
-import { Api } from '@kyso-io/kyso-store';
+import { Helper } from '@/helpers/Helper';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import slugify from 'slugify';
 import { getSessionStorageItem } from '@/helpers/isomorphic-session-storage';
+import NoLayout from '@/layouts/NoLayout';
+import type { KeyValue } from '@/model/key-value.model';
+import { ExclamationCircleIcon } from '@heroicons/react/solid';
+import type { NormalizedResponseDTO, OnboardingProgress, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
+import { Api, logoutAction } from '@kyso-io/kyso-store';
+import { useEffect, useState } from 'react';
+import slugify from 'slugify';
+import { useAppDispatch } from '../hooks/redux-hooks';
 
 enum Cta {
   One,
@@ -80,6 +79,8 @@ const markCtaDone = async (cta: Cta, url: string, loggedUser: UserDTO, target?: 
 const Index = () => {
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const redirectUrl: string | null = getSessionStorageItem('redirectUrl');
+  const [loggedUser, setLoggedUser] = useState<UserDTO | null>(null);
+  const dispatch = useAppDispatch();
 
   if (redirectUrl) {
     window.open(redirectUrl, '_self');
@@ -105,7 +106,25 @@ const Index = () => {
       url: '/',
     },
   });
-  const loggedUser: UserDTO | null = useUser();
+
+  useEffect(() => {
+    const token: string | null = getLocalStorageItem('jwt');
+    if (!token) {
+      return;
+    }
+    const getUser = async () => {
+      try {
+        const api: Api = new Api(token);
+        const responseUserDto: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+        setLoggedUser(responseUserDto.data);
+      } catch (e) {
+        localStorage.removeItem('jwt');
+        sessionStorage.clear();
+        await dispatch(logoutAction());
+      }
+    };
+    getUser();
+  }, []);
 
   useEffect(() => {
     const updateShowOnboarding = async () => {
