@@ -7,7 +7,7 @@ import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
-import { ChevronDownIcon, XIcon } from '@heroicons/react/solid';
+import { ChevronDownIcon, ExclamationCircleIcon, XIcon } from '@heroicons/react/solid';
 import type { UserDTO } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
@@ -21,6 +21,7 @@ import type { Member } from '../types/member';
 import CaptchaModal from './CaptchaModal';
 import PureAvatar from './PureAvatar';
 import PureAvatarGroup from './PureAvatarGroup';
+import ToasterNotification from './ToasterNotification';
 
 const MAX_USERS_TO_SHOW = 5;
 const REMOVE_USER_VALUE = 'remove';
@@ -107,6 +108,8 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     return data;
   }, [selectedUser, filteredMembers, users]);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [show, setShow] = useState<boolean>(false);
+  const [alertText, setAlertText] = useState<string>('');
 
   const showErrorDomain: boolean = useMemo(() => {
     if (query && isEmail && isOrgAdmin && commonData.organization) {
@@ -194,6 +197,11 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                 : 'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
             )}
             onClick={() => {
+              if (!commonData.user!.email_verified) {
+                setShow(true);
+                setAlertText('Please verify your email address before inviting a user.');
+                return;
+              }
               if (captchaIsEnabled && commonData.user?.show_captcha === true) {
                 setShowCaptchaModal(true);
                 return;
@@ -216,6 +224,11 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                 : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
             )}
             onClick={() => {
+              if (!commonData.user!.email_verified) {
+                setShow(true);
+                setAlertText('Please verify your email address before inviting a user.');
+                return;
+              }
               if (captchaIsEnabled && commonData.user?.show_captcha === true) {
                 setShowCaptchaModal(true);
                 return;
@@ -470,6 +483,11 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
                               )}
                               onClick={() => {
+                                if (!commonData.user!.email_verified) {
+                                  setShow(true);
+                                  setAlertText('Please verify your email address before updating the role of the user.');
+                                  return;
+                                }
                                 if (captchaIsEnabled && commonData.user?.show_captcha === true) {
                                   setShowCaptchaModal(true);
                                   return;
@@ -662,6 +680,11 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
                               )}
                               onClick={() => {
+                                if (!commonData.user!.email_verified) {
+                                  setShow(true);
+                                  setAlertText('Please verify your email address before updating the role of the user.');
+                                  return;
+                                }
                                 if (captchaIsEnabled && commonData.user?.show_captcha === true) {
                                   setShowCaptchaModal(true);
                                   return;
@@ -693,6 +716,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
           );
         }}
       </Menu>
+      <ToasterNotification show={show} setShow={setShow} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={alertText} />
       <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />
     </React.Fragment>
   );

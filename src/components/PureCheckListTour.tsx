@@ -1,14 +1,14 @@
-import { CheckCircleIcon, ChevronDoubleRightIcon, XCircleIcon } from '@heroicons/react/solid';
-import React, { useEffect, useState } from 'react';
-import type { UserDTO, NormalizedResponseDTO, KysoSetting } from '@kyso-io/kyso-model';
-import { OnboardingProgress, UpdateUserRequestDTO, KysoSettingsEnum } from '@kyso-io/kyso-model';
-import { ProgressBar } from 'primereact/progressbar';
-import { useUser } from '@/hooks/use-user';
-import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import { Api } from '@kyso-io/kyso-store';
 import { Helper } from '@/helpers/Helper';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { CheckCircleIcon, ChevronDoubleRightIcon, XCircleIcon } from '@heroicons/react/solid';
+import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, OnboardingProgress, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
+import { Api } from '@kyso-io/kyso-store';
+import { ProgressBar } from 'primereact/progressbar';
+import { useEffect, useState } from 'react';
 
 interface Props {
+  user: UserDTO;
   setValue: (value: string) => void;
 }
 
@@ -69,10 +69,9 @@ const markCtaDone = async (cta: Cta, loggedUser: UserDTO) => {
 };
 
 const PureCheckListTour = (props: Props) => {
-  const loggedUser: UserDTO | null = useUser();
   const [progress, setProgress] = useState(0);
   const [onboardingProgress, setOnboardingProgress] = useState(OnboardingProgress.createEmpty());
-  const { setValue } = props;
+  const { setValue, user } = props;
 
   // default values
   /* eslint-disable no-template-curly-in-string */
@@ -175,23 +174,23 @@ const PureCheckListTour = (props: Props) => {
   }, []);
 
   useEffect(() => {
-    if (loggedUser) {
+    if (user) {
       // Necessary to access the getProgressPercentage. As the loggedUser comes from an unmarshalling process, only the data
       // is available, but not the functions of the object. For that we create a new object that is a copy of the loggedUser.onboarding_progress
       // property
       const copyOnboardingProgress: OnboardingProgress = new OnboardingProgress(
-        loggedUser?.onboarding_progress.step_1!,
-        loggedUser?.onboarding_progress.step_2!,
-        loggedUser?.onboarding_progress.step_3!,
-        loggedUser?.onboarding_progress.step_4!,
-        loggedUser?.onboarding_progress.step_5!,
-        loggedUser?.onboarding_progress.finish_and_remove,
+        user.onboarding_progress.step_1!,
+        user.onboarding_progress.step_2!,
+        user.onboarding_progress.step_3!,
+        user.onboarding_progress.step_4!,
+        user.onboarding_progress.step_5!,
+        user.onboarding_progress.finish_and_remove,
       );
 
       setOnboardingProgress(copyOnboardingProgress);
       setProgress(copyOnboardingProgress.getProgressPercentage());
     }
-  }, [loggedUser]);
+  }, [user]);
 
   return (
     <div className="space-y-5 pt-8">
@@ -220,7 +219,7 @@ const PureCheckListTour = (props: Props) => {
         className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
         onClick={() => {
           setValue('publish');
-          markCtaDone(Cta.One, loggedUser!);
+          markCtaDone(Cta.One, user);
         }}
       >
         <div className="flex h-5 items-center w-8">
@@ -239,7 +238,7 @@ const PureCheckListTour = (props: Props) => {
         className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
         onClick={() => {
           setValue('read');
-          markCtaDone(Cta.Two, loggedUser!);
+          markCtaDone(Cta.Two, user);
         }}
       >
         <div className="flex h-5 items-center w-8">
@@ -258,7 +257,7 @@ const PureCheckListTour = (props: Props) => {
         className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
         onClick={() => {
           setValue('search');
-          markCtaDone(Cta.Three, loggedUser!);
+          markCtaDone(Cta.Three, user);
         }}
       >
         <div className="flex h-5 items-center w-8">
@@ -277,7 +276,7 @@ const PureCheckListTour = (props: Props) => {
         className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
         onClick={() => {
           setValue('profile');
-          markCtaDone(Cta.Four, loggedUser!);
+          markCtaDone(Cta.Four, user);
         }}
       >
         <div className="flex h-5 items-center w-8">
@@ -295,7 +294,7 @@ const PureCheckListTour = (props: Props) => {
         className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
         onClick={() => {
           setValue('cli');
-          markCtaDone(Cta.Five, loggedUser!);
+          markCtaDone(Cta.Five, user);
         }}
       >
         <div className="flex h-5 items-center w-8">
@@ -314,7 +313,7 @@ const PureCheckListTour = (props: Props) => {
           className="relative flex items-start py-3 px-6 hover:bg-slate-50 my-3"
           onClick={() => {
             setValue('finish-and-remove');
-            markCtaDone(Cta.All, loggedUser!);
+            markCtaDone(Cta.All, user);
           }}
         >
           <div className="flex h-5 items-center w-8">

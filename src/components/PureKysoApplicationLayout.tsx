@@ -148,7 +148,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         </div>
                         {commonData.user && (
                           <div className="flex items-center mr-2 cursor-pointer">
-                            <PureOnboardingDropdown />
+                            <PureOnboardingDropdown user={commonData.user} />
                           </div>
                         )}
                       </div>
