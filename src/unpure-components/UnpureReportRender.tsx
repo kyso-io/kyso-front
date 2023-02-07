@@ -204,6 +204,8 @@ const UnpureReportRender = ({
                 <RenderOnlyOffice fileUrl={`http://kyso-scs/scs${fileToRender.path_scs}`} token={localStorage.getItem('jwt')} />
               ) : FileTypesHelper.isSVS(fileToRender.path) && frontEndUrl ? (
                 <RenderMicroscopeSVS fileUrl={`http://kyso-scs/scs${fileToRender.path_scs}`} token={localStorage.getItem('jwt')} />
+              ) : FileTypesHelper.isTextBasedFiled(fileToRender.path) && !fileToRender.content ? (
+                <div></div>
               ) : (
                 <div className="prose p-3">
                   Kyso cannot render this type of file. Do you need it? Give us{' '}
