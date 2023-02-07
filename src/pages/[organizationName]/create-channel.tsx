@@ -67,6 +67,19 @@ const Index = ({ commonData, setUser }: Props) => {
     getData();
   }, []);
 
+  useEffect(() => {
+    if (!commonData.user) {
+      return undefined;
+    }
+    const interval = setInterval(() => {
+      const validJwt: boolean = checkJwt();
+      if (!validJwt) {
+        router.replace('/logout');
+      }
+    }, Helper.CHECK_JWT_TOKEN_MS);
+    return () => clearInterval(interval);
+  }, [commonData.user]);
+
   const checkName = async (name: string) => {
     setFormName(name);
     setError('');
