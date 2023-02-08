@@ -447,7 +447,7 @@ const Index = ({ commonData, setUser }: Props) => {
       );
 
       await api.updateOrganization(commonData.organization!.id!, updatedOrg);
-      router.reload();
+      window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Access}`;
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
@@ -493,7 +493,7 @@ const Index = ({ commonData, setUser }: Props) => {
           teamsIncomingWebhookUrl,
         },
       } as any);
-      router.reload();
+      window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
@@ -1388,7 +1388,9 @@ const Index = ({ commonData, setUser }: Props) => {
                         <div className="flex justify-end">
                           <button
                             disabled={requesting}
-                            onClick={() => router.reload()}
+                            onClick={() => {
+                              window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Access}`;
+                            }}
                             type="button"
                             className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                           >
@@ -1563,7 +1565,9 @@ const Index = ({ commonData, setUser }: Props) => {
                   <div className="flex justify-end">
                     <button
                       disabled={requesting}
-                      onClick={() => router.reload()}
+                      onClick={() => {
+                        window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
+                      }}
                       type="button"
                       className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
