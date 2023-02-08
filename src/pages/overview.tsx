@@ -2,7 +2,6 @@ import PureVideoModal from '@/components/PureVideoModal';
 import { checkJwt } from '@/helpers/check-jwt';
 import { Helper } from '@/helpers/Helper';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import { getSessionStorageItem } from '@/helpers/isomorphic-session-storage';
 import NoLayout from '@/layouts/NoLayout';
 import type { KeyValue } from '@/model/key-value.model';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
@@ -78,14 +77,8 @@ const markCtaDone = async (cta: Cta, url: string, loggedUser: UserDTO, target?: 
 
 const Index = () => {
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
-  const redirectUrl: string | null = getSessionStorageItem('redirectUrl');
   const [loggedUser, setLoggedUser] = useState<UserDTO | null>(null);
   const dispatch = useAppDispatch();
-
-  if (redirectUrl) {
-    window.open(redirectUrl, '_self');
-  }
-
   const [isOpen, setOpen] = useState(false);
   const [onboardingMessages, setOnboardingMessages] = useState({
     welcome_message: '',
