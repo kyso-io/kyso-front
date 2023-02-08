@@ -12,16 +12,15 @@ import {
   GlobalPermissionsEnum,
   InviteUserDto,
   KysoSettingsEnum,
+  OnboardingProgress,
   OrganizationPermissionsEnum,
   UpdateJoinCodesDto,
-  UpdateOrganizationMembersDTO,
   UpdateOrganizationDTO,
+  UpdateOrganizationMembersDTO,
   UserDTO,
   UserRoleDTO,
-  OnboardingProgress,
 } from '@kyso-io/kyso-model';
 // @ts-ignore
-import ReadMoreReact from 'read-more-react';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
@@ -29,6 +28,7 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import ReadMoreReact from 'read-more-react';
 import CaptchaModal from '../../../components/CaptchaModal';
 import ExpirationDateModal from '../../../components/ExpirationDateModal';
 import PureAvatar from '../../../components/PureAvatar';
@@ -1212,13 +1212,16 @@ const Index = ({ commonData, setUser }: Props) => {
                       <h3 className="grow text-lg font-medium leading-6 text-gray-900">Invitation Links:</h3>
                       {commonData.organization?.join_codes && (
                         <Switch
-                          disabled={requesting}
+                          disabled={requesting || !isOrgAdmin}
                           checked={enabledInvitationLinks}
                           onChange={onChangeJoinCodes}
                           className={clsx(
-                            enabledInvitationLinks ? 'bg-indigo-600' : 'bg-gray-200',
                             'ml-5 relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
                           )}
+                          style={{
+                            backgroundColor: enabledInvitationLinks ? 'rgb(79 70 229)' : 'gray',
+                            borderColor: enabledInvitationLinks ? '' : 'gray',
+                          }}
                         >
                           <span className="sr-only">Use setting</span>
                           <span
@@ -1267,7 +1270,7 @@ const Index = ({ commonData, setUser }: Props) => {
                             </div>
                           </div>
                           <div>
-                            <p className="text-sm">For channel contributos / can edit all channels:</p>
+                            <p className="text-sm">For channel contributors / can edit all channels:</p>
                             <div className="flex items-center">
                               <p className="text-normal text-gray-500 my-1">{`${window.location.origin}/${commonData.organization!.sluglified_name}?join=${
                                 commonData.organization!.join_codes!.contributor
