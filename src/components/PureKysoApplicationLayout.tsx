@@ -95,7 +95,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         {!commonData.user && (
                           <div className="flex items-center px-5">
                             <Link href="/login">
-                              <a className="text-sm">Login</a>
+                              <span className="text-sm">Login</span>
                             </Link>
                           </div>
                         )}
