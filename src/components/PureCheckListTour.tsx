@@ -4,6 +4,7 @@ import { CheckCircleIcon, ChevronDoubleRightIcon, XCircleIcon } from '@heroicons
 import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, OnboardingProgress, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import clsx from 'clsx';
 import { ProgressBar } from 'primereact/progressbar';
 import { useEffect, useState } from 'react';
 
@@ -210,7 +211,7 @@ const PureCheckListTour = (props: Props) => {
           </>
         )}
       </h2>
-      <span className="text-gray-500 pt-2 px-6">${onboardingMessages.dropdown.text}</span>
+      <span className="text-gray-500 pt-2 px-6">{onboardingMessages.dropdown.text}</span>
       <div className="px-8 pb-10">
         <ProgressBar value={progress} style={{ height: '15px', fontSize: '10px' }} color="#0c9f6e" />
       </div>
@@ -222,15 +223,13 @@ const PureCheckListTour = (props: Props) => {
           markCtaDone(Cta.One, user);
         }}
       >
-        <div className="flex h-5 items-center w-8">
-          {onboardingProgress.step_1 ? <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> : <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />}
-        </div>
+        <div className="flex h-5 items-center w-8">{onboardingProgress.step_1 && <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" />}</div>
         <div className="ml-3 text-sm w-96">
           <label className="font-medium text-gray-700">{onboardingMessages.dropdown.step_1.title}</label>
           <p className="text-gray-500">{onboardingMessages.dropdown.step_1.description}</p>
         </div>
         <div className="flex h-5 items-center w-8 pt-6">
-          <ChevronDoubleRightIcon className="h-8 w-8 text-gray-500 hover:text-indigo-500" aria-hidden="true" />
+          <ChevronDoubleRightIcon className={clsx('h-8 w-8 text-gray-500', onboardingProgress.step_1 ? 'text-indigo-500' : '')} aria-hidden="true" />
         </div>
       </div>
 
@@ -241,15 +240,13 @@ const PureCheckListTour = (props: Props) => {
           markCtaDone(Cta.Two, user);
         }}
       >
-        <div className="flex h-5 items-center w-8">
-          {onboardingProgress.step_2 ? <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> : <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />}
-        </div>
+        <div className="flex h-5 items-center w-8">{onboardingProgress.step_2 && <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" />}</div>
         <div className="ml-3 text-sm w-96">
           <label className="font-medium text-gray-700">{onboardingMessages.dropdown.step_2.title}</label>
           <p className="text-gray-500">{onboardingMessages.dropdown.step_2.description}</p>
         </div>
         <div className="flex h-5 items-center w-8 pt-6">
-          <ChevronDoubleRightIcon className="h-8 w-8 text-gray-500 hover:text-indigo-500" aria-hidden="true" />
+          <ChevronDoubleRightIcon className={clsx('h-8 w-8 text-gray-500', onboardingProgress.step_2 ? 'text-indigo-500' : '')} aria-hidden="true" />
         </div>
       </div>
 
@@ -260,15 +257,13 @@ const PureCheckListTour = (props: Props) => {
           markCtaDone(Cta.Three, user);
         }}
       >
-        <div className="flex h-5 items-center w-8">
-          {onboardingProgress.step_3 ? <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> : <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />}
-        </div>
+        <div className="flex h-5 items-center w-8">{onboardingProgress.step_3 && <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" />}</div>
         <div className="ml-3 text-sm w-96">
           <label className="font-medium text-gray-700">{onboardingMessages.dropdown.step_3.title}</label>
           <p className="text-gray-500">{onboardingMessages.dropdown.step_3.description}</p>
         </div>
         <div className="flex h-5 items-center w-8 pt-6">
-          <ChevronDoubleRightIcon className="h-8 w-8 text-gray-500 hover:text-indigo-500" aria-hidden="true" />
+          <ChevronDoubleRightIcon className={clsx('h-8 w-8 text-gray-500', onboardingProgress.step_3 ? 'text-indigo-500' : '')} aria-hidden="true" />
         </div>
       </div>
 
@@ -279,15 +274,13 @@ const PureCheckListTour = (props: Props) => {
           markCtaDone(Cta.Four, user);
         }}
       >
-        <div className="flex h-5 items-center w-8">
-          {onboardingProgress.step_4 ? <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> : <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />}
-        </div>
+        <div className="flex h-5 items-center w-8">{onboardingProgress.step_4 && <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" />}</div>
         <div className="ml-3 text-sm w-96">
           <label className="font-medium text-gray-700">{onboardingMessages.dropdown.step_4.title}</label>
           <p className="text-gray-500">{onboardingMessages.dropdown.step_4.description}</p>
         </div>
         <div className="flex h-5 items-center w-8 pt-6">
-          <ChevronDoubleRightIcon className="h-8 w-8 text-gray-500 hover:text-indigo-500" aria-hidden="true" />
+          <ChevronDoubleRightIcon className={clsx('h-8 w-8 text-gray-500', onboardingProgress.step_4 ? 'text-indigo-500' : '')} aria-hidden="true" />
         </div>
       </div>
       <div
@@ -297,15 +290,13 @@ const PureCheckListTour = (props: Props) => {
           markCtaDone(Cta.Five, user);
         }}
       >
-        <div className="flex h-5 items-center w-8">
-          {onboardingProgress.step_5 ? <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" /> : <span className="ml-2 w-4 h-4 rounded-full bg-white ring-2 ring-gray-300 " />}
-        </div>
+        <div className="flex h-5 items-center w-8">{onboardingProgress.step_5 && <CheckCircleIcon className="h-6 w-6 text-green-500" aria-hidden="true" />}</div>
         <div className="ml-3 text-sm w-96">
           <label className="font-medium text-gray-700">{onboardingMessages.dropdown.step_5.title}</label>
           <p className="text-gray-500">{onboardingMessages.dropdown.step_5.description}</p>
         </div>
         <div className="flex h-5 items-center w-8 pt-6">
-          <ChevronDoubleRightIcon className="h-8 w-8 text-gray-500 hover:text-indigo-500" aria-hidden="true" />
+          <ChevronDoubleRightIcon className={clsx('h-8 w-8 text-gray-500', onboardingProgress.step_5 ? 'text-indigo-500' : '')} aria-hidden="true" />
         </div>
       </div>
       <div className="border-t">
