@@ -40,7 +40,7 @@ const ExpirationDateModal = ({ date, isOpen, onClose, requesting }: Props) => {
         firstDayOfMonth
           .clone()
           .date(i + 1)
-          .startOf('day'),
+          .endOf('day'),
       );
     }
     const result: moment.Moment[] = [];
@@ -49,7 +49,7 @@ const ExpirationDateModal = ({ date, isOpen, onClose, requesting }: Props) => {
         firstDayOfMonth
           .clone()
           .subtract(i + 1, 'days')
-          .startOf('day'),
+          .endOf('day'),
       );
     }
     result.reverse();
@@ -59,7 +59,7 @@ const ExpirationDateModal = ({ date, isOpen, onClose, requesting }: Props) => {
         lastDayOfMonth
           .clone()
           .add(i + 1, 'days')
-          .startOf('day'),
+          .endOf('day'),
       );
     }
     return windowDays;
