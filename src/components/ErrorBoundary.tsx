@@ -48,7 +48,7 @@ class ErrorBoundary extends React.Component {
                     <h1 className="mt-2 text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">Unexpected error</h1>
                     <p className="mt-2 text-base text-gray-500">Sorry, we ran in an unexpected error, we will solve it as soon as possible.</p>
                     <div className="mt-6">
-                      <a href="#" className="text-base font-medium text-indigo-600 hover:text-indigo-500">
+                      <a href="/" className="text-base font-medium text-indigo-600 hover:text-indigo-500">
                         Go back home
                         <span aria-hidden="true"> &rarr;</span>
                       </a>

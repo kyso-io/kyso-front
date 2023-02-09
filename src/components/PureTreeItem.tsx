@@ -65,7 +65,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
 
   return (
     <Link href={href || `/${treeItem.path}`}>
-      <a
+      <span
         className={classNames('p-2 text-sm group flex items-center justify-between', current ? 'bg-gray-200' : 'hover:bg-gray-100')}
         onClick={(e) => {
           if (onNavigation) {
@@ -125,7 +125,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
             Main
           </div>
         )}
-      </a>
+      </span>
     </Link>
   );
 };
