@@ -21,15 +21,16 @@ import {
   UserRoleDTO,
 } from '@kyso-io/kyso-model';
 // @ts-ignore
-import ReadMoreReact from 'read-more-react';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import ReadMoreReact from 'read-more-react';
 import ActivityFeedComponent from '../../components/ActivityFeed';
 import InfoActivity from '../../components/InfoActivity';
 import ManageUsers from '../../components/ManageUsers';
 import ReportBadge from '../../components/ReportBadge';
+import { checkJwt } from '../../helpers/check-jwt';
 import { HelperPermissions } from '../../helpers/check-permissions';
 import { checkReportAuthors } from '../../helpers/check-report-authors';
 import { Helper } from '../../helpers/Helper';
@@ -39,7 +40,6 @@ import type { KeyValue } from '../../model/key-value.model';
 import type { CommonData } from '../../types/common-data';
 import type { Member } from '../../types/member';
 import UnpureDeleteOrganizationDropdown from '../../unpure-components/UnpureDeleteOrganizationDropdown';
-import { checkJwt } from '../../helpers/check-jwt';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
@@ -85,6 +85,9 @@ const Index = ({ commonData, setUser }: Props) => {
       return false;
     }
     const teamsResourcePermissions: ResourcePermissions[] = commonData.permissions.teams!.filter((resourcePermissions: ResourcePermissions) => {
+      if (resourcePermissions.organization_id !== orgResourcePermissions.id) {
+        return false;
+      }
       const copyCommonData: any = { ...commonData };
       copyCommonData.team = {
         id: resourcePermissions.id,
