@@ -3,6 +3,7 @@ import type { Version } from '@/hooks/use-versions';
 import { Popover } from '@headlessui/react';
 import { ViewBoardsIcon } from '@heroicons/react/outline';
 import { format } from 'date-fns';
+import { useMemo } from 'react';
 
 interface Props {
   versions: Version[];
@@ -13,12 +14,22 @@ interface Props {
 const PureVersionsDropdown = (props: Props) => {
   const { reportUrl, versions, version } = props;
 
+  const currentVersion: number = useMemo(() => {
+    if (version) {
+      return parseInt(version, 10);
+    }
+    if (!versions || versions.length === 0) {
+      return 1;
+    }
+    return versions[0]!.version;
+  }, [version, versions]);
+
   return (
     <>
       <Popover as="div" className="relative inline-block">
         <Popover.Button className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm text-gray-700 flex flex-row items-center focus:ring-0 focus:outline-none">
           <ViewBoardsIcon className="w-5 h-5 mr-2" />
-          {version ? `Version: #${version}` : 'Versions'}
+          Version: #{currentVersion}
         </Popover.Button>
 
         <Popover.Panel className="min-w-[400px] origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none z-50 py-2">
@@ -27,7 +38,7 @@ const PureVersionsDropdown = (props: Props) => {
               <a
                 aria-label="open"
                 key={item.version}
-                className={classNames('px-4 py-2 hover:bg-gray-100 items-center text-sm', item.version.toString() === version ? 'bg-gray-100' : '')}
+                className={classNames('px-4 py-2 hover:bg-gray-100 items-center text-sm', item.version === currentVersion ? 'bg-gray-100' : '')}
                 href={`${reportUrl}?version=${item.version}`}
               >
                 <div className="flex flex-row">

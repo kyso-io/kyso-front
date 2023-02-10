@@ -15,7 +15,7 @@ const Index = () => {
           <h1 className="mt-2 text-4xl font-extrabold tracking-tight text-white sm:text-5xl">Uh oh! Something when wrong...</h1>
           <p className="mt-2 text-lg font-medium text-black/50">Please try again</p>
           <div className="mt-6">
-            <a href="#" className="inline-flex items-center rounded-md border border-transparent bg-white/75 px-4 py-2 text-sm font-medium text-black/75 sm:bg-white/25 sm:hover:bg-white/50">
+            <a href="/" className="inline-flex items-center rounded-md border border-transparent bg-white/75 px-4 py-2 text-sm font-medium text-black/75 sm:bg-white/25 sm:hover:bg-white/50">
               Go back home
             </a>
           </div>
