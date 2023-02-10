@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
+import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -34,10 +35,19 @@ const Index = ({ commonData }: Props) => {
   const [show, setShow] = useState<boolean>(false);
   const [requesting, setRequesting] = useState<boolean>(false);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
+  const [notificationIcon, setNotificationIcon] = useState<any>(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
 
   useEffect(() => {
     const result: boolean = checkJwt();
     setUserIsLogged(result);
+
+    const alertMessage: string | null = sessionStorage.getItem('alertMessage');
+    if (alertMessage) {
+      setAlertText(alertMessage);
+      setShow(true);
+      setNotificationIcon(<CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />);
+      sessionStorage.removeItem('alertMessage');
+    }
   }, []);
 
   useEffect(() => {
@@ -92,6 +102,7 @@ const Index = ({ commonData }: Props) => {
     if (!captchaToken) {
       setShow(true);
       setAlertText('Please verify that you are not a robot.');
+      setNotificationIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       return;
     }
     setRequesting(true);
@@ -119,6 +130,7 @@ const Index = ({ commonData }: Props) => {
     } else {
       setShow(true);
       setAlertText('Please verify that you are not a robot.');
+      setNotificationIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
     }
     setRequesting(false);
   };
@@ -144,7 +156,7 @@ const Index = ({ commonData }: Props) => {
           )}
         </div>
       </div>
-      <ToasterNotification show={show} setShow={setShow} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={alertText} />
+      <ToasterNotification show={show} setShow={setShow} icon={notificationIcon} message={alertText} />
     </div>
   );
 };

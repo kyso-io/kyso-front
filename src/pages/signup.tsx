@@ -167,21 +167,13 @@ const Index = () => {
       const api: Api = new Api();
       const signUpDto: SignUpDto = new SignUpDto(email, nickname, displayName, password);
       await api.signup(signUpDto);
-      setNotificationType('success');
-      setNotification('You have been registered successfully. A verification link has been sent to your email account. Please wait for your first login.');
-      setTimeout(async () => {
-        const login: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
-        const response: NormalizedResponseDTO<string> = await api.login(login);
-        const token: string = response.data;
-        dispatch(setTokenAuthAction(token));
-        localStorage.setItem('jwt', token);
-        router.push(`/captcha${invitation ? `?invitation=${invitation as string}` : ''}`);
-      }, 2000);
-      setError('');
-      setEmail('');
-      setPassword('');
-      setNickname('');
-      setDisplayName('');
+      sessionStorage.setItem('alertMessage', 'You have been registered successfully. A verification link has been sent to your email account.');
+      const login: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
+      const response: NormalizedResponseDTO<string> = await api.login(login);
+      const token: string = response.data;
+      dispatch(setTokenAuthAction(token));
+      localStorage.setItem('jwt', token);
+      router.push(`/captcha${invitation ? `?invitation=${invitation as string}` : ''}`);
     } catch (e: any) {
       const errorData: { statusCode: number; message: string; error: string } = e.response.data;
       setNotificationType('danger');
