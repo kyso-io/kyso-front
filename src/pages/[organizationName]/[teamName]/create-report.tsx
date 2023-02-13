@@ -34,6 +34,7 @@ import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
 import CaptchaModal from '../../../components/CaptchaModal';
+import { PureAlert, PureAlertTypeEnum } from '../../../components/PureAlert';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../helpers/check-permissions';
@@ -63,6 +64,8 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
+  const [loggedUserShowCaptcha, setLoggedUserShowCaptcha] = useState<boolean>(true);
 
   useEffect(() => {
     if (!commonData.user) {
@@ -75,6 +78,13 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       }
     }, Helper.CHECK_JWT_TOKEN_MS);
     return () => clearInterval(interval);
+  }, [commonData.user]);
+
+  useEffect(() => {
+    if (commonData.user) {
+      setLoggedUserEmailVerified(commonData.user.email_verified);
+      setLoggedUserShowCaptcha(commonData.user.show_captcha);
+    }
   }, [commonData.user]);
 
   useEffect(() => {
@@ -327,8 +337,15 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       return;
     }
 
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!loggedUserEmailVerified) {
+      setMessageToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
+      setShowToaster(true);
+      return;
+    }
+
+    if (captchaIsEnabled && loggedUserShowCaptcha) {
+      setMessageToaster("Your account didn't pass the antibot process.");
+      setShowToaster(true);
       return;
     }
 
@@ -509,6 +526,22 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   return userIsLogged ? (
     hasPermissionCreateReport ? (
       <div className="p-4">
+        {/* Alert section */}
+        {!loggedUserEmailVerified && (
+          <PureAlert
+            title="Account not verified"
+            description="Your account has not been verified yet. Please check your inbox, verify your account and refresh this page."
+            type={PureAlertTypeEnum.WARNING}
+          />
+        )}
+
+        {captchaIsEnabled && loggedUserShowCaptcha && (
+          <PureAlert
+            title="Captcha not solved"
+            description="As far as we know, we can't differenciate you from a bot :P. Please solve the captcha before pushing new content into Kyso."
+            type={PureAlertTypeEnum.WARNING}
+          />
+        )}
         <div className="flex flex-row items-center">
           <div className="w-1/6"></div>
           <div className="w-4/6">
