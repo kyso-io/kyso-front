@@ -15,7 +15,6 @@ import {
   OnboardingProgress,
   OrganizationPermissionsEnum,
   UpdateJoinCodesDto,
-  UpdateOrganizationDTO,
   UpdateOrganizationMembersDTO,
   UserDTO,
   UserRoleDTO,
@@ -167,13 +166,6 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     return checkIfCentralizedCommunicationsChanged() || checkIfSlackChanged() || checkIfTeamsChanged();
   }, [commonData.organization, centralizedNotifications, emailsCentralizedNotifications, slackChannel, slackToken, teamsIncomingWebhookUrl]);
-
-  const accessChanged: boolean = useMemo(() => {
-    if (!commonData.organization) {
-      return false;
-    }
-    return !Helper.arrayEquals(commonData.organization!.allowed_access_domains, allowedAccessDomains);
-  }, [commonData.organization, allowedAccessDomains]);
 
   const [teamsInfo, setTeamsInfo] = useState<TeamInfo[]>([]);
   const enabledInvitationLinks: boolean = useMemo(() => {
@@ -405,49 +397,6 @@ const Index = ({ commonData, setUser }: Props) => {
         allow_download: allowDownload,
       } as any);
       router.reload();
-    } catch (e: any) {
-      /* eslint-disable no-console */
-      console.log(e.response.data);
-    } finally {
-      setRequesting(false);
-      setShowToaster(false);
-      setMessageToaster('');
-    }
-  };
-
-  const submitAccess = async () => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
-      return;
-    }
-    if (commonData.user?.email_verified === false) {
-      setShowToaster(true);
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Please verify your email');
-      return;
-    }
-    if (centralizedNotifications && emailsCentralizedNotifications.length === 0) {
-      setShowToaster(true);
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Please enter at least one valid email for centralized notifications');
-      return;
-    }
-    try {
-      setRequesting(true);
-      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
-
-      const updatedOrg: UpdateOrganizationDTO = new UpdateOrganizationDTO(
-        commonData.organization?.display_name!,
-        commonData.organization?.location!,
-        commonData.organization?.link!,
-        commonData.organization?.bio!,
-        allowedAccessDomains,
-        commonData.organization?.options!,
-        commonData.organization?.allow_download!,
-      );
-
-      await api.updateOrganization(commonData.organization!.id!, updatedOrg);
-      window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Access}`;
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
@@ -737,6 +686,22 @@ const Index = ({ commonData, setUser }: Props) => {
     }
   };
 
+  const updateAllowedAccessDomains = async (updatedAllowedAccessDomains: string[]) => {
+    try {
+      setRequesting(true);
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
+      await api.updateOrganization(commonData.organization!.id!, { allowed_access_domains: updatedAllowedAccessDomains, allow_download: commonData.organization?.allow_download! } as any);
+      window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Access}`;
+    } catch (e: any) {
+      /* eslint-disable no-console */
+      console.log(e.response.data);
+    } finally {
+      setRequesting(false);
+      setShowToaster(false);
+      setMessageToaster('');
+    }
+  };
+
   if (userIsLogged === null || !isOrgAdmin) {
     return null;
   }
@@ -971,7 +936,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   role="none"
                   style={{ float: 'right' }}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true" className="w-5 h-5 mr-1" role="none">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5 mr-1" role="none">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" role="none"></path>
                   </svg>
                   Create
@@ -1342,8 +1307,8 @@ const Index = ({ commonData, setUser }: Props) => {
                               setErrorNewDomain('Domain already registered');
                               return;
                             }
-                            setAllowedAccessDomains([...allowedAccessDomains, newDomain]);
-                            setNewDomain('');
+                            const newAllowedAccessDomains: string[] = [...allowedAccessDomains, newDomain];
+                            updateAllowedAccessDomains(newAllowedAccessDomains);
                           }}
                           className={clsx(
                             'ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
@@ -1372,7 +1337,7 @@ const Index = ({ commonData, setUser }: Props) => {
                                   <span
                                     onClick={() => {
                                       const newDomains: string[] = allowedAccessDomains.filter((d: string) => d !== domain);
-                                      setAllowedAccessDomains(newDomains);
+                                      updateAllowedAccessDomains(newDomains);
                                     }}
                                     className="font-medium text-red-600 hover:text-red-500 cursor-pointer"
                                   >
@@ -1384,31 +1349,6 @@ const Index = ({ commonData, setUser }: Props) => {
                           </ul>
                         </React.Fragment>
                       )}
-                      <div className="pt-5 sm:border-t sm:border-gray-200">
-                        <div className="flex justify-end">
-                          <button
-                            disabled={requesting}
-                            onClick={() => {
-                              window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Access}`;
-                            }}
-                            type="button"
-                            className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            disabled={requesting || !accessChanged}
-                            onClick={submitAccess}
-                            type="submit"
-                            className={clsx(
-                              'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
-                              requesting || !accessChanged ? 'opacity-50 cursor-not-allowed' : '',
-                            )}
-                          >
-                            Save
-                          </button>
-                        </div>
-                      </div>
                     </div>
                   </React.Fragment>
                 )}
