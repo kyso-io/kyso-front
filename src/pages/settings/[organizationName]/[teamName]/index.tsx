@@ -598,7 +598,8 @@ const Index = ({ commonData, setUser }: Props) => {
                         e.preventDefault();
                         switch (element.key) {
                           case OrganizationSettingsTab.Channels:
-                            setSelectedTab(element.key);
+                            // setSelectedTab(element.key);
+                            router.push(`/settings/${commonData.organization?.sluglified_name}?tab=${element.key}`);
                             break;
                           case OrganizationSettingsTab.Members:
                             setSelectedTab(element.key);
@@ -620,7 +621,7 @@ const Index = ({ commonData, setUser }: Props) => {
                       )}
                       aria-current={element.key === selectedTab ? 'page' : undefined}
                     >
-                      {element.key === OrganizationSettingsTab.Channels ? `Channel: ${commonData.team?.display_name}` : element.name}
+                      {element.name}
                     </a>
                   ))}
                 </nav>
@@ -632,7 +633,8 @@ const Index = ({ commonData, setUser }: Props) => {
               <React.Fragment>
                 {/* TEAM HEADER */}
                 <div className="flex flex-row items-center mt-6">
-                  <div className="grow flex flex-row items-center">
+                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Channel:</label>
+                  <div className="grow flex flex-row items-center ml-6">
                     <PureAvatar
                       src={commonData.team?.avatar_url || ''}
                       title={commonData.team?.display_name || ''}
