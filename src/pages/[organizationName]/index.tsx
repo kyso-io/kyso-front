@@ -7,7 +7,7 @@ import PureNewReportPopover from '@/components/PureNewReportPopover';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { XCircleIcon } from '@heroicons/react/solid';
+import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -30,6 +30,7 @@ import ActivityFeedComponent from '../../components/ActivityFeed';
 import InfoActivity from '../../components/InfoActivity';
 import ManageUsers from '../../components/ManageUsers';
 import ReportBadge from '../../components/ReportBadge';
+import ToasterNotification from '../../components/ToasterNotification';
 import { checkJwt } from '../../helpers/check-jwt';
 import { HelperPermissions } from '../../helpers/check-permissions';
 import { checkReportAuthors } from '../../helpers/check-report-authors';
@@ -67,6 +68,8 @@ const Index = ({ commonData, setUser }: Props) => {
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [showEmails, setShowEmails] = useState<boolean>(false);
+  const [show, setShow] = useState<boolean>(false);
+  const [alertText, setAlertText] = useState<string>('');
   const hasPermissionDeleteOrganization: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, [GlobalPermissionsEnum.GLOBAL_ADMIN, OrganizationPermissionsEnum.ADMIN, OrganizationPermissionsEnum.DELETE]),
     [commonData],
@@ -456,6 +459,8 @@ const Index = ({ commonData, setUser }: Props) => {
         const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData!.organization!.id!, userId, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
+        setShow(true);
+        setAlertText('User invited successfully');
       } catch (e) {
         Helper.logError('Unexpected error', e);
       }
@@ -478,6 +483,8 @@ const Index = ({ commonData, setUser }: Props) => {
       const inviteUserDto: InviteUserDto = new InviteUserDto(email, commonData!.organization!.sluglified_name, organizationRole);
       await api.inviteNewUser(inviteUserDto);
       getOrganizationMembers();
+      setShow(true);
+      setAlertText('User invited successfully');
     } catch (e) {
       Helper.logError('Unexpected error', e);
     }
@@ -603,6 +610,7 @@ const Index = ({ commonData, setUser }: Props) => {
           )}
         </div>
       )}
+      <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />} message={alertText} />
     </div>
   );
 };

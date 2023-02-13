@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
+import { CheckCircleIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, NormalizedResponseDTO, Organization, OrganizationMember, PaginatedResponseDto, ReportDTO, SearchUser, Team, TeamInfoDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -16,12 +17,12 @@ import {
   UserRoleDTO,
 } from '@kyso-io/kyso-model';
 // @ts-ignore
-import ReadMoreReact from 'read-more-react';
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
+import ReadMoreReact from 'read-more-react';
 import ActivityFeedComponent from '../../../components/ActivityFeed';
 import ChannelList from '../../../components/ChannelList';
 import ChannelVisibility from '../../../components/ChannelVisibility';
@@ -32,6 +33,8 @@ import PureNewReportPopover from '../../../components/PureNewReportPopover';
 import { PureSpinner } from '../../../components/PureSpinner';
 import ReportBadge from '../../../components/ReportBadge';
 import ReportsSearchBar from '../../../components/ReportsSearchBar';
+import ToasterNotification from '../../../components/ToasterNotification';
+import { checkJwt } from '../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import { checkReportAuthors } from '../../../helpers/check-report-authors';
 import { Helper } from '../../../helpers/Helper';
@@ -41,7 +44,6 @@ import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
 import type { KeyValue } from '../../../model/key-value.model';
 import { TailwindWidthSizeEnum } from '../../../tailwind/enum/tailwind-width.enum';
 import type { Member } from '../../../types/member';
-import { checkJwt } from '../../../helpers/check-jwt';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
@@ -82,6 +84,8 @@ const Index = ({ commonData, setUser }: Props) => {
   // MEMBERS
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
+  const [show, setShow] = useState<boolean>(false);
+  const [alertText, setAlertText] = useState<string>('');
   // REPORTS
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
   const [paginationParams, setPaginationParams] = useState<PaginationParams>({
@@ -307,6 +311,8 @@ const Index = ({ commonData, setUser }: Props) => {
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
+        setShow(true);
+        setAlertText('User invited successfully');
       } catch (e) {
         Helper.logError('Unexpected error', e);
       }
@@ -355,6 +361,8 @@ const Index = ({ commonData, setUser }: Props) => {
       }
       await api.inviteNewUser(inviteUserDto);
       getTeamMembers();
+      setShow(true);
+      setAlertText('User invited successfully');
     } catch (e) {
       Helper.logError('Unexpected error', e);
     }
@@ -649,6 +657,7 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         )}
       </div>
+      <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />} message={alertText} />
     </div>
   );
 };
