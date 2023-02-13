@@ -199,7 +199,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
             onClick={() => {
               if (!commonData.user!.email_verified) {
                 setShow(true);
-                setAlertText('Please verify your email address before inviting a user.');
+                setAlertText('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
                 return;
               }
               if (captchaIsEnabled && commonData.user?.show_captcha === true) {
@@ -226,7 +226,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
             onClick={() => {
               if (!commonData.user!.email_verified) {
                 setShow(true);
-                setAlertText('Please verify your email address before inviting a user.');
+                setAlertText('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
                 return;
               }
               if (captchaIsEnabled && commonData.user?.show_captcha === true) {

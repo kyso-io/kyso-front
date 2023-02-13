@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
 import CaptchaModal from '../components/CaptchaModal';
+import { PureAlert, PureAlertTypeEnum } from '../components/PureAlert';
 import PureAvatar from '../components/PureAvatar';
 import { RegisteredUsersAlert } from '../components/RegisteredUsersAlert';
 import ToasterNotification from '../components/ToasterNotification';
@@ -26,7 +27,6 @@ interface Props {
 const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
   const ref = useRef<any>(null);
-  const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
   const [displayName, setDisplayName] = useState<string>('');
   const [bio, setBio] = useState<string>('');
@@ -41,6 +41,8 @@ const Index = ({ commonData, setUser }: Props) => {
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
+  const [loggedUserShowCaptcha, setLoggedUserShowCaptcha] = useState<boolean>(true);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -81,10 +83,17 @@ const Index = ({ commonData, setUser }: Props) => {
     return () => clearInterval(interval);
   }, [commonData.user]);
 
+  useEffect(() => {
+    if (commonData.user) {
+      setLoggedUserEmailVerified(commonData.user.email_verified);
+      setLoggedUserShowCaptcha(commonData.user.show_captcha);
+    }
+  }, [commonData.user]);
+
   const createOrganization = async (): Promise<void> => {
     if (commonData.user?.email_verified === false) {
+      setMessageToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
       setShowToaster(true);
-      setMessageToaster('Your account is not verified. Please check your email before creating an organization.');
       return;
     }
 
@@ -93,15 +102,16 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
 
-    setShowToaster(false);
-    setMessageToaster('');
-
-    setError('');
     if (!displayName || displayName.length === 0) {
-      setError('Please specify a organization name.');
+      setMessageToaster('Please specify a organization name.');
+      setShowToaster(true);
       return;
     }
+
+    setShowToaster(false);
+    setMessageToaster('');
     setBusy(true);
+
     try {
       const api: Api = new Api(commonData.token);
       const createOrganizationDto: CreateOrganizationDto = new CreateOrganizationDto(displayName, bio, location, link, allowDownload);
@@ -114,7 +124,7 @@ const Index = ({ commonData, setUser }: Props) => {
       window.location.href = `/${organization.sluglified_name}`;
       setBusy(false);
     } catch (er: any) {
-      setError(er.response.data.message);
+      setMessageToaster(er.response.data.message);
       setBusy(false);
     }
   };
@@ -144,187 +154,205 @@ const Index = ({ commonData, setUser }: Props) => {
       <div className="w-2/12"></div>
       <div className="w-8/12 flex flex-col space-y-8">
         {userIsLogged ? (
-          <form className="space-y-8 divide-y divide-gray-200">
-            <div className="space-y-8 divide-y divide-gray-200 sm:space-y-5">
-              <div>
+          <React.Fragment>
+            {/* Alert section */}
+            {!loggedUserEmailVerified && (
+              <PureAlert
+                title="Account not verified"
+                description="Your account has not been verified yet. Please check your inbox, verify your account and refresh this page."
+                type={PureAlertTypeEnum.WARNING}
+              />
+            )}
+            {captchaIsEnabled && loggedUserShowCaptcha && (
+              <PureAlert
+                title="Captcha not solved"
+                description="As far as we know, we can't differenciate you from a bot :P. Please solve the captcha before pushing new content into Kyso."
+                type={PureAlertTypeEnum.WARNING}
+              />
+            )}
+            <form className="space-y-8 divide-y divide-gray-200">
+              <div className="space-y-8 divide-y divide-gray-200 sm:space-y-5">
                 <div>
-                  <h3 className="text-lg leading-6 font-medium text-gray-900">Create a new organization</h3>
-                  <p className="mt-1 max-w-2xl text-sm text-gray-500">{/* This will be your  */}</p>
-                </div>
+                  <div>
+                    <h3 className="text-lg leading-6 font-medium text-gray-900">Create a new organization</h3>
+                    <p className="mt-1 max-w-2xl text-sm text-gray-500">{/* This will be your  */}</p>
+                  </div>
 
-                <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
-                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start  sm:pt-5">
-                    <label htmlFor="photo" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Photo:
-                    </label>
-                    <div className="mt-1 sm:mt-0 sm:col-span-2">
-                      <div className="max-w-lg flex flex-row items-center">
-                        {file === null && (
-                          <span className="h-12 w-12 overflow-hidden rounded-full bg-gray-100">
-                            <svg className="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                            </svg>
-                          </span>
-                        )}
-                        {urlLocalFile !== null && <PureAvatar src={urlLocalFile} title="Organiztion avatar" size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XS} />}
-                        <button
-                          disabled={isBusy}
-                          type="button"
-                          onClick={() => ref.current.click()}
-                          className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                          {commonData.organization?.avatar_url !== null ? 'Change' : 'Select'}
-                        </button>
-                        {urlLocalFile !== null && (
+                  <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
+                    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start  sm:pt-5">
+                      <label htmlFor="photo" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                        Photo:
+                      </label>
+                      <div className="mt-1 sm:mt-0 sm:col-span-2">
+                        <div className="max-w-lg flex flex-row items-center">
+                          {file === null && (
+                            <span className="h-12 w-12 overflow-hidden rounded-full bg-gray-100">
+                              <svg className="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                              </svg>
+                            </span>
+                          )}
+                          {urlLocalFile !== null && <PureAvatar src={urlLocalFile} title="Organiztion avatar" size={TailwindHeightSizeEnum.H12} textSize={TailwindFontSizeEnum.XS} />}
                           <button
                             disabled={isBusy}
-                            onClick={() => {
-                              setFile(null);
-                              setUrlLocalFile(null);
-                            }}
+                            type="button"
+                            onClick={() => ref.current.click()}
                             className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                           >
-                            Remove
+                            {commonData.organization?.avatar_url !== null ? 'Change' : 'Select'}
                           </button>
-                        )}
-                        <input
-                          ref={ref}
-                          type="file"
-                          accept="image/*"
-                          onClick={(event: any) => {
-                            event.target.value = null;
-                          }}
-                          onChange={onChangeInputFile}
-                          className="hidden"
-                        />
+                          {urlLocalFile !== null && (
+                            <button
+                              disabled={isBusy}
+                              onClick={() => {
+                                setFile(null);
+                                setUrlLocalFile(null);
+                              }}
+                              className="ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            >
+                              Remove
+                            </button>
+                          )}
+                          <input
+                            ref={ref}
+                            type="file"
+                            accept="image/*"
+                            onClick={(event: any) => {
+                              event.target.value = null;
+                            }}
+                            onChange={onChangeInputFile}
+                            className="hidden"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Name:
-                    </label>
-                    <div className="mt-1 sm:mt-0 sm:col-span-2">
-                      <div className="max-w-lg flex rounded-md shadow-sm">
-                        <input
-                          type="text"
-                          name="displayName"
-                          id="displayName"
-                          value={displayName || ''}
-                          autoComplete="displayName"
-                          onChange={(e) => {
-                            setError('');
-                            setDisplayName(e.target.value);
-                          }}
-                          className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
-                        />
+                    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                        Name:
+                      </label>
+                      <div className="mt-1 sm:mt-0 sm:col-span-2">
+                        <div className="max-w-lg flex rounded-md shadow-sm">
+                          <input
+                            type="text"
+                            name="displayName"
+                            id="displayName"
+                            value={displayName || ''}
+                            autoComplete="displayName"
+                            onChange={(e) => {
+                              setMessageToaster('');
+                              setShowToaster(false);
+                              setDisplayName(e.target.value);
+                            }}
+                            className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Bio:
-                    </label>
-                    <div className="mt-1 sm:mt-0 sm:col-span-2">
-                      <div className="max-w-lg flex rounded-md shadow-sm">
-                        <textarea
-                          value={bio || ''}
-                          name="bio"
-                          id="bio"
-                          autoComplete="bio"
-                          rows={5}
-                          onChange={(e) => setBio(e.target.value)}
-                          className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
-                        ></textarea>
+                    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                        Bio:
+                      </label>
+                      <div className="mt-1 sm:mt-0 sm:col-span-2">
+                        <div className="max-w-lg flex rounded-md shadow-sm">
+                          <textarea
+                            value={bio || ''}
+                            name="bio"
+                            id="bio"
+                            autoComplete="bio"
+                            rows={5}
+                            onChange={(e) => setBio(e.target.value)}
+                            className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
+                          ></textarea>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                    <label htmlFor="link" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Link:
-                    </label>
-                    <div className="mt-1 sm:mt-0 sm:col-span-2">
-                      <div className="max-w-lg flex rounded-md shadow-sm">
-                        <input
-                          type="text"
-                          name="link"
-                          id="link"
-                          value={link || ''}
-                          autoComplete="link"
-                          onChange={(e) => setLink(e.target.value)}
-                          className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
-                        />
+                    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label htmlFor="link" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                        Link:
+                      </label>
+                      <div className="mt-1 sm:mt-0 sm:col-span-2">
+                        <div className="max-w-lg flex rounded-md shadow-sm">
+                          <input
+                            type="text"
+                            name="link"
+                            id="link"
+                            value={link || ''}
+                            autoComplete="link"
+                            onChange={(e) => setLink(e.target.value)}
+                            className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Location:
-                    </label>
-                    <div className="mt-1 sm:mt-0 sm:col-span-2">
-                      <div className="max-w-lg flex rounded-md shadow-sm">
-                        <input
-                          type="text"
-                          name="location"
-                          id="location"
-                          value={location || ''}
-                          autoComplete="location"
-                          onChange={(e) => setLocation(e.target.value)}
-                          className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
-                        />
+                    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label htmlFor="location" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                        Location:
+                      </label>
+                      <div className="mt-1 sm:mt-0 sm:col-span-2">
+                        <div className="max-w-lg flex rounded-md shadow-sm">
+                          <input
+                            type="text"
+                            name="location"
+                            id="location"
+                            value={location || ''}
+                            autoComplete="location"
+                            onChange={(e) => setLocation(e.target.value)}
+                            className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Download reports:
-                    </label>
-                    <div className="mt-1 sm:col-span-2 sm:mt-0">
-                      <select
-                        id="allowDownload"
-                        name="allowDownload"
-                        value={allowDownload}
-                        onChange={(e: any) => setAllowDownload(e.target.value)}
-                        className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
-                      >
-                        <option value={AllowDownload.ALL}>All</option>
-                        <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
-                        <option value={AllowDownload.NONE}>None</option>
-                      </select>
+                    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                      <label htmlFor="location" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                        Download reports:
+                      </label>
+                      <div className="mt-1 sm:col-span-2 sm:mt-0">
+                        <select
+                          id="allowDownload"
+                          name="allowDownload"
+                          value={allowDownload}
+                          onChange={(e: any) => setAllowDownload(e.target.value)}
+                          className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                        >
+                          <option value={AllowDownload.ALL}>All</option>
+                          <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
+                          <option value={AllowDownload.NONE}>None</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-              <div className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"></div>
-              <div className="mt-1 sm:mt-0 sm:col-span-2">
-                <div className="max-w-lg flex w-full justify-between items-center">
-                  <div className="text-red-500 text-sm">{error}</div>
-                  <button
-                    type="button"
-                    onClick={createOrganization}
-                    className={classNames(
-                      error ? 'opacity-75 cursor-not-allowed' : 'k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
-                      'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary',
-                    )}
-                  >
-                    {!isBusy && (
-                      <React.Fragment>
-                        Create organization <ArrowRightIcon className=" ml-1 w-5 h-5" />
-                      </React.Fragment>
-                    )}
-                    {isBusy && (
-                      <React.Fragment>
-                        <PureSpinner size={5} /> Creating organization
-                      </React.Fragment>
-                    )}
-                  </button>
+              <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                <div className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"></div>
+                <div className="mt-1 sm:mt-0 sm:col-span-2">
+                  <div className="max-w-lg flex w-full justify-between items-center">
+                    <div className="text-red-500 text-sm"></div>
+                    <button
+                      type="button"
+                      onClick={createOrganization}
+                      className={classNames(
+                        'k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
+                        'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary',
+                      )}
+                    >
+                      {!isBusy && (
+                        <React.Fragment>
+                          Create organization <ArrowRightIcon className=" ml-1 w-5 h-5" />
+                        </React.Fragment>
+                      )}
+                      {isBusy && (
+                        <React.Fragment>
+                          <PureSpinner size={5} /> Creating organization
+                        </React.Fragment>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          </form>
+            </form>
+          </React.Fragment>
         ) : (
           waitForLogging && <RegisteredUsersAlert />
         )}

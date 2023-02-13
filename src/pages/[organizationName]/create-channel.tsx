@@ -10,9 +10,11 @@ import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-
 import { AllowDownload, KysoSettingsEnum, Team, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import CaptchaModal from '../../components/CaptchaModal';
+import { PureAlert, PureAlertTypeEnum } from '../../components/PureAlert';
 import { RegisteredUsersAlert } from '../../components/RegisteredUsersAlert';
+import ToasterNotification from '../../components/ToasterNotification';
 import { checkJwt } from '../../helpers/check-jwt';
 import { HelperPermissions } from '../../helpers/check-permissions';
 
@@ -23,7 +25,6 @@ interface Props {
 
 const Index = ({ commonData, setUser }: Props) => {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
   const [isBusy, setBusy] = useState(false);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
@@ -36,6 +37,10 @@ const Index = ({ commonData, setUser }: Props) => {
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [enabledPublicChannels, setEnabledPublicChannels] = useState<boolean>(false);
+  const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
+  const [loggedUserShowCaptcha, setLoggedUserShowCaptcha] = useState<boolean>(true);
+  const [showToaster, setShowToaster] = useState<boolean>(false);
+  const [messageToaster, setMessageToaster] = useState<string>('');
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -80,24 +85,37 @@ const Index = ({ commonData, setUser }: Props) => {
     return () => clearInterval(interval);
   }, [commonData.user]);
 
+  useEffect(() => {
+    if (commonData.user) {
+      setLoggedUserEmailVerified(commonData.user.email_verified);
+      setLoggedUserShowCaptcha(commonData.user.show_captcha);
+    }
+  }, [commonData.user]);
+
+  useEffect(() => {
+    if (!formName) {
+      return;
+    }
+    checkName(formName);
+  }, [formName]);
+
   const checkName = async (name: string) => {
-    setFormName(name);
-    setError('');
     try {
       const api: Api = new Api(commonData.token);
       api.setOrganizationSlug(commonData.organization!.sluglified_name);
       const teamAvailable: NormalizedResponseDTO<boolean> = await api.teamNameIsAvailable(commonData.organization?.id!, name);
-
       if (!teamAvailable.data) {
-        setError('Name in use.');
+        setMessageToaster('Name in use.');
+        setShowToaster(true);
         setBusy(false);
         setTeamAvailable(false);
         return;
       }
-
+      setMessageToaster('');
+      setShowToaster(false);
       setTeamAvailable(true);
     } catch (er: any) {
-      setError(er.message);
+      setMessageToaster(er.message);
       setBusy(false);
     }
   };
@@ -105,9 +123,17 @@ const Index = ({ commonData, setUser }: Props) => {
   const createChannel = async (ev: any) => {
     ev.preventDefault();
 
-    setError('');
+    setMessageToaster('');
+
+    if (commonData.user?.email_verified === false) {
+      setShowToaster(true);
+      setMessageToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
+      return;
+    }
+
     if (!formName || formName.length === 0) {
-      setError('Please specify a channel name.');
+      setShowToaster(true);
+      setMessageToaster('Please specify a channel name.');
       return;
     }
 
@@ -116,12 +142,16 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
 
+    setShowToaster(false);
+    setMessageToaster('');
     setBusy(true);
+
     try {
       const api: Api = new Api(commonData.token);
       api.setOrganizationSlug(commonData.organization!.sluglified_name);
       if (!isTeamAvailable) {
-        setError('Name in use.');
+        setMessageToaster('Name in use.');
+        setShowToaster(true);
         setBusy(false);
         return;
       }
@@ -137,7 +167,7 @@ const Index = ({ commonData, setUser }: Props) => {
       }
       window.location.href = `/${commonData.organization!.sluglified_name}/${team.sluglified_name}`;
     } catch (er: any) {
-      setError(er.response.data.message);
+      setMessageToaster(er.response.data.message);
     } finally {
       setBusy(false);
     }
@@ -164,168 +194,185 @@ const Index = ({ commonData, setUser }: Props) => {
       <div className="w-8/12 flex flex-col space-y-8">
         {userIsLogged ? (
           hasPermissionCreateChannel ? (
-            <form className="space-y-8 divide-y divide-gray-200" onSubmit={createChannel}>
-              <div className="space-y-8 divide-y divide-gray-200 sm:space-y-5">
-                <div>
+            <React.Fragment>
+              {/* Alert section */}
+              {!loggedUserEmailVerified && (
+                <PureAlert
+                  title="Account not verified"
+                  description="Your account has not been verified yet. Please check your inbox, verify your account and refresh this page."
+                  type={PureAlertTypeEnum.WARNING}
+                />
+              )}
+              {captchaIsEnabled && loggedUserShowCaptcha && (
+                <PureAlert
+                  title="Captcha not solved"
+                  description="As far as we know, we can't differenciate you from a bot :P. Please solve the captcha before pushing new content into Kyso."
+                  type={PureAlertTypeEnum.WARNING}
+                />
+              )}
+              <form className="space-y-8 divide-y divide-gray-200" onSubmit={createChannel}>
+                <div className="space-y-8 divide-y divide-gray-200 sm:space-y-5">
                   <div>
-                    <h3 className="text-lg leading-6 font-medium text-gray-900">Create a new channel</h3>
-                    <p className="mt-1 max-w-2xl text-sm text-gray-500">{/* This will be your  */}</p>
-                  </div>
-                  <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
-                    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                        Name:
-                      </label>
-                      <div className="mt-1 sm:mt-0 sm:col-span-2">
-                        <div className="max-w-lg flex rounded-md shadow-sm">
-                          <input
-                            type="text"
-                            name="name"
-                            id="name"
-                            autoComplete="name"
-                            onChange={(e) => checkName(e.target.value)}
-                            className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
-                          />
-                        </div>
-                      </div>
+                    <div>
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">Create a new channel</h3>
+                      <p className="mt-1 max-w-2xl text-sm text-gray-500">{/* This will be your  */}</p>
                     </div>
-                    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5">
-                      <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                        Description:
-                      </label>
-                      <div className="mt-1 sm:mt-0 sm:col-span-2">
-                        <div className="max-w-lg flex rounded-md shadow-sm">
-                          <input
-                            type="text"
-                            name="description"
-                            id="description"
-                            autoComplete="description"
-                            onChange={(e) => setFormDescription(e.target.value)}
-                            className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="space-y-6 sm:space-y-5 divide-y divide-gray-200">
-                    <div className="pt-6 sm:pt-5">
-                      <div role="group" aria-labelledby="label-notifications">
-                        <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
-                          <div>
-                            <div className="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-notifications">
-                              Permissions:
-                            </div>
+                    <div className="mt-6 sm:mt-5 space-y-6 sm:space-y-5">
+                      <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                          Name:
+                        </label>
+                        <div className="mt-1 sm:mt-0 sm:col-span-2">
+                          <div className="max-w-lg flex rounded-md shadow-sm">
+                            <input
+                              type="text"
+                              name="name"
+                              id="name"
+                              autoComplete="name"
+                              onChange={(e) => setFormName(e.target.value)}
+                              className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
+                            />
                           </div>
-                          <div className="sm:col-span-2">
-                            <div className="max-w-lg">
-                              <div className="mt-4 space-y-6">
-                                <div className="flex items-start">
-                                  <input
-                                    id="private"
-                                    name="permissions"
-                                    type="radio"
-                                    checked={formPermissions === TeamVisibilityEnum.PRIVATE}
-                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 mt-1"
-                                    onChange={() => {
-                                      setFormPermissions(TeamVisibilityEnum.PRIVATE);
-                                    }}
-                                  />
-                                  <LockClosedIcon className="w-5 h-5 ml-3" />
-                                  <label htmlFor="private" className="ml-1 block text-sm  text-gray-700">
-                                    <strong>Private:</strong> Only invited members of this channel have access to this channels content.
-                                    <p className="text-gray-500 text-xs">You can invite members on the next page.</p>
-                                  </label>
-                                </div>
-
-                                <div className="flex items-start">
-                                  <input
-                                    id="organization-only"
-                                    name="permissions"
-                                    type="radio"
-                                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 mt-1"
-                                    onChange={() => {
-                                      setFormPermissions(TeamVisibilityEnum.PROTECTED);
-                                    }}
-                                  />
-                                  <ShieldCheckIcon className="w-6 h-5 ml-3" />
-                                  <label htmlFor="organization-only" className="ml-1 block text-sm  text-gray-700">
-                                    <strong>Organization only:</strong> All members of the <span className="font-medium">{commonData.organization?.display_name}</span> organization can access this
-                                    channel.
-                                  </label>
-                                </div>
-                                {enabledPublicChannels && (
+                        </div>
+                      </div>
+                      <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-gray-200 sm:pt-5">
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                          Description:
+                        </label>
+                        <div className="mt-1 sm:mt-0 sm:col-span-2">
+                          <div className="max-w-lg flex rounded-md shadow-sm">
+                            <input
+                              type="text"
+                              name="description"
+                              id="description"
+                              autoComplete="description"
+                              onChange={(e) => setFormDescription(e.target.value)}
+                              className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-6 sm:space-y-5 divide-y divide-gray-200">
+                      <div className="pt-6 sm:pt-5">
+                        <div role="group" aria-labelledby="label-notifications">
+                          <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-baseline">
+                            <div>
+                              <div className="text-base font-medium text-gray-900 sm:text-sm sm:text-gray-700" id="label-notifications">
+                                Permissions:
+                              </div>
+                            </div>
+                            <div className="sm:col-span-2">
+                              <div className="max-w-lg">
+                                <div className="mt-4 space-y-6">
                                   <div className="flex items-start">
                                     <input
-                                      id="public"
+                                      id="private"
+                                      name="permissions"
+                                      type="radio"
+                                      checked={formPermissions === TeamVisibilityEnum.PRIVATE}
+                                      className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 mt-1"
+                                      onChange={() => {
+                                        setFormPermissions(TeamVisibilityEnum.PRIVATE);
+                                      }}
+                                    />
+                                    <LockClosedIcon className="w-5 h-5 ml-3" />
+                                    <label htmlFor="private" className="ml-1 block text-sm  text-gray-700">
+                                      <strong>Private:</strong> Only invited members of this channel have access to this channels content.
+                                      <p className="text-gray-500 text-xs">You can invite members on the next page.</p>
+                                    </label>
+                                  </div>
+
+                                  <div className="flex items-start">
+                                    <input
+                                      id="organization-only"
                                       name="permissions"
                                       type="radio"
                                       className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 mt-1"
                                       onChange={() => {
-                                        setFormPermissions(TeamVisibilityEnum.PUBLIC);
+                                        setFormPermissions(TeamVisibilityEnum.PROTECTED);
                                       }}
                                     />
-                                    <LockOpenIcon className="w-6 h-5 ml-3" />
-                                    <label htmlFor="public" className="ml-1 block text-sm  text-gray-700">
-                                      <strong>Public: </strong>
-                                      Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url.
+                                    <ShieldCheckIcon className="w-6 h-5 ml-3" />
+                                    <label htmlFor="organization-only" className="ml-1 block text-sm  text-gray-700">
+                                      <strong>Organization only:</strong> All members of the <span className="font-medium">{commonData.organization?.display_name}</span> organization can access this
+                                      channel.
                                     </label>
                                   </div>
-                                )}
+                                  {enabledPublicChannels && (
+                                    <div className="flex items-start">
+                                      <input
+                                        id="public"
+                                        name="permissions"
+                                        type="radio"
+                                        className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 mt-1"
+                                        onChange={() => {
+                                          setFormPermissions(TeamVisibilityEnum.PUBLIC);
+                                        }}
+                                      />
+                                      <LockOpenIcon className="w-6 h-5 ml-3" />
+                                      <label htmlFor="public" className="ml-1 block text-sm  text-gray-700">
+                                        <strong>Public: </strong>
+                                        Everyone can see this channel. Reports in this channel can be viewed by anyone with the reports url.
+                                      </label>
+                                    </div>
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start  sm:border-gray-200 sm:pt-5">
-                    <label htmlFor="location" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
-                      Download reports:
-                    </label>
-                    <div className="mt-1 sm:col-span-2 sm:mt-0">
-                      <select
-                        id="allowDownload"
-                        name="allowDownload"
-                        value={allowDownload}
-                        onChange={(e: any) => setAllowDownload(e.target.value)}
-                        className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
-                      >
-                        <option value={AllowDownload.ALL}>All</option>
-                        <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
-                        <option value={AllowDownload.NONE}>None</option>
-                        <option value={AllowDownload.INHERITED}>Inherited</option>
-                      </select>
+                    <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start  sm:border-gray-200 sm:pt-5">
+                      <label htmlFor="location" className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">
+                        Download reports:
+                      </label>
+                      <div className="mt-1 sm:col-span-2 sm:mt-0">
+                        <select
+                          id="allowDownload"
+                          name="allowDownload"
+                          value={allowDownload}
+                          onChange={(e: any) => setAllowDownload(e.target.value)}
+                          className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                        >
+                          <option value={AllowDownload.ALL}>All</option>
+                          <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
+                          <option value={AllowDownload.NONE}>None</option>
+                          <option value={AllowDownload.INHERITED}>Inherited</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-              <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-                <div className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"></div>
-                <div className="mt-1 sm:mt-0 sm:col-span-2">
-                  <div className="max-w-lg flex w-full justify-between items-center">
-                    <div className="text-red-500 text-sm">{error}</div>
-                    <button
-                      type="submit"
-                      className={classNames(
-                        error ? 'opacity-75 cursor-not-allowed' : 'k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
-                        'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary ',
-                      )}
-                    >
-                      {!isBusy && (
-                        <>
-                          Create channel <ArrowRightIcon className=" ml-1 w-5 h-5" />
-                        </>
-                      )}
-                      {isBusy && (
-                        <>
-                          <PureSpinner size={5} /> Creating channel
-                        </>
-                      )}
-                    </button>
+                <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                  <div className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"></div>
+                  <div className="mt-1 sm:mt-0 sm:col-span-2">
+                    <div className="max-w-lg flex w-full justify-between items-center">
+                      <div className="text-red-500 text-sm"></div>
+                      <button
+                        type="submit"
+                        className={classNames(
+                          'k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
+                          'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary ',
+                        )}
+                      >
+                        {!isBusy && (
+                          <React.Fragment>
+                            Create channel <ArrowRightIcon className=" ml-1 w-5 h-5" />
+                          </React.Fragment>
+                        )}
+                        {isBusy && (
+                          <React.Fragment>
+                            <PureSpinner size={5} /> Creating channel
+                          </React.Fragment>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </form>
+              </form>
+            </React.Fragment>
           ) : (
             waitForLogging && (
               <div className="rounded-md bg-yellow-50 p-4 mt-8">
@@ -354,6 +401,7 @@ const Index = ({ commonData, setUser }: Props) => {
           waitForLogging && <RegisteredUsersAlert />
         )}
       </div>
+      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );

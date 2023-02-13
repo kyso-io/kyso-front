@@ -607,23 +607,19 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       <div className="p-4">
         {/* Alert section */}
         {!loggedUserEmailVerified && (
-          <>
-            <PureAlert
-              title="Account not verified"
-              description="Your account has not been verified yet. Please check your inbox, verify your account and refresh this page"
-              type={PureAlertTypeEnum.WARNING}
-            />
-          </>
+          <PureAlert
+            title="Account not verified"
+            description="Your account has not been verified yet. Please check your inbox, verify your account and refresh this page."
+            type={PureAlertTypeEnum.WARNING}
+          />
         )}
 
         {captchaIsEnabled && loggedUserShowCaptcha && (
-          <>
-            <PureAlert
-              title="Captcha not solved"
-              description="As far as we know, we can't differenciate you from a bot :P. Please solve the captcha before pushing new content into Kyso."
-              type={PureAlertTypeEnum.WARNING}
-            />
-          </>
+          <PureAlert
+            title="Captcha not solved"
+            description="As far as we know, we can't differenciate you from a bot :P. Please solve the captcha before pushing new content into Kyso."
+            type={PureAlertTypeEnum.WARNING}
+          />
         )}
 
         <div className="flex flex-row items-center">
@@ -642,7 +638,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                         setOpenChannelDropdown(!openChannelDropdown);
                       }}
                       className={clsx(
-                        'border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded',
+                        'border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded',
                         isEdition() ? 'bg-slate-300' : 'bg-white hover:bg-gray-100',
                       )}
                     >
@@ -922,7 +918,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                     onClick={() => {
                       if (!loggedUserEmailVerified) {
                         setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-                        setMessageToaster('Your account has not been verified yet. Please check your inbox and verify it before creating content at Kyso ;)');
+                        setMessageToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
                         setShowToaster(true);
                         return;
                       }
