@@ -5,9 +5,9 @@ import { PurePermissionDenied } from '@/components/PurePermissionDenied';
 import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
+import { SomethingHappened } from '@/components/SomethingHappened';
 import classNames from '@/helpers/class-names';
 import { getReport } from '@/helpers/get-report';
-import { v4 as uuidv4 } from 'uuid';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import useIsInViewport from '@/hooks/use-is-in-viewport';
@@ -22,7 +22,7 @@ import type { ReportData } from '@/types/report-data';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ArrowSmDownIcon } from '@heroicons/react/solid';
+import { ArrowSmDownIcon, CheckCircleIcon } from '@heroicons/react/solid';
 import type { Comment, File as KysoFile, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -34,9 +34,9 @@ import {
   TeamMembershipOriginEnum,
   TeamVisibilityEnum,
   UpdateOrganizationMembersDTO,
+  UpdateReportRequestDTO,
   UpdateTeamMembersDTO,
   UserRoleDTO,
-  UpdateReportRequestDTO,
 } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -44,9 +44,10 @@ import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { SomethingHappened } from '@/components/SomethingHappened';
+import { v4 as uuidv4 } from 'uuid';
 import CaptchaModal from '../../../../components/CaptchaModal';
 import TableOfContents from '../../../../components/TableOfContents';
+import ToasterNotification from '../../../../components/ToasterNotification';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 import { FileTypesHelper } from '../../../../helpers/FileTypesHelper';
 import { Helper } from '../../../../helpers/Helper';
@@ -90,6 +91,8 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Toc);
   const [showEmails, setShowEmails] = useState<boolean>(false);
+  const [show, setShow] = useState<boolean>(false);
+  const [alertText, setAlertText] = useState<string>('');
   const tabs: { title: string; tab: Tab }[] = useMemo(() => {
     const data: { title: string; tab: Tab }[] = [
       {
@@ -459,6 +462,8 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
+        setShow(true);
+        setAlertText('User invited successfully');
       } catch (e) {
         Helper.logError('Unexpected error', e);
       }
@@ -493,6 +498,8 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
       const inviteUserDto: InviteUserDto = new InviteUserDto(email, organizationRole, organizationRole);
       await api.inviteNewUser(inviteUserDto);
       getTeamMembers();
+      setShow(true);
+      setAlertText('User invited successfully');
     } catch (e) {
       Helper.logError('Unexpected error', e);
     }
@@ -851,6 +858,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
           </button>
         </div>
       )}
+      <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />} message={alertText} />
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
