@@ -114,9 +114,9 @@ const PureTree = (props: IPureTree) => {
               {crumbs.map((crumb, index) => (
                 <div key={`${crumb.href}+${index}`} className="flex flex-row items-center">
                   <Link href={crumb.href}>
-                    <a className={classNames('hover:underline text-sm', index + 1 === crumbs.length ? 'font-normal text-gray-400' : 'font-medium text-indigo-500')} onClick={onNavigation}>
+                    <span className={classNames('hover:underline text-sm', index + 1 === crumbs.length ? 'font-normal text-gray-400' : 'font-medium text-indigo-500')} onClick={onNavigation}>
                       {crumb.path}
-                    </a>
+                    </span>
                   </Link>
                   <svg className="shrink-0 h-3 w-3 text-gray-900" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                     <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
@@ -128,13 +128,13 @@ const PureTree = (props: IPureTree) => {
         }
 
         <Link href={getNewPath()}>
-          <a
+          <span
             className={classNames('text-sm items-center group flex min-h-[24px]', currentPath ? 'text-gray-400 hover:underline cursor-pointer' : 'text-gray-200 cursor-default')}
             onClick={onNavigation}
           >
             <ChevronLeftIcon className="h-6 w-6 mr-1" />
             back
-          </a>
+          </span>
         </Link>
       </div>
 
