@@ -146,7 +146,7 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
         </div>
         {/* Content show */}
         <div className="mt-2">
-          <p className="line-clamp-2 text-sm text-gray-600" dangerouslySetInnerHTML={{ __html: fullTextSearchResult.content }}></p>
+          <p className="line-clamp-2 text-sm text-gray-600" style={{ whiteSpace: 'pre-line' }} dangerouslySetInnerHTML={{ __html: fullTextSearchResult.content }}></p>
         </div>
       </li>
     </>

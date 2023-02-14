@@ -197,9 +197,7 @@ const SearchIndex = ({ commonData }: Props) => {
               <React.Fragment>
                 <ul role="list" className="divide-y divide-gray-200">
                   {fullTextSearchResultType.map((fullTextSearchResult: FilteredFullTextSearchResultType, index: number) => (
-                    <>
-                      <SearchItem key={index} fullTextSearchResult={fullTextSearchResult.result!} otherVersionResultsNumber={fullTextSearchResult.subResults} />
-                    </>
+                    <SearchItem key={index} fullTextSearchResult={fullTextSearchResult.result!} otherVersionResultsNumber={fullTextSearchResult.subResults} />
                   ))}
                 </ul>
                 <SearchPagination goToPage={(page: number) => setFullTextSearchParams({ ...fullTextSearchParams, page })} fullTextSearchMetadata={rawResults!.metadata} />
