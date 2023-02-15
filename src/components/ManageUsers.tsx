@@ -278,7 +278,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                   onKeyDown={(e: any) => {
                     if (e.key === 'Enter' && (selectedTeamRole === REMOVE_USER_VALUE || selectedOrgRole === REMOVE_USER_VALUE)) {
                       if (inputDeleteUser === keyDeleteUser) {
-                        const member: Member = filteredMembers[selectedMemberIndex]!;
+                        const member: Member = members[selectedMemberIndex]!;
                         onRemoveUser(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                         clearData();
                       }
@@ -332,7 +332,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                       <React.Fragment>
                         <span className="my-4 text-xs font-medium text-gray-600">Members:</span>
                         <ul role="list" className="mt-1" style={{ maxHeight: 200, overflowY: 'scroll' }}>
-                          {filteredMembers.map((member: Member, index: number) => {
+                          {filteredMembers.map((member: Member) => {
                             let roles: string | undefined = '';
                             let fromOrganization = true;
 
@@ -392,6 +392,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                       setSelectedTeamRole(member.team_roles[0]!);
                                     }
                                     setSelectedUser({ ...member });
+                                    const index: number = members.findIndex((e: Member) => e.id === member.id);
                                     setSelectedMemberIndex(index);
                                   }
                                 }}
@@ -492,7 +493,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   setShowCaptchaModal(true);
                                   return;
                                 }
-                                const member: Member = filteredMembers[selectedMemberIndex]!;
+                                const member: Member = members[selectedMemberIndex]!;
                                 onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
                                 clearData();
                               }}
@@ -661,7 +662,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   setErrorMessage('Please type the correct key to remove the user.');
                                   return;
                                 }
-                                const member: Member = filteredMembers[selectedMemberIndex]!;
+                                const member: Member = members[selectedMemberIndex]!;
                                 onRemoveUser(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                                 clearData();
                               }}
