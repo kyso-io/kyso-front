@@ -21,16 +21,21 @@ const Index = ({ commonData }: Props) => {
     if (!commonData.permissions) {
       return;
     }
+
     const redirectUserToOrganization = async () => {
       let lastOrganizationDict: { [userId: string]: string } = {};
       const lastOrganizationStr: string | null = getLocalStorageItem('last_organization');
+
       if (lastOrganizationStr) {
         try {
           lastOrganizationDict = JSON.parse(lastOrganizationStr);
         } catch (e) {}
       }
+
       if (commonData?.user !== null && lastOrganizationDict[commonData.user!.id]) {
+        // Logged user with last organization
         const indexOrg: number = commonData.permissions!.organizations!.findIndex((x: ResourcePermissions) => x.name === lastOrganizationDict[commonData.user!.id]);
+
         if (indexOrg !== -1) {
           router.push(`${lastOrganizationDict[commonData.user!.id]}`);
         } else {
@@ -42,11 +47,14 @@ const Index = ({ commonData }: Props) => {
           }
         }
       } else {
+        // Unauthorized user
         const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
         const settingsDefaultRedirectOrganization: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.DEFAULT_REDIRECT_ORGANIZATION);
         const settingsUnauthRedirect: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
+
         if (publicKeys !== null && publicKeys.length > 0) {
           let unauthorizedRedirectUrl = '/login';
+
           if (
             settingsDefaultRedirectOrganization !== undefined &&
             settingsDefaultRedirectOrganization.value &&
@@ -54,17 +62,20 @@ const Index = ({ commonData }: Props) => {
             commonData.permissions!.organizations.length > 0
           ) {
             unauthorizedRedirectUrl = `/${settingsDefaultRedirectOrganization.value}`;
-            const organizationResourcePermissions: ResourcePermissions | undefined = commonData.permissions?.organizations?.find(
+
+            // Simplify it. If unauthorized, redirect to default-organization
+            /* const organizationResourcePermissions: ResourcePermissions | undefined = commonData.permissions?.organizations?.find(
               (x: ResourcePermissions) => x.name === settingsDefaultRedirectOrganization.value,
             );
             if (!organizationResourcePermissions) {
               unauthorizedRedirectUrl = `/${commonData.permissions.organizations[0]!.name}`;
-            }
-          } else if (commonData.permissions?.organizations && commonData.permissions!.organizations.length > 0) {
+            } */
+          } /* else if (commonData.permissions?.organizations && commonData.permissions!.organizations.length > 0) {
             unauthorizedRedirectUrl = `/${commonData.permissions.organizations[0]!.name}`;
-          } else if (settingsUnauthRedirect?.value) {
+          } */ else if (settingsUnauthRedirect?.value) {
             unauthorizedRedirectUrl = settingsUnauthRedirect.value;
           }
+
           router.replace(unauthorizedRedirectUrl);
         }
       }
