@@ -46,11 +46,6 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
       e.preventDefault();
       return;
     }
-    if (formattedName.includes(' ')) {
-      setErrorMessageInput('Spaces are not allowed');
-      e.preventDefault();
-      return;
-    }
     if (formattedName.includes('/')) {
       setErrorMessageInput('Slashes are not allowed');
       e.preventDefault();
