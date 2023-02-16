@@ -59,7 +59,7 @@ const ChannelSelector = (props: IChannelSelectorProps) => {
         >
           <Menu.Items className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
             <div className="p-2">
-              <ChannelList basePath={basePath} commonData={commonData} />
+              <ChannelList basePath={basePath} commonData={commonData} showScroll={true} />
             </div>
           </Menu.Items>
         </Transition>

@@ -123,7 +123,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="my-2 flex flex-col space-y-4 mb-8">
+    <form onSubmit={handleSubmit} className="my-2 flex flex-col space-y-4 mb-8" style={{ zIndex: 1 }}>
       {hasPermissionCreateComment ? (
         <>
           <Mention

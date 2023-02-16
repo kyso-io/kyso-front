@@ -1,7 +1,8 @@
 import type { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { Menu, Transition } from '@headlessui/react';
 import { HomeIcon, SelectorIcon, ViewListIcon } from '@heroicons/react/outline';
-import { Fragment, useMemo } from 'react';
+import { SearchIcon } from '@heroicons/react/solid';
+import { Fragment, useEffect, useState } from 'react';
 
 type INavigationSelectorProps = {
   selectorItems: BreadcrumbItem[];
@@ -19,11 +20,13 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
     currentOrg = props.selectorItems.find((item) => item.current);
   }
 
-  const { selectorLabel = 'organization', extraItem } = props;
+  const [originalSortedSelectorITems, setOriginalSortedSelectorItems] = useState<BreadcrumbItem[]>([]);
+  const [sortedSelectorItems, setSortedSelectorItems] = useState<BreadcrumbItem[]>([]);
 
-  const sortedSelectorItems: BreadcrumbItem[] = useMemo(() => {
+  const { selectorLabel = 'organization', extraItem } = props;
+  useEffect(() => {
     if (props.selectorItems) {
-      return props.selectorItems.sort((a: BreadcrumbItem, b: BreadcrumbItem) => {
+      const sorted: BreadcrumbItem[] = props.selectorItems.sort((a: BreadcrumbItem, b: BreadcrumbItem) => {
         const nameA: string = a.name.toLowerCase();
         const nameB: string = b.name.toLowerCase();
         if (nameA < nameB) {
@@ -34,8 +37,10 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
         }
         return 0;
       });
+
+      setSortedSelectorItems(sorted);
+      setOriginalSortedSelectorItems(sorted);
     }
-    return [];
   }, [props.selectorItems]);
 
   return (
@@ -95,11 +100,29 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
 
             <div className="py-1">
               {currentOrg && (
-                <div className="px-4 py-2">
-                  <p className="text-sm text-gray-500 truncate">Choose {selectorLabel}:</p>
-                </div>
+                <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
+                  Organizations
+                </h3>
               )}
-              <div className="flex flex-col justify-start">
+              <div className="px-4 pb-2">
+                <div className="relative mt-1 rounded-md shadow-sm">
+                  <input
+                    type="text"
+                    name="account-number"
+                    id="account-number"
+                    className="block w-full rounded-md border-gray-300 pr-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                    placeholder="Search"
+                    onChange={(e) => {
+                      const filtered: BreadcrumbItem[] = originalSortedSelectorITems.filter((x) => x.name.toLowerCase().includes(e.target.value.toLowerCase()));
+                      setSortedSelectorItems(filtered);
+                    }}
+                  />
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
+                    <SearchIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col justify-start" style={{ maxHeight: '380PX', overflow: 'overlay' }}>
                 {sortedSelectorItems &&
                   sortedSelectorItems
                     // .filter((o) => !o.current)
