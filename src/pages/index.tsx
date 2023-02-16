@@ -62,17 +62,7 @@ const Index = ({ commonData }: Props) => {
             commonData.permissions!.organizations.length > 0
           ) {
             unauthorizedRedirectUrl = `/${settingsDefaultRedirectOrganization.value}`;
-
-            // Simplify it. If unauthorized, redirect to default-organization
-            /* const organizationResourcePermissions: ResourcePermissions | undefined = commonData.permissions?.organizations?.find(
-              (x: ResourcePermissions) => x.name === settingsDefaultRedirectOrganization.value,
-            );
-            if (!organizationResourcePermissions) {
-              unauthorizedRedirectUrl = `/${commonData.permissions.organizations[0]!.name}`;
-            } */
-          } /* else if (commonData.permissions?.organizations && commonData.permissions!.organizations.length > 0) {
-            unauthorizedRedirectUrl = `/${commonData.permissions.organizations[0]!.name}`;
-          } */ else if (settingsUnauthRedirect?.value) {
+          } else if (settingsUnauthRedirect?.value) {
             unauthorizedRedirectUrl = settingsUnauthRedirect.value;
           }
 
