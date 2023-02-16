@@ -301,8 +301,6 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       // Does not exist, so it's a new file
       fs.push(newFile);
     } else {
-      setMessageToaster(`${newFile.name} already exists`);
-      setShowToaster(true);
       // Already exists, so we just need to change the name
       fs[existingFileIndex]!.name = newFile.name;
       fs[existingFileIndex]!.path = newFile.path;
