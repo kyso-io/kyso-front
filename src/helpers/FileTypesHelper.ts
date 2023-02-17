@@ -144,6 +144,10 @@ export class FileTypesHelper {
     );
   };
 
+  public static isTsv = (name: string) => {
+    return name.toLowerCase().endsWith('.tsv');
+  };
+
   public static isPDF = (name: string) => {
     return name.toLowerCase().endsWith('.pdf');
   };
