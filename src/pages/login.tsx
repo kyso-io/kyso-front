@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { KysoDescription } from '../components/KysoDescription';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
+import type { KeyValue } from '../model/key-value.model';
 import type { DecodedToken } from '../types/decoded-token';
 
 const validateEmail = (email: string) => {
@@ -33,19 +34,21 @@ const Index = () => {
 
   const [email, setEmail] = useState(getLocalStorageItem('email') || '');
   const [error, setError] = useState<string | null>(null);
-  const [password, setPassword] = useState('');
+  const [password, setPassword] = useState<string>('');
   const dispatch = useDispatch<AppDispatch>();
-  const [bitbucketUrl, setBitbucketUrl] = useState('');
-  const [githubUrl, setGithubUrl] = useState('');
-  const [gitlabUrl, setGitlabUrl] = useState('');
-  const [googleUrl, setGoogleUrl] = useState('');
-  const [enableGoogleAuth, setEnableGoogleAuth] = useState(true);
-  const [enableGithubAuth, setEnableGithubAuth] = useState(true);
-  const [enableGitlabAuth, setEnableGitlabAuth] = useState(true);
-  const [enableBitbucketAuth, setEnableBitbucketAuth] = useState(true);
-  const [enableKysoAuth, setEnableKysoAuth] = useState(true);
-  const [enablePingSamlAuth, setEnablePingSamlAuth] = useState(true);
-  const [pingUrl, setPingUrl] = useState('');
+  const [bitbucketUrl, setBitbucketUrl] = useState<string>('');
+  const [githubUrl, setGithubUrl] = useState<string>('');
+  const [gitlabUrl, setGitlabUrl] = useState<string>('');
+  const [googleUrl, setGoogleUrl] = useState<string>('');
+  const [enableGoogleAuth, setEnableGoogleAuth] = useState<boolean>(true);
+  const [enableGithubAuth, setEnableGithubAuth] = useState<boolean>(true);
+  const [enableGitlabAuth, setEnableGitlabAuth] = useState<boolean>(true);
+  const [enableBitbucketAuth, setEnableBitbucketAuth] = useState<boolean>(true);
+  const [enableKysoAuth, setEnableKysoAuth] = useState<boolean>(true);
+  const [enablePingSamlAuth, setEnablePingSamlAuth] = useState<boolean>(true);
+  const [enableOktaSamlAuth, setEnableOktaSamlAuth] = useState<boolean>(true);
+  const [pingUrl, setPingUrl] = useState<string>('');
+  const [oktaUrl, setOktaUrl] = useState<string>('');
   const [captchaEnabled, setCaptchaEnabled] = useState<boolean>(true);
 
   useEffect(() => {
@@ -61,19 +64,21 @@ const Index = () => {
         return '';
       }
 
-      const googleClientId = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_GOOGLE_CLIENT_ID).value;
-      const bitbucketClientId = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_BITBUCKET_CLIENT_ID).value;
-      const githubClientId = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_GITHUB_CLIENT_ID).value;
-      const gitlabClientId = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_GITLAB_CLIENT_ID).value;
-      const gitlabRedirectURI = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_GITLAB_REDIRECT_URI).value;
-      const pingIdSamlSSOUrl = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_PINGID_SAML_SSO_URL).value;
+      const googleClientId = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_GOOGLE_CLIENT_ID).value;
+      const bitbucketClientId = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_BITBUCKET_CLIENT_ID).value;
+      const githubClientId = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_GITHUB_CLIENT_ID).value;
+      const gitlabClientId = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_GITLAB_CLIENT_ID).value;
+      const gitlabRedirectURI = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_GITLAB_REDIRECT_URI).value;
+      const pingIdSamlSSOUrl = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_PINGID_SAML_SSO_URL).value;
+      const oktaSamlSSOUrl = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_OKTA_SAML_SSO_URL).value;
 
-      const tmpEnableGoogleAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GOOGLE).value === 'true';
-      const tmpEnableGithubAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITHUB).value === 'true';
-      const tmpEnableGitlabAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
-      const tmpEnableBitbucketAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET).value === 'true';
-      const tmpEnableKysoAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO).value === 'true';
-      const tmpEnablePingSamlAuth = publicKeys.find((x) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML).value === 'true';
+      const tmpEnableGoogleAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GOOGLE).value === 'true';
+      const tmpEnableGithubAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITHUB).value === 'true';
+      const tmpEnableGitlabAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
+      const tmpEnableBitbucketAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET).value === 'true';
+      const tmpEnableKysoAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO).value === 'true';
+      const tmpEnablePingSamlAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML).value === 'true';
+      const tmpEnableOktaSamlAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_OKTA_SAML).value === 'true';
 
       setEnableGoogleAuth(tmpEnableGoogleAuth);
       setEnableGitlabAuth(tmpEnableGitlabAuth);
@@ -81,6 +86,7 @@ const Index = () => {
       setEnableBitbucketAuth(tmpEnableBitbucketAuth);
       setEnableKysoAuth(tmpEnableKysoAuth);
       setEnablePingSamlAuth(tmpEnablePingSamlAuth);
+      setEnableOktaSamlAuth(tmpEnableOktaSamlAuth);
 
       setGoogleUrl(
         `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&response_type=code&redirect_uri=${encodeURIComponent(
@@ -102,6 +108,7 @@ const Index = () => {
       );
 
       setPingUrl(pingIdSamlSSOUrl);
+      setOktaUrl(oktaSamlSSOUrl);
 
       const captchaEnabledValue: string = publicKeys.find((x) => x.key === KysoSettingsEnum.HCAPTCHA_ENABLED).value;
       setCaptchaEnabled(captchaEnabledValue === 'true');
@@ -308,6 +315,13 @@ const Index = () => {
               <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50" href={pingUrl}>
                 <img src="/pingid_logo.jpg" alt="PingID Logo" className="w-4 h-4 inline m-0 mr-1" />
                 Sign in with PingID
+              </a>
+            )}
+
+            {enableOktaSamlAuth && oktaUrl && oktaUrl.length > 0 && (
+              <a className="bg-white border flex border-gray-400  items-center justify-center rounded p-2.5 text-sm no-underline text-center hover:bg-gray-50" href={oktaUrl}>
+                <img src="/okta_logo.png" alt="Okta Logo" className="w-7 h-4 inline m-0 mr-1" />
+                Sign in with Okta
               </a>
             )}
 
