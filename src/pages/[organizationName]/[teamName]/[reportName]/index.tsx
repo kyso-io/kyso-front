@@ -92,6 +92,11 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const [showEmails, setShowEmails] = useState<boolean>(false);
   const [show, setShow] = useState<boolean>(false);
   const [alertText, setAlertText] = useState<string>('');
+  const [teamVisibility, setTeamVisibility] = useState<string | null>(null);
+  const [showError, setShowError] = useState<boolean>(true);
+  const [showErrorMessage, setShowErrorMessage] = useState<string>('');
+  const [showErrorRequestAccessButton, setShowErrorRequestAccessButton] = useState<boolean>(false);
+
   const tabs: { title: string; tab: Tab }[] = useMemo(() => {
     const data: { title: string; tab: Tab }[] = [
       {
@@ -132,6 +137,18 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
+
+    const getTeamVisibility = async () => {
+      if (router.query) {
+        try {
+          const quickApiCall: Api = new Api();
+          const res: NormalizedResponseDTO<string> = await quickApiCall.getTeamVisibility(router.query.organizationName as string, router.query.teamName as string);
+          setTeamVisibility(res.data);
+        } catch (e) {}
+      }
+    };
+
+    getTeamVisibility();
     getData();
   }, []);
 
@@ -602,27 +619,39 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const hasPermissionEditInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData, random]);
   const hasPermissionDeleteInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData, random]);
 
-  if (commonData.errorOrganization) {
-    return renderSomethingHappened(commonData.errorOrganization, true, commonData);
-  }
+  const report = reportData ? reportData.report : null;
+  const authors = reportData ? reportData.authors : [];
 
-  if (commonData.errorTeam) {
-    return renderSomethingHappened(commonData.errorTeam, true, commonData);
-  }
-
-  if (!reportData) {
-    return renderSomethingHappened("Can't retrieve report's contents");
-  }
-
-  if (reportData.errorReport) {
-    return renderSomethingHappened(reportData.errorReport, true, commonData);
-  }
-
-  const { report, authors } = reportData;
-
-  if (report && commonData && !hasPermissionReadReport) {
-    return renderSomethingHappened("You don't have enough permissions to see this report", true, commonData);
-  }
+  useEffect(() => {
+    if (commonData.errorOrganization) {
+      setShowError(true);
+      setShowErrorMessage(commonData.errorOrganization);
+      setShowErrorRequestAccessButton(true);
+      // renderSomethingHappened(commonData.errorOrganization, true, commonData, teamVisibility);
+    } else if (commonData.errorTeam) {
+      setShowError(true);
+      setShowErrorMessage(commonData.errorTeam);
+      setShowErrorRequestAccessButton(true);
+      // return renderSomethingHappened(commonData.errorTeam, true, commonData, teamVisibility);
+    } else if (!reportData) {
+      setShowError(true);
+      setShowErrorMessage("Can't retrieve report's contents");
+      setShowErrorRequestAccessButton(false);
+      // return renderSomethingHappened("Can't retrieve report's contents");
+    } else if (reportData.errorReport) {
+      setShowError(true);
+      setShowErrorMessage(reportData.errorReport);
+      setShowErrorRequestAccessButton(true);
+      // return renderSomethingHappened(reportData.errorReport, true, commonData, teamVisibility);
+    } else if (report && commonData && !hasPermissionReadReport) {
+      setShowError(true);
+      setShowErrorMessage("You don't have enough permissions to see this report");
+      setShowErrorRequestAccessButton(true);
+      // return renderSomethingHappened("You don't have enough permissions to see this report", true, commonData, teamVisibility);
+    } else {
+      setShowError(false);
+    }
+  }, [commonData.errorOrganization, commonData.errorTeam, reportData, reportData?.errorReport, hasPermissionReadReport]);
 
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
 
@@ -640,237 +669,242 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   };
 
   return (
-    <div>
-      <div className={classNames('hidden lg:block z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
+    <>
+      {showError && renderSomethingHappened(showErrorMessage, showErrorRequestAccessButton, commonData, teamVisibility!)}
+      {!showError && (
         <div>
-          <div className="flex flex-1 flex-col pt-32 mt-2">
-            <nav className="flex-1 space-y-1">
-              <PureSideOverlayPanel key={report?.name} cacheKey={report?.name} setSidebarOpen={(p) => setSidebarOpen(p)}>
-                <>
-                  {report && (
-                    <React.Fragment>
-                      <div className="border-b border-gray-200">
-                        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                          {tabs.map((element: { title: string; tab: Tab }) => (
-                            <a
-                              key={element.tab}
-                              onClick={() => setSelectedTab(element.tab)}
-                              className={classNames(
-                                element.tab === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                                'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer',
-                              )}
-                            >
-                              {element.title}
-                            </a>
-                          ))}
-                        </nav>
-                      </div>
-                      <div className="py-2">
-                        {selectedTab === Tab.Toc && <TableOfContents title="" toc={report.toc} collapsible={true} openInNewTab={false} />}
-                        {selectedTab === Tab.Files && (
-                          <PureTree
-                            path={currentPath}
-                            basePath={router.basePath}
-                            commonData={commonData}
-                            report={report}
-                            version={router.query.version as string}
-                            selfTree={selfTree}
-                            parentTree={parentTree}
-                            // onNavigation={(e) => {
-                            //   e.preventDefault()
-                            //   router.push(e.currentTarget.href)
-                            // }}
-                          />
-                        )}
-                      </div>
-                    </React.Fragment>
-                  )}
-                </>
-              </PureSideOverlayPanel>
-            </nav>
-          </div>
-        </div>
-      </div>
-
-      <div className={classNames('flex flex-1 flex-col', sidebarOpen ? 'pl-64' : 'lg:pl-10')}>
-        <main>
-          <div className="w-full px-4 sm:px-6 md:px-10">
-            <div className="py-4">
-              {report && (
-                <>
-                  <div className="w-full flex lg:flex-col flex-col justify-between rounded">
-                    <div className="w-full p-4">
-                      <PureReportHeader
-                        reportUrl={`${reportUrl}`}
-                        frontEndUrl={frontEndUrl}
-                        versions={versions}
-                        fileToRender={fileToRender}
-                        report={report}
-                        authors={authors}
-                        version={version}
-                        onUpvoteReport={async () => {
-                          await dispatch(toggleUserStarReportAction(report.id as string));
-                          refreshReport();
-                        }}
-                        hasPermissionEditReport={
-                          hasPermissionEditReport || /* report.user_id === commonData.user?.id || */ (report.author_ids.includes(commonData.user?.id as string) && hasPermissionEditReportOnlyMine)
-                        }
-                        hasPermissionDeleteReport={hasPermissionDeleteReport}
-                        commonData={commonData}
-                        onSetFileAsMainFile={setReportFileAsMainFile}
-                        setUser={setUser}
-                      >
-                        <ManageUsers
-                          commonData={commonData}
-                          members={members}
-                          onInputChange={(query: string) => searchUsers(query)}
-                          users={users}
-                          showTeamRoles={true}
-                          onUpdateRoleMember={updateMemberRole}
-                          onInviteNewUser={inviteNewUser}
-                          onRemoveUser={removeUser}
-                          captchaIsEnabled={captchaIsEnabled}
-                          onCaptchaSuccess={refreshUserData}
-                          showEmails={showEmails}
-                        />
-                      </PureReportHeader>
-                    </div>
-
-                    <div className="border-y p-0 mx-4">
-                      {fileToRender && onlyVisibleCell && (
-                        <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
-                          Showing only this cell.
-                          <button
-                            onClick={() => {
-                              const qs = { ...router.query };
-                              delete qs.cell;
-                              return router.push({
-                                query: { ...qs },
-                              });
-                            }}
-                            className="ml-1 text-blue-500"
-                          >
-                            View entire notebook
-                          </button>
-                        </div>
+          <div className={classNames('hidden lg:block z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
+            <div>
+              <div className="flex flex-1 flex-col pt-32 mt-2">
+                <nav className="flex-1 space-y-1">
+                  <PureSideOverlayPanel key={report?.name} cacheKey={report?.name} setSidebarOpen={(p) => setSidebarOpen(p)}>
+                    <>
+                      {report && (
+                        <React.Fragment>
+                          <div className="border-b border-gray-200">
+                            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                              {tabs.map((element: { title: string; tab: Tab }) => (
+                                <a
+                                  key={element.tab}
+                                  onClick={() => setSelectedTab(element.tab)}
+                                  className={classNames(
+                                    element.tab === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                                    'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer',
+                                  )}
+                                >
+                                  {element.title}
+                                </a>
+                              ))}
+                            </nav>
+                          </div>
+                          <div className="py-2">
+                            {selectedTab === Tab.Toc && <TableOfContents title="" toc={report.toc} collapsible={true} openInNewTab={false} />}
+                            {selectedTab === Tab.Files && (
+                              <PureTree
+                                path={currentPath}
+                                basePath={router.basePath}
+                                commonData={commonData}
+                                report={report}
+                                version={router.query.version as string}
+                                selfTree={selfTree}
+                                parentTree={parentTree}
+                                // onNavigation={(e) => {
+                                //   e.preventDefault()
+                                //   router.push(e.currentTarget.href)
+                                // }}
+                              />
+                            )}
+                          </div>
+                        </React.Fragment>
                       )}
-
-                      {fileToRender && (
-                        <UnpureReportRender
-                          key={fileToRender.id}
-                          fileToRender={fileToRender}
-                          report={report}
-                          channelMembers={channelMembers}
-                          commonData={commonData}
-                          onlyVisibleCell={onlyVisibleCell}
-                          frontEndUrl={frontEndUrl}
-                          enabledCreateInlineComment={hasPermissionCreateInlineComment}
-                          enabledEditInlineComment={hasPermissionEditInlineComment}
-                          enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
-                          captchaIsEnabled={captchaIsEnabled}
-                          setUser={setUser}
-                        />
-                      )}
-
-                      {!fileToRender && (
-                        <button
-                          type="button"
-                          className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                        >
-                          <span className="mt-2 block text-sm font-medium text-gray-900">Please choose a file in the filebrowser on the left.</span>
-                        </button>
-                      )}
-                    </div>
-
-                    {hasPermissionReadComment && (
-                      <div ref={refComments} className="block pb-44 w-full p-4 pl-8">
-                        <div className="prose max-w-none ">
-                          <Tooltip target=".comments-info" />
-                          <h4>
-                            Report{`'`}s Comments{' '}
-                            <FontAwesomeIcon
-                              className="comments-info"
-                              data-pr-tooltip="These comments are global to the report, and are shown in all files"
-                              style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
-                              icon={faCircleInfo}
-                            />
-                          </h4>
-                        </div>
-                        <PureComments
-                          report={report}
-                          commonData={commonData}
-                          hasPermissionCreateComment={hasPermissionCreateComment}
-                          hasPermissionDeleteComment={hasPermissionDeleteComment}
-                          channelMembers={channelMembers}
-                          submitComment={submitComment}
-                          defaultPlaceholderText="Write a new report's global comment"
-                          userSelectorHook={(id?: string): UserDTO | undefined => {
-                            return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
-                          }}
-                          onDeleteComment={async (id: string) => {
-                            if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                              setShowCaptchaModal(true);
-                              return;
-                            }
-                            await dispatch(deleteCommentAction(id as string));
-                          }}
-                          commentSelectorHook={(parentId: string | null = null) => {
-                            const values: Comment[] = Object.values(allComments || []);
-                            if (values.length === 0) {
-                              return [];
-                            }
-                            const filtered: Comment[] = values.filter((comment: Comment) => {
-                              return comment!.comment_id === parentId;
-                            });
-                            // Sort comments by created_at desc
-                            filtered.sort((a: Comment, b: Comment) => {
-                              return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
-                            });
-                            return filtered;
-                          }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+                    </>
+                  </PureSideOverlayPanel>
+                </nav>
+              </div>
             </div>
           </div>
-        </main>
-      </div>
-      {scrollDirection === ScrollDirection.Down && !isInViewport && (
-        <div className="sticky bottom-20 text-center">
-          <button
-            type="button"
-            onClick={() => refComments.current?.scrollIntoView({ behavior: 'smooth' })}
-            className="inline-flex items-center rounded-full border border-gray-300 bg-white px-5 py-2.5 text-xs font-medium shadow-sm hover:bg-gray-50 focus:outline-none"
-            style={{
-              fontSize: '14px',
-              color: '#234361',
-              boxShadow: 'rgb(0 0 0 / 24%) 0px 3px 8px',
-              border: 'none',
-            }}
-          >
-            <ArrowSmDownIcon
-              className="mr-1 h-6 w-6 text-gray-400"
-              aria-hidden="true"
-              style={{
-                color: '#234361',
-              }}
-            />
-            Go to comments
-          </button>
+
+          <div className={classNames('flex flex-1 flex-col', sidebarOpen ? 'pl-64' : 'lg:pl-10')}>
+            <main>
+              <div className="w-full px-4 sm:px-6 md:px-10">
+                <div className="py-4">
+                  {report && (
+                    <>
+                      <div className="w-full flex lg:flex-col flex-col justify-between rounded">
+                        <div className="w-full p-4">
+                          <PureReportHeader
+                            reportUrl={`${reportUrl}`}
+                            frontEndUrl={frontEndUrl}
+                            versions={versions}
+                            fileToRender={fileToRender}
+                            report={report}
+                            authors={authors}
+                            version={version}
+                            onUpvoteReport={async () => {
+                              await dispatch(toggleUserStarReportAction(report.id as string));
+                              refreshReport();
+                            }}
+                            hasPermissionEditReport={
+                              hasPermissionEditReport || /* report.user_id === commonData.user?.id || */ (report.author_ids.includes(commonData.user?.id as string) && hasPermissionEditReportOnlyMine)
+                            }
+                            hasPermissionDeleteReport={hasPermissionDeleteReport}
+                            commonData={commonData}
+                            onSetFileAsMainFile={setReportFileAsMainFile}
+                            setUser={setUser}
+                          >
+                            <ManageUsers
+                              commonData={commonData}
+                              members={members}
+                              onInputChange={(query: string) => searchUsers(query)}
+                              users={users}
+                              showTeamRoles={true}
+                              onUpdateRoleMember={updateMemberRole}
+                              onInviteNewUser={inviteNewUser}
+                              onRemoveUser={removeUser}
+                              captchaIsEnabled={captchaIsEnabled}
+                              onCaptchaSuccess={refreshUserData}
+                              showEmails={showEmails}
+                            />
+                          </PureReportHeader>
+                        </div>
+
+                        <div className="border-y p-0 mx-4">
+                          {fileToRender && onlyVisibleCell && (
+                            <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
+                              Showing only this cell.
+                              <button
+                                onClick={() => {
+                                  const qs = { ...router.query };
+                                  delete qs.cell;
+                                  return router.push({
+                                    query: { ...qs },
+                                  });
+                                }}
+                                className="ml-1 text-blue-500"
+                              >
+                                View entire notebook
+                              </button>
+                            </div>
+                          )}
+
+                          {fileToRender && (
+                            <UnpureReportRender
+                              key={fileToRender.id}
+                              fileToRender={fileToRender}
+                              report={report}
+                              channelMembers={channelMembers}
+                              commonData={commonData}
+                              onlyVisibleCell={onlyVisibleCell}
+                              frontEndUrl={frontEndUrl}
+                              enabledCreateInlineComment={hasPermissionCreateInlineComment}
+                              enabledEditInlineComment={hasPermissionEditInlineComment}
+                              enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
+                              captchaIsEnabled={captchaIsEnabled}
+                              setUser={setUser}
+                            />
+                          )}
+
+                          {!fileToRender && (
+                            <button
+                              type="button"
+                              className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            >
+                              <span className="mt-2 block text-sm font-medium text-gray-900">Please choose a file in the filebrowser on the left.</span>
+                            </button>
+                          )}
+                        </div>
+
+                        {hasPermissionReadComment && (
+                          <div ref={refComments} className="block pb-44 w-full p-4 pl-8">
+                            <div className="prose max-w-none ">
+                              <Tooltip target=".comments-info" />
+                              <h4>
+                                Report{`'`}s Comments{' '}
+                                <FontAwesomeIcon
+                                  className="comments-info"
+                                  data-pr-tooltip="These comments are global to the report, and are shown in all files"
+                                  style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
+                                  icon={faCircleInfo}
+                                />
+                              </h4>
+                            </div>
+                            <PureComments
+                              report={report}
+                              commonData={commonData}
+                              hasPermissionCreateComment={hasPermissionCreateComment}
+                              hasPermissionDeleteComment={hasPermissionDeleteComment}
+                              channelMembers={channelMembers}
+                              submitComment={submitComment}
+                              defaultPlaceholderText="Write a new report's global comment"
+                              userSelectorHook={(id?: string): UserDTO | undefined => {
+                                return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
+                              }}
+                              onDeleteComment={async (id: string) => {
+                                if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+                                  setShowCaptchaModal(true);
+                                  return;
+                                }
+                                await dispatch(deleteCommentAction(id as string));
+                              }}
+                              commentSelectorHook={(parentId: string | null = null) => {
+                                const values: Comment[] = Object.values(allComments || []);
+                                if (values.length === 0) {
+                                  return [];
+                                }
+                                const filtered: Comment[] = values.filter((comment: Comment) => {
+                                  return comment!.comment_id === parentId;
+                                });
+                                // Sort comments by created_at desc
+                                filtered.sort((a: Comment, b: Comment) => {
+                                  return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
+                                });
+                                return filtered;
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </main>
+          </div>
+          {scrollDirection === ScrollDirection.Down && !isInViewport && (
+            <div className="sticky bottom-20 text-center">
+              <button
+                type="button"
+                onClick={() => refComments.current?.scrollIntoView({ behavior: 'smooth' })}
+                className="inline-flex items-center rounded-full border border-gray-300 bg-white px-5 py-2.5 text-xs font-medium shadow-sm hover:bg-gray-50 focus:outline-none"
+                style={{
+                  fontSize: '14px',
+                  color: '#234361',
+                  boxShadow: 'rgb(0 0 0 / 24%) 0px 3px 8px',
+                  border: 'none',
+                }}
+              >
+                <ArrowSmDownIcon
+                  className="mr-1 h-6 w-6 text-gray-400"
+                  aria-hidden="true"
+                  style={{
+                    color: '#234361',
+                  }}
+                />
+                Go to comments
+              </button>
+            </div>
+          )}
+          <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />} message={alertText} />
+          {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
         </div>
       )}
-      <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />} message={alertText} />
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
-    </div>
+    </>
   );
 };
 
 Index.layout = KysoApplicationLayout;
 
-const renderSomethingHappened = (whatHappened: string, addRequestAccessButton?: boolean, commonData?: CommonData) => {
+const renderSomethingHappened = (whatHappened: string, addRequestAccessButton?: boolean, commonData?: CommonData, teamVisibility?: string) => {
   return (
     <>
       <SomethingHappened description={whatHappened}></SomethingHappened>
@@ -887,17 +921,39 @@ const renderSomethingHappened = (whatHappened: string, addRequestAccessButton?: 
                   <p>Send a request access to organization and team administrators. If they approve your request we will send you a confirmation message</p>
                 </div>
                 <div className="mt-5 sm:mt-0 sm:ml-6 sm:flex sm:shrink-0 sm:items-center">
-                  <button
-                    onClick={() => {
-                      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-                      api.requestAccessToOrganization(commonData.organization?.id!);
-                      alert('Request created successfully');
-                    }}
-                    type="button"
-                    className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
-                  >
-                    Request access
-                  </button>
+                  {
+                    /* Team not private. Request access to organization */
+                    teamVisibility !== TeamVisibilityEnum.PRIVATE && (
+                      <button
+                        onClick={() => {
+                          const api: Api = new Api(commonData.token);
+                          api.requestAccessToOrganization(commonData.organization?.id!);
+                          alert('Request created successfully');
+                        }}
+                        type="button"
+                        className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
+                      >
+                        Request access
+                      </button>
+                    )
+                  }
+
+                  {
+                    /* Team private. Request access to organization */
+                    teamVisibility === TeamVisibilityEnum.PRIVATE && (
+                      <button
+                        onClick={() => {
+                          const api: Api = new Api(commonData.token);
+                          api.requestAccessToTeam(commonData.team?.id!);
+                          alert('Request created successfully');
+                        }}
+                        type="button"
+                        className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
+                      >
+                        Request access to this team
+                      </button>
+                    )
+                  }
                 </div>
               </div>
             </div>
