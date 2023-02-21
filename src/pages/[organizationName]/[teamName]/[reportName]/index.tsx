@@ -93,6 +93,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const [show, setShow] = useState<boolean>(false);
   const [alertText, setAlertText] = useState<string>('');
   const [teamVisibility, setTeamVisibility] = useState<string | null>(null);
+  const [teamId, setTeamId] = useState<string | null>(null);
   const [showError, setShowError] = useState<boolean>(true);
   const [showErrorMessage, setShowErrorMessage] = useState<string>('');
   const [showErrorRequestAccessButton, setShowErrorRequestAccessButton] = useState<boolean>(false);
@@ -137,18 +138,6 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         Helper.logError(errorHttp.response.data, errorHttp);
       }
     };
-
-    const getTeamVisibility = async () => {
-      if (router.query) {
-        try {
-          const quickApiCall: Api = new Api();
-          const res: NormalizedResponseDTO<string> = await quickApiCall.getTeamVisibility(router.query.organizationName as string, router.query.teamName as string);
-          setTeamVisibility(res.data);
-        } catch (e) {}
-      }
-    };
-
-    getTeamVisibility();
     getData();
   }, []);
 
@@ -623,6 +612,19 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const authors = reportData ? reportData.authors : [];
 
   useEffect(() => {
+    const getTeamVisibility = async () => {
+      if (router.query) {
+        try {
+          const quickApiCall: Api = new Api();
+          const res: NormalizedResponseDTO<any> = await quickApiCall.getTeamVisibility(router.query.organizationName as string, router.query.teamName as string);
+          setTeamVisibility(res.data.visibility);
+          setTeamId(res.data.id);
+        } catch (e) {}
+      }
+    };
+
+    getTeamVisibility();
+
     if (commonData.errorOrganization) {
       setShowError(true);
       setShowErrorMessage(commonData.errorOrganization);
@@ -651,7 +653,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
     } else {
       setShowError(false);
     }
-  }, [commonData.errorOrganization, commonData.errorTeam, reportData, reportData?.errorReport, hasPermissionReadReport]);
+  }, [router.query, commonData.errorOrganization, commonData.errorTeam, reportData, reportData?.errorReport, hasPermissionReadReport]);
 
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
 
@@ -670,7 +672,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 
   return (
     <>
-      {showError && renderSomethingHappened(showErrorMessage, showErrorRequestAccessButton, commonData, teamVisibility!)}
+      {showError && RenderSomethingHappened(showErrorMessage, showErrorRequestAccessButton, commonData, teamId, teamVisibility!)}
       {!showError && (
         <div>
           <div className={classNames('hidden lg:block z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
@@ -904,11 +906,21 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 
 Index.layout = KysoApplicationLayout;
 
-const renderSomethingHappened = (whatHappened: string, addRequestAccessButton?: boolean, commonData?: CommonData, teamVisibility?: string) => {
+const RenderSomethingHappened = (whatHappened: string, addRequestAccessButton?: boolean, commonData?: CommonData, teamId?: string | null, teamVisibility?: string) => {
+  const [waitABit, setWaitABit] = useState<boolean>(true);
+  const [requestCreatedSuccessfully, setRequestCreatedSuccessfully] = useState<boolean>(false);
+  const [requestCreatedError, setRequestCreatedError] = useState<boolean>(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setWaitABit(false), 3000);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <>
       <SomethingHappened description={whatHappened}></SomethingHappened>
-      {addRequestAccessButton && commonData && (
+      {waitABit && <></>}
+      {addRequestAccessButton && commonData && !waitABit && !requestCreatedSuccessfully && !requestCreatedError && (
         <>
           <div className="bg-white shadow sm:rounded-lg mx-32">
             <div className="px-4 py-5 sm:p-6">
@@ -926,9 +938,19 @@ const renderSomethingHappened = (whatHappened: string, addRequestAccessButton?: 
                     teamVisibility !== TeamVisibilityEnum.PRIVATE && (
                       <button
                         onClick={() => {
-                          const api: Api = new Api(commonData.token);
-                          api.requestAccessToOrganization(commonData.organization?.id!);
-                          alert('Request created successfully');
+                          try {
+                            const api: Api = new Api(commonData.token);
+                            api
+                              .requestAccessToOrganization(commonData.organization?.id!)
+                              .then(() => {
+                                setRequestCreatedSuccessfully(true);
+                              })
+                              .catch(() => {
+                                setRequestCreatedError(true);
+                              });
+                          } catch (e) {
+                            setRequestCreatedError(true);
+                          }
                         }}
                         type="button"
                         className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
@@ -943,9 +965,19 @@ const renderSomethingHappened = (whatHappened: string, addRequestAccessButton?: 
                     teamVisibility === TeamVisibilityEnum.PRIVATE && (
                       <button
                         onClick={() => {
-                          const api: Api = new Api(commonData.token);
-                          api.requestAccessToTeam(commonData.team?.id!);
-                          alert('Request created successfully');
+                          try {
+                            const api: Api = new Api(commonData.token);
+                            api
+                              .requestAccessToTeam(teamId!)
+                              .then(() => {
+                                setRequestCreatedSuccessfully(true);
+                              })
+                              .catch(() => {
+                                setRequestCreatedError(true);
+                              });
+                          } catch (e) {
+                            setRequestCreatedError(true);
+                          }
                         }}
                         type="button"
                         className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
@@ -954,6 +986,75 @@ const renderSomethingHappened = (whatHappened: string, addRequestAccessButton?: 
                       </button>
                     )
                   }
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {requestCreatedSuccessfully && (
+        <>
+          <div className="bg-white shadow sm:rounded-lg mx-32">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="rounded-md bg-green-50 p-4">
+                <div className="flex">
+                  <div className="shrink-0">
+                    <svg className="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-green-800">Request completed</h3>
+                    <div className="mt-2 text-sm text-green-700">
+                      <p>Your request have been sent to the administrators. You will receive an email notification as soon as the administrators process and approve or reject your request.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
+      {requestCreatedError && (
+        <>
+          <div className="bg-white shadow sm:rounded-lg mx-32">
+            <div className="px-4 py-5 sm:p-6">
+              <div className="rounded-md bg-red-50 p-4">
+                <div className="flex">
+                  <div className="shrink-0">
+                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                      <path
+                        fillRule="evenodd"
+                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <h3 className="text-sm font-medium text-red-800">Error sending request</h3>
+                    <div className="mt-2 text-sm text-red-700">
+                      <p>We are sorry, but an error occurred when sending your access request. Please </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-4" style={{ paddingLeft: '95%' }}>
+                  <div className="-mx-2 -my-1.5 flex">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRequestCreatedError(false);
+                      }}
+                      className="rounded-md bg-green-50 px-2 py-1.5 text-sm font-medium text-green-800 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
+                    >
+                      Try again
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
