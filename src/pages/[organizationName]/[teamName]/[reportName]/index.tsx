@@ -603,11 +603,11 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const hasPermissionDeleteInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData, random]);
 
   if (commonData.errorOrganization) {
-    return renderSomethingHappened(commonData.errorOrganization);
+    return renderSomethingHappened(commonData.errorOrganization, true, commonData);
   }
 
   if (commonData.errorTeam) {
-    return renderSomethingHappened(commonData.errorTeam);
+    return renderSomethingHappened(commonData.errorTeam, true, commonData);
   }
 
   if (!reportData) {
@@ -615,13 +615,13 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   }
 
   if (reportData.errorReport) {
-    return renderSomethingHappened(reportData.errorReport /* , true */);
+    return renderSomethingHappened(reportData.errorReport, true, commonData);
   }
 
   const { report, authors } = reportData;
 
   if (report && commonData && !hasPermissionReadReport) {
-    return renderSomethingHappened("You don't have enough permissions to see this report");
+    return renderSomethingHappened("You don't have enough permissions to see this report", true, commonData);
   }
 
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
@@ -870,11 +870,11 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 
 Index.layout = KysoApplicationLayout;
 
-const renderSomethingHappened = (whatHappened: string, addRequestAccessButton?: boolean) => {
+const renderSomethingHappened = (whatHappened: string, addRequestAccessButton?: boolean, commonData?: CommonData) => {
   return (
     <>
       <SomethingHappened description={whatHappened}></SomethingHappened>
-      {addRequestAccessButton && (
+      {addRequestAccessButton && commonData && (
         <>
           <div className="bg-white shadow sm:rounded-lg mx-32">
             <div className="px-4 py-5 sm:p-6">
@@ -888,6 +888,11 @@ const renderSomethingHappened = (whatHappened: string, addRequestAccessButton?: 
                 </div>
                 <div className="mt-5 sm:mt-0 sm:ml-6 sm:flex sm:shrink-0 sm:items-center">
                   <button
+                    onClick={() => {
+                      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+                      api.requestAccessToOrganization(commonData.organization?.id!);
+                      alert('Request created successfully');
+                    }}
                     type="button"
                     className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
                   >
