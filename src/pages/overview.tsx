@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import PureVideoModal from '@/components/PureVideoModal';
 import { checkJwt } from '@/helpers/check-jwt';
 import { Helper } from '@/helpers/Helper';
@@ -87,7 +88,7 @@ const Index = () => {
   }
 
   const [isOpen, setOpen] = useState(false);
-  const [onboardingMessages, setOnboardingMessages] = useState({
+  const [onboardingMessages, setOnboardingMessages] = useState<any>({
     welcome_message: '',
     demo_url: '',
     first_cta: {
@@ -167,9 +168,7 @@ const Index = () => {
 
       const onboardingMessagesValues = publicKeys.find((x) => x.key === KysoSettingsEnum.ONBOARDING_MESSAGES)?.value!;
 
-      const onboardingMessagesParsed = JSON.parse(onboardingMessagesValues);
-
-      setOnboardingMessages(onboardingMessagesParsed);
+      setOnboardingMessages(onboardingMessagesValues);
     };
 
     getOrganizationOptions();

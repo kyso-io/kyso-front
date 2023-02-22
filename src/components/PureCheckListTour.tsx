@@ -76,7 +76,8 @@ const PureCheckListTour = (props: Props) => {
 
   // default values
   /* eslint-disable no-template-curly-in-string */
-  const [onboardingMessages, setOnboardingMessages] = useState({
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const [onboardingMessages, setOnboardingMessages] = useState<any>({
     welcome_message: 'A place to publish, organise & discover presentation-ready research: Jupyter notebooks, HTML, Office files, SVS images, Markdown, Data Apps & much, much more!',
     demo_url: 'https://www.loom.com/embed/fa23c122402243539909f038ddef590b',
     first_cta: {
@@ -163,9 +164,8 @@ const PureCheckListTour = (props: Props) => {
 
         const onboardingMessagesValues = resultKysoSetting.data.find((x) => x.key === KysoSettingsEnum.ONBOARDING_MESSAGES)?.value!;
 
-        const onboardingMessagesParsed = JSON.parse(onboardingMessagesValues);
         /* eslint-disable @typescript-eslint/no-explicit-any */
-        setOnboardingMessages(onboardingMessagesParsed);
+        setOnboardingMessages(onboardingMessagesValues);
         /* eslint-disable @typescript-eslint/no-explicit-any */
       } catch (errorHttp: any) {
         Helper.logError(errorHttp.response.data, errorHttp);
