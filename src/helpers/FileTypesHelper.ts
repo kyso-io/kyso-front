@@ -148,6 +148,10 @@ export class FileTypesHelper {
     return name.toLowerCase().endsWith('.tsv');
   };
 
+  public static isCsv = (name: string) => {
+    return name.toLowerCase().endsWith('.csv');
+  };
+
   public static isPDF = (name: string) => {
     return name.toLowerCase().endsWith('.pdf');
   };
