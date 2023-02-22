@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/solid';
+import type { ColumnStats } from '@kyso-io/kyso-model';
 import type { RankingInfo } from '@tanstack/match-sorter-utils';
 import { rankItem } from '@tanstack/match-sorter-utils';
 import type { Cell, Column, ColumnDef, ColumnFiltersState, FilterFn, Header, HeaderGroup, Row, SortingState } from '@tanstack/react-table';
@@ -102,8 +103,8 @@ function Filter({ column, table }: { column: Column<any, unknown>; table: Table<
   ) : (
     <div className="mt-2">
       <datalist id={`${column.id}list`}>
-        {sortedUniqueValues.slice(0, 5000).map((value: any) => (
-          <option value={value} key={value} />
+        {sortedUniqueValues.slice(0, 5000).map((value: any, index: number) => (
+          <option value={value} key={`${index}-${value}`} />
         ))}
       </datalist>
       <DebouncedInput
@@ -120,10 +121,9 @@ function Filter({ column, table }: { column: Column<any, unknown>; table: Table<
 
 interface Props {
   fileToRender: FileToRender;
-  delimiter: ',' | '\t' | ';' | string;
 }
 
-const CsvTsvRenderer = ({ fileToRender, delimiter }: Props) => {
+const CsvTsvRenderer = ({ fileToRender }: Props) => {
   const columnHelper = createColumnHelper<any>();
   const [parseResult, setParseResult] = useState<Papaparse.ParseResult<any> | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -142,6 +142,19 @@ const CsvTsvRenderer = ({ fileToRender, delimiter }: Props) => {
       }),
     );
   }, [parseResult]);
+
+  const columnsStats: { [key: string]: ColumnStats } = useMemo(() => {
+    if (!fileToRender || !Array.isArray(fileToRender.columns_stats)) {
+      return {};
+    }
+    const result: { [key: string]: ColumnStats } = {};
+    fileToRender.columns_stats.forEach((columnStat: ColumnStats) => {
+      if (columnStat.images && Array.isArray(columnStat.images) && columnStat.images.length > 0) {
+        result[columnStat.column] = columnStat;
+      }
+    });
+    return result;
+  }, [fileToRender]);
 
   const table: Table<any> = useReactTable({
     data: parseResult?.data || [],
@@ -171,9 +184,8 @@ const CsvTsvRenderer = ({ fileToRender, delimiter }: Props) => {
     if (!fileToRender || !fileToRender.content) {
       return;
     }
-    const pr = Papaparse.parse(fileToRender.content as string, {
+    const pr: Papaparse.ParseResult<any> = Papaparse.parse(fileToRender.content as string, {
       header: true,
-      delimiter,
     });
     setParseResult(pr);
   }, [fileToRender]);
@@ -203,6 +215,9 @@ const CsvTsvRenderer = ({ fileToRender, delimiter }: Props) => {
                                 </span>
                               </div>
                               {header.column.getCanFilter() && <Filter column={header.column} table={table} />}
+                              {columnsStats[header.column.id] && (
+                                <img className="h-48 w-full object-cover md:h-full md:w-48 mt-2" src={`data:image/png;base64,${columnsStats[header.column.id]!.images[0]}`} />
+                              )}
                             </div>
                           </th>
                         );

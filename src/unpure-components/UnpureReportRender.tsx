@@ -201,8 +201,8 @@ const UnpureReportRender = ({
                 <RenderAsciidoc fileUrl={`${frontEndUrl}/scs${fileToRender.path_scs}`} source={fileToRender.content} />
               ) : FileTypesHelper.isCode(fileToRender.path) && fileToRender.content ? (
                 <RenderCode code={fileToRender.content} showFileNumbers={true} />
-              ) : FileTypesHelper.isTsv(fileToRender.path) ? (
-                <CsvTsvRenderer fileToRender={fileToRender} delimiter={'\t'} />
+              ) : FileTypesHelper.isCsv(fileToRender.path) || FileTypesHelper.isTsv(fileToRender.path) ? (
+                <CsvTsvRenderer fileToRender={fileToRender} />
               ) : FileTypesHelper.isOnlyOffice(fileToRender.path) ? (
                 <RenderOnlyOffice fileUrl={`http://kyso-scs/scs${fileToRender.path_scs}`} token={localStorage.getItem('jwt')} />
               ) : FileTypesHelper.isSVS(fileToRender.path) && frontEndUrl ? (
