@@ -18,7 +18,7 @@ import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState } from 'react';
 import CaptchaModal from '../components/CaptchaModal';
-import CsvTsvRenderer from '../components/CsvTsvRenderer';
+import CsvTsvRendererInfiniteScroll from '../components/CsvTsvRendererInfiniteScroll';
 import TableOfContents from '../components/TableOfContents';
 import type { FileToRender } from '../types/file-to-render';
 import PureSideOverlayCommentsPanel from './UnpureSideOverlayCommentsPanel';
@@ -202,7 +202,7 @@ const UnpureReportRender = ({
               ) : FileTypesHelper.isCode(fileToRender.path) && fileToRender.content ? (
                 <RenderCode code={fileToRender.content} showFileNumbers={true} />
               ) : FileTypesHelper.isCsv(fileToRender.path) || FileTypesHelper.isTsv(fileToRender.path) ? (
-                <CsvTsvRenderer fileToRender={fileToRender} />
+                <CsvTsvRendererInfiniteScroll commonData={commonData} fileToRender={fileToRender} />
               ) : FileTypesHelper.isOnlyOffice(fileToRender.path) ? (
                 <RenderOnlyOffice fileUrl={`http://kyso-scs/scs${fileToRender.path_scs}`} token={localStorage.getItem('jwt')} />
               ) : FileTypesHelper.isSVS(fileToRender.path) && frontEndUrl ? (
