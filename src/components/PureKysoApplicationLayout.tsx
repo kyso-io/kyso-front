@@ -5,7 +5,6 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { MenuIcon, XIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import { Fragment, useState } from 'react';
@@ -94,9 +93,14 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         {/* Profile dropdown */}
                         {!commonData.user && (
                           <div className="flex items-center px-5">
-                            <Link href="/login">
-                              <span className="text-sm">Login</span>
-                            </Link>
+                            <button
+                              className="text-black ml-3 inline-flex justify-center rounded-md border border-transparent bg-white py-2 px-4 text-sm font-medium shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                              onClick={() => {
+                                window.location.href = '/login';
+                              }}
+                            >
+                              Login
+                            </button>
                           </div>
                         )}
                         {commonData.user && (
