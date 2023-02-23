@@ -20,7 +20,7 @@ import { createColumnHelper } from '@tanstack/table-core';
 import clsx from 'clsx';
 import Papaparse from 'papaparse';
 import React, { useEffect, useMemo, useState } from 'react';
-import type { FileToRender } from '../types/file-to-render';
+import type { FileToRender } from '../../types/file-to-render';
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -123,7 +123,7 @@ interface Props {
   fileToRender: FileToRender;
 }
 
-const CsvTsvRenderer = ({ fileToRender }: Props) => {
+const RenderCsvTsv = ({ fileToRender }: Props) => {
   const columnHelper = createColumnHelper<any>();
   const [parseResult, setParseResult] = useState<Papaparse.ParseResult<any> | null>(null);
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -245,4 +245,4 @@ const CsvTsvRenderer = ({ fileToRender }: Props) => {
   );
 };
 
-export default CsvTsvRenderer;
+export default RenderCsvTsv;

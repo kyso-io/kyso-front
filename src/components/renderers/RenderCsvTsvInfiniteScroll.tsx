@@ -6,8 +6,8 @@ import clsx from 'clsx';
 import Papaparse from 'papaparse';
 import React, { useEffect, useMemo, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import type { CommonData } from '../types/common-data';
-import type { FileToRender } from '../types/file-to-render';
+import type { CommonData } from '../../types/common-data';
+import type { FileToRender } from '../../types/file-to-render';
 
 interface Props {
   commonData: CommonData;
@@ -16,7 +16,7 @@ interface Props {
 
 const OFFSET = 50;
 
-const CsvTsvRendererInfiniteScroll = ({ commonData, fileToRender }: Props) => {
+const RenderCsvTsvInfiniteScroll = ({ commonData, fileToRender }: Props) => {
   const [headers, setHeaders] = useState<string[]>([]);
   const [items, setItems] = useState<any[]>([]);
   const [page, setPage] = useState(1);
@@ -70,12 +70,12 @@ const CsvTsvRendererInfiniteScroll = ({ commonData, fileToRender }: Props) => {
 
   return (
     <React.Fragment>
-      <InfiniteScroll height={700} dataLength={items.length} next={getLines} hasMore={hasMore} loader={<div className="flex items-center justify-center">Loading...</div>}>
+      <InfiniteScroll height={800} dataLength={items.length} next={getLines} hasMore={hasMore} loader={<div className="flex items-center justify-center">Loading...</div>}>
         <div className="mt-8">
           <div className="-my-2">
             <div className="inline-block min-w-full py-2 align-middle">
               <table className="min-w-full divide-y divide-gray-300">
-                <thead>
+                <thead className="bg-gray-50" style={{ position: 'sticky', top: '0' }}>
                   <tr>
                     {headers.map((header: string, index: number) => (
                       <th key={`${header}-${index}`} className={clsx('py-3.5 text-left text-sm font-semibold text-gray-900', index === 0 ? 'pl-6 pr-3' : 'px-3 py-3.5')}>
@@ -170,4 +170,4 @@ const CsvTsvRendererInfiniteScroll = ({ commonData, fileToRender }: Props) => {
   );
 };
 
-export default CsvTsvRendererInfiniteScroll;
+export default RenderCsvTsvInfiniteScroll;
