@@ -32,7 +32,7 @@ const Index = ({ commonData }: Props) => {
         } catch (e) {}
       }
 
-      if (commonData?.user !== null && lastOrganizationDict[commonData.user!.id]) {
+      if (commonData?.user !== null) {
         // Logged user with last organization
         const indexOrg: number = commonData.permissions!.organizations!.findIndex((x: ResourcePermissions) => x.name === lastOrganizationDict[commonData.user!.id]);
 
