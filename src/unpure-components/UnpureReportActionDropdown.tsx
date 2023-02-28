@@ -1,16 +1,16 @@
+import PureNotification from '@/components/PureNotification';
 import ToasterNotification from '@/components/ToasterNotification';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
-import { DotsVerticalIcon, FolderDownloadIcon, InformationCircleIcon, PencilIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
+import { DotsVerticalIcon, FolderDownloadIcon, InformationCircleIcon, PencilIcon, PresentationChartLineIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { deleteReportAction } from '@kyso-io/kyso-store';
-import PureNotification from '@/components/PureNotification';
-import { classNames } from 'primereact/utils';
 import debounce from 'lodash.debounce';
-import React, { Fragment, useMemo, useState } from 'react';
 import { Tooltip } from 'primereact/tooltip';
+import { classNames } from 'primereact/utils';
+import React, { Fragment, useMemo, useState } from 'react';
 import type { FileToRender } from '../types/file-to-render';
 
 interface Props {
@@ -92,6 +92,15 @@ const UnpureReportActionDropdown = (props: Props) => {
         >
           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none">
             <div className="py-1">
+              <Menu.Item>
+                <a
+                  href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}/analytics`}
+                  className={classNames('text-gray-700', 'px-4 py-2 text-sm hover:bg-gray-100 group flex items-center')}
+                >
+                  <PresentationChartLineIcon className="mr-2 h-5 w-5 text-gray-700" />
+                  Analytics
+                </a>
+              </Menu.Item>
               {hasPermissionEditReport && (
                 <React.Fragment>
                   <Menu.Item>
