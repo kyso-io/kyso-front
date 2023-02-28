@@ -121,9 +121,11 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
         if (username) {
           return;
         }
-        // Redirect user to the first public organization available on permissions
-        router.replace(`/${commonData.permissions!.organizations![0]!.name}`);
-        return;
+        if (router.pathname !== '/search') {
+          // Redirect user to the first public organization available on permissions
+          router.replace(`/${commonData.permissions!.organizations![0]!.name}`);
+          return;
+        }
       }
       const cd: { organization: Organization | null; team: Team | null; errorOrganization: string | null; errorTeam: string | null } = await getCommonData({
         token: commonData.token,
