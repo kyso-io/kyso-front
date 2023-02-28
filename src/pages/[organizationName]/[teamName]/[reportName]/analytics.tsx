@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CheckCircleIcon } from '@heroicons/react/solid';
-import type { GithubFileHash, KysoSetting, OrganizationMember, ReportDTO, TeamMember, AnalyticsSource, DeviceDetector, NormalizedResponseDTO, ReportAnalytics, UserDTO } from '@kyso-io/kyso-model';
+import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import type { AnalyticsSource, DeviceDetector, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportAnalytics, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   InviteUserDto,
@@ -67,29 +67,6 @@ const optionsPieChart = {
   responsive: true,
   maintainAspectRatio: false,
 };
-
-// const data = [
-//   {
-//     rank: 1,
-//     country_code: 392,
-//     country: 'Japan',
-//     city_code: 21671,
-//     city: 'Tokyo',
-//     lat: 35.6895,
-//     lng: 139.6917,
-//     population: 100,
-//   },
-//   {
-//     rank: 2,
-//     country_code: 356,
-//     country: 'India',
-//     city_code: 21228,
-//     city: 'Delhi',
-//     lat: 28.6667,
-//     lng: 77.2167,
-//     population: 30,
-//   },
-// ];
 
 interface Props {
   commonData: CommonData;
@@ -729,195 +706,211 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
               </div>
             </div>
             {/* ANALYTICS */}
-            <div className="py-4 px-8">
-              <h1 className="text-3xl font-bold text-gray-900 my-4">Analytics</h1>
-              <div className="flex flex-col items-center space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4">
-                <div className="w-full py-4 px-8 bg-white rounded-xl drop-shadow-md flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Total Shares</p>
-                    <p className="text-2xl font-bold text-gray-900">{Helper.formatNumber(reportAnalytics?.shares.count)}</p>
-                  </div>
-                </div>
-                <div className="w-full py-4 px-8 bg-white rounded-xl drop-shadow-md flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Total Downloads</p>
-                    <p className="text-2xl font-bold text-gray-900">{Helper.formatNumber(reportAnalytics?.downloads.count)}</p>
-                  </div>
-                </div>
-                <div className="w-full py-4 px-8 bg-white rounded-xl drop-shadow-md flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Total Views</p>
-                    <p className="text-2xl font-bold text-gray-900">{Helper.formatNumber(reportAnalytics?.views.count)}</p>
+            {!result ? (
+              <div className="py-4 px-8">
+                <h1 className="text-3xl font-bold text-gray-900 my-4">Analytics</h1>
+                <div className="bg-yellow-50 p-4" style={{ width: '50%' }}>
+                  <div className="flex">
+                    <div className="shrink-0">
+                      <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-yellow-700">There is no data available for this report yet.</p>
+                    </div>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8">
-                <div className="flex flex-col w-full">
-                  <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Who visited this report</h2>
-                  <ul role="list" className="">
-                    {reportAnalytics?.views.last_items.slice(0, 5).map((e: { timestamp: Date; user_id: string; location: string | null; device: DeviceDetector | null }, index: number) => {
-                      const userDto: UserDTO | undefined = relations.user[e.user_id];
-                      if (!userDto) {
-                        return null;
-                      }
-                      return (
-                        <li key={index} className="py-3">
-                          <div className="flex items-center space-x-4">
-                            <div className="shrink-0">
-                              <PureAvatar title={userDto.display_name} src={userDto.avatar_url} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} username={userDto.username} />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-gray-900">{userDto.display_name}</p>
-                              {/* <p className="truncate text-sm text-gray-500">{userDto.bio}</p> */}
-                            </div>
-                            <div>
-                              <p className="truncate text-sm text-gray-500">{moment(e.timestamp).fromNow()}</p>
-                            </div>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
+            ) : (
+              <div className="py-4 px-8">
+                <h1 className="text-3xl font-bold text-gray-900 my-4">Analytics</h1>
+                <div className="flex flex-col items-center space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4">
+                  <div className="w-full py-4 px-8 bg-white rounded-xl drop-shadow-md flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Total Shares</p>
+                      <p className="text-2xl font-bold text-gray-900">{Helper.formatNumber(reportAnalytics?.shares.count)}</p>
+                    </div>
+                  </div>
+                  <div className="w-full py-4 px-8 bg-white rounded-xl drop-shadow-md flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Total Downloads</p>
+                      <p className="text-2xl font-bold text-gray-900">{Helper.formatNumber(reportAnalytics?.downloads.count)}</p>
+                    </div>
+                  </div>
+                  <div className="w-full py-4 px-8 bg-white rounded-xl drop-shadow-md flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-500">Total Views</p>
+                      <p className="text-2xl font-bold text-gray-900">{Helper.formatNumber(reportAnalytics?.views.count)}</p>
+                    </div>
+                  </div>
                 </div>
-                <div style={{ width: '40%' }}></div>
-                <div className="flex flex-col w-full">
-                  <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Last interactions</h2>
-                  <ul role="list" className="">
-                    {lastInteractions.slice(0, 5).map((e: { timestamp: Date; user_id: string; action: string }, index: number) => {
-                      const userDto: UserDTO | undefined = relations.user[e.user_id];
-                      if (!userDto) {
-                        return null;
-                      }
-                      return (
-                        <li key={index} className="py-3">
-                          <div className="flex items-center space-x-4">
-                            <div className="shrink-0">
-                              <PureAvatar title={userDto.display_name} src={userDto.avatar_url} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} username={userDto.username} />
+                <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8">
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Who visited this report</h2>
+                    <ul role="list" className="">
+                      {reportAnalytics?.views.last_items.slice(0, 5).map((e: { timestamp: Date; user_id: string; location: string | null; device: DeviceDetector | null }, index: number) => {
+                        const userDto: UserDTO | undefined = relations.user[e.user_id];
+                        if (!userDto) {
+                          return null;
+                        }
+                        return (
+                          <li key={index} className="py-3">
+                            <div className="flex items-center space-x-4">
+                              <div className="shrink-0">
+                                <PureAvatar title={userDto.display_name} src={userDto.avatar_url} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} username={userDto.username} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium text-gray-900">{userDto.display_name}</p>
+                                {/* <p className="truncate text-sm text-gray-500">{userDto.bio}</p> */}
+                              </div>
+                              <div>
+                                <p className="truncate text-sm text-gray-500">{moment(e.timestamp).fromNow()}</p>
+                              </div>
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-gray-900">{userDto.display_name}</p>
-                              {/* <p className="truncate text-sm text-gray-500">{userDto.bio}</p> */}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                  <div style={{ width: '40%' }}></div>
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Last interactions</h2>
+                    <ul role="list" className="">
+                      {lastInteractions.slice(0, 5).map((e: { timestamp: Date; user_id: string; action: string }, index: number) => {
+                        const userDto: UserDTO | undefined = relations.user[e.user_id];
+                        if (!userDto) {
+                          return null;
+                        }
+                        return (
+                          <li key={index} className="py-3">
+                            <div className="flex items-center space-x-4">
+                              <div className="shrink-0">
+                                <PureAvatar title={userDto.display_name} src={userDto.avatar_url} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} username={userDto.username} />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-sm font-medium text-gray-900">{userDto.display_name}</p>
+                                {/* <p className="truncate text-sm text-gray-500">{userDto.bio}</p> */}
+                              </div>
+                              <div className="text-right">
+                                <p className="truncate text-xs text-gray-500">{moment(e.timestamp).fromNow()}</p>
+                                <span
+                                  className={clsx(
+                                    'inline-flex items-center rounded px-2 py-0.5 text-xs font-medium uppercase',
+                                    e.action === 'downloaded' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800',
+                                  )}
+                                >
+                                  {e.action}
+                                </span>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <p className="truncate text-xs text-gray-500">{moment(e.timestamp).fromNow()}</p>
-                              <span
-                                className={clsx(
-                                  'inline-flex items-center rounded px-2 py-0.5 text-xs font-medium uppercase',
-                                  e.action === 'downloaded' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800',
-                                )}
-                              >
-                                {e.action}
-                              </span>
-                            </div>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8">
-                <div className="flex flex-col w-full">
-                  <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Locations</h2>
-                  <div data-tooltip-id="my-tooltip" data-tooltip-place="top">
-                    <ComposableMap projectionConfig={{ rotate: [-10, 0, 0] }} data-tip="">
-                      <ZoomableGroup>
-                        <Geographies geography="/features.json">
-                          {({ geographies }) =>
-                            geographies.map((geo) => {
+                <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8">
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Locations</h2>
+                    <div data-tooltip-id="my-tooltip" data-tooltip-place="top">
+                      <ComposableMap projectionConfig={{ rotate: [-10, 0, 0] }} data-tip="">
+                        <ZoomableGroup>
+                          <Geographies geography="/features.json">
+                            {({ geographies }) =>
+                              geographies.map((geo) => {
+                                return (
+                                  <Geography
+                                    key={geo.rsmKey}
+                                    geography={geo}
+                                    fill="#244362"
+                                    style={{
+                                      hover: {
+                                        fill: '#839CB7',
+                                        outline: 'none',
+                                      },
+                                      pressed: {
+                                        fill: '#E42',
+                                        outline: 'none',
+                                      },
+                                    }}
+                                  />
+                                );
+                              })
+                            }
+                          </Geographies>
+                          {locations.map(
+                            (
+                              d: {
+                                location: string;
+                                coords: {
+                                  lat: number;
+                                  lng: number;
+                                } | null;
+                                count: number;
+                              },
+                              index: number,
+                            ) => {
                               return (
-                                <Geography
-                                  key={geo.rsmKey}
-                                  geography={geo}
-                                  fill="#244362"
-                                  style={{
-                                    hover: {
-                                      fill: '#839CB7',
-                                      outline: 'none',
-                                    },
-                                    pressed: {
-                                      fill: '#E42',
-                                      outline: 'none',
-                                    },
+                                <Marker
+                                  key={index}
+                                  coordinates={[d.coords!.lng, d.coords!.lat]}
+                                  onMouseEnter={(e) => {
+                                    const r: { bottom: number; height: number; left: number; right: number; top: number; width: number; x: number; y: number } = (
+                                      e.target as any
+                                    )?.getBoundingClientRect();
+                                    setTooltipContent(`${d.location}: ${d.count}`);
+                                    setTooltipPosition({
+                                      x: r.x + r.width / 2,
+                                      y: r.y + 3,
+                                    });
                                   }}
-                                />
+                                  onMouseLeave={() => {
+                                    setTooltipContent('');
+                                    setTooltipPosition(undefined);
+                                  }}
+                                >
+                                  <circle fill="#F53" stroke="#FFF" r={popScale(d.count)} />
+                                </Marker>
                               );
-                            })
-                          }
-                        </Geographies>
-                        {locations.map(
-                          (
-                            d: {
-                              location: string;
-                              coords: {
-                                lat: number;
-                                lng: number;
-                              } | null;
-                              count: number;
                             },
-                            index: number,
-                          ) => {
-                            return (
-                              <Marker
-                                key={index}
-                                coordinates={[d.coords!.lng, d.coords!.lat]}
-                                onMouseEnter={(e) => {
-                                  const r: { bottom: number; height: number; left: number; right: number; top: number; width: number; x: number; y: number } = (
-                                    e.target as any
-                                  )?.getBoundingClientRect();
-                                  setTooltipContent(`${d.location}: ${d.count}`);
-                                  setTooltipPosition({
-                                    x: r.x + r.width / 2,
-                                    y: r.y + 3,
-                                  });
-                                }}
-                                onMouseLeave={() => {
-                                  setTooltipContent('');
-                                  setTooltipPosition(undefined);
-                                }}
-                              >
-                                <circle fill="#F53" stroke="#FFF" r={popScale(d.count)} />
-                              </Marker>
-                            );
-                          },
-                        )}
-                      </ZoomableGroup>
-                    </ComposableMap>
+                          )}
+                        </ZoomableGroup>
+                      </ComposableMap>
+                    </div>
+                    <ReactTooltip id="my-tooltip" position={tooltipPosition}>
+                      {tooltipContent}
+                    </ReactTooltip>
                   </div>
-                  <ReactTooltip id="my-tooltip" position={tooltipPosition}>
-                    {tooltipContent}
-                  </ReactTooltip>
+                  <div style={{ width: '40%' }}></div>
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Devices</h2>
+                    <div className="flex flex-col items-center">
+                      <div style={{ height: 400 }}>
+                        <Pie data={deviceChartData} options={optionsPieChart} />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div style={{ width: '40%' }}></div>
-                <div className="flex flex-col w-full">
-                  <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Devices</h2>
-                  <div className="flex flex-col items-center">
-                    <div style={{ height: 400 }}>
-                      <Pie data={deviceChartData} options={optionsPieChart} />
+                <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8">
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Operating Systems</h2>
+                    <div className="flex flex-col items-center">
+                      <div style={{ height: 400 }}>
+                        <Pie data={operatingSystemsChartData} options={optionsPieChart} />
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ width: '40%' }}></div>
+                  <div className="flex flex-col w-full">
+                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Clients</h2>
+                    <div className="flex flex-col items-center">
+                      <div style={{ height: 400 }}>
+                        <Pie data={clientsChartData} options={optionsPieChart} />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8">
-                <div className="flex flex-col w-full">
-                  <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Operating Systems</h2>
-                  <div className="flex flex-col items-center">
-                    <div style={{ height: 400 }}>
-                      <Pie data={operatingSystemsChartData} options={optionsPieChart} />
-                    </div>
-                  </div>
-                </div>
-                <div style={{ width: '40%' }}></div>
-                <div className="flex flex-col w-full">
-                  <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Clients</h2>
-                  <div className="flex flex-col items-center">
-                    <div style={{ height: 400 }}>
-                      <Pie data={clientsChartData} options={optionsPieChart} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
         </main>
       </div>
