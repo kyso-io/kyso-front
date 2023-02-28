@@ -26,6 +26,7 @@ img.k-right-logo {
   background-color: #FAFAFA;
   left: 78%;
   padding: 13px;
+  z-index: 2;
 }
 
 .k-edit-report-image:hover + .k-edit-report-badge {
