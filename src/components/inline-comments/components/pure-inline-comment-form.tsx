@@ -124,6 +124,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
           field="nameSlug"
           style={{
             width: '100%',
+            zIndex: 1,
           }}
           placeholder={message}
           itemTemplate={itemTemplate}
