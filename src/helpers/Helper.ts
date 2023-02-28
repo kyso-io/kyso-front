@@ -150,4 +150,19 @@ export class Helper {
   public static teamVisibilityValues: TeamVisibilityEnum[] = [TeamVisibilityEnum.PROTECTED, TeamVisibilityEnum.PRIVATE, TeamVisibilityEnum.PUBLIC];
 
   public static CHECK_JWT_TOKEN_MS = 3000;
+
+  public static formatNumber = (x: number | null | undefined) => {
+    if (x === null || x === undefined) {
+      return 0;
+    }
+    const roundedNumber: number = Math.round((x + Number.EPSILON) * 100) / 100;
+    return roundedNumber
+      .toString()
+      .replace('.', ',')
+      .replace(/\B(?=(\d{3})+\b)/g, '.');
+  };
+
+  public static roundTwoDecimals = (value: number): number => {
+    return Math.round((value + Number.EPSILON) * 100) / 100;
+  };
 }
