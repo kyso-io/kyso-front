@@ -21,12 +21,15 @@ img.k-right-logo {
 
 .k-right-toc {
   float: right;
-  width: 41vh;
   position: fixed;
+  z-index: 2;
+  background-color: white;
+  opacity: .9;
+  width: 100%;
+  /*width: 41vh;
   background-color: #FAFAFA;
   left: 78%;
-  padding: 13px;
-  z-index: 2;
+  padding: 13px;*/
 }
 
 .k-edit-report-image:hover + .k-edit-report-badge {

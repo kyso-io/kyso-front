@@ -15,10 +15,11 @@ type IPureSideOverlayCommentsPanel = {
   commonData: CommonData;
   tooltipCloseText?: string;
   tooltipOpenText?: string;
+  icon?: ReactElement;
 };
 
 const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
-  const { cacheKey = 'overlay-panel-comment-state', children, setSidebarOpen, commonData } = props;
+  const { icon, cacheKey = 'overlay-panel-comment-state', children, setSidebarOpen, commonData } = props;
   let { tooltipCloseText, tooltipOpenText } = props;
   const [open, setOpen] = useState(true);
   const hoverRef = useRef(null);
@@ -73,7 +74,8 @@ const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
           >
             <span className="sr-only">Close panel</span>
             <span className="flex">
-              <ChatAltIcon className="h-4 w-4 mt-1" aria-hidden="true" />
+              {!icon && <ChatAltIcon className="h-4 w-4 mt-1" aria-hidden="true" />}
+              {icon && <>{icon}</>}
               {open && <ChevronDoubleRightIcon className="pl-2 h-6 w-6" aria-hidden="true" />}
               {!open && !isHover && <MenuIcon className="pl-2 h-6 w-6" aria-hidden="true" />}
               {!open && isHover && <ChevronDoubleLeftIcon className="pl-2 h-6 w-6" aria-hidden="true" />}
@@ -81,7 +83,7 @@ const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
           </button>
         </div>
 
-        {open && <div className={classNames('bg-white px-2 py-2 min-h-[400px] text-ellipsis overflow-hidden')}>{children}</div>}
+        {open && <div className={classNames('bg-white px-2 py-2 text-ellipsis overflow-hidden')}>{children}</div>}
       </div>
     </>
   );

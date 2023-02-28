@@ -11,6 +11,7 @@ import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
+import { DocumentTextIcon } from '@heroicons/react/outline';
 import type { InlineCommentDto, NormalizedResponseDTO, ReportDTO, TeamMember, UpdateInlineCommentDto, UserDTO } from '@kyso-io/kyso-model';
 import { CreateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api, createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
@@ -220,7 +221,22 @@ const UnpureReportRender = ({
               )}
             </div>
             <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'hidden lg:block p-2 min-w-fit border-l')}>
-              {fileToRender.toc && fileToRender.toc.length > 0 && <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} stickToRight={true} />}
+              {/* fileToRender.toc && fileToRender.toc.length > 0 && <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} stickToRight={true} /> */}
+              {fileToRender.toc && fileToRender.toc.length > 0 && (
+                <PureSideOverlayCommentsPanel
+                  key={report?.id!}
+                  cacheKey={report?.id!}
+                  setSidebarOpen={(p) => setSidebarOpen(p)}
+                  commonData={commonData}
+                  tooltipOpenText="Open ToC"
+                  tooltipCloseText="Close ToC"
+                  icon={<DocumentTextIcon className="h-4 w-4 mt-1" aria-hidden="true" />}
+                >
+                  <div className="">
+                    <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} stickToRight={true} />
+                  </div>
+                </PureSideOverlayCommentsPanel>
+              )}
               <PureSideOverlayCommentsPanel
                 key={report?.id!}
                 cacheKey={report?.id!}
