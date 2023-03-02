@@ -167,7 +167,8 @@ const Index = () => {
           router.push(invitation as string);
         } else if (showOnboarding) {
           if (redirect) {
-            sessionStorage.setItem('redirectUrl', redirect as string);
+            router.push(redirect as string);
+            return;
           }
 
           let toOverview = `/overview`;
