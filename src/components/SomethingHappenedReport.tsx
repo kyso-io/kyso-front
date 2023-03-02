@@ -1,5 +1,6 @@
 import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import type { CommonData } from '../types/common-data';
 import { SomethingHappened } from './SomethingHappened';
@@ -8,14 +9,15 @@ interface Props {
   whatHappened: string;
   addRequestAccessButton?: boolean;
   commonData: CommonData;
-  teamId: string | null;
   teamVisibility: TeamVisibilityEnum | null;
 }
 
-const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonData, teamId, teamVisibility }: Props) => {
+const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonData, teamVisibility }: Props) => {
   const [waitABit, setWaitABit] = useState<boolean>(true);
   const [requestCreatedSuccessfully, setRequestCreatedSuccessfully] = useState<boolean>(false);
   const [requestCreatedError, setRequestCreatedError] = useState<boolean>(false);
+  const router = useRouter();
+  const { organizationName, teamName } = router.query;
 
   useEffect(() => {
     const timer = setTimeout(() => setWaitABit(false), 3000);
@@ -47,7 +49,7 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
                           try {
                             const api: Api = new Api(commonData.token);
                             api
-                              .requestAccessToOrganization(commonData.organization?.id!)
+                              .requestAccessToOrganization(organizationName as string)
                               .then(() => {
                                 setRequestCreatedSuccessfully(true);
                               })
@@ -74,7 +76,7 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
                           try {
                             const api: Api = new Api(commonData.token);
                             api
-                              .requestAccessToTeam(teamId!)
+                              .requestAccessToTeam(organizationName as string, teamName as string)
                               .then(() => {
                                 setRequestCreatedSuccessfully(true);
                               })
