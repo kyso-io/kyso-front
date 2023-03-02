@@ -93,7 +93,6 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const [show, setShow] = useState<boolean>(false);
   const [alertText, setAlertText] = useState<string>('');
   const [teamVisibility, setTeamVisibility] = useState<TeamVisibilityEnum | null>(null);
-  const [teamId, setTeamId] = useState<string | null>(null);
   const [showError, setShowError] = useState<boolean>(true);
   const [showErrorMessage, setShowErrorMessage] = useState<string>('');
   const [showErrorRequestAccessButton, setShowErrorRequestAccessButton] = useState<boolean>(false);
@@ -609,19 +608,20 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const authors = reportData ? reportData.authors : [];
 
   useEffect(() => {
+    if (!router.query.organizationName || !router.query.teamName) {
+      return;
+    }
     const getTeamVisibility = async () => {
-      if (router.query) {
-        try {
-          const quickApiCall: Api = new Api();
-          const res: NormalizedResponseDTO<any> = await quickApiCall.getTeamVisibility(router.query.organizationName as string, router.query.teamName as string);
-          setTeamVisibility(res.data.visibility);
-          setTeamId(res.data.id);
-        } catch (e) {}
-      }
+      try {
+        const quickApiCall: Api = new Api();
+        const res: NormalizedResponseDTO<any> = await quickApiCall.getTeamVisibility(router.query.organizationName as string, router.query.teamName as string);
+        setTeamVisibility(res.data.visibility);
+      } catch (e) {}
     };
-
     getTeamVisibility();
+  }, [router.query.organizationName, router.query.teamName]);
 
+  useEffect(() => {
     if (commonData.errorOrganization) {
       setShowError(true);
       setShowErrorMessage(commonData.errorOrganization);
@@ -669,9 +669,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
 
   return (
     <>
-      {showError && (
-        <SomethingHappenedReport whatHappened={showErrorMessage} addRequestAccessButton={showErrorRequestAccessButton} commonData={commonData} teamId={teamId} teamVisibility={teamVisibility} />
-      )}
+      {showError && <SomethingHappenedReport whatHappened={showErrorMessage} addRequestAccessButton={showErrorRequestAccessButton} commonData={commonData} teamVisibility={teamVisibility} />}
       {!showError && (
         <div>
           <div className={classNames('hidden lg:block z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
