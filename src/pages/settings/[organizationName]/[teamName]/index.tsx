@@ -19,7 +19,7 @@ import {
   UpdateOrganizationMembersDTO,
   UpdateTeamMembersDTO,
   UserDTO,
-  UserRoleDTO
+  UserRoleDTO,
 } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
@@ -542,7 +542,6 @@ const Index = ({ commonData, setUser }: Props) => {
     );
     if (!organizationResourcePermissions) {
       router.push('/settings');
-      return;
     }
   }, [router.isReady, commonData?.permissions]);
 

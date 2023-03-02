@@ -357,7 +357,6 @@ const Index = ({ commonData, setUser }: Props) => {
     );
     if (!organizationResourcePermissions) {
       router.push('/settings');
-      return;
     }
   }, [router.isReady, commonData?.permissions]);
 
