@@ -111,6 +111,13 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
   const [show, setShow] = useState<boolean>(false);
   const [alertText, setAlertText] = useState<string>('');
 
+  const allowedAccessDomains: string[] = useMemo(() => {
+    if (!commonData.organization) {
+      return [];
+    }
+    return commonData.organization.allowed_access_domains || [];
+  }, []);
+
   const showErrorDomain: boolean = useMemo(() => {
     if (query && isEmail && isOrgAdmin && commonData.organization) {
       let showError = true;
@@ -433,10 +440,14 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                           <div className="flex-1" style={{ marginLeft: 10 }}>
                             <p className="text-xs font-medium text-gray-900 truncate mt-1">{query}</p>
                             {showErrorDomain ? (
-                              <>
-                                <p className="truncate text-sm text-red-500 mt-2">Your organization doesn&apos;t allow this domain</p>
-                                <p className="truncate text-sm text-red-500 mt-2">Allowed domains are {commonData.organization?.allowed_access_domains.map((x) => `${x} - `)} </p>
-                              </>
+                              <React.Fragment>
+                                <p className="truncate text-xs text-red-500">Your organization doesn&apos;t allow this domain</p>
+                                {commonData.organization?.allowed_access_domains.length === 1 ? (
+                                  <p className="truncate text-xs text-red-500">Allowed domain: {commonData.organization?.allowed_access_domains[0]} </p>
+                                ) : (
+                                  <p className="truncate text-xs text-red-500">Allowed domains: {commonData.organization?.allowed_access_domains.join(' - ')} </p>
+                                )}
+                              </React.Fragment>
                             ) : (
                               <div className="flex flex-row">
                                 {organizationRoles && (
@@ -516,22 +527,31 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                     {query && !requesting && users.length > 0 && !selectedUser && (
                       <React.Fragment>
                         <span className="my-4 text-xs font-medium text-gray-600">Select a person:</span>
-                        <ul role="list" className="mt-1" style={{ maxHeight: 200, overflowY: 'scroll' }}>
+                        <ul role="list" className="mt-1 pr-2" style={{ maxHeight: 200, overflowY: 'scroll' }}>
                           {users.map((user: UserDTO) => {
                             const member: Member | undefined = members.find((m: Member) => m.id === user.id);
                             let roles: string | undefined = '';
-
                             if (member) {
                               roles = organizationRoles.find((e: { value: string; label: string }) => e.value === member.organization_roles[0])?.label;
                               if (member.team_roles && member.team_roles.length > 0) {
                                 roles += ` / ${organizationRoles.find((e: { value: string; label: string }) => e.value === member.team_roles[0])?.label}`;
                               }
                             }
+                            let errorDomain = false;
+                            if (allowedAccessDomains.length > 0 && !allowedAccessDomains.includes(user.email.split('@')[1]!)) {
+                              errorDomain = true;
+                            }
                             return (
                               <li
                                 key={user.id}
-                                className={clsx('py-1', !commonData.user || isOrgAdmin || (commonData.team != null && isTeamAdmin && member !== undefined) ? 'cursor-pointer' : 'cursor-default')}
+                                className={clsx(
+                                  'py-1',
+                                  (!commonData.user || isOrgAdmin || (commonData.team != null && isTeamAdmin && member !== undefined)) && !errorDomain ? 'cursor-pointer' : 'cursor-default',
+                                )}
                                 onClick={() => {
+                                  if (errorDomain) {
+                                    return;
+                                  }
                                   if (!commonData.user) {
                                     router.push(`/user/${user.username}`);
                                   } else if (isOrgAdmin || (commonData.team != null && isTeamAdmin)) {
@@ -560,6 +580,16 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   <div className="flex-1" style={{ marginLeft: 10 }}>
                                     <p className="text-xs font-medium text-gray-900 truncate">{user.display_name}</p>
                                     {member ? <p className="text-xs text-gray-500 truncate">{roles}</p> : showEmails ? <p className="text-xs text-gray-500 truncate">{user.email}</p> : ''}
+                                    {errorDomain && (
+                                      <React.Fragment>
+                                        <p className="truncate text-xs text-red-500">Your organization doesn&apos;t allow this domain</p>
+                                        {allowedAccessDomains.length === 1 ? (
+                                          <p className="truncate text-xs text-red-500">Allowed domain: {allowedAccessDomains[0]} </p>
+                                        ) : (
+                                          <p className="truncate text-xs text-red-500">Allowed domains: {allowedAccessDomains.join(' - ')} </p>
+                                        )}
+                                      </React.Fragment>
+                                    )}
                                   </div>
                                 </div>
                               </li>
