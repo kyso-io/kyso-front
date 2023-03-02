@@ -5,13 +5,13 @@ import { LinkIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { CheckIcon, ExclamationCircleIcon, InformationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, TeamMember } from '@kyso-io/kyso-model';
 // @ts-ignore
-import ReadMoreReact from 'read-more-react';
 import {
   AddUserOrganizationDto,
   AllowDownload,
   GlobalPermissionsEnum,
   InviteUserDto,
   KysoSettingsEnum,
+  OnboardingProgress,
   OrganizationPermissionsEnum,
   TeamMembershipOriginEnum,
   TeamPermissionsEnum,
@@ -19,20 +19,21 @@ import {
   UpdateOrganizationMembersDTO,
   UpdateTeamMembersDTO,
   UserDTO,
-  UserRoleDTO,
-  OnboardingProgress,
+  UserRoleDTO
 } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import ReadMoreReact from 'read-more-react';
 import CaptchaModal from '../../../../components/CaptchaModal';
 import ChannelVisibility from '../../../../components/ChannelVisibility';
 import PureAvatar from '../../../../components/PureAvatar';
 import SettingsAside from '../../../../components/SettingsAside';
 import ToasterNotification from '../../../../components/ToasterNotification';
 import { OrganizationSettingsTab } from '../../../../enums/organization-settings-tab';
+import { checkJwt } from '../../../../helpers/check-jwt';
 import { HelperPermissions } from '../../../../helpers/check-permissions';
 import { Helper } from '../../../../helpers/Helper';
 import { useRedirectIfNoJWT } from '../../../../hooks/use-redirect-if-no-jwt';
@@ -42,7 +43,6 @@ import { TailwindHeightSizeEnum } from '../../../../tailwind/enum/tailwind-heigh
 import { TailwindWidthSizeEnum } from '../../../../tailwind/enum/tailwind-width.enum';
 import type { CommonData } from '../../../../types/common-data';
 import type { Member } from '../../../../types/member';
-import { checkJwt } from '../../../../helpers/check-jwt';
 
 const OrganizationRoleToLabel: { [role: string]: string } = {
   'organization-admin': 'Admin of this organization',
@@ -544,9 +544,6 @@ const Index = ({ commonData, setUser }: Props) => {
       router.push('/settings');
       return;
     }
-    if (!organizationResourcePermissions.role_names!.includes('organization-admin')) {
-      router.push('/settings');
-    }
   }, [router.isReady, commonData?.permissions]);
 
   return (
@@ -721,67 +718,85 @@ const Index = ({ commonData, setUser }: Props) => {
                 <div className="flex items-center my-4">
                   <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Visibility:</label>
                   {hasPermissionEditChannel ? (
-                    <Listbox value={null} onChange={(teamVisibilityEnum: TeamVisibilityEnum) => updateTeamVisibility(teamVisibilityEnum)}>
-                      {({ open }) => (
-                        <div className="relative ml-6" style={{ width: '200px' }}>
-                          <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
-                            <span className="inline-flex w-full">
-                              <span className="">{Helper.ucFirst(commonData.team?.visibility || '')}</span>
-                              <ChannelVisibility
-                                containerClasses="ml-2"
-                                teamVisibility={commonData.team?.visibility!}
-                                imageWidth={TailwindWidthSizeEnum.W3}
-                                imageMarginX={TailwindWidthSizeEnum.W3}
-                                imageMarginY={TailwindWidthSizeEnum.W1}
-                                alwaysOnHover={true}
-                              />
-                            </span>
-                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                              </svg>
-                            </span>
-                          </Listbox.Button>
-                          <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none sm:text-sm">
-                              {Helper.teamVisibilityValues.map((teamVisibilityEnum: TeamVisibilityEnum) => {
-                                if (teamVisibilityEnum === TeamVisibilityEnum.PUBLIC && !enabledPublicChannels) {
-                                  return null;
-                                }
-                                return (
-                                  <Listbox.Option
-                                    disabled={!hasPermissionEditChannel || requesting}
-                                    key={teamVisibilityEnum}
-                                    className={({ active }) => clsx(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'relative cursor-pointer select-none py-2 pl-3 pr-9')}
-                                    value={teamVisibilityEnum}
-                                  >
-                                    {({ selected, active }) => (
-                                      <React.Fragment>
-                                        <div className="flex">
-                                          <span className={clsx(commonData.team?.visibility === teamVisibilityEnum ? 'font-semibold' : 'font-normal')}>{Helper.ucFirst(teamVisibilityEnum)}</span>
-                                          <ChannelVisibility
-                                            containerClasses="ml-3"
-                                            teamVisibility={teamVisibilityEnum!}
-                                            imageWidth={TailwindWidthSizeEnum.W3}
-                                            imageMarginX={TailwindWidthSizeEnum.W3}
-                                            imageMarginY={TailwindWidthSizeEnum.W1}
-                                          />
-                                        </div>
-                                        {selected ? (
-                                          <span className={clsx(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
-                                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                          </span>
-                                        ) : null}
-                                      </React.Fragment>
-                                    )}
-                                  </Listbox.Option>
-                                );
-                              })}
-                            </Listbox.Options>
-                          </Transition>
-                        </div>
-                      )}
-                    </Listbox>
+                    <React.Fragment>
+                      <Listbox value={null} onChange={(teamVisibilityEnum: TeamVisibilityEnum) => updateTeamVisibility(teamVisibilityEnum)}>
+                        {({ open }) => (
+                          <div className="relative ml-6" style={{ width: '200px' }}>
+                            <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                              <span className="inline-flex w-full">
+                                <span className="">{Helper.ucFirst(commonData.team?.visibility || '')}</span>
+                                <ChannelVisibility
+                                  containerClasses="ml-2"
+                                  teamVisibility={commonData.team?.visibility!}
+                                  imageWidth={TailwindWidthSizeEnum.W3}
+                                  imageMarginX={TailwindWidthSizeEnum.W3}
+                                  imageMarginY={TailwindWidthSizeEnum.W1}
+                                  alwaysOnHover={true}
+                                />
+                              </span>
+                              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                </svg>
+                              </span>
+                            </Listbox.Button>
+                            <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none sm:text-sm">
+                                {Helper.teamVisibilityValues.map((teamVisibilityEnum: TeamVisibilityEnum) => {
+                                  if (teamVisibilityEnum === TeamVisibilityEnum.PUBLIC && !enabledPublicChannels) {
+                                    return null;
+                                  }
+                                  return (
+                                    <Listbox.Option
+                                      disabled={!hasPermissionEditChannel || requesting}
+                                      key={teamVisibilityEnum}
+                                      className={({ active }) => clsx(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'relative cursor-pointer select-none py-2 pl-3 pr-9')}
+                                      value={teamVisibilityEnum}
+                                    >
+                                      {({ selected, active }) => (
+                                        <React.Fragment>
+                                          <div className="flex">
+                                            <span className={clsx(commonData.team?.visibility === teamVisibilityEnum ? 'font-semibold' : 'font-normal')}>{Helper.ucFirst(teamVisibilityEnum)}</span>
+                                            <ChannelVisibility
+                                              containerClasses="ml-3"
+                                              teamVisibility={teamVisibilityEnum!}
+                                              imageWidth={TailwindWidthSizeEnum.W3}
+                                              imageMarginX={TailwindWidthSizeEnum.W3}
+                                              imageMarginY={TailwindWidthSizeEnum.W1}
+                                            />
+                                          </div>
+                                          {selected ? (
+                                            <span className={clsx(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
+                                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                            </span>
+                                          ) : null}
+                                        </React.Fragment>
+                                      )}
+                                    </Listbox.Option>
+                                  );
+                                })}
+                              </Listbox.Options>
+                            </Transition>
+                          </div>
+                        )}
+                      </Listbox>
+                      <div className="text-sm text-gray-700">
+                        <ul style={{ listStyle: 'circle' }}>
+                          <li>
+                            <strong>Protected:</strong> only members within the organization can access this channel&apos;s content.
+                          </li>
+                          <li>
+                            <strong>Private:</strong> only members of this channel have access to this channel&apos;s content.
+                          </li>
+                          {enabledPublicChannels && (
+                            <li>
+                              <strong>Public:</strong> any member of any organization can access this channel&apos;s content. Reports in this channel can also be viewed by external users with no Kyso
+                              account by sharing a report&apos;s shareable link.
+                            </li>
+                          )}
+                        </ul>
+                      </div>
+                    </React.Fragment>
                   ) : (
                     <div
                       style={{ width: '200px' }}
@@ -801,44 +816,32 @@ const Index = ({ commonData, setUser }: Props) => {
                     </div>
                   )}
                 </div>
-                <div className="text-sm text-gray-700">
-                  <ul style={{ listStyle: 'circle' }}>
-                    <li>
-                      <strong>Protected:</strong> only members within the organization can access this channel&apos;s content.
-                    </li>
-                    <li>
-                      <strong>Private:</strong> only members of this channel have access to this channel&apos;s content.
-                    </li>
-                    {enabledPublicChannels && (
-                      <li>
-                        <strong>Public:</strong> any member of any organization can access this channel&apos;s content. Reports in this channel can also be viewed by external users with no Kyso
-                        account by sharing a report&apos;s shareable link.
-                      </li>
-                    )}
-                  </ul>
-                </div>
 
-                <div className="space-y-1 mt-8 mb-4 sm:border-b sm:border-gray-200 pb-4">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900">Download reports</h3>
-                  <p className="max-w-2xl text-sm text-gray-500">Configure if the reports of this channel would be able to download</p>
-                </div>
-                <div className="flex items-center my-4">
-                  <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Download reports:</label>
-                  <div className="ml-6">
-                    <select
-                      id="allowDownload"
-                      name="allowDownload"
-                      value={allowDownloadOptionValue}
-                      onChange={(e: any) => updateAllowDownload(e.target.value)}
-                      className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
-                    >
-                      <option value={AllowDownload.ALL}>All</option>
-                      <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
-                      <option value={AllowDownload.NONE}>None</option>
-                      <option value={AllowDownload.INHERITED}>Inherited</option>
-                    </select>
-                  </div>
-                </div>
+                {hasPermissionEditChannel && (
+                  <React.Fragment>
+                    <div className="space-y-1 mt-8 mb-4 sm:border-b sm:border-gray-200 pb-4">
+                      <h3 className="text-lg font-medium leading-6 text-gray-900">Download reports</h3>
+                      <p className="max-w-2xl text-sm text-gray-500">Configure if the reports of this channel would be able to download</p>
+                    </div>
+                    <div className="flex items-center my-4">
+                      <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Download reports:</label>
+                      <div className="ml-6">
+                        <select
+                          id="allowDownload"
+                          name="allowDownload"
+                          value={allowDownloadOptionValue}
+                          onChange={(e: any) => updateAllowDownload(e.target.value)}
+                          className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                        >
+                          <option value={AllowDownload.ALL}>All</option>
+                          <option value={AllowDownload.ONLY_MEMBERS}>Only members</option>
+                          <option value={AllowDownload.NONE}>None</option>
+                          <option value={AllowDownload.INHERITED}>Inherited</option>
+                        </select>
+                      </div>
+                    </div>
+                  </React.Fragment>
+                )}
               </React.Fragment>
             )}
 

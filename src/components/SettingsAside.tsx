@@ -30,26 +30,7 @@ const SettingsAside = ({ commonData }: Props) => {
     if (!commonData.permissions || !commonData.permissions.organizations) {
       return data;
     }
-    data = commonData.permissions.organizations.filter((organizationResourcePermissions: ResourcePermissions) => {
-      if (!organizationResourcePermissions.role_names) {
-        return false;
-      }
-      if (organizationResourcePermissions.role_names!.includes('organization-admin')) {
-        return true;
-      }
-      return false;
-      // const teamResourcePermissions: ResourcePermissions[] =
-      //   commonData.permissions?.teams?.filter((teamResourcePermissions: ResourcePermissions) => {
-      //     if (teamResourcePermissions.organization_id !== organizationResourcePermissions.id) {
-      //       return false;
-      //     }
-      //     if (!teamResourcePermissions.role_names) {
-      //       return false;
-      //     }
-      //     return teamResourcePermissions.role_names!.includes('team-admin');
-      //   }) || [];
-      // return teamResourcePermissions.length > 0;
-    });
+    data = [...commonData.permissions.organizations];
     data.sort((a: ResourcePermissions, b: ResourcePermissions) => {
       const displayNameA: string = a.display_name.toLowerCase();
       const displayNameB: string = b.display_name.toLowerCase();
