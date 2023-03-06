@@ -80,7 +80,6 @@ const RenderCsvTsvInfiniteScroll = ({ commonData, fileToRender }: Props) => {
                     {headers.map((header: string, index: number) => (
                       <th key={`${header}-${index}`} className={clsx('py-3.5 text-left text-sm font-semibold text-gray-900', index === 0 ? 'pl-6 pr-3' : 'px-3 py-3.5')}>
                         <div className="grid justify-items-center text-center">
-                          <span>{header}</span>
                           {columnsStats[header] && (
                             <img
                               onClick={() => {
@@ -91,6 +90,7 @@ const RenderCsvTsvInfiniteScroll = ({ commonData, fileToRender }: Props) => {
                               src={`data:image/png;base64,${columnsStats[header]!.images[0]}`}
                             />
                           )}
+                          <span>{header}</span>
                         </div>
                       </th>
                     ))}
