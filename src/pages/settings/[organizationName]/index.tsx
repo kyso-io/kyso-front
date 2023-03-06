@@ -14,6 +14,7 @@ import {
   KysoSettingsEnum,
   OnboardingProgress,
   OrganizationPermissionsEnum,
+  TeamPermissionsEnum,
   UpdateJoinCodesDto,
   UpdateOrganizationMembersDTO,
   UserDTO,
@@ -90,6 +91,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     return data;
   }, []);
+  const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const [toasterIcon, setIcon] = useState<ReactElement>(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
@@ -126,11 +128,9 @@ const Index = ({ commonData, setUser }: Props) => {
 
   const checkIfSlackChanged = () => {
     const slackChanged: boolean = commonData.organization!.options!.notifications!.slackToken !== slackToken || commonData.organization!.options!.notifications!.slackChannel !== slackChannel;
-
     if (slackChanged) {
       return true;
     }
-
     return false;
   };
 
@@ -152,15 +152,16 @@ const Index = ({ commonData, setUser }: Props) => {
         return true;
       }
     }
-
     if (centralizedNotifications) {
       return true;
     }
-
     return false;
   };
 
   const notificationsChanged: boolean = useMemo(() => {
+    if (!isOrgAdmin) {
+      return false;
+    }
     if (!commonData.organization) {
       return false;
     }
@@ -355,10 +356,6 @@ const Index = ({ commonData, setUser }: Props) => {
       (resourcePermissions: ResourcePermissions) => resourcePermissions.name === (organizationName as string),
     );
     if (!organizationResourcePermissions) {
-      router.push('/settings');
-      return;
-    }
-    if (!organizationResourcePermissions.role_names!.includes('organization-admin')) {
       router.push('/settings');
     }
   }, [router.isReady, commonData?.permissions]);
@@ -702,7 +699,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
   };
 
-  if (userIsLogged === null || !isOrgAdmin) {
+  if (userIsLogged === null) {
     return null;
   }
 
@@ -745,7 +742,6 @@ const Index = ({ commonData, setUser }: Props) => {
                 <div className="sm:space-y-5">
                   <div>
                     <h3 className="text-lg font-medium leading-6 text-gray-900">Organization Information</h3>
-                    {/* <p className="mt-1 max-w-2xl text-sm text-gray-500">Use a permanent address where you can receive mail.</p> */}
                   </div>
                   <div className="space-y-6 sm:space-y-5">
                     <div className="sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
@@ -905,23 +901,28 @@ const Index = ({ commonData, setUser }: Props) => {
               <div className="hidden sm:block">
                 <div className="border-b border-gray-200">
                   <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                    {Helper.organizationSettingsTabs.map((organizationSettingsTab: { key: OrganizationSettingsTab; name: string }) => (
-                      <a
-                        key={organizationSettingsTab.name}
-                        href="#"
-                        onClick={(e: any) => {
-                          e.preventDefault();
-                          setSelectedTab(organizationSettingsTab.key);
-                        }}
-                        className={clsx(
-                          organizationSettingsTab.key === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                          'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
-                        )}
-                        aria-current={organizationSettingsTab.key === selectedTab ? 'page' : undefined}
-                      >
-                        {organizationSettingsTab.name}
-                      </a>
-                    ))}
+                    {Helper.organizationSettingsTabs.map((organizationSettingsTab: { key: OrganizationSettingsTab; name: string }) => {
+                      if (!isOrgAdmin && (organizationSettingsTab.key === OrganizationSettingsTab.Access || organizationSettingsTab.key === OrganizationSettingsTab.Notifications)) {
+                        return null;
+                      }
+                      return (
+                        <a
+                          key={organizationSettingsTab.name}
+                          href="#"
+                          onClick={(e: any) => {
+                            e.preventDefault();
+                            setSelectedTab(organizationSettingsTab.key);
+                          }}
+                          className={clsx(
+                            organizationSettingsTab.key === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                            'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm',
+                          )}
+                          aria-current={organizationSettingsTab.key === selectedTab ? 'page' : undefined}
+                        >
+                          {organizationSettingsTab.name}
+                        </a>
+                      );
+                    })}
                   </nav>
                 </div>
               </div>
@@ -929,18 +930,20 @@ const Index = ({ commonData, setUser }: Props) => {
 
             {/* TAB CHANNELS */}
             {!editing && selectedTab === OrganizationSettingsTab.Channels && (
-              <>
-                <a
-                  href={`/${organizationName}/create-channel`}
-                  className="text-gray-500 hover:bg-gray-50 hover:text-gray-900 flex items-center px-3 py-2 text-xs lg:text-sm rounded-md"
-                  role="none"
-                  style={{ float: 'right' }}
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5 mr-1" role="none">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" role="none"></path>
-                  </svg>
-                  Create
-                </a>
+              <React.Fragment>
+                {hasPermissionCreateChannel && (
+                  <a
+                    href={`/${organizationName}/create-channel`}
+                    className="text-gray-500 hover:bg-gray-50 hover:text-gray-900 flex items-center px-3 py-2 text-xs lg:text-sm rounded-md"
+                    role="none"
+                    style={{ float: 'right' }}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5 mr-1" role="none">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" role="none"></path>
+                    </svg>
+                    Create
+                  </a>
+                )}
                 <div className="mt-6 text-center">
                   <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
                     {teamsInfo.map((teamInfo: TeamInfo) => {
@@ -1000,7 +1003,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     })}
                   </ul>
                 </div>
-              </>
+              </React.Fragment>
             )}
 
             {/* TAB MEMBERS */}
@@ -1126,10 +1129,10 @@ const Index = ({ commonData, setUser }: Props) => {
                                 <p className="text-sm font-medium text-gray-900">{userDto.display_name}</p>
                                 <p className="truncate text-sm text-gray-500">{userDto.email}</p>
                                 {showErrorDomain && (
-                                  <>
+                                  <React.Fragment>
                                     <p className="truncate text-sm text-red-500 mt-2">Your organization doesn&apos;t allow this domain</p>
                                     <p className="truncate text-sm text-red-500 mt-2">Allowed domains are: {commonData.organization?.allowed_access_domains.map((x) => `${x} - `)} </p>
-                                  </>
+                                  </React.Fragment>
                                 )}
                               </a>
                             </div>

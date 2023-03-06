@@ -73,9 +73,6 @@ const Index = ({ commonData }: Props) => {
           if (!organizationResourcePermissions) {
             return;
           }
-          if (!organizationResourcePermissions.role_names!.includes('organization-admin')) {
-            return;
-          }
           data.push({
             display_name: organizationResourcePermissions.display_name,
             name: organizationResourcePermissions.name,
@@ -124,9 +121,6 @@ const Index = ({ commonData }: Props) => {
               </div>
               <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
                 {organizationsInfoDtoExtended.map((organizationInfoExtended: OrganizationInfoDtoExtended) => {
-                  if (organizationInfoExtended.role_names.length === 0) {
-                    return null;
-                  }
                   const role: string =
                     organizationInfoExtended.role_names && organizationInfoExtended.role_names.length > 0 && OrganizationRoleToLabel[organizationInfoExtended.role_names[0]!]
                       ? OrganizationRoleToLabel[organizationInfoExtended.role_names[0]!]!
