@@ -3,7 +3,7 @@ import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import { DotsVerticalIcon, ExclamationCircleIcon, TrashIcon } from '@heroicons/react/solid';
-import type { UserDTO, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import React, { Fragment, useState } from 'react';
@@ -64,7 +64,7 @@ const UnpureDeleteChannelDropdown = ({ commonData, captchaIsEnabled, setUser }: 
           leaveFrom="transform opacity-100 scale-100"
           leaveTo="transform opacity-0 scale-95"
         >
-          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none">
+          <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none z-40">
             <div className="py-1 bg-white">
               <Menu.Item>
                 <span
