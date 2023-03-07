@@ -86,6 +86,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [selectedTab, setSelectedTab] = useState<OrganizationSettingsTab>(OrganizationSettingsTab.Channels);
   const [slackChannel, setSlackChannel] = useState<string>('');
   const [teamsIncomingWebhookUrl, setTeamsIncomingWebhookUrl] = useState<string>('');
+  const [description, setDescription] = useState<string>('');
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
   const isOrgAdmin: boolean = useMemo(() => {
@@ -147,6 +148,13 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     return commonData.team.slackChannel !== slackChannel || commonData.team.teamsIncomingWebhookUrl !== teamsIncomingWebhookUrl;
   }, [commonData.team, slackChannel]);
+
+  const descriptHasChanged: boolean = useMemo(() => {
+    if (!commonData.team) {
+      return false;
+    }
+    return commonData.team.bio !== description;
+  }, [commonData.team, description]);
 
   useEffect(() => {
     const getData = async () => {
@@ -210,6 +218,7 @@ const Index = ({ commonData, setUser }: Props) => {
     setAllowDownloadOptionValue(commonData.team.allow_download || AllowDownload.INHERITED);
     setSlackChannel(commonData.team.slackChannel || '');
     setTeamsIncomingWebhookUrl(commonData.team.teamsIncomingWebhookUrl || '');
+    setDescription(commonData.team.bio || '');
     getTeamMembers();
   }, [commonData.team]);
 
@@ -436,6 +445,18 @@ const Index = ({ commonData, setUser }: Props) => {
     setRequesting(true);
   };
 
+  const updateDescription = async () => {
+    setRequesting(true);
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+      await api.updateTeam(commonData.team?.id!, { bio: description } as any);
+      window.location.reload();
+    } catch (e: any) {
+      Helper.logError(e.response.data, e);
+    }
+    setRequesting(false);
+  };
+
   const updateTeamVisibility = async (teamVisibilityEnum: TeamVisibilityEnum) => {
     setRequesting(true);
     try {
@@ -579,7 +600,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   {commonData.organization?.link}
                 </a>
                 {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
-                {Helper.isBrowser() && <ReadMoreReact text={commonData.organization?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
+                {Helper.isBrowser() && commonData.organization && <ReadMoreReact text={commonData.organization?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
               </div>
             </div>
 
@@ -705,6 +726,14 @@ const Index = ({ commonData, setUser }: Props) => {
                       <LinkIcon className="inline-block w-4 h-4 ml-1" />
                     </a>
                   </div>
+                  {hasPermissionEditChannel && descriptHasChanged && (
+                    <button
+                      className="rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      onClick={updateDescription}
+                    >
+                      Save
+                    </button>
+                  )}
                   {hasPermissionDeleteChannel && (
                     <button
                       className="ml-2 rounded border border-red-300 bg-white px-2.5 py-1.5 text-xs font-medium text-red-700 shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
@@ -714,88 +743,87 @@ const Index = ({ commonData, setUser }: Props) => {
                     </button>
                   )}
                 </div>
+
+                {hasPermissionEditChannel ? (
+                  <div className="flex items-center my-4">
+                    <label className="block text-sm font-medium text-gray-700">Description:</label>
+                    <textarea
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      rows={4}
+                      className="ml-6 block w-full rounded-md border-0 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:py-1.5 sm:text-sm sm:leading-6"
+                    />
+                  </div>
+                ) : (
+                  <div className="my-3">
+                    <ReadMoreReact text={description} ideal={200} readMoreText={'Read more...'} />
+                  </div>
+                )}
+
                 <div className="flex items-center my-4">
                   <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Visibility:</label>
                   {hasPermissionEditChannel ? (
-                    <React.Fragment>
-                      <Listbox value={null} onChange={(teamVisibilityEnum: TeamVisibilityEnum) => updateTeamVisibility(teamVisibilityEnum)}>
-                        {({ open }) => (
-                          <div className="relative ml-6" style={{ width: '200px' }}>
-                            <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
-                              <span className="inline-flex w-full">
-                                <span className="">{Helper.ucFirst(commonData.team?.visibility || '')}</span>
-                                <ChannelVisibility
-                                  containerClasses="ml-2"
-                                  teamVisibility={commonData.team?.visibility!}
-                                  imageWidth={TailwindWidthSizeEnum.W3}
-                                  imageMarginX={TailwindWidthSizeEnum.W3}
-                                  imageMarginY={TailwindWidthSizeEnum.W1}
-                                  alwaysOnHover={true}
-                                />
-                              </span>
-                              <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                                </svg>
-                              </span>
-                            </Listbox.Button>
-                            <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                              <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none sm:text-sm">
-                                {Helper.teamVisibilityValues.map((teamVisibilityEnum: TeamVisibilityEnum) => {
-                                  if (teamVisibilityEnum === TeamVisibilityEnum.PUBLIC && !enabledPublicChannels) {
-                                    return null;
-                                  }
-                                  return (
-                                    <Listbox.Option
-                                      disabled={!hasPermissionEditChannel || requesting}
-                                      key={teamVisibilityEnum}
-                                      className={({ active }) => clsx(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'relative cursor-pointer select-none py-2 pl-3 pr-9')}
-                                      value={teamVisibilityEnum}
-                                    >
-                                      {({ selected, active }) => (
-                                        <React.Fragment>
-                                          <div className="flex">
-                                            <span className={clsx(commonData.team?.visibility === teamVisibilityEnum ? 'font-semibold' : 'font-normal')}>{Helper.ucFirst(teamVisibilityEnum)}</span>
-                                            <ChannelVisibility
-                                              containerClasses="ml-3"
-                                              teamVisibility={teamVisibilityEnum!}
-                                              imageWidth={TailwindWidthSizeEnum.W3}
-                                              imageMarginX={TailwindWidthSizeEnum.W3}
-                                              imageMarginY={TailwindWidthSizeEnum.W1}
-                                            />
-                                          </div>
-                                          {selected ? (
-                                            <span className={clsx(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
-                                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                                            </span>
-                                          ) : null}
-                                        </React.Fragment>
-                                      )}
-                                    </Listbox.Option>
-                                  );
-                                })}
-                              </Listbox.Options>
-                            </Transition>
-                          </div>
-                        )}
-                      </Listbox>
-                      <div className="text-sm text-gray-700">
-                        <ul style={{ listStyle: 'circle' }}>
-                          <li>
-                            <strong>Protected:</strong> only members within the organization can access this channel&apos;s content.
-                          </li>
-                          <li>
-                            <strong>Private:</strong> only members of this channel have access to this channel&apos;s content.
-                          </li>
-                          {enabledPublicChannels && (
-                            <li>
-                              <strong>Public:</strong> any member of any organization can access this channel&apos;s content. Reports in this channel can also be viewed by external users with no Kyso
-                              account by sharing a report&apos;s shareable link.
-                            </li>
-                          )}
-                        </ul>
-                      </div>
-                    </React.Fragment>
+                    <Listbox value={null} onChange={(teamVisibilityEnum: TeamVisibilityEnum) => updateTeamVisibility(teamVisibilityEnum)}>
+                      {({ open }) => (
+                        <div className="relative ml-6" style={{ width: '200px' }}>
+                          <Listbox.Button className="relative w-full cursor-default rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 text-left shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm">
+                            <span className="inline-flex w-full">
+                              <span className="">{Helper.ucFirst(commonData.team?.visibility || '')}</span>
+                              <ChannelVisibility
+                                containerClasses="ml-2"
+                                teamVisibility={commonData.team?.visibility!}
+                                imageWidth={TailwindWidthSizeEnum.W3}
+                                imageMarginX={TailwindWidthSizeEnum.W3}
+                                imageMarginY={TailwindWidthSizeEnum.W1}
+                                alwaysOnHover={true}
+                              />
+                            </span>
+                            <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                              </svg>
+                            </span>
+                          </Listbox.Button>
+                          <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                            <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none sm:text-sm">
+                              {Helper.teamVisibilityValues.map((teamVisibilityEnum: TeamVisibilityEnum) => {
+                                if (teamVisibilityEnum === TeamVisibilityEnum.PUBLIC && !enabledPublicChannels) {
+                                  return null;
+                                }
+                                return (
+                                  <Listbox.Option
+                                    disabled={!hasPermissionEditChannel || requesting}
+                                    key={teamVisibilityEnum}
+                                    className={({ active }) => clsx(active ? 'text-white bg-indigo-600' : 'text-gray-900', 'relative cursor-pointer select-none py-2 pl-3 pr-9')}
+                                    value={teamVisibilityEnum}
+                                  >
+                                    {({ selected, active }) => (
+                                      <React.Fragment>
+                                        <div className="flex">
+                                          <span className={clsx(commonData.team?.visibility === teamVisibilityEnum ? 'font-semibold' : 'font-normal')}>{Helper.ucFirst(teamVisibilityEnum)}</span>
+                                          <ChannelVisibility
+                                            containerClasses="ml-3"
+                                            teamVisibility={teamVisibilityEnum!}
+                                            imageWidth={TailwindWidthSizeEnum.W3}
+                                            imageMarginX={TailwindWidthSizeEnum.W3}
+                                            imageMarginY={TailwindWidthSizeEnum.W1}
+                                          />
+                                        </div>
+                                        {selected ? (
+                                          <span className={clsx(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
+                                            <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                          </span>
+                                        ) : null}
+                                      </React.Fragment>
+                                    )}
+                                  </Listbox.Option>
+                                );
+                              })}
+                            </Listbox.Options>
+                          </Transition>
+                        </div>
+                      )}
+                    </Listbox>
                   ) : (
                     <div
                       style={{ width: '200px' }}
@@ -814,6 +842,22 @@ const Index = ({ commonData, setUser }: Props) => {
                       </span>
                     </div>
                   )}
+                </div>
+                <div className="text-sm text-gray-700">
+                  <ul style={{ listStyle: 'circle' }}>
+                    <li>
+                      <strong>Protected:</strong> only members within the organization can access this channel&apos;s content.
+                    </li>
+                    <li>
+                      <strong>Private:</strong> only members of this channel have access to this channel&apos;s content.
+                    </li>
+                    {enabledPublicChannels && (
+                      <li>
+                        <strong>Public:</strong> any member of any organization can access this channel&apos;s content. Reports in this channel can also be viewed by external users with no Kyso
+                        account by sharing a report&apos;s shareable link.
+                      </li>
+                    )}
+                  </ul>
                 </div>
 
                 {hasPermissionEditChannel && (
