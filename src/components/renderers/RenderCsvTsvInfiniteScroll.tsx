@@ -18,6 +18,8 @@ const OFFSET = 50;
 
 const RenderCsvTsvInfiniteScroll = ({ commonData, fileToRender }: Props) => {
   const [headers, setHeaders] = useState<string[]>([]);
+  const [delimiter, setDelimiter] = useState<string>(',');
+  const [lineBreak, setLineBreak] = useState<string>('\n');
   const [items, setItems] = useState<any[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState<boolean>(false);
@@ -48,7 +50,7 @@ const RenderCsvTsvInfiniteScroll = ({ commonData, fileToRender }: Props) => {
       if (response.data) {
         let text: string = '';
         if (page > 1) {
-          text = `${headers.map((header: string) => `${header}`).join(',')}\n`;
+          text = `${headers.map((header: string) => `${header}`).join(delimiter)}${lineBreak}`;
         }
         text += response.data.trim();
         const pr: Papaparse.ParseResult<any> = Papaparse.parse(text, {
@@ -56,6 +58,8 @@ const RenderCsvTsvInfiniteScroll = ({ commonData, fileToRender }: Props) => {
         });
         if (page === 1) {
           setHeaders(pr.meta.fields || []);
+          setDelimiter(pr.meta.delimiter);
+          setLineBreak(pr.meta.linebreak);
         }
         setItems(items.concat(pr.data));
         setPage(page + 1);
