@@ -73,10 +73,23 @@ const SettingsAside = ({ commonData }: Props) => {
             Tokens
           </a>
         )}
+        {commonData.user !== null && (
+          <a
+            href={`/settings/notifications`}
+            className={clsx(
+              router.route === '/settings/notifications' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              'flex items-center px-3 py-2 text-sm font-medium rounded-md',
+            )}
+          >
+            Notifications
+          </a>
+        )}
         {organizations.length > 0 && (
           <div
             className={clsx(
-              router.route.startsWith('/settings') ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              router.route === '/settings' || router.route === '/settings/[organizationName]' || router.route === '/settings/[organizationName]/[teamName]'
+                ? 'bg-gray-200 text-gray-900'
+                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
               'flex items-center px-3 py-2 text-sm font-medium rounded-md',
             )}
           >
