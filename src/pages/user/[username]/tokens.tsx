@@ -158,6 +158,17 @@ const Index = ({ commonData, setUser }: Props) => {
     }
   };
 
+  const closeCreateAccessTokenModal = () => {
+    setOpenCreateKysoAccessToken(false);
+    setShowToaster(false);
+    setMessageToaster('');
+    setTimeout(() => {
+      setCopied(false);
+      setKysoAccessTokenName('');
+      setNewKysoUserAccessToken(null);
+    }, 1000);
+  };
+
   return (
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6">
@@ -294,20 +305,7 @@ const Index = ({ commonData, setUser }: Props) => {
       </div>
       {/* CREATE KYSO ACCESS TOKEN */}
       <Transition.Root show={openCreateKysoAccessToken} as={Fragment}>
-        <Dialog
-          as="div"
-          className="relative z-10"
-          onClose={() => {
-            setOpenCreateKysoAccessToken(false);
-            setShowToaster(false);
-            setMessageToaster('');
-            setTimeout(() => {
-              setCopied(false);
-              setKysoAccessTokenName('');
-              setNewKysoUserAccessToken(null);
-            }, 1000);
-          }}
-        >
+        <Dialog as="div" static className="relative z-10" onClose={() => {}}>
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
             <div className="fixed inset-0 bg-gray-500/50 transition-opacity" />
           </Transition.Child>
@@ -325,6 +323,19 @@ const Index = ({ commonData, setUser }: Props) => {
               >
                 <Dialog.Panel className="relative overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl sm:p-6">
                   <div>
+                    <div className="absolute top-0 right-0 hidden pt-4 pr-4 sm:block">
+                      <button
+                        type="button"
+                        onClick={closeCreateAccessTokenModal}
+                        className="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-indigo-500 focus:ring-offset-2"
+                        title="Close dialog"
+                      >
+                        <span className="sr-only">Close</span>
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                      </button>
+                    </div>
                     <div className="mt-3 sm:mt-5">
                       <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
                         Create access token
@@ -350,6 +361,7 @@ const Index = ({ commonData, setUser }: Props) => {
                                     setShowToaster(true);
                                     setOpenCreateKysoAccessToken(false);
                                     setTimeout(() => {
+                                      setShowToaster(false);
                                       setCopied(false);
                                       setKysoAccessTokenName('');
                                       setNewKysoUserAccessToken(null);
