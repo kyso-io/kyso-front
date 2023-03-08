@@ -8,7 +8,7 @@ import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useInterval } from '@/hooks/use-interval';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
-import { InformationCircleIcon } from '@heroicons/react/solid';
+import { CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, NormalizedResponseDTO, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -16,6 +16,7 @@ import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
+import CaptchaModal from '../../../components/CaptchaModal';
 import ToasterNotification from '../../../components/ToasterNotification';
 import { checkJwt } from '../../../helpers/check-jwt';
 import { checkReportAuthors } from '../../../helpers/check-report-authors';
@@ -72,6 +73,29 @@ const Index = ({ commonData, setUser }: Props) => {
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
+  const [show, setShow] = useState<boolean>(false);
+  const [alertText, setAlertText] = useState<string>('');
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+
+  useEffect(() => {
+    const getData = async () => {
+      try {
+        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
+        const indexHcaptchaEnabled: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (indexHcaptchaEnabled !== -1) {
+          setCaptchaIsEnabled(publicKeys[indexHcaptchaEnabled]!.value === 'true');
+        }
+        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
+        if (indexShowEmail !== -1) {
+          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
+        }
+      } catch (errorHttp: any) {
+        Helper.logError(errorHttp.response.data, errorHttp);
+      }
+    };
+    getData();
+  }, []);
 
   useEffect(() => {
     if (!commonData.user) {
@@ -218,6 +242,15 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   const toggleUserStarReport = async (reportDto: ReportDTO) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShow(true);
+      setAlertText('Please verify your email');
+      return;
+    }
     const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportDto.id!);
@@ -226,6 +259,15 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   const toggleUserPinReport = async (reportDto: ReportDTO) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShow(true);
+      setAlertText('Please verify your email');
+      return;
+    }
     try {
       const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportDto.id!);
@@ -234,6 +276,15 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   const toggleGlobalPinReport = async (reportDto: ReportDTO) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShow(true);
+      setAlertText('Please verify your email');
+      return;
+    }
     try {
       const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportDto.id!);
@@ -242,6 +293,15 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   // END REPORT ACTIONS
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
+  };
 
   // START ACTIVITY FEED
 
@@ -305,21 +365,6 @@ const Index = ({ commonData, setUser }: Props) => {
       setMessageToaster(`Sorry, we can't update your profile image because: ${errorData.message}`);
     }
   };
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
-        if (indexShowEmail !== -1) {
-          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
 
   if (!userProfileData || !commonData) {
     return null;
@@ -408,6 +453,8 @@ const Index = ({ commonData, setUser }: Props) => {
           )}
         </div>
       </div>
+      <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />} message={alertText} />
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };
