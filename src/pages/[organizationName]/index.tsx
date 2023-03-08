@@ -7,7 +7,7 @@ import PureNewReportPopover from '@/components/PureNewReportPopover';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/solid';
+import { ExclamationCircleIcon, XCircleIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -27,6 +27,7 @@ import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
 import ActivityFeedComponent from '../../components/ActivityFeed';
+import CaptchaModal from '../../components/CaptchaModal';
 import InfoActivity from '../../components/InfoActivity';
 import ManageUsers from '../../components/ManageUsers';
 import ReportBadge from '../../components/ReportBadge';
@@ -70,6 +71,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [showEmails, setShowEmails] = useState<boolean>(false);
   const [show, setShow] = useState<boolean>(false);
   const [alertText, setAlertText] = useState<string>('');
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const hasPermissionDeleteOrganization: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, [GlobalPermissionsEnum.GLOBAL_ADMIN, OrganizationPermissionsEnum.ADMIN, OrganizationPermissionsEnum.DELETE]),
     [commonData],
@@ -269,6 +271,15 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   const toggleUserStarReport = async (reportDto: ReportDTO) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShow(true);
+      setAlertText('Please verify your email');
+      return;
+    }
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportDto.id!);
@@ -300,6 +311,15 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   const toggleUserPinReport = async (reportDto: ReportDTO) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShow(true);
+      setAlertText('Please verify your email');
+      return;
+    }
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportDto.id!);
@@ -331,6 +351,15 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   const toggleGlobalPinReport = async (reportDto: ReportDTO) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShow(true);
+      setAlertText('Please verify your email');
+      return;
+    }
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportDto.id!);
@@ -359,6 +388,15 @@ const Index = ({ commonData, setUser }: Props) => {
       });
       setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports } as any);
     } catch (e) {}
+  };
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
   };
 
   const getActivityFeed = async () => {
@@ -610,7 +648,8 @@ const Index = ({ commonData, setUser }: Props) => {
           )}
         </div>
       )}
-      <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />} message={alertText} />
+      <ToasterNotification show={show} setShow={setShow} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={alertText} />
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

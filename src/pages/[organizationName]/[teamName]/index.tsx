@@ -24,6 +24,7 @@ import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
 import ActivityFeedComponent from '../../../components/ActivityFeed';
+import CaptchaModal from '../../../components/CaptchaModal';
 import ChannelList from '../../../components/ChannelList';
 import ChannelVisibility from '../../../components/ChannelVisibility';
 import InfoActivity from '../../../components/InfoActivity';
@@ -117,6 +118,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [showEmails, setShowEmails] = useState<boolean>(false);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     const getData = async () => {
@@ -387,6 +389,15 @@ const Index = ({ commonData, setUser }: Props) => {
   // START REPORT ACTIONS
 
   const toggleUserStarReport = async (reportDto: ReportDTO) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShow(true);
+      setAlertText('Please verify your email');
+      return;
+    }
     try {
       const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportDto.id!);
@@ -418,6 +429,15 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   const toggleUserPinReport = async (reportDto: ReportDTO) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShow(true);
+      setAlertText('Please verify your email');
+      return;
+    }
     try {
       const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportDto.id!);
@@ -449,6 +469,15 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   const toggleGlobalPinReport = async (reportDto: ReportDTO) => {
+    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
+      setShowCaptchaModal(true);
+      return;
+    }
+    if (commonData.user?.email_verified === false) {
+      setShow(true);
+      setAlertText('Please verify your email');
+      return;
+    }
     try {
       const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportDto.id!);
@@ -480,6 +509,15 @@ const Index = ({ commonData, setUser }: Props) => {
   };
 
   // END REPORT ACTIONS
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
+  };
 
   // START ACTIVITY FEED
 
@@ -658,6 +696,7 @@ const Index = ({ commonData, setUser }: Props) => {
         )}
       </div>
       <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />} message={alertText} />
+      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

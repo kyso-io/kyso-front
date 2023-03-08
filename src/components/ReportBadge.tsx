@@ -1,15 +1,15 @@
+import PureChangeReportImage from '@/components/PureChangeReportImage';
 import type { CommonData } from '@/types/common-data';
-import { BookmarkIcon, ChatIcon } from '@heroicons/react/outline';
-import { BookmarkIcon as BookmarkIconSolid, EyeIcon, ThumbUpIcon } from '@heroicons/react/solid';
+import { BookmarkIcon as BookmarkIconOutline, ChatIcon } from '@heroicons/react/outline';
+import { EyeIcon, ThumbUpIcon } from '@heroicons/react/solid';
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { toSvg } from 'jdenticon';
 import moment from 'moment';
-import { useMemo } from 'react';
 import { Tooltip } from 'primereact/tooltip';
+import { useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import PureChangeReportImage from '@/components/PureChangeReportImage';
 import { HelperPermissions } from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureShareButton from './PureShareButton';
@@ -84,30 +84,18 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
               {/* USER PIN */}
               {toggleUserPinReport && (
                 <div className="pin-tooltip" onClick={toggleUserPinReport} data-pr-tooltip={report.user_pin ? 'Remove personal pin from the top' : 'Pin personally to the top'} data-pr-position="top">
-                  {report.user_pin ? (
-                    <BookmarkIconSolid className="cursor-pointer h-7 w-7 text-indigo-600 -mt-1 hover:text-indigo-600" />
-                  ) : (
-                    <BookmarkIcon className="cursor-pointer h-7 w-7 text-indigo-600 -mt-1 hover:text-indigo-600" />
-                  )}
+                  <BookmarkIconOutline fill={report.user_pin ? '#4f46e5' : 'white'} className="cursor-pointer h-7 w-7 text-indigo-600 -mt-1 hover:text-indigo-600" />
                 </div>
               )}
               {/* GLOBAL */}
-              {toggleGlobalPinReport && (
+              {toggleGlobalPinReport && hasPermissionReportGlobalPin && (
                 <div
                   className="pin-tooltip"
                   data-pr-tooltip={report.pin ? 'Remove global pin for everyone' : 'Pin globaly for everyone'}
                   data-pr-position="top"
-                  onClick={() => {
-                    if (hasPermissionReportGlobalPin) {
-                      toggleGlobalPinReport();
-                    }
-                  }}
+                  onClick={() => toggleGlobalPinReport()}
                 >
-                  {report.pin ? (
-                    <BookmarkIconSolid className="cursor-pointer h-7 w-7 text-orange-500 -mt-1 hover:text-orange-500" />
-                  ) : (
-                    <BookmarkIcon className="cursor-pointer h-7 w-7 text-orange-500 -mt-1 hover:text-orange-500" />
-                  )}
+                  <BookmarkIconOutline fill={report.pin ? '#f97316' : 'white'} className="cursor-pointer h-7 w-7 text-orange-500 -mt-1 hover:text-orange-500" />
                 </div>
               )}
             </div>
