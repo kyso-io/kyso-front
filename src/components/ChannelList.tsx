@@ -70,12 +70,14 @@ const ChannelList = (props: Props) => {
     <div>
       <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
         Channels
-        <a
-          href={`${basePath}/${commonData.organization?.sluglified_name}/create-channel`}
-          className={classNames('float-right text-gray-500 hover:bg-gray-100 hover:text-gray-900', 'text-sm rounded-md')}
-        >
-          <PlusCircleIcon className="w-5 h-5 mr-1" />
-        </a>
+        {(hasPermissionCreateChannel || hasPermissionCreateChannelFromOrganization) && (
+          <a
+            href={`${basePath}/${commonData.organization?.sluglified_name}/create-channel`}
+            className={classNames('float-right text-gray-500 hover:bg-gray-100 hover:text-gray-900', 'text-sm rounded-md')}
+          >
+            <PlusCircleIcon className="w-5 h-5 mr-1" />
+          </a>
+        )}
       </h3>
       <div className="px-4 pb-2">
         <div className="relative mt-1 rounded-md shadow-sm">
