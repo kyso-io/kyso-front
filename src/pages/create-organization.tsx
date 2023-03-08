@@ -16,6 +16,7 @@ import PureAvatar from '../components/PureAvatar';
 import { RegisteredUsersAlert } from '../components/RegisteredUsersAlert';
 import ToasterNotification from '../components/ToasterNotification';
 import { checkJwt } from '../helpers/check-jwt';
+import type { HttpExceptionDto } from '../interfaces/http-exception.dto';
 import { TailwindFontSizeEnum } from '../tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '../tailwind/enum/tailwind-height.enum';
 
@@ -124,7 +125,9 @@ const Index = ({ commonData, setUser }: Props) => {
       window.location.href = `/${organization.sluglified_name}`;
       setBusy(false);
     } catch (er: any) {
-      setMessageToaster(er.response.data.message);
+      const httpExceptionDto: HttpExceptionDto = er.response.data;
+      setMessageToaster(httpExceptionDto.message);
+      setShowToaster(true);
       setBusy(false);
     }
   };
