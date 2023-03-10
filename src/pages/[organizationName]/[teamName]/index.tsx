@@ -2,7 +2,20 @@
 import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
 import { CheckCircleIcon } from '@heroicons/react/solid';
-import type { ActivityFeed, NormalizedResponseDTO, Organization, OrganizationMember, PaginatedResponseDto, ReportDTO, SearchUser, Team, TeamInfoDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import type {
+  ActivityFeed,
+  NormalizedResponseDTO,
+  Organization,
+  OrganizationMember,
+  PaginatedResponseDto,
+  ReportDTO,
+  SearchUser,
+  Team,
+  TeamInfoDto,
+  TeamMember,
+  UserDTO,
+  TeamsInfoQuery,
+} from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   InviteUserDto,
@@ -211,9 +224,16 @@ const Index = ({ commonData, setUser }: Props) => {
   const getTeamsInfo = async () => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-      const result: NormalizedResponseDTO<TeamInfoDto[]> = await api.getTeamsInfo(commonData!.team!.id!);
-      if (result?.data?.length > 0) {
-        setTeamInfo(result.data[0]!);
+      const teamsInfoQuery: TeamsInfoQuery = {
+        organizationId: commonData.organization!.id!,
+        teamId: commonData.team!.id!,
+        page: 1,
+        limit: 1,
+        search: '',
+      };
+      const result: NormalizedResponseDTO<PaginatedResponseDto<TeamInfoDto>> = await api.getTeamsInfo(teamsInfoQuery);
+      if (result?.data?.results.length > 0) {
+        setTeamInfo(result.data.results[0]!);
       }
     } catch (e) {}
   };
