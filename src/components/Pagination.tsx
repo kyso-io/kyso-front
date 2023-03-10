@@ -1,4 +1,5 @@
 import { ArrowNarrowLeftIcon, ArrowNarrowRightIcon } from '@heroicons/react/solid';
+import clsx from 'clsx';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 
@@ -103,7 +104,10 @@ const Pagination = ({ page, numPages, onPageChange }: Props) => {
             }
             onPageChange(page - 1);
           }}
-          className="border-t-2 border-transparent pt-4 pr-1 inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          className={clsx(
+            'border-t-2 border-transparent pt-4 pr-1 inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300',
+            page === 1 && 'cursor-not-allowed',
+          )}
         >
           <ArrowNarrowLeftIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
           Previous
@@ -118,7 +122,10 @@ const Pagination = ({ page, numPages, onPageChange }: Props) => {
             }
             onPageChange(page + 1);
           }}
-          className="border-t-2 border-transparent pt-4 pl-1 inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          className={clsx(
+            'border-t-2 border-transparent pt-4 pl-1 inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 hover:border-gray-300',
+            page === numPages && 'cursor-not-allowed',
+          )}
         >
           Next
           <ArrowNarrowRightIcon className="ml-3 h-5 w-5 text-gray-400" aria-hidden="true" />

@@ -726,9 +726,13 @@ const Index = ({ commonData, setUser }: Props) => {
                       <LinkIcon className="inline-block w-4 h-4 ml-1" />
                     </a>
                   </div>
-                  {hasPermissionEditChannel && descriptHasChanged && (
+                  {hasPermissionEditChannel && (
                     <button
-                      className="rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      disabled={!descriptHasChanged}
+                      className={clsx(
+                        'rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                        !descriptHasChanged ? 'opacity-50 cursor-not-allowed' : '',
+                      )}
                       onClick={updateDescription}
                     >
                       Save

@@ -5,7 +5,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Switch, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, InformationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, Team, TeamInfoDto } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, Team, TeamInfoDto, PaginatedResponseDto, TeamsInfoQuery } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   AllowDownload,
@@ -31,6 +31,7 @@ import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
 import CaptchaModal from '../../../components/CaptchaModal';
 import ExpirationDateModal from '../../../components/ExpirationDateModal';
+import Pagination from '../../../components/Pagination';
 import PureAvatar from '../../../components/PureAvatar';
 import SettingsAside from '../../../components/SettingsAside';
 import ToasterNotification from '../../../components/ToasterNotification';
@@ -57,8 +58,6 @@ interface Props {
   setUser: (user: UserDTO) => void;
 }
 
-type TeamInfo = Team & TeamInfoDto;
-
 const debouncedFetchData = debounce((cb: () => void) => {
   cb();
 }, 750);
@@ -71,6 +70,9 @@ const Index = ({ commonData, setUser }: Props) => {
   const [query, setQuery] = useState<string>('');
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [requesting, setRequesting] = useState<boolean>(false);
+  const [requestingTeamsInfo, setRequestingTeamsInfo] = useState<boolean>(false);
+  const [queryTeam, setQueryTeam] = useState<string>('');
+  const debounceTeamsInfoQuery = useMemo(() => debounce((text: string) => getTeamsInfo(1, text), 1000), [commonData.organization]);
   const [members, setMembers] = useState<Member[]>([]);
   const [selectedUser, setSelectedUser] = useState<UserDTO | null>(null);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
@@ -168,7 +170,7 @@ const Index = ({ commonData, setUser }: Props) => {
     return checkIfCentralizedCommunicationsChanged() || checkIfSlackChanged() || checkIfTeamsChanged();
   }, [commonData.organization, centralizedNotifications, emailsCentralizedNotifications, slackChannel, slackToken, teamsIncomingWebhookUrl]);
 
-  const [teamsInfo, setTeamsInfo] = useState<TeamInfo[]>([]);
+  const [teamsInfo, setTeamsInfo] = useState<NormalizedResponseDTO<PaginatedResponseDto<TeamInfoDto>> | null>(null);
   const enabledInvitationLinks: boolean = useMemo(() => {
     if (!isOrgAdmin) {
       return false;
@@ -327,25 +329,7 @@ const Index = ({ commonData, setUser }: Props) => {
     if (!commonData.organization || !commonData.permissions || !commonData.permissions.teams) {
       return;
     }
-    const getTeamsInfo = async () => {
-      try {
-        const api: Api = new Api(commonData.token);
-        const result: NormalizedResponseDTO<TeamInfoDto[]> = await api.getTeamsInfo();
-        const data: TeamInfo[] = [];
-        for (const teamInfoDto of result.data) {
-          const team: Team | null = result.relations?.team && result.relations.team[teamInfoDto.team_id] ? result.relations.team[teamInfoDto.team_id] : null;
-          if (!team) {
-            continue;
-          }
-          if (team.organization_id !== commonData.organization!.id!) {
-            continue;
-          }
-          data.push({ ...teamInfoDto, ...team } as any);
-        }
-        setTeamsInfo(data);
-      } catch (e) {}
-    };
-    getTeamsInfo();
+    getTeamsInfo(1, '');
   }, [commonData.permissions, commonData.organization]);
 
   useEffect(() => {
@@ -359,6 +343,26 @@ const Index = ({ commonData, setUser }: Props) => {
       router.push('/settings');
     }
   }, [router.isReady, commonData?.permissions]);
+
+  const getTeamsInfo = async (page: number, search: string) => {
+    setRequestingTeamsInfo(true);
+    try {
+      const api: Api = new Api(commonData.token);
+      const teamsInfoQuery: TeamsInfoQuery = {
+        organizationId: commonData.organization!.id!,
+        teamId: '',
+        page,
+        limit: 24,
+        search,
+      };
+      const result: NormalizedResponseDTO<PaginatedResponseDto<TeamInfoDto>> = await api.getTeamsInfo(teamsInfoQuery);
+      setTeamsInfo(result);
+    } catch (e) {
+      /* eslint-disable no-console */
+      console.log(e);
+    }
+    setRequestingTeamsInfo(false);
+  };
 
   const onChangeInputFile = (e: any) => {
     if (e.target.files.length > 0) {
@@ -699,6 +703,10 @@ const Index = ({ commonData, setUser }: Props) => {
     }
   };
 
+  const onPageChange = async (page: number) => {
+    getTeamsInfo(page, queryTeam);
+  };
+
   if (userIsLogged === null) {
     return null;
   }
@@ -944,65 +952,109 @@ const Index = ({ commonData, setUser }: Props) => {
                     Create
                   </a>
                 )}
-                <div className="mt-6 text-center">
-                  <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
-                    {teamsInfo.map((teamInfo: TeamInfo) => {
-                      const resourcePermissions: ResourcePermissions | undefined = commonData.permissions!.teams!.find((rp: ResourcePermissions) => rp.id === teamInfo.id);
-                      if (!resourcePermissions) {
-                        return null;
-                      }
-                      if (!resourcePermissions.role_names) {
-                        return null;
-                      }
-                      const role: string = OrganizationRoleToLabel.hasOwnProperty(resourcePermissions.role_names[0]!)
-                        ? OrganizationRoleToLabel[resourcePermissions.role_names[0]!]!
-                        : resourcePermissions.role_names[0]!;
-                      return (
-                        <li
-                          key={teamInfo.team_id}
-                          className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
-                          onClick={() => router.push(`/settings/${commonData.organization!.sluglified_name}/${teamInfo.sluglified_name}`)}
-                        >
-                          <div className="space-y-1 text-lg font-medium leading-6 mt-5">
-                            <h3 style={{ color: '#234361' }}>{teamInfo.display_name}</h3>
-                            <span className="text-sm font-normal">{role}</span>
-                          </div>
-                          <div className="my-10">
-                            <PureAvatar src={teamInfo.avatar_url || ''} title={teamInfo.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
-                          </div>
-                          <div className="space-y-2 border-t py-4 px-2">
-                            <ul role="list" className="flex justify-between space-x-5 cursor-pointer">
-                              <li title="Reports">
-                                <div className="flex items-center">
-                                  <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
-                                  <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                    {teamInfo.reports} reports
-                                  </span>
-                                </div>
-                              </li>
-                              <li title="Members">
-                                <div className="flex items-center">
-                                  <UserGroupIcon className="h-6 w-6 mr-1" fill="#F1AB7A" aria-hidden="true" />
-                                  <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                    {teamInfo.members}
-                                  </span>
-                                </div>
-                              </li>
-                              <li title="Comments">
-                                <div className="flex items-center">
-                                  <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
-                                  <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                    {teamInfo.comments} comments
-                                  </span>
-                                </div>
-                              </li>
-                            </ul>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
+
+                <div className="mt-5">
+                  <input
+                    value={queryTeam}
+                    onChange={(e) => {
+                      setQueryTeam(e.target.value);
+                      debounceTeamsInfoQuery(e.target.value);
+                    }}
+                    type="text"
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    placeholder="Search channels..."
+                  />
                 </div>
+                {requestingTeamsInfo ? (
+                  <div className="flex justify-center mt-5" role="status">
+                    <svg aria-hidden="true" className="w-8 h-8 mr-2 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                        fill="currentColor"
+                      />
+                      <path
+                        d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                        fill="currentFill"
+                      />
+                    </svg>
+                    <span className="sr-only">Loading...</span>
+                  </div>
+                ) : teamsInfo !== null && teamsInfo.data !== null && teamsInfo.data.results.length > 0 ? (
+                  <React.Fragment>
+                    <div className="mt-6 text-center">
+                      <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
+                        {teamsInfo !== null &&
+                          teamsInfo.relations !== null &&
+                          teamsInfo.relations.team !== null &&
+                          teamsInfo.data !== null &&
+                          teamsInfo.data.results.map((teamInfo: TeamInfoDto) => {
+                            if (!teamsInfo.relations!.team!.hasOwnProperty(teamInfo.team_id)) {
+                              return null;
+                            }
+                            const team: Team = teamsInfo.relations!.team[teamInfo.team_id];
+                            const resourcePermissions: ResourcePermissions | undefined = commonData.permissions!.teams!.find((rp: ResourcePermissions) => rp.id === teamInfo.team_id);
+                            if (!resourcePermissions) {
+                              return null;
+                            }
+                            if (!resourcePermissions.role_names) {
+                              return null;
+                            }
+                            const role: string = OrganizationRoleToLabel.hasOwnProperty(resourcePermissions.role_names[0]!)
+                              ? OrganizationRoleToLabel[resourcePermissions.role_names[0]!]!
+                              : resourcePermissions.role_names[0]!;
+                            return (
+                              <li
+                                key={teamInfo.team_id}
+                                className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
+                                onClick={() => router.push(`/settings/${commonData.organization!.sluglified_name}/${team.sluglified_name}`)}
+                              >
+                                <div className="space-y-1 text-lg font-medium leading-6 mt-5">
+                                  <h3 style={{ color: '#234361' }}>{team.display_name}</h3>
+                                  <span className="text-sm font-normal">{role}</span>
+                                </div>
+                                <div className="my-10">
+                                  <PureAvatar src={team.avatar_url || ''} title={team.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
+                                </div>
+                                <div className="space-y-2 border-t py-4 px-2">
+                                  <ul role="list" className="flex justify-between space-x-5 cursor-pointer">
+                                    <li title="Reports">
+                                      <div className="flex items-center">
+                                        <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
+                                        <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                          {teamInfo.reports} reports
+                                        </span>
+                                      </div>
+                                    </li>
+                                    <li title="Members">
+                                      <div className="flex items-center">
+                                        <UserGroupIcon className="h-6 w-6 mr-1" fill="#F1AB7A" aria-hidden="true" />
+                                        <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                          {teamInfo.members}
+                                        </span>
+                                      </div>
+                                    </li>
+                                    <li title="Comments">
+                                      <div className="flex items-center">
+                                        <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
+                                        <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                          {teamInfo.comments} comments
+                                        </span>
+                                      </div>
+                                    </li>
+                                  </ul>
+                                </div>
+                              </li>
+                            );
+                          })}
+                      </ul>
+                    </div>
+                    <div className="mt-8">
+                      <Pagination page={teamsInfo.data.currentPage} numPages={teamsInfo.data.totalPages} onPageChange={onPageChange} />
+                    </div>
+                  </React.Fragment>
+                ) : (
+                  <p className="mt-10 text-sm text-gray-500">There are no channels.</p>
+                )}
               </React.Fragment>
             )}
 
