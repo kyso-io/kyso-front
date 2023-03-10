@@ -48,6 +48,7 @@ interface Props {
 
 const CreateReport = ({ commonData, setUser }: Props) => {
   const router = useRouter();
+  const refTitle = useRef<any>(null);
   const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
   const [loggedUserShowCaptcha, setLoggedUserShowCaptcha] = useState<boolean>(true);
   const [showToaster, setShowToaster] = useState<boolean>(false);
@@ -713,8 +714,8 @@ const CreateReport = ({ commonData, setUser }: Props) => {
             <div className="w-full mb-4">
               <div className="flex flex-col">
                 <textarea
+                  ref={refTitle}
                   style={{
-                    height: '55px',
                     border: 'none',
                     resize: 'none',
                     outline: 'none',
@@ -724,7 +725,15 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                   }}
                   value={title || ''}
                   disabled={isEdition()}
-                  onChange={(e) => setTitleDelay(e.target.value)}
+                  onChange={(e) => {
+                    const newTitle = e.target.value;
+                    if (!newTitle || newTitle.length === 0) {
+                      refTitle.current.style.height = 'auto';
+                    } else {
+                      refTitle.current.style.height = `${refTitle.current.scrollHeight}px`;
+                    }
+                    setTitleDelay(newTitle);
+                  }}
                   placeholder="Title"
                   className={clsx('p-0 focus:shadow-sm 0 block w-full border-white border-0 rounded-md text-3xl font-medium focus:text-gray-500 text-gray-900')}
                 />
@@ -736,12 +745,13 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                     overflow: 'auto',
                     WebkitBoxShadow: 'none',
                     boxShadow: 'none',
+                    height: '120px',
                   }}
                   value={description || ''}
                   placeholder="Description"
                   onChange={(e) => setDescriptionDelay(e.target.value)}
                   rows={5}
-                  className="p-0 focus:shadow-sm 0  block  w-full h-full focus:w-full  border-white border-0 text-gray-500 sm:text-sm rounded-md"
+                  className="p-0 focus:shadow-sm 0  block  w-full h-full focus:w-full  border-white border-0 text-gray-500 sm:text-sm rounded-md mt-4"
                 />
               </div>
             </div>
