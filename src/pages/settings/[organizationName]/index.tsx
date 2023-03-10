@@ -5,7 +5,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Switch, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, InformationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, Team, TeamInfoDto, PaginatedResponseDto, TeamsInfoQuery } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, PaginatedResponseDto, ResourcePermissions, Team, TeamInfoDto, TeamsInfoQuery } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   AllowDownload,
@@ -74,6 +74,18 @@ const Index = ({ commonData, setUser }: Props) => {
   const [queryTeam, setQueryTeam] = useState<string>('');
   const debounceTeamsInfoQuery = useMemo(() => debounce((text: string) => getTeamsInfo(1, text), 1000), [commonData.organization]);
   const [members, setMembers] = useState<Member[]>([]);
+  const [queryUsers, setQueryUsers] = useState<string>('');
+  const fileterdMembers: Member[] = useMemo(() => {
+    if (!queryUsers) {
+      return members;
+    }
+    const queryUserLower: string = queryUsers.toLowerCase();
+    return members.filter((member: Member) => {
+      const emailLower: string = member.email.toLowerCase();
+      const displayNameLower: string = member.display_name.toLowerCase();
+      return emailLower.includes(queryUserLower) || displayNameLower.includes(queryUserLower);
+    });
+  }, [members, queryUsers]);
   const [selectedUser, setSelectedUser] = useState<UserDTO | null>(null);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [openInviteUserModal, setOpenInviteUserModal] = useState<boolean>(false);
@@ -1062,7 +1074,7 @@ const Index = ({ commonData, setUser }: Props) => {
             {!editing && selectedTab === OrganizationSettingsTab.Members && (
               <React.Fragment>
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({members.length}):</h3>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({fileterdMembers.length}):</h3>
                   {isOrgAdmin && (
                     <button
                       className={clsx(
@@ -1076,8 +1088,17 @@ const Index = ({ commonData, setUser }: Props) => {
                     </button>
                   )}
                 </div>
+                <div className="mb-5">
+                  <input
+                    value={queryUsers}
+                    onChange={(e) => setQueryUsers(e.target.value)}
+                    type="text"
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    placeholder="Search members..."
+                  />
+                </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {members.map((member: Member) => {
+                  {fileterdMembers.map((member: Member) => {
                     const labelRole: string =
                       member.organization_roles.length > 0 && OrganizationRoleToLabel[member.organization_roles[0]!] ? OrganizationRoleToLabel[member.organization_roles[0]!]! : '';
                     return (
