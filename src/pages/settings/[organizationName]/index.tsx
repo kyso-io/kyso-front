@@ -4,7 +4,7 @@
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Switch, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
-import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, InformationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
+import { BookOpenIcon, ChatAlt2Icon, CheckCircleIcon, DocumentDuplicateIcon, ExclamationCircleIcon, InformationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, PaginatedResponseDto, ResourcePermissions, Team, TeamInfoDto, TeamsInfoQuery } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -92,6 +92,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [openEditMemberModal, setOpenEditMemberModal] = useState<boolean>(false);
   const [openDeleteMemberModal, setOpenDeleteMemberModal] = useState<boolean>(false);
   const [organizationRole, setOrganizationRole] = useState<string>('');
+  const [inputDeleteUser, setInputDeleteUser] = useState<string>('');
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
     return HelperPermissions.checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || HelperPermissions.checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
@@ -559,6 +560,10 @@ const Index = ({ commonData, setUser }: Props) => {
       getOrganizationMembers();
       setOpenDeleteMemberModal(false);
       setSelectedMember(null);
+      setInputDeleteUser('');
+      setShowToaster(true);
+      setIcon(<CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />);
+      setMessageToaster('User removed successfully');
     } catch (e) {
       Helper.logError('Unexpected error', e);
     }
@@ -1817,13 +1822,26 @@ const Index = ({ commonData, setUser }: Props) => {
                           The user <strong>{selectedMember?.display_name}</strong> will be removed from the Organization <strong>{commonData.organization?.display_name}</strong>. This action cannot be
                           undone.
                         </p>
+                        <p className="text-sm text-gray-500 my-3">
+                          Please type <strong>{selectedMember?.username}</strong> in the text box before confirming.
+                        </p>
+                        <input
+                          value={inputDeleteUser}
+                          type="text"
+                          onChange={(e) => setInputDeleteUser(e.target.value)}
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
                       </div>
                     </div>
                   </div>
                   <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                     <button
                       type="button"
-                      className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                      disabled={inputDeleteUser !== selectedMember?.username}
+                      className={clsx(
+                        'inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm',
+                        inputDeleteUser !== selectedMember?.username ? 'bg-red-400 hover:bg-red-400 focus:ring-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 focus:ring-red-900',
+                      )}
                       onClick={removeMember}
                     >
                       Remove
