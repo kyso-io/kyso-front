@@ -1,9 +1,10 @@
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, MenuIcon } from '@heroicons/react/solid';
-import type { ReactElement, MouseEvent } from 'react';
-import { useCallback, useRef, useEffect, useState } from 'react';
-import { useEventListener } from 'usehooks-ts';
 import classNames from '@/helpers/class-names';
-import { setLocalStorageItem, getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { getLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, MenuIcon } from '@heroicons/react/solid';
+import clsx from 'clsx';
+import type { MouseEvent, ReactElement } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEventListener } from 'usehooks-ts';
 
 type IPureSideOverlayPanel = {
   cacheKey?: string;
@@ -75,6 +76,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
   const { cacheKey = 'overlay-panel-state', children, setSidebarOpen } = props;
   const [open, setOpen] = useState(false);
   const [showTooltip, setShowTooltip] = useState<boolean>(false);
+  const [isHover, setIsHover] = useState<boolean>(false);
   const hoverRef = useRef(null);
   const tooltipRef = useRef(null);
   const { width, enableResize } = useResize({ minWidth: 300 });
@@ -86,16 +88,9 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
     }
   }, []);
 
-  const [isHover, setIsHover] = useState<boolean>(false);
   useEventListener('mouseenter', () => setIsHover(true), hoverRef);
   useEventListener('mouseleave', () => setIsHover(false), hoverRef);
-  useEventListener(
-    'mouseenter',
-    () => {
-      setTimeout(() => setShowTooltip(true), 100);
-    },
-    tooltipRef,
-  );
+  useEventListener('mouseenter', () => setShowTooltip(true), tooltipRef);
   useEventListener('mouseleave', () => setShowTooltip(false), tooltipRef);
 
   const setOpenAndCache = (openValue: boolean) => {
@@ -123,15 +118,14 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
             {!open && isHover && <ChevronDoubleRightIcon className="h-6 w-6" aria-hidden="true" />}
           </button>
           {showTooltip && (
-            <div className="text-xs w-32 absolute flex flex-row items-center -right-32 z-10 py-2 px-3 font-medium text-white bg-gray-500 rounded-lg shadow-sm tooltip">
+            <div className={clsx('text-xs absolute flex flex-row items-center z-10 py-2 px-3 font-medium text-white bg-gray-500 rounded-lg shadow-sm tooltip', open ? '-right-24' : 'w-28 -right-28')}>
               <svg className="absolute -left-3 text-gray-500" width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path
                   className="stroke-gray-500 fill-gray-500"
                   d="M15 17.898C15 18.972 13.7351 19.546 12.9268 18.8388L6.61617 13.3169C5.81935 12.6197 5.81935 11.3801 6.61617 10.6829L12.9268 5.16108C13.7351 4.45388 15 5.02785 15 6.1018L15 17.898Z"
                 />
               </svg>
-              {open && 'Close sidebar'}
-              {!open && 'Lock sidebar open'}
+              {open ? 'Close sidebar' : 'Open sidebar'}
             </div>
           )}
         </div>
