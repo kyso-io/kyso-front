@@ -12,29 +12,27 @@ img.k-right-logo {
 }
 
 .k-bg-primary-hover:hover {
-  background-color: #162C40;
+  background-color: #162c40;
 }
 
 .k-bg-primary-disabled {
-  background-color: #64748b
+  background-color: #64748b;
 }
 
 .k-right-toc {
+  background-color: #fafafa;
   float: right;
-  position: fixed;
-  z-index: 2;
-  background-color: white;
-  opacity: .9;
-  width: 100%;
-  /*width: 41vh;
-  background-color: #FAFAFA;
   left: 78%;
-  padding: 13px;*/
+  padding: 13px;
+  position: fixed;
+  width: 41vh;
+  z-index: 2;
+  opacity: 0.9;
 }
 
 .k-edit-report-image:hover + .k-edit-report-badge {
   bottom: 0px;
-  background-color: #FAFAFA;
+  background-color: #fafafa;
   display: block;
   opacity: 0.8;
   pointer-events: none;
@@ -60,7 +58,6 @@ img.k-right-logo {
   color: rgb(107 114 128 / var(--tw-text-opacity));
 }
 /* END THEME */
-
 
 .p-mention {
   z-index: -1;

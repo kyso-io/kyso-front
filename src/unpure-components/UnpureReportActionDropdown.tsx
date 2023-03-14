@@ -76,7 +76,7 @@ const UnpureReportActionDropdown = (props: Props) => {
         backgroundColor={TailwindColor.SLATE_50}
         icon={<InformationCircleIcon className="h-6 w-6 text-rose-700" aria-hidden="true" />}
       />
-      <Menu as="div" className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm relative inline-block" style={{ zIndex: 1 }}>
+      <Menu as="div" className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm relative inline-block" style={{ zIndex: 3 }}>
         <Menu.Button className="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
           <span className="sr-only">Open options</span>
           <DotsVerticalIcon className="h-5 w-5" aria-hidden="true" />
