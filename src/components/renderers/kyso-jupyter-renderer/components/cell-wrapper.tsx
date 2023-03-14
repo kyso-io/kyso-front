@@ -4,7 +4,7 @@ import { useNavigateToHashOnce } from '@/hooks/use-navigate-to-hash-once';
 import type { CommonData } from '@/types/common-data';
 import { ChatAltIcon, CodeIcon, LinkIcon } from '@heroicons/react/outline';
 import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useHover } from 'usehooks-ts';
 import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
 import type { Cell as ICell } from '../interfaces/jupyter-notebook';
@@ -67,7 +67,17 @@ const CellWrapper = (props: Props) => {
 
   useNavigateToHashOnce({ active: true });
 
-  const showComments = cell?.id && cell.id.length > 0 && commentsShown;
+  const showIconComments: boolean = useMemo(() => {
+    /* eslint-disable no-prototype-builtins */
+    if (!cell.hasOwnProperty('id') || !cell.id) {
+      return false;
+    }
+    if (!commonData.user) {
+      // User is not logged, check if there are comments
+      return inlineCommentDtos.length > 0;
+    }
+    return true;
+  }, [commonData, cell]);
 
   // dont both showing the code button for cells without code
   const showCodeToggle = cell?.cell_type === 'code' && (cell.source.length > 0 || (cell?.outputs && cell.outputs.length > 0));
@@ -107,7 +117,7 @@ const CellWrapper = (props: Props) => {
             <button className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', 'hover:bg-gray-200')}>In: [{cell.execution_count}]</button>
           )}
 
-          {cell?.id && (
+          {showIconComments && (
             <button
               className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', commentsShown ? 'bg-gray-100 hover:bg-gray-200' : 'hover:bg-gray-50')}
               onClick={() => setCommentsShown(!commentsShown)}
@@ -139,7 +149,7 @@ const CellWrapper = (props: Props) => {
           )}
         </div>
 
-        {showComments && (
+        {commentsShown && (
           <PureInlineComments
             commonData={commonData}
             report={report}
