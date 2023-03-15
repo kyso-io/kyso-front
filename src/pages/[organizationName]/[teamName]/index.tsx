@@ -13,8 +13,8 @@ import type {
   Team,
   TeamInfoDto,
   TeamMember,
-  UserDTO,
   TeamsInfoQuery,
+  UserDTO,
 } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -132,6 +132,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [showEmails, setShowEmails] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [defaultRedirectOrganization, setDefaultRedirectOrganization] = useState<string>('');
 
   useEffect(() => {
     const getData = async () => {
@@ -144,6 +145,10 @@ const Index = ({ commonData, setUser }: Props) => {
         const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
         if (indexShowEmail !== -1) {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
+        }
+        const indexDefaultRedirectOrganization: number = publicKeys.findIndex((x: KeyValue) => x.key === KysoSettingsEnum.DEFAULT_REDIRECT_ORGANIZATION);
+        if (indexDefaultRedirectOrganization !== -1) {
+          setDefaultRedirectOrganization(publicKeys[indexDefaultRedirectOrganization]!.value);
         }
       } catch (errorHttp: any) {
         Helper.logError(errorHttp.response.data, errorHttp);
@@ -181,6 +186,8 @@ const Index = ({ commonData, setUser }: Props) => {
     if (!HelperPermissions.belongsToTeam(commonData, router.query.organizationName as string, router.query.teamName as string)) {
       if (commonData.token) {
         router.replace(`/${router.query.organizationName as string}`);
+      } else if (defaultRedirectOrganization) {
+        router.replace(`/${defaultRedirectOrganization}`);
       } else {
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}`)}`);
       }
