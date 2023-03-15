@@ -114,7 +114,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     const getData = async () => {
       if (!organizationName && !teamName && !commonData.token) {
         if (commonData.permissions!.organizations!.length === 0) {
-          // No public organizations availabld
+          // No public organizations available
           router.replace(`/login`);
           return;
         }
@@ -163,11 +163,9 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   };
 
   return (
-    <React.Fragment>
-      <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
-        {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
-      </PureKysoApplicationLayout>
-    </React.Fragment>
+    <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
+      {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
+    </PureKysoApplicationLayout>
   );
 };
 export default KysoApplicationLayout;

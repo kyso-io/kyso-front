@@ -90,6 +90,7 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Toc);
   const [showEmails, setShowEmails] = useState<boolean>(false);
+  const [defaultRedirectOrganization, setDefaultRedirectOrganization] = useState<string>('');
   const [show, setShow] = useState<boolean>(false);
   const [alertText, setAlertText] = useState<string>('');
   const [teamVisibility, setTeamVisibility] = useState<TeamVisibilityEnum | null>(null);
@@ -132,6 +133,10 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
         if (indexShowEmail !== -1) {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
+        }
+        const indexDefaultRedirectOrganization: number = publicKeys.findIndex((x: KeyValue) => x.key === KysoSettingsEnum.DEFAULT_REDIRECT_ORGANIZATION);
+        if (indexDefaultRedirectOrganization !== -1) {
+          setDefaultRedirectOrganization(publicKeys[indexDefaultRedirectOrganization]!.value);
         }
       } catch (errorHttp: any) {
         Helper.logError(errorHttp.response.data, errorHttp);
@@ -372,11 +377,13 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         // If have a token, I want to show a "You have no permission" page. Because if I redirect directly the user
         // don't know what the hell happened
         // router.replace(`/${router.query.organizationName as string}`);
+      } else if (defaultRedirectOrganization) {
+        router.replace(`/${defaultRedirectOrganization}`);
       } else {
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}/${router.query.reportName as string}`)}`);
       }
     }
-  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
+  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName, defaultRedirectOrganization]);
 
   // START TEAM MEMBERS
 
