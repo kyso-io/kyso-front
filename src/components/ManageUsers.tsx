@@ -116,7 +116,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
       return [];
     }
     return commonData.organization.allowed_access_domains || [];
-  }, []);
+  }, [commonData.organization]);
 
   const showErrorDomain: boolean = useMemo(() => {
     if (query && isEmail && isOrgAdmin && commonData.organization) {
