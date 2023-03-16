@@ -769,7 +769,7 @@ const ReportsSearchBar = ({ members, onFiltersChange, searchUser, user }: Report
       <Menu as="div" className="relative inline-block text-left w-full">
         <React.Fragment>
           <Menu.Button ref={buttonRef} className="w-full" onClick={onClickNewFilter}>
-            <div className="mt-1 relative flex items-center content-center w-full" style={{ zIndex: -1 }}>
+            <div className="mt-1 relative flex items-center content-center w-full">
               <div className="shadow-sm border w-full text-gray-400 p-2 items-center flex sm:text-sm border-gray-300 rounded-md" style={{ height: 40 }}>
                 {selectedFilters.length === 0 && 'Filter reports'}
               </div>

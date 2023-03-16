@@ -63,7 +63,7 @@ const RenderCsvTsvInfiniteScroll = ({ commonData, fileToRender }: Props) => {
         }
         setItems(items.concat(pr.data));
         setPage(page + 1);
-        setHasMore(true);
+        setHasMore(pr.data.length === OFFSET);
       } else {
         setHasMore(false);
       }
