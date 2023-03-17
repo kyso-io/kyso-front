@@ -23,6 +23,7 @@ import {
 // @ts-ignore
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
+import { Tooltip } from 'flowbite-react';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
@@ -1033,30 +1034,36 @@ const Index = ({ commonData, setUser }: Props) => {
                                   <PureAvatar src={team.avatar_url || ''} title={team.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
                                 </div>
                                 <div className="space-y-2 border-t py-4 px-2">
-                                  <ul role="list" className="flex justify-between space-x-5 cursor-pointer">
-                                    <li title="Reports">
-                                      <div className="flex items-center">
-                                        <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
-                                        <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                          {teamInfo.reports} reports
-                                        </span>
-                                      </div>
+                                  <ul role="list" className="flex justify-around space-x-5 cursor-pointer">
+                                    <li>
+                                      <Tooltip content="Reports" placement="bottom">
+                                        <div className="flex items-center relative">
+                                          <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
+                                          <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                            {teamInfo.reports}
+                                          </span>
+                                        </div>
+                                      </Tooltip>
                                     </li>
-                                    <li title="Members">
-                                      <div className="flex items-center">
-                                        <UserGroupIcon className="h-6 w-6 mr-1" fill="#F1AB7A" aria-hidden="true" />
-                                        <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                          {teamInfo.members}
-                                        </span>
-                                      </div>
+                                    <li>
+                                      <Tooltip content="Members" placement="bottom">
+                                        <div className="flex items-center">
+                                          <UserGroupIcon className="h-6 w-6 mr-1" fill="#F1AB7A" aria-hidden="true" />
+                                          <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                            {teamInfo.members}
+                                          </span>
+                                        </div>
+                                      </Tooltip>
                                     </li>
-                                    <li title="Comments">
-                                      <div className="flex items-center">
-                                        <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
-                                        <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                          {teamInfo.comments} comments
-                                        </span>
-                                      </div>
+                                    <li>
+                                      <Tooltip content="Comments" placement="bottom">
+                                        <div className="flex items-center">
+                                          <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
+                                          <span style={{ color: '#797A83' }} className="font-normal text-sm">
+                                            {teamInfo.comments}
+                                          </span>
+                                        </div>
+                                      </Tooltip>
                                     </li>
                                   </ul>
                                 </div>
