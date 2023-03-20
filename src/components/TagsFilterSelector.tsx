@@ -1,6 +1,6 @@
 import classNames from '@/helpers/class-names';
 import { Combobox } from '@headlessui/react';
-import { SelectorIcon, CheckIcon } from '@heroicons/react/solid';
+import { CheckIcon, SelectorIcon } from '@heroicons/react/solid';
 import { useState } from 'react';
 
 type ITagsFilterSelector = {
@@ -39,7 +39,7 @@ const TagsFilterSelector = (props: ITagsFilterSelector) => {
             onChange={(event) => {
               setQuery(event.target.value);
             }}
-            placeholder={selected.length > 0 ? selected.join(', ') : 'Add tags'}
+            placeholder="Filter by tags"
           />
           <Combobox.Button className="mx-3 absolute inset-y-0 right-0 flex items-center rounded-r-md px-2 focus:outline-none">
             <SelectorIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />

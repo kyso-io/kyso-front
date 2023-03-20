@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable tailwindcss/no-contradicting-classname */
 import ManageUsers from '@/components/ManageUsers';
 import PureComments from '@/components/PureComments';
 import PureReportHeader from '@/components/PureReportHeader';
@@ -19,10 +20,11 @@ import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ArrowSmDownIcon, CheckCircleIcon } from '@heroicons/react/solid';
-import type { Comment, File as KysoFile, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
+import { ArrowSmDownIcon, CheckCircleIcon, ClipboardCopyIcon } from '@heroicons/react/solid';
+import type { Comment, File as KysoFile, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO, GitCommit } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   CommentPermissionsEnum,
@@ -38,6 +40,7 @@ import {
   UserRoleDTO,
 } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
+import { format } from 'date-fns';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
@@ -76,6 +79,25 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
     report: reportData?.report ? reportData.report : null,
     commonData,
   });
+  const gitCommit: GitCommit | null = useMemo(() => {
+    if (!versions) {
+      return null;
+    }
+    if (versions.length === 0) {
+      return null;
+    }
+    if (version) {
+      const versionNumber: number = parseInt(version, 10);
+      const index: number = versions.findIndex((v) => v.version === versionNumber);
+      if (index === -1) {
+        return null;
+      }
+      return versions[index]?.git_commit || null;
+    }
+    return versions[0]?.git_commit || null;
+  }, [versions, version]);
+  const [copiedCommitSha, setCopiedCommitSha] = useState(false);
+  const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
   const channelMembers: TeamMember[] = useChannelMembers({ commonData });
   const allComments = useAppSelector((state) => state.comments.entities);
   const userEntities: User[] = useUserEntities();
@@ -773,6 +795,50 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
                               showEmails={showEmails}
                             />
                           </PureReportHeader>
+                          {gitCommit && (
+                            <div className="bg-gray-100 text-gray-500 rounded bg-slate-50">
+                              <div className="flex flex-row content-center items-center mt-2 p-4 text-sm text-slate-700">
+                                <FontAwesomeIcon
+                                  size="xl"
+                                  style={{
+                                    marginRight: 8,
+                                  }}
+                                  icon={faGithub}
+                                />
+                                <span className="grow">{gitCommit.message}</span>
+                                <div className="mt-1 sm:mt-0 sm:col-span-2">
+                                  <div className="max-w-lg flex rounded-md shadow-sm">
+                                    <input
+                                      defaultValue={gitCommit.hash.slice(0, 8)}
+                                      type="text"
+                                      disabled
+                                      className="flex-1 block focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-l-md sm:text-sm border-gray-300"
+                                      style={{ width: 100 }}
+                                    />
+                                    <button
+                                      type="button"
+                                      className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-500 sm:text-sm"
+                                      onClick={async () => {
+                                        navigator.clipboard.writeText(gitCommit.hash);
+                                        setCopiedCommitSha(true);
+                                        if (timeoutId != null) {
+                                          clearTimeout(timeoutId);
+                                        }
+                                        const t: NodeJS.Timeout = setTimeout(() => {
+                                          setCopiedCommitSha(false);
+                                        }, 3000);
+                                        setTimeoutId(t);
+                                      }}
+                                    >
+                                      {!copiedCommitSha && <ClipboardCopyIcon className="w-5 h-5" />}
+                                      {copiedCommitSha && 'Copied!'}
+                                    </button>
+                                  </div>
+                                </div>
+                                <span className="ml-1">on {format(new Date(gitCommit.date), 'MMM d, yyyy HH:mm')}</span>
+                              </div>
+                            </div>
+                          )}
                         </div>
 
                         <div className="border-y p-0 mx-4">

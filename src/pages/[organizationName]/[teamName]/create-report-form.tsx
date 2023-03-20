@@ -15,7 +15,7 @@ import { Menu, Transition } from '@headlessui/react';
 import { FolderAddIcon } from '@heroicons/react/outline';
 import { ArrowRightIcon, ExclamationCircleIcon, InformationCircleIcon, SelectorIcon } from '@heroicons/react/solid';
 import type { File as KysoFile, KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { KysoConfigFile, KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
+import { TeamVisibilityEnum, KysoConfigFile, KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import 'easymde/dist/easymde.min.css';
@@ -293,22 +293,24 @@ const CreateReport = ({ commonData, setUser }: Props) => {
   };
 
   const filterTags = async (query?: string) => {
-    const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
+    const api: Api = new Api(commonData.token);
+    api.setOrganizationSlug(commonData.organization!.sluglified_name);
     if (commonData.team) {
       api.setTeamSlug(commonData.team?.sluglified_name);
     }
-
-    interface QueryInterface {
-      filter?: {};
+    const queryObj: any = {
+      filter: {
+        organization_id: commonData.organization!.id,
+      },
+    };
+    if (commonData.team && commonData.team.visibility === TeamVisibilityEnum.PRIVATE) {
+      queryObj.filter.team_id = commonData.team.id;
     }
-    const queryObj: QueryInterface = {};
     if (query) {
-      queryObj.filter = { search: query };
+      queryObj.filter.search = query;
     }
-
     const result: NormalizedResponseDTO<Tag[]> = await api.getTags(queryObj);
-
-    setAllowedTags(result.data.map((t) => t.name));
+    setAllowedTags(result.data.map((t: Tag) => t.name));
   };
 
   useEffect(() => {

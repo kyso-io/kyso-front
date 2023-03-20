@@ -7,6 +7,7 @@ import { KysoSettingsEnum, OnboardingProgress } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import router from 'next/router';
 import { Fragment, useEffect, useState } from 'react';
+import type { KeyValue } from '../model/key-value.model';
 import PureCheckListPage from './PureChecklistPage';
 import PureCheckListTour from './PureCheckListTour';
 
@@ -110,10 +111,12 @@ const PureOnboardingDropdown = ({ user }: Props) => {
         const api: Api = new Api();
         const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
 
-        const onboardingMessagesValues = resultKysoSetting.data.find((x) => x.key === KysoSettingsEnum.ONBOARDING_MESSAGES)?.value!;
-
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        setOnboardingMessages(onboardingMessagesValues);
+        const onboardingMessagesKeyValue: KeyValue | undefined = resultKysoSetting.data.find((x: KeyValue) => x.key === KysoSettingsEnum.ONBOARDING_MESSAGES);
+        if (onboardingMessagesKeyValue?.value) {
+          try {
+            setOnboardingMessages(JSON.parse(onboardingMessagesKeyValue.value));
+          } catch (e) {}
+        }
       } catch (errorHttp: any) {
         Helper.logError(errorHttp.response.data, errorHttp);
       }

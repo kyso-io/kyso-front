@@ -16,8 +16,12 @@ const Footer = () => {
         return;
       }
 
-      const footercontents = await publicKeys.find((x: KeyValue) => x.key === 'FOOTER_CONTENTS').value!;
-      setContents(footercontents);
+      const footerContents: KeyValue | undefined = await publicKeys.find((x: KeyValue) => x.key === 'FOOTER_CONTENTS');
+      if (footerContents?.value) {
+        try {
+          setContents(JSON.parse(footerContents.value!));
+        } catch (e) {}
+      }
     };
     getFooterContents();
   }, []);
