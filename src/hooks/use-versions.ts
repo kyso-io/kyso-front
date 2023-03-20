@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import type { CommonData } from '@/types/common-data';
-import type { NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, ReportDTO, GitCommit } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
 import useSWR from 'swr';
@@ -16,6 +16,7 @@ export interface Version {
   created_at: Date;
   num_files: number;
   message: string;
+  git_commit: GitCommit;
 }
 
 const token: string | null = getLocalStorageItem('jwt');

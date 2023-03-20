@@ -185,7 +185,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
                 <ExternalLinkIcon className="ml-1 h-4 w-4" aria-hidden="true" />
               </button>
             )}
-            {fileToRender !== null && fileToRender.git_metadata !== null && <GitMetaDataDropdown fileToRender={fileToRender} />}
+            {fileToRender !== null && fileToRender.git_metadata !== null && fileToRender.git_metadata.repository && <GitMetaDataDropdown fileToRender={fileToRender} />}
             {showCloneDropDown && (
               <UnpureCloneDropdown
                 reportUrl={`${frontEndUrl}${reportUrl}`}
