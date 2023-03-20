@@ -13,7 +13,7 @@ import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { ArrowRightIcon, ExclamationCircleIcon, InformationCircleIcon, SelectorIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { KysoConfigFile, KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
+import { TeamVisibilityEnum, KysoConfigFile, KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import 'easymde/dist/easymde.min.css';
@@ -229,16 +229,21 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
   };
 
   const filterTags = async (query?: string) => {
-    const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
+    const api: Api = new Api(commonData.token);
+    api.setOrganizationSlug(commonData.organization!.sluglified_name);
     if (commonData.team) {
       api.setTeamSlug(commonData.team?.sluglified_name);
     }
-    interface QueryInterface {
-      filter?: {};
+    const queryObj: any = {
+      filter: {
+        organization_id: commonData.organization!.id,
+      },
+    };
+    if (commonData.team && commonData.team.visibility === TeamVisibilityEnum.PRIVATE) {
+      queryObj.filter.team_id = commonData.team.id;
     }
-    const queryObj: QueryInterface = {};
     if (query) {
-      queryObj.filter = { search: query };
+      queryObj.filter.search = query;
     }
     const result: NormalizedResponseDTO<Tag[]> = await api.getTags(queryObj);
     setAllowedTags(result.data.map((t: Tag) => t.name));
@@ -409,7 +414,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
                         setOpenChannelDropdown(!openChannelDropdown);
                       }}
                       className={clsx(
-                        'border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded',
+                        'border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded',
                         isEdition() ? 'bg-slate-300' : 'bg-white hover:bg-gray-100',
                       )}
                     >
@@ -504,7 +509,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
                 <div>
                   <Menu as="div" className="relative w-fit inline-block text-left mr-4" style={{ position: 'relative', bottom: '35px' }}>
                     <Menu.Button
-                      className="hover:bg-gray-100 border-y border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded"
+                      className="hover:bg-gray-100 border p-2 flex items-center w-fit text-sm text-left font-medium text-gray-700 hover:outline-none rounded"
                       onClick={() => {
                         setOpenProtocolDropdown(!openProtocolDropdown);
                       }}

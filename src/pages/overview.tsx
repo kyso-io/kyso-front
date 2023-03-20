@@ -159,9 +159,12 @@ const Index = () => {
         return;
       }
 
-      const onboardingMessagesValues = publicKeys.find((x) => x.key === KysoSettingsEnum.ONBOARDING_MESSAGES)?.value!;
-
-      setOnboardingMessages(onboardingMessagesValues);
+      const onboardingMessagesKeyValue: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.ONBOARDING_MESSAGES);
+      if (onboardingMessagesKeyValue?.value) {
+        try {
+          setOnboardingMessages(JSON.parse(onboardingMessagesKeyValue.value));
+        } catch (e) {}
+      }
     };
 
     getOrganizationOptions();
