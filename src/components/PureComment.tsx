@@ -154,7 +154,7 @@ const PureComment = (props: IPureComment) => {
         </div>
       )}
       {comment && isReplying && commonData.user && (
-        <div>
+        <div style={{ position: 'relative' }}>
           <PureCommentForm
             user={commonData.user}
             report={report}
