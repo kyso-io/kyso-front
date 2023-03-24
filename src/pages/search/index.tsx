@@ -7,15 +7,23 @@ import { Helper } from '@/helpers/Helper';
 import type { FullTextSearchParams } from '@/interfaces/full-text-search-params';
 import type { SearchNavItem } from '@/interfaces/search-nav-item';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import { Popover } from '@headlessui/react';
+import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/solid';
 import type { FullTextSearchDTO, FullTextSearchResult, FullTextSearchResultType, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { ElasticSearchIndex } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type { CommonData } from '../../types/common-data';
 
-const fetchData = async (commonData: CommonData, params: FullTextSearchParams, cb: (fullTextSearchDTO: FullTextSearchDTO | null) => void) => {
+interface FilteredFullTextSearchResultType {
+  result: FullTextSearchResult | null;
+  subResults: number;
+}
+
+const debouncedFetchData = debounce(async (commonData: CommonData, params: FullTextSearchParams, cb: (result: any) => void) => {
   try {
     const api: Api = new Api(commonData.token);
     const resultFullTextSearchDto: NormalizedResponseDTO<FullTextSearchDTO> = await api.fullTextSearch({ ...params, terms: encodeURIComponent(params.terms) });
@@ -24,11 +32,6 @@ const fetchData = async (commonData: CommonData, params: FullTextSearchParams, c
     Helper.logError(e.response.data, e);
     cb(null);
   }
-};
-
-/* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-const debouncedFetchData = debounce((commonData: CommonData, params: FullTextSearchParams, cb: (result: any) => void) => {
-  fetchData(commonData, params, cb);
 }, 750);
 
 interface Props {
@@ -49,15 +52,101 @@ const SearchIndex = ({ commonData }: Props) => {
     filterTeams: [],
     filterTags: [],
     filterPeople: [],
+    filterFileTypes: [],
+    orderBy: '_score',
+    order: 'desc',
+  });
+  const [selectedOrderOption, setSelectedOrderOption] = useState<{ label: string; orderBy: string; order: string }>({
+    label: 'Best match',
+    orderBy: '_score',
+    order: 'desc',
   });
   const [navigation, setNavigation] = useState<SearchNavItem[]>([]);
   const [fullTextSearchResultType, setFullTextSearchResultType] = useState<FilteredFullTextSearchResultType[] | null>(null);
   const [rawResults, setRawResults] = useState<FullTextSearchResultType | null>(null);
+  const numResults: number = useMemo(() => {
+    if (!fullTextSearchDTO) {
+      return 0;
+    }
+    switch (fullTextSearchParams.type) {
+      case ElasticSearchIndex.Report:
+        return fullTextSearchDTO.reports.metadata.total;
+      case ElasticSearchIndex.Discussion:
+        return fullTextSearchDTO.discussions.metadata.total;
+      case ElasticSearchIndex.Comment:
+        return fullTextSearchDTO.comments.metadata.total;
+      default:
+        return 0;
+    }
+  }, [fullTextSearchParams, fullTextSearchDTO]);
+  const sortOptions: { label: string; orderBy: string; order: string }[] = useMemo(() => {
+    const data: { label: string; orderBy: string; order: string }[] = [
+      {
+        label: 'Best match',
+        orderBy: 'score',
+        order: 'desc',
+      },
+    ];
+    switch (fullTextSearchParams.type) {
+      case ElasticSearchIndex.Report:
+        data.push(
+          ...[
+            {
+              label: 'Most stars',
+              orderBy: 'stars',
+              order: 'desc',
+            },
+            {
+              label: 'Fewest stars',
+              orderBy: 'stars',
+              order: 'asc',
+            },
+            {
+              label: 'Most comments',
+              orderBy: 'numComments',
+              order: 'desc',
+            },
+            {
+              label: 'Fewest comments',
+              orderBy: 'numComments',
+              order: 'asc',
+            },
+          ],
+        );
+        break;
+      case ElasticSearchIndex.Discussion:
+        break;
+      case ElasticSearchIndex.Comment:
+        break;
+      case ElasticSearchIndex.User:
+        break;
+      default:
+        break;
+    }
+    data.push(
+      ...[
+        {
+          label: 'Recently updated',
+          orderBy: 'updatedAt',
+          order: 'desc',
+        },
+        {
+          label: 'Least recently updated',
+          orderBy: 'updatedAt',
+          order: 'asc',
+        },
+      ],
+    );
+    return data;
+  }, [fullTextSearchParams.type]);
 
-  interface FilteredFullTextSearchResultType {
-    result: FullTextSearchResult | null;
-    subResults: number;
-  }
+  useEffect(() => {
+    setSelectedOrderOption({
+      label: 'Best match',
+      orderBy: '_score',
+      order: 'desc',
+    });
+  }, [fullTextSearchParams.type]);
 
   const keepOnlyLatestVersions = (results: FullTextSearchResultType): FilteredFullTextSearchResultType[] => {
     const map = new Map<string, FilteredFullTextSearchResultType>();
@@ -101,11 +190,25 @@ const SearchIndex = ({ commonData }: Props) => {
     }
     if (fullTextSearchParams.type === ElasticSearchIndex.Discussion) {
       setRawResults(fullTextSearchDTO.discussions);
-      setFullTextSearchResultType(keepOnlyLatestVersions(fullTextSearchDTO.discussions));
+      setFullTextSearchResultType(
+        fullTextSearchDTO.discussions.results.map((x: FullTextSearchResult) => {
+          return {
+            result: x,
+            subResults: 1,
+          };
+        }),
+      );
     }
     if (fullTextSearchParams.type === ElasticSearchIndex.Comment) {
       setRawResults(fullTextSearchDTO.comments);
-      setFullTextSearchResultType(keepOnlyLatestVersions(fullTextSearchDTO.comments));
+      setFullTextSearchResultType(
+        fullTextSearchDTO.comments.results.map((x: FullTextSearchResult) => {
+          return {
+            result: x,
+            subResults: 1,
+          };
+        }),
+      );
     }
   }, [fullTextSearchDTO]);
 
@@ -152,9 +255,24 @@ const SearchIndex = ({ commonData }: Props) => {
     });
   };
 
+  const onFiltersChanged = (filterOrgs: string[], filterTeams: string[], filterPeople: string[], filterFileTypes: string[], filterTags: string[]) => {
+    setFullTextSearchParams({
+      ...fullTextSearchParams,
+      filterOrgs: filterOrgs.map((x: string) => encodeURIComponent(x)),
+      filterTeams: filterTeams.map((x: string) => encodeURIComponent(x)),
+      filterPeople: filterPeople.map((x: string) => encodeURIComponent(x)),
+      filterFileTypes: filterFileTypes.map((x: string) => encodeURIComponent(x)),
+      filterTags: filterTags.map((x: string) => encodeURIComponent(x)),
+      page: 1,
+    });
+  };
+
   return (
     <div className="grid grid-cols-4 gap-4 m-4">
       <SearchNavigation
+        commonData={commonData}
+        fullTextSearchDTO={fullTextSearchDTO}
+        onFiltersChanged={onFiltersChanged}
         navigation={navigation}
         elasticSearchIndex={fullTextSearchParams.type}
         onSelectedNavItem={(type: ElasticSearchIndex) => setFullTextSearchParams({ ...fullTextSearchParams, type, page: 1 })}
@@ -172,6 +290,65 @@ const SearchIndex = ({ commonData }: Props) => {
             /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
             onChange={(e: any) => setFullTextSearchParams({ ...fullTextSearchParams, terms: e.target.value, page: 1 })}
           />
+          {fullTextSearchDTO && (
+            <div className="flex flex-row items-center my-4 ml-3 text-xs">
+              <span>
+                {Helper.formatNumber(numResults)} {numResults === 1 ? 'result' : 'results'}
+              </span>
+              <Popover className="relative">
+                {({ open, close }) => (
+                  <React.Fragment>
+                    <Popover.Button className="focus:ring-0 focus:outline-none">
+                      <div className="flex flex-row items-center cursor-pointer ml-10" style={{ width: 'fit-content' }}>
+                        <span className="mr-2">Sort by:</span>
+                        <span className="mr-2 font-semibold">{selectedOrderOption.label}</span>
+                        {open ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+                      </div>
+                    </Popover.Button>
+                    <Popover.Panel className="min-w-[300px] origin-top-right absolute right-50 mt-2 rounded-md shadow-lg bg-white border focus:outline-none z-10">
+                      <ul role="list" className="divide-y divide-gray-200">
+                        <li className="relative bg-white py-2 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+                          <div className="flex justify-between">
+                            <span className="block focus:outline-none">
+                              <span className="absolute inset-0" aria-hidden="true" />
+                              <p className="truncate text-base font-medium text-gray-900">Sort options</p>
+                            </span>
+                          </div>
+                        </li>
+                        {sortOptions.map(({ label, orderBy, order }, index: number) => (
+                          <li
+                            key={index}
+                            onClick={() => {
+                              setSelectedOrderOption({ label, orderBy, order });
+                              setFullTextSearchParams({
+                                ...fullTextSearchParams,
+                                orderBy,
+                                order: order as any,
+                                page: 1,
+                              });
+                              close();
+                            }}
+                            className={clsx(
+                              'relative bg-white py-2.5 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 cursor-pointer',
+                              selectedOrderOption.orderBy === orderBy && selectedOrderOption.order === order ? 'hover:bg-blue-600 hover:text-white' : 'hover:bg-gray-50',
+                            )}
+                          >
+                            <div className={clsx('flex', selectedOrderOption.orderBy === orderBy && selectedOrderOption.order === order ? 'flex-row items-center' : 'justify-between pl-5')}>
+                              {selectedOrderOption.orderBy === orderBy && selectedOrderOption.order === order && <CheckIcon className="w-4 h-4 mr-2" />}
+                              <span className="block focus:outline-none">
+                                <span className="absolute inset-0" aria-hidden="true" />
+                                <p className={clsx('truncate text-sm')}>{label}</p>
+                              </span>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </Popover.Panel>
+                  </React.Fragment>
+                )}
+              </Popover>
+            </div>
+          )}
         </div>
         {/* SEARCH RESULTS */}
         {requesting ? (
@@ -190,7 +367,7 @@ const SearchIndex = ({ commonData }: Props) => {
         ) : !fullTextSearchDTO || !fullTextSearchResultType ? (
           <div className="bg-white py-4 text-center text-base text-gray-600 hover:text-gray-900">No results found</div>
         ) : (
-          <div className="py-6">
+          <div className="">
             {fullTextSearchResultType.length === 0 ? (
               <div className="bg-white py-4 text-center text-base text-gray-600 hover:text-gray-900">No results found</div>
             ) : (

@@ -165,4 +165,199 @@ export class Helper {
   public static roundTwoDecimals = (value: number): number => {
     return Math.round((value + Number.EPSILON) * 100) / 100;
   };
+
+  public static getFileNameGivenExtension(extension: string): string {
+    switch (extension) {
+      case 'ipynb':
+        return 'Jupyter Notebook';
+      case 'py':
+        return 'Python';
+      case 'rmd':
+        return 'R Markdown';
+      case 'md':
+        return 'Markdown';
+      case 'html':
+        return 'HTML';
+      case 'csv':
+        return 'CSV';
+      case 'tsv':
+        return 'TSV';
+      case 'json':
+        return 'JSON';
+      case 'txt':
+        return 'Text';
+      case 'pdf':
+        return 'PDF';
+      case 'docx':
+        return 'Word';
+      case 'xlsx':
+        return 'Excel';
+      case 'pptx':
+        return 'PowerPoint';
+      case 'zip':
+        return 'Zip';
+      case 'gz':
+        return 'Gzip';
+      case 'tar':
+        return 'Tar';
+      case 'tgz':
+        return 'Tgz';
+      case 'bz2':
+        return 'Bz2';
+      case 'tbz2':
+        return 'Tbz2';
+      case 'xz':
+        return 'Xz';
+      case 'txz':
+        return 'Txz';
+      case '7z':
+        return '7z';
+      case 'rar':
+        return 'Rar';
+      case 'rtf':
+        return 'RTF';
+      case 'odt':
+        return 'Open Document Text';
+      case 'ods':
+        return 'Open Document Spreadsheet';
+      case 'odp':
+        return 'Open Document Presentation';
+      case 'odg':
+        return 'Open Document Drawing';
+      case 'odc':
+        return 'Open Document Chart';
+      case 'odf':
+        return 'Open Document Formula';
+      case 'odb':
+        return 'Open Document Database';
+      case 'odi':
+        return 'Open Document Image';
+      case 'odm':
+        return 'Open Document Master Document';
+      case 'ott':
+        return 'Open Document Text Template';
+      case 'ots':
+        return 'Open Document Spreadsheet Template';
+      case 'otp':
+        return 'Open Document Presentation Template';
+      case 'otg':
+        return 'Open Document Drawing Template';
+      case 'otc':
+        return 'Open Document Chart Template';
+      case 'otf':
+        return 'Open Document Formula Template';
+      case 'otb':
+        return 'Open Document Database Template';
+      case 'oti':
+        return 'Open Document Image Template';
+      case 'oth':
+        return 'Open Document Web Page Template';
+      case 'doc':
+        return 'Word';
+      case 'xls':
+        return 'Excel';
+      case 'ppt':
+        return 'PowerPoint';
+      case 'jpg':
+        return 'JPG';
+      case 'jpeg':
+        return 'JPEG';
+      case 'png':
+        return 'PNG';
+      case 'gif':
+        return 'GIF';
+      case 'bmp':
+        return 'BMP';
+      case 'tif':
+        return 'TIF';
+      case 'tiff':
+        return 'TIFF';
+      case 'svg':
+        return 'SVG';
+      case 'webp':
+        return 'WebP';
+      case 'ico':
+        return 'ICO';
+      case 'mp3':
+        return 'MP3';
+      case 'wav':
+        return 'WAV';
+      case 'ogg':
+        return 'OGG';
+      case 'mp4':
+        return 'MP4';
+      case 'mov':
+        return 'MOV';
+      case 'avi':
+        return 'AVI';
+      case 'wmv':
+        return 'WMV';
+      case 'flv':
+        return 'FLV';
+      case 'mkv':
+        return 'MKV';
+      case 'mpg':
+        return 'MPG';
+      case 'mpeg':
+        return 'MPEG';
+      case 'm4v':
+        return 'M4V';
+      case '3gp':
+        return '3GP';
+      case '3g2':
+        return '3G2';
+      case 'webm':
+        return 'WebM';
+      case 'swf':
+        return 'SWF';
+      case 'psd':
+        return 'PSD';
+      case 'ai':
+        return 'AI';
+      case 'eps':
+        return 'EPS';
+      case 'ps':
+        return 'PS';
+      case 'ttf':
+        return 'TTF';
+      case 'woff':
+        return 'WOFF';
+      case 'woff2':
+        return 'WOFF2';
+      case 'eot':
+        return 'EOT';
+      case 'sfnt':
+        return 'SFNT';
+      case 'css':
+        return 'CSS';
+      case 'js':
+        return 'JavaScript';
+      case 'jsx':
+        return 'JSX';
+      case 'ts':
+        return 'TypeScript';
+      case 'tsx':
+        return 'TSX';
+      case 'c':
+        return 'C';
+      case 'cpp':
+        return 'C++';
+      case 'cs':
+        return 'C#';
+      case 'h':
+        return 'H';
+      case 'java':
+        return 'Java';
+      case 'm':
+        return 'Objective-C';
+      case 'mm':
+        return 'Objective-C++';
+      case 'rb':
+        return 'Ruby';
+      case '':
+        return 'Unknown';
+      default:
+        return extension;
+    }
+  }
 }
