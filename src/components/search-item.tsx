@@ -1,8 +1,11 @@
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
+import { ChatIcon, ThumbUpIcon } from '@heroicons/react/outline';
 import type { FullTextSearchResult } from '@kyso-io/kyso-model';
 import { ElasticSearchIndex } from '@kyso-io/kyso-model';
+import moment from 'moment';
 import { useRouter } from 'next/router';
+import React from 'react';
 
 interface Props {
   fullTextSearchResult: FullTextSearchResult;
@@ -30,21 +33,20 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
   };
 
   return (
-    <>
+    <React.Fragment>
       <style>{`
         em {
           font-weight: bolder
         }
       `}</style>
-
-      <li className="mb-4 relative bg-white py-5 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
+      <li className="relative bg-white py-5 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
         <div className="flex justify-between space-x-3">
           <div className="min-w-0 flex-1">
             <a href={`${basePath}${fullTextSearchResult.link}`} className="block focus:outline-none">
               <span className="absolute inset-0" aria-hidden="true"></span>
               {fullTextSearchResult.type !== ElasticSearchIndex.Comment && (
                 <>
-                  <p className="text-sm mb-2 font-medium text-gray-900 truncate">
+                  <div className="text-sm mb-2 font-medium text-gray-900 truncate">
                     {FileTypesHelper.isPowerpoint(fullTextSearchResult.filePath) ? (
                       <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/powerpoint.svg`} alt="Powerpoint File" />
                     ) : (
@@ -107,7 +109,7 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
                         )}
                       </div>
                     }
-                  </p>
+                  </div>
                 </>
               )}
 
@@ -144,12 +146,22 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
             </a>
           </div>
         </div>
-        {/* Content show */}
-        <div className="mt-2">
-          <p className="line-clamp-2 text-sm text-gray-600" style={{ whiteSpace: 'pre-line' }} dangerouslySetInnerHTML={{ __html: fullTextSearchResult.content }}></p>
+        <div className="mt-2 mb-4">
+          <div className="line-clamp-2 text-sm text-gray-600" style={{ whiteSpace: 'pre-line' }} dangerouslySetInnerHTML={{ __html: fullTextSearchResult.content }} />
+        </div>
+        <div className="flex items-center text-gray-500 text-xs">
+          <span className="hidden lg:block pr-3">{moment(fullTextSearchResult.updatedAt / 1000, 'X').format('MMMM DD, YYYY HH:mm')}</span>
+          {fullTextSearchResult.type === ElasticSearchIndex.Report && (
+            <div className="grow flex flex-row items-center text-gray-500 text-xs space-x-2">
+              <ChatIcon className="hidden lg:block shrink-0 h-5 w-5 text-orange-500" />
+              <span className="hidden lg:block">{fullTextSearchResult.numComments}</span>
+              <ThumbUpIcon className="shrink-0 h-5 w-5 text" color={fullTextSearchResult.stars > 0 ? '#4f46e5' : ''} />
+              <span>{fullTextSearchResult.stars}</span>
+            </div>
+          )}
         </div>
       </li>
-    </>
+    </React.Fragment>
   );
 };
 
