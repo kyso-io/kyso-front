@@ -89,6 +89,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [bio, setBio] = useState<string>('');
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
+  const [inputDeleteUser, setInputDeleteUser] = useState<string>('');
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
     return HelperPermissions.checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || HelperPermissions.checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
@@ -398,6 +399,7 @@ const Index = ({ commonData, setUser }: Props) => {
       getTeamMembers();
       setOpenDeleteMemberModal(false);
       setSelectedMember(null);
+      setInputDeleteUser('');
     } catch (e) {
       Helper.logError('Unexpected error', e);
     }
@@ -1442,13 +1444,25 @@ const Index = ({ commonData, setUser }: Props) => {
                         <p className="text-sm text-gray-500">
                           The user <strong>{selectedMember?.display_name}</strong> will be removed from the team <strong>{commonData.team?.sluglified_name}</strong>. This action cannot be undone.
                         </p>
+                        <p className="text-sm text-gray-500 my-3">
+                          Please type <strong>{selectedMember?.username}</strong> in the text box before confirming.
+                        </p>
+                        <input
+                          value={inputDeleteUser}
+                          type="text"
+                          onChange={(e) => setInputDeleteUser(e.target.value)}
+                          className="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+                        />
                       </div>
                     </div>
                   </div>
                   <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                     <button
                       type="button"
-                      className="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
+                      className={clsx(
+                        'inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm',
+                        inputDeleteUser !== selectedMember?.username ? 'bg-red-400 hover:bg-red-400 focus:ring-red-400 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700 focus:ring-red-900',
+                      )}
                       onClick={removeMember}
                     >
                       Remove
