@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import type { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import clsx from 'clsx';
@@ -13,6 +14,7 @@ interface Props {
   className?: string;
   tooltip?: boolean;
   username?: string;
+  style?: any;
 }
 
 const getInitials = (str: string) => {
@@ -50,6 +52,7 @@ const PureAvatar = (props: Props) => {
               `avatar-tooltip object-cover inline-block text-${props.textSize} h-${props.size} w-${props.size} rounded-full ring-0 border transition duration-100 ${props.className}`,
               isLoaded ? '' : 'invisible',
             )}
+            style={props.style}
             src={props.src}
             alt={props.title}
             data-pr-tooltip={props.title}
@@ -70,6 +73,7 @@ const PureAvatar = (props: Props) => {
             `avatar-tooltip object-cover inline-block text-${props.textSize} h-${props.size} w-${props.size} rounded-full ring-0 border transition duration-100 ${props.className}`,
             isLoaded ? '' : 'invisible',
           )}
+          style={props.style}
           src={props.src}
           alt={props.title}
           data-pr-tooltip={props.title}
@@ -81,6 +85,7 @@ const PureAvatar = (props: Props) => {
         <a href={`/user/${props.username}`}>
           <div
             className={`avatar-tooltip bg-white text-gray-600 flex items-center justify-center text-${props.textSize} h-${props.size} w-${props.size} rounded-full border ${props.className}`}
+            style={props.style}
             data-pr-tooltip={props.title}
             data-pr-position="bottom"
           >
@@ -91,6 +96,7 @@ const PureAvatar = (props: Props) => {
       {props.src && isError && !props.username && (
         <div
           className={`avatar-tooltip bg-white text-gray-600 flex items-center justify-center text-${props.textSize} h-${props.size} w-${props.size} rounded-full border ${props.className}`}
+          style={props.style}
           data-pr-tooltip={props.title}
           data-pr-position="bottom"
         >
@@ -101,6 +107,7 @@ const PureAvatar = (props: Props) => {
         // W-SIZE is a super-set of H-SIZE, so no problem there...
         <span
           className={`avatar-tooltip inline-flex items-center justify-center h-${props.size} w-${props.size} rounded-full bg-gray-200 hover:scale-110 transition duration-100 ${props.className}`}
+          style={props.style}
           data-pr-tooltip={props.title}
           data-pr-position="bottom"
         >

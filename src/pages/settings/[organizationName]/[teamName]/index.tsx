@@ -741,7 +741,7 @@ const Index = ({ commonData, setUser }: Props) => {
                   <div className="space-y-6 sm:space-y-5 my-5">
                     <div className="sm:grid sm:grid-cols-3 sm:items-center sm:gap-4 sm:pt-5">
                       <label className="block text-sm font-medium leading-6 text-gray-900">Photo</label>
-                      <div className="mt-2 sm:col-span-2 sm:mt-0">
+                      <div className="flex items-center">
                         {(commonData.team?.avatar_url === null || commonData.team?.avatar_url === '') && file === null && (
                           <span className="h-12 w-12 overflow-hidden rounded-full bg-gray-100">
                             <svg className="h-full w-full text-gray-300" fill="currentColor" viewBox="0 0 24 24">
