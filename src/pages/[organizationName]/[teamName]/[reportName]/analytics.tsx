@@ -722,9 +722,9 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
                 </div>
               </div>
             ) : (
-              <div className="py-4 px-8">
+              <div className="py-4 px-8 border-y">
                 <h1 className="text-3xl font-bold text-gray-900 my-4">Analytics</h1>
-                <div className="flex flex-col items-center space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4">
+                <div className="flex flex-col items-center space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4" style={{ position: 'relative', zIndex: -1 }}>
                   <div className="w-full py-4 px-8 bg-white rounded-xl drop-shadow-md flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-500">Total Shares</p>
