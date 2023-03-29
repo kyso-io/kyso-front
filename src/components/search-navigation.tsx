@@ -149,7 +149,9 @@ const SearchNavigation = ({ commonData, fullTextSearchDTO, onFiltersChanged, nav
           ) : null}
         </a>
       ))}
-      {fullTextSearchDTO && (
+      {/* As all the reports are in a channel (100%), if there are no available channels means that there are no results at all
+          and then, we can hide the Advanced Search */}
+      {fullTextSearchDTO && availableChannels.length > 0 && (
         <React.Fragment>
           <div className="" style={{ marginTop: 20 }}>
             <h3 className="text-slate-500 text-xl font-semibold mt-2 pb-2">Advanced search</h3>
