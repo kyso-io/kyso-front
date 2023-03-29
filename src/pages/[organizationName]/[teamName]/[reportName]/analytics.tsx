@@ -725,26 +725,26 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
               <div className="py-4 px-8 border-y">
                 <h1 className="text-3xl font-bold text-gray-900 my-4">Analytics</h1>
                 <div className="flex flex-col items-center space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4" style={{ position: 'relative', zIndex: -1 }}>
-                  <div className="w-full py-4 px-8 bg-white rounded-xl drop-shadow-md flex items-center justify-between">
+                  <div className="w-full py-4 px-8 bg-white rounded-xl flex items-center justify-between" style={{ border: '1px solid #3497FD' }}>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Total Shares</p>
                       <p className="text-2xl font-bold text-gray-900">{Helper.formatNumber(reportAnalytics?.shares.count)}</p>
                     </div>
                   </div>
-                  <div className="w-full py-4 px-8 bg-white rounded-xl drop-shadow-md flex items-center justify-between">
+                  <div className="w-full py-4 px-8 bg-white rounded-xl flex items-center justify-between" style={{ border: '1px solid #F2B705' }}>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Total Downloads</p>
                       <p className="text-2xl font-bold text-gray-900">{Helper.formatNumber(reportAnalytics?.downloads.count)}</p>
                     </div>
                   </div>
-                  <div className="w-full py-4 px-8 bg-white rounded-xl drop-shadow-md flex items-center justify-between">
+                  <div className="w-full py-4 px-8 bg-white rounded-xl flex items-center justify-between" style={{ border: '1px solid #3ACCE1' }}>
                     <div>
                       <p className="text-sm font-medium text-gray-500">Total Views</p>
                       <p className="text-2xl font-bold text-gray-900">{Helper.formatNumber(reportAnalytics?.views.count)}</p>
                     </div>
                   </div>
                 </div>
-                <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8">
+                <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8 ">
                   <div className="flex flex-col w-full">
                     <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Who visited this report</h2>
                     <ul role="list" className="">
