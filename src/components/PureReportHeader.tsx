@@ -13,6 +13,8 @@ import clsx from 'clsx';
 import format from 'date-fns/format';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
+import ReadMoreReact from 'read-more-react';
+import { Helper } from '../helpers/Helper';
 import { isReportDownloadable } from '../helpers/is-report-downloadable';
 import type { FileToRender } from '../types/file-to-render';
 import GitMetaDataDropdown from './GitMetaDataDropdown';
@@ -44,8 +46,6 @@ declare global {
   }
 }
 
-const MAX_LENGTH_DESCRIPTION: number = 400;
-
 const PureReportHeader = (props: IPureReportHeaderProps) => {
   const {
     report,
@@ -63,13 +63,6 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
     onSetFileAsMainFile,
     setUser,
   } = props;
-
-  const description: string = useMemo(() => {
-    if (report?.description && report.description.length > MAX_LENGTH_DESCRIPTION) {
-      return `${report.description.substring(0, MAX_LENGTH_DESCRIPTION)}...`;
-    }
-    return report?.description ? report.description : '';
-  }, [report.description]);
 
   const showCloneDropDown: boolean = useMemo(() => {
     if (!commonData.permissions) {
@@ -99,12 +92,12 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
   } else {
     window.svsFileParam = null;
   }
-  // <a href={`/user/${user.username}`}
+
   return (
     <div className="w-full flex 2xl:flex-row lg:flex-col justify-between p-2">
       <div className="2xl:w-4/6 flex flex-col justify-between">
         <h1 className="text-2xl font-medium break-words">{report?.title}</h1>
-        {description && <div className="text-sm break-words">{description}</div>}
+        {report?.description && Helper.isBrowser() && <ReadMoreReact text={report.description} ideal={200} readMoreText="Read more..." className="text-sm break-words" />}
         <div className="mt-3 flex text-sm flex-col lg:flex-row lg:items-top text-gray-500 font-light space-x-2 min-h-min">
           <div className="flex">
             <PureAvatarGroup data={authors} size={TailwindHeightSizeEnum.H8} tooltip={true} avatarAsLink={true}></PureAvatarGroup>
