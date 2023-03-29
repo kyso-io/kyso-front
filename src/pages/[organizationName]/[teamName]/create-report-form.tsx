@@ -617,14 +617,6 @@ const CreateReport = ({ commonData, setUser }: Props) => {
           />
         )}
 
-        {captchaIsEnabled && loggedUserShowCaptcha && (
-          <PureAlert
-            title="Captcha not solved"
-            description="As far as we know, we can't differenciate you from a bot :P. Please solve the captcha before pushing new content into Kyso."
-            type={PureAlertTypeEnum.WARNING}
-          />
-        )}
-
         <div className="flex flex-row items-center">
           <div className="w-1/6"></div>
           <div className="w-4/6">

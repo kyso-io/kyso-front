@@ -324,7 +324,8 @@ const SearchNavigation = ({ commonData, fullTextSearchDTO, onFiltersChanged, nav
               )}
             </div>
           </div>
-          {elasticSearchIndex === ElasticSearchIndex.Report && (
+          {/* TAGS */}
+          {elasticSearchIndex === ElasticSearchIndex.Report && availableTags.length > 0 && (
             <div className="mt-2 text-sm" style={{ marginTop: 20, borderBottom: '1px solid #e5e7eb' }}>
               <div className="font-semibold">Tags</div>
               <div className="flex flex-wrap py-3">

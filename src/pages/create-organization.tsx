@@ -43,7 +43,6 @@ const Index = ({ commonData, setUser }: Props) => {
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
-  const [loggedUserShowCaptcha, setLoggedUserShowCaptcha] = useState<boolean>(true);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -87,7 +86,6 @@ const Index = ({ commonData, setUser }: Props) => {
   useEffect(() => {
     if (commonData.user) {
       setLoggedUserEmailVerified(commonData.user.email_verified);
-      setLoggedUserShowCaptcha(commonData.user.show_captcha);
     }
   }, [commonData.user]);
 
@@ -163,13 +161,6 @@ const Index = ({ commonData, setUser }: Props) => {
               <PureAlert
                 title="Account not verified"
                 description="Your account has not been verified yet. Please check your inbox, verify your account and refresh this page."
-                type={PureAlertTypeEnum.WARNING}
-              />
-            )}
-            {captchaIsEnabled && loggedUserShowCaptcha && (
-              <PureAlert
-                title="Captcha not solved"
-                description="As far as we know, we can't differenciate you from a bot :P. Please solve the captcha before pushing new content into Kyso."
                 type={PureAlertTypeEnum.WARNING}
               />
             )}

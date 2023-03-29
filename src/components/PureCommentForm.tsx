@@ -131,7 +131,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
             suggestions={suggestions}
             className="relative"
             inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm "
-            panelClassName="absolute bg-white border rounded"
+            panelClassName="bg-white border rounded"
             autoHighlight
             onSearch={onSearch}
             name="input"
