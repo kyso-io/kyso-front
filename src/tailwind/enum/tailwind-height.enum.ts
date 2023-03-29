@@ -24,7 +24,6 @@ export enum TailwindHeightSizeEnum {
   H20 = '20',
   H24 = '24',
   H28 = '28',
-  H32 = '32',
   H36 = '36',
   H40 = '40',
   H44 = '44',

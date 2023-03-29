@@ -136,7 +136,7 @@ const Index = ({ commonData }: Props) => {
                         <span className="text-sm font-normal">{role}</span>
                       </div>
                       <div className="my-10">
-                        <PureAvatar src={organizationInfoExtended.avatar_url} title={organizationInfoExtended.display_name} size={TailwindHeightSizeEnum.H32} textSize={TailwindFontSizeEnum.XXXXL} />
+                        <PureAvatar src={organizationInfoExtended.avatar_url} title={organizationInfoExtended.display_name} size={TailwindHeightSizeEnum.H36} textSize={TailwindFontSizeEnum.XXXXL} />
                       </div>
                       <div className="space-y-2 border-t py-4 px-2">
                         <ul role="list" className="flex justify-between space-x-5 cursor-pointer">

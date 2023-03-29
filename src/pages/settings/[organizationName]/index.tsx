@@ -1034,7 +1034,7 @@ const Index = ({ commonData, setUser }: Props) => {
                                   <PureAvatar
                                     src={team.avatar_url || ''}
                                     title={team.display_name}
-                                    size={TailwindHeightSizeEnum.H32}
+                                    size={TailwindHeightSizeEnum.H36}
                                     textSize={TailwindFontSizeEnum.XXXXL}
                                     style={{ width: 128, height: 128 }}
                                   />
