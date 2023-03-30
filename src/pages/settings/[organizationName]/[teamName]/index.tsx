@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ToasterIcons } from '@/enums/toaster-icons';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Listbox, Transition } from '@headlessui/react';
 import { LinkIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
@@ -89,6 +90,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [bio, setBio] = useState<string>('');
   const [showToaster, setShowToaster] = useState<boolean>(false);
   const [messageToaster, setMessageToaster] = useState<string>('');
+  const [iconToaster, setIconToaster] = useState<JSX.Element>(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
   const [inputDeleteUser, setInputDeleteUser] = useState<string>('');
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
@@ -163,6 +165,12 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     return commonData.team.visibility !== visibility || commonData.team.allow_download !== allowDownload || commonData.team.bio !== bio;
   }, [commonData.team, visibility, allowDownload, bio, file, urlLocalFile]);
+
+  const sendToasterMessage = (message: string, icon: JSX.Element) => {
+    setMessageToaster(message);
+    setShowToaster(true);
+    setIconToaster(icon);
+  };
 
   useEffect(() => {
     const getData = async () => {
@@ -345,7 +353,11 @@ const Index = ({ commonData, setUser }: Props) => {
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, selectedMember!.id!, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
+
+        sendToasterMessage('User invited successfully', ToasterIcons.SUCCESS);
       } catch (e) {
+        sendToasterMessage("We're sorry! Something happened inviting an user. Please try again", ToasterIcons.ERROR);
+
         Helper.logError('Unexpected error', e);
       }
       if (teamRole) {
@@ -354,7 +366,10 @@ const Index = ({ commonData, setUser }: Props) => {
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, teamRole);
           const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
           await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
+
+          sendToasterMessage('User invited successfully', ToasterIcons.SUCCESS);
         } catch (e) {
+          sendToasterMessage("We're sorry! Something happened inviting an user. Please try again", ToasterIcons.ERROR);
           Helper.logError('Unexpected error', e);
         }
       }
@@ -365,7 +380,10 @@ const Index = ({ commonData, setUser }: Props) => {
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, organizationRole);
           const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
           await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
+
+          sendToasterMessage('User invited successfully', ToasterIcons.SUCCESS);
         } catch (e) {
+          sendToasterMessage("We're sorry! Something happened inviting an user. Please try again", ToasterIcons.ERROR);
           Helper.logError('Unexpected error', e);
         }
       }
@@ -375,7 +393,11 @@ const Index = ({ commonData, setUser }: Props) => {
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, teamRole);
           const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
           await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
+
+          sendToasterMessage('User invited successfully', ToasterIcons.SUCCESS);
         } catch (e) {
+          sendToasterMessage("We're sorry! Something happened inviting an user. Please try again", ToasterIcons.ERROR);
+
           Helper.logError('Unexpected error', e);
         }
       }
@@ -396,11 +418,15 @@ const Index = ({ commonData, setUser }: Props) => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       await api.deleteUserFromTeam(commonData.team!.id!, selectedMember!.id);
+
+      sendToasterMessage('Member removed successfully', ToasterIcons.SUCCESS);
+
       getTeamMembers();
       setOpenDeleteMemberModal(false);
       setSelectedMember(null);
       setInputDeleteUser('');
     } catch (e) {
+      sendToasterMessage("We're sorry! Something happened removing the user. Please try again", ToasterIcons.ERROR);
       Helper.logError('Unexpected error', e);
     }
     setRequesting(false);
@@ -442,6 +468,9 @@ const Index = ({ commonData, setUser }: Props) => {
         inviteUserDto.teamRole = teamRole;
       }
       await api.inviteNewUser(inviteUserDto);
+
+      sendToasterMessage('User invited successfully', ToasterIcons.SUCCESS);
+
       getTeamMembers();
       setOrganizationRole('');
       setTeamRole('');
@@ -450,6 +479,8 @@ const Index = ({ commonData, setUser }: Props) => {
       setSelectedMember(null);
       setOpenInviteUserModal(false);
     } catch (e) {
+      sendToasterMessage("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
+
       Helper.logError('Unexpected error', e);
     }
     setRequesting(true);
@@ -483,8 +514,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShowToaster(true);
-      setMessageToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      sendToasterMessage('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       return;
     }
     try {
@@ -1557,13 +1587,7 @@ const Index = ({ commonData, setUser }: Props) => {
         </Dialog>
       </Transition.Root>
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
+      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={iconToaster} message={messageToaster} backgroundColor={TailwindColor.SLATE_50} />
     </div>
   );
 };
