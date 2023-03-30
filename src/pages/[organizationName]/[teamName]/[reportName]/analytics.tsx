@@ -258,6 +258,7 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
   const [members, setMembers] = useState<Member[]>([]);
   const [show, setShow] = useState<boolean>(false);
   const [alertText, setAlertText] = useState<string>('');
+  const [alertIcon, setAlertIcon] = useState<JSX.Element>(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [showEmails, setShowEmails] = useState<boolean>(false);
   const frontEndUrl = useAppSelector((s) => {
@@ -537,7 +538,11 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
         await api.addUserToOrganization(addUserOrganizationDto);
         setShow(true);
         setAlertText('User invited successfully');
+        setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       } catch (e) {
+        setShow(true);
+        setAlertText('We are sorry! Something happened updating the role of this member. Please try again.');
+        setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
         Helper.logError('Unexpected error', e);
       }
     } else {
@@ -573,7 +578,11 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
       getTeamMembers();
       setShow(true);
       setAlertText('User invited successfully');
+      setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
     } catch (e) {
+      setShow(true);
+      setAlertText('We are sorry! Something happened inviting an user. Please try again.');
+      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       Helper.logError('Unexpected error', e);
     }
   };
@@ -918,7 +927,7 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
           </div>
         </main>
       </div>
-      <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />} message={alertText} />
+      <ToasterNotification show={show} setShow={setShow} icon={alertIcon} message={alertText} />
     </React.Fragment>
   );
 };
