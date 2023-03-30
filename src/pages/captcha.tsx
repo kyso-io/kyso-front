@@ -27,7 +27,7 @@ function isBrowser() {
 
 const Index = ({ commonData }: Props) => {
   const router = useRouter();
-  const { invitation } = router.query;
+  const { invitation, redirect } = router.query;
   const hCaptchaRef = useRef(null);
   const [captchaSiteKey, setCaptchaSiteKey] = useState<string>(DEFAULT_CAPTCHA_SITE_KEY);
   const [captchaToken, setCaptchaToken] = useState<string>('');
@@ -110,7 +110,7 @@ const Index = ({ commonData }: Props) => {
 
     const response: NormalizedResponseDTO<boolean> = await api.verifyCaptcha(captchaToken);
     if (response?.data) {
-      const redirectUrl: string | null = sessionStorage.getItem('redirectUrl') || '/';
+      const redirectUrl: string | null = sessionStorage.getItem('redirectUrl') || (redirect as string) || '/';
 
       const showOnboarding = commonData.user?.show_onboarding ? commonData.user?.show_onboarding : false;
 
@@ -118,13 +118,19 @@ const Index = ({ commonData }: Props) => {
         sessionStorage.removeItem('redirectUrl');
       }
       setTimeout(() => {
-        if (showOnboarding) {
-          router.replace('/overview');
-        }
+        // If there is an invitation or a redirect url, that's the priority.
         if (invitation) {
           router.replace(invitation as string);
-        } else {
+          return;
+        }
+
+        if (redirectUrl) {
           router.replace(redirectUrl);
+          return;
+        }
+
+        if (showOnboarding) {
+          router.replace('/overview');
         }
       }, 200);
     } else {

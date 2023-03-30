@@ -399,8 +399,6 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         // If have a token, I want to show a "You have no permission" page. Because if I redirect directly the user
         // don't know what the hell happened
         // router.replace(`/${router.query.organizationName as string}`);
-      } else if (defaultRedirectOrganization) {
-        router.replace(`/${defaultRedirectOrganization}`);
       } else {
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}/${router.query.reportName as string}`)}`);
       }

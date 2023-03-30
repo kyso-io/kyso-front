@@ -26,7 +26,7 @@ const gitlabScope = 'read_user';
 
 const Index = () => {
   const router = useRouter();
-  const { invitation } = router.query;
+  const { invitation, redirect } = router.query;
   const [email, setEmail] = useState<string>('');
   const [nickname, setNickname] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -168,6 +168,11 @@ const Index = () => {
       const signUpDto: SignUpDto = new SignUpDto(email, nickname, displayName, password);
       await api.signup(signUpDto);
       sessionStorage.setItem('alertMessage', 'You have been registered successfully. A verification link has been sent to your email account.');
+
+      if (redirect) {
+        sessionStorage.setItem('redirectUrl', redirect as string);
+      }
+
       const login: Login = new Login(password, LoginProviderEnum.KYSO, email, {});
       const response: NormalizedResponseDTO<string> = await api.login(login);
       const token: string = response.data;

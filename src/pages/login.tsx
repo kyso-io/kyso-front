@@ -331,7 +331,7 @@ const Index = () => {
               <a className="text-xs no-underline hover:none text-gray-900 hover:text-indigo-700 mr-5" href="/reset-password">
                 Forgot your password?
               </a>
-              <a className="text-xs ml-14 no-underline hover:none text-gray-900 hover:text-indigo-700" href="/signup">
+              <a className="text-xs ml-14 no-underline hover:none text-gray-900 hover:text-indigo-700" href={redirect ? `/signup?redirect=${redirect}` : `/signup`}>
                 Create an account
               </a>
             </div>
