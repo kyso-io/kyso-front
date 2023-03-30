@@ -286,8 +286,8 @@ const Index = ({ commonData, setUser }: Props) => {
                                     />
                                     <ShieldCheckIcon className="w-6 h-5 ml-3" />
                                     <label htmlFor="organization-only" className="ml-1 block text-sm  text-gray-700">
-                                      <strong>Organization only:</strong> All members of the <span className="font-medium">{commonData.organization?.display_name}</span> organization can access this
-                                      channel.
+                                      <strong>Protected:</strong> Organization only. All members of the <span className="font-medium">{commonData.organization?.display_name}</span> organization can
+                                      access this channel.
                                     </label>
                                   </div>
                                   {enabledPublicChannels && (

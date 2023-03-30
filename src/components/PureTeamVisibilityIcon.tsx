@@ -19,7 +19,7 @@ const PureTeamVisibilityIcon = (props: IPureTeamVisibilityIconProps) => {
 
   let label = 'Private';
   if (visibility === 'protected') {
-    label = 'Organization only';
+    label = 'Protected';
   }
   if (visibility === 'public') {
     label = 'Public';

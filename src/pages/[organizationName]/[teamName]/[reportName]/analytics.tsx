@@ -108,6 +108,7 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
       user_id: string;
       timestamp: Date;
       action: string;
+      source?: string;
     }[] = [];
     if (!reportAnalytics) {
       return elements;
@@ -117,6 +118,7 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
         user_id: e.user_id,
         timestamp: e.timestamp,
         action: 'downloaded',
+        source: e.source,
       });
     });
     reportAnalytics.shares.last_items.forEach((e: { timestamp: Date; user_id: string }) => {
@@ -124,6 +126,7 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
         user_id: e.user_id,
         timestamp: e.timestamp,
         action: 'share',
+        source: 'web',
       });
     });
     return elements.sort(
