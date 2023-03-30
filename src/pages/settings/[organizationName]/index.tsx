@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint no-prototype-builtins: "off" */
 /* eslint no-continue: "off" */
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Switch, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
-import { BookOpenIcon, ChatAlt2Icon, CheckCircleIcon, DocumentDuplicateIcon, ExclamationCircleIcon, InformationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
+import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, PaginatedResponseDto, ResourcePermissions, Team, TeamInfoDto, TeamsInfoQuery } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -27,25 +28,23 @@ import { Tooltip } from 'flowbite-react';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
-import type { ReactElement } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import CaptchaModal from '../../../components/CaptchaModal';
-import ExpirationDateModal from '../../../components/ExpirationDateModal';
-import Pagination from '../../../components/Pagination';
-import PureAvatar from '../../../components/PureAvatar';
-import SettingsAside from '../../../components/SettingsAside';
-import ToasterNotification from '../../../components/ToasterNotification';
-import { OrganizationSettingsTab } from '../../../enums/organization-settings-tab';
-import { checkJwt } from '../../../helpers/check-jwt';
-import { HelperPermissions } from '../../../helpers/check-permissions';
-import { Helper } from '../../../helpers/Helper';
-import { useRedirectIfNoJWT } from '../../../hooks/use-redirect-if-no-jwt';
-import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
-import { TailwindFontSizeEnum } from '../../../tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '../../../tailwind/enum/tailwind-height.enum';
-import type { CommonData } from '../../../types/common-data';
-import type { Member } from '../../../types/member';
+import CaptchaModal from '@/components/CaptchaModal';
+import ExpirationDateModal from '@/components/ExpirationDateModal';
+import Pagination from '@/components/Pagination';
+import PureAvatar from '@/components/PureAvatar';
+import SettingsAside from '@/components/SettingsAside';
+import { OrganizationSettingsTab } from '@/enums/organization-settings-tab';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { Helper } from '@/helpers/Helper';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { CommonData } from '@/types/common-data';
+import type { Member } from '@/types/member';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 const OrganizationRoleToLabel: { [role: string]: string } = {
   'organization-admin': 'Admin of this organization',
@@ -54,16 +53,11 @@ const OrganizationRoleToLabel: { [role: string]: string } = {
   'team-reader': 'Can comment all channels',
 };
 
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
-
 const debouncedFetchData = debounce((cb: () => void) => {
   cb();
 }, 750);
 
-const Index = ({ commonData, setUser }: Props) => {
+const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   useRedirectIfNoJWT();
   const { tab, edit, organizationName } = router.query;
@@ -108,9 +102,6 @@ const Index = ({ commonData, setUser }: Props) => {
     return data;
   }, []);
   const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
-  const [toasterIcon, setIcon] = useState<ReactElement>(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [invitationsLinksGloballyEnabled, setInvitationsLinksGloballyEnabled] = useState<boolean>(false);
   const [editing, setEditing] = useState<boolean>(false);
@@ -391,17 +382,13 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShowToaster(true);
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       return;
     }
     try {
-      setIcon(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
-      setMessageToaster('Updating organization profile...');
+      showToaster('Updating organization profile...', ToasterIcons.INFO);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
       if (file !== null) {
-        setShowToaster(true);
         setRequesting(true);
         await api.updateOrganizationImage(commonData.organization!.id!, file);
       }
@@ -411,14 +398,16 @@ const Index = ({ commonData, setUser }: Props) => {
         location,
         allow_download: allowDownload,
       } as any);
+
+      showToaster('Organization updated successfully', ToasterIcons.INFO);
+
       router.reload();
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
+      showToaster("We're sorry! Something happened trying to perform the operation. Please try it again", ToasterIcons.ERROR);
     } finally {
       setRequesting(false);
-      setShowToaster(false);
-      setMessageToaster('');
     }
   };
 
@@ -428,13 +417,11 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShowToaster(true);
-      setMessageToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       return;
     }
     if (centralizedNotifications && emailsCentralizedNotifications.length === 0) {
-      setShowToaster(true);
-      setMessageToaster('Please enter at least one valid email for centralized notifications');
+      showToaster('Please enter at least one valid email for centralized notifications', ToasterIcons.INFO);
       return;
     }
     try {
@@ -460,11 +447,9 @@ const Index = ({ commonData, setUser }: Props) => {
       window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
     } catch (e: any) {
       /* eslint-disable no-console */
-      console.log(e.response.data);
+      showToaster("We're sorry! Something happened trying to perform the operation. Please try it again", ToasterIcons.ERROR);
     } finally {
       setRequesting(false);
-      setShowToaster(false);
-      setMessageToaster('');
     }
   };
 
@@ -531,14 +516,10 @@ const Index = ({ commonData, setUser }: Props) => {
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, selectedMember!.id!, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
 
-        setShowToaster(true);
-        setMessageToaster('User invited successfully');
-        setIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+        showToaster('User invited successfully', ToasterIcons.INFO);
       } catch (e) {
         Helper.logError('Unexpected error', e);
-        setShowToaster(true);
-        setMessageToaster('We are sorry! Something happened inviting a new user. Please try again.');
-        setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+        showToaster('We are sorry! Something happened inviting a new user. Please try again.', ToasterIcons.ERROR);
       }
     } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
@@ -547,14 +528,10 @@ const Index = ({ commonData, setUser }: Props) => {
         const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
         await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
 
-        setShowToaster(true);
-        setMessageToaster('User invited successfully');
-        setIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+        showToaster('User invited successfully', ToasterIcons.INFO);
       } catch (e) {
         Helper.logError('Unexpected error', e);
-        setShowToaster(true);
-        setMessageToaster('We are sorry! Something happened inviting a new user. Please try again.');
-        setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+        showToaster('We are sorry! Something happened inviting a new user. Please try again.', ToasterIcons.ERROR);
       }
     }
 
@@ -577,11 +554,11 @@ const Index = ({ commonData, setUser }: Props) => {
       setOpenDeleteMemberModal(false);
       setSelectedMember(null);
       setInputDeleteUser('');
-      setShowToaster(true);
-      setIcon(<CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />);
-      setMessageToaster('User removed successfully');
+
+      showToaster('User removed successfully', ToasterIcons.INFO);
     } catch (e) {
       Helper.logError('Unexpected error', e);
+      showToaster("We're sorry! Something happened trying to perform the operation. Please try again", ToasterIcons.ERROR);
     }
     setRequesting(false);
   };
@@ -625,14 +602,11 @@ const Index = ({ commonData, setUser }: Props) => {
       setSelectedMember(null);
       setOpenInviteUserModal(false);
 
-      setShowToaster(true);
-      setMessageToaster('User invited successfully');
-      setIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('User invited successfully', ToasterIcons.INFO);
     } catch (e) {
       Helper.logError('Unexpected error', e);
-      setShowToaster(true);
-      setMessageToaster('We are sorry! Something happened inviting a new user. Please try again.');
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+
+      showToaster('We are sorry! Something happened inviting a new user. Please try again.', ToasterIcons.ERROR);
     }
     setRequesting(false);
   };
@@ -681,8 +655,7 @@ const Index = ({ commonData, setUser }: Props) => {
       document.body.removeChild(aLink);
     } catch (e) {
       Helper.logError('Unexpected error', e);
-      setMessageToaster('Error exporting members to CSV');
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('Error exporting members to CSV', ToasterIcons.ERROR);
     }
     setRequesting(false);
   };
@@ -697,8 +670,7 @@ const Index = ({ commonData, setUser }: Props) => {
     } catch (e) {
       setRequesting(false);
       Helper.logError('Error generating invitation links', e);
-      setMessageToaster('Error generating invitation links. Please review that your account is verified');
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('Error generating invitation links. Please review that your account is verified', ToasterIcons.ERROR);
     }
   };
 
@@ -721,9 +693,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setRequesting(false);
       setIsOpenExpirationDateModal(false);
       Helper.logError('Error generating invitation links', e);
-      setMessageToaster('Error generating invitation links. Please review that your account is verified');
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setShowToaster(true);
+      showToaster('Error generating invitation links. Please review that your account is verified', ToasterIcons.ERROR);
     }
   };
 
@@ -736,10 +706,9 @@ const Index = ({ commonData, setUser }: Props) => {
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
+      showToaster('Error updating access domains. Please try again', ToasterIcons.ERROR);
     } finally {
       setRequesting(false);
-      setShowToaster(false);
-      setMessageToaster('');
     }
   };
 
@@ -1339,10 +1308,10 @@ const Index = ({ commonData, setUser }: Props) => {
                                 className="ml-4 inline-flex items-center rounded border border-gray-300 bg-white px-1 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 onClick={() => {
                                   navigator.clipboard.writeText(`${window.location.origin}/${commonData.organization!.sluglified_name}?join=${commonData.organization!.join_codes!.reader}`);
-                                  setMessageToaster('Copied to clipboard');
-                                  setShowToaster(true);
+                                  showToaster('Copied to clipboard', ToasterIcons.INFO);
+
                                   setTimeout(() => {
-                                    setShowToaster(false);
+                                    hideToaster();
                                   }, 3000);
                                 }}
                               >
@@ -1362,10 +1331,10 @@ const Index = ({ commonData, setUser }: Props) => {
                                 className="ml-4 inline-flex items-center rounded border border-gray-300 bg-white px-1 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                 onClick={() => {
                                   navigator.clipboard.writeText(`${window.location.origin}/${commonData.organization!.sluglified_name}?join=${commonData.organization!.join_codes!.contributor}`);
-                                  setMessageToaster('Copied to clipboard');
-                                  setShowToaster(true);
+                                  showToaster('Copied to clipboard', ToasterIcons.INFO);
+
                                   setTimeout(() => {
-                                    setShowToaster(false);
+                                    hideToaster();
                                   }, 3000);
                                 }}
                               >
@@ -1900,7 +1869,7 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
-      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={toasterIcon} message={messageToaster} backgroundColor={TailwindColor.SLATE_50} />
+
       {/* <PingIdModal open={showOpenPingIdModal} setOpen={setShowOpenPingIdModal} /> */}
       {/* DELETE ORGANIZATION */}
       <Transition.Root show={showDeleteOrgModal} as={Fragment}>
