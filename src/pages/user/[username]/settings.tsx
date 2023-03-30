@@ -1,31 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Helper } from '@/helpers/Helper';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { InformationCircleIcon } from '@heroicons/react/outline';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
-import type { ReactElement } from 'react';
 import { useEffect, useRef, useState } from 'react';
-import CaptchaModal from '../../../components/CaptchaModal';
-import PureAvatar from '../../../components/PureAvatar';
-import SettingsAside from '../../../components/SettingsAside';
-import ToasterNotification from '../../../components/ToasterNotification';
-import { checkJwt } from '../../../helpers/check-jwt';
-import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
-import { TailwindFontSizeEnum } from '../../../tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '../../../tailwind/enum/tailwind-height.enum';
-import type { CommonData } from '../../../types/common-data';
+import CaptchaModal from '@/components/CaptchaModal';
+import PureAvatar from '@/components/PureAvatar';
+import SettingsAside from '@/components/SettingsAside';
+import { checkJwt } from '@/helpers/check-jwt';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
-
-const Index = ({ commonData, setUser }: Props) => {
+const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const username: string = router.query.username as string;
   const ref = useRef<any>(null);
@@ -38,10 +30,6 @@ const Index = ({ commonData, setUser }: Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
   const [requesting, setRequesting] = useState<boolean>(false);
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [showToasterEmailVerification, setShowToasterEmailVerification] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
-  const [toasterIcon, setIcon] = useState<ReactElement>(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [sentVerificationEmail, setSentVerificationEmail] = useState<boolean>(false);
   // const [showErrorBio, setShowErrorBio] = useState<boolean>(false);
@@ -110,17 +98,13 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShowToaster(true);
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       return;
     }
     try {
-      setIcon(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
-      setMessageToaster('Updating profile...');
+      showToaster('Updating profile...', ToasterIcons.INFO);
       const api: Api = new Api(commonData.token);
       if (file !== null) {
-        setShowToaster(true);
         setRequesting(true);
         await api.updateUserProfileImage(commonData.user!.id, file);
       }
@@ -137,10 +121,9 @@ const Index = ({ commonData, setUser }: Props) => {
       router.reload();
     } catch (e: any) {
       Helper.logError(e.response.data, e);
+      showToaster("We're sorry! Something happened trying to perfom the operation. Please try again", ToasterIcons.ERROR);
     } finally {
       setRequesting(false);
-      setShowToaster(false);
-      setMessageToaster('');
     }
   };
 
@@ -158,9 +141,11 @@ const Index = ({ commonData, setUser }: Props) => {
       const api: Api = new Api(commonData.token);
       await api.sendVerificationEmail();
       setSentVerificationEmail(true);
-      setShowToasterEmailVerification(true);
+      showToaster('The verification email was sent successfully', ToasterIcons.SUCCESS);
     } catch (e) {
       Helper.logError('Unexpected error', e);
+      showToaster("We're sorry! Something happened trying to send the verification mail. Please try again", ToasterIcons.ERROR);
+      setSentVerificationEmail(false);
     }
   };
 
@@ -348,14 +333,6 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         )}
       </div>
-      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={toasterIcon} message={messageToaster} backgroundColor={TailwindColor.SLATE_50} />
-      <ToasterNotification
-        show={showToasterEmailVerification}
-        setShow={setShowToasterEmailVerification}
-        icon={toasterIcon}
-        message="Verification e-mail sent."
-        backgroundColor={TailwindColor.SLATE_50}
-      />
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
