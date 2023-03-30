@@ -1,6 +1,6 @@
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { ChatAlt2Icon, ChatAltIcon, ChatIcon, DocumentReportIcon, TagIcon, UserGroupIcon } from '@heroicons/react/solid';
+import { ChatAlt2Icon, ChatAltIcon, ChatIcon, DocumentReportIcon, TagIcon, UserGroupIcon, UserIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, Comment, Discussion, NormalizedResponseDTO, Organization, Relations, Report, Tag, Team } from '@kyso-io/kyso-model';
 import { ActionEnum, EntityEnum } from '@kyso-io/kyso-model';
 import moment from 'moment';
@@ -317,6 +317,41 @@ const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
   );
 };
 
+const ActivityFeedUserItem = ({ activityFeed, relations }: ActivityFeedProps) => {
+  const user: ActivityFeedUser = extractSecurelyUserFromRelations(relations, activityFeed.user_id!);
+
+  return (
+    <React.Fragment>
+      <div>
+        <div className="relative">
+          <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
+            <div className="flex -space-x-1 overflow-hidden items-end">
+              <PureAvatar src={user?.avatar_url} title={user?.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+              <div className={`h-4 w-4 rounded-full -ml-2`}>
+                <UserIcon className="h-4 w-4 text-purple-500 -ml-2 bg-white rounded-full" />
+              </div>
+            </div>
+          </span>
+        </div>
+      </div>
+      <div className="min-w-0 flex-1 py-1.5">
+        <div className="text-sm text-gray-500">
+          The user&nbsp;
+          <a href={`/user/${user?.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
+            {user?.display_name}
+          </a>{' '}
+          {activityFeed.action === ActionEnum.CREATE && 'was created '}
+          {activityFeed.action === ActionEnum.UPDATE && 'was updated '}
+          {activityFeed.action === ActionEnum.DELETE && 'was deleted '}
+          {activityFeed.action === ActionEnum.PASSWORD_CHANGE && 'changed his or her password '}
+          {activityFeed.action === ActionEnum.REGISTER && 'was registered '}
+          <span className="whitespace-nowrap">{moment(activityFeed.created_at).fromNow()}</span>
+        </div>
+      </div>
+    </React.Fragment>
+  );
+};
+
 interface Props {
   activityFeed: NormalizedResponseDTO<ActivityFeed[]> | null;
   hasMore: boolean;
@@ -366,6 +401,8 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
                   return null;
                 }
                 break;
+              case EntityEnum.USER:
+                break;
               default:
                 return null;
             }
@@ -380,6 +417,7 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
                     {af.entity === EntityEnum.REPORT && <ActivityFeedReport activityFeed={af} relations={activityFeed!.relations!} />}
                     {af.entity === EntityEnum.TAG && <ActivityFeedTag activityFeed={af} relations={activityFeed!.relations!} />}
                     {af.entity === EntityEnum.TEAM && <ActivityFeedTeam activityFeed={af} relations={activityFeed!.relations!} />}
+                    {af.entity === EntityEnum.USER && <ActivityFeedUserItem activityFeed={af} relations={activityFeed!.relations!} />}
                   </div>
                 </div>
               </li>
