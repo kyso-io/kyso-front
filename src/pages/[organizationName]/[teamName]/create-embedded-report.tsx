@@ -7,11 +7,11 @@ import { SomethingHappened } from '@/components/SomethingHappened';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
 import classNames from '@/helpers/class-names';
 import { removeLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
-import { ArrowRightIcon, ExclamationCircleIcon, InformationCircleIcon, SelectorIcon } from '@heroicons/react/solid';
+import { ArrowRightIcon, SelectorIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { TeamVisibilityEnum, KysoConfigFile, KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -23,20 +23,14 @@ import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import CaptchaModal from '@/components/CaptchaModal';
 import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
-import ToasterNotification from '@/components/ToasterNotification';
 import { checkJwt } from '@/helpers/check-jwt';
 import { HelperPermissions } from '@/helpers/check-permissions';
 import { Helper } from '@/helpers/Helper';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
-
-const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
+const CreateEmbeddedReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
+
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [title, setTitle] = useState('');
   const [busy, setBusy] = useState<boolean>(false);
@@ -261,8 +255,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
 
   const setTitleDelay = (_title: string) => {
     setTitle(_title);
-    setShowToaster(false);
-    setMessageToaster('');
+    hideToaster();
   };
 
   const setDescriptionDelay = (_description: string) => {
@@ -271,7 +264,7 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
 
   const setSelectedPeopleDelay = (newSelectedPeople: TeamMember[]) => {
     setSelectedPeople(newSelectedPeople as TeamMember[]);
-    setMessageToaster('');
+    hideToaster();
   };
 
   const setTagsDelay = (newTgs: string[]) => {
@@ -311,25 +304,23 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
     if (e) {
       e.preventDefault();
     }
-    setShowToaster(false);
+
+    hideToaster();
+
     if (!title || title.trim().length === 0) {
-      setMessageToaster('Title is required.');
-      setShowToaster(true);
+      showToaster('Title is required', ToasterIcons.INFO);
       return;
     }
     if (selectedTeam === null) {
-      setMessageToaster('Please select a channel.');
-      setShowToaster(true);
+      showToaster('Please select a channel', ToasterIcons.INFO);
       return;
     }
     if (!url || url.trim().length === 0) {
-      setMessageToaster('URL is required.');
-      setShowToaster(true);
+      showToaster('URL is required', ToasterIcons.INFO);
       return;
     }
     if (!Helper.isValidUrlWithProtocol(protocol + url)) {
-      setMessageToaster('URL is not valid.');
-      setShowToaster(true);
+      showToaster('URL is not valid', ToasterIcons.INFO);
       return;
     }
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
@@ -341,14 +332,12 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
     try {
       const exists: boolean = await api.reportExists(selectedTeam.id, Helper.slugify(title));
       if (exists) {
-        setMessageToaster('Report with this name already exists. Change the title.');
-        setShowToaster(true);
+        showToaster('A report with this name already exists. Please consider to change the title', ToasterIcons.INFO);
         setBusy(false);
         return;
       }
     } catch (er: any) {
-      setMessageToaster(er.response.data.message);
-      setShowToaster(true);
+      showToaster(er.response.data.message, ToasterIcons.ERROR);
       setBusy(false);
       return;
     }
@@ -364,16 +353,17 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
     const blobZip: Blob = await zip.generateAsync({ type: 'blob' });
     const formData: FormData = new FormData();
     formData.append('file', blobZip);
-    setMessageToaster('Uploading report. Please wait ...');
-    setShowToaster(true);
+
+    showToaster('Uploading report. Please wait ...', ToasterIcons.INFO);
+
     try {
       const { data: newReport }: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
       cleanStorage();
-      setShowToaster(false);
       window.location.href = `/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`;
-      setMessageToaster('Report uploaded successfully.');
+
+      showToaster('Report uploaded successfully', ToasterIcons.INFO);
     } catch (err: any) {
-      setShowToaster(err.response.data.message);
+      showToaster(err.response.data.message, ToasterIcons.ERROR);
       setBusy(false);
     }
   };
@@ -456,9 +446,9 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
                                 <Menu.Item disabled={isEdition()} key={teamResourcePermissions.id}>
                                   <span
                                     onClick={() => {
+                                      hideToaster();
+
                                       setSelectedTeam(teamResourcePermissions);
-                                      setShowToaster(false);
-                                      setMessageToaster('');
                                       setSelectedPeople([]);
 
                                       if (report && report.author_ids && report.author_ids!.length === 0) {
@@ -605,10 +595,9 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
                   setSelected={(newSelectedPeople: TeamMember[]) => {
                     if (newSelectedPeople.length > 0) {
                       setSelectedPeopleDelay(newSelectedPeople);
-                      setShowToaster(false);
+                      hideToaster();
                     } else {
-                      setMessageToaster('At least one author is required');
-                      setShowToaster(true);
+                      showToaster('At least one author is required', ToasterIcons.INFO);
                     }
                   }}
                   emptyMessage={selectedTeam !== null ? 'No authors' : 'First select a channel to add authors'}
@@ -672,12 +661,6 @@ const CreateEmbeddedReport = ({ commonData, setUser }: Props) => {
             </div>
           </div>
         </div>
-        <ToasterNotification
-          show={showToaster}
-          setShow={setShowToaster}
-          icon={busy ? <InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" /> : <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-          message={messageToaster}
-        />
         {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       </div>
     ) : (

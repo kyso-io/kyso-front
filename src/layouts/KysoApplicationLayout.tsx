@@ -177,6 +177,8 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
 
   const hideToaster = () => {
     setToasterVisible(false);
+    setToasterIcon(ToasterIcons.INFO);
+    setToasterMessage('');
   };
 
   return (
