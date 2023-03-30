@@ -1,23 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Helper } from '@/helpers/Helper';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Switch } from '@headlessui/react';
-import { CheckCircleIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, ResourcePermissions, UserNotificationsSettings } from '@kyso-io/kyso-model';
 import { NotificationsSettings, UpdateUserNotificationsSettings, UserNotificationsSettingsScope } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
-import { RegisteredUsersAlert } from '../../components/RegisteredUsersAlert';
-import SettingsAside from '../../components/SettingsAside';
-import ToasterNotification from '../../components/ToasterNotification';
-import { checkJwt } from '../../helpers/check-jwt';
-import type { CommonData } from '../../types/common-data';
-
-interface Props {
-  commonData: CommonData;
-}
+import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
+import SettingsAside from '@/components/SettingsAside';
+import { checkJwt } from '@/helpers/check-jwt';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 enum Tab {
   GlobalConfiguration = 'Global Configuration',
@@ -118,7 +113,7 @@ const areEquals = (a: NotificationsSettings, b: NotificationsSettings) => {
   });
 };
 
-const Index = ({ commonData }: Props) => {
+const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.GlobalConfiguration);
@@ -126,8 +121,7 @@ const Index = ({ commonData }: Props) => {
   const [userNotificationsSettings, setUserNotificationsSettings] = useState<UserNotificationsSettings | null>(null);
   const [organizationId, setOrganizationId] = useState<string>('');
   const [teamId, setTeamId] = useState<string>('');
-  const [show, setShow] = useState<boolean>(false);
-  const [alertText, setAlertText] = useState<string>('');
+
   const hasChanges: boolean = useMemo(() => {
     if (!userNotificationsSettings) {
       return false;
@@ -244,26 +238,29 @@ const Index = ({ commonData }: Props) => {
         const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Global, notificationsSettings);
         const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsGlobal(updateUserNotificationsSettings);
         setUserNotificationsSettings(result.data);
-        setAlertText('Global configuration updated');
-        setShow(true);
-      } catch (e) {}
+        showToaster('Global configuration updated', ToasterIcons.INFO);
+      } catch (e) {
+        showToaster("We're sorry! Something happenend trying to execute the operation. Please try again", ToasterIcons.ERROR);
+      }
     } else {
       if (teamId) {
         try {
           const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Channel, notificationsSettings);
           const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsOrganizationChannel(organizationId, teamId, updateUserNotificationsSettings);
           setUserNotificationsSettings(result.data);
-          setAlertText('Channel configuration updated');
-          setShow(true);
-        } catch (e) {}
+          showToaster('Channel configuration updated', ToasterIcons.INFO);
+        } catch (e) {
+          showToaster("We're sorry! Something happenend trying to execute the operation. Please try again", ToasterIcons.ERROR);
+        }
       } else {
         try {
           const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Organization, notificationsSettings);
           const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsOrganization(organizationId, updateUserNotificationsSettings);
           setUserNotificationsSettings(result.data);
-          setAlertText('Organization configuration updated');
-          setShow(true);
-        } catch (e) {}
+          showToaster('Organization configuration updated', ToasterIcons.INFO);
+        } catch (e) {
+          showToaster("We're sorry! Something happenend trying to execute the operation. Please try again", ToasterIcons.ERROR);
+        }
       }
     }
   };
@@ -359,7 +356,7 @@ const Index = ({ commonData }: Props) => {
                               Object.assign(newNotificationsSettings, notificationsSettings);
                               (newNotificationsSettings as any)[option.key] = !checked;
                               setNotificationsSettings(newNotificationsSettings);
-                              setShow(false);
+                              hideToaster();
                             }}
                             className={`${checked ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full`}
                           >
@@ -400,7 +397,6 @@ const Index = ({ commonData }: Props) => {
           <RegisteredUsersAlert />
         )}
       </div>
-      <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />} message={alertText} />
     </div>
   );
 };

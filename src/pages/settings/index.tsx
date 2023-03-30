@@ -1,18 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Helper } from '@/helpers/Helper';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { BookOpenIcon, ChatAlt2Icon, UserGroupIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, OrganizationInfoDto, ResourcePermissions } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
-import PureAvatar from '../../components/PureAvatar';
-import { RegisteredUsersAlert } from '../../components/RegisteredUsersAlert';
-import SettingsAside from '../../components/SettingsAside';
-import { checkJwt } from '../../helpers/check-jwt';
-import { TailwindFontSizeEnum } from '../../tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '../../tailwind/enum/tailwind-height.enum';
-import type { CommonData } from '../../types/common-data';
+import PureAvatar from '@/components/PureAvatar';
+import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
+import SettingsAside from '@/components/SettingsAside';
+import { checkJwt } from '@/helpers/check-jwt';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 
 const OrganizationRoleToLabel: { [role: string]: string } = {
   'organization-admin': 'Admin of this organization',
@@ -21,17 +21,13 @@ const OrganizationRoleToLabel: { [role: string]: string } = {
   'team-reader': 'Can comment all channels',
 };
 
-interface Props {
-  commonData: CommonData;
-}
-
 interface OrganizationInfoDtoExtended extends OrganizationInfoDto {
   display_name: string;
   name: string;
   role_names: string[];
 }
 
-const Index = ({ commonData }: Props) => {
+const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [organizationsInfoDtoExtended, setOrganizationsInfoDtoExtended] = useState<OrganizationInfoDtoExtended[]>([]);
