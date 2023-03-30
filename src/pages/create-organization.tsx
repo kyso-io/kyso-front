@@ -1,31 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { PureSpinner } from '@/components/PureSpinner';
 import { Helper } from '@/helpers/Helper';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { CommonData } from '@/types/common-data';
-import { ArrowRightIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import { ArrowRightIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, Organization, UserDTO } from '@kyso-io/kyso-model';
 import { AllowDownload, CreateOrganizationDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
-import CaptchaModal from '../components/CaptchaModal';
-import { PureAlert, PureAlertTypeEnum } from '../components/PureAlert';
-import PureAvatar from '../components/PureAvatar';
-import { RegisteredUsersAlert } from '../components/RegisteredUsersAlert';
-import ToasterNotification from '../components/ToasterNotification';
-import { checkJwt } from '../helpers/check-jwt';
-import type { HttpExceptionDto } from '../interfaces/http-exception.dto';
-import { TailwindFontSizeEnum } from '../tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '../tailwind/enum/tailwind-height.enum';
+import CaptchaModal from '@/components/CaptchaModal';
+import { PureAlert, PureAlertTypeEnum } from '@/components/PureAlert';
+import PureAvatar from '@/components/PureAvatar';
+import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
+import { checkJwt } from '@/helpers/check-jwt';
+import type { HttpExceptionDto } from '@/interfaces/http-exception.dto';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
-
-const Index = ({ commonData, setUser }: Props) => {
+const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const ref = useRef<any>(null);
   const [isBusy, setBusy] = useState(false);
@@ -36,8 +31,6 @@ const Index = ({ commonData, setUser }: Props) => {
   const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.ALL);
   const [file, setFile] = useState<File | null>(null);
   const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
@@ -91,8 +84,7 @@ const Index = ({ commonData, setUser }: Props) => {
 
   const createOrganization = async (): Promise<void> => {
     if (commonData.user?.email_verified === false) {
-      setMessageToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
-      setShowToaster(true);
+      showToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.', ToasterIcons.INFO);
       return;
     }
 
@@ -102,19 +94,20 @@ const Index = ({ commonData, setUser }: Props) => {
     }
 
     if (!displayName || displayName.length === 0) {
-      setMessageToaster('Please specify a organization name.');
-      setShowToaster(true);
+      showToaster('Please specify a organization name.', ToasterIcons.INFO);
       return;
     }
 
-    setShowToaster(false);
-    setMessageToaster('');
+    hideToaster();
     setBusy(true);
 
     try {
       const api: Api = new Api(commonData.token);
       const createOrganizationDto: CreateOrganizationDto = new CreateOrganizationDto(displayName, bio, location, link, allowDownload);
       const result: NormalizedResponseDTO<Organization> = await api.createOrganization(createOrganizationDto);
+
+      showToaster('Organization created successfully', ToasterIcons.SUCCESS);
+
       const organization: Organization = result.data;
       api.setOrganizationSlug(organization.sluglified_name);
       if (file) {
@@ -124,8 +117,7 @@ const Index = ({ commonData, setUser }: Props) => {
       setBusy(false);
     } catch (er: any) {
       const httpExceptionDto: HttpExceptionDto = er.response.data;
-      setMessageToaster(httpExceptionDto.message);
-      setShowToaster(true);
+      showToaster(httpExceptionDto.message, ToasterIcons.ERROR);
       setBusy(false);
     }
   };
@@ -233,8 +225,7 @@ const Index = ({ commonData, setUser }: Props) => {
                             value={displayName || ''}
                             autoComplete="displayName"
                             onChange={(e) => {
-                              setMessageToaster('');
-                              setShowToaster(false);
+                              hideToaster();
                               setDisplayName(e.target.value);
                             }}
                             className="flex-1 block w-full focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-md sm:text-sm border-gray-300"
@@ -351,7 +342,6 @@ const Index = ({ commonData, setUser }: Props) => {
           waitForLogging && <RegisteredUsersAlert />
         )}
       </div>
-      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
