@@ -14,11 +14,11 @@ import classNames from '@/helpers/class-names';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { getSessionStorageItem, removeSessionStorageItem, setSessionStorageItem } from '@/helpers/isomorphic-session-storage';
 import { useChannelMembers } from '@/hooks/use-channel-members';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { FilesystemItem } from '@/model/filesystem-item.model';
-import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { ArrowRightIcon, DocumentAddIcon, ExclamationCircleIcon, FolderAddIcon, SelectorIcon, UploadIcon } from '@heroicons/react/solid';
@@ -33,12 +33,12 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import CaptchaModal from '../../../components/CaptchaModal';
-import { PureAlert, PureAlertTypeEnum } from '../../../components/PureAlert';
-import ToasterNotification from '../../../components/ToasterNotification';
-import { checkJwt } from '../../../helpers/check-jwt';
-import { HelperPermissions } from '../../../helpers/check-permissions';
-import { Helper } from '../../../helpers/Helper';
+import CaptchaModal from '@/components/CaptchaModal';
+import { PureAlert, PureAlertTypeEnum } from '@/components/PureAlert';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { Helper } from '@/helpers/Helper';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -52,18 +52,11 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
-
-const CreateReport = ({ commonData, setUser }: Props) => {
+const CreateReport = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
-  const [showToaster, setShowToaster] = useState<boolean>(false);
   const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
   const [loggedUserShowCaptcha, setLoggedUserShowCaptcha] = useState<boolean>(true);
 
@@ -337,14 +330,12 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     }
 
     if (!loggedUserEmailVerified) {
-      setMessageToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
-      setShowToaster(true);
+      showToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.', ToasterIcons.INFO);
       return;
     }
 
     if (captchaIsEnabled && loggedUserShowCaptcha) {
-      setMessageToaster("Your account didn't pass the antibot process.");
-      setShowToaster(true);
+      showToaster("Your account didn't pass the antibot process.", ToasterIcons.ERROR);
       return;
     }
 
@@ -458,8 +449,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       }
     }
     if (ignoredFiles.length > 0) {
-      setMessageToaster(ignoredFiles.length === 1 ? `File ${ignoredFiles[0]} is not allowed.` : `Files ${ignoredFiles.join(', ')} are not allowed.`);
-      setShowToaster(true);
+      showToaster(ignoredFiles.length === 1 ? `File ${ignoredFiles[0]} is not allowed.` : `Files ${ignoredFiles.join(', ')} are not allowed.`, ToasterIcons.ERROR);
     }
   };
 
@@ -864,7 +854,6 @@ const CreateReport = ({ commonData, setUser }: Props) => {
             </div>
           </div>
         </div>
-        <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
         {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       </div>
     ) : (
