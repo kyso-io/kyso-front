@@ -1,20 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { getLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import type { KeyValue } from '@/model/key-value.model';
-import type { CommonData } from '@/types/common-data';
 import type { ResourcePermissions } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import ChannelList from '../components/ChannelList';
-import { Helper } from '../helpers/Helper';
-import KysoApplicationLayout from '../layouts/KysoApplicationLayout';
+import ChannelList from '@/components/ChannelList';
+import { Helper } from '@/helpers/Helper';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 
-interface Props {
-  commonData: CommonData;
-}
-
-const Index = ({ commonData }: Props) => {
+const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
 
   useEffect(() => {
