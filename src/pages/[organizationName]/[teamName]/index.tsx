@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { CommonData } from '@/types/common-data';
 import UnpureDeleteChannelDropdown from '@/unpure-components/UnpureDeleteChannelDropdown';
-import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type {
   ActivityFeed,
   NormalizedResponseDTO,
@@ -36,28 +34,29 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import ActivityFeedComponent from '../../../components/ActivityFeed';
-import CaptchaModal from '../../../components/CaptchaModal';
-import ChannelList from '../../../components/ChannelList';
-import ChannelVisibility from '../../../components/ChannelVisibility';
-import InfoActivity from '../../../components/InfoActivity';
-import ManageUsers from '../../../components/ManageUsers';
-import Pagination from '../../../components/Pagination';
-import PureNewReportPopover from '../../../components/PureNewReportPopover';
-import { PureSpinner } from '../../../components/PureSpinner';
-import ReportBadge from '../../../components/ReportBadge';
-import ReportsSearchBar from '../../../components/ReportsSearchBar';
-import ToasterNotification from '../../../components/ToasterNotification';
-import { checkJwt } from '../../../helpers/check-jwt';
-import { HelperPermissions } from '../../../helpers/check-permissions';
-import { checkReportAuthors } from '../../../helpers/check-report-authors';
-import { Helper } from '../../../helpers/Helper';
-import type { PaginationParams } from '../../../interfaces/pagination-params';
-import type { ReportsFilter } from '../../../interfaces/reports-filter';
-import KysoApplicationLayout from '../../../layouts/KysoApplicationLayout';
-import type { KeyValue } from '../../../model/key-value.model';
-import { TailwindWidthSizeEnum } from '../../../tailwind/enum/tailwind-width.enum';
-import type { Member } from '../../../types/member';
+import ActivityFeedComponent from '@/components/ActivityFeed';
+import CaptchaModal from '@/components/CaptchaModal';
+import ChannelList from '@/components/ChannelList';
+import ChannelVisibility from '@/components/ChannelVisibility';
+import InfoActivity from '@/components/InfoActivity';
+import ManageUsers from '@/components/ManageUsers';
+import Pagination from '@/components/Pagination';
+import PureNewReportPopover from '@/components/PureNewReportPopover';
+import { PureSpinner } from '@/components/PureSpinner';
+import ReportBadge from '@/components/ReportBadge';
+import ReportsSearchBar from '@/components/ReportsSearchBar';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { checkReportAuthors } from '@/helpers/check-report-authors';
+import { Helper } from '@/helpers/Helper';
+import type { PaginationParams } from '@/interfaces/pagination-params';
+import type { ReportsFilter } from '@/interfaces/reports-filter';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { KeyValue } from '@/model/key-value.model';
+import { TailwindWidthSizeEnum } from '@/tailwind/enum/tailwind-width.enum';
+import type { Member } from '@/types/member';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
@@ -87,20 +86,12 @@ const debouncedPaginatedReports = debounce(
   500,
 );
 
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
-
-const Index = ({ commonData, setUser }: Props) => {
+const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const [teamInfo, setTeamInfo] = useState<TeamInfoDto | null>(null);
   // MEMBERS
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
-  const [show, setShow] = useState<boolean>(false);
-  const [alertText, setAlertText] = useState<string>('');
-  const [alertIcon, setAlertIcon] = useState<JSX.Element>(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
   // REPORTS
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
   const [paginationParams, setPaginationParams] = useState<PaginationParams>({
@@ -341,14 +332,12 @@ const Index = ({ commonData, setUser }: Props) => {
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
-        setShow(true);
-        setAlertText('User invited successfully');
-        setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />);
+
+        showToaster('User invited successfully', ToasterIcons.INFO);
       } catch (e) {
         Helper.logError('Unexpected error', e);
-        setShow(true);
-        setAlertText('We are sorry! Something happened updating the role of this member. Please try again.');
-        setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+
+        showToaster('We are sorry! Something happened updating the role of this member. Please try again.', ToasterIcons.ERROR);
       }
       if (teamRole) {
         try {
@@ -395,13 +384,10 @@ const Index = ({ commonData, setUser }: Props) => {
       }
       await api.inviteNewUser(inviteUserDto);
       getTeamMembers();
-      setShow(true);
-      setAlertText('User invited successfully');
-      setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />);
+
+      showToaster('User invited successfully', ToasterIcons.INFO);
     } catch (e) {
-      setShow(true);
-      setAlertText('We are sorry! Something happened inviting an user. Please try again.');
-      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('We are sorry! Something happened inviting an user. Please try again.', ToasterIcons.ERROR);
       Helper.logError('Unexpected error', e);
     }
   };
@@ -431,9 +417,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShow(true);
-      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
-      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.ERROR);
       return;
     }
     try {
@@ -472,9 +456,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShow(true);
-      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
-      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.ERROR);
       return;
     }
     try {
@@ -513,9 +495,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShow(true);
-      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
-      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.ERROR);
       return;
     }
     try {
@@ -735,7 +715,6 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         )}
       </div>
-      <ToasterNotification show={show} setShow={setShow} icon={alertIcon} message={alertText} />
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
