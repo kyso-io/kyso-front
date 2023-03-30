@@ -6,6 +6,7 @@ import SearchPagination from '@/components/search-pagination';
 import { Helper } from '@/helpers/Helper';
 import type { FullTextSearchParams } from '@/interfaces/full-text-search-params';
 import type { SearchNavItem } from '@/interfaces/search-nav-item';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Popover } from '@headlessui/react';
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/solid';
@@ -16,7 +17,7 @@ import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
-import type { CommonData } from '../../types/common-data';
+import type { CommonData } from '@/types/common-data';
 
 interface FilteredFullTextSearchResultType {
   result: FullTextSearchResult | null;
@@ -34,11 +35,7 @@ const debouncedFetchData = debounce(async (commonData: CommonData, params: FullT
   }
 }, 750);
 
-interface Props {
-  commonData: CommonData;
-}
-
-const SearchIndex = ({ commonData }: Props) => {
+const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const { q } = router.query;
   const [requesting, setRequesting] = useState<boolean>(false);
