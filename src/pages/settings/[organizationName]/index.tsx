@@ -530,8 +530,15 @@ const Index = ({ commonData, setUser }: Props) => {
         const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, selectedMember!.id!, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
+
+        setShowToaster(true);
+        setMessageToaster('User invited successfully');
+        setIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       } catch (e) {
         Helper.logError('Unexpected error', e);
+        setShowToaster(true);
+        setMessageToaster('We are sorry! Something happened inviting a new user. Please try again.');
+        setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       }
     } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
@@ -539,10 +546,18 @@ const Index = ({ commonData, setUser }: Props) => {
         const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, organizationRole);
         const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
         await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
+
+        setShowToaster(true);
+        setMessageToaster('User invited successfully');
+        setIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       } catch (e) {
         Helper.logError('Unexpected error', e);
+        setShowToaster(true);
+        setMessageToaster('We are sorry! Something happened inviting a new user. Please try again.');
+        setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       }
     }
+
     getOrganizationMembers();
     setOpenEditMemberModal(false);
     setOpenInviteUserModal(false);
@@ -609,8 +624,15 @@ const Index = ({ commonData, setUser }: Props) => {
       setUsers(users.filter((u: UserDTO) => u.id !== selectedMember?.id));
       setSelectedMember(null);
       setOpenInviteUserModal(false);
+
+      setShowToaster(true);
+      setMessageToaster('User invited successfully');
+      setIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
     } catch (e) {
       Helper.logError('Unexpected error', e);
+      setShowToaster(true);
+      setMessageToaster('We are sorry! Something happened inviting a new user. Please try again.');
+      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
     }
     setRequesting(false);
   };
