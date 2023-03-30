@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { CommonData } from '@/types/common-data';
 import { Dialog, Transition } from '@headlessui/react';
 import { TrashIcon } from '@heroicons/react/outline';
-import { CheckIcon, ClipboardIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import { ClipboardIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, KysoUserAccessToken, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { CreateKysoAccessTokenDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -11,20 +11,14 @@ import clsx from 'clsx';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useState } from 'react';
-import CaptchaModal from '../../../components/CaptchaModal';
-import SettingsAside from '../../../components/SettingsAside';
-import ToasterNotification from '../../../components/ToasterNotification';
-import { checkJwt } from '../../../helpers/check-jwt';
-import { Helper } from '../../../helpers/Helper';
-import { useRedirectIfNoJWT } from '../../../hooks/use-redirect-if-no-jwt';
-import { TailwindColor } from '../../../tailwind/enum/tailwind-color.enum';
+import CaptchaModal from '@/components/CaptchaModal';
+import SettingsAside from '@/components/SettingsAside';
+import { checkJwt } from '@/helpers/check-jwt';
+import { Helper } from '@/helpers/Helper';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
-
-const Index = ({ commonData, setUser }: Props) => {
+const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
   useRedirectIfNoJWT();
   const router = useRouter();
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -34,11 +28,8 @@ const Index = ({ commonData, setUser }: Props) => {
   const [openCreateKysoAccessToken, setOpenCreateKysoAccessToken] = useState<boolean>(false);
   const [openDeleteKysoAccessToken, setOpenDeleteKysoAccessToken] = useState<boolean>(false);
   const [openRevokeAllKysoAccessTokens, setOpenRevokeAllKysoAccessTokens] = useState<boolean>(false);
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [newKysoUserAccessToken, setNewKysoUserAccessToken] = useState<KysoUserAccessToken | null>(null);
-  const [copied, setCopied] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
@@ -91,18 +82,15 @@ const Index = ({ commonData, setUser }: Props) => {
 
   const createKysoAccessToken = async () => {
     setRequesting(true);
-    setMessageToaster('');
-    setShowToaster(false);
+    hideToaster();
     const index: number = kysoUserAccessTokens.findIndex((item: KysoUserAccessToken) => item.name === kysoAccessTokenName);
     if (index !== -1) {
-      setMessageToaster('You already have a token with this name');
-      setShowToaster(true);
+      showToaster('A token with this name already exists. Please choose another name.', ToasterIcons.INFO);
       setRequesting(false);
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShowToaster(true);
-      setMessageToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       setRequesting(false);
       return;
     }
@@ -112,8 +100,10 @@ const Index = ({ commonData, setUser }: Props) => {
       const resultKysoUserAccessToken: NormalizedResponseDTO<KysoUserAccessToken> = await api.createAccessToken(createKysoAccessTokenDto);
       setNewKysoUserAccessToken(resultKysoUserAccessToken.data);
       setKysoUserAccessTokens([...kysoUserAccessTokens, resultKysoUserAccessToken.data]);
+      showToaster('Access token was created successfully', ToasterIcons.SUCCESS);
     } catch (e: any) {
       Helper.logError(e.response.data, e);
+      showToaster("We're sorry! Something happened trying to create your access token. Please try again", ToasterIcons.ERROR);
     } finally {
       setRequesting(false);
     }
@@ -160,10 +150,8 @@ const Index = ({ commonData, setUser }: Props) => {
 
   const closeCreateAccessTokenModal = () => {
     setOpenCreateKysoAccessToken(false);
-    setShowToaster(false);
-    setMessageToaster('');
+    hideToaster();
     setTimeout(() => {
-      setCopied(false);
       setKysoAccessTokenName('');
       setNewKysoUserAccessToken(null);
     }, 1000);
@@ -199,8 +187,7 @@ const Index = ({ commonData, setUser }: Props) => {
                     return;
                   }
                   if (!commonData.user?.email_verified) {
-                    setShowToaster(true);
-                    setMessageToaster('Please check your email');
+                    showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
                     return;
                   }
                   setOpenCreateKysoAccessToken(true);
@@ -356,13 +343,11 @@ const Index = ({ commonData, setUser }: Props) => {
                                   className="ml-2 inline-flex items-center rounded border border-gray-300 bg-white px-2 py-1 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                                   onClick={() => {
                                     navigator.clipboard.writeText(newKysoUserAccessToken.access_token);
-                                    setCopied(true);
-                                    setMessageToaster('Access token copied to clipboard');
-                                    setShowToaster(true);
+                                    showToaster('The Access token was copied in your clipboard', ToasterIcons.INFO);
                                     setOpenCreateKysoAccessToken(false);
+
                                     setTimeout(() => {
-                                      setShowToaster(false);
-                                      setCopied(false);
+                                      hideToaster();
                                       setKysoAccessTokenName('');
                                       setNewKysoUserAccessToken(null);
                                     }, 1000);
@@ -543,13 +528,6 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         </Dialog>
       </Transition.Root>
-      <ToasterNotification
-        show={showToaster}
-        setShow={setShowToaster}
-        icon={copied ? <CheckIcon className="h-6 w-6 text-blue-400" aria-hidden="true" /> : <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-        message={messageToaster}
-        backgroundColor={TailwindColor.SLATE_50}
-      />
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
