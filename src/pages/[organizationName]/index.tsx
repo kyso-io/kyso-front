@@ -4,10 +4,11 @@ import ChannelList from '@/components/ChannelList';
 import Pagination from '@/components/Pagination';
 import PureAvatar from '@/components/PureAvatar';
 import PureNewReportPopover from '@/components/PureNewReportPopover';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { CheckCircleIcon, ExclamationCircleIcon, XCircleIcon } from '@heroicons/react/solid';
+import { XCircleIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -26,33 +27,27 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import ActivityFeedComponent from '../../components/ActivityFeed';
-import CaptchaModal from '../../components/CaptchaModal';
-import InfoActivity from '../../components/InfoActivity';
-import ManageUsers from '../../components/ManageUsers';
-import ReportBadge from '../../components/ReportBadge';
-import ToasterNotification from '../../components/ToasterNotification';
-import { checkJwt } from '../../helpers/check-jwt';
-import { HelperPermissions } from '../../helpers/check-permissions';
-import { checkReportAuthors } from '../../helpers/check-report-authors';
-import { Helper } from '../../helpers/Helper';
-import { useInterval } from '../../hooks/use-interval';
-import type { PaginationParams } from '../../interfaces/pagination-params';
-import type { KeyValue } from '../../model/key-value.model';
-import type { CommonData } from '../../types/common-data';
-import type { Member } from '../../types/member';
-import UnpureDeleteOrganizationDropdown from '../../unpure-components/UnpureDeleteOrganizationDropdown';
+import ActivityFeedComponent from '@/components/ActivityFeed';
+import CaptchaModal from '@/components/CaptchaModal';
+import InfoActivity from '@/components/InfoActivity';
+import ManageUsers from '@/components/ManageUsers';
+import ReportBadge from '@/components/ReportBadge';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { checkReportAuthors } from '@/helpers/check-report-authors';
+import { Helper } from '@/helpers/Helper';
+import { useInterval } from '@/hooks/use-interval';
+import type { PaginationParams } from '@/interfaces/pagination-params';
+import type { KeyValue } from '@/model/key-value.model';
+import type { Member } from '@/types/member';
+import UnpureDeleteOrganizationDropdown from '@/unpure-components/UnpureDeleteOrganizationDropdown';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
 
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
-
-const Index = ({ commonData, setUser }: Props) => {
+const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const { join, organizationName } = router.query;
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
@@ -69,9 +64,6 @@ const Index = ({ commonData, setUser }: Props) => {
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [showEmails, setShowEmails] = useState<boolean>(false);
-  const [show, setShow] = useState<boolean>(false);
-  const [alertText, setAlertText] = useState<string>('');
-  const [alertIcon, setAlertIcon] = useState<JSX.Element>(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const hasPermissionDeleteOrganization: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, [GlobalPermissionsEnum.GLOBAL_ADMIN, OrganizationPermissionsEnum.ADMIN, OrganizationPermissionsEnum.DELETE]),
@@ -277,9 +269,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShow(true);
-      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
-      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       return;
     }
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
@@ -318,9 +308,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShow(true);
-      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
-      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       return;
     }
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
@@ -359,9 +347,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShow(true);
-      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
-      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       return;
     }
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
@@ -501,11 +487,11 @@ const Index = ({ commonData, setUser }: Props) => {
         const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData!.organization!.id!, userId, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
-        setShow(true);
-        setAlertText('User invited successfully');
-        setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />);
+
+        showToaster('User invited successfully', ToasterIcons.INFO);
       } catch (e) {
         Helper.logError('Unexpected error', e);
+        showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
       }
     } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
@@ -513,8 +499,10 @@ const Index = ({ commonData, setUser }: Props) => {
         const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, organizationRole);
         const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
         await api.updateOrganizationMemberRoles(commonData!.organization!.id!, updateOrganizationMembersDTO);
+        showToaster('User invited successfully', ToasterIcons.INFO);
       } catch (e) {
         Helper.logError('Unexpected error', e);
+        showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
       }
     }
     getOrganizationMembers();
@@ -526,13 +514,10 @@ const Index = ({ commonData, setUser }: Props) => {
       const inviteUserDto: InviteUserDto = new InviteUserDto(email, commonData!.organization!.sluglified_name, organizationRole);
       await api.inviteNewUser(inviteUserDto);
       getOrganizationMembers();
-      setShow(true);
-      setAlertText('User invited successfully');
-      setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />);
+
+      showToaster('User invited successfully', ToasterIcons.INFO);
     } catch (e) {
-      setShow(true);
-      setAlertText('Sorry, something happened trying to invite an user. Please try it again.');
-      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
       Helper.logError('Unexpected error', e);
     }
   };
@@ -542,11 +527,14 @@ const Index = ({ commonData, setUser }: Props) => {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       if (type === TeamMembershipOriginEnum.ORGANIZATION) {
         await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
+        showToaster('User removed successfully', ToasterIcons.INFO);
       } else {
         await api.deleteUserFromTeam(commonData.team!.id!, userId);
+        showToaster('User removed successfully', ToasterIcons.INFO);
       }
       getOrganizationMembers();
     } catch (e) {
+      showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
       Helper.logError('Unexpected error', e);
     }
   };
@@ -657,7 +645,6 @@ const Index = ({ commonData, setUser }: Props) => {
           )}
         </div>
       )}
-      <ToasterNotification show={show} setShow={setShow} icon={alertIcon} message={alertText} />
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
