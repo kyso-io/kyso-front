@@ -118,6 +118,8 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
             buttonClasses="hover:bg-gray-100"
             title="Share report"
             description="Send this url to someone to share this report"
+            report={report}
+            commonData={commonData}
             url={`${window.location.origin}/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`}
           />
           <div className="flex flex-row items-center space-x-2 bg-white hover:bg-gray-100 p-2  rounded-md">

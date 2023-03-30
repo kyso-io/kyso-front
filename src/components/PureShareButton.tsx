@@ -2,7 +2,10 @@ import classNames from '@/helpers/class-names';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Dialog, Transition } from '@headlessui/react';
 import { ShareIcon } from '@heroicons/react/solid';
+import { Api } from '@kyso-io/kyso-store';
 import React, { Fragment, useState } from 'react';
+import type { ReportDTO } from '@kyso-io/kyso-model';
+import type { CommonData } from '@/types/common-data';
 import PureKysoButton from './PureKysoButton';
 
 type Props = {
@@ -12,9 +15,11 @@ type Props = {
   url: string;
   title: string;
   description: string;
+  report?: ReportDTO;
+  commonData?: CommonData;
 };
 
-const PureShareButton = ({ iconClasses, buttonClasses, withText, url, title, description }: Props) => {
+const PureShareButton = ({ iconClasses, buttonClasses, withText, url, title, description, report, commonData }: Props) => {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -81,6 +86,11 @@ const PureShareButton = ({ iconClasses, buttonClasses, withText, url, title, des
                       onClick={() => {
                         navigator.clipboard.writeText(url);
                         setCopied(true);
+
+                        if (report && commonData) {
+                          const api: Api = new Api(commonData.token, report.organization_sluglified_name, report.team_sluglified_name);
+                          api.onSharedReport(report.id!);
+                        }
                       }}
                     >
                       {!copied && 'Copy link'}

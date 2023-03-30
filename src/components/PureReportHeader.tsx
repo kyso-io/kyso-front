@@ -151,6 +151,8 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
             title="Share report"
             description="Send this url to someone to share this report"
             withText={true}
+            report={report}
+            commonData={commonData}
             url={`${window.location.origin}/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`}
           />
         </div>
