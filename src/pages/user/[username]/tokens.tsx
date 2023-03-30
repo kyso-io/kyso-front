@@ -102,7 +102,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (commonData.user?.email_verified === false) {
       setShowToaster(true);
-      setMessageToaster('Please verify your email');
+      setMessageToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
       setRequesting(false);
       return;
     }

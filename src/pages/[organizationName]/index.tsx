@@ -7,7 +7,7 @@ import PureNewReportPopover from '@/components/PureNewReportPopover';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { ExclamationCircleIcon, XCircleIcon } from '@heroicons/react/solid';
+import { CheckCircleIcon, ExclamationCircleIcon, XCircleIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -71,6 +71,7 @@ const Index = ({ commonData, setUser }: Props) => {
   const [showEmails, setShowEmails] = useState<boolean>(false);
   const [show, setShow] = useState<boolean>(false);
   const [alertText, setAlertText] = useState<string>('');
+  const [alertIcon, setAlertIcon] = useState<JSX.Element>(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const hasPermissionDeleteOrganization: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, [GlobalPermissionsEnum.GLOBAL_ADMIN, OrganizationPermissionsEnum.ADMIN, OrganizationPermissionsEnum.DELETE]),
@@ -277,7 +278,8 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (commonData.user?.email_verified === false) {
       setShow(true);
-      setAlertText('Please verify your email');
+      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       return;
     }
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
@@ -317,7 +319,8 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (commonData.user?.email_verified === false) {
       setShow(true);
-      setAlertText('Please verify your email');
+      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       return;
     }
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
@@ -357,7 +360,8 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (commonData.user?.email_verified === false) {
       setShow(true);
-      setAlertText('Please verify your email');
+      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       return;
     }
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
@@ -499,6 +503,7 @@ const Index = ({ commonData, setUser }: Props) => {
         await api.addUserToOrganization(addUserOrganizationDto);
         setShow(true);
         setAlertText('User invited successfully');
+        setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />);
       } catch (e) {
         Helper.logError('Unexpected error', e);
       }
@@ -523,7 +528,11 @@ const Index = ({ commonData, setUser }: Props) => {
       getOrganizationMembers();
       setShow(true);
       setAlertText('User invited successfully');
+      setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />);
     } catch (e) {
+      setShow(true);
+      setAlertText('Sorry, something happened trying to invite an user. Please try it again.');
+      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
       Helper.logError('Unexpected error', e);
     }
   };
@@ -648,7 +657,7 @@ const Index = ({ commonData, setUser }: Props) => {
           )}
         </div>
       )}
-      <ToasterNotification show={show} setShow={setShow} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={alertText} />
+      <ToasterNotification show={show} setShow={setShow} icon={alertIcon} message={alertText} />
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );

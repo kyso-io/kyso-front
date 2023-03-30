@@ -112,7 +112,7 @@ const Index = ({ commonData, setUser }: Props) => {
     if (commonData.user?.email_verified === false) {
       setShowToaster(true);
       setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Please verify your email');
+      setMessageToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
       return;
     }
     try {

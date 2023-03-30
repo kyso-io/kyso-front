@@ -248,7 +248,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (commonData.user?.email_verified === false) {
       setShow(true);
-      setAlertText('Please verify your email');
+      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
       return;
     }
     const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
@@ -265,7 +265,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (commonData.user?.email_verified === false) {
       setShow(true);
-      setAlertText('Please verify your email');
+      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
       return;
     }
     try {
@@ -282,7 +282,7 @@ const Index = ({ commonData, setUser }: Props) => {
     }
     if (commonData.user?.email_verified === false) {
       setShow(true);
-      setAlertText('Please verify your email');
+      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
       return;
     }
     try {
