@@ -8,12 +8,12 @@ import { SomethingHappened } from '@/components/SomethingHappened';
 import TagsFilterSelector from '@/components/TagsFilterSelector';
 import classNames from '@/helpers/class-names';
 import { removeLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { FolderAddIcon } from '@heroicons/react/outline';
-import { ArrowRightIcon, ExclamationCircleIcon, InformationCircleIcon, SelectorIcon } from '@heroicons/react/solid';
+import { ArrowRightIcon, SelectorIcon } from '@heroicons/react/solid';
 import type { File as KysoFile, KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { TeamVisibilityEnum, KysoConfigFile, KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -22,16 +22,16 @@ import 'easymde/dist/easymde.min.css';
 import FormData from 'form-data';
 import JSZip from 'jszip';
 import { useRouter } from 'next/router';
-import type { ChangeEvent, ReactElement } from 'react';
+import type { ChangeEvent } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import slugify from 'slugify';
-import CaptchaModal from '../../../components/CaptchaModal';
-import { RegisteredUsersAlert } from '../../../components/RegisteredUsersAlert';
-import ToasterNotification from '../../../components/ToasterNotification';
-import { checkJwt } from '../../../helpers/check-jwt';
-import { HelperPermissions } from '../../../helpers/check-permissions';
-import { Helper } from '../../../helpers/Helper';
-import type { HttpExceptionDto } from '../../../interfaces/http-exception.dto';
+import CaptchaModal from '@/components/CaptchaModal';
+import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { Helper } from '@/helpers/Helper';
+import type { HttpExceptionDto } from '@/interfaces/http-exception.dto';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 interface TmpReportFile {
   id: string | null;
@@ -41,19 +41,11 @@ interface TmpReportFile {
   file: File | null;
 }
 
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
-
-const CreateReport = ({ commonData, setUser }: Props) => {
+const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const refTitle = useRef<any>(null);
   const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
   const [loggedUserShowCaptcha, setLoggedUserShowCaptcha] = useState<boolean>(true);
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
-  const [toasterIcon, setIcon] = useState<ReactElement>(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const inputRef = useRef<any>(null);
   const [title, setTitle] = useState('');
@@ -325,8 +317,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
 
   const setTitleDelay = (_title: string) => {
     setTitle(_title);
-    setShowToaster(false);
-    setMessageToaster('');
+    hideToaster();
   };
 
   const setDescriptionDelay = (_description: string) => {
@@ -335,7 +326,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
 
   const setSelectedPeopleDelay = (newSelectedPeople: TeamMember[]) => {
     setSelectedPeople(newSelectedPeople as TeamMember[]);
-    setMessageToaster('');
+    hideToaster();
   };
 
   const setTagsDelay = (newTgs: string[]) => {
@@ -346,23 +337,17 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     if (e) {
       e.preventDefault();
     }
-    setShowToaster(false);
+    hideToaster();
     if (!title || title.trim().length === 0) {
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Title is required.');
-      setShowToaster(true);
+      showToaster('Title is required.', ToasterIcons.INFO);
       return;
     }
     if (selectedTeam === null) {
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Please select a channel.');
-      setShowToaster(true);
+      showToaster('Please select a channel.', ToasterIcons.INFO);
       return;
     }
     if (tmpReportFiles.length === 0) {
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Please upload at least one file.');
-      setShowToaster(true);
+      showToaster('Please upload at least one file.', ToasterIcons.INFO);
       return;
     }
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
@@ -374,9 +359,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     try {
       const exists: boolean = await api.reportExists(selectedTeam.id, Helper.slugify(title));
       if (exists) {
-        setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-        setMessageToaster('Report with this name already exists. Change the title.');
-        setShowToaster(true);
+        showToaster('A report with this name already exists. Please consider to change the title.', ToasterIcons.INFO);
         setBusy(false);
         return;
       }
@@ -385,8 +368,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       if (httpExceptionDto.statusCode === 403) {
         return;
       }
-      setMessageToaster(error.response.data.message);
-      setShowToaster(true);
+      showToaster(error.response.data.message, ToasterIcons.ERROR);
       setBusy(false);
       return;
     }
@@ -412,25 +394,24 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     const resultKysoSettings: NormalizedResponseDTO<string> = await api.getSettingValue(KysoSettingsEnum.MAX_FILE_SIZE);
     const maxFileSize: number = Helper.parseFileSizeStr(resultKysoSettings.data);
     if (blobZip.size > maxFileSize) {
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster(`You exceeded the maximum upload size permitted (${resultKysoSettings.data})`);
-      setShowToaster(true);
+      showToaster(`You exceeded the maximum upload size permitted (${resultKysoSettings.data})`, ToasterIcons.ERROR);
+
       setBusy(false);
       return;
     }
     const formData: FormData = new FormData();
     formData.append('file', blobZip);
-    setIcon(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
-    setMessageToaster('Uploading report. Please wait ...');
-    setShowToaster(true);
+
+    showToaster('Uploading report. Please wait ...', ToasterIcons.INFO);
+
     try {
       const { data: newReport }: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
       cleanStorage();
-      setShowToaster(false);
       window.location.href = `/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`;
-      setMessageToaster('Report uploaded successfully.');
+
+      showToaster('Report uploaded successfully.', ToasterIcons.INFO);
     } catch (err: any) {
-      setShowToaster(err.response.data.message);
+      showToaster(err.response.data.message, ToasterIcons.ERROR);
       setBusy(false);
     }
   };
@@ -439,23 +420,18 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     if (e) {
       e.preventDefault();
     }
-    setShowToaster(false);
+    hideToaster();
+
     if (!title || title.trim().length === 0) {
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Title is required.');
-      setShowToaster(true);
+      showToaster('Title is required.', ToasterIcons.INFO);
       return;
     }
     if (selectedTeam === null) {
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Please select a channel.');
-      setShowToaster(true);
+      showToaster('Please select a channel.', ToasterIcons.INFO);
       return;
     }
     if (tmpReportFiles.length === 0) {
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster('Please upload at least one file.');
-      setShowToaster(true);
+      showToaster('Please upload at least one file.', ToasterIcons.INFO);
       return;
     }
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
@@ -511,10 +487,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     const resultKysoSettings: NormalizedResponseDTO<string> = await api.getSettingValue(KysoSettingsEnum.MAX_FILE_SIZE);
     const maxFileSize: number = Helper.parseFileSizeStr(resultKysoSettings.data);
     if (blobZip.size > maxFileSize) {
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster(`You exceeded the maximum upload size permitted (${resultKysoSettings.data})`);
-      setShowToaster(true);
-      setBusy(false);
+      showToaster(`You exceeded the maximum upload size permitted (${resultKysoSettings.data})`, ToasterIcons.ERROR);
       return;
     }
 
@@ -523,19 +496,21 @@ const CreateReport = ({ commonData, setUser }: Props) => {
     formData.append('version', report!.last_version.toString());
     formData.append('unmodifiedFiles', JSON.stringify(unmodifiedFiles));
     formData.append('deletedFiles', JSON.stringify(deletedFiles));
-    setIcon(<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />);
-    setMessageToaster('Updating report. Please wait ...');
-    setShowToaster(true);
+
+    showToaster('Updating report. Please wait ...', ToasterIcons.INFO);
+
     try {
       const responseUpdateReport: NormalizedResponseDTO<ReportDTO> = await api.updateUiReport(report!.id!, formData);
       cleanStorage();
-      setShowToaster(false);
+      hideToaster();
+
       const updatedReport: ReportDTO = responseUpdateReport.data;
       window.location.href = `/${updatedReport.organization_sluglified_name}/${updatedReport.team_sluglified_name}/${updatedReport.name}`;
-      setMessageToaster('Report updated successfully.');
+
+      showToaster('Report updated successfully', ToasterIcons.INFO);
     } catch (err: any) {
       Helper.logError('Unexpected error', err);
-      setShowToaster(err.response.data.message);
+      showToaster(err.response.data.message, ToasterIcons.ERROR);
       setBusy(false);
     }
   };
@@ -577,14 +552,14 @@ const CreateReport = ({ commonData, setUser }: Props) => {
       }
     }
     setTmpReportFiles(copyTmpReportFiles);
+
     if (ignoredFiles.length > 0) {
-      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-      setMessageToaster(
+      showToaster(
         ignoredFiles.length === 1
           ? `${ignoredFiles[0]} is a self-generated configuration file. It is not possible to upload it.`
           : `The following files ${ignoredFiles.join(', ')} will not be uploaded. The system will generate a configuration file.`,
+        ToasterIcons.ERROR,
       );
-      setShowToaster(true);
     }
   };
 
@@ -674,8 +649,7 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                                   <span
                                     onClick={() => {
                                       setSelectedTeam(teamResourcePermissions);
-                                      setShowToaster(false);
-                                      setMessageToaster('');
+                                      hideToaster();
                                       setSelectedPeople([]);
 
                                       if (report && report.author_ids && report.author_ids!.length === 0) {
@@ -758,11 +732,9 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                   setSelected={(newSelectedPeople: TeamMember[]) => {
                     if (newSelectedPeople.length > 0) {
                       setSelectedPeopleDelay(newSelectedPeople);
-                      setShowToaster(false);
+                      hideToaster();
                     } else {
-                      setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-                      setMessageToaster('At least one author is required');
-                      setShowToaster(true);
+                      showToaster('At least one author is required', ToasterIcons.INFO);
                     }
                   }}
                   emptyMessage={selectedTeam !== null ? 'No authors' : 'First select a channel to add authors'}
@@ -921,16 +893,12 @@ const CreateReport = ({ commonData, setUser }: Props) => {
                     disabled={!hasPermissionCreateReport || busy}
                     onClick={() => {
                       if (!loggedUserEmailVerified) {
-                        setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-                        setMessageToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
-                        setShowToaster(true);
+                        showToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.', ToasterIcons.INFO);
                         return;
                       }
 
                       if (captchaIsEnabled && loggedUserShowCaptcha) {
-                        setIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
-                        setMessageToaster("Your account didn't pass the antibot process.");
-                        setShowToaster(true);
+                        showToaster("Your account didn't pass the antibot process.", ToasterIcons.INFO);
                         return;
                       }
 
@@ -952,13 +920,6 @@ const CreateReport = ({ commonData, setUser }: Props) => {
             </div>
           </div>
         </div>
-        <ToasterNotification
-          show={showToaster}
-          setShow={setShowToaster}
-          // icon={busy ? <InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" /> : <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />}
-          icon={toasterIcon}
-          message={messageToaster}
-        />
         {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       </div>
     ) : (
