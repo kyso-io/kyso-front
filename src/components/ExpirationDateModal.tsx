@@ -158,7 +158,8 @@ const ExpirationDateModal = ({ date, isOpen, onClose, requesting }: Props) => {
                           {days.map((day: moment.Moment, dayIndex: number) => {
                             const isSelected: boolean = day.isSame(selectedDate, 'day');
                             const isToday: boolean = day.isSame(moment(), 'day');
-                            const canBeSelected: boolean = day.isSameOrAfter(moment().startOf('day'), 'day') && day.isSameOrBefore(moment().add(LIMIT_MONTHS, 'months').endOf('day'), 'day');
+                            const canBeSelected: boolean =
+                              day.isSameOrAfter(moment().startOf('day').add(1, 'day'), 'day') && day.isSameOrBefore(moment().add(LIMIT_MONTHS, 'months').endOf('day'), 'day');
                             const datetime: string = day.format('YYYY-MM-DD');
                             return (
                               <button
@@ -171,11 +172,10 @@ const ExpirationDateModal = ({ date, isOpen, onClose, requesting }: Props) => {
                                 className={clsx(
                                   'py-1.5 hover:bg-gray-100 focus:z-10',
                                   canBeSelected ? 'bg-white' : 'bg-gray-50 cursor-not-allowed',
-                                  (isSelected || isToday) && 'font-semibold',
+                                  isSelected && 'font-semibold',
                                   isSelected && 'text-white',
                                   !isSelected && canBeSelected && !isToday && 'text-gray-900',
-                                  !isSelected && !canBeSelected && !isToday && 'text-gray-400',
-                                  isToday && !isSelected && 'text-indigo-600',
+                                  !isSelected && !canBeSelected && 'text-gray-400',
                                   dayIndex === 0 && 'rounded-tl-lg',
                                   dayIndex === 6 && 'rounded-tr-lg',
                                   dayIndex === days.length - 7 && 'rounded-bl-lg',
