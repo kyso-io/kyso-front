@@ -6,9 +6,8 @@ import { SomethingHappened } from '@/components/SomethingHappened';
 import UserProfileInfo from '@/components/UserProfileInfo';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useInterval } from '@/hooks/use-interval';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { CommonData } from '@/types/common-data';
-import { CheckCircleIcon, InformationCircleIcon } from '@heroicons/react/solid';
 import type { ActivityFeed, NormalizedResponseDTO, PaginatedResponseDto, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -16,12 +15,12 @@ import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
-import CaptchaModal from '../../../components/CaptchaModal';
-import ToasterNotification from '../../../components/ToasterNotification';
-import { checkJwt } from '../../../helpers/check-jwt';
-import { checkReportAuthors } from '../../../helpers/check-report-authors';
-import { Helper } from '../../../helpers/Helper';
-import type { KeyValue } from '../../../model/key-value.model';
+import CaptchaModal from '@/components/CaptchaModal';
+import { checkJwt } from '@/helpers/check-jwt';
+import { checkReportAuthors } from '@/helpers/check-report-authors';
+import { Helper } from '@/helpers/Helper';
+import type { KeyValue } from '@/model/key-value.model';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 60;
@@ -53,18 +52,11 @@ type UserProfileData = {
   errorUserProfile: string | null;
 };
 
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
-
-const Index = ({ commonData, setUser }: Props) => {
+const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const { username } = router.query;
   const [userProfileData, setUserProfileData] = useState<UserProfileData | null>(null);
   const [currentTab, onChangeTab] = useState<string>('Overview');
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
   const [showEmails, setShowEmails] = useState<boolean>(false);
   // REPORTS
   const [reportsResponse, setReportsResponse] = useState<NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null>(null);
@@ -73,8 +65,6 @@ const Index = ({ commonData, setUser }: Props) => {
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
-  const [show, setShow] = useState<boolean>(false);
-  const [alertText, setAlertText] = useState<string>('');
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
 
@@ -247,8 +237,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShow(true);
-      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       return;
     }
     const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
@@ -264,8 +253,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShow(true);
-      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       return;
     }
     try {
@@ -281,8 +269,7 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     if (commonData.user?.email_verified === false) {
-      setShow(true);
-      setAlertText('Your email is not verified, please review your inbox. You can send another verification mail in Settings');
+      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
       return;
     }
     try {
@@ -345,24 +332,23 @@ const Index = ({ commonData, setUser }: Props) => {
       return;
     }
     try {
-      setShowToaster(true);
-      setMessageToaster('Uploading image...');
+      showToaster('Uploading image...', ToasterIcons.INFO);
       const api: Api = new Api(commonData.token);
       const response: NormalizedResponseDTO<UserDTO> = await api.updateUserBackgroundImage(commonData.user!.id, file);
       setUser(response.data);
       setUserProfileData({ errorUserProfile: null, userProfile: response.data });
-      setMessageToaster('Image uploaded successfully!');
+      showToaster('Image uploaded successfully!', ToasterIcons.INFO);
       setTimeout(() => {
-        setShowToaster(false);
+        hideToaster();
       }, 3000);
     } catch (e: any) {
       // Default error message
-      setMessageToaster(`Image couldn't be updated`);
+      showToaster(`We're sorry! Something happenend and the image couldn't be updated`, ToasterIcons.ERROR);
 
       // Specific error message. If something fails, the first message will be shown
       const errorData: { statusCode: number; message: string; error: string } = e.response.data;
       Helper.logError('Error uploading user profile image', errorData);
-      setMessageToaster(`Sorry, we can't update your profile image because: ${errorData.message}`);
+      showToaster(`Sorry, we can't update your profile image because: ${errorData.message}`, ToasterIcons.ERROR);
     }
   };
 
@@ -376,7 +362,6 @@ const Index = ({ commonData, setUser }: Props) => {
 
   return (
     <div className="p-2">
-      <ToasterNotification show={showToaster} setShow={setShowToaster} message={messageToaster} icon={<InformationCircleIcon className="h-6 w-6 text-blue-400" aria-hidden="true" />} />
       <UserProfileInfo
         commonData={commonData}
         onChangeBackgroundImage={onChangeBackgroundImage}
@@ -453,7 +438,6 @@ const Index = ({ commonData, setUser }: Props) => {
           )}
         </div>
       </div>
-      <ToasterNotification show={show} setShow={setShow} icon={<CheckCircleIcon className="h-6 w-6 text-blue-700" aria-hidden="true" />} message={alertText} />
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
