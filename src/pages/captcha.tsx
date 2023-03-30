@@ -1,22 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ToasterIcons } from '@/enums/toaster-icons';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
-import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
-import ToasterNotification from '../components/ToasterNotification';
 import { checkJwt } from '../helpers/check-jwt';
-import type { CommonData } from '../types/common-data';
 
 const DEFAULT_CAPTCHA_SITE_KEY = '22';
-
-interface Props {
-  commonData: CommonData;
-}
 
 function isBrowser() {
   if (typeof window !== 'undefined') {
@@ -25,17 +20,14 @@ function isBrowser() {
   return false;
 }
 
-const Index = ({ commonData }: Props) => {
+const Index = ({ commonData, showToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const { invitation, redirect } = router.query;
   const hCaptchaRef = useRef(null);
   const [captchaSiteKey, setCaptchaSiteKey] = useState<string>(DEFAULT_CAPTCHA_SITE_KEY);
   const [captchaToken, setCaptchaToken] = useState<string>('');
-  const [alertText, setAlertText] = useState<string>('');
-  const [show, setShow] = useState<boolean>(false);
   const [requesting, setRequesting] = useState<boolean>(false);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
-  const [notificationIcon, setNotificationIcon] = useState<any>(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
 
   useEffect(() => {
     const result: boolean = checkJwt();
@@ -43,9 +35,7 @@ const Index = ({ commonData }: Props) => {
 
     const alertMessage: string | null = sessionStorage.getItem('alertMessage');
     if (alertMessage) {
-      setAlertText(alertMessage);
-      setShow(true);
-      setNotificationIcon(<CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />);
+      showToaster(alertMessage, ToasterIcons.INFO);
       sessionStorage.removeItem('alertMessage');
     }
   }, []);
@@ -100,9 +90,7 @@ const Index = ({ commonData }: Props) => {
 
   const onSubmit = async () => {
     if (!captchaToken) {
-      setShow(true);
-      setAlertText('Please verify that you are not a robot.');
-      setNotificationIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('Please verify that you are not a robot solving this captcha', ToasterIcons.INFO);
       return;
     }
     setRequesting(true);
@@ -134,9 +122,7 @@ const Index = ({ commonData }: Props) => {
         }
       }, 200);
     } else {
-      setShow(true);
-      setAlertText('Please verify that you are not a robot.');
-      setNotificationIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('Please verify that you are not a robot.', ToasterIcons.INFO);
     }
     setRequesting(false);
   };
@@ -162,7 +148,6 @@ const Index = ({ commonData }: Props) => {
           )}
         </div>
       </div>
-      <ToasterNotification show={show} setShow={setShow} icon={notificationIcon} message={alertText} />
     </div>
   );
 };
