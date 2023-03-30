@@ -8,11 +8,14 @@ import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTok
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
-import { checkJwt } from '../helpers/check-jwt';
-import { getCommonData } from '../helpers/get-common-data';
-import { getReport } from '../helpers/get-report';
-import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
-import { useAppDispatch } from '../hooks/redux-hooks';
+import { checkJwt } from '@/helpers/check-jwt';
+import { getCommonData } from '@/helpers/get-common-data';
+import { getReport } from '@/helpers/get-report';
+import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import { useAppDispatch } from '@/hooks/redux-hooks';
+import ToasterNotification from '@/components/ToasterNotification';
+import { ToasterIcons } from '@/enums/toaster-icons';
+import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
 
 type IUnpureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -30,6 +33,10 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     user: null,
   });
   const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [toasterMessage, setToasterMessage] = useState<string>('');
+  const [toasterIcon, setToasterIcon] = useState<JSX.Element>(ToasterIcons.INFO);
+  const [toasterVisible, setToasterVisible] = useState<boolean>(false);
+
   const dispatch = useAppDispatch();
 
   const userNavigation = [
@@ -162,10 +169,32 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     });
   };
 
+  const showToaster = (message: string, icon: JSX.Element) => {
+    setToasterMessage(message);
+    setToasterIcon(icon);
+    setToasterVisible(true);
+  };
+
+  const hideToaster = () => {
+    setToasterVisible(false);
+  };
+
   return (
     <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
-      {React.cloneElement(children, { commonData, reportData, setReportData, setUser })}
+      <>
+        {React.cloneElement(children, { commonData, reportData, setReportData, setUser, showToaster, hideToaster })}
+        <ToasterNotification show={toasterVisible} setShow={setToasterVisible} icon={toasterIcon} message={toasterMessage} backgroundColor={TailwindColor.SLATE_50} />
+      </>
     </PureKysoApplicationLayout>
   );
 };
 export default KysoApplicationLayout;
+
+export interface IKysoApplicationLayoutProps {
+  commonData: CommonData;
+  reportData: ReportData | null;
+  setReportData: React.Dispatch<React.SetStateAction<ReportData | null>>;
+  setUser: (user: UserDTO) => void;
+  showToaster: (message: string, icon: JSX.Element) => void;
+  hideToaster: () => void;
+}

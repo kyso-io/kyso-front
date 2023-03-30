@@ -21,12 +21,12 @@ import FormData from 'form-data';
 import JSZip from 'jszip';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
-import CaptchaModal from '../../../components/CaptchaModal';
-import { RegisteredUsersAlert } from '../../../components/RegisteredUsersAlert';
-import ToasterNotification from '../../../components/ToasterNotification';
-import { checkJwt } from '../../../helpers/check-jwt';
-import { HelperPermissions } from '../../../helpers/check-permissions';
-import { Helper } from '../../../helpers/Helper';
+import CaptchaModal from '@/components/CaptchaModal';
+import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
+import ToasterNotification from '@/components/ToasterNotification';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { Helper } from '@/helpers/Helper';
 
 interface Props {
   commonData: CommonData;

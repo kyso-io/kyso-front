@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ToasterIcons } from '@/enums/toaster-icons';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { FeedbackDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -8,15 +10,8 @@ import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import CaptchaModal from '../components/CaptchaModal';
-import ToasterNotification from '../components/ToasterNotification';
 import { checkJwt } from '../helpers/check-jwt';
 import { Helper } from '../helpers/Helper';
-import type { CommonData } from '../types/common-data';
-
-interface Props {
-  commonData: CommonData;
-  setUser: (user: UserDTO) => void;
-}
 
 function isBrowser() {
   if (typeof window !== 'undefined') {
@@ -25,14 +20,11 @@ function isBrowser() {
   return false;
 }
 
-const Index = ({ commonData, setUser }: Props) => {
+const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
-  const [alertText, setAlertText] = useState<string>('');
-  const [show, setShow] = useState<boolean>(false);
   const [requesting, setRequesting] = useState<boolean>(false);
   const [subject, setSubject] = useState<string>('');
   const [message, setMessage] = useState<string>('');
-  const [alertIsError, setAlertIsError] = useState<boolean>(false);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
@@ -57,9 +49,7 @@ const Index = ({ commonData, setUser }: Props) => {
 
   const onSubmit = async () => {
     if (!commonData.user!.email_verified) {
-      setShow(true);
-      setAlertIsError(true);
-      setAlertText('Please verify your email address before submitting feedback.');
+      showToaster('Please verify your email address before submitting feedback', ToasterIcons.INFO);
       return;
     }
     if (captchaIsEnabled && commonData.user!.show_captcha) {
@@ -71,20 +61,18 @@ const Index = ({ commonData, setUser }: Props) => {
       const api: Api = new Api(commonData.token);
       const feedbackDto: FeedbackDto = new FeedbackDto(subject, message);
       await api.createFeedback(feedbackDto);
-      setShow(true);
       setSubject('');
       setMessage('');
-      setShow(true);
-      setAlertIsError(false);
-      setAlertText('Feedback sent successfully');
+
+      showToaster('Your feedback was sent successfully', ToasterIcons.INFO);
+
       const redirectUrl: string | null = sessionStorage.getItem('redirectUrl') || '/';
       if (isBrowser()) {
         sessionStorage.removeItem('redirectUrl');
       }
       setTimeout(() => router.push(redirectUrl), 2000);
     } catch (e: any) {
-      setAlertIsError(true);
-      setAlertText(e.response.data.message);
+      showToaster("We're sorry! Something happened sending your feedback. Please try again", ToasterIcons.ERROR);
     }
     setRequesting(false);
   };
@@ -195,12 +183,6 @@ const Index = ({ commonData, setUser }: Props) => {
           </div>
         )}
       </div>
-      <ToasterNotification
-        show={show}
-        setShow={setShow}
-        icon={alertIsError ? <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" /> : <CheckCircleIcon className="h-6 w-6 text-green-400" aria-hidden="true" />}
-        message={alertText}
-      />
       {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );

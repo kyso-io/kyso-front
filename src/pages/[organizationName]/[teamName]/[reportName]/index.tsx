@@ -15,6 +15,7 @@ import { ScrollDirection, useScrollDirection } from '@/hooks/use-scroll-directio
 import { useUserEntities } from '@/hooks/use-user-entities';
 import type { Version } from '@/hooks/use-versions';
 import { useVersions } from '@/hooks/use-versions';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
@@ -23,7 +24,7 @@ import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ArrowSmDownIcon, CheckCircleIcon, ClipboardCopyIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import { ArrowSmDownIcon, ClipboardCopyIcon } from '@heroicons/react/solid';
 import type { Comment, File as KysoFile, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO, GitCommit } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -47,28 +48,21 @@ import { dirname } from 'path';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import CaptchaModal from '../../../../components/CaptchaModal';
-import TableOfContents from '../../../../components/TableOfContents';
-import ToasterNotification from '../../../../components/ToasterNotification';
-import { HelperPermissions } from '../../../../helpers/check-permissions';
-import { FileTypesHelper } from '../../../../helpers/FileTypesHelper';
-import { Helper } from '../../../../helpers/Helper';
-import type { KeyValue } from '../../../../model/key-value.model';
-import type { FileToRender } from '../../../../types/file-to-render';
-
-interface Props {
-  commonData: CommonData;
-  setReportData: (data: ReportData | null) => void;
-  reportData: ReportData | null;
-  setUser: (user: UserDTO) => void;
-}
+import CaptchaModal from '@/components/CaptchaModal';
+import TableOfContents from '@/components/TableOfContents';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { FileTypesHelper } from '@/helpers/FileTypesHelper';
+import { Helper } from '@/helpers/Helper';
+import type { KeyValue } from '@/model/key-value.model';
+import type { FileToRender } from '@/types/file-to-render';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 enum Tab {
   Files = 'files',
   Toc = 'toc',
 }
 
-const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
+const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: IKysoApplicationLayoutProps) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [selfTree, setSelfTree] = useState<GithubFileHash[]>([]);
@@ -113,9 +107,6 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Toc);
   const [showEmails, setShowEmails] = useState<boolean>(false);
   const [defaultRedirectOrganization, setDefaultRedirectOrganization] = useState<string>('');
-  const [show, setShow] = useState<boolean>(false);
-  const [alertText, setAlertText] = useState<string>('');
-  const [alertIcon, setAlertIcon] = useState<JSX.Element>(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
   const [teamVisibility, setTeamVisibility] = useState<TeamVisibilityEnum | null>(null);
   const [showError, setShowError] = useState<boolean>(true);
   const [showErrorMessage, setShowErrorMessage] = useState<string>('');
@@ -496,13 +487,10 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
-        setShow(true);
-        setAlertText('User invited successfully');
-        setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+
+        showToaster('User invited successfully', ToasterIcons.SUCCESS);
       } catch (e) {
-        setShow(true);
-        setAlertText('We are sorry! Something happened updating the role of this member. Please try again.');
-        setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+        showToaster('We are sorry! Something happened updating the role of this member. Please try again.', ToasterIcons.ERROR);
         Helper.logError('Unexpected error', e);
       }
     } else {
@@ -536,13 +524,9 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
       const inviteUserDto: InviteUserDto = new InviteUserDto(email, organizationRole, organizationRole);
       await api.inviteNewUser(inviteUserDto);
       getTeamMembers();
-      setShow(true);
-      setAlertText('User invited successfully');
-      setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('User invited successfully', ToasterIcons.SUCCESS);
     } catch (e) {
-      setShow(true);
-      setAlertText('We are sorry! Something happened inviting an user. Please try again.');
-      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('We are sorry! Something happened inviting an user. Please try again.', ToasterIcons.ERROR);
       Helper.logError('Unexpected error', e);
     }
   };
@@ -974,7 +958,6 @@ const Index = ({ commonData, reportData, setReportData, setUser }: Props) => {
               </button>
             </div>
           )}
-          <ToasterNotification show={show} setShow={setShow} icon={alertIcon} message={alertText} />
           {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
         </div>
       )}

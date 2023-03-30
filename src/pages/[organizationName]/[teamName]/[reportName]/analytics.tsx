@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
+import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { AnalyticsSource, DeviceDetector, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportAnalytics, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -23,29 +23,30 @@ import { Pie } from 'react-chartjs-2';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 import { v4 as uuidv4 } from 'uuid';
-import ManageUsers from '../../../../components/ManageUsers';
-import PureAvatar from '../../../../components/PureAvatar';
-import PureReportHeader from '../../../../components/PureReportHeader';
-import PureSideOverlayPanel from '../../../../components/PureSideOverlayPanel';
-import PureTree from '../../../../components/PureTree';
-import TableOfContents from '../../../../components/TableOfContents';
-import ToasterNotification from '../../../../components/ToasterNotification';
-import { HelperPermissions } from '../../../../helpers/check-permissions';
-import classNames from '../../../../helpers/class-names';
-import { getReport } from '../../../../helpers/get-report';
-import { Helper } from '../../../../helpers/Helper';
-import { useAppDispatch, useAppSelector } from '../../../../hooks/redux-hooks';
-import type { Version } from '../../../../hooks/use-versions';
-import { useVersions } from '../../../../hooks/use-versions';
-import KysoApplicationLayout from '../../../../layouts/KysoApplicationLayout';
-import type { KeyValue } from '../../../../model/key-value.model';
-import { TailwindFontSizeEnum } from '../../../../tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '../../../../tailwind/enum/tailwind-height.enum';
-import type { CommonData } from '../../../../types/common-data';
-import type { Member } from '../../../../types/member';
-import type { ReportData } from '../../../../types/report-data';
+import ManageUsers from '@/components/ManageUsers';
+import PureAvatar from '@/components/PureAvatar';
+import PureReportHeader from '@/components/PureReportHeader';
+import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
+import PureTree from '@/components/PureTree';
+import TableOfContents from '@/components/TableOfContents';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import classNames from '@/helpers/class-names';
+import { getReport } from '@/helpers/get-report';
+import { Helper } from '@/helpers/Helper';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import type { Version } from '@/hooks/use-versions';
+import { useVersions } from '@/hooks/use-versions';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { KeyValue } from '@/model/key-value.model';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { CommonData } from '@/types/common-data';
+import type { Member } from '@/types/member';
+import type { ReportData } from '@/types/report-data';
 
 import 'react-tooltip/dist/react-tooltip.css';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Colors);
 
@@ -68,19 +69,12 @@ const optionsPieChart = {
   maintainAspectRatio: false,
 };
 
-interface Props {
-  commonData: CommonData;
-  reportData: ReportData | null;
-  setUser: (user: UserDTO) => void;
-  setReportData: (data: ReportData | null) => void;
-}
-
 enum Tab {
   Files = 'files',
   Toc = 'toc',
 }
 
-const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
+const Index = ({ commonData, reportData, setUser, setReportData, showToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [result, setResult] = useState<NormalizedResponseDTO<ReportAnalytics> | null>(null);
@@ -256,9 +250,6 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
   const version = router.query.version ? (router.query.version as string) : undefined;
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [show, setShow] = useState<boolean>(false);
-  const [alertText, setAlertText] = useState<string>('');
-  const [alertIcon, setAlertIcon] = useState<JSX.Element>(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [showEmails, setShowEmails] = useState<boolean>(false);
   const frontEndUrl = useAppSelector((s) => {
@@ -536,13 +527,10 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
-        setShow(true);
-        setAlertText('User invited successfully');
-        setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+
+        showToaster('User invited successfully', ToasterIcons.SUCCESS);
       } catch (e) {
-        setShow(true);
-        setAlertText('We are sorry! Something happened updating the role of this member. Please try again.');
-        setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+        showToaster('We are sorry! Something happened updating the role of this member. Please try again.', ToasterIcons.SUCCESS);
         Helper.logError('Unexpected error', e);
       }
     } else {
@@ -576,13 +564,10 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
       const inviteUserDto: InviteUserDto = new InviteUserDto(email, organizationRole, organizationRole);
       await api.inviteNewUser(inviteUserDto);
       getTeamMembers();
-      setShow(true);
-      setAlertText('User invited successfully');
-      setAlertIcon(<CheckCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+
+      showToaster('User invited successfully', ToasterIcons.SUCCESS);
     } catch (e) {
-      setShow(true);
-      setAlertText('We are sorry! Something happened inviting an user. Please try again.');
-      setAlertIcon(<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />);
+      showToaster('We are sorry! Something happened inviting an user. Please try again.', ToasterIcons.ERROR);
       Helper.logError('Unexpected error', e);
     }
   };
@@ -927,7 +912,6 @@ const Index = ({ commonData, reportData, setUser, setReportData }: Props) => {
           </div>
         </main>
       </div>
-      <ToasterNotification show={show} setShow={setShow} icon={alertIcon} message={alertText} />
     </React.Fragment>
   );
 };
