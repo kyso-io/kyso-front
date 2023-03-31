@@ -30,12 +30,15 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.ALL);
   const [file, setFile] = useState<File | null>(null);
   const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
+  const [isEmailVerified, setIsEmailVerified] = useState<boolean>(false);
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
       setWaitForLogging(true);
     }, 1000);
+
+    setIsEmailVerified(isCurrentUserVerified());
 
     return () => clearTimeout(timeout);
   }, []);
@@ -105,7 +108,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         {isUserLogged ? (
           <React.Fragment>
             {/* Alert section */}
-            {!isCurrentUserVerified() && (
+            {!isEmailVerified && (
               <PureAlert
                 title="Account not verified"
                 description="Your account has not been verified yet. Please check your inbox, verify your account and refresh this page."

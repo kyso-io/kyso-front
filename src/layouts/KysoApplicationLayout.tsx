@@ -217,7 +217,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
    * @returns false if the user didn't resolved the captcha, true in the contrary
    */
   const isCurrentUserSolvedCaptcha = (): boolean => {
-    if (captchaIsEnabledInKysoSettings && commonData.user!.show_captcha) {
+    if (captchaIsEnabledInKysoSettings && commonData.user && commonData.user.show_captcha) {
       setShowCaptchaModal(true);
       return false;
     }
@@ -232,8 +232,8 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
    * @returns true if is verified, false if not
    */
   const isCurrentUserVerified = (): boolean => {
-    if (!commonData.user!.email_verified) {
-      showToaster('Please verify your email address before submitting feedback', ToasterIcons.INFO);
+    if (commonData.user && !commonData.user.email_verified) {
+      showToaster('Please verify your email account to be able to make changes on Kyso', ToasterIcons.INFO);
       return false;
     }
     return true;

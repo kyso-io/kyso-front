@@ -83,9 +83,12 @@ const CaptchaModal = ({ user, open, onClose, redirectUrl }: Props) => {
               <Dialog.Panel className="relative overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
                 <div className="mt-3 text-center sm:mt-5">
                   <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                    Solve captcha
+                    Are you a bot?
                   </Dialog.Title>
-                  <div className="mt-2">
+                  <div className="max-w-xl">
+                    <p className="mt-6 text-sm">Before we continue we have to make sure you are not a bot! Please solve the following captcha.</p>
+                  </div>
+                  <div className="mt-4" style={{ marginLeft: '20%' }}>
                     <HCaptcha ref={hCaptchaRef} sitekey={captchaSiteKey} onVerify={setCaptchaToken} />
                   </div>
                 </div>
