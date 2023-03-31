@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import PureAvatar from '@/components/PureAvatar';
 import { PureSpinner } from '@/components/PureSpinner';
 import classNames from '@/helpers/class-names';
@@ -14,7 +15,6 @@ type IPureCommentForm = {
   onSubmitted?: () => void;
   hasPermissionCreateComment?: boolean;
   channelMembers: TeamMember[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   submitComment: (text: string, userIds: string[], commentId?: string) => void;
 };
 
@@ -46,34 +46,19 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
   const [value, setValue] = useState<string>(initialValue);
   const [isLoading, setIsLoading] = useState(false);
 
-  /** Assigned but never used
-  let isUserAuthor = false
-  if (user && user.id === comment?.user_id) {
-    isUserAuthor = true
-  }
-  * */
-
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   const handleSubmit = async (e: any) => {
     setIsLoading(true);
     e.preventDefault();
     const targetValue = e.target.input.value;
-
-    // parse out nameSlugs
     const mentionedNameSlugs = parseMentions(targetValue);
     let userIds: string[] = [];
     if (channelMembers) {
       userIds = channelMembers.filter((mem: TeamMember) => mentionedNameSlugs.includes(mem.nameSlug)).map((m: TeamMember) => m.id!);
     }
-
-    /* eslint-disable @typescript-eslint/no-explicit-any */
-    await submitComment(targetValue, userIds, comment?.id);
-
+    submitComment(targetValue, userIds, comment?.id);
     setValue('');
-    setTimeout(() => {
-      setIsLoading(false);
-      onSubmitted();
-    }, 500);
+    setIsLoading(false);
+    onSubmitted();
   };
 
   let message = 'Write a new comment';
@@ -134,8 +119,6 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
       )}
 
       <div className="flex justify-between pt-4">
-        <div>{/* <p className="text-xs text-gray-500">Use @ to mention people</p> */}</div>
-
         <div className="flex flex-row space-x-2">
           {comment && (
             <button className="hover:underline text-gray-500 text-sm" onClick={onCancel}>
@@ -147,6 +130,9 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
               onClick={(e) => {
                 e.preventDefault();
                 setValue('');
+                if (onCancel) {
+                  onCancel();
+                }
               }}
               className={classNames(
                 'mr-2 inline-flex items-center px-2.5 py-1.5 border border-gray-500 text-xs font-medium rounded shadow-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white hover:bg-gray-100 focus:ring-gray-100',

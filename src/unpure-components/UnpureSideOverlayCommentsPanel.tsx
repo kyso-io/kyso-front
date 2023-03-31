@@ -1,12 +1,12 @@
-import type { CommonData } from '@/types/common-data';
-import type { ReactElement } from 'react';
-import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, MenuIcon } from '@heroicons/react/solid';
-import { useRef, useState, useEffect } from 'react';
-import { useEventListener } from 'usehooks-ts';
 import classNames from '@/helpers/class-names';
-import { setLocalStorageItem, getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import { Tooltip } from 'primereact/tooltip';
+import { getLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
+import type { CommonData } from '@/types/common-data';
 import { ChatAltIcon } from '@heroicons/react/outline';
+import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, MenuIcon } from '@heroicons/react/solid';
+import { Tooltip } from 'primereact/tooltip';
+import type { ReactElement } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { useEventListener } from 'usehooks-ts';
 
 type IPureSideOverlayCommentsPanel = {
   cacheKey?: string;
@@ -82,8 +82,11 @@ const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
             </span>
           </button>
         </div>
-
-        {open && <div className={classNames('bg-white px-2 py-2 text-ellipsis overflow-hidden')}>{children}</div>}
+        {open && (
+          <div className={classNames('bg-white px-2 py-2 text-ellipsis overflow-hidden')} style={{ height: 'auto', overflow: 'visible' }}>
+            {children}
+          </div>
+        )}
       </div>
     </>
   );

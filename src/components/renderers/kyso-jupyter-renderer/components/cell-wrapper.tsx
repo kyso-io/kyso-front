@@ -3,7 +3,7 @@ import { Helper } from '@/helpers/Helper';
 import { useNavigateToHashOnce } from '@/hooks/use-navigate-to-hash-once';
 import type { CommonData } from '@/types/common-data';
 import { ChatAltIcon, CodeIcon, LinkIcon } from '@heroicons/react/outline';
-import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, InlineCommentStatusEnum, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import { useMemo, useRef, useState } from 'react';
 import { useHover } from 'usehooks-ts';
 import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
@@ -25,9 +25,9 @@ interface Props {
   first: boolean;
   last: boolean;
   inlineComments: InlineCommentDto[];
-  createInlineComment: (cellId: string, user_ids: string[], text: string) => void;
+  createInlineComment: (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => void;
+  updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteInlineComment: (id: string) => void;
-  editInlineComment: (id: string, user_ids: string[], text: string) => void;
   enabledCreateInlineComment: boolean;
   enabledDeleteInlineComment: boolean;
   enabledEditInlineComment: boolean;
@@ -48,8 +48,8 @@ const CellWrapper = (props: Props) => {
     enabledCreateInlineComment,
     enabledDeleteInlineComment,
     createInlineComment,
+    updateInlineComment,
     deleteInlineComment,
-    editInlineComment,
   } = props;
 
   const reportContext: ReportContext = {
@@ -157,16 +157,9 @@ const CellWrapper = (props: Props) => {
             hasPermissionCreateComment={enabledCreateInlineComment}
             hasPermissionDeleteComment={enabledDeleteInlineComment}
             comments={inlineCommentDtos}
-            onDeleteComment={(commentId) => {
-              deleteInlineComment(commentId);
-            }}
-            submitComment={(text?: string, user_ids?: string[], commentId?: string) => {
-              if (!commentId) {
-                createInlineComment(cell.id, user_ids!, text!);
-              } else {
-                editInlineComment(commentId, user_ids!, text!);
-              }
-            }}
+            createInlineComment={createInlineComment}
+            updateInlineComment={updateInlineComment}
+            deleteComment={deleteInlineComment}
           />
         )}
       </div>
