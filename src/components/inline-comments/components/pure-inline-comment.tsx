@@ -172,7 +172,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                             }}
                           >
                             {getTag(InlineCommentStatusEnum.DOING)}
-                            <p className="mt-1 text-gray-600">You are going to work on this comment soon.</p>
+                            <p className="mt-1 text-gray-600">You are working on this comment.</p>
                           </div>
                         )}
                         {comment.current_status !== InlineCommentStatusEnum.CLOSED && (
