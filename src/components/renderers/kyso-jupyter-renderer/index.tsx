@@ -1,6 +1,6 @@
 /* eslint-disable react/self-closing-comp */
 import type { CommonData } from '@/types/common-data';
-import type { TableOfContentEntryDto, InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, InlineCommentStatusEnum, ReportDTO, TableOfContentEntryDto, TeamMember } from '@kyso-io/kyso-model';
 import React from 'react';
 import TableOfContents from '../../TableOfContents';
 import CellWrapper from './components/cell-wrapper';
@@ -15,9 +15,9 @@ interface Props {
   showInputs: boolean;
   showOutputs: boolean;
   inlineComments: InlineCommentDto[];
-  createInlineComment: (cellId: string, user_ids: string[], text: string) => void;
+  createInlineComment: (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => void;
+  updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteInlineComment: (id: string) => void;
-  editInlineComment: (id: string, user_ids: string[], text: string) => void;
   enabledCreateInlineComment: boolean;
   enabledDeleteInlineComment: boolean;
   enabledEditInlineComment: boolean;
@@ -35,7 +35,7 @@ export const RenderJupyter = ({
   createInlineComment,
   deleteInlineComment,
   onlyVisibleCell,
-  editInlineComment,
+  updateInlineComment,
   enabledCreateInlineComment,
   enabledDeleteInlineComment,
   enabledEditInlineComment,
@@ -66,7 +66,7 @@ export const RenderJupyter = ({
             inlineComments={inlineComments}
             createInlineComment={createInlineComment}
             deleteInlineComment={deleteInlineComment}
-            editInlineComment={editInlineComment}
+            updateInlineComment={updateInlineComment}
             enabledCreateInlineComment={enabledCreateInlineComment}
             enabledDeleteInlineComment={enabledDeleteInlineComment}
             enabledEditInlineComment={enabledEditInlineComment}

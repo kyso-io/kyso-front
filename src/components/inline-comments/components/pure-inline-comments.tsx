@@ -1,12 +1,14 @@
 /* eslint-disable import/no-cycle */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CommonData } from '@/types/common-data';
-import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
-import React from 'react';
-import { Tooltip } from 'primereact/tooltip';
-import 'primereact/resources/primereact.min.css'; // core css
-import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import type { InlineCommentDto, InlineCommentStatusEnum, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import clsx from 'clsx';
+import 'primereact/resources/primereact.min.css'; // core css
+import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
+import { Tooltip } from 'primereact/tooltip';
+import React from 'react';
 import PureInlineComment from './pure-inline-comment';
 import PureInlineCommentForm from './pure-inline-comment-form';
 
@@ -21,13 +23,13 @@ type IPureComments = {
   comments: InlineCommentDto[];
   hasPermissionCreateComment: boolean;
   hasPermissionDeleteComment: boolean;
-  onDeleteComment: (id: string) => void;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  submitComment: (text: string, user_ids: string[], commentId?: string) => void;
+  createInlineComment: (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => void;
+  updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
+  deleteComment: (id: string) => void;
 };
 
 const PureComments = (props: IPureComments) => {
-  const { comments, submitComment, commonData, report, channelMembers, hasPermissionDeleteComment, hasPermissionCreateComment, onDeleteComment } = props;
+  const { comments, commonData, report, channelMembers, hasPermissionDeleteComment, hasPermissionCreateComment, deleteComment, createInlineComment, updateInlineComment } = props;
   return (
     <div className={classNames('w-full flex flex-col')}>
       {(comments?.length > 0 || commonData.user) && (
@@ -46,22 +48,49 @@ const PureComments = (props: IPureComments) => {
       )}
       <div className="flex flex-col">
         {comments &&
-          comments.map((comment) => (
-            <PureInlineComment
-              onDeleteComment={onDeleteComment}
-              hasPermissionDeleteComment={hasPermissionDeleteComment}
-              channelMembers={channelMembers}
-              key={`comment-${comment.id}`}
-              submitComment={submitComment}
-              comment={comment}
-              report={report}
-              hasPermissionCreateComment={hasPermissionCreateComment}
-              commonData={commonData}
-            />
+          comments.map((inlineComment: InlineCommentDto) => (
+            <React.Fragment key={inlineComment.id}>
+              <PureInlineComment
+                hasPermissionDeleteComment={hasPermissionDeleteComment}
+                channelMembers={channelMembers}
+                comment={inlineComment}
+                report={report}
+                hasPermissionCreateComment={hasPermissionCreateComment}
+                commonData={commonData}
+                deleteComment={deleteComment}
+                createInlineComment={createInlineComment}
+                updateInlineComment={updateInlineComment}
+                parentInlineComment={null}
+              />
+              {inlineComment.inline_comments.map((childComment: InlineCommentDto) => (
+                <PureInlineComment
+                  key={childComment.id}
+                  hasPermissionDeleteComment={hasPermissionDeleteComment}
+                  channelMembers={channelMembers}
+                  comment={childComment}
+                  report={report}
+                  hasPermissionCreateComment={hasPermissionCreateComment}
+                  commonData={commonData}
+                  deleteComment={deleteComment}
+                  createInlineComment={createInlineComment}
+                  updateInlineComment={updateInlineComment}
+                  parentInlineComment={inlineComment}
+                />
+              ))}
+            </React.Fragment>
           ))}
       </div>
-
-      {commonData.user && <PureInlineCommentForm user={commonData.user} submitComment={submitComment} channelMembers={channelMembers} />}
+      {commonData.user && (
+        <div className={clsx({ 'mt-20': comments && comments.length > 0 })}>
+          <PureInlineCommentForm
+            user={commonData.user}
+            submitComment={(text: string, userIds: string[]) => {
+              createInlineComment(report.id!, userIds, text, null);
+            }}
+            channelMembers={channelMembers}
+          />
+        </div>
+      )}
     </div>
   );
 };

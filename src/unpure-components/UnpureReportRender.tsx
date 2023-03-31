@@ -12,9 +12,9 @@ import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
 import { DocumentTextIcon } from '@heroicons/react/outline';
-import type { InlineCommentDto, NormalizedResponseDTO, ReportDTO, TeamMember, UpdateInlineCommentDto, UserDTO } from '@kyso-io/kyso-model';
-import { CreateInlineCommentDto } from '@kyso-io/kyso-model';
-import { Api, createInlineCommentAction, deleteInlineCommentAction, getInlineCommentsAction, updateInlineCommentAction } from '@kyso-io/kyso-store';
+import type { InlineCommentDto, InlineCommentStatusEnum, NormalizedResponseDTO, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import { CreateInlineCommentDto, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
+import { Api, getInlineCommentsAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState } from 'react';
@@ -76,47 +76,54 @@ const UnpureReportRender = ({
     }
   }, [report.id, fileToRender.id]);
 
-  const createInlineComment = async (cell_id: string, user_ids: string[], text: string) => {
+  const createInlineComment = async (_: string, user_ids: string[], text: string, parent_id: string | null) => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
       setShowCaptchaModal(true);
       return;
     }
     try {
-      const createInlineCommentDto: CreateInlineCommentDto = new CreateInlineCommentDto(report.id as string, cell_id, text, user_ids);
-      const data = await dispatch(createInlineCommentAction(createInlineCommentDto));
-      if (data?.payload) {
-        setInlineComments([...inlineComments, data.payload]);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const createInlineCommentDto: CreateInlineCommentDto = new CreateInlineCommentDto(report.id as string, fileToRender.id, text, user_ids, parent_id);
+      const response: NormalizedResponseDTO<InlineCommentDto> = await api.createInlineComment(createInlineCommentDto);
+
+      const newInlineComment: InlineCommentDto = response.data;
+      const copyInlineComments: InlineCommentDto[] = [...inlineComments];
+      if (newInlineComment.parent_comment_id) {
+        const index: number = copyInlineComments.findIndex((inlineComment: InlineCommentDto) => inlineComment.id === newInlineComment.parent_comment_id);
+        if (index !== -1) {
+          copyInlineComments[index]!.inline_comments.unshift(newInlineComment);
+        } else {
+          copyInlineComments[index]!.inline_comments = [newInlineComment];
+        }
+      } else {
+        copyInlineComments.push(response.data);
       }
+      setInlineComments(copyInlineComments);
     } catch (e) {
       // Helper.logError("Unexpected error", e);;
     }
   };
 
-  const editInlineComment = async (id: string, user_ids: string[], text: string) => {
+  const updateInlineComment = async (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
       setShowCaptchaModal(true);
       return;
     }
     try {
-      const data = await dispatch(
-        updateInlineCommentAction({
-          inlineCommentId: id,
-          updateInlineCommentDto: {
-            text,
-            mentions: user_ids,
-          } as UpdateInlineCommentDto,
-        }),
-      );
-      if (data?.payload) {
-        setInlineComments(
-          inlineComments.map((inlineComment) => {
-            if (inlineComment.id === id) {
-              return data.payload;
-            }
-            return inlineComment;
-          }),
-        );
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(text, user_ids, status);
+      const response: NormalizedResponseDTO<InlineCommentDto> = await api.updateInlineComment(id, updateInlineCommentDto);
+      const updatedInlineComment: InlineCommentDto = response.data;
+      const copyInlineComments: InlineCommentDto[] = [...inlineComments];
+      if (updatedInlineComment.parent_comment_id) {
+        const index: number = copyInlineComments.findIndex((inlineComment: InlineCommentDto) => inlineComment.id === updatedInlineComment.parent_comment_id);
+        const indexChild: number = copyInlineComments[index]!.inline_comments.findIndex((inlineComment: InlineCommentDto) => inlineComment.id === id);
+        copyInlineComments[index]!.inline_comments[indexChild] = updatedInlineComment;
+      } else {
+        const index: number = copyInlineComments.findIndex((inlineComment: InlineCommentDto) => inlineComment.id === id);
+        copyInlineComments[index] = updatedInlineComment;
       }
+      setInlineComments(copyInlineComments);
     } catch (e) {
       // Helper.logError("Unexpected error", e);;
     }
@@ -125,7 +132,7 @@ const UnpureReportRender = ({
   const onCloseCaptchaModal = async (refreshUser: boolean) => {
     setShowCaptchaModal(false);
     if (refreshUser) {
-      const api: Api = new Api(commonData.token);
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
       setUser(result.data);
     }
@@ -136,11 +143,37 @@ const UnpureReportRender = ({
       setShowCaptchaModal(true);
       return;
     }
-    try {
-      const data = await dispatch(deleteInlineCommentAction(id));
-      if (data?.payload) {
-        setInlineComments(inlineComments.filter((inlineComment) => inlineComment.id !== id));
+    let deletedInlineComment: InlineCommentDto | null = null;
+    for (const inlineCommentItem of inlineComments) {
+      if (inlineCommentItem.id === id) {
+        deletedInlineComment = inlineCommentItem;
+        break;
       }
+      if (inlineCommentItem.inline_comments.length > 0) {
+        for (const inlineCommentChild of inlineCommentItem.inline_comments) {
+          if (inlineCommentChild.id === id) {
+            deletedInlineComment = inlineCommentChild;
+            break;
+          }
+        }
+      }
+    }
+    if (!deletedInlineComment) {
+      return;
+    }
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      await api.deleteInlineComment(id);
+      const copyInlineComments: InlineCommentDto[] = [...inlineComments];
+      if (deletedInlineComment.parent_comment_id) {
+        const index: number = copyInlineComments.findIndex((inlineComment: InlineCommentDto) => inlineComment.id === deletedInlineComment!.parent_comment_id);
+        const indexChild: number = copyInlineComments[index]!.inline_comments.findIndex((inlineComment: InlineCommentDto) => inlineComment.id === id);
+        copyInlineComments[index]!.inline_comments.splice(indexChild, 1);
+      } else {
+        const index: number = copyInlineComments.findIndex((inlineComment: InlineCommentDto) => inlineComment.id === id);
+        copyInlineComments.splice(index, 1);
+      }
+      setInlineComments(copyInlineComments);
     } catch (e) {
       // Helper.logError("Unexpected error", e);;
     }
@@ -172,8 +205,8 @@ const UnpureReportRender = ({
             showOutputs={false}
             inlineComments={inlineComments}
             createInlineComment={createInlineComment}
+            updateInlineComment={updateInlineComment}
             deleteInlineComment={deleteInlineComment}
-            editInlineComment={editInlineComment}
             enabledCreateInlineComment={enabledCreateInlineComment}
             enabledEditInlineComment={enabledEditInlineComment}
             enabledDeleteInlineComment={enabledDeleteInlineComment}
@@ -252,16 +285,9 @@ const UnpureReportRender = ({
                   hasPermissionCreateComment={enabledCreateInlineComment}
                   hasPermissionDeleteComment={enabledDeleteInlineComment}
                   comments={inlineComments}
-                  onDeleteComment={(commentId: string) => {
-                    deleteInlineComment(commentId);
-                  }}
-                  submitComment={(text?: string, user_ids?: string[], commentId?: string) => {
-                    if (!commentId) {
-                      createInlineComment(fileToRender.id, user_ids!, text!);
-                    } else {
-                      editInlineComment(commentId, user_ids!, text!);
-                    }
-                  }}
+                  createInlineComment={createInlineComment}
+                  updateInlineComment={updateInlineComment}
+                  deleteComment={deleteInlineComment}
                 />
               </PureSideOverlayCommentsPanel>
             </div>
