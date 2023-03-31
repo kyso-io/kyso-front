@@ -16,7 +16,7 @@ function isBrowser() {
   return false;
 }
 
-const Index = ({ commonData, isCurrentUserSolvedCaptcha, showToaster, isCurrentUserVerified, isUserLogged }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const [requesting, setRequesting] = useState<boolean>(false);
   const [subject, setSubject] = useState<string>('');
