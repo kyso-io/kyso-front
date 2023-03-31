@@ -3,15 +3,11 @@ import { ToasterIcons } from '@/enums/toaster-icons';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
-import { FeedbackDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
+import { FeedbackDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import CaptchaModal from '../components/CaptchaModal';
-import { checkJwt } from '../helpers/check-jwt';
-import { Helper } from '../helpers/Helper';
+import { useState } from 'react';
 
 function isBrowser() {
   if (typeof window !== 'undefined') {
@@ -20,43 +16,23 @@ function isBrowser() {
   return false;
 }
 
-const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, isCurrentUserSolvedCaptcha, showToaster, isCurrentUserVerified, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const [requesting, setRequesting] = useState<boolean>(false);
   const [subject, setSubject] = useState<string>('');
   const [message, setMessage] = useState<string>('');
-  const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
-
-  useEffect(() => {
-    const result: boolean = checkJwt();
-    setUserIsLogged(result);
-    const getData = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
 
   const onSubmit = async () => {
-    if (!commonData.user!.email_verified) {
-      showToaster('Please verify your email address before submitting feedback', ToasterIcons.INFO);
+    if (!isCurrentUserSolvedCaptcha()) {
       return;
     }
-    if (captchaIsEnabled && commonData.user!.show_captcha) {
-      setShowCaptchaModal(true);
+
+    if (!isCurrentUserVerified()) {
       return;
     }
+
     setRequesting(true);
+
     try {
       const api: Api = new Api(commonData.token);
       const feedbackDto: FeedbackDto = new FeedbackDto(subject, message);
@@ -77,18 +53,9 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
     setRequesting(false);
   };
 
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
-  };
-
   const disabledButton: boolean = !subject || !message || requesting;
 
-  if (userIsLogged === null) {
+  if (!isUserLogged) {
     return null;
   }
 
@@ -96,7 +63,7 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
     <div className="flex flex-row space-x-8 p-2">
       <div className="w-1/6"></div>
       <div className="w-4/6">
-        {userIsLogged ? (
+        {isUserLogged ? (
           <div className="mt-4">
             <div className="space-y-8 divide-y divide-gray-200">
               <div className="space-y-8 divide-y divide-gray-200 sm:space-y-5">
@@ -183,7 +150,6 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
           </div>
         )}
       </div>
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

@@ -3,7 +3,8 @@ import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
 import type { CommonData } from '@/types/common-data';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import type { ReportData } from '@/types/report-data';
-import type { NormalizedResponseDTO, Organization, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, Organization, Team, TokenPermissions, UserDTO, KysoSetting } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
@@ -16,6 +17,8 @@ import { useAppDispatch } from '@/hooks/redux-hooks';
 import ToasterNotification from '@/components/ToasterNotification';
 import { ToasterIcons } from '@/enums/toaster-icons';
 import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
+import CaptchaModal from '@/components/CaptchaModal';
+import { Helper } from '@/helpers/Helper';
 
 type IUnpureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -32,10 +35,14 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     errorTeam: null,
     user: null,
   });
+
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [toasterMessage, setToasterMessage] = useState<string>('');
   const [toasterIcon, setToasterIcon] = useState<JSX.Element>(ToasterIcons.INFO);
   const [toasterVisible, setToasterVisible] = useState<boolean>(false);
+  const [captchaIsEnabledInKysoSettings, setCaptchaIsEnabledInKysoSettings] = useState<boolean>(false);
+  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
+  const [isUserLogged, setIsUserLogged] = useState<boolean>(false);
 
   const dispatch = useAppDispatch();
 
@@ -67,7 +74,26 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   ];
 
   useEffect(() => {
-    checkJwt();
+    const result: boolean = checkJwt();
+    setIsUserLogged(result);
+
+    const checkIfCaptchaIsEnabledInKysoSettings = async () => {
+      try {
+        const api: Api = new Api();
+        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
+        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
+        if (index !== -1) {
+          if (resultKysoSetting.data[index]!.value === 'true') {
+            setCaptchaIsEnabledInKysoSettings(true);
+          } else {
+            setCaptchaIsEnabledInKysoSettings(false);
+          }
+        }
+      } catch (errorHttp: any) {
+        Helper.logError(errorHttp.response.data, errorHttp);
+      }
+    };
+
     const getData = async () => {
       const token: string | null = getLocalStorageItem('jwt');
       // TODO: remove use of store in the near future
@@ -99,7 +125,9 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       }
       setCommonData({ ...commonData, user, permissions, token });
     };
+
     getData();
+    checkIfCaptchaIsEnabledInKysoSettings();
   }, []);
 
   useEffect(() => {
@@ -181,11 +209,52 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     setToasterMessage('');
   };
 
+  /**
+   * Evaluates if the captcha configuration is enabled and if the user has resolved the captcha successfully.
+   *
+   * If not, shows the captcha modal
+   *
+   * @returns false if the user didn't resolved the captcha, true in the contrary
+   */
+  const isCurrentUserSolvedCaptcha = (): boolean => {
+    if (captchaIsEnabledInKysoSettings && commonData.user!.show_captcha) {
+      setShowCaptchaModal(true);
+      return false;
+    }
+
+    setShowCaptchaModal(false);
+    return true;
+  };
+
+  /**
+   * Checks if the user is verified. If not, shows a toaster remembering it.
+   *
+   * @returns true if is verified, false if not
+   */
+  const isCurrentUserVerified = (): boolean => {
+    if (!commonData.user!.email_verified) {
+      showToaster('Please verify your email address before submitting feedback', ToasterIcons.INFO);
+      return false;
+    }
+    return true;
+  };
+
+  const onCloseCaptchaModal = async (refreshUser: boolean) => {
+    setShowCaptchaModal(false);
+
+    if (refreshUser) {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
+      setUser(result.data);
+    }
+  };
+
   return (
     <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
       <>
-        {React.cloneElement(children, { commonData, reportData, setReportData, setUser, showToaster, hideToaster })}
+        {React.cloneElement(children, { commonData, reportData, setReportData, setUser, showToaster, hideToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified, isUserLogged })}
         <ToasterNotification show={toasterVisible} setShow={setToasterVisible} icon={toasterIcon} message={toasterMessage} backgroundColor={TailwindColor.SLATE_50} />
+        {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       </>
     </PureKysoApplicationLayout>
   );
@@ -199,4 +268,7 @@ export interface IKysoApplicationLayoutProps {
   setUser: (user: UserDTO) => void;
   showToaster: (message: string, icon: JSX.Element) => void;
   hideToaster: () => void;
+  isCurrentUserSolvedCaptcha: () => boolean;
+  isCurrentUserVerified: () => boolean;
+  isUserLogged: boolean;
 }
