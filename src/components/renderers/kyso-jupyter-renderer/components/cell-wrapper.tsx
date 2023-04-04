@@ -25,7 +25,7 @@ interface Props {
   first: boolean;
   last: boolean;
   inlineComments: InlineCommentDto[];
-  createInlineComment: (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => void;
+  createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
   updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteInlineComment: (id: string) => void;
   enabledCreateInlineComment: boolean;

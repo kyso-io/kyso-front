@@ -23,7 +23,7 @@ type IPureComments = {
   comments: InlineCommentDto[];
   hasPermissionCreateComment: boolean;
   hasPermissionDeleteComment: boolean;
-  createInlineComment: (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => void;
+  createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
   updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteComment: (id: string) => void;
 };
@@ -85,7 +85,7 @@ const PureComments = (props: IPureComments) => {
           <PureInlineCommentForm
             user={commonData.user}
             submitComment={(text: string, userIds: string[]) => {
-              createInlineComment(report.id!, userIds, text, null);
+              createInlineComment(userIds, text, null);
             }}
             channelMembers={channelMembers}
           />

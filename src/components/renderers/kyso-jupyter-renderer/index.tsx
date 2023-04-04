@@ -64,7 +64,7 @@ export const RenderJupyter = ({
             showInputs={showInputs}
             showOutputs={showOutputs}
             inlineComments={inlineComments}
-            createInlineComment={createInlineComment}
+            createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(key, user_ids, text, parent_id)}
             deleteInlineComment={deleteInlineComment}
             updateInlineComment={updateInlineComment}
             enabledCreateInlineComment={enabledCreateInlineComment}

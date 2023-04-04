@@ -76,16 +76,15 @@ const UnpureReportRender = ({
     }
   }, [report.id, fileToRender.id]);
 
-  const createInlineComment = async (_: string, user_ids: string[], text: string, parent_id: string | null) => {
+  const createInlineComment = async (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => {
     if (captchaIsEnabled && commonData.user?.show_captcha === true) {
       setShowCaptchaModal(true);
       return;
     }
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      const createInlineCommentDto: CreateInlineCommentDto = new CreateInlineCommentDto(report.id as string, fileToRender.id, text, user_ids, parent_id);
+      const createInlineCommentDto: CreateInlineCommentDto = new CreateInlineCommentDto(report.id as string, cell_id, text, user_ids, parent_id);
       const response: NormalizedResponseDTO<InlineCommentDto> = await api.createInlineComment(createInlineCommentDto);
-
       const newInlineComment: InlineCommentDto = response.data;
       const copyInlineComments: InlineCommentDto[] = [...inlineComments];
       if (newInlineComment.parent_comment_id) {
@@ -285,7 +284,7 @@ const UnpureReportRender = ({
                   hasPermissionCreateComment={enabledCreateInlineComment}
                   hasPermissionDeleteComment={enabledDeleteInlineComment}
                   comments={inlineComments}
-                  createInlineComment={createInlineComment}
+                  createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(fileToRender.id, user_ids, text, parent_id)}
                   updateInlineComment={updateInlineComment}
                   deleteComment={deleteInlineComment}
                 />

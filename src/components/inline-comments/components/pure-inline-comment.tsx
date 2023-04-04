@@ -28,7 +28,7 @@ type IPureInlineComment = {
   channelMembers: TeamMember[];
   onCancel?: () => void;
   report: ReportDTO;
-  createInlineComment: (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => void;
+  createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
   updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteComment: (id: string) => void;
   parentInlineComment: InlineCommentDto | null;
@@ -212,7 +212,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
         <div className="pl-10">
           <PureInlineCommentForm
             user={commonData.user!}
-            submitComment={(text: string, userIds: string[]) => createInlineComment('', userIds, text, comment.id)}
+            submitComment={(text: string, userIds: string[]) => createInlineComment(userIds, text, comment.id)}
             channelMembers={channelMembers}
             onSubmitted={() => setReplying(false)}
             onCancel={() => setReplying(false)}
