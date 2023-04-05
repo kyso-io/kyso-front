@@ -1,17 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import CaptchaModal from '@/components/CaptchaModal';
 import ErrorNotification from '@/components/ErrorNotification';
 import Filesystem from '@/components/Filesystem';
 import MemberFilterSelector from '@/components/MemberFilterSelector';
 import NewReportNamingDropdown from '@/components/NewReportNamingDropdown';
+import { PureAlert, PureAlertTypeEnum } from '@/components/PureAlert';
 import PureKysoButton from '@/components/PureKysoButton';
 import { PureSpinner } from '@/components/PureSpinner';
+import { SomethingHappened } from '@/components/SomethingHappened';
+import TagsFilterSelector from '@/components/TagsFilterSelector';
 import RenderBase64Image from '@/components/renderers/RenderBase64Image';
 import RenderCode from '@/components/renderers/RenderCode';
 import RenderError from '@/components/renderers/RenderError';
-import { SomethingHappened } from '@/components/SomethingHappened';
-import TagsFilterSelector from '@/components/TagsFilterSelector';
-import classNames from '@/helpers/class-names';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
+import { Helper } from '@/helpers/Helper';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import classNames from '@/helpers/class-names';
 import { getSessionStorageItem, removeSessionStorageItem, setSessionStorageItem } from '@/helpers/isomorphic-session-storage';
 import { useChannelMembers } from '@/hooks/use-channel-members';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
@@ -23,7 +29,7 @@ import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { ArrowRightIcon, DocumentAddIcon, ExclamationCircleIcon, FolderAddIcon, SelectorIcon, UploadIcon } from '@heroicons/react/solid';
 import type { KysoSetting, NormalizedResponseDTO, ReportDTO, ResourcePermissions, Tag, UserDTO } from '@kyso-io/kyso-model';
-import { TeamVisibilityEnum, KysoConfigFile, KysoSettingsEnum, ReportPermissionsEnum, ReportType, TeamMember, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
+import { KysoConfigFile, KysoSettingsEnum, ReportPermissionsEnum, ReportType, TeamMember, TeamMembershipOriginEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import 'easymde/dist/easymde.min.css';
 import FormData from 'form-data';
@@ -33,12 +39,6 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import CaptchaModal from '@/components/CaptchaModal';
-import { PureAlert, PureAlertTypeEnum } from '@/components/PureAlert';
-import { checkJwt } from '@/helpers/check-jwt';
-import { HelperPermissions } from '@/helpers/check-permissions';
-import { Helper } from '@/helpers/Helper';
-import { ToasterIcons } from '@/enums/toaster-icons';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -693,7 +693,7 @@ const CreateReport = ({ commonData, setUser, showToaster }: IKysoApplicationLayo
               <div className="flex min-h-12 border-b">
                 <div className="inline-flex items-center justify-end w-full">
                   <NewReportNamingDropdown
-                    label="Create new file"
+                    label="Create a new text based file"
                     icon={DocumentAddIcon}
                     onCreate={(newFile: CreationReportFileSystemObject) => {
                       addNewFile(newFile);
@@ -778,49 +778,25 @@ const CreateReport = ({ commonData, setUser, showToaster }: IKysoApplicationLayo
             </div>
           </div>
           <div className="w-4/6">
-            {FileTypesHelper.isTextBasedFiled(selectedFile.file.name) && (
-              <>
-                <SimpleMdeReact key="editor" options={editorOptions as any} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
-              </>
-            )}
-
-            {FileTypesHelper.isImage(selectedFile.file.name) && (
+            {FileTypesHelper.isTextBasedFiled(selectedFile.file.name) ? (
+              <SimpleMdeReact key="editor" options={editorOptions as any} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
+            ) : FileTypesHelper.isImage(selectedFile.file.name) ? (
               <div className="pl-10">
                 <RenderBase64Image base64={selectedFileValue} alt={selectedFile.file.name} />
               </div>
+            ) : FileTypesHelper.isJupyterNotebook(selectedFile.file.name) ? (
+              <RenderError message="Jupyter notebooks can only be displayed once the report is created." />
+            ) : FileTypesHelper.isCode(selectedFile.file.name) ? (
+              <RenderCode code={selectedFileValue} showFileNumbers={true} />
+            ) : FileTypesHelper.isOnlyOffice(selectedFile.file.name) ? (
+              <RenderError message="Microsoft Office content only can be displayed when the report is created." />
+            ) : FileTypesHelper.isGoogleDocs(selectedFile.file.name) ? (
+              <RenderError message={`Files of type ${FileTypesHelper.getExtension(selectedFile.file.name)} only can be displayed when the report is created`} />
+            ) : selectedFile.file.type !== 'folder' ? (
+              !FileTypesHelper.isSupported(selectedFile.file.name) && <RenderError message={`This file can't be rendered while you create a report. Did you miss to set the extension of the file?`} />
+            ) : (
+              <div>{error && <ErrorNotification message={error} />}</div>
             )}
-
-            {FileTypesHelper.isJupyterNotebook(selectedFile.file.name) && (
-              <>
-                <RenderError message="Jupyter notebooks can only be displayed once the report is created." />
-              </>
-            )}
-
-            {FileTypesHelper.isCode(selectedFile.file.name) && (
-              <>
-                <RenderCode code={selectedFileValue} showFileNumbers={true} />
-              </>
-            )}
-
-            {FileTypesHelper.isOnlyOffice(selectedFile.file.name) && (
-              <>
-                <RenderError message="Microsoft Office content only can be displayed when the report is created." />
-              </>
-            )}
-
-            {FileTypesHelper.isGoogleDocs(selectedFile.file.name) && (
-              <>
-                <RenderError message={`Files of type ${FileTypesHelper.getExtension(selectedFile.file.name)} only can be displayed when the report is created`} />
-              </>
-            )}
-
-            {selectedFile.file.type !== 'folder' && !FileTypesHelper.isSupported(selectedFile.file.name) && (
-              <>
-                <RenderError message={`This file can't be rendered while you create a report. Did you miss to set the extension of the file?`} />
-              </>
-            )}
-
-            <div>{error && <ErrorNotification message={error} />}</div>
           </div>
         </div>
         <div className="flex flex-row items-center">
