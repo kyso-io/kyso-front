@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
+import SettingsAside from '@/components/SettingsAside';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '@/helpers/Helper';
+import { checkJwt } from '@/helpers/check-jwt';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Switch } from '@headlessui/react';
@@ -9,10 +13,6 @@ import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useMemo, useState } from 'react';
-import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
-import SettingsAside from '@/components/SettingsAside';
-import { checkJwt } from '@/helpers/check-jwt';
-import { ToasterIcons } from '@/enums/toaster-icons';
 
 enum Tab {
   GlobalConfiguration = 'Global Configuration',
@@ -146,6 +146,14 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
     }
     return !areEquals(userNotificationsSettings.organization_settings[organizationId]!, notificationsSettings);
   }, [notificationsSettings, organizationId, teamId]);
+  const organizationsResourcePermissions: ResourcePermissions[] = useMemo(() => {
+    if (!commonData.permissions) {
+      return [];
+    }
+    return commonData.permissions.organizations!.sort((a: ResourcePermissions, b: ResourcePermissions) =>
+      a.display_name.toLowerCase() > b.display_name.toLowerCase() ? 1 : a.display_name.toLowerCase() < b.display_name.toLowerCase() ? -1 : 0,
+    );
+  }, [commonData.permissions]);
   const teamsResourcePermissions: ResourcePermissions[] = useMemo(() => {
     if (!organizationId) {
       return [];
@@ -153,9 +161,11 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
     if (!commonData.permissions) {
       return [];
     }
-    return commonData.permissions.teams!.filter((trp: ResourcePermissions) => {
-      return trp.organization_id === organizationId;
-    });
+    return commonData.permissions
+      .teams!.filter((trp: ResourcePermissions) => trp.organization_id === organizationId)
+      .sort((a: ResourcePermissions, b: ResourcePermissions) =>
+        a.display_name.toLowerCase() > b.display_name.toLowerCase() ? 1 : a.display_name.toLowerCase() < b.display_name.toLowerCase() ? -1 : 0,
+      );
   }, [commonData.permissions, organizationId]);
 
   useEffect(() => {
@@ -302,7 +312,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                 {/* NOTIFICATIONS SETTINGS */}
                 <div>
                   <div className="mb-4">
-                    <h3 className="text-lg font-semibold leading-6 text-gray-900">{selectedTab === Tab.GlobalConfiguration ? 'Global configuration' : 'Configuratin per organization or channel'}</h3>
+                    <h3 className="text-lg font-semibold leading-6 text-gray-900">{selectedTab === Tab.GlobalConfiguration ? 'Global configuration' : 'Configuration per organization or channel'}</h3>
                     <p className="mt-1 text-sm text-gray-500">
                       {selectedTab === Tab.GlobalConfiguration
                         ? 'This configuration is applied generally for you user at Kyso. You can overwrite this configuration per organization and channel.'
@@ -315,12 +325,13 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                       <select
                         className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
                         onChange={(e) => {
+                          setTeamId('');
                           setOrganizationId(e.target.value);
                         }}
                       >
-                        {commonData.permissions!.organizations!.map((orp: ResourcePermissions) => (
+                        {organizationsResourcePermissions.map((orp: ResourcePermissions) => (
                           <option key={orp.id} value={orp.id}>
-                            {orp.name}
+                            {orp.display_name}
                           </option>
                         ))}
                       </select>
@@ -334,7 +345,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                         <option value="">All</option>
                         {teamsResourcePermissions.map((trp: ResourcePermissions) => (
                           <option key={trp.id} value={trp.id}>
-                            {trp.name}
+                            {trp.display_name}
                           </option>
                         ))}
                       </select>
