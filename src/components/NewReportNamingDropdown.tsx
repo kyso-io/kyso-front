@@ -3,12 +3,11 @@
 import classNames from '@/helpers/class-names';
 import { CreationReportFileSystemObject } from '@/model/creation-report-file';
 import { Menu, Transition } from '@headlessui/react';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { ElementType } from 'react';
 import React, { Fragment, useEffect, useRef, useState } from 'react';
 import { v4 } from 'uuid';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '../helpers/Helper';
-import ToasterNotification from './ToasterNotification';
 
 type INewReportNamingDropdown = {
   label: string;
@@ -22,6 +21,8 @@ type INewReportNamingDropdown = {
   cancelButtonLabel?: string;
   onCreate: (newName: CreationReportFileSystemObject) => void;
   files: CreationReportFileSystemObject[];
+  showToaster: (message: string, icon: JSX.Element) => void;
+  hideToaster: () => void;
 };
 
 const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
@@ -29,14 +30,11 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
   const [newName, setNewName] = useState(value || '');
   const inputRef: any = useRef<any>(null);
   const refMenuButton = useRef<HTMLButtonElement>(null);
-  const [showToaster, setShowToaster] = useState<boolean>(false);
-  const [messageToaster, setMessageToaster] = useState<string>('');
   const [errorMessageInput, setErrorMessageInput] = useState<string>('');
 
   const handleCreation = (e: any): void => {
     if (!newName) {
-      setMessageToaster('Please enter a name');
-      setShowToaster(true);
+      props.showToaster('Please enter a name', ToasterIcons.INFO);
       e.preventDefault();
       return;
     }
@@ -96,8 +94,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
     const fileObject: CreationReportFileSystemObject = new CreationReportFileSystemObject(v4(), formattedName, formattedName, isFolder ? 'folder' : fileType, '', parentId);
     onCreate(fileObject);
     setNewName('');
-    setMessageToaster('');
-    setShowToaster(false);
+    props.hideToaster();
   };
 
   return (
@@ -145,8 +142,7 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
                               const name: string = event.target.value || '';
                               setErrorMessageInput('');
                               setNewName(name);
-                              setMessageToaster('');
-                              setShowToaster(false);
+                              props.hideToaster();
                             }}
                             /* eslint-disable @typescript-eslint/no-explicit-any */
                             onKeyDown={(e: any) => {
@@ -189,7 +185,6 @@ const NewReportNamingDropdown = (props: INewReportNamingDropdown) => {
           );
         }}
       </Menu>
-      <ToasterNotification show={showToaster} setShow={setShowToaster} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={messageToaster} />
     </React.Fragment>
   );
 };

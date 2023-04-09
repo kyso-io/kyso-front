@@ -15,6 +15,8 @@ interface FilesystemEntryProps {
   onSetAsMainFile?: (newMainFile: FilesystemItem) => void;
   onSelectedFile?: (selectedFile: FilesystemItem) => void;
   onUploadFile: (event: ChangeEvent<HTMLInputElement>, parent: FilesystemItem) => void;
+  showToaster: (message: string, icon: JSX.Element) => void;
+  hideToaster: () => void;
   selectedFileId: string;
   files: CreationReportFileSystemObject[];
 }
@@ -102,6 +104,8 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                       }}
                       files={files}
                       parent={parent}
+                      showToaster={props.showToaster}
+                      hideToaster={props.hideToaster}
                     />
 
                     <NewReportNamingDropdown
@@ -118,6 +122,8 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                       }}
                       files={files}
                       parent={parent}
+                      showToaster={props.showToaster}
+                      hideToaster={props.hideToaster}
                     />
 
                     <label
@@ -167,6 +173,8 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
                   }}
                   parent={parent}
                   files={files}
+                  showToaster={props.showToaster}
+                  hideToaster={props.hideToaster}
                 />
 
                 <button
@@ -202,6 +210,8 @@ const FilesystemEntry = (props: FilesystemEntryProps) => {
             props.onSelectedFile!(selectedItem);
           }}
           files={files}
+          showToaster={props.showToaster}
+          hideToaster={props.hideToaster}
         />
       ))}
     </>

@@ -12,6 +12,8 @@ interface Props {
   onSelectedFile?: (selectedFile: FilesystemItem) => void;
   onUploadFile: (event: ChangeEvent<HTMLInputElement>, parent: FilesystemItem) => void;
   selectedFileId: string;
+  showToaster: (message: string, icon: JSX.Element) => void;
+  hideToaster: () => void;
 }
 
 const Filesystem = (props: Props) => {
@@ -56,6 +58,8 @@ const Filesystem = (props: Props) => {
             props.onSelectedFile!(selectedItem);
           }}
           files={props.files}
+          showToaster={props.showToaster}
+          hideToaster={props.hideToaster}
         />
       ))}
     </>

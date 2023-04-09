@@ -51,7 +51,7 @@ const blobToBase64 = (blob: Blob): Promise<string> => {
   });
 };
 
-const CreateReport = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
+const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
 
   useEffect(() => {
@@ -657,6 +657,8 @@ const CreateReport = ({ commonData, showToaster, isCurrentUserVerified, isCurren
                       addNewFile(newFile);
                     }}
                     files={files}
+                    showToaster={showToaster}
+                    hideToaster={hideToaster}
                   />
                   <NewReportNamingDropdown
                     label="Create new folder"
@@ -666,6 +668,8 @@ const CreateReport = ({ commonData, showToaster, isCurrentUserVerified, isCurren
                       addNewFile(n);
                     }}
                     files={files}
+                    showToaster={showToaster}
+                    hideToaster={hideToaster}
                   />
                   <div>
                     <label
@@ -730,6 +734,8 @@ const CreateReport = ({ commonData, showToaster, isCurrentUserVerified, isCurren
                       setSelectedFileValue('');
                       setSelectedFile(sFile);
                     }}
+                    showToaster={showToaster}
+                    hideToaster={hideToaster}
                   />
                 )}
               </div>
