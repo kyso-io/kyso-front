@@ -28,7 +28,6 @@ import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
 import ActivityFeedComponent from '@/components/ActivityFeed';
-import CaptchaModal from '@/components/CaptchaModal';
 import InfoActivity from '@/components/InfoActivity';
 import ManageUsers from '@/components/ManageUsers';
 import ReportBadge from '@/components/ReportBadge';
@@ -47,7 +46,7 @@ const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
 
-const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, setUser, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isCaptchaEnabled }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const { join, organizationName } = router.query;
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
@@ -62,13 +61,12 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [showEmails, setShowEmails] = useState<boolean>(false);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const hasPermissionDeleteOrganization: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, [GlobalPermissionsEnum.GLOBAL_ADMIN, OrganizationPermissionsEnum.ADMIN, OrganizationPermissionsEnum.DELETE]),
     [commonData],
   );
+
   const hasPermissionCreateReport: boolean = useMemo(() => {
     if (!commonData.permissions) {
       return false;
@@ -97,16 +95,13 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
     }
     return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
   }, [commonData.permissions, commonData.organization]);
+
   const [invitationError, setInvitationError] = useState<string>('');
 
   useEffect(() => {
     const getData = async () => {
       try {
         const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexHcaptchaEnabled: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (indexHcaptchaEnabled !== -1) {
-          setCaptchaIsEnabled(publicKeys[indexHcaptchaEnabled]!.value === 'true');
-        }
         const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
         if (indexShowEmail !== -1) {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
@@ -264,15 +259,12 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
   };
 
   const toggleUserStarReport = async (reportDto: ReportDTO) => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
-      return;
-    }
+
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
+
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportDto.id!);
       const { data: report } = result;
@@ -303,14 +295,10 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
   };
 
   const toggleUserPinReport = async (reportDto: ReportDTO) => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
-      return;
-    }
+
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportDto.id!);
@@ -342,14 +330,10 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
   };
 
   const toggleGlobalPinReport = async (reportDto: ReportDTO) => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
-      return;
-    }
+
     const api: Api = new Api(commonData.token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportDto.id!);
@@ -378,15 +362,6 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
       });
       setPaginatedResponseDto({ ...paginatedResponseDto!, results: newReports } as any);
     } catch (e) {}
-  };
-
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
   };
 
   const getActivityFeed = async () => {
@@ -481,6 +456,10 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
   };
 
   const updateMemberRole = async (userId: string, organizationRole: string): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     const index: number = members.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
       try {
@@ -509,6 +488,10 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
   };
 
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     try {
       const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
       const inviteUserDto: InviteUserDto = new InviteUserDto(email, commonData!.organization!.sluglified_name, organizationRole);
@@ -523,6 +506,10 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
   };
 
   const removeUser = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       if (type === TeamMembershipOriginEnum.ORGANIZATION) {
@@ -595,12 +582,12 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
                   onUpdateRoleMember={updateMemberRole}
                   onInviteNewUser={inviteNewUser}
                   onRemoveUser={removeUser}
-                  captchaIsEnabled={captchaIsEnabled}
+                  captchaIsEnabled={isCaptchaEnabled}
                   onCaptchaSuccess={onCaptchaSuccess}
                   showEmails={showEmails}
                 />
-                {hasPermissionDeleteOrganization && <UnpureDeleteOrganizationDropdown commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
-                {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={captchaIsEnabled} setUser={setUser} />}
+                {hasPermissionDeleteOrganization && <UnpureDeleteOrganizationDropdown commonData={commonData} captchaIsEnabled={isCaptchaEnabled} setUser={setUser} />}
+                {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={isCaptchaEnabled} setUser={setUser} />}
               </div>
             </div>
             {organizationInfo && (
@@ -645,7 +632,6 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
           )}
         </div>
       )}
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

@@ -40,7 +40,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   const [toasterMessage, setToasterMessage] = useState<string>('');
   const [toasterIcon, setToasterIcon] = useState<JSX.Element>(ToasterIcons.INFO);
   const [toasterVisible, setToasterVisible] = useState<boolean>(false);
-  const [captchaIsEnabledInKysoSettings, setCaptchaIsEnabledInKysoSettings] = useState<boolean>(false);
+  const [isCaptchaEnabled, setIsCaptchaEnabled] = useState<boolean>(false);
   const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [isUserLogged, setIsUserLogged] = useState<boolean>(false);
 
@@ -84,9 +84,9 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
         const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
         if (index !== -1) {
           if (resultKysoSetting.data[index]!.value === 'true') {
-            setCaptchaIsEnabledInKysoSettings(true);
+            setIsCaptchaEnabled(true);
           } else {
-            setCaptchaIsEnabledInKysoSettings(false);
+            setIsCaptchaEnabled(false);
           }
         }
       } catch (errorHttp: any) {
@@ -217,7 +217,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
    * @returns false if the user didn't resolved the captcha, true in the contrary
    */
   const isCurrentUserSolvedCaptcha = (): boolean => {
-    if (captchaIsEnabledInKysoSettings && commonData.user && commonData.user.show_captcha) {
+    if (isCaptchaEnabled && commonData.user && commonData.user.show_captcha) {
       setShowCaptchaModal(true);
       return false;
     }
@@ -233,7 +233,16 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
    */
   const isCurrentUserVerified = (): boolean => {
     if (commonData.user && !commonData.user.email_verified) {
-      showToaster('Please verify your email account to be able to make changes on Kyso', ToasterIcons.INFO);
+      showToaster(
+        `Please <b>verify your email account</b> to be able to make changes on Kyso. <br/><br/>
+        <a target="_blank" href="/user/${commonData.user.username}/settings/">
+          <button type="button"
+            class="k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary">
+            Send another verification mail
+          </button>
+        </a>`,
+        ToasterIcons.INFO,
+      );
       return false;
     }
     return true;
@@ -252,7 +261,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   return (
     <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
       <>
-        {React.cloneElement(children, { commonData, reportData, setReportData, setUser, showToaster, hideToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified, isUserLogged })}
+        {React.cloneElement(children, { commonData, reportData, setReportData, setUser, showToaster, hideToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified, isUserLogged, isCaptchaEnabled })}
         <ToasterNotification show={toasterVisible} setShow={setToasterVisible} icon={toasterIcon} message={toasterMessage} backgroundColor={TailwindColor.SLATE_50} />
         {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       </>
@@ -271,4 +280,5 @@ export interface IKysoApplicationLayoutProps {
   isCurrentUserSolvedCaptcha: () => boolean;
   isCurrentUserVerified: () => boolean;
   isUserLogged: boolean;
+  isCaptchaEnabled: boolean;
 }

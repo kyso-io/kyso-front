@@ -30,7 +30,6 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import CaptchaModal from '@/components/CaptchaModal';
 import ExpirationDateModal from '@/components/ExpirationDateModal';
 import Pagination from '@/components/Pagination';
 import PureAvatar from '@/components/PureAvatar';
@@ -57,7 +56,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
   cb();
 }, 750);
 
-const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   useRedirectIfNoJWT();
   const { tab, edit, organizationName } = router.query;
@@ -102,7 +101,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
     return data;
   }, []);
   const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [invitationsLinksGloballyEnabled, setInvitationsLinksGloballyEnabled] = useState<boolean>(false);
   const [editing, setEditing] = useState<boolean>(false);
   const [bio, setBio] = useState<string>('');
@@ -111,7 +109,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.ALL);
   const [file, setFile] = useState<File | null>(null);
   const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
-  const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [newDomain, setNewDomain] = useState<string>('');
   const [allowedAccessDomains, setAllowedAccessDomains] = useState<string[]>([]);
   const [errorNewDomain, setErrorNewDomain] = useState<string>('');
@@ -130,7 +127,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   // const [showOpenPingIdModal, setShowOpenPingIdModal] = useState<boolean>(true);
   const [showDeleteOrgModal, setShowDeleteOrgModal] = useState<boolean>(false);
   const [textOrgModal, setTextOrgModal] = useState<string>('');
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<OrganizationSettingsTab>(OrganizationSettingsTab.Channels);
 
   const checkIfSlackChanged = () => {
@@ -231,16 +227,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   }, [tab]);
 
   useEffect(() => {
-    const result: boolean = checkJwt();
-    setUserIsLogged(result);
     const getKysoSettings = async () => {
       try {
         const api: Api = new Api();
         const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const indexCatpcha: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (indexCatpcha !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[indexCatpcha]!.value === 'true');
-        }
         const indexInvitationLinks: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.ENABLE_INVITATION_LINKS_GLOBALLY);
         if (indexInvitationLinks !== -1) {
           setInvitationsLinksGloballyEnabled(resultKysoSetting.data[indexInvitationLinks]!.value === 'true');
@@ -377,14 +367,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const submit = async () => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
-      return;
-    }
+
     try {
       showToaster('Updating organization profile...', ToasterIcons.INFO);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
@@ -412,14 +398,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const submitNotifications = async () => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
-      return;
-    }
+
     if (centralizedNotifications && emailsCentralizedNotifications.length === 0) {
       showToaster('Please enter at least one valid email for centralized notifications', ToasterIcons.INFO);
       return;
@@ -508,6 +490,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const updateMemberRole = async (): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     const index: number = members.findIndex((m: Member) => m.id === selectedMember?.id);
     if (index === -1) {
@@ -546,6 +532,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const removeMember = async (): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
@@ -590,6 +580,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const inviteNewUser = async (): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
@@ -612,10 +606,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const deleteOrganization = async () => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
@@ -630,16 +624,11 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
     }
   };
 
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
-  };
-
   const exportMembersInCsv = async () => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
@@ -661,6 +650,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const onChangeJoinCodes = async (result: boolean) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
@@ -698,6 +691,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const updateAllowedAccessDomains = async (updatedAllowedAccessDomains: string[]) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     try {
       setRequesting(true);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
@@ -716,7 +713,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
     getTeamsInfo(page, queryTeam);
   };
 
-  if (userIsLogged === null) {
+  if (isUserLogged === null) {
     return null;
   }
 
@@ -1129,8 +1126,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
                             <div title="Edit member role in the organization">
                               <PencilIcon
                                 onClick={() => {
-                                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                    setShowCaptchaModal(true);
+                                  if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                                     return;
                                   }
                                   if (requesting) {
@@ -1145,8 +1141,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
                             <div title="Remove member from the organization">
                               <TrashIcon
                                 onClick={() => {
-                                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                    setShowCaptchaModal(true);
+                                  if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                                     return;
                                   }
                                   if (requesting) {
@@ -1222,8 +1217,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
                               <button
                                 disabled={requesting || showErrorDomain}
                                 onClick={() => {
-                                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                    setShowCaptchaModal(true);
+                                  if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                                     return;
                                   }
                                   if (requesting) {
@@ -1945,7 +1939,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
           </div>
         </Dialog>
       </Transition.Root>
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       <ExpirationDateModal date={validUntil} isOpen={isOpenExpirationDateModal} onClose={onCloseExpirationDateModal} requesting={requesting} />
     </div>
   );

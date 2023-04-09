@@ -48,7 +48,6 @@ import { dirname } from 'path';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import CaptchaModal from '@/components/CaptchaModal';
 import TableOfContents from '@/components/TableOfContents';
 import { HelperPermissions } from '@/helpers/check-permissions';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
@@ -62,7 +61,7 @@ enum Tab {
   Toc = 'toc',
 }
 
-const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, reportData, setReportData, setUser, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isCaptchaEnabled }: IKysoApplicationLayoutProps) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [selfTree, setSelfTree] = useState<GithubFileHash[]>([]);
@@ -99,11 +98,9 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const refComments = useRef<any>(null);
   const isInViewport = useIsInViewport(refComments);
   const scrollDirection: ScrollDirection | null = useScrollDirection();
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Toc);
   const [showEmails, setShowEmails] = useState<boolean>(false);
   const [defaultRedirectOrganization, setDefaultRedirectOrganization] = useState<string>('');
@@ -140,10 +137,6 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
     const getData = async () => {
       try {
         const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexHcaptchaEnabled: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (indexHcaptchaEnabled !== -1) {
-          setCaptchaIsEnabled(publicKeys[indexHcaptchaEnabled]!.value === 'true');
-        }
         const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
         if (indexShowEmail !== -1) {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
@@ -481,6 +474,10 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
   };
 
   const updateMemberRole = async (userId: string, organizationRole: string, teamRole?: string): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     const index: number = members.findIndex((m: Member) => m.id === userId);
     if (index === -1) {
       try {
@@ -519,6 +516,10 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
   };
 
   const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       const inviteUserDto: InviteUserDto = new InviteUserDto(email, organizationRole, organizationRole);
@@ -532,6 +533,9 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
   };
 
   const removeUser = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       if (type === TeamMembershipOriginEnum.ORGANIZATION) {
@@ -568,8 +572,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
   // TODO -> confusion as to whether these are Conmment or CommentDTO
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const submitComment = async (newComment: any, parentComment: any) => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
 
@@ -675,13 +678,6 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
 
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
 
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      refreshUserData();
-    }
-  };
-
   const refreshUserData = async () => {
     const api: Api = new Api(commonData.token);
     const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
@@ -761,6 +757,10 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
                             authors={authors}
                             version={version}
                             onUpvoteReport={async () => {
+                              if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                                return;
+                              }
+
                               await dispatch(toggleUserStarReportAction(report.id as string));
                               refreshReport();
                             }}
@@ -781,7 +781,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
                               onUpdateRoleMember={updateMemberRole}
                               onInviteNewUser={inviteNewUser}
                               onRemoveUser={removeUser}
-                              captchaIsEnabled={captchaIsEnabled}
+                              captchaIsEnabled={isCaptchaEnabled}
                               onCaptchaSuccess={refreshUserData}
                               showEmails={showEmails}
                             />
@@ -863,7 +863,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
                               enabledCreateInlineComment={hasPermissionCreateInlineComment}
                               enabledEditInlineComment={hasPermissionEditInlineComment}
                               enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
-                              captchaIsEnabled={captchaIsEnabled}
+                              captchaIsEnabled={isCaptchaEnabled}
                               setUser={setUser}
                             />
                           )}
@@ -904,8 +904,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
                                 return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
                               }}
                               onDeleteComment={async (id: string) => {
-                                if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                  setShowCaptchaModal(true);
+                                if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                                   return;
                                 }
                                 await dispatch(deleteCommentAction(id as string));
@@ -958,7 +957,6 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster }: 
               </button>
             </div>
           )}
-          {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
         </div>
       )}
     </>

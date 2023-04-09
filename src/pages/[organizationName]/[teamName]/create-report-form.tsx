@@ -14,7 +14,7 @@ import { KysoButton } from '@/types/kyso-button.enum';
 import { Menu, Transition } from '@headlessui/react';
 import { FolderAddIcon } from '@heroicons/react/outline';
 import { ArrowRightIcon, SelectorIcon } from '@heroicons/react/solid';
-import type { File as KysoFile, KysoSetting, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import type { File as KysoFile, NormalizedResponseDTO, ResourcePermissions, Tag, TeamMember } from '@kyso-io/kyso-model';
 import { TeamVisibilityEnum, KysoConfigFile, KysoSettingsEnum, ReportDTO, ReportPermissionsEnum, ReportType } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
@@ -25,7 +25,6 @@ import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import slugify from 'slugify';
-import CaptchaModal from '@/components/CaptchaModal';
 import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
 import { checkJwt } from '@/helpers/check-jwt';
 import { HelperPermissions } from '@/helpers/check-permissions';
@@ -41,12 +40,9 @@ interface TmpReportFile {
   file: File | null;
 }
 
-const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
+const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const refTitle = useRef<any>(null);
-  const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
-  const [loggedUserShowCaptcha, setLoggedUserShowCaptcha] = useState<boolean>(true);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const inputRef = useRef<any>(null);
   const [title, setTitle] = useState('');
   const [busy, setBusy] = useState<boolean>(false);
@@ -85,7 +81,6 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
     }
     return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
   }, [commonData.permissions, commonData.organization]);
-  const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const teamsResourcePermissions: ResourcePermissions[] = useMemo(() => {
     if (!commonData.organization) {
       return [];
@@ -103,7 +98,6 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
   const [report, setReport] = useState<ReportDTO>(ReportDTO.createEmpty());
   const [reportFiles, setReportFiles] = useState<KysoFile[]>([]);
   const [tmpReportFiles, setTmpReportFiles] = useState<TmpReportFile[]>([]);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
 
   const isEdition = () => {
@@ -119,13 +113,6 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
   }, []);
 
   useEffect(() => {
-    if (commonData.user) {
-      setLoggedUserEmailVerified(commonData.user.email_verified);
-      setLoggedUserShowCaptcha(commonData.user.show_captcha);
-    }
-  }, [commonData.user]);
-
-  useEffect(() => {
     if (!commonData.user) {
       return undefined;
     }
@@ -139,23 +126,6 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
   }, [commonData.user]);
 
   useEffect(() => {
-    const result: boolean = checkJwt();
-    setUserIsLogged(result);
-
-    const getData = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
-      }
-    };
-    getData();
-
     if (report && commonData.user?.id) {
       report.author_ids = [commonData.user!.id];
     }
@@ -334,6 +304,10 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
   };
 
   const createReport = async (e?: any) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     if (e) {
       e.preventDefault();
     }
@@ -348,10 +322,6 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
     }
     if (tmpReportFiles.length === 0) {
       showToaster('Please upload at least one file.', ToasterIcons.INFO);
-      return;
-    }
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
       return;
     }
     setBusy(true);
@@ -417,6 +387,10 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
   };
 
   const updateReport = async (e?: any) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     if (e) {
       e.preventDefault();
     }
@@ -434,10 +408,7 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
       showToaster('Please upload at least one file.', ToasterIcons.INFO);
       return;
     }
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
-      return;
-    }
+
     setBusy(true);
     const unmodifiedFiles: string[] = [];
     const deletedFiles: string[] = [];
@@ -516,6 +487,10 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
   };
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     if (!event.target.files) {
       return;
     }
@@ -563,16 +538,7 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
     }
   };
 
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
-  };
-
-  if (userIsLogged === null) {
+  if (isUserLogged === null) {
     return null;
   }
 
@@ -580,11 +546,11 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
     return null;
   }
 
-  return userIsLogged ? (
+  return isUserLogged ? (
     hasPermissionCreateReport ? (
       <div className="p-4">
         {/* Alert section */}
-        {!loggedUserEmailVerified && (
+        {!isCurrentUserVerified && (
           <PureAlert
             title="Account not verified"
             description="Your account has not been verified yet. Please check your inbox, verify your account and refresh this page."
@@ -892,16 +858,6 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
                     type={!hasPermissionCreateReport ? KysoButton.PRIMARY_DISABLED : KysoButton.PRIMARY}
                     disabled={!hasPermissionCreateReport || busy}
                     onClick={() => {
-                      if (!loggedUserEmailVerified) {
-                        showToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.', ToasterIcons.INFO);
-                        return;
-                      }
-
-                      if (captchaIsEnabled && loggedUserShowCaptcha) {
-                        showToaster("Your account didn't pass the antibot process.", ToasterIcons.INFO);
-                        return;
-                      }
-
                       if (isEdition()) {
                         updateReport();
                       } else {
@@ -920,7 +876,6 @@ const CreateReport = ({ commonData, setUser, showToaster, hideToaster }: IKysoAp
             </div>
           </div>
         </div>
-        {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
       </div>
     ) : (
       <SomethingHappened title="Forbidden resource" description={`Sorry, but you don't have permissions to create reports`} asciiArt="ᕕ(⌐■_■)ᕗ"></SomethingHappened>

@@ -6,19 +6,17 @@ import { Helper } from '@/helpers/Helper';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { ArrowRightIcon, ExclamationCircleIcon, LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
+import type { KysoSetting, NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { AllowDownload, KysoSettingsEnum, Team, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
-import CaptchaModal from '@/components/CaptchaModal';
-import { PureAlert, PureAlertTypeEnum } from '@/components/PureAlert';
 import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
 import { checkJwt } from '@/helpers/check-jwt';
 import { HelperPermissions } from '@/helpers/check-permissions';
 import { ToasterIcons } from '@/enums/toaster-icons';
 
-const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const [isBusy, setBusy] = useState(false);
   const [formName, setFormName] = useState('');
@@ -26,13 +24,9 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   const [isTeamAvailable, setTeamAvailable] = useState(true);
   const [formPermissions, setFormPermissions] = useState<TeamVisibilityEnum>(TeamVisibilityEnum.PRIVATE);
   const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.INHERITED);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const hasPermissionCreateChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.CREATE), [commonData]);
-  const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [waitForLogging, setWaitForLogging] = useState<boolean>(false);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [enabledPublicChannels, setEnabledPublicChannels] = useState<boolean>(false);
-  const [loggedUserEmailVerified, setLoggedUserEmailVerified] = useState<boolean>(false);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -43,17 +37,12 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   }, []);
 
   useEffect(() => {
-    const result: boolean = checkJwt();
-    setUserIsLogged(result);
     const getData = async () => {
       try {
         const api: Api = new Api();
         const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const indexCaptcha: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (indexCaptcha !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[indexCaptcha]!.value === 'true');
-        }
         const indexPublicChannels: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.ALLOW_PUBLIC_CHANNELS);
+
         if (indexPublicChannels !== -1) {
           setEnabledPublicChannels(resultKysoSetting.data[indexPublicChannels]!.value === 'true');
         }
@@ -75,12 +64,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
       }
     }, Helper.CHECK_JWT_TOKEN_MS);
     return () => clearInterval(interval);
-  }, [commonData.user]);
-
-  useEffect(() => {
-    if (commonData.user) {
-      setLoggedUserEmailVerified(commonData.user.email_verified);
-    }
   }, [commonData.user]);
 
   useEffect(() => {
@@ -110,22 +93,14 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const createChannel = async (ev: any) => {
-    ev.preventDefault();
-
-    hideToaster();
-
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.', ToasterIcons.INFO);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
+
+    ev.preventDefault();
 
     if (!formName || formName.length === 0) {
       showToaster('Please specify a channel name.', ToasterIcons.INFO);
-      return;
-    }
-
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
       return;
     }
 
@@ -158,16 +133,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
     }
   };
 
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
-  };
-
-  if (userIsLogged === null) {
+  if (isUserLogged === null) {
     return null;
   }
 
@@ -177,18 +143,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
       <div className="w-8/12 flex flex-col space-y-8">
-        {userIsLogged ? (
+        {isUserLogged ? (
           hasPermissionCreateChannel ? (
             <React.Fragment>
-              {/* Alert section */}
-              {!loggedUserEmailVerified && (
-                <PureAlert
-                  title="Account not verified"
-                  description="Your account has not been verified yet. Please check your inbox, verify your account and refresh this page."
-                  type={PureAlertTypeEnum.WARNING}
-                />
-              )}
-              <form className="space-y-8 divide-y divide-gray-200" onSubmit={createChannel}>
+              <form className="space-y-8 divide-y divide-gray-200">
                 <div className="space-y-8 divide-y divide-gray-200 sm:space-y-5">
                   <div>
                     <div>
@@ -329,7 +287,8 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
                     <div className="max-w-lg flex w-full justify-between items-center">
                       <div className="text-red-500 text-sm"></div>
                       <button
-                        type="submit"
+                        type="button"
+                        onClick={createChannel}
                         className={classNames(
                           'k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
                           'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary ',
@@ -379,7 +338,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
           waitForLogging && <RegisteredUsersAlert />
         )}
       </div>
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };
