@@ -18,7 +18,6 @@ import { Api, getInlineCommentsAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState } from 'react';
-import CaptchaModal from '../components/CaptchaModal';
 import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
 import TableOfContents from '../components/TableOfContents';
 import type { FileToRender } from '../types/file-to-render';
@@ -36,8 +35,9 @@ interface Props {
   enabledCreateInlineComment: boolean;
   enabledEditInlineComment: boolean;
   enabledDeleteInlineComment: boolean;
-  captchaIsEnabled: boolean;
   setUser: (user: UserDTO) => void;
+  isCurrentUserSolvedCaptcha: () => boolean;
+  isCurrentUserVerified: () => boolean;
 }
 
 const UnpureReportRender = ({
@@ -50,15 +50,14 @@ const UnpureReportRender = ({
   enabledCreateInlineComment,
   enabledEditInlineComment,
   enabledDeleteInlineComment,
-  captchaIsEnabled,
-  setUser,
+  isCurrentUserVerified,
+  isCurrentUserSolvedCaptcha,
 }: Props) => {
   const dispatch = useAppDispatch();
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   useEffect(() => {
     if (report.id) {
@@ -77,10 +76,10 @@ const UnpureReportRender = ({
   }, [report.id, fileToRender.id]);
 
   const createInlineComment = async (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
+
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const createInlineCommentDto: CreateInlineCommentDto = new CreateInlineCommentDto(report.id as string, cell_id, text, user_ids, parent_id);
@@ -104,8 +103,7 @@ const UnpureReportRender = ({
   };
 
   const updateInlineComment = async (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
     try {
@@ -128,20 +126,11 @@ const UnpureReportRender = ({
     }
   };
 
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
-  };
-
   const deleteInlineComment = async (id: string) => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
+
     let deletedInlineComment: InlineCommentDto | null = null;
     for (const inlineCommentItem of inlineComments) {
       if (inlineCommentItem.id === id) {
@@ -293,7 +282,6 @@ const UnpureReportRender = ({
           </div>
         </div>
       )}
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </React.Fragment>
   );
 };

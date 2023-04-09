@@ -3,49 +3,41 @@ import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import { DotsVerticalIcon, ExclamationCircleIcon, TrashIcon } from '@heroicons/react/solid';
-import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import React, { Fragment, useState } from 'react';
-import CaptchaModal from '../components/CaptchaModal';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 interface Props {
   commonData: CommonData;
-  captchaIsEnabled: boolean;
-  setUser: (user: UserDTO) => void;
+  showToaster: (message: string, icon: JSX.Element) => void;
+  isCurrentUserSolvedCaptcha: () => boolean;
+  isCurrentUserVerified: () => boolean;
 }
 
-const UnpureDeleteOrganizationDropdown = ({ commonData, captchaIsEnabled, setUser }: Props) => {
+const UnpureDeleteOrganizationDropdown = ({ commonData, showToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified }: Props) => {
   const [requesting, setRequesting] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   const deleteOrganization = async () => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       await api.deleteOrganization(commonData.organization!.id!);
+      showToaster(`Organization deleted successfully`, ToasterIcons.INFO);
     } catch (error: any) {
+      showToaster(`Something happened trying to delete the organization. Please try again. <br /> <br /> ${error.response.data.message}`, ToasterIcons.ERROR);
       Helper.logError(error.response.data.message, error);
       setOpen(false);
       setInput('');
       setRequesting(false);
     }
     window.location.href = '/';
-  };
-
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
   };
 
   return (
@@ -167,7 +159,6 @@ const UnpureDeleteOrganizationDropdown = ({ commonData, captchaIsEnabled, setUse
           </div>
         </Dialog>
       </Transition.Root>
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </React.Fragment>
   );
 };

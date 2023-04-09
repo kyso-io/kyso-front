@@ -29,7 +29,6 @@ import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import CaptchaModal from '@/components/CaptchaModal';
 import ChannelVisibility from '@/components/ChannelVisibility';
 import PureAvatar from '@/components/PureAvatar';
 import SettingsAside from '@/components/SettingsAside';
@@ -62,7 +61,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
   cb();
 }, 750);
 
-const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   useRedirectIfNoJWT();
   const { organizationName, teamName, tab } = router.query;
@@ -106,7 +105,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
     }
     return data;
   }, []);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
+
   const hasPermissionEditChannel: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.EDIT), [commonData]);
   const hasPermissionDeleteChannel: boolean = useMemo(
     () => HelperPermissions.checkPermissions(commonData, [OrganizationPermissionsEnum.ADMIN, TeamPermissionsEnum.ADMIN, TeamPermissionsEnum.DELETE]),
@@ -114,7 +113,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   );
   const [showDeleteTeamModal, setShowDeleteTeamModal] = useState<boolean>(false);
   const [textTeamModal, setTextTeamModal] = useState<string>('');
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [allowDownload, setAllowDownload] = useState<AllowDownload>(AllowDownload.INHERITED);
 
   const teams: ResourcePermissions[] = useMemo(() => {
@@ -162,10 +160,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
       try {
         const api: Api = new Api();
         const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const indexCaptcha: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (indexCaptcha !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[indexCaptcha]!.value === 'true');
-        }
         const indexPublicChannels: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.ALLOW_PUBLIC_CHANNELS);
         if (indexPublicChannels !== -1) {
           setEnabledPublicChannels(resultKysoSetting.data[indexPublicChannels]!.value === 'true');
@@ -315,6 +309,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const editMember = (member: Member) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setSelectedMember(member);
     setOpenEditMemberModal(true);
     setOrganizationRole(member.organization_roles[0]!);
@@ -326,11 +324,19 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const deleteMember = (member: Member) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setSelectedMember(member);
     setOpenDeleteMemberModal(true);
   };
 
   const updateMemberRole = async (): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     const index: number = members.findIndex((m: Member) => m.id === selectedMember?.id);
     if (index === -1) {
@@ -399,6 +405,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const removeMember = async (): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
@@ -443,6 +453,9 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const inviteNewUser = async (): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
@@ -472,6 +485,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const updateTeam = async () => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
@@ -494,14 +511,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const updateNotifications = async () => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
-      return;
-    }
+
     try {
       setRequesting(true);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
@@ -517,10 +530,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const deleteTeam = async () => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
@@ -534,16 +547,11 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
     window.location.href = `/settings/${commonData.organization?.sluglified_name}`;
   };
 
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
-  };
-
   const exportMembersInCsv = async () => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
@@ -1023,10 +1031,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
                               <button
                                 disabled={requesting}
                                 onClick={() => {
-                                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                    setShowCaptchaModal(true);
+                                  if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                                     return;
                                   }
+
                                   if (requesting) {
                                     return;
                                   }
@@ -1103,13 +1111,14 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
                             <div title="Edit member role in the team">
                               <PencilIcon
                                 onClick={() => {
-                                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                    setShowCaptchaModal(true);
+                                  if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                                     return;
                                   }
+
                                   if (requesting) {
                                     return;
                                   }
+
                                   editMember(member);
                                 }}
                                 className="h-5 w-5 text-gray-400 hover:text-gray-500 cursor-pointer"
@@ -1120,13 +1129,14 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
                               <div title="Remove member from the team">
                                 <TrashIcon
                                   onClick={() => {
-                                    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                      setShowCaptchaModal(true);
+                                    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                                       return;
                                     }
+
                                     if (requesting) {
                                       return;
                                     }
+
                                     deleteMember(member);
                                   }}
                                   className="mr-1 h-5 w-5 text-red-400 group-hover:text-gray-500 cursor-pointer"
@@ -1570,7 +1580,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
           </div>
         </Dialog>
       </Transition.Root>
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

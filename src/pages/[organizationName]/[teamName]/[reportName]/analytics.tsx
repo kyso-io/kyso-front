@@ -74,7 +74,7 @@ enum Tab {
   Toc = 'toc',
 }
 
-const Index = ({ commonData, reportData, setUser, setReportData, showToaster }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [result, setResult] = useState<NormalizedResponseDTO<ReportAnalytics> | null>(null);
@@ -250,7 +250,6 @@ const Index = ({ commonData, reportData, setUser, setReportData, showToaster }: 
   const version = router.query.version ? (router.query.version as string) : undefined;
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [showEmails, setShowEmails] = useState<boolean>(false);
   const frontEndUrl = useAppSelector((s) => {
     const settings = s.kysoSettings?.publicSettings?.filter((x: KysoSetting) => x.key === KysoSettingsEnum.BASE_URL);
@@ -319,10 +318,6 @@ const Index = ({ commonData, reportData, setUser, setReportData, showToaster }: 
     const getData = async () => {
       try {
         const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexHcaptchaEnabled: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (indexHcaptchaEnabled !== -1) {
-          setCaptchaIsEnabled(publicKeys[indexHcaptchaEnabled]!.value === 'true');
-        }
         const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
         if (indexShowEmail !== -1) {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
@@ -587,12 +582,6 @@ const Index = ({ commonData, reportData, setUser, setReportData, showToaster }: 
     }
   };
 
-  const refreshUserData = async () => {
-    const api: Api = new Api(commonData.token);
-    const r: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-    setUser(r.data);
-  };
-
   if (requesting) {
     return (
       <div className="flex flex-col h-screen justify-center items-center">
@@ -685,7 +674,9 @@ const Index = ({ commonData, reportData, setUser, setReportData, showToaster }: 
                   hasPermissionDeleteReport={hasPermissionDeleteReport}
                   commonData={commonData}
                   onSetFileAsMainFile={() => {}}
-                  setUser={setUser}
+                  isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                  isCurrentUserVerified={isCurrentUserVerified}
+                  showToaster={showToaster}
                 >
                   <ManageUsers
                     commonData={commonData}
@@ -696,9 +687,10 @@ const Index = ({ commonData, reportData, setUser, setReportData, showToaster }: 
                     onUpdateRoleMember={updateMemberRole}
                     onInviteNewUser={inviteNewUser}
                     onRemoveUser={removeUser}
-                    captchaIsEnabled={captchaIsEnabled}
-                    onCaptchaSuccess={refreshUserData}
                     showEmails={showEmails}
+                    showToaster={showToaster}
+                    isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                    isCurrentUserVerified={isCurrentUserVerified}
                   />
                 </PureReportHeader>
               </div>

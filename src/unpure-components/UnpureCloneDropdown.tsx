@@ -3,71 +3,45 @@ import PureKysoButton from '@/components/PureKysoButton';
 import type { CommonData } from '@/types/common-data';
 import { KysoButton } from '@/types/kyso-button.enum';
 import { Popover } from '@headlessui/react';
-import { ChevronDownIcon, ClipboardCopyIcon, ExclamationCircleIcon, FolderDownloadIcon, TerminalIcon } from '@heroicons/react/outline';
-import type { NormalizedResponseDTO, ReportDTO, UserDTO } from '@kyso-io/kyso-model';
+import { ChevronDownIcon, ClipboardCopyIcon, FolderDownloadIcon, TerminalIcon } from '@heroicons/react/outline';
+import type { ReportDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import saveAs from 'file-saver';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import slugify from 'slugify';
-import CaptchaModal from '../components/CaptchaModal';
-import ToasterNotification from '../components/ToasterNotification';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 interface Props {
   reportUrl: string;
   report: ReportDTO;
   commonData: CommonData;
-  hasPermissionDeleteReport: boolean;
-  hasPermissionEditReport: boolean;
-  setUser: (user: UserDTO) => void;
+  // hasPermissionDeleteReport: boolean; // refactor: This is not being used... and makes no sense, here we dont delete any report
+  // hasPermissionEditReport: boolean;   // refactor: This is not being used... and makes no sense, here we dont edit any report
+  isCurrentUserSolvedCaptcha: () => boolean;
+  isCurrentUserVerified: () => boolean;
+  showToaster: (message: string, icon: JSX.Element) => void;
 }
 
-const UnpureCloneDropdown = ({ reportUrl, commonData, report, setUser }: Props) => {
-  const [show, setShow] = useState(false);
+const UnpureCloneDropdown = ({ reportUrl, commonData, report, isCurrentUserSolvedCaptcha, isCurrentUserVerified, showToaster }: Props) => {
   const [copied, setCopied] = useState(false);
-  const [alertText, setAlertText] = useState<string>('Creating zip, this may take a moment...');
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
-  const [error, setError] = useState<boolean>(false);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!show) {
-      setTimeout(() => {
-        setError(false);
-      }, 1000);
-    }
-  }, [show]);
 
   const downloadReport = async () => {
-    if (commonData.user && commonData.user.show_captcha) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
-    setError(false);
-    setAlertText('Creating zip, this may take a moment...');
-    setShow(true);
+
+    showToaster('Creating zip file, this may take a moment...', ToasterIcons.INFO);
+
     try {
       const api: Api = new Api(commonData.token);
       const result: Buffer = await api.downloadReport(report.id!);
       const blob = new Blob([result], { type: 'application/zip' });
       saveAs(blob, `${slugify(report.name)}.zip`);
-      setAlertText('Download fininshed.');
+      showToaster('Download finished!', ToasterIcons.INFO);
     } catch (e: any) {
-      setError(true);
       const errorData: any = JSON.parse(Buffer.from(e.response.data).toString());
-      setAlertText(errorData.message);
-    }
-    setTimeout(() => {
-      setShow(false);
-      setError(false);
-    }, 5000);
-  };
-
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
+      showToaster(`Something happened: ${errorData.message}`, ToasterIcons.ERROR);
     }
   };
 
@@ -126,13 +100,6 @@ const UnpureCloneDropdown = ({ reportUrl, commonData, report, setUser }: Props) 
           </div>
         </Popover.Panel>
       </Popover>
-      <ToasterNotification
-        show={show}
-        setShow={setShow}
-        icon={error ? <ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" /> : <FolderDownloadIcon className="h-6 w-6 text-green-400" aria-hidden="true" />}
-        message={alertText}
-      />
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </>
   );
 };

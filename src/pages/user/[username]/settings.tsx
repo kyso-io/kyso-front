@@ -3,13 +3,11 @@ import { Helper } from '@/helpers/Helper';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
+import { UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
-import CaptchaModal from '@/components/CaptchaModal';
 import PureAvatar from '@/components/PureAvatar';
 import SettingsAside from '@/components/SettingsAside';
 import { checkJwt } from '@/helpers/check-jwt';
@@ -17,12 +15,10 @@ import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { ToasterIcons } from '@/enums/toaster-icons';
 
-const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const username: string = router.query.username as string;
   const ref = useRef<any>(null);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
-  const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [isCurrentUser, setIsCurrentUser] = useState<boolean | null>(null);
   const [bio, setBio] = useState<string>('');
   const [link, setLink] = useState<string>('');
@@ -30,29 +26,7 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
   const [file, setFile] = useState<File | null>(null);
   const [urlLocalFile, setUrlLocalFile] = useState<string | null>(null);
   const [requesting, setRequesting] = useState<boolean>(false);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
   const [sentVerificationEmail, setSentVerificationEmail] = useState<boolean>(false);
-  // const [showErrorBio, setShowErrorBio] = useState<boolean>(false);
-  // const [showErrorLink, setShowErrorLink] = useState<boolean>(false);
-  // const [showErrorLocation, setShowErrorLocation] = useState<boolean>(false);
-
-  useEffect(() => {
-    const result: boolean = checkJwt();
-    setUserIsLogged(result);
-    const getData = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
 
   useEffect(() => {
     if (!commonData.user) {
@@ -77,13 +51,13 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
   }, [commonData.user]);
 
   useEffect(() => {
-    if (userIsLogged === null) {
+    if (isUserLogged === null) {
       return;
     }
-    if (userIsLogged) {
+    if (isUserLogged) {
       setIsCurrentUser(commonData.user?.username === username);
     }
-  }, [commonData.user, userIsLogged]);
+  }, [commonData.user, isUserLogged]);
 
   const onChangeInputFile = (e: any) => {
     if (e.target.files.length > 0) {
@@ -93,14 +67,10 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
   };
 
   const submit = async () => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
-      return;
-    }
+
     try {
       showToaster('Updating profile...', ToasterIcons.INFO);
       const api: Api = new Api(commonData.token);
@@ -127,15 +97,6 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
     }
   };
 
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
-  };
-
   const sendVerificationEmail = async () => {
     try {
       const api: Api = new Api(commonData.token);
@@ -149,7 +110,7 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
     }
   };
 
-  if (userIsLogged === null) {
+  if (isUserLogged === null) {
     return null;
   }
 
@@ -333,7 +294,6 @@ const Index = ({ commonData, setUser, showToaster }: IKysoApplicationLayoutProps
           </div>
         )}
       </div>
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

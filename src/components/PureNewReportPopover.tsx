@@ -4,25 +4,21 @@ import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon, ChevronUpIcon, ClipboardCopyIcon, PencilAltIcon, TerminalIcon } from '@heroicons/react/outline';
 import { LinkIcon, UploadIcon } from '@heroicons/react/solid';
-import type { NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
-import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import CaptchaModal from './CaptchaModal';
 
 const TIMEOUT_MS = 5000;
 
 interface Props {
   commonData: CommonData;
-  captchaIsEnabled: boolean;
-  setUser: (user: UserDTO) => void;
+  isCurrentUserSolvedCaptcha: () => boolean;
+  isCurrentUserVerified: () => boolean;
 }
 
-const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) => {
+const PureNewReportPopover = ({ commonData, isCurrentUserSolvedCaptcha, isCurrentUserVerified }: Props) => {
   const router = useRouter();
   const [copiedKysoConfigFile, setCopiedKysoConfigFile] = useState<boolean>(false);
   const [copiedKysoPush, setCopiedKysoPush] = useState<boolean>(false);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
 
   const kysoYamlContent = `organization: ${commonData.organization?.sluglified_name}\nchannel: ${
     commonData.team?.sluglified_name || 'channel-name'
@@ -35,15 +31,6 @@ const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) 
     createLinkForm = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form`;
     createLinkEmbedded = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-embedded-report`;
   }
-
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
-  };
 
   return (
     <React.Fragment>
@@ -68,8 +55,7 @@ const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) 
                   <div className="p-4 border-b cursor-pointer">
                     <a
                       onClick={() => {
-                        if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                          setShowCaptchaModal(true);
+                        if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                           return;
                         }
                         router.push(createLinkForm);
@@ -86,8 +72,7 @@ const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) 
                   <div className="p-4 border-b cursor-pointer">
                     <a
                       onClick={() => {
-                        if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                          setShowCaptchaModal(true);
+                        if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                           return;
                         }
                         router.push(createLink);
@@ -104,8 +89,7 @@ const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) 
                   <div className="p-4 border-b cursor-pointer">
                     <a
                       onClick={() => {
-                        if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                          setShowCaptchaModal(true);
+                        if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                           return;
                         }
                         router.push(createLinkEmbedded);
@@ -194,7 +178,6 @@ const PureNewReportPopover = ({ commonData, captchaIsEnabled, setUser }: Props) 
           );
         }}
       </Popover>
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} redirectUrl={createLinkForm} />}
     </React.Fragment>
   );
 };

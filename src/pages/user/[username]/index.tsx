@@ -15,7 +15,6 @@ import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
-import CaptchaModal from '@/components/CaptchaModal';
 import { checkJwt } from '@/helpers/check-jwt';
 import { checkReportAuthors } from '@/helpers/check-report-authors';
 import { Helper } from '@/helpers/Helper';
@@ -52,7 +51,7 @@ type UserProfileData = {
   errorUserProfile: string | null;
 };
 
-const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, setUser, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const { username } = router.query;
   const [userProfileData, setUserProfileData] = useState<UserProfileData | null>(null);
@@ -65,17 +64,11 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
 
   useEffect(() => {
     const getData = async () => {
       try {
         const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexHcaptchaEnabled: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (indexHcaptchaEnabled !== -1) {
-          setCaptchaIsEnabled(publicKeys[indexHcaptchaEnabled]!.value === 'true');
-        }
         const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
         if (indexShowEmail !== -1) {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
@@ -232,14 +225,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const toggleUserStarReport = async (reportDto: ReportDTO) => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
-      return;
-    }
+
     const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
     try {
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserStarReport(reportDto.id!);
@@ -248,12 +237,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const toggleUserPinReport = async (reportDto: ReportDTO) => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
-      return;
-    }
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
     try {
@@ -264,12 +248,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const toggleGlobalPinReport = async (reportDto: ReportDTO) => {
-    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-      setShowCaptchaModal(true);
-      return;
-    }
-    if (commonData.user?.email_verified === false) {
-      showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
       return;
     }
     try {
@@ -280,15 +259,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   // END REPORT ACTIONS
-
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
-  };
 
   // START ACTIVITY FEED
 
@@ -328,6 +298,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   // END ACTIVITY FEED
 
   const onChangeBackgroundImage = async (file: File) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     if (!file) {
       return;
     }
@@ -438,7 +412,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
           )}
         </div>
       </div>
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };

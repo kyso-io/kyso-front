@@ -35,7 +35,9 @@ type IPureReportHeaderProps = {
   hasPermissionDeleteReport: boolean;
   children?: ReactElement;
   onSetFileAsMainFile: () => void;
-  setUser: (user: UserDTO) => void;
+  isCurrentUserSolvedCaptcha: () => boolean;
+  isCurrentUserVerified: () => boolean;
+  showToaster: (message: string, icon: JSX.Element) => void;
 };
 
 declare global {
@@ -61,7 +63,9 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
     hasPermissionEditReport,
     hasPermissionDeleteReport,
     onSetFileAsMainFile,
-    setUser,
+    isCurrentUserSolvedCaptcha,
+    isCurrentUserVerified,
+    showToaster,
   } = props;
 
   const showCloneDropDown: boolean = useMemo(() => {
@@ -186,9 +190,9 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
                 reportUrl={`${frontEndUrl}${reportUrl}`}
                 report={report}
                 commonData={commonData}
-                hasPermissionEditReport={hasPermissionEditReport}
-                hasPermissionDeleteReport={hasPermissionDeleteReport}
-                setUser={setUser}
+                isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                isCurrentUserVerified={isCurrentUserVerified}
+                showToaster={showToaster}
               />
             )}
             <PureVersionsDropdown versions={versions} version={version} reportUrl={reportUrl} />

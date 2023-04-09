@@ -46,7 +46,7 @@ const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
 
-const Index = ({ commonData, setUser, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isCaptchaEnabled }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const { join, organizationName } = router.query;
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
@@ -528,12 +528,6 @@ const Index = ({ commonData, setUser, showToaster, isCurrentUserVerified, isCurr
 
   // END ORGANIZATION MEMBERS
 
-  const onCaptchaSuccess = async () => {
-    const api: Api = new Api(commonData.token);
-    const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-    setUser(result.data);
-  };
-
   if (commonData.errorOrganization) {
     return <div className="text-center mt-4">{commonData.errorOrganization}</div>;
   }
@@ -582,12 +576,22 @@ const Index = ({ commonData, setUser, showToaster, isCurrentUserVerified, isCurr
                   onUpdateRoleMember={updateMemberRole}
                   onInviteNewUser={inviteNewUser}
                   onRemoveUser={removeUser}
-                  captchaIsEnabled={isCaptchaEnabled}
-                  onCaptchaSuccess={onCaptchaSuccess}
                   showEmails={showEmails}
+                  showToaster={showToaster}
+                  isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                  isCurrentUserVerified={isCurrentUserVerified}
                 />
-                {hasPermissionDeleteOrganization && <UnpureDeleteOrganizationDropdown commonData={commonData} captchaIsEnabled={isCaptchaEnabled} setUser={setUser} />}
-                {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={isCaptchaEnabled} setUser={setUser} />}
+                {hasPermissionDeleteOrganization && (
+                  <UnpureDeleteOrganizationDropdown
+                    commonData={commonData}
+                    showToaster={showToaster}
+                    isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                    isCurrentUserVerified={isCurrentUserVerified}
+                  />
+                )}
+                {commonData?.user && hasPermissionCreateReport && (
+                  <PureNewReportPopover commonData={commonData} isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha} isCurrentUserVerified={isCurrentUserVerified} />
+                )}
               </div>
             </div>
             {organizationInfo && (

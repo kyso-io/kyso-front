@@ -61,7 +61,7 @@ enum Tab {
   Toc = 'toc',
 }
 
-const Index = ({ commonData, reportData, setReportData, setUser, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isCaptchaEnabled }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, reportData, setReportData, setUser, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
   const [selfTree, setSelfTree] = useState<GithubFileHash[]>([]);
@@ -678,12 +678,6 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
 
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
 
-  const refreshUserData = async () => {
-    const api: Api = new Api(commonData.token);
-    const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-    setUser(result.data);
-  };
-
   return (
     <>
       {showError && <SomethingHappenedReport whatHappened={showErrorMessage} addRequestAccessButton={showErrorRequestAccessButton} commonData={commonData} teamVisibility={teamVisibility} />}
@@ -770,7 +764,9 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                             hasPermissionDeleteReport={hasPermissionDeleteReport}
                             commonData={commonData}
                             onSetFileAsMainFile={setReportFileAsMainFile}
-                            setUser={setUser}
+                            isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                            isCurrentUserVerified={isCurrentUserVerified}
+                            showToaster={showToaster}
                           >
                             <ManageUsers
                               commonData={commonData}
@@ -781,9 +777,10 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                               onUpdateRoleMember={updateMemberRole}
                               onInviteNewUser={inviteNewUser}
                               onRemoveUser={removeUser}
-                              captchaIsEnabled={isCaptchaEnabled}
-                              onCaptchaSuccess={refreshUserData}
                               showEmails={showEmails}
+                              showToaster={showToaster}
+                              isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                              isCurrentUserVerified={isCurrentUserVerified}
                             />
                           </PureReportHeader>
                           {gitCommit && (
@@ -863,7 +860,8 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                               enabledCreateInlineComment={hasPermissionCreateInlineComment}
                               enabledEditInlineComment={hasPermissionEditInlineComment}
                               enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
-                              captchaIsEnabled={isCaptchaEnabled}
+                              isCurrentUserVerified={isCurrentUserVerified}
+                              isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
                               setUser={setUser}
                             />
                           )}

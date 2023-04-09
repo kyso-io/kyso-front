@@ -85,7 +85,7 @@ const debouncedPaginatedReports = debounce(
   500,
 );
 
-const Index = ({ commonData, setUser, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isCaptchaEnabled }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const [teamInfo, setTeamInfo] = useState<TeamInfoDto | null>(null);
   // MEMBERS
@@ -591,12 +591,6 @@ const Index = ({ commonData, setUser, showToaster, isCurrentUserVerified, isCurr
 
   // END SEARCH USER
 
-  const onCaptchaSuccess = async () => {
-    const api: Api = new Api(commonData.token);
-    const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-    setUser(result.data);
-  };
-
   if (commonData.errorTeam) {
     return <div className="text-center mt-4">{commonData.errorTeam}</div>;
   }
@@ -631,12 +625,17 @@ const Index = ({ commonData, setUser, showToaster, isCurrentUserVerified, isCurr
                 onUpdateRoleMember={updateMemberRole}
                 onInviteNewUser={inviteNewUser}
                 onRemoveUser={removeUser}
-                captchaIsEnabled={isCaptchaEnabled}
-                onCaptchaSuccess={onCaptchaSuccess}
                 showEmails={showEmails}
+                showToaster={showToaster}
+                isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                isCurrentUserVerified={isCurrentUserVerified}
               />
-              {hasPermissionDeleteChannel && <UnpureDeleteChannelDropdown commonData={commonData} captchaIsEnabled={isCaptchaEnabled} setUser={setUser} />}
-              {commonData?.user && hasPermissionCreateReport && <PureNewReportPopover commonData={commonData} captchaIsEnabled={isCaptchaEnabled} setUser={setUser} />}
+              {hasPermissionDeleteChannel && (
+                <UnpureDeleteChannelDropdown commonData={commonData} showToaster={showToaster} isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha} isCurrentUserVerified={isCurrentUserVerified} />
+              )}
+              {commonData?.user && hasPermissionCreateReport && (
+                <PureNewReportPopover commonData={commonData} isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha} isCurrentUserVerified={isCurrentUserVerified} />
+              )}
             </div>
           </div>
         )}

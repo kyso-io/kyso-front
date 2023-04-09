@@ -1,13 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 import ListboxWithText from '@/components/PureListBoxWithText';
-import PureNotification from '@/components/PureNotification';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
-import { ChevronDownIcon, ExclamationCircleIcon, XIcon } from '@heroicons/react/solid';
+import { ChevronDownIcon, XIcon } from '@heroicons/react/solid';
 import type { UserDTO } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
@@ -15,13 +14,12 @@ import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import slugify from 'slugify';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { HelperPermissions } from '../helpers/check-permissions';
 import { Helper } from '../helpers/Helper';
 import type { Member } from '../types/member';
-import CaptchaModal from './CaptchaModal';
 import PureAvatar from './PureAvatar';
 import PureAvatarGroup from './PureAvatarGroup';
-import ToasterNotification from './ToasterNotification';
 
 const MAX_USERS_TO_SHOW = 5;
 const REMOVE_USER_VALUE = 'remove';
@@ -39,12 +37,26 @@ interface Props {
   onUpdateRoleMember: (userId: string, organizationRole: string, teamRole?: string) => void;
   onInviteNewUser: (email: string, organizationRole: string, teamRole?: string) => void;
   onRemoveUser: (userId: string, type: TeamMembershipOriginEnum) => void;
-  captchaIsEnabled: boolean;
-  onCaptchaSuccess: () => void;
   showEmails: boolean;
+  showToaster: (message: string, icon: JSX.Element) => void;
+  isCurrentUserSolvedCaptcha: () => boolean;
+  isCurrentUserVerified: () => boolean;
 }
 
-const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles, onUpdateRoleMember, onInviteNewUser, onRemoveUser, captchaIsEnabled, onCaptchaSuccess, showEmails }: Props) => {
+const ManageUsers = ({
+  commonData,
+  members,
+  users,
+  onInputChange,
+  showTeamRoles,
+  onUpdateRoleMember,
+  onInviteNewUser,
+  onRemoveUser,
+  showEmails,
+  showToaster,
+  isCurrentUserSolvedCaptcha,
+  isCurrentUserVerified,
+}: Props) => {
   const router = useRouter();
   const [query, setQuery] = useState<string>('');
   const [selectedUser, setSelectedUser] = useState<UserDTO | Member | null>(null);
@@ -54,8 +66,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
   const [selectedMemberIndex, setSelectedMemberIndex] = useState<number>(-1);
   const [selectedOrgLabel, setSelectedOrgLabel] = useState<string>('Select an option');
   const [selectedTeamLabel, setSelectedTeamLabel] = useState<string>('Select an option');
-  const [notificationType, setNotificationType] = useState<string>('');
-  const [notificationMessage, setNotificationMessage] = useState<string>('');
   const [isEmail, setIsEmail] = useState<boolean>(false);
   const [inputDeleteUser, setInputDeleteUser] = useState<string>('');
   const [keyDeleteUser, setKeyDeleteUser] = useState<string>('');
@@ -107,9 +117,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     }
     return data;
   }, [selectedUser, filteredMembers, users]);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
-  const [show, setShow] = useState<boolean>(false);
-  const [alertText, setAlertText] = useState<string>('');
 
   const allowedAccessDomains: string[] = useMemo(() => {
     if (!commonData.organization) {
@@ -178,18 +185,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
     plusMembers = filteredMembers.length - MAX_USERS_TO_SHOW;
   }
 
-  const delayedCallback = debounce(async () => {
-    setNotificationType('');
-    setNotificationMessage('');
-  }, 3000);
-
-  const onCloseCaptchaModal = (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      onCaptchaSuccess();
-    }
-  };
-
   const getInviteButton = () => {
     return (
       <React.Fragment>
@@ -204,13 +199,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                 : 'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
             )}
             onClick={() => {
-              if (!commonData.user!.email_verified) {
-                setShow(true);
-                setAlertText('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
-                return;
-              }
-              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                setShowCaptchaModal(true);
+              if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                 return;
               }
               onUpdateRoleMember(selectedUser.id, selectedOrgRole, selectedTeamRole);
@@ -231,13 +220,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                 : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
             )}
             onClick={() => {
-              if (!commonData.user!.email_verified) {
-                setShow(true);
-                setAlertText('Your account has not been verified yet. Please check your inbox, verify your account and refresh this page.');
-                return;
-              }
-              if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                setShowCaptchaModal(true);
+              if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                 return;
               }
               onInviteNewUser(query, selectedOrgRole, selectedTeamRole);
@@ -253,7 +236,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
 
   return (
     <React.Fragment>
-      <div className="text-left">{notificationMessage && <PureNotification message={notificationMessage} type={notificationType} />}</div>
       <Menu as="div" className="ml-2 relative inline-block text-left">
         {({ open }) => {
           useEffect(() => {
@@ -368,9 +350,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                 )}
                                 onClick={() => {
                                   if (!(!commonData.user || isOrgAdmin || (isTeamAdmin && showTeamRoles))) {
-                                    setNotificationMessage('You need admin permission to continue');
-                                    setNotificationType('warning');
-                                    delayedCallback();
+                                    showToaster(`You don't have enough permissions to perform this action`, ToasterIcons.INFO);
                                   }
                                   if (!commonData.user) {
                                     router.push(`/user/${member.username}`);
@@ -495,13 +475,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
                               )}
                               onClick={() => {
-                                if (!commonData.user!.email_verified) {
-                                  setShow(true);
-                                  setAlertText('Please verify your email address before updating the role of the user.');
-                                  return;
-                                }
-                                if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                  setShowCaptchaModal(true);
+                                if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                                   return;
                                 }
                                 const member: Member = members[selectedMemberIndex]!;
@@ -711,13 +685,7 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
                                   : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
                               )}
                               onClick={() => {
-                                if (!commonData.user!.email_verified) {
-                                  setShow(true);
-                                  setAlertText('Please verify your email address before updating the role of the user.');
-                                  return;
-                                }
-                                if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                  setShowCaptchaModal(true);
+                                if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                                   return;
                                 }
                                 const member: Member = members[selectedMemberIndex]!;
@@ -747,8 +715,6 @@ const ManageUsers = ({ commonData, members, users, onInputChange, showTeamRoles,
           );
         }}
       </Menu>
-      <ToasterNotification show={show} setShow={setShow} icon={<ExclamationCircleIcon className="h-6 w-6 text-red-400" aria-hidden="true" />} message={alertText} />
-      <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />
     </React.Fragment>
   );
 };

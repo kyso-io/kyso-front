@@ -4,21 +4,20 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Transition } from '@headlessui/react';
 import { TrashIcon } from '@heroicons/react/outline';
 import { ClipboardIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { KysoSetting, KysoUserAccessToken, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
-import { CreateKysoAccessTokenDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
+import type { KysoUserAccessToken, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import { CreateKysoAccessTokenDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useState } from 'react';
-import CaptchaModal from '@/components/CaptchaModal';
 import SettingsAside from '@/components/SettingsAside';
 import { checkJwt } from '@/helpers/check-jwt';
 import { Helper } from '@/helpers/Helper';
 import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
 import { ToasterIcons } from '@/enums/toaster-icons';
 
-const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   useRedirectIfNoJWT();
   const router = useRouter();
   const [requesting, setRequesting] = useState<boolean>(false);
@@ -28,25 +27,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   const [openCreateKysoAccessToken, setOpenCreateKysoAccessToken] = useState<boolean>(false);
   const [openDeleteKysoAccessToken, setOpenDeleteKysoAccessToken] = useState<boolean>(false);
   const [openRevokeAllKysoAccessTokens, setOpenRevokeAllKysoAccessTokens] = useState<boolean>(false);
-  const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean>(false);
   const [newKysoUserAccessToken, setNewKysoUserAccessToken] = useState<KysoUserAccessToken | null>(null);
-  const [showCaptchaModal, setShowCaptchaModal] = useState<boolean>(false);
-
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
 
   useEffect(() => {
     if (!commonData.user) {
@@ -81,6 +62,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   }, [commonData.token]);
 
   const createKysoAccessToken = async () => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     hideToaster();
     const index: number = kysoUserAccessTokens.findIndex((item: KysoUserAccessToken) => item.name === kysoAccessTokenName);
@@ -110,6 +95,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const deleteKysoAccessToken = async () => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token);
@@ -125,6 +114,10 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
   };
 
   const revokeAllKysoAccessTokens = async () => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+
     setRequesting(true);
     try {
       const api: Api = new Api(commonData.token);
@@ -137,15 +130,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
       setRequesting(false);
     }
     setOpenRevokeAllKysoAccessTokens(false);
-  };
-
-  const onCloseCaptchaModal = async (refreshUser: boolean) => {
-    setShowCaptchaModal(false);
-    if (refreshUser) {
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
-      setUser(result.data);
-    }
   };
 
   const closeCreateAccessTokenModal = () => {
@@ -182,12 +166,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
               <button
                 disabled={requesting}
                 onClick={() => {
-                  if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                    setShowCaptchaModal(true);
-                    return;
-                  }
-                  if (!commonData.user?.email_verified) {
-                    showToaster('Your email is not verified, please review your inbox. You can send another verification mail in Settings', ToasterIcons.INFO);
+                  if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                     return;
                   }
                   setOpenCreateKysoAccessToken(true);
@@ -201,8 +180,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
                 <button
                   disabled={requesting}
                   onClick={() => {
-                    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                      setShowCaptchaModal(true);
+                    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                       return;
                     }
                     setOpenRevokeAllKysoAccessTokens(true);
@@ -264,11 +242,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
                               <div className="flex flex-row-reverse" title="Remove access token">
                                 <TrashIcon
                                   onClick={() => {
-                                    if (captchaIsEnabled && commonData.user?.show_captcha === true) {
-                                      setShowCaptchaModal(true);
-                                      return;
-                                    }
-                                    if (requesting) {
+                                    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
                                       return;
                                     }
                                     setSelectedKysoAccessToken(kysoUserAccessToken);
@@ -528,7 +502,6 @@ const Index = ({ commonData, setUser, showToaster, hideToaster }: IKysoApplicati
           </div>
         </Dialog>
       </Transition.Root>
-      {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
     </div>
   );
 };
