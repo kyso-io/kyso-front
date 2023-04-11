@@ -356,11 +356,11 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                               Object.assign(newNotificationsSettings, notificationsSettings);
                               (newNotificationsSettings as any)[option.key] = !checked;
                               if (option.disabled_for_channel && teamId !== '') {
-                                newNotificationsSettings.new_member_organization = false;
-                                newNotificationsSettings.removed_member_in_organization = false;
-                                newNotificationsSettings.updated_role_in_organization = false;
-                                newNotificationsSettings.organization_removed = false;
-                                newNotificationsSettings.new_channel = false;
+                                delete (newNotificationsSettings as any).new_member_organization;
+                                delete (newNotificationsSettings as any).removed_member_in_organization;
+                                delete (newNotificationsSettings as any).updated_role_in_organization;
+                                delete (newNotificationsSettings as any).organization_removed;
+                                delete (newNotificationsSettings as any).new_channel;
                               }
                               await onUpdateUserNotificationsSettings(newNotificationsSettings);
                               hideToaster();
