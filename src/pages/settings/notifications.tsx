@@ -21,89 +21,105 @@ enum Tab {
 
 const tabs: Tab[] = [Tab.GlobalConfiguration, Tab.OrganizationAndChannel];
 
-const options: { title: string; description: string; key: string }[] = [
+const options: { title: string; description: string; key: string; disabled_for_channel: boolean }[] = [
   // ORGANIZATION
   {
     title: 'New member in your organization',
     description: 'Receive a notification every time a new member is added to you organization',
     key: 'new_member_organization',
+    disabled_for_channel: true,
   },
   {
     title: 'Removed member from your organization',
     description: 'Receive a notification every time a member is removed from your organization',
     key: 'removed_member_in_organization',
+    disabled_for_channel: true,
   },
   {
     title: 'Changed role in your organization',
     description: 'Receive a notification every time your role in the organization changes',
     key: 'updated_role_in_organization',
+    disabled_for_channel: true,
   },
   {
     title: 'Organization removed',
     description: 'Receive a notification every time an organization is removed',
     key: 'organization_removed',
+    disabled_for_channel: true,
   },
   // CHANNEL
   {
     title: 'New channel',
     description: 'Receive a notification every time a new channel is created.',
     key: 'new_channel',
+    disabled_for_channel: true,
   },
   {
     title: 'New member in your channel',
     description: 'Receive a notification every time a new member is added to you channel',
     key: 'new_member_channel',
+    disabled_for_channel: false,
   },
   {
     title: 'Removed member from your channel',
     description: 'Receive a notification every time a member is removed from your channel',
     key: 'removed_member_in_channel',
+    disabled_for_channel: false,
   },
   {
     title: 'Changed role in your channel',
     description: 'Receive a notification every time your role in the channel changes',
     key: 'updated_role_in_channel',
+    disabled_for_channel: false,
   },
   {
     title: 'Channel removed',
     description: 'Receive a notification every time a channel is removed',
     key: 'channel_removed',
+    disabled_for_channel: false,
   },
   // REPORT
   {
     title: 'New report',
     description: 'Receive a notification every time a new report is created.',
     key: 'new_report',
+    disabled_for_channel: false,
   },
   {
     title: 'New report version',
     description: 'Receive a notification every time a new version of a report is uploaded.',
     key: 'new_report_version',
+    disabled_for_channel: false,
   },
   {
     title: 'Report removed',
     description: 'Receive a notification every time a report is removed',
     key: 'report_removed',
+    disabled_for_channel: false,
   },
   {
     title: 'New comment in report',
     description: 'Receive a notification every time a new comment is added to a report',
     key: 'new_comment_in_report',
+    disabled_for_channel: false,
   },
   {
     title: 'Replay comment in report',
     description: 'Receive a notification every time a comment is replied in a report',
     key: 'replay_comment_in_report',
+    disabled_for_channel: false,
   },
   {
     title: 'New mention in report',
     description: 'Receive a notification every time you are mentioned in a report',
     key: 'new_mention_in_report',
+    disabled_for_channel: false,
   },
   {
     title: 'Report comment removed',
     description: 'Receive a notification every time a comment is removed from a report',
     key: 'report_comment_removed',
+    disabled_for_channel: false,
   },
 ];
 
@@ -321,20 +337,31 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                     </div>
                   )}
                   <div className="space-y-6 sm:space-y-5">
-                    {options.map((option: { title: string; description: string; key: string }, index: number) => {
+                    {options.map((option: { title: string; description: string; key: string; disabled_for_channel: boolean }, index: number) => {
                       const checked: boolean = (notificationsSettings as any)[option.key];
                       return (
                         <div key={index} className="flex items-center sm:border-t sm:border-gray-200 pt-5">
                           <div className="sm:grid grow">
                             <h4 className="text-base font-semibold leading-6 text-gray-900">{option.title}</h4>
                             <p className=" text-sm text-gray-500">{option.description}</p>
+                            {option.disabled_for_channel && teamId !== '' && (
+                              <p className=" text-sm text-gray-500">This parameter acts at the organization level. Please, select &quot;all&quot; in &quot;channel&quot; to be able to edit it.</p>
+                            )}
                           </div>
                           <Switch
+                            disabled={option.disabled_for_channel && teamId !== ''}
                             checked={checked}
                             onChange={async () => {
                               const newNotificationsSettings: NotificationsSettings = new NotificationsSettings();
                               Object.assign(newNotificationsSettings, notificationsSettings);
                               (newNotificationsSettings as any)[option.key] = !checked;
+                              if (option.disabled_for_channel && teamId !== '') {
+                                newNotificationsSettings.new_member_organization = false;
+                                newNotificationsSettings.removed_member_in_organization = false;
+                                newNotificationsSettings.updated_role_in_organization = false;
+                                newNotificationsSettings.organization_removed = false;
+                                newNotificationsSettings.new_channel = false;
+                              }
                               await onUpdateUserNotificationsSettings(newNotificationsSettings);
                               hideToaster();
                             }}
@@ -344,6 +371,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                             style={{
                               backgroundColor: checked ? 'rgb(79 70 229)' : 'gray',
                               borderColor: checked ? '' : 'gray',
+                              cursor: option.disabled_for_channel && teamId !== '' ? 'not-allowed' : 'pointer',
                             }}
                           >
                             <span className="sr-only">Enable notifications</span>
