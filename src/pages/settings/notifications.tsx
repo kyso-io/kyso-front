@@ -107,12 +107,6 @@ const options: { title: string; description: string; key: string }[] = [
   },
 ];
 
-const areEquals = (a: NotificationsSettings, b: NotificationsSettings) => {
-  return Object.keys(a).every((key: string) => {
-    return (a as any)[key] === (b as any)[key];
-  });
-};
-
 const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
@@ -121,31 +115,6 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
   const [userNotificationsSettings, setUserNotificationsSettings] = useState<UserNotificationsSettings | null>(null);
   const [organizationId, setOrganizationId] = useState<string>('');
   const [teamId, setTeamId] = useState<string>('');
-
-  const hasChanges: boolean = useMemo(() => {
-    if (!userNotificationsSettings) {
-      return false;
-    }
-    if (selectedTab === Tab.GlobalConfiguration) {
-      return !areEquals(userNotificationsSettings.global_settings, notificationsSettings);
-    }
-    if (teamId) {
-      /* eslint-disable no-prototype-builtins */
-      if (!userNotificationsSettings.channels_settings.hasOwnProperty(organizationId)) {
-        return true;
-      }
-      /* eslint-disable no-prototype-builtins */
-      if (!userNotificationsSettings.channels_settings[organizationId]!.hasOwnProperty(teamId)) {
-        return true;
-      }
-      return !areEquals(userNotificationsSettings.channels_settings[organizationId]![teamId]!, notificationsSettings);
-    }
-    /* eslint-disable no-prototype-builtins */
-    if (!userNotificationsSettings.organization_settings.hasOwnProperty(organizationId)) {
-      return true;
-    }
-    return !areEquals(userNotificationsSettings.organization_settings[organizationId]!, notificationsSettings);
-  }, [notificationsSettings, organizationId, teamId]);
   const organizationsResourcePermissions: ResourcePermissions[] = useMemo(() => {
     if (!commonData.permissions) {
       return [];
@@ -241,11 +210,11 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
     }
   }, [userNotificationsSettings, selectedTab, organizationId, teamId]);
 
-  const onUpdateUserNotificationsSettings = async () => {
+  const onUpdateUserNotificationsSettings = async (nss: NotificationsSettings) => {
     const api: Api = new Api(commonData.token);
     if (selectedTab === Tab.GlobalConfiguration) {
       try {
-        const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Global, notificationsSettings);
+        const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Global, nss);
         const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsGlobal(updateUserNotificationsSettings);
         setUserNotificationsSettings(result.data);
         showToaster('Global configuration updated', ToasterIcons.INFO);
@@ -255,7 +224,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
     } else {
       if (teamId) {
         try {
-          const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Channel, notificationsSettings);
+          const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Channel, nss);
           const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsOrganizationChannel(organizationId, teamId, updateUserNotificationsSettings);
           setUserNotificationsSettings(result.data);
           showToaster('Channel configuration updated', ToasterIcons.INFO);
@@ -264,7 +233,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
         }
       } else {
         try {
-          const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Organization, notificationsSettings);
+          const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Organization, nss);
           const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsOrganization(organizationId, updateUserNotificationsSettings);
           setUserNotificationsSettings(result.data);
           showToaster('Organization configuration updated', ToasterIcons.INFO);
@@ -362,11 +331,11 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                           </div>
                           <Switch
                             checked={checked}
-                            onChange={() => {
+                            onChange={async () => {
                               const newNotificationsSettings: NotificationsSettings = new NotificationsSettings();
                               Object.assign(newNotificationsSettings, notificationsSettings);
                               (newNotificationsSettings as any)[option.key] = !checked;
-                              setNotificationsSettings(newNotificationsSettings);
+                              await onUpdateUserNotificationsSettings(newNotificationsSettings);
                               hideToaster();
                             }}
                             className={`${checked ? 'bg-blue-600' : 'bg-gray-200'} relative inline-flex h-6 w-11 items-center rounded-full`}
@@ -377,28 +346,6 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                         </div>
                       );
                     })}
-                  </div>
-                  <div className="mt-5 pt-5 sm:border-t sm:border-gray-200">
-                    <div className="flex justify-end gap-x-3">
-                      <button
-                        type="button"
-                        onClick={() => router.reload()}
-                        className="rounded-md bg-white py-2 px-3 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        disabled={!hasChanges}
-                        onClick={onUpdateUserNotificationsSettings}
-                        className={clsx(
-                          !hasChanges && 'opacity-50 cursor-not-allowed',
-                          'inline-flex justify-center rounded-md bg-indigo-600 py-2 px-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600',
-                        )}
-                      >
-                        Save
-                      </button>
-                    </div>
                   </div>
                 </div>
               </div>
