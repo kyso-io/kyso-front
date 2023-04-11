@@ -206,12 +206,24 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
     } else if (teamId) {
       /* eslint-disable no-prototype-builtins */
       if (!userNotificationsSettings.channels_settings.hasOwnProperty(organizationId)) {
-        setNotificationsSettings(new NotificationsSettings());
+        const ns: NotificationsSettings = new NotificationsSettings();
+        delete (ns as any).new_member_organization;
+        delete (ns as any).removed_member_in_organization;
+        delete (ns as any).updated_role_in_organization;
+        delete (ns as any).organization_removed;
+        delete (ns as any).new_channel;
+        setNotificationsSettings(ns);
         /* eslint-disable no-lonely-if */
       } else {
         /* eslint-disable no-prototype-builtins */
         if (!userNotificationsSettings.channels_settings[organizationId]!.hasOwnProperty(teamId)) {
-          setNotificationsSettings(new NotificationsSettings());
+          const ns: NotificationsSettings = new NotificationsSettings();
+          delete (ns as any).new_member_organization;
+          delete (ns as any).removed_member_in_organization;
+          delete (ns as any).updated_role_in_organization;
+          delete (ns as any).organization_removed;
+          delete (ns as any).new_channel;
+          setNotificationsSettings(ns);
         } else {
           setNotificationsSettings(userNotificationsSettings.channels_settings[organizationId]![teamId]!);
         }
@@ -338,7 +350,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                   )}
                   <div className="space-y-6 sm:space-y-5">
                     {options.map((option: { title: string; description: string; key: string; disabled_for_channel: boolean }, index: number) => {
-                      const checked: boolean = (notificationsSettings as any)[option.key];
+                      const checked: boolean = (notificationsSettings as any).hasOwnProperty(option.key) && (notificationsSettings as any)[option.key] === true;
                       return (
                         <div key={index} className="flex items-center sm:border-t sm:border-gray-200 pt-5">
                           <div className="sm:grid grow">
