@@ -118,7 +118,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
         <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
       )}
 
-      <div className="flex justify-between pt-4">
+      <div className="flex justify-end pt-4">
         <div className="flex flex-row space-x-2">
           {comment && (
             <button className="hover:underline text-gray-500 text-sm" onClick={onCancel}>
