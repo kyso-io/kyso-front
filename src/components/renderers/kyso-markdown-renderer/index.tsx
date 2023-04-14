@@ -1,6 +1,8 @@
 /* eslint-disable react/self-closing-comp */
-import React from 'react';
 import { useNavigateToHashOnce } from '@/hooks/use-navigate-to-hash-once';
+import React, { useMemo } from 'react';
+import { Helper } from '../../../helpers/Helper';
+import RenderCode from '../RenderCode';
 import MarkdownWrapper from './components/markdown-wrapper';
 import type { ReportContext } from './interfaces/context';
 
@@ -44,15 +46,35 @@ const translateImagesToSCSUrl = (source: string, c: ReportContext) => {
 
 export const RenderMarkdown = (props: Props) => {
   useNavigateToHashOnce({ active: true });
-  let finalContent = null;
-
-  if (props.source) {
-    finalContent = props.source.toString();
-
-    if (props.context) {
-      finalContent = translateImagesToSCSUrl(props.source.toString(), props.context);
+  const finalContent: string = useMemo(() => {
+    if (props.source) {
+      let content: string = props.source.toString();
+      if (props.context) {
+        content = translateImagesToSCSUrl(props.source.toString(), props.context);
+      }
+      return content;
     }
+    return '';
+  }, [props.source, props.context]);
 
+  const fileWithHeaders: { headers: string; content: string } | null = useMemo(() => {
+    if (!finalContent) {
+      return null;
+    }
+    return Helper.getHeadersAndContentFromMarkdownFile(finalContent);
+  }, [finalContent]);
+
+  if (finalContent) {
+    if (fileWithHeaders) {
+      return (
+        <React.Fragment>
+          <div className="mb-4">
+            <RenderCode code={fileWithHeaders.headers} showFileNumbers={true} />
+          </div>
+          <MarkdownWrapper source={fileWithHeaders.content}></MarkdownWrapper>
+        </React.Fragment>
+      );
+    }
     return <MarkdownWrapper source={finalContent}></MarkdownWrapper>;
   }
   return <div>No content to show</div>;

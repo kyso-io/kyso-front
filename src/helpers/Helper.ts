@@ -360,4 +360,32 @@ export class Helper {
         return extension;
     }
   }
+
+  public static getHeadersAndContentFromMarkdownFile(fileContent: string): { headers: string; content: string } | null {
+    const lines: string[] = fileContent.split('\n');
+    let startIndex = -1;
+    let endIndex = -1;
+    for (let i = 0; i < lines.length; i += 1) {
+      const line = lines[i]!;
+      if (line.startsWith('---')) {
+        if (startIndex === -1) {
+          startIndex = i;
+        } else {
+          endIndex = i;
+          break;
+        }
+      }
+    }
+    if (startIndex === -1 || endIndex === -1) {
+      return null;
+    }
+    try {
+      return {
+        headers: lines.slice(startIndex + 1, endIndex).join('\n'),
+        content: lines.slice(endIndex + 1).join('\n'),
+      };
+    } catch (e) {
+      return null;
+    }
+  }
 }
