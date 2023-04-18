@@ -4,7 +4,7 @@ import { useAppDispatch } from '@/hooks/redux-hooks';
 import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
-import { DotsVerticalIcon, FolderDownloadIcon, InformationCircleIcon, PencilIcon, PresentationChartLineIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
+import { ChatAltIcon, DotsVerticalIcon, FolderDownloadIcon, InformationCircleIcon, PencilIcon, PresentationChartLineIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { deleteReportAction } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
@@ -99,6 +99,15 @@ const UnpureReportActionDropdown = (props: Props) => {
                 >
                   <PresentationChartLineIcon className="mr-2 h-5 w-5 text-gray-700" />
                   Analytics
+                </a>
+              </Menu.Item>
+              <Menu.Item>
+                <a
+                  href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}/tasks`}
+                  className={classNames('text-gray-700', 'px-4 py-2 text-sm hover:bg-gray-100 group flex items-center')}
+                >
+                  <ChatAltIcon className="mr-2 h-5 w-5 text-gray-700" />
+                  Tasks
                 </a>
               </Menu.Item>
               {hasPermissionEditReport && (
