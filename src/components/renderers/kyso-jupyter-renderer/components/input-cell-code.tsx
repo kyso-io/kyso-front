@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import RenderCode from '../../RenderCode';
 import type { Cell } from '../interfaces/jupyter-notebook';
 

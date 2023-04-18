@@ -7,18 +7,17 @@ import OutputsCell from './outputs-cell';
 interface Props {
   showInput: boolean;
   showOutput: boolean;
+  index: number;
   cell: ICell;
   context?: ReportContext;
 }
 
-const Cell = ({ cell, showInput, showOutput, context }: Props) => {
+const Cell = ({ cell, index, showInput, showOutput, context }: Props) => {
   const hasInput = cell.source.length > 0;
   const hasOutput = cell?.outputs && cell.outputs.length > 0;
-  // const hasInputOrOutput = cell.source.length > 0 || (cell?.outputs && cell.outputs.length > 0)
-
   return (
     <div style={{ overflowX: 'auto' }}>
-      {hasInput && <InputCell cell={cell} showInput={showInput} context={context} />}
+      {hasInput && <InputCell index={index} cell={cell} showInput={showInput} context={context} />}
 
       {hasOutput && <OutputsCell cell={cell} showOutput={showOutput} />}
     </div>

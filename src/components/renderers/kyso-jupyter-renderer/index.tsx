@@ -53,6 +53,7 @@ export const RenderJupyter = ({
 
         return (
           <CellWrapper
+            index={index}
             key={key}
             onlyVisibleCell={onlyVisibleCell}
             last={index + 1 === jupyterNotebook.cells.length}

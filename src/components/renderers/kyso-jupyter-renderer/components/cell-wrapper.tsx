@@ -18,6 +18,7 @@ interface Props {
   commonData: CommonData;
   report: ReportDTO;
   channelMembers: TeamMember[];
+  index: number;
   cell: ICell;
   showInputs: boolean;
   navigatetoSelf?: boolean;
@@ -36,6 +37,7 @@ interface Props {
 
 const CellWrapper = (props: Props) => {
   const {
+    index,
     cell,
     inlineComments,
     showInputs,
@@ -108,7 +110,7 @@ const CellWrapper = (props: Props) => {
           // (!onlyVisibleCell && isHover) ? "border-x border-y" : `border-x ${(onlyVisibleCell || last) ? " border-b border-b-inherit" : "border-y border-y-white"}`,
         )}
       >
-        <Cell cell={cell} showInput={inputShown} showOutput={outputShown} context={reportContext} />
+        <Cell index={index} cell={cell} showInput={inputShown} showOutput={outputShown} context={reportContext} />
       </div>
 
       <div className={classNames('w-3/12 p-[1px]')}>
