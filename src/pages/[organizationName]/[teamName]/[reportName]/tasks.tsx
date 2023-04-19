@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+// import Board from 'react-trello-ts';
+import Board from 'react-trello';
 import ManageUsers from '@/components/ManageUsers';
 import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
@@ -27,6 +29,7 @@ import {
   InviteUserDto,
   KysoSettingsEnum,
   ReportPermissionsEnum,
+  UpdateInlineCommentDto,
   TeamMembershipOriginEnum,
   UpdateOrganizationMembersDTO,
   UpdateTeamMembersDTO,
@@ -43,6 +46,10 @@ import ReadMoreReact from 'read-more-react';
 import { v4 as uuidv4 } from 'uuid';
 import Pagination from '../../../../components/Pagination';
 import TagInlineComment from '../../../../components/inline-comments/components/tag-inline-comment';
+import { TailwindHeightSizeEnum } from '../../../../tailwind/enum/tailwind-height.enum';
+import { TailwindFontSizeEnum } from '../../../../tailwind/enum/tailwind-font-size.enum';
+import PureAvatar from '../../../../components/PureAvatar';
+import TitleKanbanColumn from '../../../../components/inline-comments/components/title-kanban-column';
 
 enum Tab {
   Files = 'files',
@@ -77,7 +84,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   const [selectedTabListView, setSelectedTabListView] = useState<TabsListView>(TabsListView.Open);
   const [page, setPage] = useState<number>(1);
   const [selectedSortOption, setSelectedSortOption] = useState<{ name: string; value: string }>(sortOptions[0]!);
-  const [viewType, setViewType] = useState<ViewType>(ViewType.List);
+  const [viewType, setViewType] = useState<ViewType>(ViewType.Kanban);
 
   // START DATA REPORT
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
@@ -113,6 +120,14 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     if (!result) {
       return [];
     }
+    if (viewType === ViewType.Kanban) {
+      return result.data.sort((a: InlineCommentDto, b: InlineCommentDto) => {
+        if (selectedSortOption.value === 'created_at') {
+          return moment(b.created_at).diff(moment(a.created_at));
+        }
+        return moment(b.updated_at).diff(moment(a.updated_at));
+      });
+    }
     return result.data
       .filter((x: InlineCommentDto) => {
         if (selectedTabListView === TabsListView.Open) {
@@ -126,7 +141,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
         }
         return moment(b.updated_at).diff(moment(a.updated_at));
       });
-  }, [result, selectedTabListView, selectedSortOption]);
+  }, [result, selectedTabListView, selectedSortOption, viewType]);
 
   const paginatedInlineCommentDtos: InlineCommentDto[] = useMemo(() => {
     if (inlineCommentDtos.length === 0) {
@@ -143,6 +158,81 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     }
     return Math.ceil(inlineCommentDtos.length / LIMIT);
   }, [inlineCommentDtos]);
+
+  const boardData: any = useMemo(() => {
+    if (!commonData || !commonData.user || !reportData || !reportData.report) {
+      return {
+        lanes: [],
+      };
+    }
+    const isUserAuthor = (inlineCommentDto: InlineCommentDto) => commonData.user?.id === inlineCommentDto?.user_id;
+    const isReportAuthor: boolean = reportData.report.author_ids.includes(commonData.user?.id);
+    const inlineCommentToCard = (x: InlineCommentDto, draggable: boolean): any => {
+      return {
+        id: x.id,
+        title: x.user_name,
+        description: x.text.length > 225 ? `${x.text.substring(0, 225)}...` : x.text,
+        label: moment(x.created_at).format('DD/MM/YYYY HH:mm'),
+        draggable,
+        metadata: x,
+      };
+    };
+    const openedTasks: InlineCommentDto[] = inlineCommentDtos.filter((x: InlineCommentDto) => x.current_status === InlineCommentStatusEnum.OPEN);
+    const todoTasks: InlineCommentDto[] = inlineCommentDtos.filter((x: InlineCommentDto) => x.current_status === InlineCommentStatusEnum.TO_DO);
+    const doingTasks: InlineCommentDto[] = inlineCommentDtos.filter((x: InlineCommentDto) => x.current_status === InlineCommentStatusEnum.DOING);
+    const closedTasks: InlineCommentDto[] = inlineCommentDtos.filter((x: InlineCommentDto) => x.current_status === InlineCommentStatusEnum.CLOSED);
+    return {
+      lanes: [
+        {
+          id: InlineCommentStatusEnum.OPEN,
+          status: InlineCommentStatusEnum.OPEN,
+          title: 'Open tasks',
+          label: `${openedTasks.length}/${inlineCommentDtos.length}`,
+          cards: openedTasks.map((x: InlineCommentDto) => {
+            const draggable: boolean = isUserAuthor(x) && isReportAuthor;
+            return inlineCommentToCard(x, draggable);
+          }),
+        },
+        {
+          id: InlineCommentStatusEnum.TO_DO,
+          status: InlineCommentStatusEnum.TO_DO,
+          title: 'To do tasks',
+          label: `${todoTasks.length}/${inlineCommentDtos.length}`,
+          cards: todoTasks.map((x: InlineCommentDto) => {
+            const draggable: boolean = isUserAuthor(x) && isReportAuthor;
+            return inlineCommentToCard(x, draggable);
+          }),
+        },
+        {
+          id: InlineCommentStatusEnum.DOING,
+          status: InlineCommentStatusEnum.DOING,
+          title: 'Doing tasks',
+          label: `${doingTasks.length}/${inlineCommentDtos.length}`,
+          cards: doingTasks.map((x: InlineCommentDto) => {
+            const draggable: boolean = isUserAuthor(x) && isReportAuthor;
+            return inlineCommentToCard(x, draggable);
+          }),
+        },
+        {
+          id: InlineCommentStatusEnum.CLOSED,
+          status: InlineCommentStatusEnum.CLOSED,
+          title: 'Closed tasks',
+          label: `${closedTasks.length}/${inlineCommentDtos.length}`,
+          cards: closedTasks.map((x: InlineCommentDto) => {
+            const draggable: boolean = isUserAuthor(x) && isReportAuthor;
+            return inlineCommentToCard(x, draggable);
+          }),
+        },
+      ],
+    };
+  }, [inlineCommentDtos, commonData.user]);
+
+  const title: string = useMemo(() => {
+    if (viewType === ViewType.Kanban) {
+      return 'Tasks';
+    }
+    return selectedTabListView === TabsListView.Open ? 'Ongoing tasks' : 'Finished tasks';
+  }, [viewType, selectedTabListView]);
 
   useEffect(() => {
     if (!commonData.permissions || !commonData.permissions.organizations || !commonData.permissions.teams || !router.query.organizationName || !router.query.teamName) {
@@ -481,6 +571,27 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     return null;
   }
 
+  const updateInlineCommentStatus = async (id: string, status: InlineCommentStatusEnum) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+    try {
+      const inlineCommentDto: InlineCommentDto = inlineCommentDtos.find((ic: InlineCommentDto) => ic.id === id)!;
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(inlineCommentDto.id, inlineCommentDto.text, inlineCommentDto.mentions, status);
+      const response: NormalizedResponseDTO<InlineCommentDto> = await api.updateInlineComment(id, updateInlineCommentDto);
+      const updatedInlineComment: InlineCommentDto = response.data;
+      const copyResult: NormalizedResponseDTO<InlineCommentDto[]> = { ...result! };
+      const copyData: InlineCommentDto[] = [...copyResult.data];
+      const index: number = copyData.findIndex((inlineComment: InlineCommentDto) => inlineComment.id === id);
+      copyData[index] = updatedInlineComment;
+      copyResult.data = copyData;
+      setResult(copyResult);
+    } catch (e) {
+      // Helper.logError("Unexpected error", e);;
+    }
+  };
+
   return (
     <div className="tasks">
       <div className={classNames('hidden lg:block z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
@@ -580,7 +691,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
             ) : (
               <div className="py-4 px-8 border-y">
                 <div className="flex flex-row content-center my-3">
-                  <h1 className="text-3xl font-bold text-gray-900 my-4 grow">{selectedTabListView === TabsListView.Open ? 'Ongoing tasks' : 'Finished tasks'}</h1>
+                  <h1 className="text-3xl font-bold text-gray-900 my-4 grow">{title}</h1>
                   <div className="space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
                     {viewTypes.map((element: { name: string; value: ViewType }) => (
                       <div key={element.value} className="flex items-center">
@@ -630,7 +741,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                                     </span>
                                   </Listbox.Button>
                                   <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
-                                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none sm:text-sm">
                                       {sortOptions.map((sortOption: { name: string; value: string }, index: number) => (
                                         <Listbox.Option
                                           key={index}
@@ -680,7 +791,6 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                                   <a href="#" className="block hover:bg-gray-50">
                                     <div className="p-4 sm:px-6">
                                       <div className="flex items-center justify-between">
-                                        {/* <p className="truncate text-sm font-medium text-indigo-600">{inlineCommentDto.text}</p> */}
                                         <ReadMoreReact text={inlineCommentDto.text} ideal={200} readMoreText="Read more..." className="text-sm font-medium text-indigo-600" />
                                         <div className="ml-2 flex shrink-0">
                                           <TagInlineComment status={inlineCommentDto.current_status} />
@@ -754,7 +864,60 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                     )}
                   </React.Fragment>
                 ) : (
-                  <p>hola</p>
+                  <Board
+                    data={boardData}
+                    draggable={true}
+                    editable={false}
+                    hideCardDeleteIcon={true}
+                    handleDragEnd={(inlineCommentId: string, _: string, newStatus: string) => updateInlineCommentStatus(inlineCommentId, newStatus as InlineCommentStatusEnum)}
+                    // onCardClick={(cardId: string, metadata: any, card: any) => console.log('onCardClick', { cardId, metadata, laneId: card })}
+                    components={{
+                      BoardWrapper: (e: any) => e.children[0],
+                      Section: (e: any) => {
+                        return (
+                          <div className={clsx('bg-gray-200 rounded', { 'mr-2': e.index < 3 })}>
+                            <div className="mx-auto max-w-7xl py-2 px-4">
+                              <div className="flex flex-row justify-between items-center">
+                                <TitleKanbanColumn title={e.title} status={e.status} />
+                                <span className="text-xs text-gray-500">{e.label}</span>
+                              </div>
+                              {e.children[1]}
+                            </div>
+                          </div>
+                        );
+                      },
+                      Card: (e: any) => {
+                        const inlineCommentDto: InlineCommentDto = e.metadata;
+                        return (
+                          <div className="overflow-hidden bg-white sm:rounded-lg sm:shadow my-1 cursor-pointer">
+                            <div className="bg-white px-4 py-5 sm:px-6">
+                              <div className="flex space-x-3">
+                                <div className="shrink-0">
+                                  <PureAvatar src={inlineCommentDto.user_avatar} title={inlineCommentDto.user_name} size={TailwindHeightSizeEnum.H10} textSize={TailwindFontSizeEnum.XS} />
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-sm font-semibold text-gray-900">
+                                    <span>{inlineCommentDto.user_name}</span>
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    <span>{moment(inlineCommentDto.created_at).format('DD MMMM YYYY [at] HH:mm A')}</span>
+                                  </p>
+                                </div>
+                              </div>
+                              <div
+                                className="mt-3 text-sm text-gray-500"
+                                style={{
+                                  width: 230,
+                                }}
+                              >
+                                <ReadMoreReact text={inlineCommentDto.text || ''} ideal={100} readMoreText="Read more..." className="text-sm font-medium text-indigo-600" />
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      },
+                    }}
+                  />
                 )}
               </div>
             )}

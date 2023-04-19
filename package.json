@@ -70,6 +70,7 @@
     "react-simple-maps": "^3.0.0",
     "react-simplemde-editor": "^5.0.2",
     "react-tooltip": "^5.8.3",
+    "react-trello": "^2.2.11",
     "read-more-react": "^1.0.10",
     "rehype-katex": "^6.0.2",
     "rehype-raw": "^6.1.1",

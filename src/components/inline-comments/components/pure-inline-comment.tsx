@@ -15,6 +15,7 @@ import moment from 'moment';
 import { useMemo, useState } from 'react';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import PureInlineCommentForm from './pure-inline-comment-form';
+import TagInlineComment from './tag-inline-comment';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -64,21 +65,6 @@ const PureInlineComment = (props: IPureInlineComment) => {
     return null;
   }
 
-  const getTag = (status: InlineCommentStatusEnum) => {
-    switch (status) {
-      case InlineCommentStatusEnum.OPEN:
-        return <span className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded-full dark:bg-blue-900 dark:text-blue-300">open</span>;
-      case InlineCommentStatusEnum.TO_DO:
-        return <span className="bg-gray-100 text-gray-800 text-xs font-medium mr-2 px-2.5 py-1 rounded-full dark:bg-gray-700 dark:text-gray-300">to do</span>;
-      case InlineCommentStatusEnum.DOING:
-        return <span className="bg-yellow-100 text-yellow-800 text-xs font-medium mr-2 px-2.5 py-1 rounded-full dark:bg-yellow-900 dark:text-yellow-300">doing</span>;
-      case InlineCommentStatusEnum.CLOSED:
-        return <span className="bg-red-100 text-red-800 text-xs font-medium mr-2 px-2.5 py-1 rounded-full dark:bg-red-900 dark:text-red-300">closed</span>;
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="not-prose">
       {comment && isEditing ? (
@@ -126,7 +112,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
               <Popover className="relative inline-block">
                 <Popover.Button className="focus:outline-none">
                   <div className="flex flex-row items-center cursor-pointer">
-                    {getTag(comment.current_status!)}
+                    <TagInlineComment status={comment.current_status!} />
                     <ChevronDownIcon className="h-5 w-5" aria-hidden="true" />
                   </div>
                 </Popover.Button>
@@ -147,7 +133,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                               close();
                             }}
                           >
-                            {getTag(InlineCommentStatusEnum.OPEN)}
+                            <TagInlineComment status={InlineCommentStatusEnum.OPEN} />
                             <p className="mt-1 text-gray-600">This comment is open for resolution.</p>
                           </div>
                         )}
@@ -159,7 +145,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                               close();
                             }}
                           >
-                            {getTag(InlineCommentStatusEnum.TO_DO)}
+                            <TagInlineComment status={InlineCommentStatusEnum.TO_DO} />
                             <p className="mt-1 text-gray-600">You are planing to work on this comment in the future.</p>
                           </div>
                         )}
@@ -171,7 +157,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                               close();
                             }}
                           >
-                            {getTag(InlineCommentStatusEnum.DOING)}
+                            <TagInlineComment status={InlineCommentStatusEnum.DOING} />
                             <p className="mt-1 text-gray-600">You are working on this comment.</p>
                           </div>
                         )}
@@ -183,7 +169,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                               close();
                             }}
                           >
-                            {getTag(InlineCommentStatusEnum.CLOSED)}
+                            <TagInlineComment status={InlineCommentStatusEnum.CLOSED} />
                             <p className="mt-1 text-gray-600">This comment is resolved.</p>
                           </div>
                         )}
@@ -193,7 +179,9 @@ const PureInlineComment = (props: IPureInlineComment) => {
                 </Popover.Panel>
               </Popover>
             ) : !parentInlineComment ? (
-              <div className="cursor-default">{getTag(comment.current_status!)}</div>
+              <div className="cursor-default">
+                <TagInlineComment status={comment.current_status!} />
+              </div>
             ) : null}
             {hasPermissionCreateComment && replying && (
               <span onClick={() => setReplying(false)} className="cursor-pointer">
