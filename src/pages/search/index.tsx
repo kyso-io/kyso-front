@@ -255,11 +255,11 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
   const onFiltersChanged = (filterOrgs: string[], filterTeams: string[], filterPeople: string[], filterFileTypes: string[], filterTags: string[]) => {
     setFullTextSearchParams({
       ...fullTextSearchParams,
-      filterOrgs: filterOrgs.map((x: string) => encodeURIComponent(x)),
-      filterTeams: filterTeams.map((x: string) => encodeURIComponent(x)),
-      filterPeople: filterPeople.map((x: string) => encodeURIComponent(x)),
-      filterFileTypes: filterFileTypes.map((x: string) => encodeURIComponent(x)),
-      filterTags: filterTags.map((x: string) => encodeURIComponent(x)),
+      filterOrgs /* .map((x: string) => encodeURIComponent(x)) */,
+      filterTeams /* .map((x: string) => encodeURIComponent(x)) */,
+      filterPeople /* .map((x: string) => encodeURIComponent(x)) */,
+      filterFileTypes /* .map((x: string) => encodeURIComponent(x)) */,
+      filterTags /* .map((x: string) => encodeURIComponent(x)) */,
       page: 1,
     });
   };
@@ -272,6 +272,7 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
         onFiltersChanged={onFiltersChanged}
         navigation={navigation}
         elasticSearchIndex={fullTextSearchParams.type}
+        fullTextSearchParams={fullTextSearchParams}
         onSelectedNavItem={(type: ElasticSearchIndex) => setFullTextSearchParams({ ...fullTextSearchParams, type, page: 1 })}
       />
       <div className="col-span-3">
