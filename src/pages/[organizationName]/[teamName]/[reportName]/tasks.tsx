@@ -4,6 +4,7 @@ import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import TableOfContents from '@/components/TableOfContents';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '@/helpers/Helper';
 import { HelperPermissions } from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
@@ -12,14 +13,17 @@ import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
 import type { Version } from '@/hooks/use-versions';
 import { useVersions } from '@/hooks/use-versions';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { KeyValue } from '@/model/key-value.model';
 import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
+import { Listbox, Transition } from '@headlessui/react';
+import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { GithubFileHash, InlineCommentDto, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
+  InlineCommentStatusEnum,
   InviteUserDto,
   KysoSettingsEnum,
   ReportPermissionsEnum,
@@ -27,18 +31,16 @@ import {
   UpdateOrganizationMembersDTO,
   UpdateTeamMembersDTO,
   UserRoleDTO,
-  InlineCommentStatusEnum,
 } from '@kyso-io/kyso-model';
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
+import clsx from 'clsx';
+import moment from 'moment';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
-import React, { useEffect, useMemo, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
-import moment from 'moment';
-import { ToasterIcons } from '@/enums/toaster-icons';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import clsx from 'clsx';
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import 'react-tooltip/dist/react-tooltip.css';
+import ReadMoreReact from 'read-more-react';
+import { v4 as uuidv4 } from 'uuid';
 import Pagination from '../../../../components/Pagination';
 import TagInlineComment from '../../../../components/inline-comments/components/tag-inline-comment';
 
@@ -52,7 +54,20 @@ enum TabsListView {
   Closed = 'closed',
 }
 
+enum ViewType {
+  List = 'list',
+  Kanban = 'kanban',
+}
+
 const LIMIT = 10;
+const sortOptions: { name: string; value: string }[] = [
+  { name: 'Last created', value: 'created_at' },
+  { name: 'Last updated', value: 'updated_at' },
+];
+const viewTypes: { name: string; value: ViewType }[] = [
+  { name: 'List', value: ViewType.List },
+  { name: 'Kanban', value: ViewType.Kanban },
+];
 
 const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
@@ -61,6 +76,8 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   const [requesting, setRequesting] = useState<boolean>(true);
   const [selectedTabListView, setSelectedTabListView] = useState<TabsListView>(TabsListView.Open);
   const [page, setPage] = useState<number>(1);
+  const [selectedSortOption, setSelectedSortOption] = useState<{ name: string; value: string }>(sortOptions[0]!);
+  const [viewType, setViewType] = useState<ViewType>(ViewType.List);
 
   // START DATA REPORT
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
@@ -96,13 +113,20 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     if (!result) {
       return [];
     }
-    return result.data.filter((x: InlineCommentDto) => {
-      if (selectedTabListView === TabsListView.Open) {
-        return x.current_status === InlineCommentStatusEnum.OPEN || x.current_status === InlineCommentStatusEnum.TO_DO || x.current_status === InlineCommentStatusEnum.DOING;
-      }
-      return x.current_status === InlineCommentStatusEnum.CLOSED;
-    });
-  }, [result, selectedTabListView]);
+    return result.data
+      .filter((x: InlineCommentDto) => {
+        if (selectedTabListView === TabsListView.Open) {
+          return x.current_status === InlineCommentStatusEnum.OPEN || x.current_status === InlineCommentStatusEnum.TO_DO || x.current_status === InlineCommentStatusEnum.DOING;
+        }
+        return x.current_status === InlineCommentStatusEnum.CLOSED;
+      })
+      .sort((a: InlineCommentDto, b: InlineCommentDto) => {
+        if (selectedSortOption.value === 'created_at') {
+          return moment(b.created_at).diff(moment(a.created_at));
+        }
+        return moment(b.updated_at).diff(moment(a.updated_at));
+      });
+  }, [result, selectedTabListView, selectedSortOption]);
 
   const paginatedInlineCommentDtos: InlineCommentDto[] = useMemo(() => {
     if (inlineCommentDtos.length === 0) {
@@ -458,7 +482,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   }
 
   return (
-    <React.Fragment>
+    <div className="tasks">
       <div className={classNames('hidden lg:block z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
         <div className="flex flex-1 flex-col pt-32 mt-2">
           <nav className="flex-1 space-y-1">
@@ -538,7 +562,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                 </PureReportHeader>
               </div>
             </div>
-            {/* TODO */}
+            {/* TASKS */}
             {!result ? (
               <div className="py-4 px-8">
                 <h1 className="text-3xl font-bold text-gray-900 my-4">Tasks</h1>
@@ -555,114 +579,189 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
               </div>
             ) : (
               <div className="py-4 px-8 border-y">
-                <h1 className="text-3xl font-bold text-gray-900 my-4">{selectedTabListView === TabsListView.Open ? 'Ongoing tasks' : 'Finished tasks'}</h1>
-                <div className="hidden sm:block">
-                  <div className="border-b border-gray-200">
-                    <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-                      {[TabsListView.Open, TabsListView.Closed].map((tab: TabsListView) => (
-                        <span
-                          key={tab}
-                          onClick={() => setSelectedTabListView(tab)}
-                          className={clsx(
-                            'cursor-pointer',
-                            tab === selectedTabListView ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                            'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium',
-                          )}
-                          aria-current={tab === selectedTabListView ? 'page' : undefined}
-                        >
-                          {Helper.ucFirst(tab)}
-                        </span>
-                      ))}
-                    </nav>
+                <div className="flex flex-row content-center my-3">
+                  <h1 className="text-3xl font-bold text-gray-900 my-4 grow">{selectedTabListView === TabsListView.Open ? 'Ongoing tasks' : 'Finished tasks'}</h1>
+                  <div className="space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                    {viewTypes.map((element: { name: string; value: ViewType }) => (
+                      <div key={element.value} className="flex items-center">
+                        <input
+                          onChange={() => setViewType(element.value)}
+                          type="radio"
+                          checked={element.value === viewType}
+                          className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
+                        />
+                        <label className="ml-3 block text-sm font-medium leading-6 text-gray-900">{element.name}</label>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <div className="overflow-hidden bg-white shadow sm:rounded-md my-4">
-                  <ul role="list" className="divide-y divide-gray-200">
-                    {paginatedInlineCommentDtos.map((inlineCommentDto: InlineCommentDto) => {
-                      const participants: { [key: string]: boolean } = {
-                        [inlineCommentDto.user_id]: true,
-                      };
-                      inlineCommentDto.inline_comments.forEach((inlineComment: InlineCommentDto) => {
-                        participants[inlineComment.user_id] = true;
-                      });
-                      return (
-                        <li key={inlineCommentDto.id}>
-                          <a href="#" className="block hover:bg-gray-50">
-                            <div className="p-4 sm:px-6">
-                              <div className="flex items-center justify-between">
-                                <p className="truncate text-sm font-medium text-indigo-600">{inlineCommentDto.text}</p>
-                                <div className="ml-2 flex shrink-0">
-                                  <TagInlineComment status={inlineCommentDto.current_status} />
+                {viewType === ViewType.List ? (
+                  <React.Fragment>
+                    <div className="hidden sm:block">
+                      <div className="flex flex-row">
+                        <nav className="border-b border-gray-200 -mb-px flex space-x-8 grow mr-10" aria-label="Tabs">
+                          {[TabsListView.Open, TabsListView.Closed].map((tab: TabsListView) => (
+                            <span
+                              key={tab}
+                              onClick={() => setSelectedTabListView(tab)}
+                              className={clsx(
+                                'cursor-pointer',
+                                tab === selectedTabListView ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                                'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium',
+                              )}
+                              aria-current={tab === selectedTabListView ? 'page' : undefined}
+                            >
+                              {Helper.ucFirst(tab)}
+                            </span>
+                          ))}
+                        </nav>
+                        <div className="flex flex-col">
+                          <Listbox value={selectedSortOption} onChange={setSelectedSortOption}>
+                            {({ open }) => (
+                              <React.Fragment>
+                                <Listbox.Label className="block text-sm font-medium leading-6 text-gray-900">Sort by:</Listbox.Label>
+                                <div className="relative mt-1">
+                                  <Listbox.Button className="relative w-full cursor-default rounded-md bg-white py-1.5 pl-3 pr-10 text-left text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                                    <span className="block truncate">{selectedSortOption.name}</span>
+                                    <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
+                                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5 text-gray-400">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
+                                      </svg>
+                                    </span>
+                                  </Listbox.Button>
+                                  <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
+                                    <Listbox.Options className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+                                      {sortOptions.map((sortOption: { name: string; value: string }, index: number) => (
+                                        <Listbox.Option
+                                          key={index}
+                                          className={({ active }) => classNames(active ? 'bg-indigo-600 text-white' : 'text-gray-900', 'relative cursor-default select-none py-2 pl-3 pr-9')}
+                                          value={sortOption}
+                                        >
+                                          {({ selected, active }) => (
+                                            <React.Fragment>
+                                              <span className={classNames(selected ? 'font-semibold' : 'font-normal', 'block truncate')}>{sortOption.name}</span>
+                                              {selected ? (
+                                                <span className={classNames(active ? 'text-white' : 'text-indigo-600', 'absolute inset-y-0 right-0 flex items-center pr-4')}>
+                                                  <CheckIcon className="h-5 w-5" aria-hidden="true" />
+                                                </span>
+                                              ) : null}
+                                            </React.Fragment>
+                                          )}
+                                        </Listbox.Option>
+                                      ))}
+                                    </Listbox.Options>
+                                  </Transition>
                                 </div>
-                              </div>
-                              <div className="mt-2 sm:flex sm:justify-between">
-                                <div className="sm:flex">
-                                  <p className="flex items-center text-sm text-gray-500">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1.5">
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
-                                      />
-                                    </svg>
-                                    {Object.keys(participants).length} participans
-                                  </p>
-                                  <p className="mt-2 flex items-center text-sm text-gray-500 sm:ml-6 sm:mt-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1.5">
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
-                                      />
-                                    </svg>
-                                    {inlineCommentDto.inline_comments.length} answers
-                                  </p>
-                                  <p className="mt-2 flex items-center text-sm text-gray-500 sm:ml-6 sm:mt-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1.5">
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"
-                                      />
-                                    </svg>
-                                    {inlineCommentDto.status_history.length - 1} status changes
-                                  </p>
-                                  {/* <p className="mt-2 flex items-center text-sm text-gray-500 sm:ml-6 sm:mt-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1.5">
-                                      <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
-                                      />
-                                    </svg>
-                                    {inlineCommentDto.cell_id} - {inlineCommentDto.report_id} source
-                                  </p> */}
-                                </div>
-                                <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1.5">
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
-                                    />
-                                  </svg>
-                                  <p>{moment(inlineCommentDto.created_at).fromNow()}</p>
-                                </div>
-                              </div>
-                            </div>
-                          </a>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-                {numPages > 1 && <Pagination numPages={numPages} onPageChange={(p: number) => setPage(p)} page={page} />}
+                              </React.Fragment>
+                            )}
+                          </Listbox>
+                        </div>
+                      </div>
+                    </div>
+                    {paginatedInlineCommentDtos.length === 0 ? (
+                      <p className="mt-6 text-sm text-gray-500">There are not {selectedTabListView === TabsListView.Open ? 'opened' : 'closed'} tasks for this report</p>
+                    ) : (
+                      <React.Fragment>
+                        <div className="overflow-hidden bg-white shadow sm:rounded-md my-4">
+                          <ul role="list" className="divide-y divide-gray-200">
+                            {paginatedInlineCommentDtos.map((inlineCommentDto: InlineCommentDto) => {
+                              const participants: { [key: string]: boolean } = {
+                                [inlineCommentDto.user_id]: true,
+                              };
+                              inlineCommentDto.inline_comments.forEach((inlineComment: InlineCommentDto) => {
+                                participants[inlineComment.user_id] = true;
+                              });
+                              let file: File | null = null;
+                              if (result!.relations!.file[inlineCommentDto.file_id]) {
+                                file = result!.relations!.file[inlineCommentDto.file_id];
+                              }
+                              return (
+                                <li key={inlineCommentDto.id} className="container-inline-comment">
+                                  <a href="#" className="block hover:bg-gray-50">
+                                    <div className="p-4 sm:px-6">
+                                      <div className="flex items-center justify-between">
+                                        {/* <p className="truncate text-sm font-medium text-indigo-600">{inlineCommentDto.text}</p> */}
+                                        <ReadMoreReact text={inlineCommentDto.text} ideal={200} readMoreText="Read more..." className="text-sm font-medium text-indigo-600" />
+                                        <div className="ml-2 flex shrink-0">
+                                          <TagInlineComment status={inlineCommentDto.current_status} />
+                                        </div>
+                                      </div>
+                                      <div className="mt-2 sm:flex sm:justify-between">
+                                        <div className="sm:flex">
+                                          <p className="flex items-center text-sm text-gray-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1.5">
+                                              <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+                                              />
+                                            </svg>
+                                            {Object.keys(participants).length} participans
+                                          </p>
+                                          <p className="mt-2 flex items-center text-sm text-gray-500 sm:ml-6 sm:mt-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1.5">
+                                              <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"
+                                              />
+                                            </svg>
+                                            {inlineCommentDto.inline_comments.length} answers
+                                          </p>
+                                          <p className="mt-2 flex items-center text-sm text-gray-500 sm:ml-6 sm:mt-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1.5">
+                                              <path
+                                                strokeLinecap="round"
+                                                strokeLinejoin="round"
+                                                d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"
+                                              />
+                                            </svg>
+                                            {inlineCommentDto.status_history.length - 1} status changes
+                                          </p>
+                                          {file && (
+                                            <p className="mt-2 flex items-center text-sm text-gray-500 sm:ml-6 sm:mt-0">
+                                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1.5">
+                                                <path
+                                                  strokeLinecap="round"
+                                                  strokeLinejoin="round"
+                                                  d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
+                                                />
+                                              </svg>
+                                              source /{file.name}
+                                            </p>
+                                          )}
+                                        </div>
+                                        <div className="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                                          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 mr-1.5">
+                                            <path
+                                              strokeLinecap="round"
+                                              strokeLinejoin="round"
+                                              d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"
+                                            />
+                                          </svg>
+                                          <p>{moment(inlineCommentDto.created_at).fromNow()}</p>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </a>
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                        {numPages > 1 && <Pagination numPages={numPages} onPageChange={(p: number) => setPage(p)} page={page} />}
+                      </React.Fragment>
+                    )}
+                  </React.Fragment>
+                ) : (
+                  <p>hola</p>
+                )}
               </div>
             )}
           </div>
         </main>
       </div>
-    </React.Fragment>
+    </div>
   );
 };
 

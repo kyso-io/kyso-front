@@ -191,3 +191,11 @@ img.k-right-logo {
 #tooltip[data-popper-placement^='right'] > #arrow {
   left: -4px;
 }
+
+.tasks .container-inline-comment .displayed-text {
+  --tw-text-opacity: 1;
+  color: rgb(79 70 229 / var(--tw-text-opacity));
+  font-weight: 500;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
