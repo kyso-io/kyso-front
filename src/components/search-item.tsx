@@ -150,13 +150,23 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
           <div className="line-clamp-2 text-sm text-gray-600" style={{ whiteSpace: 'pre-line' }} dangerouslySetInnerHTML={{ __html: fullTextSearchResult.content }} />
         </div>
         <div className="flex items-center text-gray-500 text-xs">
-          <span className="hidden lg:block pr-3">{moment(fullTextSearchResult.updatedAt / 1000, 'X').format('MMMM DD, YYYY HH:mm')}</span>
+          {moment(fullTextSearchResult.updatedAt / 1000, 'X').format('MMMM DD, YYYY HH:mm') !== 'Invalid date' && (
+            <span className="hidden lg:block pr-3">{moment(fullTextSearchResult.updatedAt / 1000, 'X').format('MMMM DD, YYYY HH:mm')}</span>
+          )}
           {fullTextSearchResult.type === ElasticSearchIndex.Report && (
             <div className="grow flex flex-row items-center text-gray-500 text-xs space-x-2">
-              <ChatIcon className="hidden lg:block shrink-0 h-5 w-5 text-orange-500" />
-              <span className="hidden lg:block">{fullTextSearchResult.numComments}</span>
-              <ThumbUpIcon className="shrink-0 h-5 w-5 text" color={fullTextSearchResult.stars > 0 ? '#4f46e5' : ''} />
-              <span>{fullTextSearchResult.stars}</span>
+              {fullTextSearchResult.numComments && (
+                <>
+                  <ChatIcon className="hidden lg:block shrink-0 h-5 w-5 text-orange-500" />
+                  <span className="hidden lg:block">{fullTextSearchResult.numComments}</span>
+                </>
+              )}
+              {fullTextSearchResult.stars && (
+                <>
+                  <ThumbUpIcon className="shrink-0 h-5 w-5 text" color={fullTextSearchResult.stars > 0 ? '#4f46e5' : ''} />
+                  <span>{fullTextSearchResult.stars}</span>
+                </>
+              )}
             </div>
           )}
         </div>
