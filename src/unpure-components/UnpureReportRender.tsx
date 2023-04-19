@@ -1,25 +1,24 @@
-import PureInlineComments from '@/components/inline-comments/components/pure-inline-comments';
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { PureSpinner } from '@/components/PureSpinner';
+import PureInlineComments from '@/components/inline-comments/components/pure-inline-comments';
+import RenderCode from '@/components/renderers/RenderCode';
+import RenderMicroscopeSVS from '@/components/renderers/RenderMicroscopeSVS';
 import { RenderAsciidoc } from '@/components/renderers/kyso-asciidoc-renderer';
 import { RenderJupyter } from '@/components/renderers/kyso-jupyter-renderer';
 import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
 import RenderOnlyOffice from '@/components/renderers/kyso-onlyoffice-renderer/RenderOnlyOffice';
-import RenderCode from '@/components/renderers/RenderCode';
-import RenderMicroscopeSVS from '@/components/renderers/RenderMicroscopeSVS';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
-import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
 import { DocumentTextIcon } from '@heroicons/react/outline';
 import type { InlineCommentDto, InlineCommentStatusEnum, NormalizedResponseDTO, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { CreateInlineCommentDto, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
-import { Api, getInlineCommentsAction } from '@kyso-io/kyso-store';
+import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState } from 'react';
-import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
 import TableOfContents from '../components/TableOfContents';
+import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
 import type { FileToRender } from '../types/file-to-render';
 import PureSideOverlayCommentsPanel from './UnpureSideOverlayCommentsPanel';
 
@@ -53,26 +52,23 @@ const UnpureReportRender = ({
   isCurrentUserVerified,
   isCurrentUserSolvedCaptcha,
 }: Props) => {
-  const dispatch = useAppDispatch();
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (report.id) {
-      const getReportInlineComments = async () => {
-        const data = await dispatch(getInlineCommentsAction(report.id as string));
-        if (data?.payload) {
-          if (fileToRender.path.endsWith('.ipynb')) {
-            setInlineComments(data.payload);
-          } else {
-            setInlineComments(data.payload.filter((c: InlineCommentDto) => c.cell_id === fileToRender.id));
-          }
-        }
-      };
-      getReportInlineComments();
+    if (!report || !fileToRender) {
+      return;
     }
+    const getReportInlineComments = async () => {
+      try {
+        const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+        const response: NormalizedResponseDTO<InlineCommentDto[]> = await api.getInlineComments(report.id as string, fileToRender.id);
+        setInlineComments(response.data);
+      } catch (e) {}
+    };
+    getReportInlineComments();
   }, [report.id, fileToRender.id]);
 
   const createInlineComment = async (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => {
@@ -82,7 +78,7 @@ const UnpureReportRender = ({
 
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      const createInlineCommentDto: CreateInlineCommentDto = new CreateInlineCommentDto(report.id as string, cell_id, text, user_ids, parent_id);
+      const createInlineCommentDto: CreateInlineCommentDto = new CreateInlineCommentDto(report.id as string, fileToRender.id, cell_id, text, user_ids, parent_id);
       const response: NormalizedResponseDTO<InlineCommentDto> = await api.createInlineComment(createInlineCommentDto);
       const newInlineComment: InlineCommentDto = response.data;
       const copyInlineComments: InlineCommentDto[] = [...inlineComments];
@@ -108,7 +104,7 @@ const UnpureReportRender = ({
     }
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(text, user_ids, status);
+      const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(fileToRender.id, text, user_ids, status);
       const response: NormalizedResponseDTO<InlineCommentDto> = await api.updateInlineComment(id, updateInlineCommentDto);
       const updatedInlineComment: InlineCommentDto = response.data;
       const copyInlineComments: InlineCommentDto[] = [...inlineComments];
