@@ -356,7 +356,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                             <h4 className="text-base font-semibold leading-6 text-gray-900">{option.title}</h4>
                             <p className=" text-sm text-gray-500">{option.description}</p>
                             {isDisabled && (
-                              <p className="text-sm text-gray-500 mt-1 underline italic">
+                              <p className="text-sm text-gray-500 font-bold mt-3">
                                 This parameter acts at the organization level. Please, select &quot;all&quot; in &quot;channel&quot; to be able to edit it.
                               </p>
                             )}
