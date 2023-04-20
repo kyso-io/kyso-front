@@ -272,6 +272,8 @@ const UnpureReportRender = ({
                   createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(fileToRender.id, user_ids, text, parent_id)}
                   updateInlineComment={updateInlineComment}
                   deleteComment={deleteInlineComment}
+                  showTitle={true}
+                  showCreateNewComment={true}
                 />
               </PureSideOverlayCommentsPanel>
             </div>

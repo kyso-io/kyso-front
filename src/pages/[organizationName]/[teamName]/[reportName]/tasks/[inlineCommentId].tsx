@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import Board from 'react-trello-ts';
 import ManageUsers from '@/components/ManageUsers';
 import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
@@ -20,11 +19,14 @@ import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { GithubFileHash, InlineCommentDto, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import type { GithubFileHash, InlineCommentDto, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO, InlineCommentStatusEnum } from '@kyso-io/kyso-model';
 import {
+  UpdateInlineCommentDto,
+  CreateInlineCommentDto,
   AddUserOrganizationDto,
   InviteUserDto,
   KysoSettingsEnum,
+  InlineCommentPermissionsEnum,
   ReportPermissionsEnum,
   TeamMembershipOriginEnum,
   UpdateOrganizationMembersDTO,
@@ -37,6 +39,9 @@ import { dirname } from 'path';
 import React, { useEffect, useMemo, useState } from 'react';
 import 'react-tooltip/dist/react-tooltip.css';
 import { v4 as uuidv4 } from 'uuid';
+import PureInlineComments from '../../../../../components/inline-comments/components/pure-inline-comments';
+import { useChannelMembers } from '../../../../../hooks/use-channel-members';
+import type { HttpExceptionDto } from '../../../../../interfaces/http-exception.dto';
 
 enum Tab {
   Files = 'files',
@@ -49,6 +54,11 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   const [result, setResult] = useState<NormalizedResponseDTO<InlineCommentDto> | null>(null);
   const [requesting, setRequesting] = useState<boolean>(true);
   const { inlineCommentId } = router.query;
+  const channelMembers: TeamMember[] = useChannelMembers({ commonData });
+  const random: string = uuidv4();
+  const hasPermissionCreateInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.CREATE), [commonData, random]);
+  const hasPermissionDeleteInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData, random]);
+  const [httpExceptionDto, setHttpExceptionDto] = useState<HttpExceptionDto | null>(null);
 
   // START DATA REPORT
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
@@ -74,26 +84,30 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     report: reportData?.report ? reportData.report : null,
     commonData,
   });
-  const random: string = uuidv4();
   const hasPermissionEditReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData, random]);
   const hasPermissionDeleteReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.DELETE), [commonData, random]);
   const hasPermissionEditReportOnlyMine: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT_ONLY_MINE), [commonData, random]);
   // END DATA REPORT
 
+  const getInlineComment = async () => {
+    try {
+      const api: Api = new Api(commonData.token);
+      const r: NormalizedResponseDTO<InlineCommentDto> = await api.getInlineComment(inlineCommentId as string);
+      setResult(r);
+    } catch (e: any) {
+      const hedto: HttpExceptionDto = e.response.data;
+      setHttpExceptionDto(hedto);
+    } finally {
+      setRequesting(false);
+    }
+  };
+
   useEffect(() => {
-    if (!inlineCommentId) {
+    if (!commonData || !inlineCommentId) {
       return;
     }
-    const getInlineComment = async () => {
-      try {
-        // const api: Api = new Api(commonData.token);
-        // const r: NormalizedResponseDTO<InlineCommentDto> = await Api.getInlineComment(inlineCommentId as string);
-        setResult(null);
-        setRequesting(false);
-      } catch (e) {}
-    };
     getInlineComment();
-  }, [inlineCommentId]);
+  }, [commonData, inlineCommentId]);
 
   useEffect(() => {
     if (!commonData.permissions || !commonData.permissions.organizations || !commonData.permissions.teams || !router.query.organizationName || !router.query.teamName) {
@@ -410,6 +424,45 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     );
   }
 
+  const createInlineComment = async (user_ids: string[], text: string, parent_id: string | null) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const createInlineCommentDto: CreateInlineCommentDto = new CreateInlineCommentDto(result!.data.report_id, result!.data.file_id, result!.data.cell_id, text, user_ids, parent_id);
+      await api.createInlineComment(createInlineCommentDto);
+      await getInlineComment();
+    } catch (e) {}
+  };
+
+  const updateInlineComment = async (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(result!.data.file_id, text, user_ids, status);
+      await api.updateInlineComment(id, updateInlineCommentDto);
+      await getInlineComment();
+    } catch (e) {}
+  };
+
+  const deleteInlineComment = async (id: string) => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      return;
+    }
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      await api.deleteInlineComment(id);
+      if (result!.data.id === id) {
+        router.replace(`/${router.query.organizationName}/${router.query.teamName}/${router.query.reportName}/tasks`);
+        return;
+      }
+      await getInlineComment();
+    } catch (e) {}
+  };
+
   const report = reportData?.report;
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
   const authors = reportData ? reportData.authors : [];
@@ -502,26 +555,41 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
             {!result ? (
               <div className="py-4 px-8">
                 <h1 className="text-3xl font-bold text-gray-900 my-4">Tasks</h1>
-                <div className="bg-yellow-50 p-4" style={{ width: '50%' }}>
-                  <div className="flex">
-                    <div className="shrink-0">
-                      <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-yellow-700">There is no data available for this report yet.</p>
+                {httpExceptionDto && (
+                  <div className="bg-yellow-50 p-4" style={{ width: '50%' }}>
+                    <div className="flex">
+                      <div className="shrink-0">
+                        <ExclamationCircleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+                      </div>
+                      <div className="ml-3">
+                        <p className="text-sm text-yellow-700">{httpExceptionDto.message}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             ) : (
               <div className="py-4 px-8 border-y">
                 <div className="grid grid-cols-12">
-                  <div className="col-span-8">
-                    <div className="flex flex-row content-center my-3">
+                  <div className="col-span-8 pr-20">
+                    <div className="flex flex-col content-center my-3">
                       <h1 className="text-3xl font-bold text-gray-900 my-4 grow">Task dashboard</h1>
+                      <PureInlineComments
+                        commonData={commonData}
+                        report={report}
+                        channelMembers={channelMembers}
+                        hasPermissionCreateComment={hasPermissionCreateInlineComment}
+                        hasPermissionDeleteComment={hasPermissionDeleteInlineComment}
+                        comments={[result.data]}
+                        createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(user_ids, text, parent_id)}
+                        updateInlineComment={updateInlineComment}
+                        deleteComment={deleteInlineComment}
+                        showTitle={false}
+                        showCreateNewComment={false}
+                      />
                     </div>
                   </div>
-                  <div className="col-span-4">
+                  <div className="col-span-4 pl-20">
                     <div className="flex flex-row content-center my-3">
                       <h1 className="text-3xl font-bold text-gray-900 my-4 grow">Status history</h1>
                     </div>

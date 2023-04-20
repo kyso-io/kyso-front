@@ -44,6 +44,7 @@ import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import 'react-tooltip/dist/react-tooltip.css';
 import ReadMoreReact from 'read-more-react';
 import { v4 as uuidv4 } from 'uuid';
+import Link from 'next/link';
 import Pagination from '../../../../../components/Pagination';
 import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
 import { TailwindHeightSizeEnum } from '../../../../../tailwind/enum/tailwind-height.enum';
@@ -577,6 +578,9 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     }
     try {
       const inlineCommentDto: InlineCommentDto = inlineCommentDtos.find((ic: InlineCommentDto) => ic.id === id)!;
+      if (inlineCommentDto.current_status === status) {
+        return;
+      }
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(inlineCommentDto.id, inlineCommentDto.text, inlineCommentDto.mentions, status);
       const response: NormalizedResponseDTO<InlineCommentDto> = await api.updateInlineComment(id, updateInlineCommentDto);
@@ -788,7 +792,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                               }
                               return (
                                 <li key={inlineCommentDto.id} className="container-inline-comment">
-                                  <a href="#" className="block hover:bg-gray-50">
+                                  <Link href={`/${router.query.organizationName}/${router.query.teamName}/${router.query.reportName}/tasks/${inlineCommentDto.id}`} className="block hover:bg-gray-50">
                                     <div className="p-4 sm:px-6">
                                       <div className="flex items-center justify-between">
                                         <ReadMoreReact text={inlineCommentDto.text} ideal={200} readMoreText="Read more..." className="text-sm font-medium text-indigo-600" />
@@ -853,7 +857,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                                         </div>
                                       </div>
                                     </div>
-                                  </a>
+                                  </Link>
                                 </li>
                               );
                             })}
@@ -870,7 +874,6 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                     editable={false}
                     hideCardDeleteIcon={true}
                     handleDragEnd={(inlineCommentId: string, _: string, newStatus: string) => updateInlineCommentStatus(inlineCommentId, newStatus as InlineCommentStatusEnum)}
-                    // onCardClick={(cardId: string, metadata: any, card: any) => console.log('onCardClick', { cardId, metadata, laneId: card })}
                     components={{
                       BoardWrapper: (e: any) => e.children[0],
                       Section: (e: any) => {
@@ -889,8 +892,11 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                       Card: (e: any) => {
                         const inlineCommentDto: InlineCommentDto = e.metadata;
                         return (
-                          <div className="overflow-hidden bg-white sm:rounded-lg sm:shadow my-1 cursor-pointer">
-                            <div className="bg-white px-4 py-5 sm:px-6">
+                          <Link
+                            href={`/${router.query.organizationName}/${router.query.teamName}/${router.query.reportName}/tasks/${inlineCommentDto.id}`}
+                            className="overflow-hidden bg-white sm:rounded-lg sm:shadow cursor-pointer"
+                          >
+                            <div className="bg-white px-4 py-5 sm:px-6 my-1">
                               <div className="flex space-x-3">
                                 <div className="shrink-0">
                                   <PureAvatar src={inlineCommentDto.user_avatar} title={inlineCommentDto.user_name} size={TailwindHeightSizeEnum.H10} textSize={TailwindFontSizeEnum.XS} />
@@ -913,7 +919,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                                 <ReadMoreReact text={inlineCommentDto.text || ''} ideal={100} readMoreText="Read more..." className="text-sm font-medium text-indigo-600" />
                               </div>
                             </div>
-                          </div>
+                          </Link>
                         );
                       },
                     }}

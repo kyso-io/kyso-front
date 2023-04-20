@@ -162,6 +162,8 @@ const CellWrapper = (props: Props) => {
             createInlineComment={createInlineComment}
             updateInlineComment={updateInlineComment}
             deleteComment={deleteInlineComment}
+            showCreateNewComment={true}
+            showTitle={true}
           />
         )}
       </div>
