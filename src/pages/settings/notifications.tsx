@@ -189,15 +189,6 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
   }, [commonData.token]);
 
   useEffect(() => {
-    if (!commonData.permissions) {
-      return;
-    }
-    if (commonData.permissions.organizations!.length > 0) {
-      setOrganizationId(commonData.permissions.organizations![0]!.id);
-    }
-  }, [commonData.permissions]);
-
-  useEffect(() => {
     if (!userNotificationsSettings) {
       return;
     }
@@ -229,11 +220,15 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
         }
       }
     } else {
-      /* eslint-disable no-prototype-builtins */
-      if (!userNotificationsSettings.organization_settings.hasOwnProperty(organizationId)) {
-        setNotificationsSettings(new NotificationsSettings());
+      if (organizationId) {
+        /* eslint-disable no-prototype-builtins */
+        if (!userNotificationsSettings.organization_settings.hasOwnProperty(organizationId)) {
+          setNotificationsSettings(new NotificationsSettings());
+        } else {
+          setNotificationsSettings(userNotificationsSettings.organization_settings[organizationId]!);
+        }
       } else {
-        setNotificationsSettings(userNotificationsSettings.organization_settings[organizationId]!);
+        setOrganizationId(organizationsResourcePermissions[0]!.id);
       }
     }
   }, [userNotificationsSettings, selectedTab, organizationId, teamId]);
@@ -350,51 +345,59 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                   )}
                   <div className="space-y-6 sm:space-y-5">
                     {options.map((option: { title: string; description: string; key: string; disabled_for_channel: boolean }, index: number) => {
-                      const checked: boolean = (notificationsSettings as any).hasOwnProperty(option.key) && (notificationsSettings as any)[option.key] === true;
+                      let checked: boolean = (notificationsSettings as any).hasOwnProperty(option.key) && (notificationsSettings as any)[option.key] === true;
+                      const isDisabled: boolean = option.disabled_for_channel && teamId !== '';
+                      if (isDisabled) {
+                        checked = false;
+                      }
                       return (
                         <div key={index} className="flex items-center sm:border-t sm:border-gray-200 pt-5">
                           <div className="sm:grid grow">
                             <h4 className="text-base font-semibold leading-6 text-gray-900">{option.title}</h4>
                             <p className=" text-sm text-gray-500">{option.description}</p>
-                            {option.disabled_for_channel && teamId !== '' && (
-                              <p className=" text-sm text-gray-500">This parameter acts at the organization level. Please, select &quot;all&quot; in &quot;channel&quot; to be able to edit it.</p>
+                            {isDisabled && (
+                              <p className="text-sm text-gray-500 font-bold mt-3">
+                                This parameter acts at the organization level. Please, select &quot;all&quot; in &quot;channel&quot; to be able to edit it.
+                              </p>
                             )}
                           </div>
-                          <Switch
-                            disabled={option.disabled_for_channel && teamId !== ''}
-                            checked={checked}
-                            onChange={async () => {
-                              const newNotificationsSettings: NotificationsSettings = new NotificationsSettings();
-                              Object.assign(newNotificationsSettings, notificationsSettings);
-                              (newNotificationsSettings as any)[option.key] = !checked;
-                              if (option.disabled_for_channel && teamId !== '') {
-                                delete (newNotificationsSettings as any).new_member_organization;
-                                delete (newNotificationsSettings as any).removed_member_in_organization;
-                                delete (newNotificationsSettings as any).updated_role_in_organization;
-                                delete (newNotificationsSettings as any).organization_removed;
-                                delete (newNotificationsSettings as any).new_channel;
-                              }
-                              await onUpdateUserNotificationsSettings(newNotificationsSettings);
-                              hideToaster();
-                            }}
-                            className={clsx(
-                              'ml-5 relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
-                            )}
-                            style={{
-                              backgroundColor: checked ? 'rgb(79 70 229)' : 'gray',
-                              borderColor: checked ? '' : 'gray',
-                              cursor: option.disabled_for_channel && teamId !== '' ? 'not-allowed' : 'pointer',
-                            }}
-                          >
-                            <span className="sr-only">Enable notifications</span>
-                            <span
-                              aria-hidden="true"
+                          <div className="flex flex-col">
+                            <Switch
+                              disabled={isDisabled}
+                              checked={checked}
+                              onChange={async () => {
+                                const newNotificationsSettings: NotificationsSettings = new NotificationsSettings();
+                                Object.assign(newNotificationsSettings, notificationsSettings);
+                                (newNotificationsSettings as any)[option.key] = !checked;
+                                if (option.disabled_for_channel && teamId !== '') {
+                                  delete (newNotificationsSettings as any).new_member_organization;
+                                  delete (newNotificationsSettings as any).removed_member_in_organization;
+                                  delete (newNotificationsSettings as any).updated_role_in_organization;
+                                  delete (newNotificationsSettings as any).organization_removed;
+                                  delete (newNotificationsSettings as any).new_channel;
+                                }
+                                await onUpdateUserNotificationsSettings(newNotificationsSettings);
+                                hideToaster();
+                              }}
                               className={clsx(
-                                checked ? 'translate-x-5' : 'translate-x-0',
-                                'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                                'ml-5 relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
                               )}
-                            />
-                          </Switch>
+                              style={{
+                                backgroundColor: isDisabled ? '#D1D1D1' : checked ? 'rgb(79 70 229)' : 'gray',
+                                borderColor: isDisabled ? '#D1D1D1' : checked ? '' : 'gray',
+                                cursor: isDisabled ? 'not-allowed' : 'pointer',
+                              }}
+                            >
+                              <span className="sr-only">Enable notifications</span>
+                              <span
+                                aria-hidden="true"
+                                className={clsx(
+                                  checked ? 'translate-x-5' : 'translate-x-0',
+                                  'pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+                                )}
+                              />
+                            </Switch>
+                          </div>
                         </div>
                       );
                     })}
