@@ -101,14 +101,17 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
                       <span className="text-xs font-semibold inline-block py-1 px-2 ml-2 rounded text-black bg-white last:mr-0 mr-1 border">{`+${otherVersionResultsNumber - 1} more versions`}</span>
                     )}
 
-                    {
-                      <div style={{ marginLeft: '27px', fontSize: '0.9em', fontFamily: 'monospace' }}>
-                        {fullTextSearchResult.filePath.replace(
-                          `/${fullTextSearchResult.organizationSlug}/${fullTextSearchResult.teamSlug}/reports/${Helper.slugify(fullTextSearchResult.title)}/${fullTextSearchResult.version}`,
-                          '.',
-                        )}
-                      </div>
-                    }
+                    {/* If it's a kyso file, don't write the path */}
+                    {!fullTextSearchResult.filePath.endsWith('kyso.json') ||
+                      !fullTextSearchResult.filePath.endsWith('kyso.yaml') ||
+                      (!fullTextSearchResult.filePath.endsWith('kyso.yml') && (
+                        <div style={{ marginLeft: '27px', fontSize: '0.9em', fontFamily: 'monospace' }}>
+                          {fullTextSearchResult.filePath.replace(
+                            `/${fullTextSearchResult.organizationSlug}/${fullTextSearchResult.teamSlug}/reports/${Helper.slugify(fullTextSearchResult.title)}/${fullTextSearchResult.version}`,
+                            '.',
+                          )}
+                        </div>
+                      ))}
                   </div>
                 </>
               )}
