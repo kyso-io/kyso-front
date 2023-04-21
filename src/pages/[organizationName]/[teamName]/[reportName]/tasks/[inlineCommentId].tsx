@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import moment from 'moment';
 import ManageUsers from '@/components/ManageUsers';
 import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
@@ -18,8 +19,20 @@ import type { KeyValue } from '@/model/key-value.model';
 import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
-import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { GithubFileHash, InlineCommentDto, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO, InlineCommentStatusEnum } from '@kyso-io/kyso-model';
+import { ExclamationCircleIcon, TagIcon } from '@heroicons/react/solid';
+import type {
+  User,
+  GithubFileHash,
+  InlineCommentDto,
+  KysoSetting,
+  NormalizedResponseDTO,
+  OrganizationMember,
+  ReportDTO,
+  TeamMember,
+  UserDTO,
+  InlineCommentStatusEnum,
+  InlineCommentStatusHistoryDto,
+} from '@kyso-io/kyso-model';
 import {
   UpdateInlineCommentDto,
   CreateInlineCommentDto,
@@ -39,9 +52,14 @@ import { dirname } from 'path';
 import React, { useEffect, useMemo, useState } from 'react';
 import 'react-tooltip/dist/react-tooltip.css';
 import { v4 as uuidv4 } from 'uuid';
+import Link from 'next/link';
 import PureInlineComments from '../../../../../components/inline-comments/components/pure-inline-comments';
 import { useChannelMembers } from '../../../../../hooks/use-channel-members';
 import type { HttpExceptionDto } from '../../../../../interfaces/http-exception.dto';
+import PureAvatar from '../../../../../components/PureAvatar';
+import { TailwindHeightSizeEnum } from '../../../../../tailwind/enum/tailwind-height.enum';
+import { TailwindFontSizeEnum } from '../../../../../tailwind/enum/tailwind-font-size.enum';
+import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
 
 enum Tab {
   Files = 'files',
@@ -590,8 +608,96 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                     </div>
                   </div>
                   <div className="col-span-4 pl-20">
-                    <div className="flex flex-row content-center my-3">
+                    <div className="flex flex-col content-center my-3">
                       <h1 className="text-3xl font-bold text-gray-900 my-4 grow">Status history</h1>
+                      <div className="flow-root">
+                        <ul role="list" className="-mb-8">
+                          {result.data.status_history.reverse().map((inlineStatusHistory: InlineCommentStatusHistoryDto, index: number) => {
+                            const user: User | null = result.relations!.user[inlineStatusHistory.user_id] ?? null;
+                            if (!user) {
+                              return null;
+                            }
+                            if (index === 0) {
+                              return (
+                                <React.Fragment key={0}>
+                                  <li>
+                                    <div className="relative pb-8">
+                                      <span className="absolute left-5 top-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                                      <div className="relative flex items-start space-x-3">
+                                        <div className="relative px-1">
+                                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 ring-8 ring-white">
+                                            <TagIcon className="h-5 w-5 text-gray-500" aria-hidden="true" />
+                                          </div>
+                                        </div>
+                                        <div className="min-w-0 flex-1 py-0">
+                                          <div className="text-sm leading-8 text-gray-500">
+                                            <span className="mr-0.5">
+                                              <a className="font-medium text-gray-900">Discussion started</a> at version
+                                            </span>
+                                            {inlineStatusHistory.report_version !== null && (
+                                              <span className="mx-1">
+                                                <span className="inline-flex items-center gap-x-1.5 rounded-full px-2 py-1 text-xs text-gray-900 ring-1 ring-inset ring-gray-200 font-bold">
+                                                  {inlineStatusHistory.report_version}
+                                                </span>
+                                              </span>
+                                            )}
+                                            <span className="whitespace-nowrap">{moment(inlineStatusHistory.date).fromNow()}</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </li>
+                                  <li>
+                                    <div className="relative pb-8">
+                                      {result.data.status_history.length >= 2 && <span className="absolute left-5 top-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />}
+                                      <div className="relative flex items-start space-x-3">
+                                        <div className="relative">
+                                          <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H10} textSize={TailwindFontSizeEnum.XS} />
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                          <div>
+                                            <div className="text-sm">
+                                              <Link href="" className="font-medium text-gray-900">
+                                                {user.display_name}
+                                              </Link>
+                                            </div>
+                                            <p className="mt-0.5 text-sm text-gray-500">Created the first comment {moment(inlineStatusHistory.date).fromNow()}</p>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </li>
+                                </React.Fragment>
+                              );
+                            }
+                            return (
+                              <li key={index}>
+                                <div className="relative pb-8">
+                                  {index < result.data.status_history.length - 1 ? <span className="absolute left-5 top-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" /> : null}
+                                  <div className="relative flex items-start space-x-3">
+                                    <div className="relative">
+                                      <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H10} textSize={TailwindFontSizeEnum.XS} />
+                                      <span className="absolute -bottom-0.5 -right-1 rounded-tl bg-white px-0.5 py-px"></span>
+                                    </div>
+                                    <div className="min-w-0 flex-1">
+                                      <div>
+                                        <div className="text-sm">
+                                          <Link href="" className="font-medium text-gray-900">
+                                            {user.display_name}
+                                          </Link>
+                                        </div>
+                                        <p className="mt-0.5 text-sm text-gray-500">
+                                          Changed status to <TagInlineComment status={inlineStatusHistory.to_status} /> {moment(inlineStatusHistory.date).fromNow()}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </li>
+                            );
+                          })}
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
