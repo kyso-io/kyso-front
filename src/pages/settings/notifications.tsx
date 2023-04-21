@@ -293,7 +293,13 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                             'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium cursor-pointer',
                           )}
                           aria-current={tab === selectedTab ? 'page' : undefined}
-                          onClick={() => setSelectedTab(tab)}
+                          onClick={() => {
+                            if (tab === Tab.GlobalConfiguration) {
+                              setOrganizationId('');
+                              setTeamId('');
+                            }
+                            setSelectedTab(tab);
+                          }}
                         >
                           {tab}
                         </span>
