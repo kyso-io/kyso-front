@@ -20,11 +20,6 @@ export class Helper {
     // in every new session, which I think is a good balance between being updated and don't overwhelm
     // the API
 
-    // Don't save it man, just call to the fucking endpoint
-    /* if (sessionStorage.getItem('kyso-settings')) {
-      return JSON.parse(sessionStorage.getItem('kyso-settings') as string);
-    } */
-
     /* eslint-disable @typescript-eslint/no-explicit-any */
     const publicSettings: any = await store.dispatch(fetchPublicKysoSettings());
 
@@ -359,6 +354,10 @@ export class Helper {
       default:
         return extension;
     }
+  }
+
+  public static isKysoFile(path: string): boolean {
+    return path.endsWith('kyso.json') || path.endsWith('kyso.yaml') || path.endsWith('kyso.yml');
   }
 
   public static getHeadersAndContentFromMarkdownFile(fileContent: string): { headers: string; content: string } | null {

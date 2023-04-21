@@ -93,7 +93,17 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
                       ''
                     )}
 
-                    {isUnknownFile(fullTextSearchResult.filePath) ? <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/file.svg`} alt="Typescript File" /> : ''}
+                    {isUnknownFile(fullTextSearchResult.filePath) && !Helper.isKysoFile(fullTextSearchResult.filePath) ? (
+                      <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/file.svg`} alt="Unknown extension" />
+                    ) : (
+                      ''
+                    )}
+
+                    {Helper.isKysoFile(fullTextSearchResult.filePath) ? (
+                      <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/kyso-logo-dark.svg`} alt="Kyso's Report" />
+                    ) : (
+                      ''
+                    )}
 
                     {fullTextSearchResult.title}
 
@@ -101,14 +111,14 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber }: Props) 
                       <span className="text-xs font-semibold inline-block py-1 px-2 ml-2 rounded text-black bg-white last:mr-0 mr-1 border">{`+${otherVersionResultsNumber - 1} more versions`}</span>
                     )}
 
-                    {
+                    {!Helper.isKysoFile(fullTextSearchResult.filePath) && (
                       <div style={{ marginLeft: '27px', fontSize: '0.9em', fontFamily: 'monospace' }}>
                         {fullTextSearchResult.filePath.replace(
                           `/${fullTextSearchResult.organizationSlug}/${fullTextSearchResult.teamSlug}/reports/${Helper.slugify(fullTextSearchResult.title)}/${fullTextSearchResult.version}`,
                           '.',
                         )}
                       </div>
-                    }
+                    )}
                   </div>
                 </>
               )}
