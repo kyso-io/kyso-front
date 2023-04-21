@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // import Board from 'react-trello-ts';
-import Board from 'react-trello';
 import ManageUsers from '@/components/ManageUsers';
 import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
@@ -29,8 +28,8 @@ import {
   InviteUserDto,
   KysoSettingsEnum,
   ReportPermissionsEnum,
-  UpdateInlineCommentDto,
   TeamMembershipOriginEnum,
+  UpdateInlineCommentDto,
   UpdateOrganizationMembersDTO,
   UpdateTeamMembersDTO,
   UserRoleDTO,
@@ -38,19 +37,20 @@ import {
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import 'react-tooltip/dist/react-tooltip.css';
+import Board from 'react-trello';
 import ReadMoreReact from 'read-more-react';
 import { v4 as uuidv4 } from 'uuid';
-import Link from 'next/link';
 import Pagination from '../../../../../components/Pagination';
-import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
-import { TailwindHeightSizeEnum } from '../../../../../tailwind/enum/tailwind-height.enum';
-import { TailwindFontSizeEnum } from '../../../../../tailwind/enum/tailwind-font-size.enum';
 import PureAvatar from '../../../../../components/PureAvatar';
+import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
 import TitleKanbanColumn from '../../../../../components/inline-comments/components/title-kanban-column';
+import { TailwindFontSizeEnum } from '../../../../../tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '../../../../../tailwind/enum/tailwind-height.enum';
 
 enum Tab {
   Files = 'files',
@@ -85,7 +85,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   const [selectedTabListView, setSelectedTabListView] = useState<TabsListView>(TabsListView.Open);
   const [page, setPage] = useState<number>(1);
   const [selectedSortOption, setSelectedSortOption] = useState<{ name: string; value: string }>(sortOptions[0]!);
-  const [viewType, setViewType] = useState<ViewType>(ViewType.Kanban);
+  const [viewType, setViewType] = useState<ViewType>(ViewType.List);
 
   // START DATA REPORT
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
