@@ -198,22 +198,17 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
       /* eslint-disable no-prototype-builtins */
       if (!userNotificationsSettings.channels_settings.hasOwnProperty(organizationId)) {
         const ns: NotificationsSettings = { ...userNotificationsSettings.global_settings } as any;
-        delete (ns as any).new_member_organization;
-        delete (ns as any).removed_member_in_organization;
-        delete (ns as any).updated_role_in_organization;
-        delete (ns as any).organization_removed;
-        delete (ns as any).new_channel;
         setNotificationsSettings(ns);
         /* eslint-disable no-lonely-if */
       } else {
         /* eslint-disable no-prototype-builtins */
         if (!userNotificationsSettings.channels_settings[organizationId]!.hasOwnProperty(teamId)) {
           const ns: NotificationsSettings = { ...userNotificationsSettings.channels_settings[organizationId] } as any;
-          delete (ns as any).new_member_organization;
-          delete (ns as any).removed_member_in_organization;
-          delete (ns as any).updated_role_in_organization;
-          delete (ns as any).organization_removed;
-          delete (ns as any).new_channel;
+          ns.new_member_organization = userNotificationsSettings.organization_settings[organizationId]!.new_member_organization;
+          ns.removed_member_in_organization = userNotificationsSettings.organization_settings[organizationId]!.removed_member_in_organization;
+          ns.updated_role_in_organization = userNotificationsSettings.organization_settings[organizationId]!.updated_role_in_organization;
+          ns.organization_removed = userNotificationsSettings.organization_settings[organizationId]!.organization_removed;
+          ns.new_channel = userNotificationsSettings.organization_settings[organizationId]!.new_channel;
           setNotificationsSettings(ns);
         } else {
           setNotificationsSettings(userNotificationsSettings.channels_settings[organizationId]![teamId]!);
@@ -351,11 +346,8 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                   )}
                   <div className="space-y-6 sm:space-y-5">
                     {options.map((option: { title: string; description: string; key: string; disabled_for_channel: boolean }, index: number) => {
-                      let checked: boolean = (notificationsSettings as any).hasOwnProperty(option.key) && (notificationsSettings as any)[option.key] === true;
+                      const checked: boolean = (notificationsSettings as any).hasOwnProperty(option.key) && (notificationsSettings as any)[option.key] === true;
                       const isDisabled: boolean = option.disabled_for_channel && teamId !== '';
-                      if (isDisabled) {
-                        checked = false;
-                      }
                       return (
                         <div key={index} className="flex items-center sm:border-t sm:border-gray-200 pt-5">
                           <div className="sm:grid grow">
