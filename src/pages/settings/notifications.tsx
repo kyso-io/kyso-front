@@ -197,7 +197,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
     } else if (teamId) {
       /* eslint-disable no-prototype-builtins */
       if (!userNotificationsSettings.channels_settings.hasOwnProperty(organizationId)) {
-        const ns: NotificationsSettings = new NotificationsSettings();
+        const ns: NotificationsSettings = { ...userNotificationsSettings.global_settings } as any;
         delete (ns as any).new_member_organization;
         delete (ns as any).removed_member_in_organization;
         delete (ns as any).updated_role_in_organization;
@@ -208,7 +208,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
       } else {
         /* eslint-disable no-prototype-builtins */
         if (!userNotificationsSettings.channels_settings[organizationId]!.hasOwnProperty(teamId)) {
-          const ns: NotificationsSettings = new NotificationsSettings();
+          const ns: NotificationsSettings = { ...userNotificationsSettings.channels_settings[organizationId] } as any;
           delete (ns as any).new_member_organization;
           delete (ns as any).removed_member_in_organization;
           delete (ns as any).updated_role_in_organization;
@@ -223,7 +223,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
       if (organizationId) {
         /* eslint-disable no-prototype-builtins */
         if (!userNotificationsSettings.organization_settings.hasOwnProperty(organizationId)) {
-          setNotificationsSettings(new NotificationsSettings());
+          setNotificationsSettings({ ...userNotificationsSettings.global_settings } as any);
         } else {
           setNotificationsSettings(userNotificationsSettings.organization_settings[organizationId]!);
         }
@@ -293,7 +293,13 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                             'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium cursor-pointer',
                           )}
                           aria-current={tab === selectedTab ? 'page' : undefined}
-                          onClick={() => setSelectedTab(tab)}
+                          onClick={() => {
+                            if (tab === Tab.GlobalConfiguration) {
+                              setOrganizationId('');
+                              setTeamId('');
+                            }
+                            setSelectedTab(tab);
+                          }}
                         >
                           {tab}
                         </span>

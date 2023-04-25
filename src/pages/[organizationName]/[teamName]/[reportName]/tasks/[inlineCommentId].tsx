@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import moment from 'moment';
 import ManageUsers from '@/components/ManageUsers';
 import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
@@ -21,45 +20,46 @@ import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import { ExclamationCircleIcon, TagIcon } from '@heroicons/react/solid';
 import type {
-  User,
   GithubFileHash,
   InlineCommentDto,
+  InlineCommentStatusEnum,
+  InlineCommentStatusHistoryDto,
   KysoSetting,
   NormalizedResponseDTO,
   OrganizationMember,
   ReportDTO,
   TeamMember,
+  User,
   UserDTO,
-  InlineCommentStatusEnum,
-  InlineCommentStatusHistoryDto,
 } from '@kyso-io/kyso-model';
 import {
-  UpdateInlineCommentDto,
-  CreateInlineCommentDto,
   AddUserOrganizationDto,
+  CreateInlineCommentDto,
+  InlineCommentPermissionsEnum,
   InviteUserDto,
   KysoSettingsEnum,
-  InlineCommentPermissionsEnum,
   ReportPermissionsEnum,
   TeamMembershipOriginEnum,
+  UpdateInlineCommentDto,
   UpdateOrganizationMembersDTO,
   UpdateTeamMembersDTO,
   UserRoleDTO,
 } from '@kyso-io/kyso-model';
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
+import moment from 'moment';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import React, { useEffect, useMemo, useState } from 'react';
 import 'react-tooltip/dist/react-tooltip.css';
 import { v4 as uuidv4 } from 'uuid';
-import Link from 'next/link';
+import PureAvatar from '../../../../../components/PureAvatar';
 import PureInlineComments from '../../../../../components/inline-comments/components/pure-inline-comments';
+import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
 import { useChannelMembers } from '../../../../../hooks/use-channel-members';
 import type { HttpExceptionDto } from '../../../../../interfaces/http-exception.dto';
-import PureAvatar from '../../../../../components/PureAvatar';
-import { TailwindHeightSizeEnum } from '../../../../../tailwind/enum/tailwind-height.enum';
 import { TailwindFontSizeEnum } from '../../../../../tailwind/enum/tailwind-font-size.enum';
-import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
+import { TailwindHeightSizeEnum } from '../../../../../tailwind/enum/tailwind-height.enum';
 
 enum Tab {
   Files = 'files',
@@ -604,6 +604,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                         deleteComment={deleteInlineComment}
                         showTitle={false}
                         showCreateNewComment={false}
+                        isLastVersion={true}
                       />
                     </div>
                   </div>

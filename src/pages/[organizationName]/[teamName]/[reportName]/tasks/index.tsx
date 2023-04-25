@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-// import Board from 'react-trello-ts';
 import ManageUsers from '@/components/ManageUsers';
 import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
@@ -37,7 +36,6 @@ import {
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
@@ -792,7 +790,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                               }
                               return (
                                 <li key={inlineCommentDto.id} className="container-inline-comment">
-                                  <Link href={`/${router.query.organizationName}/${router.query.teamName}/${router.query.reportName}/tasks/${inlineCommentDto.id}`} className="block hover:bg-gray-50">
+                                  <a href={`/${router.query.organizationName}/${router.query.teamName}/${router.query.reportName}/tasks/${inlineCommentDto.id}`} className="block hover:bg-gray-50">
                                     <div className="p-4 sm:px-6">
                                       <div className="flex items-center justify-between">
                                         <ReadMoreReact text={inlineCommentDto.text} ideal={200} readMoreText="Read more..." className="text-sm font-medium text-indigo-600" />
@@ -857,7 +855,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                                         </div>
                                       </div>
                                     </div>
-                                  </Link>
+                                  </a>
                                 </li>
                               );
                             })}
@@ -870,7 +868,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                 ) : (
                   <Board
                     data={boardData}
-                    draggable={true}
+                    // draggable={true}
                     editable={false}
                     hideCardDeleteIcon={true}
                     handleDragEnd={(inlineCommentId: string, _: string, newStatus: string) => updateInlineCommentStatus(inlineCommentId, newStatus as InlineCommentStatusEnum)}
@@ -878,13 +876,22 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                       BoardWrapper: (e: any) => e.children[0],
                       Section: (e: any) => {
                         return (
-                          <div className={clsx('bg-gray-200 rounded', { 'mr-2': e.index < 3 })}>
-                            <div className="mx-auto max-w-7xl py-2 px-4">
-                              <div className="flex flex-row justify-between items-center">
-                                <TitleKanbanColumn title={e.title} status={e.status} />
-                                <span className="text-xs text-gray-500">{e.label}</span>
+                          <div
+                            style={{
+                              height: '100%',
+                              display: 'inline-block',
+                              verticalAlign: 'top',
+                              whiteSpace: 'normal',
+                            }}
+                          >
+                            <div className={clsx('bg-gray-200 rounded', { 'mr-2': e.index < 3 })}>
+                              <div className="mx-auto max-w-7xl py-2 px-4">
+                                <div className="flex flex-row justify-between items-center">
+                                  <TitleKanbanColumn title={e.title} status={e.status} />
+                                  <span className="text-xs text-gray-500">{e.label}</span>
+                                </div>
+                                {e.children[1]}
                               </div>
-                              {e.children[1]}
                             </div>
                           </div>
                         );
@@ -892,7 +899,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                       Card: (e: any) => {
                         const inlineCommentDto: InlineCommentDto = e.metadata;
                         return (
-                          <Link
+                          <a
                             href={`/${router.query.organizationName}/${router.query.teamName}/${router.query.reportName}/tasks/${inlineCommentDto.id}`}
                             className="overflow-hidden bg-white sm:rounded-lg sm:shadow cursor-pointer"
                           >
@@ -919,7 +926,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                                 <ReadMoreReact text={inlineCommentDto.text || ''} ideal={100} readMoreText="Read more..." className="text-sm font-medium text-indigo-600" />
                               </div>
                             </div>
-                          </Link>
+                          </a>
                         );
                       },
                     }}
