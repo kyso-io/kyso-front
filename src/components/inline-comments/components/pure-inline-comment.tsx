@@ -32,10 +32,23 @@ type IPureInlineComment = {
   updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteComment: (id: string) => void;
   parentInlineComment: InlineCommentDto | null;
+  isLastVersion: boolean;
 };
 
 const PureInlineComment = (props: IPureInlineComment) => {
-  const { commonData, channelMembers, hasPermissionDeleteComment, hasPermissionCreateComment, comment, deleteComment, createInlineComment, updateInlineComment, parentInlineComment, report } = props;
+  const {
+    commonData,
+    channelMembers,
+    hasPermissionDeleteComment,
+    hasPermissionCreateComment,
+    comment,
+    deleteComment,
+    createInlineComment,
+    updateInlineComment,
+    parentInlineComment,
+    report,
+    isLastVersion,
+  } = props;
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [replying, setReplying] = useState<boolean>(false);
   const isOrgAdmin: boolean = useMemo(() => {
@@ -96,12 +109,12 @@ const PureInlineComment = (props: IPureInlineComment) => {
       ) : (
         <div className={classNames('flex py-2 border rounded my-1 px-4 flex-col', parentInlineComment ? 'ml-10' : '')}>
           <div className="flex flex-row justify-end space-x-2 text-xs font-light text-gray-400">
-            {isUserAuthor && hasPermissionCreateComment && !isClosed && (
+            {isUserAuthor && hasPermissionCreateComment && !isClosed && isLastVersion && (
               <button className="hover:underline" onClick={() => setIsEditing(!isEditing)}>
                 Edit
               </button>
             )}
-            {((isUserAuthor && hasPermissionDeleteComment) || isOrgAdmin || isTeamAdmin) && !isClosed && (
+            {((isUserAuthor && hasPermissionDeleteComment) || isOrgAdmin || isTeamAdmin) && !isClosed && isLastVersion && (
               <button
                 className="hover:underline"
                 onClick={() => {
@@ -122,7 +135,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
               {isUserAuthor ? 'You' : comment?.user_name}
               {comment?.created_at ? ` wrote ${moment(new Date(comment.created_at)).fromNow()}` : ''}
             </div>
-            {canChangeStatus && !replying && !parentInlineComment ? (
+            {canChangeStatus && !replying && !parentInlineComment && isLastVersion ? (
               <Popover className="relative inline-block">
                 <Popover.Button className="focus:outline-none">
                   <div className="flex flex-row items-center cursor-pointer">
@@ -200,7 +213,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                 Cancel
               </span>
             )}
-            {hasPermissionCreateComment && !replying && !parentInlineComment && !isClosed && (
+            {hasPermissionCreateComment && !replying && !parentInlineComment && !isClosed && isLastVersion && (
               <span onClick={() => setReplying(true)} className="cursor-pointer">
                 Reply
               </span>

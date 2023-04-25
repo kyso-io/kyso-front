@@ -6,6 +6,11 @@ import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import SomethingHappenedReport from '@/components/SomethingHappenedReport';
+import TableOfContents from '@/components/TableOfContents';
+import { ToasterIcons } from '@/enums/toaster-icons';
+import { FileTypesHelper } from '@/helpers/FileTypesHelper';
+import { Helper } from '@/helpers/Helper';
+import { HelperPermissions } from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
 import { getReport } from '@/helpers/get-report';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
@@ -17,7 +22,9 @@ import type { Version } from '@/hooks/use-versions';
 import { useVersions } from '@/hooks/use-versions';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { KeyValue } from '@/model/key-value.model';
 import type { CommonData } from '@/types/common-data';
+import type { FileToRender } from '@/types/file-to-render';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
@@ -25,7 +32,7 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ArrowSmDownIcon, ClipboardCopyIcon } from '@heroicons/react/solid';
-import type { Comment, File as KysoFile, GithubFileHash, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO, GitCommit } from '@kyso-io/kyso-model';
+import type { Comment, GitCommit, GithubFileHash, File as KysoFile, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   CommentPermissionsEnum,
@@ -48,13 +55,6 @@ import { dirname } from 'path';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import TableOfContents from '@/components/TableOfContents';
-import { HelperPermissions } from '@/helpers/check-permissions';
-import { FileTypesHelper } from '@/helpers/FileTypesHelper';
-import { Helper } from '@/helpers/Helper';
-import type { KeyValue } from '@/model/key-value.model';
-import type { FileToRender } from '@/types/file-to-render';
-import { ToasterIcons } from '@/enums/toaster-icons';
 
 enum Tab {
   Files = 'files',
@@ -108,6 +108,19 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
   const [showError, setShowError] = useState<boolean>(true);
   const [showErrorMessage, setShowErrorMessage] = useState<string>('');
   const [showErrorRequestAccessButton, setShowErrorRequestAccessButton] = useState<boolean>(false);
+  const isLastVersion: boolean = useMemo(() => {
+    if (!reportData?.report) {
+      return false;
+    }
+    if (!version) {
+      return true;
+    }
+    const versionNumber: number = parseInt(version, 10);
+    if (Number.isNaN(versionNumber)) {
+      return true;
+    }
+    return versionNumber === reportData.report.last_version;
+  }, [reportData]);
 
   const tabs: { title: string; tab: Tab }[] = useMemo(() => {
     const data: { title: string; tab: Tab }[] = [
@@ -863,6 +876,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                               isCurrentUserVerified={isCurrentUserVerified}
                               isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
                               setUser={setUser}
+                              isLastVersion={isLastVersion}
                             />
                           )}
 

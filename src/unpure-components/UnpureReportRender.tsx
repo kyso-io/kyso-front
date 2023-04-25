@@ -37,6 +37,7 @@ interface Props {
   setUser: (user: UserDTO) => void;
   isCurrentUserSolvedCaptcha: () => boolean;
   isCurrentUserVerified: () => boolean;
+  isLastVersion: boolean;
 }
 
 const UnpureReportRender = ({
@@ -51,6 +52,7 @@ const UnpureReportRender = ({
   enabledDeleteInlineComment,
   isCurrentUserVerified,
   isCurrentUserSolvedCaptcha,
+  isLastVersion,
 }: Props) => {
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
@@ -195,6 +197,7 @@ const UnpureReportRender = ({
             enabledEditInlineComment={enabledEditInlineComment}
             enabledDeleteInlineComment={enabledDeleteInlineComment}
             toc={fileToRender.toc}
+            isLastVersion={isLastVersion}
           />
         )
       ) : (
@@ -272,6 +275,7 @@ const UnpureReportRender = ({
                   createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(fileToRender.id, user_ids, text, parent_id)}
                   updateInlineComment={updateInlineComment}
                   deleteComment={deleteInlineComment}
+                  isLastVersion={isLastVersion}
                 />
               </PureSideOverlayCommentsPanel>
             </div>

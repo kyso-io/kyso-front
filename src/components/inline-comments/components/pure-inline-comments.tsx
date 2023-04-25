@@ -26,10 +26,11 @@ type IPureComments = {
   createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
   updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteComment: (id: string) => void;
+  isLastVersion: boolean;
 };
 
 const PureComments = (props: IPureComments) => {
-  const { comments, commonData, report, channelMembers, hasPermissionDeleteComment, hasPermissionCreateComment, deleteComment, createInlineComment, updateInlineComment } = props;
+  const { comments, commonData, report, channelMembers, hasPermissionDeleteComment, hasPermissionCreateComment, deleteComment, createInlineComment, updateInlineComment, isLastVersion } = props;
   return (
     <div className={classNames('w-full flex flex-col')}>
       {(comments?.length > 0 || commonData.user) && (
@@ -61,6 +62,7 @@ const PureComments = (props: IPureComments) => {
                 createInlineComment={createInlineComment}
                 updateInlineComment={updateInlineComment}
                 parentInlineComment={null}
+                isLastVersion={isLastVersion}
               />
               {inlineComment.inline_comments.map((childComment: InlineCommentDto) => (
                 <PureInlineComment
@@ -75,12 +77,13 @@ const PureComments = (props: IPureComments) => {
                   createInlineComment={createInlineComment}
                   updateInlineComment={updateInlineComment}
                   parentInlineComment={inlineComment}
+                  isLastVersion={isLastVersion}
                 />
               ))}
             </React.Fragment>
           ))}
       </div>
-      {commonData.user && (
+      {commonData.user && hasPermissionCreateComment && isLastVersion && (
         <div className={clsx({ 'mt-20': comments && comments.length > 0 })}>
           <PureInlineCommentForm
             user={commonData.user}

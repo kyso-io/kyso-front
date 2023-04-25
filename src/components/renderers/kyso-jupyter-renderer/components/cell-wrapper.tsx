@@ -33,6 +33,7 @@ interface Props {
   enabledDeleteInlineComment: boolean;
   enabledEditInlineComment: boolean;
   onlyVisibleCell?: string;
+  isLastVersion: boolean;
 }
 
 const CellWrapper = (props: Props) => {
@@ -52,6 +53,7 @@ const CellWrapper = (props: Props) => {
     createInlineComment,
     updateInlineComment,
     deleteInlineComment,
+    isLastVersion,
   } = props;
 
   const reportContext: ReportContext = {
@@ -162,6 +164,7 @@ const CellWrapper = (props: Props) => {
             createInlineComment={createInlineComment}
             updateInlineComment={updateInlineComment}
             deleteComment={deleteInlineComment}
+            isLastVersion={isLastVersion}
           />
         )}
       </div>
