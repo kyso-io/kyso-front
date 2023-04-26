@@ -21,9 +21,9 @@ function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
 }
 
-const thisItemIsTheSelectedFile = (computedPath: string, href: string) => {
-  if (computedPath && href) {
-    return computedPath === href;
+const thisItemIsTheSelectedFile = (selectedItemPathSCS: string, treeItemPathSCS: string) => {
+  if (selectedItemPathSCS && treeItemPathSCS) {
+    return selectedItemPathSCS === treeItemPathSCS;
   }
   return false;
 };
@@ -31,18 +31,6 @@ const thisItemIsTheSelectedFile = (computedPath: string, href: string) => {
 const PureTreeItem = (props: IPureTreeItemProps) => {
   const { treeItem, href, isMainFile, onNavigation, selectedFile } = props;
   let icon = treeItem.type === 'file' ? faFile : faFolder;
-
-  let organization = '';
-  let channel = '';
-  let report = '';
-  let computedPath = `_`;
-
-  if (selectedFile) {
-    organization = selectedFile.path_scs.split('/')[1]!;
-    channel = selectedFile.path_scs.split('/')[2]!;
-    report = selectedFile.path_scs.split('/')[4]!;
-    computedPath = `/${organization}/${channel}/${report}/${selectedFile.path}`;
-  }
 
   const extension = treeItem.path.split('.').pop();
   if (treeItem.type === 'file') {
@@ -86,9 +74,9 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
 
   return (
     <>
-      <Link href={href || `/${treeItem.path}`} className={classNames(thisItemIsTheSelectedFile(computedPath, href!) ? 'bg-blue' : '')}>
+      <Link href={href || `/${treeItem.path}`} className={classNames(thisItemIsTheSelectedFile(selectedFile!.path_scs, treeItem?.path_scs) ? 'bg-blue' : '')}>
         <span
-          className={classNames('p-2 text-sm group flex items-center justify-between', computedPath === href ? 'bg-gray-200' : 'hover:bg-gray-100')}
+          className={classNames('p-2 text-sm group flex items-center justify-between', thisItemIsTheSelectedFile(selectedFile!.path_scs, treeItem?.path_scs) ? 'bg-gray-200' : 'hover:bg-gray-100')}
           onClick={(e) => {
             if (onNavigation) {
               onNavigation(e);
@@ -149,7 +137,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
           )}
         </span>
       </Link>
-      {selectedFile && thisItemIsTheSelectedFile(computedPath, href!) && selectedFile.toc && selectedFile.toc.length > 0 && (
+      {selectedFile && thisItemIsTheSelectedFile(selectedFile?.path_scs, treeItem?.path_scs) && selectedFile.toc && selectedFile.toc.length > 0 && (
         <div className="ml-6">
           <TableOfContents toc={selectedFile.toc} openInNewTab={false} title={''} collapsible={false}></TableOfContents>
         </div>
