@@ -131,7 +131,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
     ];
     if (reportData?.report && reportData.report.toc && reportData.report.toc.length > 0) {
       data.splice(0, 0, {
-        title: 'Index',
+        title: 'Table of Contents',
         tab: Tab.Toc,
       });
     }
@@ -705,7 +705,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                       {report && (
                         <React.Fragment>
                           <div className="border-b border-gray-200">
-                            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                            <nav className="pl-1 -mb-px flex space-x-8" aria-label="Tabs">
                               {tabs.map((element: { title: string; tab: Tab }) => (
                                 <a
                                   key={element.tab}
@@ -731,6 +731,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                                 version={router.query.version as string}
                                 selfTree={selfTree}
                                 parentTree={parentTree}
+                                selectedFile={fileToRender!}
                                 // onNavigation={(e) => {
                                 //   e.preventDefault()
                                 //   router.push(e.currentTarget.href)

@@ -25,7 +25,7 @@ const LineTableOfContents = ({ toc, collapsible, deep, openInNewTab }: PropsLine
     <ul className={'my-1'} style={{ marginLeft: `${deep * 10}px` }}>
       {toc.map((entry: TableOfContentEntryDto, index: number) => (
         <li key={index}>
-          <div className="flex items-center">
+          <div className="flex items-center hover:animate-pulse">
             {((collapsible && (!entry.children || entry.children.length === 0)) || !collapsible) && (
               <span
                 className="mr-3"
@@ -49,7 +49,12 @@ const LineTableOfContents = ({ toc, collapsible, deep, openInNewTab }: PropsLine
                 {collapsed[index] ? <ChevronRightIcon className="h-4 w-4 mr-1" /> : <ChevronRightIcon className="h-4 w-4 mr-1 rotate-90" />}
               </button>
             )}
-            <a href={entry.href} target={openInNewTab ? '_blank' : '_self'} rel="noreferrer" className="text-sm w-6 text-gray-500 cursor-pointer grow">
+            <a
+              href={entry.href}
+              target={openInNewTab ? '_blank' : '_self'}
+              rel="noreferrer"
+              className="text-sm w-6 text-gray-500 cursor-pointer grow underline hover:no-underline hover:font-extrabold"
+            >
               {entry.title}
             </a>
           </div>
