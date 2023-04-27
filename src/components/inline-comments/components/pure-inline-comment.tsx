@@ -107,7 +107,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
           />
         </div>
       ) : (
-        <div className={classNames('flex py-2 border rounded my-1 px-4 flex-col', parentInlineComment ? 'ml-10' : '')}>
+        <div id={comment.cell_id} className={classNames('flex py-2 border rounded my-1 px-4 flex-col', parentInlineComment ? 'ml-10' : '')}>
           <div className="flex flex-row justify-end space-x-2 text-xs font-light text-gray-400">
             {isUserAuthor && hasPermissionCreateComment && !isClosed && isLastVersion && (
               <button className="hover:underline" onClick={() => setIsEditing(!isEditing)}>
