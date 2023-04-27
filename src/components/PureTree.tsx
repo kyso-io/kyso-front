@@ -1,6 +1,7 @@
 import PureTreeItem from '@/components/PureTreeItem';
 import classNames from '@/helpers/class-names';
 import type { CommonData } from '@/types/common-data';
+import type { FileToRender } from '@/types/file-to-render';
 import { ChevronLeftIcon } from '@heroicons/react/solid';
 import type { GithubFileHash, ReportDTO } from '@kyso-io/kyso-model';
 import Link from 'next/link';
@@ -13,11 +14,12 @@ type IPureTree = {
   version: string;
   selfTree: GithubFileHash[];
   parentTree: GithubFileHash[];
+  selectedFile?: FileToRender;
   onNavigation?: (e: React.MouseEvent<HTMLElement>) => void;
 };
 
 const PureTree = (props: IPureTree) => {
-  const { path, basePath, version, commonData, report, selfTree = [], parentTree = [], onNavigation } = props;
+  const { path, basePath, version, commonData, report, selfTree = [], parentTree = [], onNavigation, selectedFile } = props;
 
   let currentPath = '';
   if (path) {
@@ -141,7 +143,7 @@ const PureTree = (props: IPureTree) => {
       <div className="text-ellipsis overflow-hidden">
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
         {tree?.map((item: any) => (
-          <PureTreeItem onNavigation={onNavigation} key={item.path} treeItem={item} current={lastPathSegment === item.path} isMainFile={item.id === report.main_file_id} href={getNewPath(item)} />
+          <PureTreeItem onNavigation={onNavigation} key={item.path} treeItem={item} isMainFile={item.id === report.main_file_id} href={getNewPath(item)} selectedFile={selectedFile} />
         ))}
       </div>
     </div>
