@@ -3,6 +3,7 @@ import { KeyValue } from '@/model/key-value.model';
 import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { fetchPublicKysoSettings, store } from '@kyso-io/kyso-store';
 import slugify from 'slugify';
+import _ from 'lodash';
 import { OrganizationSettingsTab } from '../enums/organization-settings-tab';
 
 export class Helper {
@@ -354,6 +355,36 @@ export class Helper {
       default:
         return extension;
     }
+  }
+
+  /**
+   * Process @wholeText param looking for @termToHighlight and adds a <mark> to it
+   * Then stringifies it and return as a string
+   *
+   * @param wholeText Text to highlight
+   * @param termToHighlight Term to be highlighted
+   * @returns
+   */
+  public static highlight(wholeText: string, termToHighlight: string): string {
+    if (wholeText && termToHighlight) {
+      if (!termToHighlight.trim()) {
+        return wholeText;
+      }
+      const regex = new RegExp(`(${_.escapeRegExp(termToHighlight)})`, 'gi');
+      const parts = wholeText.split(regex);
+
+      const highlightedParts = parts.map((part, i) => {
+        const fitsInRegex = regex.test(part);
+
+        if (fitsInRegex) {
+          return `<mark key="${i}">${part}</mark>`;
+        }
+        return part;
+      });
+
+      return highlightedParts.join('');
+    }
+    return wholeText;
   }
 
   public static isKysoFile(path: string): boolean {

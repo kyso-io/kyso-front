@@ -372,7 +372,7 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
               <React.Fragment>
                 <ul role="list" className="divide-y divide-gray-200">
                   {fullTextSearchResultType.map((fullTextSearchResult: FilteredFullTextSearchResultType, index: number) => (
-                    <SearchItem key={index} fullTextSearchResult={fullTextSearchResult.result!} otherVersionResultsNumber={fullTextSearchResult.subResults} />
+                    <SearchItem key={index} fullTextSearchResult={fullTextSearchResult.result!} otherVersionResultsNumber={fullTextSearchResult.subResults} terms={fullTextSearchParams.terms} />
                   ))}
                 </ul>
                 <SearchPagination goToPage={(page: number) => setFullTextSearchParams({ ...fullTextSearchParams, page })} fullTextSearchMetadata={rawResults!.metadata} />
