@@ -30,7 +30,7 @@ const debouncedFetchData = debounce(async (commonData: CommonData, params: FullT
     const resultFullTextSearchDto: NormalizedResponseDTO<FullTextSearchDTO> = await api.fullTextSearch({ ...params, terms: encodeURIComponent(params.terms) });
     cb(resultFullTextSearchDto.data);
   } catch (e: any) {
-    Helper.logError(e.response.data, e);
+    Helper.logError(e?.response?.data, e);
     cb(null);
   }
 }, 750);

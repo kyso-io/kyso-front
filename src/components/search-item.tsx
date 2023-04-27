@@ -33,6 +33,8 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
     );
   };
 
+  const finalRedirectUrl = `${basePath}${fullTextSearchResult.link}&highlight=${terms}&showInlineComments=true`;
+
   return (
     <React.Fragment>
       <style>{`
@@ -43,7 +45,7 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
       <li className="relative bg-white py-5 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
         <div className="flex justify-between space-x-3">
           <div className="min-w-0 flex-1">
-            <a href={`${basePath}${fullTextSearchResult.link}?highlight=${terms}`} className="block focus:outline-none">
+            <a href={finalRedirectUrl} className="block focus:outline-none">
               <span className="absolute inset-0" aria-hidden="true"></span>
               {fullTextSearchResult.type !== ElasticSearchIndex.Comment && (
                 <>

@@ -194,7 +194,6 @@ const UnpureReportRender = ({
             enabledCreateInlineComment={enabledCreateInlineComment}
             enabledEditInlineComment={enabledEditInlineComment}
             enabledDeleteInlineComment={enabledDeleteInlineComment}
-            toc={fileToRender.toc}
             isLastVersion={isLastVersion}
           />
         )
@@ -239,22 +238,6 @@ const UnpureReportRender = ({
               )}
             </div>
             <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'hidden lg:block p-2 min-w-fit border-l')}>
-              {/* fileToRender.toc && fileToRender.toc.length > 0 && <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} stickToRight={true} /> */}
-              {/* fileToRender.toc && fileToRender.toc.length > 0 && (
-                <PureSideOverlayCommentsPanel
-                  key={report?.id!}
-                  cacheKey={report?.id!}
-                  setSidebarOpen={(p) => setSidebarOpen(p)}
-                  commonData={commonData}
-                  tooltipOpenText="Open ToC"
-                  tooltipCloseText="Close ToC"
-                  icon={<DocumentTextIcon className="h-4 w-4 mt-1" aria-hidden="true" />}
-                >
-                  <div className="">
-                    <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} stickToRight={true} />
-                  </div>
-                </PureSideOverlayCommentsPanel>
-              ) */}
               <PureSideOverlayCommentsPanel
                 key={report?.id!}
                 cacheKey={report?.id!}

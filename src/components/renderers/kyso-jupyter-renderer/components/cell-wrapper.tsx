@@ -6,6 +6,7 @@ import { ChatAltIcon, CodeIcon, LinkIcon } from '@heroicons/react/outline';
 import type { InlineCommentDto, InlineCommentStatusEnum, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import { useMemo, useRef, useState } from 'react';
 import { useHover } from 'usehooks-ts';
+import { useRouter } from 'next/router';
 import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
 import type { Cell as ICell } from '../interfaces/jupyter-notebook';
 import Cell from './cell';
@@ -56,6 +57,9 @@ const CellWrapper = (props: Props) => {
     isLastVersion,
   } = props;
 
+  const router = useRouter();
+  const { showInlineComments } = router.query;
+
   const reportContext: ReportContext = {
     organizationSlug: commonData.organization?.sluglified_name!,
     teamSlug: commonData.team?.sluglified_name!,
@@ -67,7 +71,7 @@ const CellWrapper = (props: Props) => {
 
   const [inputShown, setInputShown] = useState(showInputs);
   const [outputShown, setOutputShown] = useState(showOutputs);
-  const [commentsShown, setCommentsShown] = useState(false);
+  const [commentsShown, setCommentsShown] = useState((showInlineComments && inlineCommentDtos.length > 0) || false);
 
   useNavigateToHashOnce({ active: true });
 
