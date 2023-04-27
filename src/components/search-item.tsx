@@ -33,7 +33,14 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
     );
   };
 
-  const finalRedirectUrl = `${basePath}${fullTextSearchResult.link}&highlight=${terms}&showInlineComments=true`;
+  let finalRedirectUrl = '';
+  if (fullTextSearchResult.link.indexOf('?') === -1) {
+    // No parameters, add them from scratch
+    finalRedirectUrl = `${basePath}${fullTextSearchResult.link}?highlight=${terms}&showInlineComments=true`;
+  } else {
+    // Existing parameters, append to the end
+    finalRedirectUrl = `${basePath}${fullTextSearchResult.link}&highlight=${terms}&showInlineComments=true`;
+  }
 
   return (
     <React.Fragment>
