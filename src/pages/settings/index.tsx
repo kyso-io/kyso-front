@@ -78,7 +78,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
         });
         setOrganizationsInfoDtoExtended(data);
       } catch (e: any) {
-        Helper.logError(e.response.data, e);
+        Helper.logError(e?.response?.data, e);
       }
     };
     getData();

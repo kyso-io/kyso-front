@@ -32,7 +32,7 @@ const UnpureDeleteOrganizationDropdown = ({ commonData, showToaster, isCurrentUs
       showToaster(`Organization deleted successfully`, ToasterIcons.INFO);
     } catch (error: any) {
       showToaster(`Something happened trying to delete the organization. Please try again. <br /> <br /> ${error.response.data.message}`, ToasterIcons.ERROR);
-      Helper.logError(error.response.data.message, error);
+      Helper.logError(error?.response?.data?.message, error);
       setOpen(false);
       setInput('');
       setRequesting(false);

@@ -323,7 +323,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
+        Helper.logError(errorHttp?.response?.data, errorHttp);
       }
     };
     getData();

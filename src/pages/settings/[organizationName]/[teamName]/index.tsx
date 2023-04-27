@@ -165,7 +165,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
           setEnabledPublicChannels(resultKysoSetting.data[indexPublicChannels]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
+        Helper.logError(errorHttp?.response?.data, errorHttp);
       }
     };
     getData();
@@ -505,7 +505,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       }
       router.reload();
     } catch (e: any) {
-      Helper.logError(e.response.data, e);
+      Helper.logError(e?.response?.data, e);
     }
     setRequesting(false);
   };
@@ -539,7 +539,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       await api.deleteTeam(commonData.team!.id!);
     } catch (error: any) {
-      Helper.logError(error.response.data, error);
+      Helper.logError(error?.response?.data, error);
       setShowDeleteTeamModal(false);
       setTextTeamModal('');
       setRequesting(false);

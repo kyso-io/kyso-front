@@ -47,7 +47,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
           setEnabledPublicChannels(resultKysoSetting.data[indexPublicChannels]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
+        Helper.logError(errorHttp?.response?.data, errorHttp);
       }
     };
     getData();

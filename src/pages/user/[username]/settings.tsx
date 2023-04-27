@@ -90,7 +90,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
       await api.updateUser(commonData.user!.id!, updateUserRequestDto);
       router.reload();
     } catch (e: any) {
-      Helper.logError(e.response.data, e);
+      Helper.logError(e?.response?.data, e);
       showToaster("We're sorry! Something happened trying to perfom the operation. Please try again", ToasterIcons.ERROR);
     } finally {
       setRequesting(false);

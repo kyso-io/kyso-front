@@ -154,7 +154,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
+        Helper.logError(errorHttp?.response?.data, errorHttp);
       }
     };
     getData();

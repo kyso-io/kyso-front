@@ -107,7 +107,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
       } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
+        Helper.logError(errorHttp?.response?.data, errorHttp);
       }
     };
     getData();
