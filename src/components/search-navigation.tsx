@@ -1,10 +1,10 @@
+import type { FullTextSearchParams } from '@/interfaces/full-text-search-params';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/solid';
 import type { FullTextSearchAggregator, FullTextSearchDTO, FullTextSearchResultType, ResourcePermissions } from '@kyso-io/kyso-model';
 import { ElasticSearchIndex } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import React, { useEffect, useMemo, useState } from 'react';
-import type { FullTextSearchParams } from '@/interfaces/full-text-search-params';
 import { Helper } from '../helpers/Helper';
 import type { SearchNavItem } from '../interfaces/search-nav-item';
 import type { CommonData } from '../types/common-data';
@@ -47,6 +47,8 @@ const SearchNavigation = ({ commonData, fullTextSearchParams, fullTextSearchDTO,
         return fullTextSearchDTO.comments;
       case ElasticSearchIndex.Discussion:
         return fullTextSearchDTO.discussions;
+      case ElasticSearchIndex.InlineComment:
+        return fullTextSearchDTO.inlineComments;
       case ElasticSearchIndex.Report:
         return fullTextSearchDTO.reports;
       case ElasticSearchIndex.User:

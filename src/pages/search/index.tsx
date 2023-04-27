@@ -72,6 +72,8 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
         return fullTextSearchDTO.discussions.metadata.total;
       case ElasticSearchIndex.Comment:
         return fullTextSearchDTO.comments.metadata.total;
+      case ElasticSearchIndex.InlineComment:
+        return fullTextSearchDTO.inlineComments.metadata.total;
       default:
         return 0;
     }
@@ -114,6 +116,8 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
       case ElasticSearchIndex.Discussion:
         break;
       case ElasticSearchIndex.Comment:
+        break;
+      case ElasticSearchIndex.InlineComment:
         break;
       case ElasticSearchIndex.User:
         break;
@@ -207,6 +211,17 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
         }),
       );
     }
+    if (fullTextSearchParams.type === ElasticSearchIndex.InlineComment) {
+      setRawResults(fullTextSearchDTO.inlineComments);
+      setFullTextSearchResultType(
+        fullTextSearchDTO.inlineComments.results.map((x: FullTextSearchResult) => {
+          return {
+            result: x,
+            subResults: 1,
+          };
+        }),
+      );
+    }
   }, [fullTextSearchDTO]);
 
   useEffect(() => {
@@ -240,12 +255,14 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
           { name: 'Report files', elasticSearchIndex: ElasticSearchIndex.Report, count: result.reports.metadata.total },
           /* { name: 'Discussions', elasticSearchIndex: ElasticSearchIndex.Discussion, count: result.discussions.metadata.total }, */
           { name: 'Report comments', elasticSearchIndex: ElasticSearchIndex.Comment, count: result.comments.metadata.total },
+          { name: 'Inline comments', elasticSearchIndex: ElasticSearchIndex.InlineComment, count: result.inlineComments.metadata.total },
         ]);
       } else {
         setNavigation([
           { name: 'Report files', elasticSearchIndex: ElasticSearchIndex.Report, count: 0 },
           /* { name: 'Discussions', elasticSearchIndex: ElasticSearchIndex.Discussion, count: 0 }, */
           { name: 'Report comments', elasticSearchIndex: ElasticSearchIndex.Comment, count: 0 },
+          { name: 'Inline comments', elasticSearchIndex: ElasticSearchIndex.InlineComment, count: 0 },
         ]);
       }
       setRequesting(false);
