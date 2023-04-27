@@ -118,7 +118,7 @@ const PureOnboardingDropdown = ({ user }: Props) => {
           } catch (e) {}
         }
       } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
+        Helper.logError(errorHttp?.response?.data, errorHttp);
       }
     };
     getData();
