@@ -1014,9 +1014,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                                 className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
                                 onClick={() => router.push(`/settings/${commonData.organization!.sluglified_name}/${team.sluglified_name}`)}
                               >
-                                <div className="space-y-1 text-lg font-medium leading-6 mt-5">
+                                <div className="space-y-1 text-lg font-medium leading-6 mt-5" style={{ height: '48px' }}>
                                   <h3 style={{ color: '#234361' }}>{team.display_name}</h3>
-                                  <span className="text-sm font-normal">{role}</span>
+                                  <span className="text-sm font-normal truncate">{role}</span>
                                 </div>
                                 <div className="my-10">
                                   <PureAvatar

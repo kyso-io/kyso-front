@@ -127,9 +127,9 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
                       className="overflow-hidden rounded-md border border-gray-300 bg-white cursor-pointer"
                       onClick={() => router.push(`/settings/${organizationInfoExtended.name}`)}
                     >
-                      <div className="space-y-1 text-lg font-medium leading-6 mt-5">
+                      <div className="space-y-1 text-lg font-medium leading-6 mt-5" style={{ height: '48px' }}>
                         <h3 style={{ color: '#234361' }}>{organizationInfoExtended.display_name}</h3>
-                        <span className="text-sm font-normal">{role}</span>
+                        <span className="text-sm font-normal truncate">{role}</span>
                       </div>
                       <div className="my-10">
                         <PureAvatar src={organizationInfoExtended.avatar_url} title={organizationInfoExtended.display_name} size={TailwindHeightSizeEnum.H36} textSize={TailwindFontSizeEnum.XXXXL} />
@@ -140,7 +140,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
                             <div className="flex items-center">
                               <BookOpenIcon className="h-6 w-6 mr-1" fill="#628CF9" aria-hidden="true" />
                               <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                {organizationInfoExtended.reports} reports
+                                {organizationInfoExtended.reports}
                               </span>
                             </div>
                           </li>
@@ -156,7 +156,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
                             <div className="flex items-center">
                               <ChatAlt2Icon className="h-6 w-6 mr-1" fill="#70CBE1" aria-hidden="true" />
                               <span style={{ color: '#797A83' }} className="font-normal text-sm">
-                                {organizationInfoExtended.comments} comments
+                                {organizationInfoExtended.comments}
                               </span>
                             </div>
                           </li>

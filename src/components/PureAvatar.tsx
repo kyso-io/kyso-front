@@ -84,23 +84,23 @@ const PureAvatar = (props: Props) => {
       {props.src && isError && props.username && (
         <a href={`/user/${props.username}`}>
           <div
-            className={`avatar-tooltip bg-white text-gray-600 flex items-center justify-center text-${props.textSize} h-${props.size} w-${props.size} rounded-full border ${props.className}`}
+            className={`avatar-tooltip inline-flex items-center justify-center h-${props.size} w-${props.size} rounded-full bg-gray-200 hover:scale-110 transition duration-100 ${props.className}`}
             style={props.style}
             data-pr-tooltip={props.title}
             data-pr-position="bottom"
           >
-            {getInitials(props.title)}
+            <span className={`text-${props.textSize} font-medium leading-none text-gray-500`}>{getInitials(props.title)}</span>
           </div>
         </a>
       )}
       {props.src && isError && !props.username && (
         <div
-          className={`avatar-tooltip bg-white text-gray-600 flex items-center justify-center text-${props.textSize} h-${props.size} w-${props.size} rounded-full border ${props.className}`}
+          className={`avatar-tooltip inline-flex items-center justify-center h-${props.size} w-${props.size} rounded-full bg-gray-200 hover:scale-110 transition duration-100 ${props.className}`}
           style={props.style}
           data-pr-tooltip={props.title}
           data-pr-position="bottom"
         >
-          {getInitials(props.title)}
+          <span className={`text-${props.textSize} font-medium leading-none text-gray-500`}>{getInitials(props.title)}</span>
         </div>
       )}
       {!props.src && (
