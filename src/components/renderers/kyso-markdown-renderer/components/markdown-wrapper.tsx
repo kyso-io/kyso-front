@@ -9,8 +9,11 @@ import gfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import remarkUnwrapImages from 'remark-unwrap-images';
 import { visit } from 'unist-util-visit';
-import RenderCode from '../../RenderCode';
+import _ from 'lodash';
+import { useRouter } from 'next/router';
+import { useEffect, useState } from 'react';
 import Mermaid from './mermaid';
+import RenderCode from '../../RenderCode';
 
 function customDirectives() {
   return transform;
@@ -125,11 +128,43 @@ interface Props {
   source: string;
 }
 const MarkdownWrapper = ({ source }: Props) => {
+  const router = useRouter();
+  const { highlight } = router.query;
+
+  const [highlightedText, setHighlightedText] = useState(source || 'No source');
+
+  const doHighlight = (wholeText: string, highlightText: string): string => {
+    if (wholeText && highlightText) {
+      if (!highlightText.trim()) {
+        return wholeText;
+      }
+      const regex = new RegExp(`(${_.escapeRegExp(highlightText)})`, 'gi');
+      const parts = wholeText.split(regex);
+
+      const highlightedParts = parts.map((part, i) => {
+        const fitsInRegex = regex.test(part);
+
+        if (fitsInRegex) {
+          return `<mark key="${i}">${part}</mark>`;
+        }
+        return part;
+      });
+
+      return highlightedParts.join('');
+    }
+    return wholeText;
+  };
+
+  useEffect(() => {
+    const computedText = doHighlight(source, highlight as string);
+    setHighlightedText(computedText);
+  }, [highlight]);
+
   return (
     <div className="prose max-w-none break-words">
       <MathJaxContext>
         <ReactMarkdown remarkPlugins={[gfm, remarkMath, directive, customDirectives, remarkUnwrapImages]} rehypePlugins={[rehypeSlug, rehypeKatex, rehypeRaw]} components={components}>
-          {source}
+          {highlightedText}
         </ReactMarkdown>
       </MathJaxContext>
     </div>

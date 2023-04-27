@@ -103,7 +103,6 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
   const scrollDirection: ScrollDirection | null = useScrollDirection();
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Toc);
   const [showEmails, setShowEmails] = useState<boolean>(false);
-  const [defaultRedirectOrganization, setDefaultRedirectOrganization] = useState<string>('');
   const [teamVisibility, setTeamVisibility] = useState<TeamVisibilityEnum | null>(null);
   const [showError, setShowError] = useState<boolean>(true);
   const [showErrorMessage, setShowErrorMessage] = useState<string>('');
@@ -153,10 +152,6 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
         const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
         if (indexShowEmail !== -1) {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
-        }
-        const indexDefaultRedirectOrganization: number = publicKeys.findIndex((x: KeyValue) => x.key === KysoSettingsEnum.DEFAULT_REDIRECT_ORGANIZATION);
-        if (indexDefaultRedirectOrganization !== -1) {
-          setDefaultRedirectOrganization(publicKeys[indexDefaultRedirectOrganization]!.value);
         }
       } catch (errorHttp: any) {
         Helper.logError(errorHttp.response.data, errorHttp);
@@ -401,7 +396,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}/${router.query.reportName as string}`)}`);
       }
     }
-  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName, defaultRedirectOrganization]);
+  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
 
   // START TEAM MEMBERS
 
