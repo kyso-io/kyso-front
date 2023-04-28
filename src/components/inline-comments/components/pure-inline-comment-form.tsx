@@ -102,6 +102,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
           inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm"
           panelClassName="w-full absolute bg-white border rounded"
           autoHighlight
+          autoFocus
           onSearch={onSearch}
           name="input"
           value={value}

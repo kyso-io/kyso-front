@@ -168,7 +168,7 @@ const PureCheckListTour = (props: Props) => {
         setOnboardingMessages(onboardingMessagesValues);
         /* eslint-disable @typescript-eslint/no-explicit-any */
       } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
+        Helper.logError(errorHttp?.response?.data, errorHttp);
       }
     };
     getData();

@@ -31,7 +31,7 @@ const UnpureDeleteChannelDropdown = ({ commonData, showToaster, isCurrentUserSol
       await api.deleteTeam(commonData.team!.id!);
       showToaster(`Channel deleted successfully`, ToasterIcons.INFO);
     } catch (error: any) {
-      Helper.logError(error.response.data.message, error);
+      Helper.logError(error?.response?.data?.message, error);
       showToaster(`Something happened trying to delete the channel. Please try again <br /><br /> ${error.response.data.message}`, ToasterIcons.ERROR);
       setOpen(false);
       setInput('');

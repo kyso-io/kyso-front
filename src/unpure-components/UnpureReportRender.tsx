@@ -10,14 +10,12 @@ import RenderOnlyOffice from '@/components/renderers/kyso-onlyoffice-renderer/Re
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
-import { DocumentTextIcon } from '@heroicons/react/outline';
 import type { InlineCommentDto, InlineCommentStatusEnum, NormalizedResponseDTO, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { CreateInlineCommentDto, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState } from 'react';
-import TableOfContents from '../components/TableOfContents';
 import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
 import type { FileToRender } from '../types/file-to-render';
 import PureSideOverlayCommentsPanel from './UnpureSideOverlayCommentsPanel';
@@ -196,7 +194,6 @@ const UnpureReportRender = ({
             enabledCreateInlineComment={enabledCreateInlineComment}
             enabledEditInlineComment={enabledEditInlineComment}
             enabledDeleteInlineComment={enabledDeleteInlineComment}
-            toc={fileToRender.toc}
             isLastVersion={isLastVersion}
           />
         )
@@ -241,22 +238,6 @@ const UnpureReportRender = ({
               )}
             </div>
             <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'hidden lg:block p-2 min-w-fit border-l')}>
-              {/* fileToRender.toc && fileToRender.toc.length > 0 && <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} stickToRight={true} /> */}
-              {fileToRender.toc && fileToRender.toc.length > 0 && (
-                <PureSideOverlayCommentsPanel
-                  key={report?.id!}
-                  cacheKey={report?.id!}
-                  setSidebarOpen={(p) => setSidebarOpen(p)}
-                  commonData={commonData}
-                  tooltipOpenText="Open ToC"
-                  tooltipCloseText="Close ToC"
-                  icon={<DocumentTextIcon className="h-4 w-4 mt-1" aria-hidden="true" />}
-                >
-                  <div className="">
-                    <TableOfContents title="Table of Contents" toc={fileToRender.toc} collapsible={false} openInNewTab={false} stickToRight={true} />
-                  </div>
-                </PureSideOverlayCommentsPanel>
-              )}
               <PureSideOverlayCommentsPanel
                 key={report?.id!}
                 cacheKey={report?.id!}

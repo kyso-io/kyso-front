@@ -1,3 +1,5 @@
+import { Helper } from '@/helpers/Helper';
+import { useRouter } from 'next/router';
 import React from 'react';
 
 const asciidoctor = require('asciidoctor')();
@@ -15,6 +17,9 @@ interface Props {
 }
 
 export const RenderAsciidoc = (props: Props) => {
+  const router = useRouter();
+  const { highlight } = router.query;
+
   if (props.source) {
     // Compute baseUrl
     const urlElements = props.fileUrl.split('/');
@@ -25,6 +30,7 @@ export const RenderAsciidoc = (props: Props) => {
     let tocAttribute: string | undefined;
     // Get the attributes from the document, reading it line by line
     const source = props.source.toString();
+
     const sourceLines: string[] = source.split(/\r?\n/);
     for (let i = 0; i < sourceLines.length; i += 1) {
       const line: string = sourceLines[i] || '';
@@ -58,8 +64,9 @@ export const RenderAsciidoc = (props: Props) => {
       },
     };
     const html = asciidoctor.convert(source, options);
+    const highlightedHtml = Helper.highlight(html, highlight as string);
     const className = 'prose max-w-none break-words prose-pre:bg-stone-400';
-    return <div className={className} dangerouslySetInnerHTML={{ __html: html }} />;
+    return <div className={className} dangerouslySetInnerHTML={{ __html: highlightedHtml }} />;
   }
   return <div>No content to show</div>;
 };

@@ -90,7 +90,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
           }
         }
       } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
+        Helper.logError(errorHttp?.response?.data, errorHttp);
       }
     };
 

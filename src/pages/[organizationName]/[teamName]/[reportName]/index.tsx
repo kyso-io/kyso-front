@@ -103,7 +103,6 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
   const scrollDirection: ScrollDirection | null = useScrollDirection();
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Toc);
   const [showEmails, setShowEmails] = useState<boolean>(false);
-  const [defaultRedirectOrganization, setDefaultRedirectOrganization] = useState<string>('');
   const [teamVisibility, setTeamVisibility] = useState<TeamVisibilityEnum | null>(null);
   const [showError, setShowError] = useState<boolean>(true);
   const [showErrorMessage, setShowErrorMessage] = useState<string>('');
@@ -131,7 +130,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
     ];
     if (reportData?.report && reportData.report.toc && reportData.report.toc.length > 0) {
       data.splice(0, 0, {
-        title: 'Index',
+        title: 'Table of Contents',
         tab: Tab.Toc,
       });
     }
@@ -154,12 +153,8 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
         if (indexShowEmail !== -1) {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
-        const indexDefaultRedirectOrganization: number = publicKeys.findIndex((x: KeyValue) => x.key === KysoSettingsEnum.DEFAULT_REDIRECT_ORGANIZATION);
-        if (indexDefaultRedirectOrganization !== -1) {
-          setDefaultRedirectOrganization(publicKeys[indexDefaultRedirectOrganization]!.value);
-        }
       } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
+        Helper.logError(errorHttp?.response?.data, errorHttp);
       }
     };
     getData();
@@ -401,7 +396,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}/${router.query.reportName as string}`)}`);
       }
     }
-  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName, defaultRedirectOrganization]);
+  }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
 
   // START TEAM MEMBERS
 
@@ -705,7 +700,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                       {report && (
                         <React.Fragment>
                           <div className="border-b border-gray-200">
-                            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                            <nav className="pl-1 -mb-px flex space-x-8" aria-label="Tabs">
                               {tabs.map((element: { title: string; tab: Tab }) => (
                                 <a
                                   key={element.tab}
@@ -731,6 +726,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                                 version={router.query.version as string}
                                 selfTree={selfTree}
                                 parentTree={parentTree}
+                                selectedFile={fileToRender!}
                                 // onNavigation={(e) => {
                                 //   e.preventDefault()
                                 //   router.push(e.currentTarget.href)

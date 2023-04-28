@@ -53,7 +53,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         const resultKysoUserAccessTokens: NormalizedResponseDTO<KysoUserAccessToken[]> = await api.getAccessTokens();
         setKysoUserAccessTokens(resultKysoUserAccessTokens.data);
       } catch (e: any) {
-        Helper.logError(e.response.data, e);
+        Helper.logError(e?.response?.data, e);
       } finally {
         setRequesting(false);
       }
@@ -87,7 +87,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       setKysoUserAccessTokens([...kysoUserAccessTokens, resultKysoUserAccessToken.data]);
       showToaster('Access token was created successfully', ToasterIcons.SUCCESS);
     } catch (e: any) {
-      Helper.logError(e.response.data, e);
+      Helper.logError(e?.response?.data, e);
       showToaster("We're sorry! Something happened trying to create your access token. Please try again", ToasterIcons.ERROR);
     } finally {
       setRequesting(false);
@@ -106,7 +106,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       setKysoUserAccessTokens(kysoUserAccessTokens.filter((item: KysoUserAccessToken) => item.id !== selectedKysoAccessToken!.id));
       setSelectedKysoAccessToken(null);
     } catch (e: any) {
-      Helper.logError(e.response.data, e);
+      Helper.logError(e?.response?.data, e);
     } finally {
       setRequesting(false);
     }
@@ -125,7 +125,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       setKysoUserAccessTokens(resultKysoUserAccessToken.data);
       setSelectedKysoAccessToken(null);
     } catch (e: any) {
-      Helper.logError(e.response.data, e);
+      Helper.logError(e?.response?.data, e);
     } finally {
       setRequesting(false);
     }

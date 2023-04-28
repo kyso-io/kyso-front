@@ -121,7 +121,6 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   // SEARCH USER
   const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
   const [showEmails, setShowEmails] = useState<boolean>(false);
-  const [defaultRedirectOrganization, setDefaultRedirectOrganization] = useState<string>('');
 
   useEffect(() => {
     const getData = async () => {
@@ -131,12 +130,8 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
         if (indexShowEmail !== -1) {
           setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
         }
-        const indexDefaultRedirectOrganization: number = publicKeys.findIndex((x: KeyValue) => x.key === KysoSettingsEnum.DEFAULT_REDIRECT_ORGANIZATION);
-        if (indexDefaultRedirectOrganization !== -1) {
-          setDefaultRedirectOrganization(publicKeys[indexDefaultRedirectOrganization]!.value);
-        }
       } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
+        Helper.logError(errorHttp?.response?.data, errorHttp);
       }
     };
     getData();
@@ -171,8 +166,6 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     if (!HelperPermissions.belongsToTeam(commonData, router.query.organizationName as string, router.query.teamName as string)) {
       if (commonData.token) {
         router.replace(`/${router.query.organizationName as string}`);
-      } else if (defaultRedirectOrganization) {
-        router.replace(`/${defaultRedirectOrganization}`);
       } else {
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}`)}`);
       }
