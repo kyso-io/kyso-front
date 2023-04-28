@@ -257,6 +257,8 @@ const UnpureReportRender = ({
                   updateInlineComment={updateInlineComment}
                   deleteComment={deleteInlineComment}
                   isLastVersion={isLastVersion}
+                  showTitle={true}
+                  showCreateNewComment={true}
                 />
               </PureSideOverlayCommentsPanel>
             </div>

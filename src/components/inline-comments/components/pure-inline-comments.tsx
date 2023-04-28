@@ -27,13 +27,28 @@ type IPureComments = {
   updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteComment: (id: string) => void;
   isLastVersion: boolean;
+  showTitle: boolean;
+  showCreateNewComment: boolean;
 };
 
 const PureComments = (props: IPureComments) => {
-  const { comments, commonData, report, channelMembers, hasPermissionDeleteComment, hasPermissionCreateComment, deleteComment, createInlineComment, updateInlineComment, isLastVersion } = props;
+  const {
+    comments,
+    commonData,
+    report,
+    channelMembers,
+    hasPermissionDeleteComment,
+    hasPermissionCreateComment,
+    deleteComment,
+    createInlineComment,
+    updateInlineComment,
+    isLastVersion,
+    showTitle,
+    showCreateNewComment,
+  } = props;
   return (
     <div className={classNames('w-full flex flex-col')}>
-      {(comments?.length > 0 || commonData.user) && (
+      {(comments?.length > 0 || commonData.user) && showTitle && (
         <div className="prose max-w-none ">
           <Tooltip target=".inline-comments-info" />
           <h4>
@@ -83,7 +98,7 @@ const PureComments = (props: IPureComments) => {
             </React.Fragment>
           ))}
       </div>
-      {commonData.user && hasPermissionCreateComment && isLastVersion && (
+      {commonData.user && hasPermissionCreateComment && isLastVersion && showCreateNewComment && (
         <div className={clsx({ 'mt-20': comments && comments.length > 0 })}>
           <PureInlineCommentForm
             user={commonData.user}
