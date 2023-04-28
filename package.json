@@ -2,7 +2,6 @@
   "name": "kyso-front",
   "version": "2.0.5",
   "scripts": {
-    "preinstall": "npx npm-force-resolutions",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -18,7 +17,7 @@
     "prepare": "is-ci || husky install"
   },
   "resolutions": {
-    "react-redux": "^8.0.2"
+    "cookie-signature": "^8.0.2"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
@@ -62,10 +61,10 @@
     "papaparse": "^5.3.2",
     "plotly": "^1.0.6",
     "primereact": "^9.2.2",
-    "react": "^18.2.0",
+    "react": "^18.1.0",
     "react-chartjs-2": "^5.2.0",
     "react-copy-to-clipboard": "^5.1.0",
-    "react-dom": "^18.2.0",
+    "react-dom": "^18.1.0",
     "react-infinite-scroll-component": "^6.1.0",
     "react-markdown": "^8.0.3",
     "react-mentions": "^4.4.7",
@@ -105,7 +104,7 @@
     "@types/next": "^9.0.0",
     "@types/node": "^17.0.38",
     "@types/papaparse": "^5.3.7",
-    "@types/react": "^18.2.0",
+    "@types/react": "^18.0.15",
     "@types/react-mentions": "^4.1.6",
     "@types/react-plotly.js": "^2.5.1",
     "@types/react-simple-maps": "^3.0.0",
