@@ -16,6 +16,9 @@
     "prettier": "prettier --write \"./src/**/*.{ts,js}\"",
     "prepare": "is-ci || husky install"
   },
+  "resolutions": {
+    "cookie-signature": "^8.0.2"
+  },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-brands-svg-icons": "^6.1.1",
