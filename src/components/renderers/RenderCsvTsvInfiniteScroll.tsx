@@ -86,6 +86,7 @@ const RenderCsvTsvInfiniteScroll = ({ commonData, fileToRender }: Props) => {
                         <div className="grid justify-items-center text-center">
                           {columnsStats[header] && (
                             <img
+                              alt="Column stats"
                               onClick={() => {
                                 setSelectedColumn(header);
                                 setIsOpen(true);
@@ -127,7 +128,7 @@ const RenderCsvTsvInfiniteScroll = ({ commonData, fileToRender }: Props) => {
             }}
           >
             <Transition.Child as={React.Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-              <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+              <div className="fixed inset-0 bg-gray-500 bg-opacity/75 transition-opacity" />
             </Transition.Child>
             <div className="fixed inset-0 z-10 overflow-y-auto">
               <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
@@ -147,7 +148,7 @@ const RenderCsvTsvInfiniteScroll = ({ commonData, fileToRender }: Props) => {
                           {selectedColumn}
                         </Dialog.Title>
                         <div className="mt-2">
-                          <img className="cursor-pointer w-full object-cover md:h-full mt-2" src={`data:image/png;base64,${columnsStats[selectedColumn]!.images[0]}`} />
+                          <img alt="Column stats" className="cursor-pointer w-full object-cover md:h-full mt-2" src={`data:image/png;base64,${columnsStats[selectedColumn]!.images[0]}`} />
                         </div>
                       </div>
                     </div>

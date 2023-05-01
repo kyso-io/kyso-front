@@ -196,7 +196,7 @@ const RenderCsvTsv = ({ fileToRender }: Props) => {
       <div className="flow-root">
         <div className="-my-2 -mx-6 overflow-x-auto lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+            <div className="overflow-hidden shadow ring-1 ring-black ring-opacity/5 sm:rounded-lg">
               <table className="min-w-full divide-y divide-gray-300">
                 <thead className="bg-gray-50">
                   {table.getHeaderGroups().map((headerGroup: HeaderGroup<any>) => (
@@ -216,7 +216,7 @@ const RenderCsvTsv = ({ fileToRender }: Props) => {
                               </div>
                               {header.column.getCanFilter() && <Filter column={header.column} table={table} />}
                               {columnsStats[header.column.id] && (
-                                <img className="h-48 w-full object-cover md:h-full md:w-48 mt-2" src={`data:image/png;base64,${columnsStats[header.column.id]!.images[0]}`} />
+                                <img alt="Column stats" className="h-48 w-full object-cover md:h-full md:w-48 mt-2" src={`data:image/png;base64,${columnsStats[header.column.id]!.images[0]}`} />
                               )}
                             </div>
                           </th>
