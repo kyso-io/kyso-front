@@ -1,24 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import CaptchaModal from '@/components/CaptchaModal';
 import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
-import type { CommonData } from '@/types/common-data';
-import type { LayoutProps } from '@/types/pageWithLayout';
-import type { ReportData } from '@/types/report-data';
-import type { NormalizedResponseDTO, Organization, Team, TokenPermissions, UserDTO, KysoSetting } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
-import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
-import { useRouter } from 'next/router';
-import type { ReactElement } from 'react';
-import React, { useEffect, useState } from 'react';
+import ToasterNotification from '@/components/ToasterNotification';
+import { ToasterIcons } from '@/enums/toaster-icons';
+import { Helper } from '@/helpers/Helper';
 import { checkJwt } from '@/helpers/check-jwt';
 import { getCommonData } from '@/helpers/get-common-data';
 import { getReport } from '@/helpers/get-report';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useAppDispatch } from '@/hooks/redux-hooks';
-import ToasterNotification from '@/components/ToasterNotification';
-import { ToasterIcons } from '@/enums/toaster-icons';
 import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
-import CaptchaModal from '@/components/CaptchaModal';
-import { Helper } from '@/helpers/Helper';
+import type { CommonData } from '@/types/common-data';
+import type { LayoutProps } from '@/types/pageWithLayout';
+import type { ReportData } from '@/types/report-data';
+import type { KysoSetting, NormalizedResponseDTO, Organization, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
+import { useRouter } from 'next/router';
+import type { ReactElement } from 'react';
+import React, { useEffect, useState } from 'react';
 
 type IUnpureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -260,11 +260,11 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
 
   return (
     <PureKysoApplicationLayout commonData={commonData} report={reportData ? reportData.report : null} basePath={router.basePath} userNavigation={userNavigation}>
-      <>
+      <React.Fragment>
         {React.cloneElement(children, { commonData, reportData, setReportData, setUser, showToaster, hideToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified, isUserLogged, isCaptchaEnabled })}
         <ToasterNotification show={toasterVisible} setShow={setToasterVisible} icon={toasterIcon} message={toasterMessage} backgroundColor={TailwindColor.SLATE_50} />
         {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
-      </>
+      </React.Fragment>
     </PureKysoApplicationLayout>
   );
 };

@@ -4,16 +4,17 @@ import type { CommonData } from '@/types/common-data';
 import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { MenuIcon, XIcon } from '@heroicons/react/solid';
-import type { ReportDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
+import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import type { ReactElement } from 'react';
-import { Fragment, useState } from 'react';
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
+import type { ReactElement } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import BreadcrumbNavbar from './BreadcrumbNavbar';
-import PureOnboardingDropdown from './PureOnboardingDropdown';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
+import PureOnboardingDropdown from './PureOnboardingDropdown';
 import PureShareButton from './PureShareButton';
 
 type IPureKysoApplicationLayoutProps = {
@@ -31,6 +32,22 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
   const [query, setQuery] = useState<string>('');
   const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : '';
   const currentUrl = `${origin}${router.asPath}`;
+  const [numOpenedInlineComments, setNumOpenedInlineComments] = useState<number>(0);
+
+  useEffect(() => {
+    if (!commonData.token || !commonData.user) {
+      return;
+    }
+    getNumOpenedInlineComments();
+  }, [commonData.user]);
+
+  const getNumOpenedInlineComments = async () => {
+    try {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<number> = await api.countOpenedInlineComments();
+      setNumOpenedInlineComments(result.data);
+    } catch (e) {}
+  };
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
   const navigation: any[] = [];
@@ -104,48 +121,70 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                           </div>
                         )}
                         {commonData.user && (
-                          <Menu as="div" className="relative">
-                            <div>
-                              <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
-                                <span className="sr-only">Open user menu</span>
-                                <PureAvatar src={commonData.user.avatar_url} title={commonData.user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
-                              </Menu.Button>
-                            </div>
-                            <Transition
-                              as={Fragment}
-                              enter="transition ease-out duration-100"
-                              enterFrom="transform opacity-0 scale-95"
-                              enterTo="transform opacity-100 scale-100"
-                              leave="transition ease-in duration-75"
-                              leaveFrom="transform opacity-100 scale-100"
-                              leaveTo="transform opacity-0 scale-95"
-                            >
-                              <Menu.Items className="z-50 absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
-                                {userNavigation.map((item) => (
-                                  <Menu.Item key={item.name}>
-                                    {({ active }) => {
-                                      if (item.callback) {
+                          <React.Fragment>
+                            {numOpenedInlineComments > 0 && (
+                              <div className="flex items-center pr-5 cursor-pointer">
+                                <a href="/my-tasks" type="button" className="relative inline-flex items-center p-3 text-sm font-medium text-center text-white" title="Opened tasks">
+                                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75"
+                                    />
+                                  </svg>
+                                  <span className="sr-only">Notifications</span>
+                                  <div
+                                    className="absolute inline-flex items-center justify-center w-6 h-6 font-bold text-white bg-white border-white rounded-full -top-0.5 -right-0.5"
+                                    style={{ color: '#244362', fontSize: '10px' }}
+                                  >
+                                    {numOpenedInlineComments > 99 ? '99+' : numOpenedInlineComments}
+                                  </div>
+                                </a>
+                              </div>
+                            )}
+                            <Menu as="div" className="relative">
+                              <div>
+                                <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
+                                  <span className="sr-only">Open user menu</span>
+                                  <PureAvatar src={commonData.user.avatar_url} title={commonData.user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+                                </Menu.Button>
+                              </div>
+                              <Transition
+                                as={Fragment}
+                                enter="transition ease-out duration-100"
+                                enterFrom="transform opacity-0 scale-95"
+                                enterTo="transform opacity-100 scale-100"
+                                leave="transition ease-in duration-75"
+                                leaveFrom="transform opacity-100 scale-100"
+                                leaveTo="transform opacity-0 scale-95"
+                              >
+                                <Menu.Items className="z-50 absolute right-0 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black/5 focus:outline-none">
+                                  {userNavigation.map((item) => (
+                                    <Menu.Item key={item.name}>
+                                      {({ active }) => {
+                                        if (item.callback) {
+                                          return (
+                                            <button className={classNames(active ? 'bg-gray-100' : '', 'w-full text-left px-4 py-2 text-sm text-gray-700')} onClick={item.callback}>
+                                              {item.name}
+                                            </button>
+                                          );
+                                        }
                                         return (
-                                          <button className={classNames(active ? 'bg-gray-100' : '', 'w-full text-left px-4 py-2 text-sm text-gray-700')} onClick={item.callback}>
+                                          <a
+                                            href={item.href}
+                                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
+                                            target={classNames(item.newTab ? '_blank' : '')}
+                                          >
                                             {item.name}
-                                          </button>
+                                          </a>
                                         );
-                                      }
-                                      return (
-                                        <a
-                                          href={item.href}
-                                          className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                                          target={classNames(item.newTab ? '_blank' : '')}
-                                        >
-                                          {item.name}
-                                        </a>
-                                      );
-                                    }}
-                                  </Menu.Item>
-                                ))}
-                              </Menu.Items>
-                            </Transition>
-                          </Menu>
+                                      }}
+                                    </Menu.Item>
+                                  ))}
+                                </Menu.Items>
+                              </Transition>
+                            </Menu>
+                          </React.Fragment>
                         )}
                         <div className="flex items-center px-5 cursor-pointer">
                           <PureShareButton title="Share page" description="Send this url to someone to share this page" iconClasses={'text-white h-6 w-6'} buttonClasses="" url={currentUrl} />
