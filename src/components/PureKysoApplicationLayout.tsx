@@ -45,8 +45,14 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
     try {
       const api: Api = new Api(commonData.token);
       const result: NormalizedResponseDTO<number> = await api.countOpenedInlineComments();
-      setNumOpenedInlineComments(result.data);
-    } catch (e) {}
+      if (result && result.data) {
+        setNumOpenedInlineComments(result.data);
+      } else {
+        setNumOpenedInlineComments(0);
+      }
+    } catch (e) {
+      setNumOpenedInlineComments(0);
+    }
   };
 
   /* eslint-disable @typescript-eslint/no-explicit-any */
