@@ -122,9 +122,9 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         )}
                         {commonData.user && (
                           <React.Fragment>
-                            {numOpenedInlineComments > 0 && (
+                            {
                               <div className="flex items-center pr-5 cursor-pointer">
-                                <a href="/my-tasks" type="button" className="relative inline-flex items-center p-3 text-sm font-medium text-center text-white" title="Opened tasks">
+                                <a href="/my-tasks" type="button" className="relative inline-flex items-center p-3 text-sm font-medium text-center text-white" title="My tasks">
                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                     <path
                                       strokeLinecap="round"
@@ -141,7 +141,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                                   </div>
                                 </a>
                               </div>
-                            )}
+                            }
                             <Menu as="div" className="relative">
                               <div>
                                 <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
