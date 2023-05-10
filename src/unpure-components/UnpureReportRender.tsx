@@ -203,7 +203,7 @@ const UnpureReportRender = ({
             <div className={clsx(sidebarOpen ? 'w-9/12' : 'w-11/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>
               {fileToRender.path.endsWith('.html') ? (
                 <PureIframeRenderer file={fileToRender} />
-              ) : FileTypesHelper.isTextBasedFiled(fileToRender.path) && fileToRender.content ? (
+              ) : FileTypesHelper.isMarkdown(fileToRender.path) && fileToRender.content ? (
                 <RenderMarkdown
                   source={fileToRender.content}
                   context={{
@@ -213,6 +213,8 @@ const UnpureReportRender = ({
                     version: report.last_version,
                   }}
                 />
+              ) : FileTypesHelper.isPlainTextFile(fileToRender.path) && fileToRender.content ? (
+                <code style={{ maxWidth: '100%', contentVisibility: 'auto', display: 'block', whiteSpace: 'break-spaces' }}>{fileToRender.content}</code>
               ) : (FileTypesHelper.isImage(fileToRender.path) || fileToRender.path.toLowerCase().endsWith('.webp') || fileToRender.path.toLowerCase().endsWith('.svg')) && frontEndUrl ? (
                 <img src={`${frontEndUrl}/scs${fileToRender.path_scs}`} alt={fileToRender.path} />
               ) : FileTypesHelper.isAdoc(fileToRender.path) && fileToRender.content && frontEndUrl ? (
@@ -225,7 +227,9 @@ const UnpureReportRender = ({
                 <RenderOnlyOffice fileUrl={`http://kyso-scs/scs${fileToRender.path_scs}`} token={localStorage.getItem('jwt')} />
               ) : FileTypesHelper.isSVS(fileToRender.path) && frontEndUrl ? (
                 <RenderMicroscopeSVS fileUrl={`http://kyso-scs/scs${fileToRender.path_scs}`} token={localStorage.getItem('jwt')} />
-              ) : FileTypesHelper.isTextBasedFiled(fileToRender.path) && !fileToRender.content ? (
+              ) : FileTypesHelper.isPlainTextFile(fileToRender.path) && !fileToRender.content ? (
+                <div></div>
+              ) : FileTypesHelper.isMarkdown(fileToRender.path) && !fileToRender.content ? (
                 <div></div>
               ) : (
                 <div className="prose p-3">

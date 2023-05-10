@@ -69,8 +69,8 @@ export class FileTypesHelper {
     return name.toLowerCase().endsWith('.json');
   };
 
-  public static isTextBasedFiled = (name: string) => {
-    return name != null && (name.toLowerCase().endsWith('.txt') || FileTypesHelper.isMarkdown(name) || name.toLowerCase().endsWith('.cfg'));
+  public static isPlainTextFile = (name: string) => {
+    return name != null && (name.toLowerCase().endsWith('.txt') || name.toLowerCase().endsWith('.cfg'));
   };
 
   public static isJupyterNotebook = (name: string) => {
@@ -183,7 +183,7 @@ export class FileTypesHelper {
     return (
       (name != null && FileTypesHelper.isImage(name)) ||
       FileTypesHelper.isCode(name) ||
-      FileTypesHelper.isTextBasedFiled(name) ||
+      FileTypesHelper.isPlainTextFile(name) ||
       FileTypesHelper.isJupyterNotebook(name) ||
       FileTypesHelper.isOnlyOffice(name) ||
       FileTypesHelper.isGoogleDocs(name) ||

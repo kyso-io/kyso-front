@@ -742,7 +742,7 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
             </div>
           </div>
           <div className="w-4/6">
-            {FileTypesHelper.isTextBasedFiled(selectedFile.file.name) ? (
+            {FileTypesHelper.isPlainTextFile(selectedFile.file.name) || FileTypesHelper.isMarkdown(selectedFile.file.name) ? (
               <SimpleMdeReact key="editor" options={editorOptions as any} value={selectedFileValue} onChange={(value) => handleEditorChange(selectedFile?.file.id!, value)} />
             ) : FileTypesHelper.isImage(selectedFile.file.name) ? (
               <div className="pl-10">

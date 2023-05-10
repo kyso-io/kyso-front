@@ -343,7 +343,13 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
 
         setFileToRender(ftr);
         const downloadFile: boolean =
-          ftr !== null && (FileTypesHelper.isJupyterNotebook(ftr.path) || FileTypesHelper.isTextBasedFiled(ftr.path) || FileTypesHelper.isAdoc(ftr.path) || FileTypesHelper.isCode(ftr.path));
+          ftr !== null &&
+          (FileTypesHelper.isJupyterNotebook(ftr.path) ||
+            FileTypesHelper.isPlainTextFile(ftr.path) ||
+            FileTypesHelper.isAdoc(ftr.path) ||
+            FileTypesHelper.isMarkdown(ftr.path) ||
+            FileTypesHelper.isCode(ftr.path));
+
         if (ftr && downloadFile) {
           setFileToRender({ ...ftr, isLoading: true });
           const data: Buffer = await api.getReportFileContent(ftr.id, {
