@@ -326,7 +326,6 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
         showToaster('User invited successfully', ToasterIcons.INFO);
       } catch (e) {
         Helper.logError('Unexpected error', e);
-
         showToaster('We are sorry! Something happened updating the role of this member. Please try again.', ToasterIcons.ERROR);
       }
       if (teamRole) {
@@ -335,8 +334,10 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
           const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
           await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
+          showToaster('User invited successfully', ToasterIcons.INFO);
         } catch (e) {
           Helper.logError('Unexpected error', e);
+          showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
         }
       }
     } else {
@@ -346,8 +347,10 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, organizationRole);
           const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
           await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
+          showToaster('User updated successfully', ToasterIcons.INFO);
         } catch (e) {
           Helper.logError('Unexpected error', e);
+          showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
         }
       }
       if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
@@ -356,8 +359,10 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
           const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
           await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
+          showToaster('User updated successfully', ToasterIcons.INFO);
         } catch (e) {
           Helper.logError('Unexpected error', e);
+          showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
         }
       }
     }
@@ -395,12 +400,15 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       if (type === TeamMembershipOriginEnum.ORGANIZATION) {
         await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
+        showToaster('User removed successfully', ToasterIcons.INFO);
       } else {
         api.setTeamSlug(commonData.team!.sluglified_name);
         await api.deleteUserFromTeam(commonData.team!.id!, userId);
+        showToaster('User removed successfully', ToasterIcons.INFO);
       }
       getTeamMembers();
     } catch (e) {
+      showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
       Helper.logError('Unexpected error', e);
     }
   };

@@ -11,13 +11,19 @@ img.k-right-logo {
   background-color: #244362;
 }
 
-.k-bg-primary-hover:hover {
-  background-color: #162c40;
+.k-bg-primary:disabled {
+  background-color: #64748b;
 }
 
 .k-bg-primary-disabled {
   background-color: #64748b;
 }
+
+.k-bg-primary:hover {
+  background-color: #162c40;
+}
+
+
 
 .k-right-toc {
   background-color: #fafafa;
