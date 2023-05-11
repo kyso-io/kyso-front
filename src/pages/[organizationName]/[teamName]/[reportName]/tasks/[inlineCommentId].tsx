@@ -376,7 +376,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   }
 
   const createInlineComment = async (user_ids: string[], text: string, parent_id: string | null) => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -390,7 +390,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   };
 
   const updateInlineComment = async (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -404,7 +404,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   };
 
   const deleteInlineComment = async (id: string) => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;

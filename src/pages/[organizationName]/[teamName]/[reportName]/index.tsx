@@ -520,7 +520,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
   // TODO -> confusion as to whether these are Conmment or CommentDTO
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const submitComment = async (newComment: any, parentComment: any) => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -702,7 +702,12 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                             authors={authors}
                             version={version}
                             onUpvoteReport={async () => {
-                              const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+                              const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
+                                isCurrentUserVerified(),
+                                isCurrentUserSolvedCaptcha(),
+                                showToaster,
+                                commonData,
+                              );
 
                               if (!isValid) {
                                 return;
@@ -857,7 +862,12 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                                 return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
                               }}
                               onDeleteComment={async (id: string) => {
-                                const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+                                const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
+                                  isCurrentUserVerified(),
+                                  isCurrentUserSolvedCaptcha(),
+                                  showToaster,
+                                  commonData,
+                                );
 
                                 if (!isValid) {
                                   return;

@@ -212,7 +212,7 @@ const ManageUsers = ({
                 : 'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
             )}
             onClick={() => {
-              const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+              const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
               if (!isValid) {
                 return;
@@ -251,7 +251,7 @@ const ManageUsers = ({
 
   /** Generic management events */
   const onUpdateRoleMemberDoAction = async (userId: string, organizationRole: string, teamRole?: string): Promise<void> => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -297,7 +297,7 @@ const ManageUsers = ({
   };
 
   const onInviteNewUserDoAction = async (email: string, organizationRole: string, teamRole?: string): Promise<void> => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -321,7 +321,7 @@ const ManageUsers = ({
   };
 
   const onRemoveUserDoAction = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -585,7 +585,12 @@ const ManageUsers = ({
                                   : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
                               )}
                               onClick={() => {
-                                const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+                                const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
+                                  isCurrentUserVerified(),
+                                  isCurrentUserSolvedCaptcha(),
+                                  showToaster,
+                                  commonData,
+                                );
 
                                 if (!isValid) {
                                   return;
@@ -800,7 +805,12 @@ const ManageUsers = ({
                                   : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
                               )}
                               onClick={() => {
-                                const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+                                const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
+                                  isCurrentUserVerified(),
+                                  isCurrentUserSolvedCaptcha(),
+                                  showToaster,
+                                  commonData,
+                                );
 
                                 if (!isValid) {
                                   return;

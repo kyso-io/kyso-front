@@ -21,7 +21,7 @@ const UnpureDeleteChannelDropdown = ({ commonData, showToaster, isCurrentUserSol
   const [input, setInput] = useState<string>('');
 
   const deleteTeam = async () => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;

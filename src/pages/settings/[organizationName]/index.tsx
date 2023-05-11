@@ -367,7 +367,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const submit = async () => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -400,7 +400,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const submitNotifications = async () => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -494,7 +494,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const updateMemberRole = async (): Promise<void> => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -538,7 +538,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const removeMember = async (): Promise<void> => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -588,7 +588,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const inviteNewUser = async (): Promise<void> => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -616,7 +616,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const deleteOrganization = async () => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -637,7 +637,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const exportMembersInCsv = async () => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -664,7 +664,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const onChangeJoinCodes = async (result: boolean) => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -707,7 +707,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const updateAllowedAccessDomains = async (updatedAllowedAccessDomains: string[]) => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -1144,7 +1144,12 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                             <div title="Edit member role in the organization">
                               <PencilIcon
                                 onClick={() => {
-                                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+                                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
+                                    isCurrentUserVerified(),
+                                    isCurrentUserSolvedCaptcha(),
+                                    showToaster,
+                                    commonData,
+                                  );
 
                                   if (!isValid) {
                                     return;
@@ -1161,7 +1166,12 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                             <div title="Remove member from the organization">
                               <TrashIcon
                                 onClick={() => {
-                                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+                                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
+                                    isCurrentUserVerified(),
+                                    isCurrentUserSolvedCaptcha(),
+                                    showToaster,
+                                    commonData,
+                                  );
 
                                   if (!isValid) {
                                     return;
@@ -1239,7 +1249,12 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                               <button
                                 disabled={requesting || showErrorDomain}
                                 onClick={() => {
-                                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+                                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
+                                    isCurrentUserVerified(),
+                                    isCurrentUserSolvedCaptcha(),
+                                    showToaster,
+                                    commonData,
+                                  );
 
                                   if (!isValid) {
                                     return;

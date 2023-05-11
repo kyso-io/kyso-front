@@ -62,7 +62,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   }, [commonData.token]);
 
   const createKysoAccessToken = async () => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -97,7 +97,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const deleteKysoAccessToken = async () => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -118,7 +118,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const revokeAllKysoAccessTokens = async () => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;
@@ -172,7 +172,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
               <button
                 disabled={requesting}
                 onClick={() => {
-                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
                   if (!isValid) {
                     return;
@@ -188,7 +188,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                 <button
                   disabled={requesting}
                   onClick={() => {
-                    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+                    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
                     if (!isValid) {
                       return;
@@ -252,7 +252,12 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                               <div className="flex flex-row-reverse" title="Remove access token">
                                 <TrashIcon
                                   onClick={() => {
-                                    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+                                    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
+                                      isCurrentUserVerified(),
+                                      isCurrentUserSolvedCaptcha(),
+                                      showToaster,
+                                      commonData,
+                                    );
 
                                     if (!isValid) {
                                       return;

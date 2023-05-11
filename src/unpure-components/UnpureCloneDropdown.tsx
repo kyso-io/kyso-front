@@ -28,7 +28,7 @@ const UnpureCloneDropdown = ({ reportUrl, commonData, report, isCurrentUserSolve
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   const downloadReport = async () => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
       return;

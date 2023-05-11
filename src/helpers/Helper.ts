@@ -5,6 +5,7 @@ import { fetchPublicKysoSettings, store } from '@kyso-io/kyso-store';
 import slugify from 'slugify';
 import _ from 'lodash';
 import { ToasterIcons } from '@/enums/toaster-icons';
+import type { CommonData } from '@/types/common-data';
 import { OrganizationSettingsTab } from '../enums/organization-settings-tab';
 import { ToasterMessages } from './ToasterMessages';
 
@@ -13,12 +14,13 @@ export class Helper {
     isCurrentUserVerified: boolean,
     isCurrentUserSolvedCaptcha: boolean,
     showToaster: (message: string, icon: JSX.Element) => void,
+    commonData: CommonData,
   ): boolean {
     if (!isCurrentUserVerified || !isCurrentUserSolvedCaptcha) {
       if (!isCurrentUserVerified && !isCurrentUserSolvedCaptcha) {
-        showToaster(ToasterMessages.noVerifiedEmailAndNoCaptchaSolvedError(), ToasterIcons.ERROR);
+        showToaster(ToasterMessages.noVerifiedEmailAndNoCaptchaSolvedError(commonData), ToasterIcons.ERROR);
       } else if (!isCurrentUserVerified) {
-        showToaster(ToasterMessages.noVerifiedEmailError(), ToasterIcons.ERROR);
+        showToaster(ToasterMessages.noVerifiedEmailError(commonData), ToasterIcons.ERROR);
       } else {
         // If we reach this is because only solvedcaptcha is true
         showToaster(ToasterMessages.noCaptchaSolvedError(), ToasterIcons.ERROR);
