@@ -418,4 +418,16 @@ export class Helper {
       return null;
     }
   }
+
+  public static slug(value: string): string {
+    if (!value) {
+      return '';
+    }
+    return slugify(value, {
+      replacement: '-',
+      lower: true,
+      strict: true,
+      trim: true,
+    });
+  }
 }

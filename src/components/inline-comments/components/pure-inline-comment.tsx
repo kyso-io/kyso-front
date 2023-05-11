@@ -8,7 +8,7 @@ import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import type { InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import type { UserDTO, InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, InlineCommentStatusEnum, OrganizationPermissionsEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import moment from 'moment';
@@ -16,6 +16,8 @@ import { useMemo, useState } from 'react';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import PureInlineCommentForm from './pure-inline-comment-form';
 import TagInlineComment from './tag-inline-comment';
+import { Helper } from '../../../helpers/Helper';
+import { useAppSelector } from '../../../hooks/redux-hooks';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -50,6 +52,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
     report,
     isLastVersion,
   } = props;
+  const userEntities: { [key: string]: UserDTO } = useAppSelector((state) => state.user.entities);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [replying, setReplying] = useState<boolean>(false);
   const isOrgAdmin: boolean = useMemo(() => {
@@ -73,6 +76,25 @@ const PureInlineComment = (props: IPureInlineComment) => {
   const canChangeStatus: boolean = useMemo(() => {
     return isUserAuthor || isReportAuthor;
   }, [isUserAuthor, isReportAuthor]);
+
+  const commentText: string = useMemo(() => {
+    if (!comment || !comment.text) {
+      return '';
+    }
+    const mentionedUsers: UserDTO[] = [];
+    for (const userId of comment.mentions) {
+      if (userEntities[userId]) {
+        mentionedUsers.push(userEntities[userId]!);
+      }
+    }
+    return comment.text.replace(/@([a-z0-9_-]+)/gi, (match: string, displayNameSlug: string): string => {
+      const mentionedUser: UserDTO | undefined = mentionedUsers.find((u: UserDTO) => Helper.slug(u.display_name) === displayNameSlug);
+      if (mentionedUser) {
+        return `[${match}](/user/${mentionedUser.username})`;
+      }
+      return match;
+    });
+  }, [comment]);
 
   if (comment.markedAsDeleted) {
     return null;
@@ -114,7 +136,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
               </button>
             )}
           </div>
-          <RenderMarkdown source={comment?.text} />
+          <RenderMarkdown source={commentText} />
           <div className="pt-0 rounded-t flex items-center justify-start space-x-2 text-xs font-light text-gray-400">
             <PureAvatar src={comment?.user_avatar} title={comment?.user_name} size={TailwindHeightSizeEnum.H5} textSize={TailwindFontSizeEnum.SM} />
             <div className="grow">

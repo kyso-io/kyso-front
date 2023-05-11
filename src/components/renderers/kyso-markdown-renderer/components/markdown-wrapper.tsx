@@ -35,6 +35,15 @@ function customDirectives() {
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const components: any = {
+  // Edit link
+  a: (props: any) => {
+    const { href, children } = props;
+    return (
+      <a className="text-blue-500 hover:underline" href={href}>
+        {children}
+      </a>
+    );
+  },
   /* eslint-disable @typescript-eslint/no-explicit-any */
   img: (props: any) => <img {...props} style={{ width: 'auto', maxWidth: '70%' }} alt={props.alt} />,
   /* eslint-disable @typescript-eslint/no-explicit-any */

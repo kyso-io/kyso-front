@@ -9,8 +9,9 @@ import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { formatDistanceToNow } from 'date-fns';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { RenderMarkdown } from './renderers/kyso-markdown-renderer';
+import { Helper } from '../helpers/Helper';
 
 type IPureComment = {
   hasPermissionCreateComment: boolean;
@@ -31,6 +32,25 @@ const PureComment = (props: IPureComment) => {
   const { commentSelectorHook, commonData, submitComment, report, channelMembers, onDeleteComment, hasPermissionDeleteComment, hasPermissionCreateComment, comment, userSelectorHook } = props;
   const [isEditing, setIsEditing] = useState(false);
   const [isReplying, setIsReplying] = useState(false);
+  const commentText: string = useMemo(() => {
+    if (!comment || !comment.text) {
+      return '';
+    }
+    const mentionedUsers: UserDTO[] = [];
+    for (const userId of comment.user_ids) {
+      const user: UserDTO | undefined = userSelectorHook(userId);
+      if (user) {
+        mentionedUsers.push(user);
+      }
+    }
+    return comment.text.replace(/@([a-z0-9_-]+)/gi, (match: string, displayNameSlug: string): string => {
+      const mentionedUser: UserDTO | undefined = mentionedUsers.find((u: UserDTO) => Helper.slug(u.display_name) === displayNameSlug);
+      if (mentionedUser) {
+        return `[${match}](/user/${mentionedUser.username})`;
+      }
+      return match;
+    });
+  }, [comment]);
 
   const commentUser: UserDTO | undefined = userSelectorHook(comment?.user_id);
 
@@ -114,7 +134,7 @@ const PureComment = (props: IPureComment) => {
             </div>
 
             <div className="text-sm">
-              <RenderMarkdown source={comment?.text} />
+              <RenderMarkdown source={commentText} />
 
               <div className="rounded-t flex items-center justify-end space-x-2 text-sm text-gray-400">
                 <div className="space-x-2 mt-2">
