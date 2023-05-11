@@ -1,3 +1,4 @@
+/* eslint-disable unused-imports/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import PureAvatar from '@/components/PureAvatar';
 import { PureSpinner } from '@/components/PureSpinner';
@@ -6,7 +7,8 @@ import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { InlineCommentDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Mention } from 'primereact/mention';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 type IPureCommentForm = {
   comment?: InlineCommentDto;
@@ -37,6 +39,22 @@ const parseMentions = (str: string) => {
 
 const PureInlineCommentForm = (props: IPureCommentForm) => {
   const { comment, submitComment, user, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true } = props;
+  const mentionsRef = useRef<any>(null);
+  const [id] = useState<string | undefined>(`picf-${uuidv4()}`);
+
+  useEffect(() => {
+    function handleDocumentKeyDown(event: any) {
+      if (event.target.closest(`#${id}`) !== null) {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+          handleSubmit(event);
+        }
+      }
+    }
+    document.addEventListener('keydown', handleDocumentKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleDocumentKeyDown);
+    };
+  }, []);
 
   let initialValue = '';
   if (comment) {
@@ -49,7 +67,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
   const handleSubmit = async (e: any) => {
     setIsLoading(true);
     e.preventDefault();
-    const targetValue = e.target.input.value;
+    const targetValue = mentionsRef.current.getInput().value;
     const mentionedNameSlugs = parseMentions(targetValue);
     let userIds: string[] = [];
     if (channelMembers) {
@@ -97,6 +115,8 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
     <form onSubmit={handleSubmit} className="my-2">
       {hasPermissionCreateComment ? (
         <Mention
+          ref={mentionsRef}
+          id={id}
           suggestions={suggestions}
           className="relative"
           inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm"

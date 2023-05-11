@@ -1,10 +1,13 @@
+/* eslint-disable unused-imports/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { PureSpinner } from '@/components/PureSpinner';
 import classNames from '@/helpers/class-names';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Mention } from 'primereact/mention';
-import { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 import PureAvatar from './PureAvatar';
 
 type IPureCommentForm = {
@@ -41,6 +44,22 @@ const parseMentions = (str: string) => {
 
 const PureCommentForm = (props: IPureCommentForm) => {
   const { parentComment, comment, submitComment, user, report, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true, userSelectorHook } = props;
+  const mentionsRef = useRef<any>(null);
+  const [id] = useState<string | undefined>(`pfc-${uuidv4()}`);
+
+  useEffect(() => {
+    function handleDocumentKeyDown(event: any) {
+      if (event.target.closest(`#${id}`) !== null) {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+          handleSubmit(event);
+        }
+      }
+    }
+    document.addEventListener('keydown', handleDocumentKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleDocumentKeyDown);
+    };
+  }, []);
 
   let initialValue = '';
   if (comment) {
@@ -59,7 +78,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (e: any) => {
     e.preventDefault();
-    const inputValue = e.target.input.value;
+    const inputValue = mentionsRef.current.getInput().value;
 
     // parse out nameSlugs
     const mentionedNameSlugs = parseMentions(inputValue);
@@ -125,8 +144,10 @@ const PureCommentForm = (props: IPureCommentForm) => {
   return (
     <form onSubmit={handleSubmit} className="my-2 flex flex-col space-y-4 mb-8" style={{ zIndex: 1, position: 'relative' }}>
       {hasPermissionCreateComment ? (
-        <>
+        <React.Fragment>
           <Mention
+            ref={mentionsRef}
+            id={id}
             autoFocus={!!parentComment?.id}
             suggestions={suggestions}
             className="relative"
@@ -147,7 +168,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
               background: #eef2ff;
             }
           `}</style>
-        </>
+        </React.Fragment>
       ) : (
         <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
       )}
