@@ -8,13 +8,26 @@ import { Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { ChevronDownIcon, XIcon } from '@heroicons/react/solid';
 import type { UserDTO } from '@kyso-io/kyso-model';
-import { GlobalPermissionsEnum, OrganizationPermissionsEnum, TeamMembershipOriginEnum, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import {
+  GlobalPermissionsEnum,
+  OrganizationPermissionsEnum,
+  TeamMembershipOriginEnum,
+  TeamPermissionsEnum,
+  TeamVisibilityEnum,
+  AddUserOrganizationDto,
+  UserRoleDTO,
+  UpdateOrganizationMembersDTO,
+  UpdateTeamMembersDTO,
+  InviteUserDto,
+} from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import slugify from 'slugify';
 import { ToasterIcons } from '@/enums/toaster-icons';
+import { Api } from '@kyso-io/kyso-store';
+import { ToasterMessages } from '@/helpers/ToasterMessages';
 import { HelperPermissions } from '../helpers/check-permissions';
 import { Helper } from '../helpers/Helper';
 import type { Member } from '../types/member';
@@ -220,9 +233,7 @@ const ManageUsers = ({
                 : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
             )}
             onClick={() => {
-              if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-                return;
-              }
+              onInviteNewUserDoAction(query, selectedOrgRole, selectedTeamRole);
               onInviteNewUser(query, selectedOrgRole, selectedTeamRole);
               clearData();
             }}
@@ -232,6 +243,118 @@ const ManageUsers = ({
         )}
       </React.Fragment>
     );
+  };
+
+  /** Generic management events */
+  const onUpdateRoleMemberDoAction = async (userId: string, organizationRole: string, teamRole?: string): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      if (!isCurrentUserVerified() && !isCurrentUserSolvedCaptcha()) {
+        showToaster(ToasterMessages.noVerifiedEmailAndNoCaptchaSolvedError(), ToasterIcons.ERROR);
+      } else if (!isCurrentUserVerified()) {
+        showToaster(ToasterMessages.noVerifiedEmailError(), ToasterIcons.ERROR);
+      } else {
+        // If we reach this is because only solvedcaptcha is true
+        showToaster(ToasterMessages.noCaptchaSolvedError(), ToasterIcons.ERROR);
+      }
+      return;
+    }
+
+    const index: number = members.findIndex((m: Member) => m.id === userId);
+    if (index === -1) {
+      try {
+        const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
+        const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
+        await api.addUserToOrganization(addUserOrganizationDto);
+        showToaster('User added to the organization successfully', ToasterIcons.SUCCESS);
+      } catch (e) {
+        showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.SUCCESS);
+        Helper.logError('Unexpected error', e);
+      }
+    } else {
+      if (!members[index]!.organization_roles.includes(organizationRole)) {
+        try {
+          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
+          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, organizationRole);
+          const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
+          await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
+          showToaster('The role at the organization was changed successfully', ToasterIcons.SUCCESS);
+        } catch (e) {
+          showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.SUCCESS);
+          Helper.logError('Unexpected error', e);
+        }
+      }
+      if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
+        try {
+          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
+          const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
+          await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
+          showToaster('The role at the channel was changed successfully', ToasterIcons.SUCCESS);
+        } catch (e) {
+          Helper.logError('Unexpected error', e);
+          showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.SUCCESS);
+        }
+      }
+    }
+  };
+
+  const onInviteNewUserDoAction = async (email: string, organizationRole: string, teamRole?: string): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      if (!isCurrentUserVerified() && !isCurrentUserSolvedCaptcha()) {
+        showToaster(ToasterMessages.noVerifiedEmailAndNoCaptchaSolvedError(), ToasterIcons.ERROR);
+      } else if (!isCurrentUserVerified()) {
+        showToaster(ToasterMessages.noVerifiedEmailError(), ToasterIcons.ERROR);
+      } else {
+        // If we reach this is because only solvedcaptcha is true
+        showToaster(ToasterMessages.noCaptchaSolvedError(), ToasterIcons.ERROR);
+      }
+      return;
+    }
+
+    try {
+      const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
+      const inviteUserDto: InviteUserDto = new InviteUserDto(email, commonData!.organization!.sluglified_name, organizationRole);
+
+      if (teamRole) {
+        inviteUserDto.teamSlug = commonData.team!.sluglified_name;
+        inviteUserDto.teamRole = teamRole;
+      }
+
+      await api.inviteNewUser(inviteUserDto);
+      showToaster('User invited successfully', ToasterIcons.INFO);
+    } catch (e) {
+      showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.ERROR);
+      Helper.logError('Unexpected error', e);
+    }
+  };
+
+  const onRemoveUserDoAction = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
+    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+      if (!isCurrentUserVerified() && !isCurrentUserSolvedCaptcha()) {
+        showToaster(ToasterMessages.noVerifiedEmailAndNoCaptchaSolvedError(), ToasterIcons.ERROR);
+      } else if (!isCurrentUserVerified()) {
+        showToaster(ToasterMessages.noVerifiedEmailError(), ToasterIcons.ERROR);
+      } else {
+        // If we reach this is because only solvedcaptcha is true
+        showToaster(ToasterMessages.noCaptchaSolvedError(), ToasterIcons.ERROR);
+      }
+      return;
+    }
+
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
+      if (type === TeamMembershipOriginEnum.ORGANIZATION) {
+        await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
+        showToaster('User removed successfully', ToasterIcons.INFO);
+      } else {
+        api.setTeamSlug(commonData.team!.sluglified_name);
+        await api.deleteUserFromTeam(commonData.team!.id!, userId);
+        showToaster('User removed successfully', ToasterIcons.INFO);
+      }
+    } catch (e) {
+      showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.ERROR);
+      Helper.logError('Unexpected error', e);
+    }
   };
 
   return (
@@ -268,6 +391,7 @@ const ManageUsers = ({
                     if (e.key === 'Enter' && (selectedTeamRole === REMOVE_USER_VALUE || selectedOrgRole === REMOVE_USER_VALUE)) {
                       if (inputDeleteUser === keyDeleteUser) {
                         const member: Member = members[selectedMemberIndex]!;
+                        onRemoveUserDoAction(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                         onRemoveUser(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                         clearData();
                       }
@@ -479,6 +603,7 @@ const ManageUsers = ({
                                   return;
                                 }
                                 const member: Member = members[selectedMemberIndex]!;
+                                onUpdateRoleMemberDoAction(member.id, selectedOrgRole, selectedTeamRole);
                                 onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
                                 clearData();
                               }}

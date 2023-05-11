@@ -7,7 +7,6 @@ import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import SomethingHappenedReport from '@/components/SomethingHappenedReport';
 import TableOfContents from '@/components/TableOfContents';
-import { ToasterIcons } from '@/enums/toaster-icons';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import { HelperPermissions } from '@/helpers/check-permissions';
@@ -32,21 +31,21 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ArrowSmDownIcon, ClipboardCopyIcon } from '@heroicons/react/solid';
-import type { Comment, GitCommit, GithubFileHash, File as KysoFile, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, User, UserDTO } from '@kyso-io/kyso-model';
-import {
-  AddUserOrganizationDto,
-  CommentPermissionsEnum,
-  InlineCommentPermissionsEnum,
-  InviteUserDto,
-  KysoSettingsEnum,
-  ReportPermissionsEnum,
+import type {
+  Comment,
+  GitCommit,
+  GithubFileHash,
+  File as KysoFile,
+  KysoSetting,
+  NormalizedResponseDTO,
+  OrganizationMember,
+  ReportDTO,
+  TeamMember,
+  User,
+  UserDTO,
   TeamMembershipOriginEnum,
-  TeamVisibilityEnum,
-  UpdateOrganizationMembersDTO,
-  UpdateReportRequestDTO,
-  UpdateTeamMembersDTO,
-  UserRoleDTO,
 } from '@kyso-io/kyso-model';
+import { CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import { format } from 'date-fns';
 import moment from 'moment';
@@ -487,81 +486,16 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
     }
   };
 
-  const updateMemberRole = async (userId: string, organizationRole: string, teamRole?: string): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      return;
-    }
-
-    const index: number = members.findIndex((m: Member) => m.id === userId);
-    if (index === -1) {
-      try {
-        const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-        const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
-        await api.addUserToOrganization(addUserOrganizationDto);
-
-        showToaster('User invited successfully', ToasterIcons.SUCCESS);
-      } catch (e) {
-        showToaster('We are sorry! Something happened updating the role of this member. Please try again.', ToasterIcons.ERROR);
-        Helper.logError('Unexpected error', e);
-      }
-    } else {
-      if (!members[index]!.organization_roles.includes(organizationRole)) {
-        try {
-          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, organizationRole);
-          const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
-          await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
-        } catch (e) {
-          Helper.logError('Unexpected error', e);
-        }
-      }
-      if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
-        try {
-          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
-          const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
-          await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
-        } catch (e) {
-          Helper.logError('Unexpected error', e);
-        }
-      }
-    }
+  const updateMemberRole = async (_userId: string, _organizationRole: string, _teamRole?: string): Promise<void> => {
     getTeamMembers();
   };
 
-  const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      return;
-    }
-
-    try {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-      const inviteUserDto: InviteUserDto = new InviteUserDto(email, organizationRole, organizationRole);
-      await api.inviteNewUser(inviteUserDto);
-      getTeamMembers();
-      showToaster('User invited successfully', ToasterIcons.SUCCESS);
-    } catch (e) {
-      showToaster('We are sorry! Something happened inviting an user. Please try again.', ToasterIcons.ERROR);
-      Helper.logError('Unexpected error', e);
-    }
+  const inviteNewUser = async (_email: string, _organizationRole: string): Promise<void> => {
+    getTeamMembers();
   };
 
-  const removeUser = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      return;
-    }
-    try {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-      if (type === TeamMembershipOriginEnum.ORGANIZATION) {
-        await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
-      } else {
-        api.setTeamSlug(commonData.team!.sluglified_name);
-        await api.deleteUserFromTeam(commonData.team!.id!, userId);
-      }
-      getTeamMembers();
-    } catch (e) {
-      Helper.logError('Unexpected error', e);
-    }
+  const removeUser = async (_userId: string, _type: TeamMembershipOriginEnum): Promise<void> => {
+    getTeamMembers();
   };
 
   useEffect(() => {

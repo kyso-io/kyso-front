@@ -13,20 +13,9 @@ import type {
   TeamMember,
   TeamsInfoQuery,
   UserDTO,
-} from '@kyso-io/kyso-model';
-import {
-  AddUserOrganizationDto,
-  InviteUserDto,
-  KysoSettingsEnum,
-  OrganizationPermissionsEnum,
-  ReportPermissionsEnum,
-  SearchUserDto,
   TeamMembershipOriginEnum,
-  TeamPermissionsEnum,
-  UpdateOrganizationMembersDTO,
-  UpdateTeamMembersDTO,
-  UserRoleDTO,
 } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, SearchUserDto, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 // @ts-ignore
 import { Api } from '@kyso-io/kyso-store';
 import debounce from 'lodash.debounce';
@@ -55,7 +44,6 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { KeyValue } from '@/model/key-value.model';
 import { TailwindWidthSizeEnum } from '@/tailwind/enum/tailwind-width.enum';
 import type { Member } from '@/types/member';
-import { ToasterIcons } from '@/enums/toaster-icons';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
@@ -311,106 +299,16 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     }
   };
 
-  const updateMemberRole = async (userId: string, organizationRole: string, teamRole?: string): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      return;
-    }
-
-    const index: number = members.findIndex((m: Member) => m.id === userId);
-    if (index === -1) {
-      try {
-        const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-        const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
-        await api.addUserToOrganization(addUserOrganizationDto);
-
-        showToaster('User invited successfully', ToasterIcons.INFO);
-      } catch (e) {
-        Helper.logError('Unexpected error', e);
-        showToaster('We are sorry! Something happened updating the role of this member. Please try again.', ToasterIcons.ERROR);
-      }
-      if (teamRole) {
-        try {
-          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
-          const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
-          await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
-          showToaster('User invited successfully', ToasterIcons.INFO);
-        } catch (e) {
-          Helper.logError('Unexpected error', e);
-          showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
-        }
-      }
-    } else {
-      if (!members[index]!.organization_roles.includes(organizationRole)) {
-        try {
-          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, organizationRole);
-          const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
-          await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
-          showToaster('User updated successfully', ToasterIcons.INFO);
-        } catch (e) {
-          Helper.logError('Unexpected error', e);
-          showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
-        }
-      }
-      if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
-        try {
-          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
-          const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
-          await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
-          showToaster('User updated successfully', ToasterIcons.INFO);
-        } catch (e) {
-          Helper.logError('Unexpected error', e);
-          showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
-        }
-      }
-    }
+  const updateMemberRole = async (_userId: string, _organizationRole: string, _teamRole?: string): Promise<void> => {
     getTeamMembers();
   };
 
-  const inviteNewUser = async (email: string, organizationRole: string, teamRole?: string): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      return;
-    }
-
-    try {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-      const inviteUserDto: InviteUserDto = new InviteUserDto(email, commonData.organization!.sluglified_name, organizationRole);
-      if (teamRole) {
-        inviteUserDto.teamSlug = commonData.team!.sluglified_name;
-        inviteUserDto.teamRole = teamRole;
-      }
-      await api.inviteNewUser(inviteUserDto);
-      getTeamMembers();
-
-      showToaster('User invited successfully', ToasterIcons.INFO);
-    } catch (e) {
-      showToaster('We are sorry! Something happened inviting an user. Please try again.', ToasterIcons.ERROR);
-      Helper.logError('Unexpected error', e);
-    }
+  const inviteNewUser = async (_email: string, _organizationRole: string, _teamRole?: string): Promise<void> => {
+    getTeamMembers();
   };
 
-  const removeUser = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      return;
-    }
-
-    try {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-      if (type === TeamMembershipOriginEnum.ORGANIZATION) {
-        await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
-        showToaster('User removed successfully', ToasterIcons.INFO);
-      } else {
-        api.setTeamSlug(commonData.team!.sluglified_name);
-        await api.deleteUserFromTeam(commonData.team!.id!, userId);
-        showToaster('User removed successfully', ToasterIcons.INFO);
-      }
-      getTeamMembers();
-    } catch (e) {
-      showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
-      Helper.logError('Unexpected error', e);
-    }
+  const removeUser = async (_userId: string, _type: TeamMembershipOriginEnum): Promise<void> => {
+    getTeamMembers();
   };
 
   // END TEAM MEMBERS

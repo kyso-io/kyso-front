@@ -9,18 +9,18 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { XCircleIcon } from '@heroicons/react/solid';
-import type { ActivityFeed, NormalizedResponseDTO, OrganizationInfoDto, OrganizationMember, PaginatedResponseDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
-import {
-  AddUserOrganizationDto,
-  GlobalPermissionsEnum,
-  InviteUserDto,
-  KysoSettingsEnum,
-  OrganizationPermissionsEnum,
-  ReportPermissionsEnum,
+import type {
+  ActivityFeed,
+  NormalizedResponseDTO,
+  OrganizationInfoDto,
+  OrganizationMember,
+  PaginatedResponseDto,
+  ReportDTO,
+  ResourcePermissions,
+  UserDTO,
   TeamMembershipOriginEnum,
-  UpdateOrganizationMembersDTO,
-  UserRoleDTO,
 } from '@kyso-io/kyso-model';
+import { AddUserOrganizationDto, GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, UpdateOrganizationMembersDTO, UserRoleDTO } from '@kyso-io/kyso-model';
 // @ts-ignore
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -487,43 +487,12 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     getOrganizationMembers();
   };
 
-  const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      return;
-    }
-
-    try {
-      const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
-      const inviteUserDto: InviteUserDto = new InviteUserDto(email, commonData!.organization!.sluglified_name, organizationRole);
-      await api.inviteNewUser(inviteUserDto);
-      getOrganizationMembers();
-
-      showToaster('User invited successfully', ToasterIcons.INFO);
-    } catch (e) {
-      showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
-      Helper.logError('Unexpected error', e);
-    }
+  const inviteNewUser = async (_email: string, _organizationRole: string): Promise<void> => {
+    getOrganizationMembers();
   };
 
-  const removeUser = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      return;
-    }
-
-    try {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-      if (type === TeamMembershipOriginEnum.ORGANIZATION) {
-        await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
-        showToaster('User removed successfully', ToasterIcons.INFO);
-      } else {
-        await api.deleteUserFromTeam(commonData.team!.id!, userId);
-        showToaster('User removed successfully', ToasterIcons.INFO);
-      }
-      getOrganizationMembers();
-    } catch (e) {
-      showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
-      Helper.logError('Unexpected error', e);
-    }
+  const removeUser = async (_userId: string, _type: TeamMembershipOriginEnum): Promise<void> => {
+    getOrganizationMembers();
   };
 
   // END ORGANIZATION MEMBERS

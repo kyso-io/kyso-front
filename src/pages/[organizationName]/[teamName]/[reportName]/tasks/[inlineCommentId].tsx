@@ -4,7 +4,6 @@ import PureReportHeader from '@/components/PureReportHeader';
 import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import TableOfContents from '@/components/TableOfContents';
-import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '@/helpers/Helper';
 import { HelperPermissions } from '@/helpers/check-permissions';
 import classNames from '@/helpers/class-names';
@@ -31,20 +30,9 @@ import type {
   TeamMember,
   User,
   UserDTO,
-} from '@kyso-io/kyso-model';
-import {
-  AddUserOrganizationDto,
-  CreateInlineCommentDto,
-  InlineCommentPermissionsEnum,
-  InviteUserDto,
-  KysoSettingsEnum,
-  ReportPermissionsEnum,
   TeamMembershipOriginEnum,
-  UpdateInlineCommentDto,
-  UpdateOrganizationMembersDTO,
-  UpdateTeamMembersDTO,
-  UserRoleDTO,
 } from '@kyso-io/kyso-model';
+import { CreateInlineCommentDto, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import Link from 'next/link';
@@ -353,71 +341,16 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     }
   };
 
-  const updateMemberRole = async (userId: string, organizationRole: string, teamRole?: string): Promise<void> => {
-    const index: number = members.findIndex((m: Member) => m.id === userId);
-    if (index === -1) {
-      try {
-        const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-        const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
-        await api.addUserToOrganization(addUserOrganizationDto);
-
-        showToaster('User invited successfully', ToasterIcons.SUCCESS);
-      } catch (e) {
-        showToaster('We are sorry! Something happened updating the role of this member. Please try again.', ToasterIcons.SUCCESS);
-        Helper.logError('Unexpected error', e);
-      }
-    } else {
-      if (!members[index]!.organization_roles.includes(organizationRole)) {
-        try {
-          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, organizationRole);
-          const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
-          await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
-        } catch (e) {
-          Helper.logError('Unexpected error', e);
-        }
-      }
-      if (teamRole && !members[index]!.team_roles.includes(teamRole)) {
-        try {
-          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
-          const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
-          await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
-        } catch (e) {
-          Helper.logError('Unexpected error', e);
-        }
-      }
-    }
+  const updateMemberRole = async (_userId: string, _organizationRole: string, _teamRole?: string): Promise<void> => {
     getTeamMembers();
   };
 
-  const inviteNewUser = async (email: string, organizationRole: string): Promise<void> => {
-    try {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-      const inviteUserDto: InviteUserDto = new InviteUserDto(email, organizationRole, organizationRole);
-      await api.inviteNewUser(inviteUserDto);
-      getTeamMembers();
-
-      showToaster('User invited successfully', ToasterIcons.SUCCESS);
-    } catch (e) {
-      showToaster('We are sorry! Something happened inviting an user. Please try again.', ToasterIcons.ERROR);
-      Helper.logError('Unexpected error', e);
-    }
+  const inviteNewUser = async (_email: string, _organizationRole: string): Promise<void> => {
+    getTeamMembers();
   };
 
-  const removeUser = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
-    try {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
-      if (type === TeamMembershipOriginEnum.ORGANIZATION) {
-        await api.removeUserFromOrganization(commonData!.organization!.id!, userId);
-      } else {
-        api.setTeamSlug(commonData.team!.sluglified_name);
-        await api.deleteUserFromTeam(commonData.team!.id!, userId);
-      }
-      getTeamMembers();
-    } catch (e) {
-      Helper.logError('Unexpected error', e);
-    }
+  const removeUser = async (_userId: string, _type: TeamMembershipOriginEnum): Promise<void> => {
+    getTeamMembers();
   };
 
   if (requesting) {
