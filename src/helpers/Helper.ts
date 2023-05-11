@@ -4,9 +4,30 @@ import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { fetchPublicKysoSettings, store } from '@kyso-io/kyso-store';
 import slugify from 'slugify';
 import _ from 'lodash';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { OrganizationSettingsTab } from '../enums/organization-settings-tab';
+import { ToasterMessages } from './ToasterMessages';
 
 export class Helper {
+  public static validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
+    isCurrentUserVerified: boolean,
+    isCurrentUserSolvedCaptcha: boolean,
+    showToaster: (message: string, icon: JSX.Element) => void,
+  ): boolean {
+    if (!isCurrentUserVerified || !isCurrentUserSolvedCaptcha) {
+      if (!isCurrentUserVerified && !isCurrentUserSolvedCaptcha) {
+        showToaster(ToasterMessages.noVerifiedEmailAndNoCaptchaSolvedError(), ToasterIcons.ERROR);
+      } else if (!isCurrentUserVerified) {
+        showToaster(ToasterMessages.noVerifiedEmailError(), ToasterIcons.ERROR);
+      } else {
+        // If we reach this is because only solvedcaptcha is true
+        showToaster(ToasterMessages.noCaptchaSolvedError(), ToasterIcons.ERROR);
+      }
+      return false;
+    }
+    return true;
+  }
+
   /* eslint-disable @typescript-eslint/no-explicit-any */
   public static ListToKeyVal(data: any) {
     return data.reduce((prev: any, curr: any) => {

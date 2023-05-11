@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ToasterIcons } from '@/enums/toaster-icons';
+import { Helper } from '@/helpers/Helper';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
@@ -23,11 +24,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   const [message, setMessage] = useState<string>('');
 
   const onSubmit = async () => {
-    if (!isCurrentUserSolvedCaptcha()) {
-      return;
-    }
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
 
-    if (!isCurrentUserVerified()) {
+    if (!isValid) {
       return;
     }
 

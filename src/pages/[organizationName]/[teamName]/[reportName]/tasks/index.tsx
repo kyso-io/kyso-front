@@ -504,7 +504,9 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   }
 
   const updateInlineCommentStatus = async (id: string, status: InlineCommentStatusEnum) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
     try {

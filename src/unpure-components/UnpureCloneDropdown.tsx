@@ -10,6 +10,7 @@ import saveAs from 'file-saver';
 import { useState } from 'react';
 import slugify from 'slugify';
 import { ToasterIcons } from '@/enums/toaster-icons';
+import { Helper } from '@/helpers/Helper';
 
 interface Props {
   reportUrl: string;
@@ -27,7 +28,9 @@ const UnpureCloneDropdown = ({ reportUrl, commonData, report, isCurrentUserSolve
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   const downloadReport = async () => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 

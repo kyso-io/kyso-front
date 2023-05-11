@@ -212,9 +212,13 @@ const ManageUsers = ({
                 : 'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
             )}
             onClick={() => {
-              if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+              const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+              if (!isValid) {
                 return;
               }
+
+              onUpdateRoleMemberDoAction(selectedUser.id, selectedOrgRole, selectedTeamRole);
               onUpdateRoleMember(selectedUser.id, selectedOrgRole, selectedTeamRole);
               clearData();
             }}
@@ -247,15 +251,9 @@ const ManageUsers = ({
 
   /** Generic management events */
   const onUpdateRoleMemberDoAction = async (userId: string, organizationRole: string, teamRole?: string): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      if (!isCurrentUserVerified() && !isCurrentUserSolvedCaptcha()) {
-        showToaster(ToasterMessages.noVerifiedEmailAndNoCaptchaSolvedError(), ToasterIcons.ERROR);
-      } else if (!isCurrentUserVerified()) {
-        showToaster(ToasterMessages.noVerifiedEmailError(), ToasterIcons.ERROR);
-      } else {
-        // If we reach this is because only solvedcaptcha is true
-        showToaster(ToasterMessages.noCaptchaSolvedError(), ToasterIcons.ERROR);
-      }
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -299,15 +297,9 @@ const ManageUsers = ({
   };
 
   const onInviteNewUserDoAction = async (email: string, organizationRole: string, teamRole?: string): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      if (!isCurrentUserVerified() && !isCurrentUserSolvedCaptcha()) {
-        showToaster(ToasterMessages.noVerifiedEmailAndNoCaptchaSolvedError(), ToasterIcons.ERROR);
-      } else if (!isCurrentUserVerified()) {
-        showToaster(ToasterMessages.noVerifiedEmailError(), ToasterIcons.ERROR);
-      } else {
-        // If we reach this is because only solvedcaptcha is true
-        showToaster(ToasterMessages.noCaptchaSolvedError(), ToasterIcons.ERROR);
-      }
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -329,15 +321,9 @@ const ManageUsers = ({
   };
 
   const onRemoveUserDoAction = async (userId: string, type: TeamMembershipOriginEnum): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
-      if (!isCurrentUserVerified() && !isCurrentUserSolvedCaptcha()) {
-        showToaster(ToasterMessages.noVerifiedEmailAndNoCaptchaSolvedError(), ToasterIcons.ERROR);
-      } else if (!isCurrentUserVerified()) {
-        showToaster(ToasterMessages.noVerifiedEmailError(), ToasterIcons.ERROR);
-      } else {
-        // If we reach this is because only solvedcaptcha is true
-        showToaster(ToasterMessages.noCaptchaSolvedError(), ToasterIcons.ERROR);
-      }
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -599,9 +585,12 @@ const ManageUsers = ({
                                   : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
                               )}
                               onClick={() => {
-                                if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                                const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+                                if (!isValid) {
                                   return;
                                 }
+
                                 const member: Member = members[selectedMemberIndex]!;
                                 onUpdateRoleMemberDoAction(member.id, selectedOrgRole, selectedTeamRole);
                                 onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
@@ -792,6 +781,7 @@ const ManageUsers = ({
                                   return;
                                 }
                                 const member: Member = members[selectedMemberIndex]!;
+                                onRemoveUserDoAction(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                                 onRemoveUser(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                                 clearData();
                               }}
@@ -810,10 +800,13 @@ const ManageUsers = ({
                                   : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
                               )}
                               onClick={() => {
-                                if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                                const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+                                if (!isValid) {
                                   return;
                                 }
                                 const member: Member = members[selectedMemberIndex]!;
+                                onUpdateRoleMemberDoAction(member.id, selectedOrgRole, selectedTeamRole);
                                 onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
                                 clearData();
                               }}

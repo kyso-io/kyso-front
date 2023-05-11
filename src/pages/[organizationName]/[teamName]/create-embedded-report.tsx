@@ -281,7 +281,9 @@ const CreateEmbeddedReport = ({ commonData, showToaster, hideToaster, isCurrentU
   };
 
   const createReport = async (e?: any) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 

@@ -62,7 +62,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   }, [commonData.token]);
 
   const createKysoAccessToken = async () => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -95,7 +97,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const deleteKysoAccessToken = async () => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -114,7 +118,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const revokeAllKysoAccessTokens = async () => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -166,7 +172,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
               <button
                 disabled={requesting}
                 onClick={() => {
-                  if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+                  if (!isValid) {
                     return;
                   }
                   setOpenCreateKysoAccessToken(true);
@@ -180,7 +188,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                 <button
                   disabled={requesting}
                   onClick={() => {
-                    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+                    if (!isValid) {
                       return;
                     }
                     setOpenRevokeAllKysoAccessTokens(true);
@@ -242,7 +252,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                               <div className="flex flex-row-reverse" title="Remove access token">
                                 <TrashIcon
                                   onClick={() => {
-                                    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                                    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+                                    if (!isValid) {
                                       return;
                                     }
                                     setSelectedKysoAccessToken(kysoUserAccessToken);

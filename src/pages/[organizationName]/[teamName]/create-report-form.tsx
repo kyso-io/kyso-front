@@ -304,7 +304,9 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
   };
 
   const createReport = async (e?: any) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -387,7 +389,9 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
   };
 
   const updateReport = async (e?: any) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -487,7 +491,9 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
   };
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 

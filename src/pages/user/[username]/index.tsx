@@ -225,7 +225,9 @@ const Index = ({ commonData, setUser, showToaster, hideToaster, isCurrentUserVer
   };
 
   const toggleUserStarReport = async (reportDto: ReportDTO) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -237,9 +239,12 @@ const Index = ({ commonData, setUser, showToaster, hideToaster, isCurrentUserVer
   };
 
   const toggleUserPinReport = async (reportDto: ReportDTO) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
+
     try {
       const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleUserPinReport(reportDto.id!);
@@ -248,9 +253,12 @@ const Index = ({ commonData, setUser, showToaster, hideToaster, isCurrentUserVer
   };
 
   const toggleGlobalPinReport = async (reportDto: ReportDTO) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
+
     try {
       const api: Api = new Api(token, reportDto.organization_sluglified_name, reportDto.team_sluglified_name);
       const result: NormalizedResponseDTO<ReportDTO> = await api.toggleGlobalPinReport(reportDto.id!);
@@ -298,7 +306,9 @@ const Index = ({ commonData, setUser, showToaster, hideToaster, isCurrentUserVer
   // END ACTIVITY FEED
 
   const onChangeBackgroundImage = async (file: File) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 

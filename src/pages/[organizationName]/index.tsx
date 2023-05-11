@@ -259,7 +259,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   };
 
   const toggleUserStarReport = async (reportDto: ReportDTO) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -295,7 +297,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   };
 
   const toggleUserPinReport = async (reportDto: ReportDTO) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -330,7 +334,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   };
 
   const toggleGlobalPinReport = async (reportDto: ReportDTO) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -456,7 +462,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   };
 
   const updateMemberRole = async (userId: string, organizationRole: string): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 

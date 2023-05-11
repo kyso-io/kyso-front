@@ -367,7 +367,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const submit = async () => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -398,7 +400,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const submitNotifications = async () => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -490,7 +494,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const updateMemberRole = async (): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -532,7 +538,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const removeMember = async (): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -580,7 +588,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const inviteNewUser = async (): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -606,7 +616,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const deleteOrganization = async () => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -625,7 +637,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const exportMembersInCsv = async () => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -650,7 +664,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const onChangeJoinCodes = async (result: boolean) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -691,7 +707,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const updateAllowedAccessDomains = async (updatedAllowedAccessDomains: string[]) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -1126,7 +1144,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                             <div title="Edit member role in the organization">
                               <PencilIcon
                                 onClick={() => {
-                                  if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+                                  if (!isValid) {
                                     return;
                                   }
                                   if (requesting) {
@@ -1141,7 +1161,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                             <div title="Remove member from the organization">
                               <TrashIcon
                                 onClick={() => {
-                                  if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+                                  if (!isValid) {
                                     return;
                                   }
                                   if (requesting) {
@@ -1217,7 +1239,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                               <button
                                 disabled={requesting || showErrorDomain}
                                 onClick={() => {
-                                  if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+                                  if (!isValid) {
                                     return;
                                   }
                                   if (requesting) {

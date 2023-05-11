@@ -36,6 +36,7 @@ interface Props {
   isCurrentUserSolvedCaptcha: () => boolean;
   isCurrentUserVerified: () => boolean;
   isLastVersion: boolean;
+  showToaster: (message: string, icon: JSX.Element) => void;
 }
 
 const UnpureReportRender = ({
@@ -51,6 +52,7 @@ const UnpureReportRender = ({
   isCurrentUserVerified,
   isCurrentUserSolvedCaptcha,
   isLastVersion,
+  showToaster,
 }: Props) => {
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
@@ -72,7 +74,9 @@ const UnpureReportRender = ({
   }, [report.id, fileToRender.id]);
 
   const createInlineComment = async (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -99,7 +103,9 @@ const UnpureReportRender = ({
   };
 
   const updateInlineComment = async (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
     try {
@@ -123,7 +129,9 @@ const UnpureReportRender = ({
   };
 
   const deleteInlineComment = async (id: string) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 

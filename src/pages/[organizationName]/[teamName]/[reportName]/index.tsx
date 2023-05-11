@@ -520,7 +520,9 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
   // TODO -> confusion as to whether these are Conmment or CommentDTO
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const submitComment = async (newComment: any, parentComment: any) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -700,7 +702,9 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                             authors={authors}
                             version={version}
                             onUpvoteReport={async () => {
-                              if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                              const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+                              if (!isValid) {
                                 return;
                               }
 
@@ -813,6 +817,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                               isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
                               setUser={setUser}
                               isLastVersion={isLastVersion}
+                              showToaster={showToaster}
                             />
                           )}
 
@@ -852,7 +857,9 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                                 return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
                               }}
                               onDeleteComment={async (id: string) => {
-                                if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+                                const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+                                if (!isValid) {
                                   return;
                                 }
                                 await dispatch(deleteCommentAction(id as string));

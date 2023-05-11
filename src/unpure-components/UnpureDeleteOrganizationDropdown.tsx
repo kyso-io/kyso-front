@@ -21,7 +21,9 @@ const UnpureDeleteOrganizationDropdown = ({ commonData, showToaster, isCurrentUs
   const [input, setInput] = useState<string>('');
 
   const deleteOrganization = async () => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 

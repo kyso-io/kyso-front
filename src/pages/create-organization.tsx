@@ -57,7 +57,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   }, [commonData.user]);
 
   const createOrganization = async (): Promise<void> => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 

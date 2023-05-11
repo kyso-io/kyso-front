@@ -93,7 +93,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   };
 
   const createChannel = async (ev: any) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 

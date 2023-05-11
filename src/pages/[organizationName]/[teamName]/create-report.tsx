@@ -282,7 +282,9 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleSubmit = async (e?: any) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
@@ -390,7 +392,9 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
   };
 
   const onUploadFile = async (event: ChangeEvent<HTMLInputElement>, parent?: FilesystemItem) => {
-    if (!isCurrentUserVerified() || !isCurrentUserSolvedCaptcha()) {
+    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster);
+
+    if (!isValid) {
       return;
     }
 
