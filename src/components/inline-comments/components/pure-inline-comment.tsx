@@ -12,7 +12,8 @@ import type { UserDTO, InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/
 import { GlobalPermissionsEnum, InlineCommentStatusEnum, OrganizationPermissionsEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import moment from 'moment';
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Tooltip } from 'primereact/tooltip';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import PureInlineCommentForm from './pure-inline-comment-form';
 import TagInlineComment from './tag-inline-comment';
@@ -117,10 +118,21 @@ const PureInlineComment = (props: IPureInlineComment) => {
       ) : (
         <div id={comment.cell_id} className={classNames('flex py-2 border rounded my-1 px-4 flex-col', parentInlineComment ? 'ml-10' : '')}>
           <div className="flex flex-row justify-end space-x-2 text-xs font-light text-gray-400">
-            {isUserAuthor && hasPermissionCreateComment && !isClosed && isLastVersion && (
-              <button className="hover:underline" onClick={() => setIsEditing(!isEditing)}>
-                Edit
-              </button>
+            {isUserAuthor && hasPermissionCreateComment && isLastVersion && (
+              <React.Fragment>
+                {isClosed ? (
+                  <React.Fragment>
+                    <Tooltip target=".edit-button-tooltip" />
+                    <span className="edit-button-tooltip" data-pr-tooltip="Edition is not allowed when status is closed" data-pr-position="bottom">
+                      <button className="hover:underline">Edit</button>
+                    </span>
+                  </React.Fragment>
+                ) : (
+                  <button className="hover:underline" onClick={() => setIsEditing(!isEditing)}>
+                    Edit
+                  </button>
+                )}
+              </React.Fragment>
             )}
             {((isUserAuthor && hasPermissionDeleteComment) || isOrgAdmin || isTeamAdmin) && !isClosed && isLastVersion && (
               <button
@@ -223,10 +235,21 @@ const PureInlineComment = (props: IPureInlineComment) => {
                 Cancel
               </span>
             )}
-            {hasPermissionCreateComment && !replying && !parentInlineComment && !isClosed && isLastVersion && (
-              <span onClick={() => setReplying(true)} className="cursor-pointer">
-                Reply
-              </span>
+            {hasPermissionCreateComment && !replying && !parentInlineComment && isLastVersion && (
+              <React.Fragment>
+                {isClosed ? (
+                  <React.Fragment>
+                    <Tooltip target=".reply-button-tooltip" />
+                    <span className="reply-button-tooltip" data-pr-tooltip="Replies not allowed when status is closed" data-pr-position="bottom">
+                      <button className="hover:underline">Reply</button>
+                    </span>
+                  </React.Fragment>
+                ) : (
+                  <button className="hover:underline" onClick={() => setReplying(true)}>
+                    Reply
+                  </button>
+                )}
+              </React.Fragment>
             )}
           </div>
         </div>
