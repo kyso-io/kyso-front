@@ -40,4 +40,8 @@ export class ToasterMessages {
   public static noCaptchaSolvedError(): string {
     return 'Please prove that you are not a bot';
   }
+
+  public static noEnoughPermissions(): string {
+    return `Sorry, but you don't have enough permissions to perform this action`;
+  }
 }

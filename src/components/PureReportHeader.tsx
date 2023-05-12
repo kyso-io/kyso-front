@@ -205,6 +205,9 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
                 fileToRender={fileToRender}
                 onSetFileAsMainFile={onSetFileAsMainFile}
                 version={version}
+                isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                isCurrentUserVerified={isCurrentUserVerified}
+                showToaster={showToaster}
               />
             )}
           </div>
