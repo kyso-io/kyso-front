@@ -293,7 +293,6 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
         onSelectedNavItem={(type: ElasticSearchIndex) => setFullTextSearchParams({ ...fullTextSearchParams, type, page: 1 })}
       />
       <div className="col-span-3">
-        {/* SEARCH BAR */}
         <div className="mt-1">
           {fullTextSearchDTO && (
             <div className="flex flex-row items-center my-4 ml-3 text-xs">
