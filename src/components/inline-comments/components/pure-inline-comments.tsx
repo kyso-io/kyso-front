@@ -31,7 +31,7 @@ type IPureComments = {
   showCreateNewComment: boolean;
 };
 
-const PureComments = (props: IPureComments) => {
+const PureInlineComments = (props: IPureComments) => {
   const {
     comments,
     commonData,
@@ -113,4 +113,4 @@ const PureComments = (props: IPureComments) => {
   );
 };
 
-export default PureComments;
+export default PureInlineComments;

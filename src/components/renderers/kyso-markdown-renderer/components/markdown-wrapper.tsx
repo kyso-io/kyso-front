@@ -1,5 +1,7 @@
 import { MathJax, MathJaxContext } from 'better-react-mathjax';
 import 'katex/dist/katex.min.css';
+import { useRouter } from 'next/router';
+import { useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
@@ -9,11 +11,9 @@ import gfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import remarkUnwrapImages from 'remark-unwrap-images';
 import { visit } from 'unist-util-visit';
-import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
-import Mermaid from './mermaid';
-import RenderCode from '../../RenderCode';
 import { Helper } from '../../../../helpers/Helper';
+import RenderCode from '../../RenderCode';
+import Mermaid from './mermaid';
 
 function customDirectives() {
   return transform;
@@ -86,12 +86,12 @@ const MarkdownWrapper = ({ source }: Props) => {
   const router = useRouter();
   const { highlight } = router.query;
 
-  const [highlightedText, setHighlightedText] = useState(source || 'No source');
-
-  useEffect(() => {
-    const computedText = Helper.highlight(source, highlight as string);
-    setHighlightedText(computedText);
-  }, [highlight]);
+  const highlightedText: string = useMemo(() => {
+    if (!highlight) {
+      return source;
+    }
+    return Helper.highlight(source, highlight as string);
+  }, [source, highlight]);
 
   return (
     <div className="prose max-w-none break-words">
