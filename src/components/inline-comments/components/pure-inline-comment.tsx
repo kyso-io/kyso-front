@@ -8,17 +8,17 @@ import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import type { UserDTO, InlineCommentDto, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, InlineCommentStatusEnum, OrganizationPermissionsEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import moment from 'moment';
-import React, { useMemo, useState } from 'react';
 import { Tooltip } from 'primereact/tooltip';
+import React, { useMemo, useState } from 'react';
+import { Helper } from '../../../helpers/Helper';
 import { HelperPermissions } from '../../../helpers/check-permissions';
+import { useAppSelector } from '../../../hooks/redux-hooks';
 import PureInlineCommentForm from './pure-inline-comment-form';
 import TagInlineComment from './tag-inline-comment';
-import { Helper } from '../../../helpers/Helper';
-import { useAppSelector } from '../../../hooks/redux-hooks';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -193,7 +193,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                             }}
                           >
                             <TagInlineComment status={InlineCommentStatusEnum.TO_DO} />
-                            <p className="mt-1 text-gray-600">You are planing to work on this comment in the future.</p>
+                            <p className="mt-1 text-gray-600">You are planing to work on this task in the future.</p>
                           </div>
                         )}
                         {comment.current_status !== InlineCommentStatusEnum.DOING && (
@@ -205,7 +205,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                             }}
                           >
                             <TagInlineComment status={InlineCommentStatusEnum.DOING} />
-                            <p className="mt-1 text-gray-600">You are working on this comment.</p>
+                            <p className="mt-1 text-gray-600">You are working on this task.</p>
                           </div>
                         )}
                         {comment.current_status !== InlineCommentStatusEnum.CLOSED && (
@@ -217,7 +217,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                             }}
                           >
                             <TagInlineComment status={InlineCommentStatusEnum.CLOSED} />
-                            <p className="mt-1 text-gray-600">This comment is resolved.</p>
+                            <p className="mt-1 text-gray-600">This task is resolved.</p>
                           </div>
                         )}
                       </div>

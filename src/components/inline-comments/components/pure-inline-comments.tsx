@@ -52,7 +52,7 @@ const PureComments = (props: IPureComments) => {
         <div className="prose max-w-none ">
           <Tooltip target=".inline-comments-info" />
           <h4>
-            File{`'`}s comments{' '}
+            File{`'`}s Tasks
             <FontAwesomeIcon
               className="inline-comments-info"
               data-pr-tooltip="These comments are local to the current file, and will change if you open another file"

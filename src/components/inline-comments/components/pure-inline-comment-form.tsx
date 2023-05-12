@@ -79,11 +79,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
     onSubmitted();
   };
 
-  let message = 'Write a new comment';
-
-  if (comment?.id) {
-    message = 'Edit comment';
-  }
+  const message = comment?.id ? 'Write a reply' : 'Write a new task';
 
   const [suggestions, setSuggestions] = useState<TeamMember[]>([]);
 
