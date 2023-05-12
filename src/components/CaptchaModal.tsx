@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { Dialog, Transition } from '@headlessui/react';
-import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
+import type { UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
+import { usePublicSettings } from '../hooks/use-public-settings';
 
 const DEFAULT_CAPTCHA_SITE_KEY = '22';
 
@@ -17,6 +19,7 @@ interface Props {
 }
 
 const CaptchaModal = ({ user, open, onClose, redirectUrl }: Props) => {
+  const kysoSettingValues: (any | null)[] = usePublicSettings([KysoSettingsEnum.HCAPTCHA_ENABLED, KysoSettingsEnum.HCAPTCHA_SITE_KEY]);
   const hCaptchaRef = useRef(null);
   const [captchaSiteKey, setCaptchaSiteKey] = useState<string>(DEFAULT_CAPTCHA_SITE_KEY);
   const [captchaToken, setCaptchaToken] = useState<string>('');
@@ -30,25 +33,17 @@ const CaptchaModal = ({ user, open, onClose, redirectUrl }: Props) => {
       onClose(false);
       return;
     }
-    const getData = async () => {
-      const api: Api = new Api();
-      const response: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-      const captchaEnabledKysoSetting: KysoSetting | undefined = response.data.find((kysoSetting: KysoSetting) => kysoSetting.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-      const captchaEnabled: boolean = captchaEnabledKysoSetting === undefined || captchaEnabledKysoSetting.value === 'true';
-      if (!captchaEnabled) {
-        onClose(false);
-        return;
-      }
-      const captchaSiteKeyKysoSetting: KysoSetting | undefined = response.data.find((kysoSetting: KysoSetting) => kysoSetting.key === KysoSettingsEnum.HCAPTCHA_SITE_KEY);
-      if (!captchaSiteKeyKysoSetting) {
-        /* eslint-disable no-alert */
-        alert('Captcha is enabled but no site key is set. Please contact support.');
-        return;
-      }
-      setCaptchaSiteKey(captchaSiteKeyKysoSetting.value);
-    };
-    getData();
-  }, [open]);
+    if (!kysoSettingValues[0]) {
+      onClose(false);
+      return;
+    }
+    if (!kysoSettingValues[1]) {
+      /* eslint-disable no-alert */
+      alert('Captcha is enabled but no site key is set. Please contact support.');
+      return;
+    }
+    setCaptchaSiteKey(kysoSettingValues[1]);
+  }, [open, user, kysoSettingValues]);
 
   const onSubmit = async () => {
     setRequesting(true);

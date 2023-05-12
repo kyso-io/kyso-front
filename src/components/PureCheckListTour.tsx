@@ -1,12 +1,13 @@
-import { Helper } from '@/helpers/Helper';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { CheckCircleIcon, ChevronDoubleRightIcon, XCircleIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
+import type { UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, OnboardingProgress, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { ProgressBar } from 'primereact/progressbar';
 import { useEffect, useState } from 'react';
+import { usePublicSetting } from '../hooks/use-public-setting';
 
 interface Props {
   user: UserDTO;
@@ -70,6 +71,7 @@ const markCtaDone = async (cta: Cta, loggedUser: UserDTO) => {
 };
 
 const PureCheckListTour = (props: Props) => {
+  const onboardingMessagessStr: any | null = usePublicSetting(KysoSettingsEnum.ONBOARDING_MESSAGES);
   const [progress, setProgress] = useState(0);
   const [onboardingProgress, setOnboardingProgress] = useState(OnboardingProgress.createEmpty());
   const { setValue, user } = props;
@@ -157,22 +159,13 @@ const PureCheckListTour = (props: Props) => {
   });
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-
-        const onboardingMessagesValues = resultKysoSetting.data.find((x) => x.key === KysoSettingsEnum.ONBOARDING_MESSAGES)?.value!;
-
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        setOnboardingMessages(onboardingMessagesValues);
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!onboardingMessagessStr) {
+      return;
+    }
+    try {
+      setOnboardingMessages(JSON.parse(onboardingMessagessStr));
+    } catch (e) {}
+  }, [onboardingMessagessStr]);
 
   useEffect(() => {
     if (user) {

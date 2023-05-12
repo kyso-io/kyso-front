@@ -1,4 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import ManageUsers from '@/components/ManageUsers';
+import PureAvatar from '@/components/PureAvatar';
+import PureReportHeader from '@/components/PureReportHeader';
+import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
+import PureTree from '@/components/PureTree';
+import TableOfContents from '@/components/TableOfContents';
+import { Helper } from '@/helpers/Helper';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import classNames from '@/helpers/class-names';
+import { getReport } from '@/helpers/get-report';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import type { Version } from '@/hooks/use-versions';
+import { useVersions } from '@/hooks/use-versions';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { CommonData } from '@/types/common-data';
+import type { Member } from '@/types/member';
+import type { ReportData } from '@/types/report-data';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type {
   AnalyticsSource,
@@ -10,8 +30,8 @@ import type {
   ReportAnalytics,
   ReportDTO,
   TeamMember,
-  UserDTO,
   TeamMembershipOriginEnum,
+  UserDTO,
 } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
@@ -26,29 +46,9 @@ import { Pie } from 'react-chartjs-2';
 import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from 'react-simple-maps';
 import { Tooltip as ReactTooltip } from 'react-tooltip';
 import { v4 as uuidv4 } from 'uuid';
-import ManageUsers from '@/components/ManageUsers';
-import PureAvatar from '@/components/PureAvatar';
-import PureReportHeader from '@/components/PureReportHeader';
-import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
-import PureTree from '@/components/PureTree';
-import TableOfContents from '@/components/TableOfContents';
-import { HelperPermissions } from '@/helpers/check-permissions';
-import classNames from '@/helpers/class-names';
-import { getReport } from '@/helpers/get-report';
-import { Helper } from '@/helpers/Helper';
-import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
-import type { Version } from '@/hooks/use-versions';
-import { useVersions } from '@/hooks/use-versions';
-import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { KeyValue } from '@/model/key-value.model';
-import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import type { CommonData } from '@/types/common-data';
-import type { Member } from '@/types/member';
-import type { ReportData } from '@/types/report-data';
 
 import 'react-tooltip/dist/react-tooltip.css';
+import { usePublicSetting } from '../../../../hooks/use-public-setting';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Colors);
 
@@ -79,6 +79,7 @@ enum Tab {
 const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const globalPrivacyShowEmailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
   const [result, setResult] = useState<NormalizedResponseDTO<ReportAnalytics> | null>(null);
   const [requesting, setRequesting] = useState<boolean>(true);
   const [tooltipContent, setTooltipContent] = useState<string>('');
@@ -317,19 +318,11 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   }, [commonData, reportData]);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
-        if (indexShowEmail !== -1) {
-          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!globalPrivacyShowEmailStr) {
+      return;
+    }
+    setShowEmails(globalPrivacyShowEmailStr === 'true');
+  }, [globalPrivacyShowEmailStr]);
 
   useEffect(() => {
     if (reportData?.report && reportData.report.toc && reportData.report.toc.length > 0) {

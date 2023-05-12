@@ -1,21 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Helper } from '@/helpers/Helper';
 import { Menu, Transition } from '@headlessui/react';
-import type { KysoSetting, NormalizedResponseDTO, UserDTO } from '@kyso-io/kyso-model';
+import type { UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, OnboardingProgress } from '@kyso-io/kyso-model';
-import { Api } from '@kyso-io/kyso-store';
 import router from 'next/router';
 import { Fragment, useEffect, useState } from 'react';
-import type { KeyValue } from '../model/key-value.model';
-import PureCheckListPage from './PureChecklistPage';
+import { usePublicSetting } from '../hooks/use-public-setting';
 import PureCheckListTour from './PureCheckListTour';
+import PureCheckListPage from './PureChecklistPage';
 
 interface Props {
   user: UserDTO;
 }
 
 const PureOnboardingDropdown = ({ user }: Props) => {
+  const onboardingMessagessStr: any | null = usePublicSetting(KysoSettingsEnum.ONBOARDING_MESSAGES);
   const [value, setValue] = useState('');
   const [open, setOpen] = useState<boolean>(false);
   const [onboardingProgress, setOnboardingProgress] = useState(OnboardingProgress.createEmpty());
@@ -106,23 +105,13 @@ const PureOnboardingDropdown = ({ user }: Props) => {
   const [valueContent, setValueContent] = useState(onboardingMessages.dropdown.step_1);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-
-        const onboardingMessagesKeyValue: KeyValue | undefined = resultKysoSetting.data.find((x: KeyValue) => x.key === KysoSettingsEnum.ONBOARDING_MESSAGES);
-        if (onboardingMessagesKeyValue?.value) {
-          try {
-            setOnboardingMessages(JSON.parse(onboardingMessagesKeyValue.value));
-          } catch (e) {}
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!onboardingMessagessStr) {
+      return;
+    }
+    try {
+      setOnboardingMessages(JSON.parse(onboardingMessagessStr));
+    } catch (e) {}
+  }, [onboardingMessagessStr]);
 
   useEffect(() => {
     if (onboarding) {

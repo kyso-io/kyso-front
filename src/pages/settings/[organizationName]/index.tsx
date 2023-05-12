@@ -6,7 +6,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Switch, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, PaginatedResponseDto, ResourcePermissions, Team, TeamInfoDto, TeamsInfoQuery } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, OrganizationMember, PaginatedResponseDto, ResourcePermissions, Team, TeamInfoDto, TeamsInfoQuery } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   AllowDownload,
@@ -22,6 +22,20 @@ import {
   UserRoleDTO,
 } from '@kyso-io/kyso-model';
 // @ts-ignore
+import ExpirationDateModal from '@/components/ExpirationDateModal';
+import Pagination from '@/components/Pagination';
+import PureAvatar from '@/components/PureAvatar';
+import SettingsAside from '@/components/SettingsAside';
+import { OrganizationSettingsTab } from '@/enums/organization-settings-tab';
+import { ToasterIcons } from '@/enums/toaster-icons';
+import { Helper } from '@/helpers/Helper';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import type { CommonData } from '@/types/common-data';
+import type { Member } from '@/types/member';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { Tooltip } from 'flowbite-react';
@@ -30,20 +44,7 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import ExpirationDateModal from '@/components/ExpirationDateModal';
-import Pagination from '@/components/Pagination';
-import PureAvatar from '@/components/PureAvatar';
-import SettingsAside from '@/components/SettingsAside';
-import { OrganizationSettingsTab } from '@/enums/organization-settings-tab';
-import { checkJwt } from '@/helpers/check-jwt';
-import { HelperPermissions } from '@/helpers/check-permissions';
-import { Helper } from '@/helpers/Helper';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import type { CommonData } from '@/types/common-data';
-import type { Member } from '@/types/member';
-import { ToasterIcons } from '@/enums/toaster-icons';
+import { usePublicSetting } from '../../../hooks/use-public-setting';
 
 const OrganizationRoleToLabel: { [role: string]: string } = {
   'organization-admin': 'Admin of this organization',
@@ -59,6 +60,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
 const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   useRedirectIfNoJWT();
+  const enableInvitationLinksGloballyStr: any | null = usePublicSetting(KysoSettingsEnum.ENABLE_INVITATION_LINKS_GLOBALLY);
   const { tab, edit, organizationName } = router.query;
   const ref = useRef<any>(null);
   const [query, setQuery] = useState<string>('');
@@ -227,20 +229,11 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   }, [tab]);
 
   useEffect(() => {
-    const getKysoSettings = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const indexInvitationLinks: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.ENABLE_INVITATION_LINKS_GLOBALLY);
-        if (indexInvitationLinks !== -1) {
-          setInvitationsLinksGloballyEnabled(resultKysoSetting.data[indexInvitationLinks]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getKysoSettings();
-  }, []);
+    if (!enableInvitationLinksGloballyStr) {
+      return;
+    }
+    setInvitationsLinksGloballyEnabled(enableInvitationLinksGloballyStr === 'true');
+  }, [enableInvitationLinksGloballyStr]);
 
   useEffect(() => {
     if (!isOrgAdmin) {

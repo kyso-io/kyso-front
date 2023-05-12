@@ -11,18 +11,12 @@ import type {
   Team,
   TeamInfoDto,
   TeamMember,
+  TeamMembershipOriginEnum,
   TeamsInfoQuery,
   UserDTO,
-  TeamMembershipOriginEnum,
 } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, SearchUserDto, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 // @ts-ignore
-import { Api } from '@kyso-io/kyso-store';
-import debounce from 'lodash.debounce';
-import moment from 'moment';
-import { useRouter } from 'next/router';
-import React, { useEffect, useMemo, useState } from 'react';
-import ReadMoreReact from 'read-more-react';
 import ActivityFeedComponent from '@/components/ActivityFeed';
 import ChannelList from '@/components/ChannelList';
 import ChannelVisibility from '@/components/ChannelVisibility';
@@ -33,17 +27,23 @@ import PureNewReportPopover from '@/components/PureNewReportPopover';
 import { PureSpinner } from '@/components/PureSpinner';
 import ReportBadge from '@/components/ReportBadge';
 import ReportsSearchBar from '@/components/ReportsSearchBar';
+import { Helper } from '@/helpers/Helper';
 import { checkJwt } from '@/helpers/check-jwt';
 import { HelperPermissions } from '@/helpers/check-permissions';
 import { checkReportAuthors } from '@/helpers/check-report-authors';
-import { Helper } from '@/helpers/Helper';
 import type { PaginationParams } from '@/interfaces/pagination-params';
 import type { ReportsFilter } from '@/interfaces/reports-filter';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { KeyValue } from '@/model/key-value.model';
 import { TailwindWidthSizeEnum } from '@/tailwind/enum/tailwind-width.enum';
 import type { Member } from '@/types/member';
+import { Api } from '@kyso-io/kyso-store';
+import debounce from 'lodash.debounce';
+import moment from 'moment';
+import { useRouter } from 'next/router';
+import React, { useEffect, useMemo, useState } from 'react';
+import ReadMoreReact from 'read-more-react';
+import { usePublicSetting } from '../../../hooks/use-public-setting';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
@@ -75,6 +75,8 @@ const debouncedPaginatedReports = debounce(
 
 const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
+  const showEmailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
+
   const [teamInfo, setTeamInfo] = useState<TeamInfoDto | null>(null);
   // MEMBERS
   const [members, setMembers] = useState<Member[]>([]);
@@ -111,19 +113,11 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   const [showEmails, setShowEmails] = useState<boolean>(false);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
-        if (indexShowEmail !== -1) {
-          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!showEmailStr) {
+      return;
+    }
+    setShowEmails(showEmailStr === 'true');
+  }, [showEmailStr]);
 
   useEffect(() => {
     if (!commonData.user) {

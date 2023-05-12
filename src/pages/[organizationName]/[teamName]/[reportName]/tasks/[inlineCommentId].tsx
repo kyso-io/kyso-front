@@ -13,7 +13,6 @@ import type { Version } from '@/hooks/use-versions';
 import { useVersions } from '@/hooks/use-versions';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { KeyValue } from '@/model/key-value.model';
 import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
@@ -28,9 +27,9 @@ import type {
   OrganizationMember,
   ReportDTO,
   TeamMember,
+  TeamMembershipOriginEnum,
   User,
   UserDTO,
-  TeamMembershipOriginEnum,
 } from '@kyso-io/kyso-model';
 import { CreateInlineCommentDto, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
@@ -45,6 +44,7 @@ import PureAvatar from '../../../../../components/PureAvatar';
 import PureInlineComments from '../../../../../components/inline-comments/components/pure-inline-comments';
 import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
 import { useChannelMembers } from '../../../../../hooks/use-channel-members';
+import { usePublicSetting } from '../../../../../hooks/use-public-setting';
 import type { HttpExceptionDto } from '../../../../../interfaces/http-exception.dto';
 import { TailwindFontSizeEnum } from '../../../../../tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '../../../../../tailwind/enum/tailwind-height.enum';
@@ -57,6 +57,7 @@ enum Tab {
 const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const globalPrivacyShowEmailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
   const [result, setResult] = useState<NormalizedResponseDTO<InlineCommentDto> | null>(null);
   const [requesting, setRequesting] = useState<boolean>(true);
   const { inlineCommentId } = router.query;
@@ -141,19 +142,11 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
-        if (indexShowEmail !== -1) {
-          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!globalPrivacyShowEmailStr) {
+      return;
+    }
+    setShowEmails(globalPrivacyShowEmailStr === 'true');
+  }, [globalPrivacyShowEmailStr]);
 
   useEffect(() => {
     if (reportData?.report && reportData.report.toc && reportData.report.toc.length > 0) {

@@ -13,13 +13,12 @@ import type { Version } from '@/hooks/use-versions';
 import { useVersions } from '@/hooks/use-versions';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { KeyValue } from '@/model/key-value.model';
 import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import { Listbox, Transition } from '@headlessui/react';
 import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { GithubFileHash, InlineCommentDto, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, UserDTO, TeamMembershipOriginEnum } from '@kyso-io/kyso-model';
+import type { GithubFileHash, InlineCommentDto, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, TeamMembershipOriginEnum, UserDTO } from '@kyso-io/kyso-model';
 import { InlineCommentStatusEnum, KysoSettingsEnum, ReportPermissionsEnum, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
@@ -34,7 +33,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Pagination from '../../../../../components/Pagination';
 import PureAvatar from '../../../../../components/PureAvatar';
 import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
-import TitleKanbanColumn from '../../../../../components/inline-comments/components/title-kanban-column';
+import { usePublicSetting } from '../../../../../hooks/use-public-setting';
 import { TailwindFontSizeEnum } from '../../../../../tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '../../../../../tailwind/enum/tailwind-height.enum';
 
@@ -66,6 +65,7 @@ const viewTypes: { name: string; value: ViewType }[] = [
 const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const globalPrivacyShowEmailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
   const [result, setResult] = useState<NormalizedResponseDTO<InlineCommentDto[]> | null>(null);
   const [requesting, setRequesting] = useState<boolean>(true);
   const [selectedTabListView, setSelectedTabListView] = useState<TabsListView>(TabsListView.Open);
@@ -262,19 +262,11 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   }, [commonData, reportData]);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
-        if (indexShowEmail !== -1) {
-          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp.response.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!globalPrivacyShowEmailStr) {
+      return;
+    }
+    setShowEmails(globalPrivacyShowEmailStr === 'true');
+  }, [globalPrivacyShowEmailStr]);
 
   useEffect(() => {
     if (reportData?.report && reportData.report.toc && reportData.report.toc.length > 0) {
@@ -822,7 +814,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                             <div className={clsx('bg-gray-200 rounded', { 'mr-2': e.index < 3 })}>
                               <div className="mx-auto max-w-7xl py-2 px-4">
                                 <div className="flex flex-row justify-between items-center">
-                                  <TitleKanbanColumn title={e.title} status={e.status} />
+                                  <TagInlineComment status={e.status} />
                                   <span className="text-xs text-gray-500">{e.label}</span>
                                 </div>
                                 {e.children[1]}

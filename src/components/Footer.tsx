@@ -1,30 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Helper } from '@/helpers/Helper';
-import type { KeyValue } from '@/model/key-value.model';
 import { ArrowUpIcon } from '@heroicons/react/solid';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { useEffect, useState } from 'react';
+import { usePublicSetting } from '../hooks/use-public-setting';
 
 const Footer = () => {
+  const footerContentsStr: any | null = usePublicSetting(KysoSettingsEnum.FOOTER_CONTENTS);
   const [contents, setContents] = useState<any>([]);
 
   useEffect(() => {
-    const getFooterContents = async () => {
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const publicKeys: any[] = await Helper.getKysoPublicSettings();
-
-      if (!publicKeys || publicKeys.length === 0) {
-        return;
-      }
-
-      const footerContents: KeyValue | undefined = await publicKeys.find((x: KeyValue) => x.key === 'FOOTER_CONTENTS');
-      if (footerContents?.value) {
-        try {
-          setContents(JSON.parse(footerContents.value!));
-        } catch (e) {}
-      }
-    };
-    getFooterContents();
-  }, []);
+    if (!footerContentsStr) {
+      return;
+    }
+    try {
+      setContents(JSON.parse(footerContentsStr));
+    } catch (e) {}
+  }, [footerContentsStr]);
 
   return (
     <footer className="w-screen block text-white px-8 k-bg-primary">

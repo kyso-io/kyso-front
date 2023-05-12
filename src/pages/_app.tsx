@@ -1,15 +1,15 @@
 import '../styles/globals.css';
 import '../styles/styles.css';
 
-import type { ReactNode } from 'react';
-import { useEffect, useState } from 'react';
-import { store } from '@kyso-io/kyso-store';
-import type { AppProps } from 'next/app';
-import { Provider } from 'react-redux';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { Helper } from '@/helpers/Helper';
 import type { KeyValue } from '@/model/key-value.model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
-import ErrorBoundary from '@/components/ErrorBoundary';
+import { store } from '@kyso-io/kyso-store';
+import type { AppProps } from 'next/app';
+import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
+import { Provider } from 'react-redux';
 import type { PageWithLayoutType } from '../types/pageWithLayout';
 
 type AppLayoutProps = AppProps & {
@@ -19,7 +19,7 @@ type AppLayoutProps = AppProps & {
 };
 
 function MyApp({ Component, pageProps }: AppLayoutProps) {
-  // Added theme management
+  const [mounted, setMounted] = useState<boolean>(false);
   const [theme, setTheme] = useState<string | null>(null);
 
   const Layout = Component.layout || ((children: ReactNode) => <>{children}</>);
@@ -31,9 +31,14 @@ function MyApp({ Component, pageProps }: AppLayoutProps) {
       if (keyValue && keyValue.value) {
         setTheme(keyValue.value);
       }
+      setMounted(true);
     };
     getTheme();
   }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <ErrorBoundary>

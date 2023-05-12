@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import PureKysoButton from '@/components/PureKysoButton';
 import PureNotification from '@/components/PureNotification';
-import { Helper } from '@/helpers/Helper';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import MainLayout from '@/layouts/MainLayout';
 import type { CommonData } from '@/types/common-data';
@@ -11,6 +11,7 @@ import { emailRecoveryPasswordAction } from '@kyso-io/kyso-store';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
+import { usePublicSettings } from '../hooks/use-public-settings';
 
 const validateEmail = (email: string) => {
   /* eslint-disable no-useless-escape */
@@ -26,7 +27,7 @@ const ResetPassword = (props: IResetPassword) => {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { commonData } = props;
-
+  const kysoSettingValues: (any | null)[] = usePublicSettings([KysoSettingsEnum.HCAPTCHA_SITE_KEY, KysoSettingsEnum.HCAPTCHA_ENABLED]);
   const [email, setEmail] = useState('');
   const [notification, setNotification] = useState('');
   const [notificationType, setNotificationType] = useState('');
@@ -43,26 +44,12 @@ const ResetPassword = (props: IResetPassword) => {
   }, [commonData]);
 
   useEffect(() => {
-    const getOrganizationOptions = async () => {
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const publicKeys: any[] = await Helper.getKysoPublicSettings();
-
-      if (!publicKeys || publicKeys.length === 0) {
-        // api might be down
-        setNotificationType('danger');
-        setNotification('An unknown error has occurred');
-        return;
-      }
-
-      const newCaptchaSiteKey = publicKeys.find((x) => x.key === KysoSettingsEnum.HCAPTCHA_SITE_KEY).value;
-
-      const newCaptchaEnabled = publicKeys.find((x) => x.key === KysoSettingsEnum.HCAPTCHA_ENABLED).value === 'true';
-
-      setCaptchaSiteKey(newCaptchaSiteKey);
-      setCaptchaEnabled(newCaptchaEnabled);
-    };
-    getOrganizationOptions();
-  }, []);
+    if (kysoSettingValues.length === 0) {
+      return;
+    }
+    setCaptchaSiteKey(kysoSettingValues[0]);
+    setCaptchaEnabled(kysoSettingValues[1] === 'true');
+  }, [kysoSettingValues]);
 
   const onSubmit = async () => {
     if (!validateEmail(email)) {

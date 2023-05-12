@@ -3,7 +3,6 @@ import CaptchaModal from '@/components/CaptchaModal';
 import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
 import ToasterNotification from '@/components/ToasterNotification';
 import { ToasterIcons } from '@/enums/toaster-icons';
-import { Helper } from '@/helpers/Helper';
 import { checkJwt } from '@/helpers/check-jwt';
 import { getCommonData } from '@/helpers/get-common-data';
 import { getReport } from '@/helpers/get-report';
@@ -13,12 +12,13 @@ import { TailwindColor } from '@/tailwind/enum/tailwind-color.enum';
 import type { CommonData } from '@/types/common-data';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import type { ReportData } from '@/types/report-data';
-import type { KysoSetting, NormalizedResponseDTO, Organization, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, Organization, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
+import { usePublicSetting } from '../hooks/use-public-setting';
 
 type IUnpureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -35,7 +35,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     errorTeam: null,
     user: null,
   });
-
+  const hcaptchEnabledStr: any | null = usePublicSetting(KysoSettingsEnum.HCAPTCHA_ENABLED);
   const [reportData, setReportData] = useState<ReportData | null>(null);
   const [toasterMessage, setToasterMessage] = useState<string>('');
   const [toasterIcon, setToasterIcon] = useState<JSX.Element>(ToasterIcons.INFO);
@@ -76,24 +76,6 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   useEffect(() => {
     const result: boolean = checkJwt();
     setIsUserLogged(result);
-
-    const checkIfCaptchaIsEnabledInKysoSettings = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          if (resultKysoSetting.data[index]!.value === 'true') {
-            setIsCaptchaEnabled(true);
-          } else {
-            setIsCaptchaEnabled(false);
-          }
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-
     const getData = async () => {
       const token: string | null = getLocalStorageItem('jwt');
       // TODO: remove use of store in the near future
@@ -125,10 +107,15 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
       }
       setCommonData({ ...commonData, user, permissions, token });
     };
-
     getData();
-    checkIfCaptchaIsEnabledInKysoSettings();
   }, []);
+
+  useEffect(() => {
+    if (!hcaptchEnabledStr) {
+      return;
+    }
+    setIsCaptchaEnabled(hcaptchEnabledStr === 'true');
+  }, [hcaptchEnabledStr]);
 
   useEffect(() => {
     if (!commonData.permissions) {

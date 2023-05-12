@@ -5,8 +5,21 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Listbox, Transition } from '@headlessui/react';
 import { LinkIcon, PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO, OrganizationMember, ResourcePermissions, TeamMember } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, OrganizationMember, ResourcePermissions, TeamMember } from '@kyso-io/kyso-model';
 // @ts-ignore
+import ChannelVisibility from '@/components/ChannelVisibility';
+import PureAvatar from '@/components/PureAvatar';
+import SettingsAside from '@/components/SettingsAside';
+import { OrganizationSettingsTab } from '@/enums/organization-settings-tab';
+import { Helper } from '@/helpers/Helper';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { TailwindWidthSizeEnum } from '@/tailwind/enum/tailwind-width.enum';
+import type { CommonData } from '@/types/common-data';
+import type { Member } from '@/types/member';
 import {
   AddUserOrganizationDto,
   AllowDownload,
@@ -29,19 +42,7 @@ import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import ChannelVisibility from '@/components/ChannelVisibility';
-import PureAvatar from '@/components/PureAvatar';
-import SettingsAside from '@/components/SettingsAside';
-import { OrganizationSettingsTab } from '@/enums/organization-settings-tab';
-import { checkJwt } from '@/helpers/check-jwt';
-import { HelperPermissions } from '@/helpers/check-permissions';
-import { Helper } from '@/helpers/Helper';
-import { useRedirectIfNoJWT } from '@/hooks/use-redirect-if-no-jwt';
-import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { TailwindWidthSizeEnum } from '@/tailwind/enum/tailwind-width.enum';
-import type { CommonData } from '@/types/common-data';
-import type { Member } from '@/types/member';
+import { usePublicSetting } from '../../../../hooks/use-public-setting';
 
 const OrganizationRoleToLabel: { [role: string]: string } = {
   'organization-admin': 'Admin of this organization',
@@ -64,6 +65,7 @@ const debouncedFetchData = debounce((cb: () => void) => {
 const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   useRedirectIfNoJWT();
+  const allowPublicChannelsStr: any | null = usePublicSetting(KysoSettingsEnum.ALLOW_PUBLIC_CHANNELS);
   const { organizationName, teamName, tab } = router.query;
   const [query, setQuery] = useState<string>('');
   const [users, setUsers] = useState<UserDTO[]>([]);
@@ -156,20 +158,11 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   }, [commonData.team, visibility, allowDownload, bio, file, urlLocalFile]);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const indexPublicChannels: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.ALLOW_PUBLIC_CHANNELS);
-        if (indexPublicChannels !== -1) {
-          setEnabledPublicChannels(resultKysoSetting.data[indexPublicChannels]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!allowPublicChannelsStr) {
+      return;
+    }
+    setEnabledPublicChannels(allowPublicChannelsStr === 'true');
+  }, [allowPublicChannelsStr]);
 
   useEffect(() => {
     if (!commonData.user) {

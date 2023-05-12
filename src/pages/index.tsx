@@ -1,20 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import ChannelList from '@/components/ChannelList';
 import { getLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
-import type { KeyValue } from '@/model/key-value.model';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import type { ResourcePermissions } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import ChannelList from '@/components/ChannelList';
-import { Helper } from '@/helpers/Helper';
-import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import { usePublicSettings } from '../hooks/use-public-settings';
 
 const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
+  const kysoSettingValues: (any | null)[] = usePublicSettings([KysoSettingsEnum.DEFAULT_REDIRECT_ORGANIZATION, KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL]);
 
   useEffect(() => {
     if (!commonData.permissions) {
+      return;
+    }
+    if (kysoSettingValues.length === 0) {
       return;
     }
 
@@ -44,26 +47,15 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
         }
       } else {
         // Unauthorized user
-        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const settingsDefaultRedirectOrganization: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.DEFAULT_REDIRECT_ORGANIZATION);
-        const settingsUnauthRedirect: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.UNAUTHORIZED_REDIRECT_URL);
-
-        if (publicKeys !== null && publicKeys.length > 0) {
-          let unauthorizedRedirectUrl = '/login';
-
-          if (
-            settingsDefaultRedirectOrganization !== undefined &&
-            settingsDefaultRedirectOrganization.value &&
-            commonData.permissions?.organizations &&
-            commonData.permissions!.organizations.length > 0
-          ) {
-            unauthorizedRedirectUrl = `/${settingsDefaultRedirectOrganization.value}`;
-          } else if (settingsUnauthRedirect?.value) {
-            unauthorizedRedirectUrl = settingsUnauthRedirect.value;
-          }
-
-          router.replace(unauthorizedRedirectUrl);
+        const settingsDefaultRedirectOrganization: any | null = kysoSettingValues[0];
+        const settingsUnauthRedirect: any | null = kysoSettingValues[1];
+        let unauthorizedRedirectUrl = '/login';
+        if (settingsDefaultRedirectOrganization && commonData.permissions?.organizations && commonData.permissions!.organizations.length > 0) {
+          unauthorizedRedirectUrl = `/${settingsDefaultRedirectOrganization}`;
+        } else if (settingsUnauthRedirect) {
+          unauthorizedRedirectUrl = settingsUnauthRedirect;
         }
+        router.replace(unauthorizedRedirectUrl);
       }
     };
     redirectUserToOrganization();

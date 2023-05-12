@@ -17,30 +17,30 @@ import type {
   PaginatedResponseDto,
   ReportDTO,
   ResourcePermissions,
-  UserDTO,
   TeamMembershipOriginEnum,
+  UserDTO,
 } from '@kyso-io/kyso-model';
 import { AddUserOrganizationDto, GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, UpdateOrganizationMembersDTO, UserRoleDTO } from '@kyso-io/kyso-model';
 // @ts-ignore
+import ActivityFeedComponent from '@/components/ActivityFeed';
+import InfoActivity from '@/components/InfoActivity';
+import ManageUsers from '@/components/ManageUsers';
+import ReportBadge from '@/components/ReportBadge';
+import { ToasterIcons } from '@/enums/toaster-icons';
+import { Helper } from '@/helpers/Helper';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { checkReportAuthors } from '@/helpers/check-report-authors';
+import { useInterval } from '@/hooks/use-interval';
+import type { PaginationParams } from '@/interfaces/pagination-params';
+import type { Member } from '@/types/member';
+import UnpureDeleteOrganizationDropdown from '@/unpure-components/UnpureDeleteOrganizationDropdown';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import ActivityFeedComponent from '@/components/ActivityFeed';
-import InfoActivity from '@/components/InfoActivity';
-import ManageUsers from '@/components/ManageUsers';
-import ReportBadge from '@/components/ReportBadge';
-import { checkJwt } from '@/helpers/check-jwt';
-import { HelperPermissions } from '@/helpers/check-permissions';
-import { checkReportAuthors } from '@/helpers/check-report-authors';
-import { Helper } from '@/helpers/Helper';
-import { useInterval } from '@/hooks/use-interval';
-import type { PaginationParams } from '@/interfaces/pagination-params';
-import type { KeyValue } from '@/model/key-value.model';
-import type { Member } from '@/types/member';
-import UnpureDeleteOrganizationDropdown from '@/unpure-components/UnpureDeleteOrganizationDropdown';
-import { ToasterIcons } from '@/enums/toaster-icons';
+import { usePublicSetting } from '../../hooks/use-public-setting';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
@@ -48,6 +48,7 @@ const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
 
 const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
+  const globalPrivacyShowEmailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
   const { join, organizationName } = router.query;
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
   const [organizationInfo, setOrganizationInfo] = useState<OrganizationInfoDto | null>(null);
@@ -66,7 +67,6 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     () => HelperPermissions.checkPermissions(commonData, [GlobalPermissionsEnum.GLOBAL_ADMIN, OrganizationPermissionsEnum.ADMIN, OrganizationPermissionsEnum.DELETE]),
     [commonData],
   );
-
   const hasPermissionCreateReport: boolean = useMemo(() => {
     if (!commonData.permissions) {
       return false;
@@ -95,23 +95,14 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     }
     return HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE);
   }, [commonData.permissions, commonData.organization]);
-
   const [invitationError, setInvitationError] = useState<string>('');
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
-        if (indexShowEmail !== -1) {
-          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!globalPrivacyShowEmailStr) {
+      return;
+    }
+    setShowEmails(globalPrivacyShowEmailStr === 'true');
+  }, [globalPrivacyShowEmailStr]);
 
   useEffect(() => {
     if (!commonData.user) {

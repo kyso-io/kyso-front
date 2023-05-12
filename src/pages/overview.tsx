@@ -1,10 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import PureVideoModal from '@/components/PureVideoModal';
 import { checkJwt } from '@/helpers/check-jwt';
-import { Helper } from '@/helpers/Helper';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import NoLayout from '@/layouts/NoLayout';
-import type { KeyValue } from '@/model/key-value.model';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, OnboardingProgress, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
@@ -12,6 +10,7 @@ import { Api, logoutAction } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
 import slugify from 'slugify';
 import { useAppDispatch } from '../hooks/redux-hooks';
+import { usePublicSetting } from '../hooks/use-public-setting';
 
 enum Cta {
   One,
@@ -77,6 +76,7 @@ const markCtaDone = async (cta: Cta, url: string, loggedUser: UserDTO, target?: 
 };
 
 const Index = () => {
+  const onboardingMessagesStr: any | null = usePublicSetting(KysoSettingsEnum.ONBOARDING_MESSAGES);
   const [userIsLogged, setUserIsLogged] = useState<boolean | null>(null);
   const [loggedUser, setLoggedUser] = useState<UserDTO | null>(null);
   const dispatch = useAppDispatch();
@@ -151,24 +151,16 @@ const Index = () => {
   useEffect(() => {
     const result: boolean = checkJwt();
     setUserIsLogged(result);
-
-    const getOrganizationOptions = async () => {
-      const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-
-      if (!publicKeys || publicKeys.length === 0) {
-        return;
-      }
-
-      const onboardingMessagesKeyValue: KeyValue | undefined = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.ONBOARDING_MESSAGES);
-      if (onboardingMessagesKeyValue?.value) {
-        try {
-          setOnboardingMessages(JSON.parse(onboardingMessagesKeyValue.value));
-        } catch (e) {}
-      }
-    };
-
-    getOrganizationOptions();
   }, []);
+
+  useEffect(() => {
+    if (!onboardingMessagesStr) {
+      return;
+    }
+    try {
+      setOnboardingMessages(JSON.parse(onboardingMessagesStr));
+    } catch (e) {}
+  }, [onboardingMessagesStr]);
 
   if (userIsLogged === null) {
     return null;

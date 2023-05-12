@@ -1,23 +1,25 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ChannelList from '@/components/ChannelList';
 import { PureSpinner } from '@/components/PureSpinner';
-import classNames from '@/helpers/class-names';
+import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '@/helpers/Helper';
+import { checkJwt } from '@/helpers/check-jwt';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import classNames from '@/helpers/class-names';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { ArrowRightIcon, ExclamationCircleIcon, LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from '@heroicons/react/solid';
-import type { KysoSetting, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { AllowDownload, KysoSettingsEnum, Team, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
-import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
-import { checkJwt } from '@/helpers/check-jwt';
-import { HelperPermissions } from '@/helpers/check-permissions';
-import { ToasterIcons } from '@/enums/toaster-icons';
+import { usePublicSetting } from '../../hooks/use-public-setting';
 
 const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
+  const allowPublicChannelsStr: any | null = usePublicSetting(KysoSettingsEnum.ALLOW_PUBLIC_CHANNELS);
   const [isBusy, setBusy] = useState(false);
   const [formName, setFormName] = useState('');
   const [formDescription, setFormDescription] = useState('');
@@ -37,21 +39,11 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   }, []);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const indexPublicChannels: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.ALLOW_PUBLIC_CHANNELS);
-
-        if (indexPublicChannels !== -1) {
-          setEnabledPublicChannels(resultKysoSetting.data[indexPublicChannels]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!allowPublicChannelsStr) {
+      return;
+    }
+    setEnabledPublicChannels(allowPublicChannelsStr === 'true');
+  }, [allowPublicChannelsStr]);
 
   useEffect(() => {
     if (!commonData.user) {

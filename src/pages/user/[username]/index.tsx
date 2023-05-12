@@ -4,6 +4,10 @@ import { PureSpinner } from '@/components/PureSpinner';
 import ReportBadge from '@/components/ReportBadge';
 import { SomethingHappened } from '@/components/SomethingHappened';
 import UserProfileInfo from '@/components/UserProfileInfo';
+import { ToasterIcons } from '@/enums/toaster-icons';
+import { Helper } from '@/helpers/Helper';
+import { checkJwt } from '@/helpers/check-jwt';
+import { checkReportAuthors } from '@/helpers/check-report-authors';
 import { getLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import { useInterval } from '@/hooks/use-interval';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
@@ -15,11 +19,7 @@ import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { checkJwt } from '@/helpers/check-jwt';
-import { checkReportAuthors } from '@/helpers/check-report-authors';
-import { Helper } from '@/helpers/Helper';
-import type { KeyValue } from '@/model/key-value.model';
-import { ToasterIcons } from '@/enums/toaster-icons';
+import { usePublicSetting } from '../../../hooks/use-public-setting';
 
 const token: string | null = getLocalStorageItem('jwt');
 const DAYS_ACTIVITY_FEED: number = 60;
@@ -53,6 +53,7 @@ type UserProfileData = {
 
 const Index = ({ commonData, setUser, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
+  const globalPrivacyShowEmailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
   const { username } = router.query;
   const [userProfileData, setUserProfileData] = useState<UserProfileData | null>(null);
   const [currentTab, onChangeTab] = useState<string>('Overview');
@@ -66,19 +67,11 @@ const Index = ({ commonData, setUser, showToaster, hideToaster, isCurrentUserVer
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
-        if (indexShowEmail !== -1) {
-          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!globalPrivacyShowEmailStr) {
+      return;
+    }
+    setShowEmails(globalPrivacyShowEmailStr === 'true');
+  }, [globalPrivacyShowEmailStr]);
 
   useEffect(() => {
     if (!commonData.user) {

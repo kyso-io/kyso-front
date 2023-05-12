@@ -21,7 +21,6 @@ import type { Version } from '@/hooks/use-versions';
 import { useVersions } from '@/hooks/use-versions';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { KeyValue } from '@/model/key-value.model';
 import type { CommonData } from '@/types/common-data';
 import type { FileToRender } from '@/types/file-to-render';
 import type { Member } from '@/types/member';
@@ -41,9 +40,9 @@ import type {
   OrganizationMember,
   ReportDTO,
   TeamMember,
+  TeamMembershipOriginEnum,
   User,
   UserDTO,
-  TeamMembershipOriginEnum,
 } from '@kyso-io/kyso-model';
 import { CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
@@ -54,6 +53,7 @@ import { dirname } from 'path';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { usePublicSetting } from '../../../../hooks/use-public-setting';
 
 enum Tab {
   Files = 'files',
@@ -63,6 +63,7 @@ enum Tab {
 const Index = ({ commonData, reportData, setReportData, setUser, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const globalPrivacyShowemailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
   const [selfTree, setSelfTree] = useState<GithubFileHash[]>([]);
   const [parentTree, setParentTree] = useState<GithubFileHash[]>([]);
   const [fileToRender, setFileToRender] = useState<FileToRender | null>(null);
@@ -145,19 +146,11 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
   }, [reportData?.report]);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const publicKeys: KeyValue[] = await Helper.getKysoPublicSettings();
-        const indexShowEmail: number = publicKeys.findIndex((keyValue: KeyValue) => keyValue.key === KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
-        if (indexShowEmail !== -1) {
-          setShowEmails(publicKeys[indexShowEmail]!.value === 'true');
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!globalPrivacyShowemailStr) {
+      return;
+    }
+    setShowEmails(globalPrivacyShowemailStr === 'true');
+  }, [globalPrivacyShowemailStr]);
 
   useEffect(() => {
     if (!reportData || !reportData.report) {

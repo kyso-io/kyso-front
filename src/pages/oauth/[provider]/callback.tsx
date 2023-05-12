@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Helper } from '@/helpers/Helper';
-import type { KysoSetting, LoginProviderEnum, NormalizedResponseDTO, Token } from '@kyso-io/kyso-model';
+import type { LoginProviderEnum, NormalizedResponseDTO, Token } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
 import { Api, setTokenAuthAction } from '@kyso-io/kyso-store';
@@ -8,32 +7,23 @@ import decode from 'jwt-decode';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { usePublicSetting } from '../../../hooks/use-public-setting';
 import MainLayout from '../../../layouts/MainLayout';
 import type { DecodedToken } from '../../../types/decoded-token';
 
 const Page = () => {
   const router = useRouter();
+  const hcaptchaEnabledStr: any | null = usePublicSetting(KysoSettingsEnum.HCAPTCHA_ENABLED);
   const dispatch = useDispatch<AppDispatch>();
   const { code, provider, state } = router.query;
   const [captchaIsEnabled, setCaptchaIsEnabled] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const getData = async () => {
-      try {
-        const api: Api = new Api();
-        const resultKysoSetting: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-        const index: number = resultKysoSetting.data.findIndex((item: KysoSetting) => item.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-        if (index !== -1) {
-          setCaptchaIsEnabled(resultKysoSetting.data[index]!.value === 'true');
-        } else {
-          setCaptchaIsEnabled(false);
-        }
-      } catch (errorHttp: any) {
-        Helper.logError(errorHttp?.response?.data, errorHttp);
-      }
-    };
-    getData();
-  }, []);
+    if (!hcaptchaEnabledStr) {
+      return;
+    }
+    setCaptchaIsEnabled(hcaptchaEnabledStr === 'true');
+  }, [hcaptchaEnabledStr]);
 
   useEffect(() => {
     if (captchaIsEnabled === null) {

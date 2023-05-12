@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import ErrorNotification from '@/components/ErrorNotification';
-import { Helper } from '@/helpers/Helper';
 import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
@@ -8,7 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NormalizedResponseDTO, Token } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, Login, LoginProviderEnum } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
-import { Api, setError as storeSetError, setTokenAuthAction } from '@kyso-io/kyso-store';
+import { Api, setTokenAuthAction, setError as storeSetError } from '@kyso-io/kyso-store';
 import decode from 'jwt-decode';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -16,7 +15,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { KysoDescription } from '../components/KysoDescription';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
-import type { KeyValue } from '../model/key-value.model';
+import { usePublicSettings } from '../hooks/use-public-settings';
 import type { DecodedToken } from '../types/decoded-token';
 
 const validateEmail = (email: string) => {
@@ -30,8 +29,24 @@ const gitlabScope = 'read_user';
 
 const Index = () => {
   const router = useRouter();
+  const kysoSettingValues: (any | null)[] = usePublicSettings([
+    KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GOOGLE, // 0
+    KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITHUB, // 1
+    KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB, // 2
+    KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET, // 3
+    KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO, // 4
+    KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML, // 5
+    KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_OKTA_SAML, // 6
+    KysoSettingsEnum.AUTH_GOOGLE_CLIENT_ID, // 7
+    KysoSettingsEnum.AUTH_GITHUB_CLIENT_ID, // 8
+    KysoSettingsEnum.AUTH_GITLAB_CLIENT_ID, // 9
+    KysoSettingsEnum.AUTH_GITLAB_REDIRECT_URI, // 10
+    KysoSettingsEnum.AUTH_BITBUCKET_CLIENT_ID, // 11
+    KysoSettingsEnum.AUTH_PINGID_SAML_SSO_URL, // 12
+    KysoSettingsEnum.AUTH_OKTA_SAML_SSO_URL, // 13
+    KysoSettingsEnum.HCAPTCHA_ENABLED, // 14
+  ]);
   const { redirect, invitation } = router.query;
-
   const [email, setEmail] = useState(getLocalStorageItem('email') || '');
   const [error, setError] = useState<string | null>(null);
   const [password, setPassword] = useState<string>('');
@@ -55,68 +70,40 @@ const Index = () => {
     if (!router.isReady) {
       return;
     }
-    const getOrganizationOptions = async () => {
-      /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-      const publicKeys: any[] = await Helper.getKysoPublicSettings();
+    if (kysoSettingValues.length === 0) {
+      return;
+    }
+    setEnableGoogleAuth(kysoSettingValues[0] === 'true');
+    setEnableGithubAuth(kysoSettingValues[1] === 'true');
+    setEnableGitlabAuth(kysoSettingValues[2] === 'true');
+    setEnableBitbucketAuth(kysoSettingValues[3] === 'true');
+    setEnableKysoAuth(kysoSettingValues[4] === 'true');
+    setEnablePingSamlAuth(kysoSettingValues[5] === 'true');
+    setEnableOktaSamlAuth(kysoSettingValues[6] === 'true');
 
-      if (!publicKeys || publicKeys.length === 0) {
-        // return toaster.danger("An unknown error has occurred");
-        return '';
-      }
+    setGoogleUrl(
+      `https://accounts.google.com/o/oauth2/v2/auth?client_id=${kysoSettingValues[7]}&response_type=code&redirect_uri=${encodeURIComponent(
+        `${window.location.origin}/oauth/google/callback`,
+      )}&scope=${encodeURIComponent('https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.emails.read')}${
+        invitation ? `&state=${invitation}` : ''
+      }${redirect ? `&state=${redirect}` : ''}`,
+    );
+    setGithubUrl(
+      `https://github.com/login/oauth/authorize?client_id=${kysoSettingValues[8]}&scope=${githubScopes.join(',')}${invitation ? `&state=${invitation}` : ''}${redirect ? `&state=${redirect}` : ''}`,
+    );
+    setGitlabUrl(
+      `https://gitlab.com/oauth/authorize?client_id=${kysoSettingValues[9]}&scope=${gitlabScope}&redirect_uri=${kysoSettingValues[10]}&response_type=code${invitation ? `&state=${invitation}` : ''}${
+        redirect ? `&state=${redirect}` : ''
+      }`,
+    );
+    setBitbucketUrl(
+      `https://bitbucket.org/site/oauth2/authorize?client_id=${kysoSettingValues[11]}&response_type=code${invitation ? `&state=${invitation}` : ''}${redirect ? `&state=${redirect}` : ''}`,
+    );
+    setPingUrl(kysoSettingValues[12]);
+    setOktaUrl(kysoSettingValues[13]);
 
-      const googleClientId = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_GOOGLE_CLIENT_ID).value;
-      const bitbucketClientId = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_BITBUCKET_CLIENT_ID).value;
-      const githubClientId = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_GITHUB_CLIENT_ID).value;
-      const gitlabClientId = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_GITLAB_CLIENT_ID).value;
-      const gitlabRedirectURI = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_GITLAB_REDIRECT_URI).value;
-      const pingIdSamlSSOUrl = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_PINGID_SAML_SSO_URL).value;
-      const oktaSamlSSOUrl = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_OKTA_SAML_SSO_URL).value;
-
-      const tmpEnableGoogleAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GOOGLE).value === 'true';
-      const tmpEnableGithubAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITHUB).value === 'true';
-      const tmpEnableGitlabAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_GITLAB).value === 'true';
-      const tmpEnableBitbucketAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_BITBUCKET).value === 'true';
-      const tmpEnableKysoAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_KYSO).value === 'true';
-      const tmpEnablePingSamlAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_PINGID_SAML).value === 'true';
-      const tmpEnableOktaSamlAuth = publicKeys.find((x: KeyValue) => x.key === KysoSettingsEnum.AUTH_ENABLE_GLOBALLY_OKTA_SAML).value === 'true';
-
-      setEnableGoogleAuth(tmpEnableGoogleAuth);
-      setEnableGitlabAuth(tmpEnableGitlabAuth);
-      setEnableGithubAuth(tmpEnableGithubAuth);
-      setEnableBitbucketAuth(tmpEnableBitbucketAuth);
-      setEnableKysoAuth(tmpEnableKysoAuth);
-      setEnablePingSamlAuth(tmpEnablePingSamlAuth);
-      setEnableOktaSamlAuth(tmpEnableOktaSamlAuth);
-
-      setGoogleUrl(
-        `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&response_type=code&redirect_uri=${encodeURIComponent(
-          `${window.location.origin}/oauth/google/callback`,
-        )}&scope=${encodeURIComponent('https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/user.emails.read')}${
-          invitation ? `&state=${invitation}` : ''
-        }${redirect ? `&state=${redirect}` : ''}`,
-      );
-      setBitbucketUrl(
-        `https://bitbucket.org/site/oauth2/authorize?client_id=${bitbucketClientId}&response_type=code${invitation ? `&state=${invitation}` : ''}${redirect ? `&state=${redirect}` : ''}`,
-      );
-      setGithubUrl(
-        `https://github.com/login/oauth/authorize?client_id=${githubClientId}&scope=${githubScopes.join(',')}${invitation ? `&state=${invitation}` : ''}${redirect ? `&state=${redirect}` : ''}`,
-      );
-      setGitlabUrl(
-        `https://gitlab.com/oauth/authorize?client_id=${gitlabClientId}&scope=${gitlabScope}&redirect_uri=${gitlabRedirectURI}&response_type=code${invitation ? `&state=${invitation}` : ''}${
-          redirect ? `&state=${redirect}` : ''
-        }`,
-      );
-
-      setPingUrl(pingIdSamlSSOUrl);
-      setOktaUrl(oktaSamlSSOUrl);
-
-      const captchaEnabledValue: string = publicKeys.find((x) => x.key === KysoSettingsEnum.HCAPTCHA_ENABLED).value;
-      setCaptchaEnabled(captchaEnabledValue === 'true');
-
-      return '';
-    };
-    getOrganizationOptions();
-  }, [router.isReady]);
+    setCaptchaEnabled(kysoSettingValues[14] === 'true');
+  }, [router.isReady, kysoSettingValues]);
 
   useEffect(() => {
     if (router.query.error) {

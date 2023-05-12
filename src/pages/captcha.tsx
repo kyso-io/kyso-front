@@ -3,13 +3,14 @@ import { ToasterIcons } from '@/enums/toaster-icons';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
-import type { KysoSetting, NormalizedResponseDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import { checkJwt } from '../helpers/check-jwt';
+import { usePublicSettings } from '../hooks/use-public-settings';
 
 const DEFAULT_CAPTCHA_SITE_KEY = '22';
 
@@ -22,6 +23,7 @@ function isBrowser() {
 
 const Index = ({ commonData, showToaster }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
+  const kysoSettingValues: (any | null)[] = usePublicSettings([KysoSettingsEnum.HCAPTCHA_ENABLED, KysoSettingsEnum.HCAPTCHA_SITE_KEY]);
   const { invitation, redirect } = router.query;
   const hCaptchaRef = useRef(null);
   const [captchaSiteKey, setCaptchaSiteKey] = useState<string>(DEFAULT_CAPTCHA_SITE_KEY);
@@ -59,34 +61,25 @@ const Index = ({ commonData, showToaster }: IKysoApplicationLayoutProps) => {
       setTimeout(() => router.replace(redirectUrl), 500);
       return;
     }
-    const getData = async () => {
-      const api: Api = new Api();
-      const response: NormalizedResponseDTO<KysoSetting[]> = await api.getPublicSettings();
-      const captchaEnabledKysoSetting: KysoSetting | undefined = response.data.find((kysoSetting: KysoSetting) => kysoSetting.key === KysoSettingsEnum.HCAPTCHA_ENABLED);
-      const captchaEnabled: boolean = captchaEnabledKysoSetting === undefined || captchaEnabledKysoSetting.value === 'true';
-
-      if (!captchaEnabled) {
-        if (commonData.user?.show_onboarding) {
-          router.push('/overview');
-          return;
-        }
-
-        if (isBrowser()) {
-          sessionStorage.removeItem('redirectUrl');
-        }
-        setTimeout(() => router.replace(redirectUrl), 200);
+    const captchaEnabled: boolean = kysoSettingValues[0] === null || kysoSettingValues[0].value === 'true';
+    if (!captchaEnabled) {
+      if (commonData.user?.show_onboarding) {
+        router.push('/overview');
         return;
       }
-      const captchaSiteKeyKysoSetting: KysoSetting | undefined = response.data.find((kysoSetting: KysoSetting) => kysoSetting.key === KysoSettingsEnum.HCAPTCHA_SITE_KEY);
-      if (!captchaSiteKeyKysoSetting) {
-        /* eslint-disable no-alert */
-        alert('Captcha is enabled but no site key is set. Please contact support.');
-        return;
+      if (isBrowser()) {
+        sessionStorage.removeItem('redirectUrl');
       }
-      setCaptchaSiteKey(captchaSiteKeyKysoSetting.value);
-    };
-    getData();
-  }, [commonData.user]);
+      setTimeout(() => router.replace(redirectUrl), 200);
+      return;
+    }
+    if (!kysoSettingValues[1]) {
+      /* eslint-disable no-alert */
+      alert('Captcha is enabled but no site key is set. Please contact support.');
+      return;
+    }
+    setCaptchaSiteKey(kysoSettingValues[1]);
+  }, [commonData.user, kysoSettingValues]);
 
   const onSubmit = async () => {
     if (!captchaToken) {
