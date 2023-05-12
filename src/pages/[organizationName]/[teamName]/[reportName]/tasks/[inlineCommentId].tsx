@@ -335,15 +335,24 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   };
 
   const updateMemberRole = async (_userId: string, _organizationRole: string, _teamRole?: string): Promise<void> => {
-    getTeamMembers();
+    // Reloading of data is too fast, to retrieve the right value we need to wait a bit
+    setTimeout(() => {
+      getTeamMembers();
+    }, 500);
   };
 
   const inviteNewUser = async (_email: string, _organizationRole: string): Promise<void> => {
-    getTeamMembers();
+    // Reloading of data is too fast, to retrieve the right value we need to wait a bit
+    setTimeout(() => {
+      getTeamMembers();
+    }, 500);
   };
 
   const removeUser = async (_userId: string, _type: TeamMembershipOriginEnum): Promise<void> => {
-    getTeamMembers();
+    // Reloading of data is too fast, to retrieve the right value we need to wait a bit
+    setTimeout(() => {
+      getTeamMembers();
+    }, 500);
   };
 
   if (requesting) {

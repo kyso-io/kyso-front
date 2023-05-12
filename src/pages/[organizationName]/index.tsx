@@ -20,13 +20,12 @@ import type {
   TeamMembershipOriginEnum,
   UserDTO,
 } from '@kyso-io/kyso-model';
-import { AddUserOrganizationDto, GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, UpdateOrganizationMembersDTO, UserRoleDTO } from '@kyso-io/kyso-model';
+import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum } from '@kyso-io/kyso-model';
 // @ts-ignore
 import ActivityFeedComponent from '@/components/ActivityFeed';
 import InfoActivity from '@/components/InfoActivity';
 import ManageUsers from '@/components/ManageUsers';
 import ReportBadge from '@/components/ReportBadge';
-import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '@/helpers/Helper';
 import { checkJwt } from '@/helpers/check-jwt';
 import { HelperPermissions } from '@/helpers/check-permissions';
@@ -452,46 +451,25 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     }
   };
 
-  const updateMemberRole = async (userId: string, organizationRole: string): Promise<void> => {
-    const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
-
-    if (!isValid) {
-      return;
-    }
-
-    const index: number = members.findIndex((m: Member) => m.id === userId);
-    if (index === -1) {
-      try {
-        const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
-        const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData!.organization!.id!, userId, organizationRole);
-        await api.addUserToOrganization(addUserOrganizationDto);
-
-        showToaster('User invited successfully', ToasterIcons.INFO);
-      } catch (e) {
-        Helper.logError('Unexpected error', e);
-        showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
-      }
-    } else if (!members[index]!.organization_roles.includes(organizationRole)) {
-      try {
-        const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
-        const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, organizationRole);
-        const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
-        await api.updateOrganizationMemberRoles(commonData!.organization!.id!, updateOrganizationMembersDTO);
-        showToaster('User invited successfully', ToasterIcons.INFO);
-      } catch (e) {
-        Helper.logError('Unexpected error', e);
-        showToaster("We're sorry! Something happened and we couldn't do the operation. Please try again", ToasterIcons.ERROR);
-      }
-    }
-    getOrganizationMembers();
+  const updateMemberRole = async (_userId: string, _organizationRole: string): Promise<void> => {
+    // Reloading of data is too fast, to retrieve the right value we need to wait a bit
+    setTimeout(() => {
+      getOrganizationMembers();
+    }, 500);
   };
 
   const inviteNewUser = async (_email: string, _organizationRole: string): Promise<void> => {
-    getOrganizationMembers();
+    // Reloading of data is too fast, to retrieve the right value we need to wait a bit
+    setTimeout(() => {
+      getOrganizationMembers();
+    }, 500);
   };
 
   const removeUser = async (_userId: string, _type: TeamMembershipOriginEnum): Promise<void> => {
-    getOrganizationMembers();
+    // Reloading of data is too fast, to retrieve the right value we need to wait a bit
+    setTimeout(() => {
+      getOrganizationMembers();
+    }, 500);
   };
 
   // END ORGANIZATION MEMBERS

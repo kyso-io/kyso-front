@@ -211,14 +211,14 @@ const ManageUsers = ({
                 ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
                 : 'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
             )}
-            onClick={() => {
+            onClick={async () => {
               const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
               if (!isValid) {
                 return;
               }
 
-              onUpdateRoleMemberDoAction(selectedUser.id, selectedOrgRole, selectedTeamRole);
+              await onUpdateRoleMemberDoAction(selectedUser.id, selectedOrgRole, selectedTeamRole);
               onUpdateRoleMember(selectedUser.id, selectedOrgRole, selectedTeamRole);
               clearData();
             }}
@@ -236,8 +236,8 @@ const ManageUsers = ({
                 ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
                 : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
             )}
-            onClick={() => {
-              onInviteNewUserDoAction(query, selectedOrgRole, selectedTeamRole);
+            onClick={async () => {
+              await onInviteNewUserDoAction(query, selectedOrgRole, selectedTeamRole);
               onInviteNewUser(query, selectedOrgRole, selectedTeamRole);
               clearData();
             }}
@@ -265,7 +265,7 @@ const ManageUsers = ({
         await api.addUserToOrganization(addUserOrganizationDto);
         showToaster('User added to the organization successfully', ToasterIcons.SUCCESS);
       } catch (e) {
-        showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.SUCCESS);
+        showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.ERROR);
         Helper.logError('Unexpected error', e);
       }
     } else {
@@ -277,7 +277,7 @@ const ManageUsers = ({
           await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
           showToaster('The role at the organization was changed successfully', ToasterIcons.SUCCESS);
         } catch (e) {
-          showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.SUCCESS);
+          showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.ERROR);
           Helper.logError('Unexpected error', e);
         }
       }
@@ -290,7 +290,7 @@ const ManageUsers = ({
           showToaster('The role at the channel was changed successfully', ToasterIcons.SUCCESS);
         } catch (e) {
           Helper.logError('Unexpected error', e);
-          showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.SUCCESS);
+          showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.ERROR);
         }
       }
     }
@@ -373,11 +373,11 @@ const ManageUsers = ({
                 <Menu.Items
                   className="origin-top-right absolute right-0 mt-2 px-4 py-2 min-w-max rounded-md shadow-lg bg-white ring-1 ring-gray-200 ring-opacity/5 focus:outline-none"
                   style={{ zIndex: 100, width: showTeamRoles ? 380 : selectedUser ? 380 : 280 }}
-                  onKeyDown={(e: any) => {
+                  onKeyDown={async (e: any) => {
                     if (e.key === 'Enter' && (selectedTeamRole === REMOVE_USER_VALUE || selectedOrgRole === REMOVE_USER_VALUE)) {
                       if (inputDeleteUser === keyDeleteUser) {
                         const member: Member = members[selectedMemberIndex]!;
-                        onRemoveUserDoAction(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
+                        await onRemoveUserDoAction(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                         onRemoveUser(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                         clearData();
                       }
@@ -584,7 +584,7 @@ const ManageUsers = ({
                                   ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
                                   : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
                               )}
-                              onClick={() => {
+                              onClick={async () => {
                                 const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
                                   isCurrentUserVerified(),
                                   isCurrentUserSolvedCaptcha(),
@@ -597,7 +597,7 @@ const ManageUsers = ({
                                 }
 
                                 const member: Member = members[selectedMemberIndex]!;
-                                onUpdateRoleMemberDoAction(member.id, selectedOrgRole, selectedTeamRole);
+                                await onUpdateRoleMemberDoAction(member.id, selectedOrgRole, selectedTeamRole);
                                 onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
                                 clearData();
                               }}
@@ -780,13 +780,13 @@ const ManageUsers = ({
                                 'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2',
                                 inputDeleteUser !== keyDeleteUser ? 'k-bg-primary-disabled cursor-not-allowed' : 'k-bg-primary',
                               )}
-                              onClick={() => {
+                              onClick={async () => {
                                 if (inputDeleteUser !== keyDeleteUser) {
                                   setErrorMessage('Please type the correct key to remove the user.');
                                   return;
                                 }
                                 const member: Member = members[selectedMemberIndex]!;
-                                onRemoveUserDoAction(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
+                                await onRemoveUserDoAction(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                                 onRemoveUser(member.id, selectedOrgRole === REMOVE_USER_VALUE ? TeamMembershipOriginEnum.ORGANIZATION : TeamMembershipOriginEnum.TEAM);
                                 clearData();
                               }}
@@ -804,7 +804,7 @@ const ManageUsers = ({
                                   ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
                                   : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
                               )}
-                              onClick={() => {
+                              onClick={async () => {
                                 const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
                                   isCurrentUserVerified(),
                                   isCurrentUserSolvedCaptcha(),
@@ -816,7 +816,7 @@ const ManageUsers = ({
                                   return;
                                 }
                                 const member: Member = members[selectedMemberIndex]!;
-                                onUpdateRoleMemberDoAction(member.id, selectedOrgRole, selectedTeamRole);
+                                await onUpdateRoleMemberDoAction(member.id, selectedOrgRole, selectedTeamRole);
                                 onUpdateRoleMember(member.id, selectedOrgRole, selectedTeamRole);
                                 clearData();
                               }}
