@@ -265,7 +265,7 @@ const ManageUsers = ({
         await api.addUserToOrganization(addUserOrganizationDto);
         showToaster('User added to the organization successfully', ToasterIcons.SUCCESS);
       } catch (e) {
-        showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.SUCCESS);
+        showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.ERROR);
         Helper.logError('Unexpected error', e);
       }
     } else {
@@ -277,7 +277,7 @@ const ManageUsers = ({
           await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
           showToaster('The role at the organization was changed successfully', ToasterIcons.SUCCESS);
         } catch (e) {
-          showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.SUCCESS);
+          showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.ERROR);
           Helper.logError('Unexpected error', e);
         }
       }
@@ -290,7 +290,7 @@ const ManageUsers = ({
           showToaster('The role at the channel was changed successfully', ToasterIcons.SUCCESS);
         } catch (e) {
           Helper.logError('Unexpected error', e);
-          showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.SUCCESS);
+          showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.ERROR);
         }
       }
     }
