@@ -295,16 +295,6 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
       <div className="col-span-3">
         {/* SEARCH BAR */}
         <div className="mt-1">
-          <input
-            name="search"
-            type="text"
-            autoComplete="off"
-            placeholder="Search Kyso"
-            value={fullTextSearchParams.terms}
-            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-            /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
-            onChange={(e: any) => setFullTextSearchParams({ ...fullTextSearchParams, terms: e.target.value, page: 1 })}
-          />
           {fullTextSearchDTO && (
             <div className="flex flex-row items-center my-4 ml-3 text-xs">
               <span>

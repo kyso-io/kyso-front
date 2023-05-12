@@ -34,12 +34,18 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
   const currentUrl = `${origin}${router.asPath}`;
   const [numOpenedInlineComments, setNumOpenedInlineComments] = useState<number>(0);
 
+  const { q } = router.query;
+
   useEffect(() => {
     if (!commonData.token || !commonData.user) {
       return;
     }
     getNumOpenedInlineComments();
   }, [commonData.user]);
+
+  useEffect(() => {
+    setQuery(q as string);
+  }, [q]);
 
   const getNumOpenedInlineComments = async () => {
     try {
