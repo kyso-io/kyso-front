@@ -10,8 +10,8 @@ import RenderOnlyOffice from '@/components/renderers/kyso-onlyoffice-renderer/Re
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
-import type { InlineCommentDto, InlineCommentStatusEnum, NormalizedResponseDTO, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { CreateInlineCommentDto, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, NormalizedResponseDTO, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import { InlineCommentStatusEnum, CreateInlineCommentDto, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
@@ -67,7 +67,7 @@ const UnpureReportRender = ({
       try {
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
         const response: NormalizedResponseDTO<InlineCommentDto[]> = await api.getInlineComments(report.id as string, fileToRender.id);
-        setInlineComments(response.data);
+        setInlineComments(response.data.filter((inlineComment: InlineCommentDto) => inlineComment.current_status !== InlineCommentStatusEnum.CLOSED));
       } catch (e) {}
     };
     getReportInlineComments();

@@ -20,10 +20,6 @@ import { useAppSelector } from '../../../hooks/redux-hooks';
 import PureInlineCommentForm from './pure-inline-comment-form';
 import TagInlineComment from './tag-inline-comment';
 
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ');
-}
-
 type IPureInlineComment = {
   hasPermissionCreateComment: boolean;
   hasPermissionDeleteComment: boolean;
@@ -116,7 +112,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
           />
         </div>
       ) : (
-        <div id={comment.cell_id} className={classNames('flex py-2 border rounded my-1 px-4 flex-col', parentInlineComment ? 'ml-10' : '')}>
+        <div id={comment.cell_id} className={clsx('flex py-2 border rounded my-1 px-4 flex-col', parentInlineComment ? 'ml-10' : '', isClosed ? 'bg-slate-50' : '')}>
           <div className="flex flex-row justify-end space-x-2 text-xs font-light text-gray-400">
             {isUserAuthor && hasPermissionCreateComment && isLastVersion && (
               <React.Fragment>
