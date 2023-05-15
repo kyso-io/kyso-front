@@ -13,7 +13,7 @@ export const checkReportAuthors = (result: NormalizedResponseDTO<PaginatedRespon
   });
   const dataWithAuthors: ReportDTO[] = [];
   for (const x of result.data.results) {
-    const allAuthorsId: string[] = [x.user_id, ...x.author_ids];
+    const allAuthorsId: string[] = [...x.author_ids];
     const uniqueAllAuthorsId: string[] = Array.from(new Set(allAuthorsId));
     const allAuthorsData: UserDTO[] = [];
     for (const authorId of uniqueAllAuthorsId) {
