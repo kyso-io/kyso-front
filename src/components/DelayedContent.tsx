@@ -6,12 +6,16 @@ type IDelayedContent = {
    * Delay in milliseconds
    */
   delay?: number;
+  /**
+   * Skeleton template to apply, if not provided, text skeleton is shown
+   */
+  skeletonTemplate?: ReactElement;
   children: ReactElement;
 };
 
 const DelayedContent = (props: IDelayedContent) => {
   let { delay } = props;
-  const { children } = props;
+  const { children, skeletonTemplate } = props;
   const [showContent, setShowContent] = useState<boolean>(false);
 
   const linesSkeleton = () => {
@@ -39,7 +43,13 @@ const DelayedContent = (props: IDelayedContent) => {
 
   return (
     <>
-      {!showContent && linesSkeleton()}
+      {!showContent && (
+        <>
+          {skeletonTemplate && <>{skeletonTemplate}</>}
+
+          {!skeletonTemplate && <>{linesSkeleton()}</>}
+        </>
+      )}
       {showContent && <>{children}</>}
     </>
   );
