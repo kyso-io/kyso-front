@@ -259,6 +259,9 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
       const finalPermissions: NotificationsSettings = buildFinalNotificationSettings(selectedOrganizationSettings, selectedChannelSettings, result.data.global_settings);
 
       setNotificationsSettings(finalPermissions);
+
+      const refreshedUserNotificationsSettings: NormalizedResponseDTO<UserNotificationsSettings> = await api.getUserNotificationsSetting();
+      setUserNotificationsSettings(refreshedUserNotificationsSettings.data);
     } catch (e) {}
   };
 
@@ -375,7 +378,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                   </div>
                   {selectedTab === Tab.OrganizationAndChannel && (
                     <>
-                      {isGlobalInheritanceBroken && !isOrganizationInheritanceBroken && (
+                      {teamId === '' && isGlobalInheritanceBroken && !isOrganizationInheritanceBroken && (
                         <>
                           <div className="rounded-md bg-blue-50 p-4">
                             <div className="flex">
@@ -399,7 +402,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                                         await api.deleteUserNotificationsSettingsOrganization(organizationId);
 
                                         showToaster('Restoration to global configuration done successfully', ToasterIcons.INFO);
-                                        refreshData();
+                                        await refreshData();
                                       } catch (e) {
                                         showToaster('Something happened trying to restore to global configuration. Please try again', ToasterIcons.ERROR);
                                       }
@@ -437,7 +440,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                                         await api.deleteUserNotificationsSettingsOrganizationChannel(organizationId, teamId);
 
                                         showToaster('Restoration to organization configuration done successfully', ToasterIcons.INFO);
-                                        refreshData();
+                                        await refreshData();
                                       } catch (e) {
                                         showToaster('Something happened trying to restore to organization configuration. Please try again', ToasterIcons.ERROR);
                                       }
