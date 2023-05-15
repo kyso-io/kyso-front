@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import DelayedContent from '@/components/DelayedContent';
 import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
 import SettingsAside from '@/components/SettingsAside';
 import { ToasterIcons } from '@/enums/toaster-icons';
@@ -257,11 +258,10 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
       }
 
       const finalPermissions: NotificationsSettings = buildFinalNotificationSettings(selectedOrganizationSettings, selectedChannelSettings, result.data.global_settings);
-
-      setNotificationsSettings(finalPermissions);
-
       const refreshedUserNotificationsSettings: NormalizedResponseDTO<UserNotificationsSettings> = await api.getUserNotificationsSetting();
+
       setUserNotificationsSettings(refreshedUserNotificationsSettings.data);
+      setNotificationsSettings(finalPermissions);
     } catch (e) {}
   };
 
@@ -356,6 +356,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                             if (tab === Tab.GlobalConfiguration) {
                               setOrganizationId('');
                               setTeamId('');
+                              refreshData();
                             }
                             setSelectedTab(tab);
                           }}
@@ -379,7 +380,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                   {selectedTab === Tab.OrganizationAndChannel && (
                     <>
                       {teamId === '' && isGlobalInheritanceBroken && !isOrganizationInheritanceBroken && (
-                        <>
+                        <DelayedContent>
                           <div className="rounded-md bg-blue-50 p-4">
                             <div className="flex">
                               <div className="shrink-0">
@@ -414,10 +415,10 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                               </div>
                             </div>
                           </div>
-                        </>
+                        </DelayedContent>
                       )}
                       {isOrganizationInheritanceBroken && (
-                        <>
+                        <DelayedContent>
                           <div className="rounded-md bg-blue-50 p-4">
                             <div className="flex">
                               <div className="shrink-0">
@@ -452,7 +453,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                               </div>
                             </div>
                           </div>
-                        </>
+                        </DelayedContent>
                       )}
                       <div className="grid grid-cols-4 gap-4 pt-4 pb-6">
                         <label className="block text-sm font-medium leading-6 text-gray-900 sm:pt-1.5">Organization:</label>
@@ -461,6 +462,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                           onChange={(e) => {
                             setTeamId('');
                             setOrganizationId(e.target.value);
+                            refreshData();
                           }}
                         >
                           {organizationsResourcePermissions.map((orp: ResourcePermissions) => (
@@ -474,6 +476,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                           className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
                           onChange={(e) => {
                             setTeamId(e.target.value);
+                            refreshData();
                           }}
                         >
                           <option value="">All</option>
