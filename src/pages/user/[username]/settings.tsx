@@ -52,7 +52,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
 
   useEffect(() => {
     if (isUserLogged === null) {
-      return;
+      router.push('/login');
     }
     if (isUserLogged) {
       setIsCurrentUser(commonData.user?.username === username);
