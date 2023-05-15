@@ -7,6 +7,7 @@ import { checkJwt } from '@/helpers/check-jwt';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Switch } from '@headlessui/react';
+import { InformationCircleIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, ResourcePermissions, UserNotificationsSettings } from '@kyso-io/kyso-model';
 import { NotificationsSettings, UpdateUserNotificationsSettings, UserNotificationsSettingsScope } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
@@ -130,6 +131,8 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
   const [notificationsSettings, setNotificationsSettings] = useState<NotificationsSettings>(new NotificationsSettings());
   const [userNotificationsSettings, setUserNotificationsSettings] = useState<UserNotificationsSettings | null>(null);
   const [organizationId, setOrganizationId] = useState<string>('');
+  const [isGlobalInheritanceBroken, setIsGlobalInheritanceBroken] = useState<boolean>(false);
+  const [isOrganizationInheritanceBroken, setIsOrganizationInheritanceBroken] = useState<boolean>(false);
   const [teamId, setTeamId] = useState<string>('');
   const organizationsResourcePermissions: ResourcePermissions[] = useMemo(() => {
     if (!commonData.permissions) {
@@ -188,44 +191,104 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
     getData();
   }, [commonData.token]);
 
+  const buildFinalNotificationSettings = (
+    orgNotificationSettings: NotificationsSettings | undefined,
+    teamNotificationSettings: NotificationsSettings | undefined,
+    globalNotificationSettings: NotificationsSettings,
+  ) => {
+    let finalSettings: NotificationsSettings | undefined = new NotificationsSettings();
+
+    if (globalNotificationSettings) {
+      finalSettings = globalNotificationSettings;
+    }
+
+    // If there is organization settings, that overwrites globals
+    if (orgNotificationSettings) {
+      finalSettings = orgNotificationSettings;
+      setIsGlobalInheritanceBroken(true);
+    } else {
+      setIsGlobalInheritanceBroken(false);
+    }
+
+    // If there is team settings, that overwrite SOME of the properties
+    if (teamNotificationSettings) {
+      setIsOrganizationInheritanceBroken(true);
+
+      for (const option of options) {
+        if (option.disabled_for_channel === false) {
+          // fuck off typescript
+          // @ts-ignore
+          finalSettings[option.key] = teamNotificationSettings[option.key];
+        }
+      }
+    } else {
+      setIsOrganizationInheritanceBroken(false);
+    }
+
+    return finalSettings;
+  };
+
+  const refreshData = async () => {
+    try {
+      const api: Api = new Api(commonData.token);
+      const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.getUserNotificationsSetting();
+
+      let selectedChannelSettings;
+      let selectedOrganizationSettings;
+
+      if (!result.data) {
+        return;
+      }
+
+      if (Helper.isPropertyInObject(result.data.organization_settings, organizationId)) {
+        selectedOrganizationSettings = result.data.organization_settings[organizationId]!;
+      } else {
+        selectedOrganizationSettings = undefined;
+      }
+
+      if (Helper.isPropertyInObject(result.data.channels_settings, organizationId)) {
+        if (Helper.isPropertyInObject(result.data.channels_settings[organizationId]!, teamId)) {
+          selectedChannelSettings = result.data.channels_settings[organizationId]![teamId]!;
+        } else {
+          selectedChannelSettings = undefined;
+        }
+      } else {
+        selectedChannelSettings = undefined;
+      }
+
+      const finalPermissions: NotificationsSettings = buildFinalNotificationSettings(selectedOrganizationSettings, selectedChannelSettings, result.data.global_settings);
+
+      setNotificationsSettings(finalPermissions);
+    } catch (e) {}
+  };
+
   useEffect(() => {
     if (!userNotificationsSettings) {
       return;
     }
-    if (selectedTab === Tab.GlobalConfiguration) {
-      setNotificationsSettings(userNotificationsSettings.global_settings);
-    } else if (teamId) {
-      /* eslint-disable no-prototype-builtins */
-      if (!userNotificationsSettings.channels_settings.hasOwnProperty(organizationId)) {
-        const ns: NotificationsSettings = { ...userNotificationsSettings.global_settings } as any;
-        setNotificationsSettings(ns);
-        /* eslint-disable no-lonely-if */
+
+    let selectedChannelSettings;
+    let selectedOrganizationSettings;
+
+    if (Helper.isPropertyInObject(userNotificationsSettings.organization_settings, organizationId)) {
+      selectedOrganizationSettings = userNotificationsSettings.organization_settings[organizationId]!;
+    } else {
+      selectedOrganizationSettings = undefined;
+    }
+
+    if (Helper.isPropertyInObject(userNotificationsSettings.channels_settings, organizationId)) {
+      if (Helper.isPropertyInObject(userNotificationsSettings.channels_settings[organizationId]!, teamId)) {
+        selectedChannelSettings = userNotificationsSettings.channels_settings[organizationId]![teamId]!;
       } else {
-        /* eslint-disable no-prototype-builtins */
-        if (!userNotificationsSettings.channels_settings[organizationId]!.hasOwnProperty(teamId)) {
-          const ns: NotificationsSettings = { ...userNotificationsSettings.channels_settings[organizationId] } as any;
-          ns.new_member_organization = userNotificationsSettings.organization_settings[organizationId]!.new_member_organization;
-          ns.removed_member_in_organization = userNotificationsSettings.organization_settings[organizationId]!.removed_member_in_organization;
-          ns.updated_role_in_organization = userNotificationsSettings.organization_settings[organizationId]!.updated_role_in_organization;
-          ns.organization_removed = userNotificationsSettings.organization_settings[organizationId]!.organization_removed;
-          ns.new_channel = userNotificationsSettings.organization_settings[organizationId]!.new_channel;
-          setNotificationsSettings(ns);
-        } else {
-          setNotificationsSettings(userNotificationsSettings.channels_settings[organizationId]![teamId]!);
-        }
+        selectedChannelSettings = undefined;
       }
     } else {
-      if (organizationId) {
-        /* eslint-disable no-prototype-builtins */
-        if (!userNotificationsSettings.organization_settings.hasOwnProperty(organizationId)) {
-          setNotificationsSettings({ ...userNotificationsSettings.global_settings } as any);
-        } else {
-          setNotificationsSettings(userNotificationsSettings.organization_settings[organizationId]!);
-        }
-      } else {
-        setOrganizationId(organizationsResourcePermissions[0]!.id);
-      }
+      selectedChannelSettings = undefined;
     }
+
+    const finalPermissions: NotificationsSettings = buildFinalNotificationSettings(selectedOrganizationSettings, selectedChannelSettings, userNotificationsSettings.global_settings);
+
+    setNotificationsSettings(finalPermissions);
   }, [userNotificationsSettings, selectedTab, organizationId, teamId]);
 
   const onUpdateUserNotificationsSettings = async (nss: NotificationsSettings) => {
@@ -239,25 +302,23 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
       } catch (e) {
         showToaster("We're sorry! Something happenend trying to execute the operation. Please try again", ToasterIcons.ERROR);
       }
+    } else if (teamId) {
+      try {
+        const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Channel, nss);
+        const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsOrganizationChannel(organizationId, teamId, updateUserNotificationsSettings);
+        setUserNotificationsSettings(result.data);
+        showToaster('Channel configuration updated', ToasterIcons.INFO);
+      } catch (e) {
+        showToaster("We're sorry! Something happenend trying to execute the operation. Please try again", ToasterIcons.ERROR);
+      }
     } else {
-      if (teamId) {
-        try {
-          const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Channel, nss);
-          const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsOrganizationChannel(organizationId, teamId, updateUserNotificationsSettings);
-          setUserNotificationsSettings(result.data);
-          showToaster('Channel configuration updated', ToasterIcons.INFO);
-        } catch (e) {
-          showToaster("We're sorry! Something happenend trying to execute the operation. Please try again", ToasterIcons.ERROR);
-        }
-      } else {
-        try {
-          const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Organization, nss);
-          const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsOrganization(organizationId, updateUserNotificationsSettings);
-          setUserNotificationsSettings(result.data);
-          showToaster('Organization configuration updated', ToasterIcons.INFO);
-        } catch (e) {
-          showToaster("We're sorry! Something happenend trying to execute the operation. Please try again", ToasterIcons.ERROR);
-        }
+      try {
+        const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Organization, nss);
+        const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsOrganization(organizationId, updateUserNotificationsSettings);
+        setUserNotificationsSettings(result.data);
+        showToaster('Organization configuration updated', ToasterIcons.INFO);
+      } catch (e) {
+        showToaster("We're sorry! Something happenend trying to execute the operation. Please try again", ToasterIcons.ERROR);
       }
     }
   };
@@ -313,40 +374,118 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                     </p>
                   </div>
                   {selectedTab === Tab.OrganizationAndChannel && (
-                    <div className="grid grid-cols-4 gap-4 pt-4 pb-6">
-                      <label className="block text-sm font-medium leading-6 text-gray-900 sm:pt-1.5">Organization:</label>
-                      <select
-                        className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        onChange={(e) => {
-                          setTeamId('');
-                          setOrganizationId(e.target.value);
-                        }}
-                      >
-                        {organizationsResourcePermissions.map((orp: ResourcePermissions) => (
-                          <option key={orp.id} value={orp.id}>
-                            {orp.display_name}
-                          </option>
-                        ))}
-                      </select>
-                      <label className="block text-sm font-medium leading-6 text-gray-900 sm:pt-1.5">Channel:</label>
-                      <select
-                        className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        onChange={(e) => {
-                          setTeamId(e.target.value);
-                        }}
-                      >
-                        <option value="">All</option>
-                        {teamsResourcePermissions.map((trp: ResourcePermissions) => (
-                          <option key={trp.id} value={trp.id}>
-                            {trp.display_name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <>
+                      {isGlobalInheritanceBroken && !isOrganizationInheritanceBroken && (
+                        <>
+                          <div className="rounded-md bg-blue-50 p-4">
+                            <div className="flex">
+                              <div className="shrink-0">
+                                <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                              </div>
+                              <div className="ml-3 flex-1 md:flex md:justify-between">
+                                <p className="text-sm text-blue-700">
+                                  This organization has it's own configuration and does not follows the Global Configuration anymore, then the changes done in the Global Configuration will not be
+                                  propagated to this organization.
+                                  <br />
+                                  <button
+                                    type="button"
+                                    className={clsx(
+                                      'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
+                                      'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
+                                    )}
+                                    onClick={async () => {
+                                      try {
+                                        const api: Api = new Api(commonData.token);
+                                        await api.deleteUserNotificationsSettingsOrganization(organizationId);
+
+                                        showToaster('Restoration to global configuration done successfully', ToasterIcons.INFO);
+                                        refreshData();
+                                      } catch (e) {
+                                        showToaster('Something happened trying to restore to global configuration. Please try again', ToasterIcons.ERROR);
+                                      }
+                                    }}
+                                  >
+                                    Restore to global settings
+                                  </button>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      {isOrganizationInheritanceBroken && (
+                        <>
+                          <div className="rounded-md bg-blue-50 p-4">
+                            <div className="flex">
+                              <div className="shrink-0">
+                                <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                              </div>
+                              <div className="ml-3 flex-1 md:flex md:justify-between">
+                                <p className="text-sm text-blue-700">
+                                  This channel has it's own configuration and does not follows the Organization Configuration anymore, then the changes done in the Organization Configuration will not
+                                  be propagated to this channel, except those which don't apply to the channel.
+                                  <br />
+                                  <button
+                                    type="button"
+                                    className={clsx(
+                                      'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
+                                      'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
+                                    )}
+                                    onClick={async () => {
+                                      try {
+                                        const api: Api = new Api(commonData.token);
+                                        await api.deleteUserNotificationsSettingsOrganizationChannel(organizationId, teamId);
+
+                                        showToaster('Restoration to organization configuration done successfully', ToasterIcons.INFO);
+                                        refreshData();
+                                      } catch (e) {
+                                        showToaster('Something happened trying to restore to organization configuration. Please try again', ToasterIcons.ERROR);
+                                      }
+                                    }}
+                                  >
+                                    Restore to organization settings
+                                  </button>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                      <div className="grid grid-cols-4 gap-4 pt-4 pb-6">
+                        <label className="block text-sm font-medium leading-6 text-gray-900 sm:pt-1.5">Organization:</label>
+                        <select
+                          className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            setTeamId('');
+                            setOrganizationId(e.target.value);
+                          }}
+                        >
+                          {organizationsResourcePermissions.map((orp: ResourcePermissions) => (
+                            <option key={orp.id} value={orp.id}>
+                              {orp.display_name}
+                            </option>
+                          ))}
+                        </select>
+                        <label className="block text-sm font-medium leading-6 text-gray-900 sm:pt-1.5">Channel:</label>
+                        <select
+                          className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                          onChange={(e) => {
+                            setTeamId(e.target.value);
+                          }}
+                        >
+                          <option value="">All</option>
+                          {teamsResourcePermissions.map((trp: ResourcePermissions) => (
+                            <option key={trp.id} value={trp.id}>
+                              {trp.display_name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
                   )}
                   <div className="space-y-6 sm:space-y-5">
                     {options.map((option: { title: string; description: string; key: string; disabled_for_channel: boolean }, index: number) => {
-                      const checked: boolean = (notificationsSettings as any).hasOwnProperty(option.key) && (notificationsSettings as any)[option.key] === true;
+                      const checked: boolean = Helper.isPropertyInObject(notificationsSettings, option.key) && (notificationsSettings as any)[option.key] === true;
                       const isDisabled: boolean = option.disabled_for_channel && teamId !== '';
                       return (
                         <div key={index} className="flex items-center sm:border-t sm:border-gray-200 pt-5">

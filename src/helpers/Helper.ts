@@ -10,6 +10,11 @@ import { OrganizationSettingsTab } from '../enums/organization-settings-tab';
 import { ToasterMessages } from './ToasterMessages';
 
 export class Helper {
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  public static isPropertyInObject(object: any, property: string): boolean {
+    return Object.prototype.hasOwnProperty.call(object, property);
+  }
+
   public static validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
     isCurrentUserVerified: boolean,
     isCurrentUserSolvedCaptcha: boolean,
@@ -30,7 +35,6 @@ export class Helper {
     return true;
   }
 
-  /* eslint-disable @typescript-eslint/no-explicit-any */
   public static ListToKeyVal(data: any) {
     return data.reduce((prev: any, curr: any) => {
       prev[curr.id] = curr;
