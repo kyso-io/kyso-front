@@ -1,9 +1,10 @@
 import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { CommonData } from '../types/common-data';
 import { SomethingHappened } from './SomethingHappened';
+import DelayedContent from './DelayedContent';
 
 interface Props {
   whatHappened: string;
@@ -13,22 +14,18 @@ interface Props {
 }
 
 const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonData, teamVisibility }: Props) => {
-  const [waitABit, setWaitABit] = useState<boolean>(true);
   const [requestCreatedSuccessfully, setRequestCreatedSuccessfully] = useState<boolean>(false);
   const [requestCreatedError, setRequestCreatedError] = useState<boolean>(false);
   const router = useRouter();
   const { organizationName, teamName } = router.query;
 
-  useEffect(() => {
-    const timer = setTimeout(() => setWaitABit(false), 3000);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <>
-      <SomethingHappened description={whatHappened} />
-      {waitABit && <></>}
-      {addRequestAccessButton && commonData && !waitABit && !requestCreatedSuccessfully && !requestCreatedError && (
+      <DelayedContent delay={3000} skeletonTemplate={<></>}>
+        <SomethingHappened description={whatHappened} />
+      </DelayedContent>
+
+      {addRequestAccessButton && commonData && !requestCreatedSuccessfully && !requestCreatedError && (
         <>
           <div className="bg-white shadow sm:rounded-lg mx-32">
             <div className="px-4 py-5 sm:p-6">
