@@ -91,12 +91,12 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
         data.push(
           ...[
             {
-              label: 'Most stars',
+              label: 'Most likes',
               orderBy: 'stars',
               order: 'desc',
             },
             {
-              label: 'Fewest stars',
+              label: 'Fewest likes',
               orderBy: 'stars',
               order: 'asc',
             },

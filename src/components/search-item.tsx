@@ -1,11 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import { ChatIcon, ThumbUpIcon } from '@heroicons/react/outline';
 import type { FullTextSearchResult } from '@kyso-io/kyso-model';
 import { ElasticSearchIndex } from '@kyso-io/kyso-model';
+import clsx from 'clsx';
 import moment from 'moment';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface Props {
   fullTextSearchResult: FullTextSearchResult;
@@ -16,6 +18,10 @@ interface Props {
 const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: Props) => {
   const router = useRouter();
   const { basePath } = router;
+
+  const highlightedTitle: any = useMemo(() => {
+    return fullTextSearchResult.title.replace(new RegExp(terms, 'gi'), (match) => `<span class="font-bold">${match}</span>`);
+  }, [terms]);
 
   const isUnknownFile = (name: string) => {
     return (
@@ -115,7 +121,7 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
                       ''
                     )}
 
-                    {fullTextSearchResult.title}
+                    <div className="font-normal" dangerouslySetInnerHTML={{ __html: highlightedTitle }}></div>
 
                     {otherVersionResultsNumber && otherVersionResultsNumber > 1 && (
                       <span className="text-xs font-semibold inline-block py-1 px-2 ml-2 rounded text-black bg-white last:mr-0 mr-1 border">{`+${otherVersionResultsNumber - 1} more versions`}</span>
@@ -175,18 +181,18 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
           )}
           {fullTextSearchResult.type === ElasticSearchIndex.Report && (
             <div className="grow flex flex-row items-center text-gray-500 text-xs space-x-2">
-              {fullTextSearchResult.numComments && (
-                <>
-                  <ChatIcon className="hidden lg:block shrink-0 h-5 w-5 text-orange-500" />
-                  <span className="hidden lg:block">{fullTextSearchResult.numComments}</span>
-                </>
-              )}
-              {fullTextSearchResult.stars && (
-                <>
-                  <ThumbUpIcon className="shrink-0 h-5 w-5 text" color={fullTextSearchResult.stars > 0 ? '#4f46e5' : ''} />
-                  <span>{fullTextSearchResult.stars}</span>
-                </>
-              )}
+              <ChatIcon className={clsx('hidden lg:block shrink-0 h-5 w-5', fullTextSearchResult.numComments > 0 ? 'text-orange-500' : '')} />
+              <span className="hidden lg:block">{fullTextSearchResult.numComments}</span>
+              <ThumbUpIcon className="shrink-0 h-5 w-5 text" color={fullTextSearchResult.stars > 0 ? '#4f46e5' : ''} />
+              <span>{fullTextSearchResult.stars}</span>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke={fullTextSearchResult.numTasks > 0 ? '#a855f7' : '#6b7280'} className="w-5 h-5">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75"
+                />
+              </svg>
+              <span>{fullTextSearchResult.numTasks}</span>
             </div>
           )}
         </div>
