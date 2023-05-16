@@ -762,9 +762,8 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
               <RenderError message={`Files of type ${FileTypesHelper.getExtension(selectedFile.file.name)} only can be displayed when the report is created`} />
             ) : selectedFile.file.type !== 'folder' ? (
               !FileTypesHelper.isSupported(selectedFile.file.name) && <RenderError message={`This file can't be rendered while you create a report. Did you miss to set the extension of the file?`} />
-            ) : (
-              <div>{error && <ErrorNotification message={error} />}</div>
-            )}
+            ) : null}
+            <div>{error && <ErrorNotification message={error} />}</div>
           </div>
         </div>
         <div className="flex flex-row items-center">
