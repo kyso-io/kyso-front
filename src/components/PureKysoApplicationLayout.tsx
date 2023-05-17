@@ -11,6 +11,7 @@ import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import type { ReactElement } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
+import { SkeletonTemplates } from '@/enums/skeleton-templates';
 import BreadcrumbNavbar from './BreadcrumbNavbar';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
@@ -122,16 +123,18 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                       <div className="flex items-center ml-6">
                         {/* Profile dropdown */}
                         {!commonData.user && (
-                          <div className="flex items-center px-5">
-                            <button
-                              className="text-black ml-3 inline-flex justify-center rounded-md border border-transparent bg-white py-2 px-4 text-sm font-medium shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-                              onClick={() => {
-                                window.location.href = '/login';
-                              }}
-                            >
-                              Login
-                            </button>
-                          </div>
+                          <DelayedContent skeletonTemplate={<></>} delay={1600}>
+                            <div className="flex items-center px-5">
+                              <button
+                                className="text-black ml-3 inline-flex justify-center rounded-md border border-transparent bg-white py-2 px-4 text-sm font-medium shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+                                onClick={() => {
+                                  window.location.href = '/login';
+                                }}
+                              >
+                                Login
+                              </button>
+                            </div>
+                          </DelayedContent>
                         )}
                         {commonData.user && (
                           <React.Fragment>
@@ -167,10 +170,9 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                               <div>
                                 <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
                                   <span className="sr-only">Open user menu</span>
-                                  <DelayedContent >
+                                  <DelayedContent skeletonTemplate={SkeletonTemplates.PORTRAIT_PLACEHOLDER}>
                                     <PureAvatar src={commonData.user.avatar_url} title={commonData.user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
                                   </DelayedContent>
-                                  
                                 </Menu.Button>
                               </div>
                               <Transition
