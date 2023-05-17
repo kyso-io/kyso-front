@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-case-declarations */
-import { Combobox, Menu, Transition } from '@headlessui/react';
-import { CheckIcon } from '@heroicons/react/solid';
-import { InlineCommentStatusEnum, NormalizedResponseDTO, PaginatedResponseDto } from '@kyso-io/kyso-model';
+import { Menu, Transition } from '@headlessui/react';
+import { SearchIcon, SelectorIcon, XIcon } from '@heroicons/react/solid';
 import type { InlineCommentDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
+import { InlineCommentStatusEnum, NormalizedResponseDTO, PaginatedResponseDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
@@ -183,7 +183,7 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
   );
 };
 
-interface PruebaProps {
+interface CustomMenuItemsProps {
   options: { label: string; value: string; isFixed?: boolean; parent?: string }[];
   openedQuery: any;
   values: { label: string; value: string; parent?: string; isFixed?: boolean }[];
@@ -191,7 +191,7 @@ interface PruebaProps {
   showSearchInput: boolean;
 }
 
-const CustomMenuItems = ({ options, openedQuery, values, setValues, showSearchInput }: PruebaProps) => {
+const CustomMenuItems = ({ options, openedQuery, values, setValues, showSearchInput }: CustomMenuItemsProps) => {
   const inputRef = useRef<any>();
   const [query, setQuery] = useState<string>('');
   const fileteredOptions: { label: string; value: string; isFixed?: boolean; parent?: string }[] = useMemo(() => {
@@ -411,6 +411,12 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
       ? [{ id: '', display_name: 'All' } as any, ...commonData.permissions.organizations]
       : commonData.permissions.organizations.filter((rp: ResourcePermissions) => rp.display_name.toLowerCase().replace(/\s+/g, '').includes(queryOrg.toLowerCase().replace(/\s+/g, '')));
   }, [commonData.permissions?.organizations, queryOrg]);
+  const selectedOrgResourcePermission: ResourcePermissions = useMemo(() => {
+    if (!orgResourcePermissions) {
+      return { id: '', display_name: 'All' } as any;
+    }
+    return orgResourcePermissions.find((rp: ResourcePermissions) => rp.id === openedQuery?.organization_id) || ({ id: '', display_name: 'All' } as any);
+  }, [orgResourcePermissions, openedQuery?.organization_id]);
 
   useEffect(() => {
     if (!commonData.token) {
@@ -618,85 +624,103 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
       <h1 className="mb-10 text-3xl font-extrabold tracking-tight text-slate-900">My Tasks</h1>
       {/* SEARCH BAR */}
       <div className="flex flex-row mb-6">
-        <Combobox
-          value={openedQuery.organization_id ?? ''}
-          onChange={(e: string) => {
-            setOpenedQuery({
-              limit: LIMIT,
-              page: 1,
-              order_by: 'created_at',
-              order_direction: 'desc',
-              organization_id: e,
-            });
-            setClosedQuery({
-              limit: LIMIT,
-              page: 1,
-              order_by: 'created_at',
-              order_direction: 'desc',
-              organization_id: e,
-            });
-            const copyValues: { label: string; value: string; parent?: string; isFixed?: boolean }[] = [];
-            for (const v of values) {
-              if (v.value !== 'team_id' && v.parent !== 'team_id') {
-                copyValues.push({ ...v });
-              }
-            }
-            setValues(copyValues);
-          }}
-        >
-          <div className="relative">
-            <div className="ring-1 ring-slate-900/5 dark:ring-white/10 dark:ring-inset border-1 relative w-full cursor-default overflow-hidden rounded-lg bg-white text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity/75 focus-visible:ring-offset-2 focus-visible:ring-offset-teal-300 sm:text-sm">
-              <Combobox.Input
-                className="w-full border-none py-2 pl-3 pr-10 text-sm leading-5 text-gray-900 focus:ring-0"
-                displayValue={(id: string) => {
-                  const data = [{ id: '', display_name: 'All' } as any, ...commonData.permissions!.organizations!];
-                  const index: number = data.findIndex((o: ResourcePermissions) => o.id === id);
-                  if (index === -1) {
-                    return '';
-                  }
-                  return data[index]!.display_name;
-                }}
-                onChange={(e) => {
-                  setQueryOrg(e.target.value);
-                }}
-              />
-              <Combobox.Button className="absolute inset-y-0 right-0 flex items-center pr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9" />
-                </svg>
-              </Combobox.Button>
-            </div>
-            <Transition as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0" afterLeave={() => setQueryOrg('')}>
-              <Combobox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white text-base shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none sm:text-sm p-1">
-                {orgResourcePermissions.length === 0 && queryOrg !== '' ? (
-                  <div className="relative cursor-default select-none py-2 px-4 text-gray-700">Nothing found.</div>
-                ) : (
-                  orgResourcePermissions.map((rp: ResourcePermissions) => (
-                    <Combobox.Option
-                      key={rp.id}
-                      className={({ active }) => `relative cursor-default select-none py-2 pl-10 pr-4 rounded-md ${active ? 'k-bg-primary text-white' : 'text-gray-900'}`}
-                      value={rp.id}
-                    >
-                      {({ selected, active }) => (
-                        <React.Fragment>
-                          <span className={`block truncate ${selected ? 'font-medium' : 'font-normal'}`}>{rp.display_name}</span>
-                          {selected ? (
-                            <span className={`absolute inset-y-0 left-0 flex items-center pl-3 ${active ? 'text-white' : 'text-teal-600'}`}>
-                              <CheckIcon className="h-5 w-5" aria-hidden="true" />
-                            </span>
-                          ) : null}
-                        </React.Fragment>
-                      )}
-                    </Combobox.Option>
-                  ))
-                )}
-              </Combobox.Options>
+        <div className="rounded-md flex items-center">
+          <span className="hover:bg-gray-100 border-y border-l rounded-l p-2 p-x-4 flex items-center w-fit text-xs lg:text-sm text-left font-medium text-gray-700">
+            {selectedOrgResourcePermission.display_name}
+          </span>
+          <Menu as="div" className="relative w-fit inline-block text-left">
+            <Menu.Button className={clsx('hover:bg-gray-100 border p-2 flex items-center w-fit text-xs lg:text-sm text-left font-medium text-gray-700 hover:outline-none rounded')}>
+              <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
+            </Menu.Button>
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
+                <div className="py-1">
+                  <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
+                    Organizations
+                  </h3>
+                  <div className="px-4 pb-2">
+                    <div className="relative mt-1 rounded-md shadow-sm">
+                      <input
+                        type="text"
+                        name="account-number"
+                        id="account-number"
+                        className="block w-full rounded-md border-gray-300 pr-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                        placeholder="Search"
+                        value={queryOrg}
+                        onChange={(e) => setQueryOrg(e.target.value)}
+                      />
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                        {queryOrg ? (
+                          <div className="cursor-pointer" onClick={() => setQueryOrg('')}>
+                            <XIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                          </div>
+                        ) : (
+                          <SearchIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col justify-start" style={{ maxHeight: '380px', overflow: 'overlay' }}>
+                  {orgResourcePermissions.length === 0 && queryOrg !== '' ? (
+                    <div className="relative cursor-default select-none py-2 px-4 text-gray-700 text-sm">Nothing found.</div>
+                  ) : (
+                    orgResourcePermissions.map((rp: ResourcePermissions) => (
+                      <Menu.Item key={rp.id}>
+                        {({ active }) => (
+                          <span
+                            className={clsx(
+                              active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                              openedQuery.organization_id === rp.id ? 'font-bold' : 'font-normal',
+                              'block px-4 py-2 text-sm cursor-pointer',
+                            )}
+                            onClick={() => {
+                              setQueryOrg('');
+                              setOpenedQuery({
+                                limit: LIMIT,
+                                page: 1,
+                                order_by: 'created_at',
+                                order_direction: 'desc',
+                                organization_id: rp.id,
+                              });
+                              setClosedQuery({
+                                limit: LIMIT,
+                                page: 1,
+                                order_by: 'created_at',
+                                order_direction: 'desc',
+                                organization_id: rp.id,
+                              });
+                              const copyValues: { label: string; value: string; parent?: string; isFixed?: boolean }[] = [];
+                              for (const v of values) {
+                                if (v.value !== 'team_id' && v.parent !== 'team_id') {
+                                  copyValues.push({ ...v });
+                                }
+                              }
+                              setValues(copyValues);
+                            }}
+                          >
+                            {rp.display_name}
+                          </span>
+                        )}
+                      </Menu.Item>
+                    ))
+                  )}
+                </div>
+              </Menu.Items>
             </Transition>
-          </div>
-        </Combobox>
+          </Menu>
+        </div>
         <div
-          className="mx-5 relative px-4 py-2 font-semibold text-sm bg-white text-slate-700 dark:bg-slate-700 dark:text-white rounded-md shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 dark:ring-inset border-indigo-500 border-2 border-none cursor-text"
-          style={{ width: '100%', textAlign: 'left' }}
+          className="mx-5 grow relative px-4 py-2 font-semibold text-sm bg-white text-slate-700 dark:bg-slate-700 dark:text-white rounded-md shadow-sm ring-1 ring-slate-900/5 dark:ring-white/10 dark:ring-inset border-indigo-500 border-2 border-none cursor-text"
+          style={{ textAlign: 'left' }}
           onClick={() => {
             if (options.length === 0) {
               return;
