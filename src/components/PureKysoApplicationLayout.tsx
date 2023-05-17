@@ -16,6 +16,7 @@ import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
 import PureOnboardingDropdown from './PureOnboardingDropdown';
 import PureShareButton from './PureShareButton';
+import DelayedContent from './DelayedContent';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -32,7 +33,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
   const [query, setQuery] = useState<string>('');
   const origin = typeof window !== 'undefined' && window.location.origin ? window.location.origin : '';
   const currentUrl = `${origin}${router.asPath}`;
-  const [numOpenedInlineComments, setNumOpenedInlineComments] = useState<number>(0);
+  const [numOpenedInlineComments, setNumOpenedInlineComments] = useState<number>(-1);
 
   const { q } = router.query;
 
@@ -149,7 +150,15 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                                     className="absolute inline-flex items-center justify-center w-6 h-6 font-bold text-white bg-white border-white rounded-full -top-0.5 -right-0.5"
                                     style={{ color: '#244362', fontSize: '10px' }}
                                   >
-                                    {numOpenedInlineComments > 99 ? '99+' : numOpenedInlineComments}
+                                    {numOpenedInlineComments > 99 ? '99+' : <></>}
+                                    {numOpenedInlineComments <= 99 && numOpenedInlineComments >= 0 ? numOpenedInlineComments : <></>}
+                                    {numOpenedInlineComments < 0 ? (
+                                      <div className="inline-flex items-center rounded-md transition ease-in-out duration-150 cursor-not-allowed">
+                                        <div className="animate-bounce">...</div>
+                                      </div>
+                                    ) : (
+                                      <></>
+                                    )}
                                   </div>
                                 </a>
                               </div>
@@ -158,7 +167,10 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                               <div>
                                 <Menu.Button className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300">
                                   <span className="sr-only">Open user menu</span>
-                                  <PureAvatar src={commonData.user.avatar_url} title={commonData.user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+                                  <DelayedContent >
+                                    <PureAvatar src={commonData.user.avatar_url} title={commonData.user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+                                  </DelayedContent>
+                                  
                                 </Menu.Button>
                               </div>
                               <Transition
