@@ -189,6 +189,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               <UnpureCloneDropdown
                 reportUrl={`${frontEndUrl}${reportUrl}`}
                 report={report}
+                version={version}
                 commonData={commonData}
                 isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
                 isCurrentUserVerified={isCurrentUserVerified}

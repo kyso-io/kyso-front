@@ -113,7 +113,7 @@ const UnpureReportActionDropdown = (props: Props) => {
 
                         window.location.assign(`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form?reportId=${report.id}`);
                       }}
-                      className={classNames('text-gray-700', 'px-4 py-2 text-sm hover:bg-gray-100 group flex items-center')}
+                      className={classNames('text-gray-700 px-4 py-2 text-sm hover:bg-gray-100 group flex items-center cursor-pointer')}
                     >
                       <PencilIcon className="mr-2 h-5 w-5 text-gray-700" />
                       Edit Report

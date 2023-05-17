@@ -15,6 +15,7 @@ import { Helper } from '@/helpers/Helper';
 interface Props {
   reportUrl: string;
   report: ReportDTO;
+  version?: string;
   commonData: CommonData;
   // hasPermissionDeleteReport: boolean; // refactor: This is not being used... and makes no sense, here we dont delete any report
   // hasPermissionEditReport: boolean;   // refactor: This is not being used... and makes no sense, here we dont edit any report
@@ -23,7 +24,7 @@ interface Props {
   showToaster: (message: string, icon: JSX.Element) => void;
 }
 
-const UnpureCloneDropdown = ({ reportUrl, commonData, report, isCurrentUserSolvedCaptcha, isCurrentUserVerified, showToaster }: Props) => {
+const UnpureCloneDropdown = ({ reportUrl, commonData, report, version, isCurrentUserSolvedCaptcha, isCurrentUserVerified, showToaster }: Props) => {
   const [copied, setCopied] = useState(false);
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
@@ -38,7 +39,11 @@ const UnpureCloneDropdown = ({ reportUrl, commonData, report, isCurrentUserSolve
 
     try {
       const api: Api = new Api(commonData.token);
-      const result: Buffer = await api.downloadReport(report.id!);
+      let versionNumber: number | undefined;
+      if (version && !Number.isNaN(version as any)) {
+        versionNumber = parseInt(version, 10);
+      }
+      const result: Buffer = await api.downloadReport(report.id!, versionNumber);
       const blob = new Blob([result], { type: 'application/zip' });
       saveAs(blob, `${slugify(report.name)}.zip`);
       showToaster('Download finished!', ToasterIcons.INFO);
