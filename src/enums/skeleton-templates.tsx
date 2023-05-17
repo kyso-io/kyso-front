@@ -19,24 +19,34 @@ export class SkeletonTemplates {
   );
 
   public static PORTRAIT_PLACEHOLDER: JSX.Element = (
-    <div className="relative" data-headlessui-state="">
-      <span className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300" id="headlessui-menu-button-:r3:" aria-haspopup="menu" aria-expanded="false" data-headlessui-state="">
-        <span className="sr-only">Open user menu</span>
-        <svg
-          className="avatar-tooltip object-cover inline-block text-xs h-8 w-8 rounded-full ring-0 border transition duration-100 undefined"
-          aria-hidden="true"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fillRule="evenodd"
-            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
-            clipRule="evenodd"
-          ></path>
-        </svg>
-      </span>
-    </div>
+    <>
+      <div className="relative" data-headlessui-state="">
+        <div>
+          <button
+            className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300"
+            id="headlessui-menu-button-:r3:"
+            type="button"
+            aria-haspopup="menu"
+            aria-expanded="false"
+            data-headlessui-state=""
+          >
+            <svg
+              className="avatar-tooltip object-cover inline-block text-xs h-8 w-8 rounded-full ring-0 border transition duration-100 undefined"
+              aria-hidden="true"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </>
   );
 
   public static REPORT_DETAIL: JSX.Element = (

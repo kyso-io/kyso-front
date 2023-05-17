@@ -3,8 +3,8 @@
 /* eslint-disable no-case-declarations */
 import { Combobox, Menu, Transition } from '@headlessui/react';
 import { CheckIcon } from '@heroicons/react/solid';
-import type { InlineCommentDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
 import { InlineCommentStatusEnum, NormalizedResponseDTO, PaginatedResponseDto } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
@@ -102,7 +102,9 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
     <a
       key={inlineCommentDto.id}
       className="flex flex-col py-4 border-b"
-      href={`/${report?.organization_sluglified_name}/${report?.team_sluglified_name}/${report?.name}`}
+      href={`/${report?.organization_sluglified_name}/${report?.team_sluglified_name}/${report?.name}?taskId=${inlineCommentDto.id}${
+        inlineCommentDto.cell_id ? `&cell=${inlineCommentDto.cell_id}` : ''
+      }${inlineCommentDto.orphan ? `&version=${inlineCommentDto.report_version}` : ''}`}
       onMouseEnter={() => {
         setHoveredInlineComment(true);
       }}
@@ -118,6 +120,11 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
         <span className="text-sm ml-4 grow font-thin" style={{ color: '#454F63' }}>
           {inlineCommentDto.user_name}
         </span>
+        {inlineCommentDto.orphan && (
+          <div className="flex flex-row items-center grow">
+            <span className="text-sm text-slate-500 font-bold">This task is related to a {inlineCommentDto.cell_id ? 'cell' : 'file'} that does't exists in the latest version of the report</span>
+          </div>
+        )}
         <TagInlineComment status={inlineCommentDto.current_status} />
       </div>
       <div className="mt-5 mb-10">
@@ -163,6 +170,7 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
           </svg>
           <span className="text-sm text-slate-500">source /{file?.name ?? 'File not found'}</span>
         </div>
+
         <div className="flex flex-row items-center">
           <span className="text-xs mr-2" style={{ color: '#4D4F5C' }}>
             Report {users.length === 1 ? 'Author' : 'Authors'}
