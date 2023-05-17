@@ -224,14 +224,31 @@ const CustomMenuItems = ({ options, openedQuery, values, setValues, showSearchIn
   return (
     <div className="py-1 px-2" style={{ width: '250px' }}>
       {showSearchInput && (
-        <input
-          ref={inputRef}
-          className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 pl-3 mt-2"
-          placeholder="Search..."
-          value={query}
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => setQuery(e.target.value)}
-        />
+        <div className="relative mt-1 rounded-md shadow-sm">
+          <input
+            ref={inputRef}
+            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 sm:text-sm sm:leading-6 pl-3 mt-2"
+            placeholder="Search..."
+            value={query}
+            onClick={(e) => e.stopPropagation()}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+            {query ? (
+              <div
+                className="cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setQuery('');
+                }}
+              >
+                <XIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+              </div>
+            ) : (
+              <SearchIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+            )}
+          </div>
+        </div>
       )}
       <div className="mt-2" style={{ maxHeight: '230px', overflowY: 'scroll' }}>
         {fileteredOptions.length === 0 && (
@@ -262,7 +279,7 @@ const CustomMenuItems = ({ options, openedQuery, values, setValues, showSearchIn
                   }}
                   className={clsx(
                     'group flex w-full items-center rounded-md p-2 text-sm text-left',
-                    active && !disabled ? 'k-bg-primary text-white' : 'text-gray-900',
+                    active && !disabled ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
                     disabled ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer',
                   )}
                 >
@@ -643,9 +660,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
             >
               <Menu.Items className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
                 <div className="py-1">
-                  <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
-                    Organizations
-                  </h3>
+                  <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Organizations</h3>
                   <div className="px-4 pb-2">
                     <div className="relative mt-1 rounded-md shadow-sm">
                       <input
@@ -807,7 +822,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
                   >
                     <Menu.Items
                       static
-                      className="absolute left-0 mt-2 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity/5 focus:outline-none"
+                      className="absolute left-0 mt-2 origin-top-right divide-y divide-gray-100 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 focus:outline-none"
                       style={{ width: 'auto' }}
                     >
                       {options.length === 1 && options[0]!.value === 'text_contains' && (
