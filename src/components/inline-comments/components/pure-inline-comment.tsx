@@ -259,6 +259,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
             onSubmitted={() => setReplying(false)}
             onCancel={() => setReplying(false)}
             hasPermissionCreateComment={hasPermissionCreateComment}
+            isReply={true}
           />
         </div>
       )}

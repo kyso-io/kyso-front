@@ -255,8 +255,8 @@ const UnpureReportRender = ({
                 cacheKey={report?.id!}
                 setSidebarOpen={(p) => setSidebarOpen(p)}
                 commonData={commonData}
-                tooltipOpenText="Open file's comments"
-                tooltipCloseText="Close file's comments"
+                tooltipOpenText="Open file's tasks"
+                tooltipCloseText="Close file's tasks"
               >
                 <PureInlineComments
                   commonData={commonData}

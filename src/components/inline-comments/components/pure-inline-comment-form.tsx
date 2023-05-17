@@ -7,7 +7,7 @@ import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { InlineCommentDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Mention } from 'primereact/mention';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 type IPureCommentForm = {
@@ -18,6 +18,7 @@ type IPureCommentForm = {
   hasPermissionCreateComment?: boolean;
   channelMembers: TeamMember[];
   submitComment: (text: string, userIds: string[], commentId?: string) => void;
+  isReply?: boolean;
 };
 
 const parseMentions = (str: string) => {
@@ -38,7 +39,7 @@ const parseMentions = (str: string) => {
 };
 
 const PureInlineCommentForm = (props: IPureCommentForm) => {
-  const { comment, submitComment, user, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true } = props;
+  const { comment, submitComment, user, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true, isReply = false } = props;
   const mentionsRef = useRef<any>(null);
   const [id] = useState<string | undefined>(`picf-${uuidv4()}`);
 
@@ -79,7 +80,18 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
     onSubmitted();
   };
 
-  const message = comment?.id ? 'Write a reply' : 'Write a new task';
+  const message: string = useMemo(() => {
+    if (comment) {
+      if (!comment.parent_comment_id) {
+        return 'Update your reply';
+      }
+      return 'Update your task';
+    }
+    if (isReply) {
+      return 'Write a reply';
+    }
+    return 'Write a new task';
+  }, [comment, isReply]);
 
   const [suggestions, setSuggestions] = useState<TeamMember[]>([]);
 

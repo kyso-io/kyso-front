@@ -255,14 +255,14 @@ const SearchIndex = ({ commonData }: IKysoApplicationLayoutProps) => {
           { name: 'Report files', elasticSearchIndex: ElasticSearchIndex.Report, count: result.reports.metadata.total },
           /* { name: 'Discussions', elasticSearchIndex: ElasticSearchIndex.Discussion, count: result.discussions.metadata.total }, */
           { name: 'Report comments', elasticSearchIndex: ElasticSearchIndex.Comment, count: result.comments.metadata.total },
-          { name: 'Inline comments', elasticSearchIndex: ElasticSearchIndex.InlineComment, count: result.inlineComments.metadata.total },
+          { name: 'Tasks', elasticSearchIndex: ElasticSearchIndex.InlineComment, count: result.inlineComments.metadata.total },
         ]);
       } else {
         setNavigation([
           { name: 'Report files', elasticSearchIndex: ElasticSearchIndex.Report, count: 0 },
           /* { name: 'Discussions', elasticSearchIndex: ElasticSearchIndex.Discussion, count: 0 }, */
           { name: 'Report comments', elasticSearchIndex: ElasticSearchIndex.Comment, count: 0 },
-          { name: 'Inline comments', elasticSearchIndex: ElasticSearchIndex.InlineComment, count: 0 },
+          { name: 'Tasks', elasticSearchIndex: ElasticSearchIndex.InlineComment, count: 0 },
         ]);
       }
       setRequesting(false);
