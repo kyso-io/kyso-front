@@ -40,14 +40,14 @@ import { dirname } from 'path';
 import React, { useEffect, useMemo, useState } from 'react';
 import 'react-tooltip/dist/react-tooltip.css';
 import { v4 as uuidv4 } from 'uuid';
-import PureAvatar from '../../../../../components/PureAvatar';
-import PureInlineComments from '../../../../../components/inline-comments/components/pure-inline-comments';
-import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
-import { useChannelMembers } from '../../../../../hooks/use-channel-members';
-import { usePublicSetting } from '../../../../../hooks/use-public-setting';
-import type { HttpExceptionDto } from '../../../../../interfaces/http-exception.dto';
-import { TailwindFontSizeEnum } from '../../../../../tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '../../../../../tailwind/enum/tailwind-height.enum';
+import PureAvatar from '@/components/PureAvatar';
+import PureInlineComments from '@/components/inline-comments/components/pure-inline-comments';
+import TagInlineComment from '@/components/inline-comments/components/tag-inline-comment';
+import { useChannelMembers } from '@/hooks/use-channel-members';
+import { usePublicSetting } from '@/hooks/use-public-setting';
+import type { HttpExceptionDto } from '@/interfaces/http-exception.dto';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 
 enum Tab {
   Files = 'files',

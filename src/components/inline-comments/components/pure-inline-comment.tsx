@@ -13,12 +13,15 @@ import { GlobalPermissionsEnum, InlineCommentStatusEnum, OrganizationPermissions
 import clsx from 'clsx';
 import moment from 'moment';
 import { Tooltip } from 'primereact/tooltip';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
+import { Api } from '@kyso-io/kyso-store';
 import { Helper } from '../../../helpers/Helper';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import { useAppSelector } from '../../../hooks/redux-hooks';
 import PureInlineCommentForm from './pure-inline-comment-form';
 import TagInlineComment from './tag-inline-comment';
+import PureInlineCommentStatusHistory from './pure-inline-comment-status-history';
 
 type IPureInlineComment = {
   hasPermissionCreateComment: boolean;
@@ -49,9 +52,14 @@ const PureInlineComment = (props: IPureInlineComment) => {
     report,
     isLastVersion,
   } = props;
+
+  const router = useRouter();
+  const { taskId } = router.query;
+
   const userEntities: { [key: string]: UserDTO } = useAppSelector((state) => state.user.entities);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [replying, setReplying] = useState<boolean>(false);
+  const [statusHistoryUsers, setStatusHistoryUsers] = useState<UserDTO[]>([]);
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
     return HelperPermissions.checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || HelperPermissions.checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
@@ -93,6 +101,26 @@ const PureInlineComment = (props: IPureInlineComment) => {
     });
   }, [comment]);
 
+  const getUsersFromStatusHistory = async (theComment: InlineCommentDto) => {
+    if (!theComment || !theComment.status_history) {
+      return;
+    }
+
+    const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+    const result = await api.getUsers({
+      userIds: theComment.status_history.map((x) => x.user_id),
+      page: 1,
+      per_page: 1000,
+      sort: '',
+    });
+
+    setStatusHistoryUsers(result.data);
+  };
+
+  useEffect(() => {
+    getUsersFromStatusHistory(comment);
+  }, [comment]);
+
   if (comment.markedAsDeleted) {
     return null;
   }
@@ -114,6 +142,21 @@ const PureInlineComment = (props: IPureInlineComment) => {
       ) : (
         <div id={comment.cell_id} className={clsx('flex py-2 border rounded my-1 px-4 flex-col', parentInlineComment ? 'ml-10' : '', isClosed ? 'bg-slate-50' : '')}>
           <div className="flex flex-row justify-end space-x-2 text-xs font-light text-gray-400">
+            {comment.parent_comment_id === null && (
+              <React.Fragment>
+                <button
+                  type="button"
+                  className="hover:underline"
+                  onClick={() => {
+                    router.replace({
+                      query: { ...router.query, taskId: comment.id },
+                    });
+                  }}
+                >
+                  History
+                </button>
+              </React.Fragment>
+            )}
             {isUserAuthor && hasPermissionCreateComment && isLastVersion && (
               <React.Fragment>
                 {isClosed ? (
@@ -144,7 +187,15 @@ const PureInlineComment = (props: IPureInlineComment) => {
               </button>
             )}
           </div>
-          <RenderMarkdown source={commentText} />
+
+          {(taskId as string) === comment.id ? (
+            <mark className="mb-2 mt-1">
+              <RenderMarkdown source={commentText} />
+            </mark>
+          ) : (
+            <RenderMarkdown source={commentText} />
+          )}
+
           <div className="pt-0 rounded-t flex items-center justify-start space-x-2 text-xs font-light text-gray-400">
             <PureAvatar src={comment?.user_avatar} title={comment?.user_name} size={TailwindHeightSizeEnum.H5} textSize={TailwindFontSizeEnum.SM} />
             <div className="grow">
@@ -263,6 +314,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
           />
         </div>
       )}
+      {(taskId as string) === comment.id ? <PureInlineCommentStatusHistory inlineComment={comment} historyUsers={statusHistoryUsers} /> : <></>}
     </div>
   );
 };
