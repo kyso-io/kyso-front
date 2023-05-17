@@ -5,7 +5,7 @@ import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayou
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Switch, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
-import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, LinkIcon, MailIcon, UserGroupIcon } from '@heroicons/react/solid';
+import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, LinkIcon, MailIcon, SearchIcon, UserGroupIcon, XIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, OrganizationMember, PaginatedResponseDto, ResourcePermissions, Team, TeamInfoDto, TeamsInfoQuery } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
@@ -57,6 +57,8 @@ const debouncedFetchData = debounce((cb: () => void) => {
   cb();
 }, 750);
 
+const LIMIT_MEMBERS_BY_PAGE = 8;
+
 const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   useRedirectIfNoJWT();
@@ -71,7 +73,11 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
   const debounceTeamsInfoQuery = useMemo(() => debounce((text: string) => getTeamsInfo(1, text), 1000), [commonData.organization]);
   const [members, setMembers] = useState<Member[]>([]);
   const [queryUsers, setQueryUsers] = useState<string>('');
-  const fileterdMembers: Member[] = useMemo(() => {
+  const [paginationFilteredMembers, setPaginationFilteredMembers] = useState<{ page: number; numPages: number }>({
+    page: 0,
+    numPages: 0,
+  });
+  const filteredMembers: Member[] = useMemo(() => {
     if (!queryUsers) {
       return members;
     }
@@ -82,6 +88,14 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       return emailLower.includes(queryUserLower) || displayNameLower.includes(queryUserLower);
     });
   }, [members, queryUsers]);
+  const filteredMembersPaginated: Member[] = useMemo(() => {
+    if (filteredMembers.length === 0) {
+      return [];
+    }
+    const start: number = (paginationFilteredMembers.page - 1) * LIMIT_MEMBERS_BY_PAGE;
+    const end: number = start + LIMIT_MEMBERS_BY_PAGE;
+    return filteredMembers.slice(start, end);
+  }, [filteredMembers, paginationFilteredMembers]);
   const [selectedUser, setSelectedUser] = useState<UserDTO | null>(null);
   const [selectedMember, setSelectedMember] = useState<Member | null>(null);
   const [openInviteUserModal, setOpenInviteUserModal] = useState<boolean>(false);
@@ -331,6 +345,13 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       router.push('/settings');
     }
   }, [router.isReady, commonData?.permissions]);
+
+  useEffect(() => {
+    setPaginationFilteredMembers({
+      page: 1,
+      numPages: filteredMembers.length > 0 ? Math.ceil(filteredMembers.length / LIMIT_MEMBERS_BY_PAGE) : 0,
+    });
+  }, [filteredMembers]);
 
   const getTeamsInfo = async (page: number, search: string) => {
     setRequestingTeamsInfo(true);
@@ -1091,7 +1112,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
             {!editing && selectedTab === OrganizationSettingsTab.Members && (
               <React.Fragment>
                 <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({fileterdMembers.length}):</h3>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900 my-8">Organization members ({filteredMembers.length}):</h3>
                   {isOrgAdmin && (
                     <button
                       className={clsx(
@@ -1105,7 +1126,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                     </button>
                   )}
                 </div>
-                <div className="mb-5">
+                <div className="mb-5 relative">
                   <input
                     value={queryUsers}
                     onChange={(e) => setQueryUsers(e.target.value)}
@@ -1113,9 +1134,18 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                     placeholder="Search members..."
                   />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    {queryUsers ? (
+                      <div className="cursor-pointer" onClick={() => setQueryUsers('')}>
+                        <XIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                      </div>
+                    ) : (
+                      <SearchIcon className="h-4 w-4 text-gray-400 pointer-events-none" aria-hidden="true" />
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {fileterdMembers.map((member: Member) => {
+                  {filteredMembersPaginated.map((member: Member) => {
                     const labelRole: string =
                       member.organization_roles.length > 0 && OrganizationRoleToLabel[member.organization_roles[0]!] ? OrganizationRoleToLabel[member.organization_roles[0]!]! : '';
                     return (
@@ -1183,19 +1213,59 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                       </div>
                     );
                   })}
+                  {filteredMembersPaginated.length === 0 && (
+                    <div className="col-span-2">
+                      <p className="text-sm text-gray-500">There are no members.</p>
+                    </div>
+                  )}
                 </div>
+                {paginationFilteredMembers.numPages > 0 && (
+                  <div className="my-6">
+                    <Pagination
+                      page={paginationFilteredMembers.page}
+                      numPages={paginationFilteredMembers.numPages}
+                      onPageChange={(page: number) => setPaginationFilteredMembers({ ...paginationFilteredMembers, page })}
+                    />
+                  </div>
+                )}
                 {isOrgAdmin && (
                   <div className="mt-4">
                     {/* SEARCH USERS */}
-                    <h3 className="text-lg font-medium leading-6 text-gray-900 my-4">Add users to the organization:</h3>
-                    <div className="my-4 sm:col-span-2">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900 mt-8 mb-4">Add users to the organization:</h3>
+                    <div className="my-4 relative">
                       <input
                         type="text"
                         value={query}
                         onChange={(e: React.ChangeEvent<HTMLInputElement>) => setQuery(e.target.value)}
-                        placeholder="Search users"
-                        className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                        placeholder="Search users..."
+                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                       />
+                      <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        {requesting ? (
+                          <svg aria-hidden="true" className="w-5 h-5 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                              d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+                              fill="currentColor"
+                            ></path>
+                            <path
+                              d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+                              fill="currentFill"
+                            ></path>
+                          </svg>
+                        ) : query ? (
+                          <div
+                            className="cursor-pointer"
+                            onClick={() => {
+                              setQuery('');
+                              setUsers([]);
+                            }}
+                          >
+                            <XIcon className="h-4 w-4 text-gray-400" aria-hidden="true" />
+                          </div>
+                        ) : (
+                          <SearchIcon className="h-4 w-4 text-gray-400 pointer-events-none" aria-hidden="true" />
+                        )}
+                      </div>
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       {users.map((userDto: UserDTO) => {
@@ -1272,6 +1342,11 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                           </div>
                         );
                       })}
+                      {!requesting && query && users.length === 0 && (
+                        <div className="col-span-2">
+                          <p className="text-sm text-gray-500">No users have been found.</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}

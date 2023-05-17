@@ -106,7 +106,7 @@ const options: { title: string; description: string; key: string; disabled_for_c
     disabled_for_channel: false,
   },
   {
-    title: 'Replay comment in report',
+    title: 'Reply comment in report',
     description: 'Receive a notification every time a comment is replied in a report',
     key: 'replay_comment_in_report',
     disabled_for_channel: false,
