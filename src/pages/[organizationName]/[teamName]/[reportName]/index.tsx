@@ -29,7 +29,7 @@ import UnpureReportRender from '@/unpure-components/UnpureReportRender';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ArrowSmDownIcon, ClipboardCopyIcon } from '@heroicons/react/solid';
+import { ArrowSmDownIcon, ClipboardCopyIcon, InformationCircleIcon } from '@heroicons/react/solid';
 import type {
   Comment,
   GitCommit,
@@ -65,6 +65,7 @@ enum Tab {
 const Index = ({ commonData, reportData, setReportData, setUser, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const dispatch = useAppDispatch();
   const router = useRouter();
+  const { orphan } = router.query;
   const globalPrivacyShowemailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
   const [selfTree, setSelfTree] = useState<GithubFileHash[]>([]);
   const [parentTree, setParentTree] = useState<GithubFileHash[]>([]);
@@ -794,6 +795,20 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                           </div>
 
                           <div className="border-y p-0 mx-4">
+                            {orphan && (
+                              <DelayedContent>
+                                <div className="rounded-md bg-blue-50 p-4 mt-2">
+                                  <div className="flex">
+                                    <div className="shrink-0">
+                                      <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                                    </div>
+                                    <div className="ml-3 flex-1 md:flex md:justify-between">
+                                      <p className="text-sm text-blue-700">This task is related to a cell that does not exists anymore in the latest version of this report</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </DelayedContent>
+                            )}
                             {fileToRender && onlyVisibleCell && (
                               <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
                                 Showing only this cell.

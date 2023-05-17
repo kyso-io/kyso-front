@@ -379,83 +379,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                   </div>
                   {selectedTab === Tab.OrganizationAndChannel && (
                     <>
-                      {teamId === '' && isGlobalInheritanceBroken && !isOrganizationInheritanceBroken && (
-                        <DelayedContent>
-                          <div className="rounded-md bg-blue-50 p-4">
-                            <div className="flex">
-                              <div className="shrink-0">
-                                <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
-                              </div>
-                              <div className="ml-3 flex-1 md:flex md:justify-between">
-                                <p className="text-sm text-blue-700">
-                                  This organization has it's own configuration and does not follows the Global Configuration anymore, then the changes done in the Global Configuration will not be
-                                  propagated to this organization.
-                                  <br />
-                                  <button
-                                    type="button"
-                                    className={clsx(
-                                      'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                                      'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
-                                    )}
-                                    onClick={async () => {
-                                      try {
-                                        const api: Api = new Api(commonData.token);
-                                        await api.deleteUserNotificationsSettingsOrganization(organizationId);
-
-                                        showToaster('Restoration to global configuration done successfully', ToasterIcons.INFO);
-                                        await refreshData();
-                                      } catch (e) {
-                                        showToaster('Something happened trying to restore to global configuration. Please try again', ToasterIcons.ERROR);
-                                      }
-                                    }}
-                                  >
-                                    Restore to global settings
-                                  </button>
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </DelayedContent>
-                      )}
-                      {isOrganizationInheritanceBroken && (
-                        <DelayedContent>
-                          <div className="rounded-md bg-blue-50 p-4">
-                            <div className="flex">
-                              <div className="shrink-0">
-                                <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
-                              </div>
-                              <div className="ml-3 flex-1 md:flex md:justify-between">
-                                <p className="text-sm text-blue-700">
-                                  This channel has it's own configuration and does not follows the Organization Configuration anymore, then the changes done in the Organization Configuration will not
-                                  be propagated to this channel, except those which don't apply to the channel.
-                                  <br />
-                                  <button
-                                    type="button"
-                                    className={clsx(
-                                      'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                                      'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
-                                    )}
-                                    onClick={async () => {
-                                      try {
-                                        const api: Api = new Api(commonData.token);
-                                        await api.deleteUserNotificationsSettingsOrganizationChannel(organizationId, teamId);
-
-                                        showToaster('Restoration to organization configuration done successfully', ToasterIcons.INFO);
-                                        await refreshData();
-                                      } catch (e) {
-                                        showToaster('Something happened trying to restore to organization configuration. Please try again', ToasterIcons.ERROR);
-                                      }
-                                    }}
-                                  >
-                                    Restore to organization settings
-                                  </button>
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </DelayedContent>
-                      )}
-                      <div className="grid grid-cols-4 gap-4 pt-4 pb-6">
+                      <div className="grid grid-cols-4 gap-4 py-4">
                         <label className="block text-sm font-medium leading-6 text-gray-900 sm:pt-1.5">Organization:</label>
                         <select
                           className="block w-full rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-indigo-600 sm:text-sm sm:leading-6"
@@ -488,6 +412,82 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                         </select>
                       </div>
                     </>
+                  )}
+                  {teamId === '' && isGlobalInheritanceBroken && !isOrganizationInheritanceBroken && (
+                    <DelayedContent>
+                      <div className="rounded-md bg-blue-50 p-4 mb-4">
+                        <div className="flex">
+                          <div className="shrink-0">
+                            <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                          </div>
+                          <div className="ml-3 flex-1 md:flex md:justify-between">
+                            <p className="text-sm text-blue-700">
+                              This organization has it's own configuration and does not follows the Global Configuration anymore, then the changes done in the Global Configuration will not be
+                              propagated to this organization.
+                              <br />
+                              <button
+                                type="button"
+                                className={clsx(
+                                  'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
+                                  'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
+                                )}
+                                onClick={async () => {
+                                  try {
+                                    const api: Api = new Api(commonData.token);
+                                    await api.deleteUserNotificationsSettingsOrganization(organizationId);
+
+                                    showToaster('Restoration to global configuration done successfully', ToasterIcons.INFO);
+                                    await refreshData();
+                                  } catch (e) {
+                                    showToaster('Something happened trying to restore to global configuration. Please try again', ToasterIcons.ERROR);
+                                  }
+                                }}
+                              >
+                                Restore to global settings
+                              </button>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </DelayedContent>
+                  )}
+                  {isOrganizationInheritanceBroken && (
+                    <DelayedContent>
+                      <div className="rounded-md bg-blue-50 p-4 mb-4">
+                        <div className="flex">
+                          <div className="shrink-0">
+                            <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                          </div>
+                          <div className="ml-3 flex-1 md:flex md:justify-between">
+                            <p className="text-sm text-blue-700">
+                              This channel has it's own configuration and does not follows the Organization Configuration anymore, then the changes done in the Organization Configuration will not be
+                              propagated to this channel, except those which don't apply to the channel.
+                              <br />
+                              <button
+                                type="button"
+                                className={clsx(
+                                  'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
+                                  'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
+                                )}
+                                onClick={async () => {
+                                  try {
+                                    const api: Api = new Api(commonData.token);
+                                    await api.deleteUserNotificationsSettingsOrganizationChannel(organizationId, teamId);
+
+                                    showToaster('Restoration to organization configuration done successfully', ToasterIcons.INFO);
+                                    await refreshData();
+                                  } catch (e) {
+                                    showToaster('Something happened trying to restore to organization configuration. Please try again', ToasterIcons.ERROR);
+                                  }
+                                }}
+                              >
+                                Restore to organization settings
+                              </button>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </DelayedContent>
                   )}
                   <div className="space-y-6 sm:space-y-5">
                     {options.map((option: { title: string; description: string; key: string; disabled_for_channel: boolean }, index: number) => {

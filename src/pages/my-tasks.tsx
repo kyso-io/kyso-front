@@ -98,13 +98,14 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
     participants[reply.user_id] = true;
   }
   const numParticipants: number = Object.keys(participants).length;
+  const queryParams: string = `?taskId=${inlineCommentDto.id}${inlineCommentDto.cell_id ? `&cell=${inlineCommentDto.cell_id.trim()}` : ''}${
+    inlineCommentDto.orphan ? `&version=${inlineCommentDto.report_version}` : ''
+  }${inlineCommentDto.orphan ? `&orphan=true` : ''}`;
   return (
     <a
       key={inlineCommentDto.id}
       className="flex flex-col py-4 border-b"
-      href={`/${report?.organization_sluglified_name}/${report?.team_sluglified_name}/${report?.name}?taskId=${inlineCommentDto.id}${
-        inlineCommentDto.cell_id ? `&cell=${inlineCommentDto.cell_id}` : ''
-      }${inlineCommentDto.orphan ? `&version=${inlineCommentDto.report_version}` : ''}`}
+      href={`/${report?.organization_sluglified_name}/${report?.team_sluglified_name}/${report?.name}/${queryParams}`}
       onMouseEnter={() => {
         setHoveredInlineComment(true);
       }}
