@@ -422,8 +422,8 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                           </div>
                           <div className="ml-3 flex-1 md:flex md:justify-between">
                             <p className="text-sm text-blue-700">
-                              This organization has it's own configuration and does not follows the Global Configuration anymore, then the changes done in the Global Configuration will not be
-                              propagated to this organization.
+                              This organization has its own configuration and does not follows the Global Configuration anymore, so the changes done in the Global Configuration will not be propagated
+                              to this organization.
                               <br />
                               <button
                                 type="button"
