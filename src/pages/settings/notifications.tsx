@@ -526,8 +526,8 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                                 'ml-5 relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
                               )}
                               style={{
-                                backgroundColor: isDisabled ? '#D1D1D1' : checked ? 'rgb(79 70 229)' : 'gray',
-                                borderColor: isDisabled ? '#D1D1D1' : checked ? '' : 'gray',
+                                backgroundColor: isDisabled ? (checked ? '#BCB8F5' : '#D1D1D1') : checked ? 'rgb(79 70 229)' : 'gray',
+                                borderColor: isDisabled ? (checked ? '#BCB8F5' : '#D1D1D1') : checked ? '' : 'gray',
                                 cursor: isDisabled ? 'not-allowed' : 'pointer',
                               }}
                             >
