@@ -1,21 +1,24 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import PureAvatar from '@/components/PureAvatar';
+import SettingsAside from '@/components/SettingsAside';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '@/helpers/Helper';
+import { checkJwt } from '@/helpers/check-jwt';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import { UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
-import PureAvatar from '@/components/PureAvatar';
-import SettingsAside from '@/components/SettingsAside';
-import { checkJwt } from '@/helpers/check-jwt';
-import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { ToasterIcons } from '@/enums/toaster-icons';
+import Loader from '../../../components/Loader';
+import { useRedirectIfNoJWT } from '../../../hooks/use-redirect-if-no-jwt';
 
-const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
+const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
+  useRedirectIfNoJWT();
   const router = useRouter();
   const username: string = router.query.username as string;
   const ref = useRef<any>(null);
@@ -48,16 +51,8 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     setBio(commonData.user.bio);
     setLink(commonData.user.link);
     setLocation(commonData.user.location);
+    setIsCurrentUser(commonData.user?.username === username);
   }, [commonData.user]);
-
-  useEffect(() => {
-    if (isUserLogged === null) {
-      router.push('/login');
-    }
-    if (isUserLogged) {
-      setIsCurrentUser(commonData.user?.username === username);
-    }
-  }, [commonData.user, isUserLogged]);
 
   const onChangeInputFile = (e: any) => {
     if (e.target.files.length > 0) {
@@ -112,8 +107,8 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     }
   };
 
-  if (isUserLogged === null) {
-    return null;
+  if (isCurrentUser === null) {
+    return <Loader />;
   }
 
   return (
