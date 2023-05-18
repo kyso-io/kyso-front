@@ -50,13 +50,13 @@ const SettingsBreadcrumbNavbar = (props: Props) => {
     <div>
       {organizationSelectorItems.length > 0 && (
         <div className="flex lg:flex-row flex-col lg:items-center space-y-2 lg:space-y-0 lg:space-x-0 p-2">
-          {<NavigationSelector selectorItems={organizationSelectorItems} />}
+          {<NavigationSelector commonData={commonData} selectorItems={organizationSelectorItems} />}
           {commonData.organization && (
             <svg className="hidden lg:inline-block shrink-0 h-5 w-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
               <path d="M5.555 17.776l8-16 .894.448-8 16-.894-.448z" />
             </svg>
           )}
-          {commonData.organization && <NavigationSelector selectorItems={channelSelectorItems} selectorLabel="channel" />}
+          {commonData.organization && <NavigationSelector commonData={commonData} selectorItems={channelSelectorItems} selectorLabel="channel" />}
         </div>
       )}
       {props.children && <div className="py-4 px-6">{props.children}</div>}

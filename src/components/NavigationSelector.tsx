@@ -1,10 +1,11 @@
 import type { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { Menu, Transition } from '@headlessui/react';
-import { HomeIcon, SelectorIcon, ViewListIcon } from '@heroicons/react/outline';
-import { SearchIcon } from '@heroicons/react/solid';
+import { HomeIcon, PlusCircleIcon, SearchIcon, SelectorIcon, ViewListIcon } from '@heroicons/react/outline';
 import { Fragment, useEffect, useState } from 'react';
+import type { CommonData } from '../types/common-data';
 
 type INavigationSelectorProps = {
+  commonData: CommonData;
   selectorItems: BreadcrumbItem[];
   selectorLabel?: string;
   extraItem?: React.ReactElement;
@@ -59,15 +60,11 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
         <Menu.Button
           className={classNames('hover:bg-gray-100 border p-2 flex items-center w-fit text-xs lg:text-sm text-left font-medium text-gray-700 hover:outline-none', currentOrg ? 'rounded-r' : 'rounded')}
         >
-          {/* {currentOrg ? currentOrg.name : ''} */}
           {!currentOrg ? `Select ${selectorLabel}` : ''}
           <div className={classNames(!currentOrg ? 'pl-2' : '')}>
             <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />
-            {/* {currentOrg && <ChevronDownIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />} */}
-            {/* {!currentOrg && <SelectorIcon className="shrink-0 h-5 w-5 text-gray-700 group-hover:text-gray-500" aria-hidden="true" />} */}
           </div>
         </Menu.Button>
-
         <Transition
           as={Fragment}
           enter="transition ease-out duration-100"
@@ -78,30 +75,15 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
           leaveTo="transform opacity-0 scale-95"
         >
           <Menu.Items className=" z-50 origin-top-left absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-slate-200 ring-opacity/5 divide-y divide-gray-100 focus:outline-none">
-            {/* {currentOrg && (
-              <>
-                <Menu.Item>
-                  {({ active }) => (
-                    <a href={`${currentOrg!.href}`} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm', 'font-medium')}>
-                      Go to {currentOrg!.name}
-                    </a>
-                  )}
-                </Menu.Item>
-
-                <Menu.Item>
-                  {({ active }) => (
-                    <a href={`${currentOrg!.href}/settings`} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm')}>
-                      Go to settings
-                    </a>
-                  )}
-                </Menu.Item>
-              </>
-            )} */}
-
             <div className="py-1">
               {currentOrg && (
                 <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
                   Organizations
+                  {props.commonData.user !== null && (
+                    <a href="/create-organization" className={classNames('float-right text-gray-500 hover:bg-gray-100 hover:text-gray-900', 'text-sm rounded-md')}>
+                      <PlusCircleIcon className="w-5 h-5 mr-1" />
+                    </a>
+                  )}
                 </h3>
               )}
               <div className="px-4 pb-2">
@@ -124,17 +106,15 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
               </div>
               <div className="flex flex-col justify-start" style={{ maxHeight: '380PX', overflow: 'overlay' }}>
                 {sortedSelectorItems &&
-                  sortedSelectorItems
-                    // .filter((o) => !o.current)
-                    .map((item: BreadcrumbItem) => (
-                      <Menu.Item key={item.href}>
-                        {({ active }) => (
-                          <a href={item.href} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm', item.current ? 'font-bold' : 'font-normal')}>
-                            {item.name}
-                          </a>
-                        )}
-                      </Menu.Item>
-                    ))}
+                  sortedSelectorItems.map((item: BreadcrumbItem) => (
+                    <Menu.Item key={item.href}>
+                      {({ active }) => (
+                        <a href={item.href} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm', item.current ? 'font-bold' : 'font-normal')}>
+                          {item.name}
+                        </a>
+                      )}
+                    </Menu.Item>
+                  ))}
                 {extraItem}
               </div>
             </div>
