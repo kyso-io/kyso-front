@@ -1,3 +1,4 @@
+/* eslint no-prototype-builtins: "off" */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-case-declarations */
@@ -69,7 +70,10 @@ interface Props {
 const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedResponse }: Props) => {
   const [hoveredInlineComment, setHoveredInlineComment] = useState<boolean>(false);
   const report: ReportDTO | null = normalizedResponse.relations!.report[inlineCommentDto.report_id] ?? null;
-  const file: File | null = normalizedResponse.relations!.file[inlineCommentDto.file_id] ?? null;
+  const file: File | null =
+    normalizedResponse.relations.hasOwnProperty('file') && normalizedResponse.relations.file.hasOwnProperty(inlineCommentDto.file_id)
+      ? normalizedResponse.relations.file[inlineCommentDto.file_id]
+      : null;
   const users: UserDTO[] = [];
   let organization: ResourcePermissions | null = null;
   let team: ResourcePermissions | null = null;
@@ -169,7 +173,7 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
               d="M6.75 7.5l3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0021 18V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v12a2.25 2.25 0 002.25 2.25z"
             />
           </svg>
-          <span className="text-sm text-slate-500">source /{file?.name ?? 'File not found'}</span>
+          <span className={clsx('text-sm', file !== null ? 'text-slate-500' : 'text-red-400')}>{file ? `source /${file.name}` : 'File not found'}</span>
         </div>
 
         <div className="flex flex-row items-center">
