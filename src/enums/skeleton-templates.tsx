@@ -19,7 +19,7 @@ export class SkeletonTemplates {
   );
 
   public static PORTRAIT_PLACEHOLDER: JSX.Element = (
-    <div className="relative animate-spin" data-headlessui-state="">
+    <div className="relative animate-pulse" data-headlessui-state="">
       <div>
         <span className="flex max-w-xs items-center rounded-full text-sm hover:text-gray-300" id="headlessui-menu-button-:r3:" aria-haspopup="menu" aria-expanded="false" data-headlessui-state="">
           <svg
