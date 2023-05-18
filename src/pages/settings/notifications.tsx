@@ -429,7 +429,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                                 type="button"
                                 className={clsx(
                                   'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                                  'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
+                                  'k-bg-primary focus:ring-indigo-900',
                                 )}
                                 onClick={async () => {
                                   try {
@@ -467,7 +467,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                                 type="button"
                                 className={clsx(
                                   'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-                                  'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
+                                  'k-bg-primary focus:ring-indigo-900',
                                 )}
                                 onClick={async () => {
                                   try {

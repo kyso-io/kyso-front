@@ -1,6 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 import ListboxWithText from '@/components/PureListBoxWithText';
+import { ToasterIcons } from '@/enums/toaster-icons';
+import { ToasterMessages } from '@/helpers/ToasterMessages';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
@@ -9,27 +11,25 @@ import { SearchIcon } from '@heroicons/react/outline';
 import { ChevronDownIcon, XIcon } from '@heroicons/react/solid';
 import type { UserDTO } from '@kyso-io/kyso-model';
 import {
+  AddUserOrganizationDto,
   GlobalPermissionsEnum,
+  InviteUserDto,
   OrganizationPermissionsEnum,
   TeamMembershipOriginEnum,
   TeamPermissionsEnum,
   TeamVisibilityEnum,
-  AddUserOrganizationDto,
-  UserRoleDTO,
   UpdateOrganizationMembersDTO,
   UpdateTeamMembersDTO,
-  InviteUserDto,
+  UserRoleDTO,
 } from '@kyso-io/kyso-model';
+import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import slugify from 'slugify';
-import { ToasterIcons } from '@/enums/toaster-icons';
-import { Api } from '@kyso-io/kyso-store';
-import { ToasterMessages } from '@/helpers/ToasterMessages';
-import { HelperPermissions } from '../helpers/check-permissions';
 import { Helper } from '../helpers/Helper';
+import { HelperPermissions } from '../helpers/check-permissions';
 import type { Member } from '../types/member';
 import PureAvatar from './PureAvatar';
 import PureAvatarGroup from './PureAvatarGroup';
@@ -207,9 +207,7 @@ const ManageUsers = ({
             disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
             className={clsx(
               'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-              !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
-                ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                : 'k-bg-primary k-bg-primary-hover focus:ring-indigo-900',
+              !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed' : 'k-bg-primary focus:ring-indigo-900',
             )}
             onClick={async () => {
               const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
@@ -232,9 +230,7 @@ const ManageUsers = ({
             disabled={!selectedOrgRole || (!selectedTeamRole && showTeamRoles)}
             className={clsx(
               'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
-              !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
-                ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
+              !selectedOrgRole || (!selectedTeamRole && showTeamRoles) ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed' : 'k-bg-primary  focus:ring-indigo-900',
             )}
             onClick={async () => {
               await onInviteNewUserDoAction(query, selectedOrgRole, selectedTeamRole);
@@ -582,7 +578,7 @@ const ManageUsers = ({
                                 'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
                                 !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
                                   ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                                  : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
+                                  : 'k-bg-primary  focus:ring-indigo-900',
                               )}
                               onClick={async () => {
                                 const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
@@ -802,7 +798,7 @@ const ManageUsers = ({
                                 'mt-3 inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded shadow-sm text-white  focus:outline-none focus:ring-2 focus:ring-offset-2',
                                 !selectedOrgRole || (!selectedTeamRole && showTeamRoles)
                                   ? 'bg-slate-500 hover:bg-slate-500 focus:ring-slate-500 cursor-not-allowed'
-                                  : 'k-bg-primary k-bg-primary-hover  focus:ring-indigo-900',
+                                  : 'k-bg-primary  focus:ring-indigo-900',
                               )}
                               onClick={async () => {
                                 const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(

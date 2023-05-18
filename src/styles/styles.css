@@ -23,7 +23,9 @@ img.k-right-logo {
   background-color: #162c40;
 }
 
-
+.header.k-bg-primary:hover {
+  background-color: #244362;
+}
 
 .k-right-toc {
   background-color: #fafafa;

@@ -138,7 +138,7 @@ const UnpureDeleteChannelDropdown = ({ commonData, showToaster, isCurrentUserSol
                       disabled={input !== commonData.team?.sluglified_name || requesting}
                       className={clsx(
                         'inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm',
-                        input !== commonData.team?.sluglified_name || requesting ? 'cursor-not-allowed k-bg-primary-disabled' : 'k-bg-primary k-bg-primary-hover',
+                        input !== commonData.team?.sluglified_name || requesting ? 'cursor-not-allowed k-bg-primary-disabled' : 'k-bg-primary',
                       )}
                       onClick={deleteTeam}
                     >

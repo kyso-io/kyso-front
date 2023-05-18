@@ -224,7 +224,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
         `Please <b>verify your email account</b> to be able to make changes on Kyso. <br/><br/>
         <a target="_blank" href="/user/${commonData.user.username}/settings/">
           <button type="button"
-            class="k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary">
+            class="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary">
             Send another verification mail
           </button>
         </a>`,

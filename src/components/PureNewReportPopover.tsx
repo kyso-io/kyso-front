@@ -45,7 +45,7 @@ const PureNewReportPopover = ({ commonData, isCurrentUserSolvedCaptcha, isCurren
 
           return (
             <React.Fragment>
-              <Popover.Button className="w-fit whitespace-nowrap p-3 font-medium text-white rounded k-bg-primary k-bg-primary-hover text-sm flex flex-row items-center focus:ring-0 focus:outline-none">
+              <Popover.Button className="w-fit whitespace-nowrap p-3 font-medium text-white rounded k-bg-primary text-sm flex flex-row items-center focus:ring-0 focus:outline-none">
                 Post a report
                 {open ? <ChevronUpIcon className="w-5 h-5 ml-2" /> : <ChevronDownIcon className="w-5 h-5 ml-2" />}
               </Popover.Button>

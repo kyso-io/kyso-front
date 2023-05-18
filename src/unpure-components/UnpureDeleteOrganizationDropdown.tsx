@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
 import { Dialog, Menu, Transition } from '@headlessui/react';
@@ -6,7 +7,6 @@ import { DotsVerticalIcon, ExclamationCircleIcon, TrashIcon } from '@heroicons/r
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import React, { Fragment, useState } from 'react';
-import { ToasterIcons } from '@/enums/toaster-icons';
 
 interface Props {
   commonData: CommonData;
@@ -138,7 +138,7 @@ const UnpureDeleteOrganizationDropdown = ({ commonData, showToaster, isCurrentUs
                       disabled={input !== commonData.organization?.sluglified_name || requesting}
                       className={clsx(
                         'inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm',
-                        input !== commonData.organization?.sluglified_name || requesting ? 'cursor-not-allowed k-bg-primary-disabled' : 'k-bg-primary k-bg-primary-hover',
+                        input !== commonData.organization?.sluglified_name || requesting ? 'cursor-not-allowed k-bg-primary-disabled' : 'k-bg-primary',
                       )}
                       onClick={deleteOrganization}
                     >

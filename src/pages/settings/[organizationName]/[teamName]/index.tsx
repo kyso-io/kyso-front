@@ -42,8 +42,8 @@ import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import { usePublicSetting } from '../../../../hooks/use-public-setting';
 import Pagination from '../../../../components/Pagination';
+import { usePublicSetting } from '../../../../hooks/use-public-setting';
 
 const OrganizationRoleToLabel: { [role: string]: string } = {
   'organization-admin': 'Admin of this organization',
@@ -1687,7 +1687,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                       type="button"
                       className={clsx(
                         'inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm',
-                        requesting || textTeamModal !== commonData.team?.sluglified_name ? 'cursor-not-allowed k-bg-primary-disabled' : 'k-bg-primary k-bg-primary-hover',
+                        requesting || textTeamModal !== commonData.team?.sluglified_name ? 'cursor-not-allowed k-bg-primary-disabled' : 'k-bg-primary',
                       )}
                       disabled={requesting || textTeamModal !== commonData.team?.sluglified_name}
                       onClick={deleteTeam}

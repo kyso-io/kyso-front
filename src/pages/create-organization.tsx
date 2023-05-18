@@ -1,8 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { PureAlert, PureAlertTypeEnum } from '@/components/PureAlert';
+import PureAvatar from '@/components/PureAvatar';
 import { PureSpinner } from '@/components/PureSpinner';
+import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '@/helpers/Helper';
+import { checkJwt } from '@/helpers/check-jwt';
+import type { HttpExceptionDto } from '@/interfaces/http-exception.dto';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { ArrowRightIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, Organization } from '@kyso-io/kyso-model';
 import { AllowDownload, CreateOrganizationDto } from '@kyso-io/kyso-model';
@@ -10,14 +18,6 @@ import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useRef, useState } from 'react';
-import { PureAlert, PureAlertTypeEnum } from '@/components/PureAlert';
-import PureAvatar from '@/components/PureAvatar';
-import { RegisteredUsersAlert } from '@/components/RegisteredUsersAlert';
-import { checkJwt } from '@/helpers/check-jwt';
-import type { HttpExceptionDto } from '@/interfaces/http-exception.dto';
-import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { ToasterIcons } from '@/enums/toaster-icons';
 
 const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
@@ -279,7 +279,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                       type="button"
                       onClick={createOrganization}
                       className={classNames(
-                        'k-bg-primary-hover focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
+                        'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
                         'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary',
                       )}
                     >

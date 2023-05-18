@@ -2025,7 +2025,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                       type="button"
                       className={clsx(
                         'inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm',
-                        requesting || textOrgModal !== commonData.organization?.sluglified_name ? 'cursor-not-allowed k-bg-primary-disabled' : 'k-bg-primary k-bg-primary-hover',
+                        requesting || textOrgModal !== commonData.organization?.sluglified_name ? 'cursor-not-allowed k-bg-primary-disabled' : 'k-bg-primary',
                       )}
                       disabled={requesting || textOrgModal !== commonData.organization?.sluglified_name}
                       onClick={deleteOrganization}
