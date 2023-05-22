@@ -18,11 +18,15 @@ interface KysoCommentStatesValues {
 const TagInlineComment = ({ status }: Props) => {
   const kysoCommentStatesValues: KysoCommentStatesValues | null = usePublicSetting(KysoSettingsEnum.KYSO_COMMENT_STATES_VALUES);
 
-  if (!kysoCommentStatesValues || !status) {
-    return null;
-  }
+  try {
+    if (!kysoCommentStatesValues || !status) {
+      return null;
+    }
 
-  return <span className={kysoCommentStatesValues.classes[status] ?? ''}>{kysoCommentStatesValues.labels[status] ?? status}</span>;
+    return <span className={kysoCommentStatesValues.classes[status] ?? ''}>{kysoCommentStatesValues.labels[status] ?? status}</span>;
+  } catch (ex) {
+    return <span>{status}</span>;
+  }
 };
 
 export default TagInlineComment;
