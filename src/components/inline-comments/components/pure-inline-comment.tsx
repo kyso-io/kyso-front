@@ -137,6 +137,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
             onSubmitted={() => setIsEditing(!isEditing)}
             onCancel={() => setIsEditing(!isEditing)}
             hasPermissionCreateComment={hasPermissionCreateComment}
+            isEdition={true}
           />
         </div>
       ) : (
@@ -148,8 +149,17 @@ const PureInlineComment = (props: IPureInlineComment) => {
                   type="button"
                   className="hover:underline"
                   onClick={() => {
+                    const { query } = router;
+
+                    if (query.taskId) {
+                      // Exists previous one, remove it
+                      delete query.taskId;
+                    } else {
+                      query.taskId = comment.id;
+                    }
+
                     router.replace({
-                      query: { ...router.query, taskId: comment.id },
+                      query,
                     });
                   }}
                 >

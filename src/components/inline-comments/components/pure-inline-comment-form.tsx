@@ -22,6 +22,7 @@ type IPureCommentForm = {
   channelMembers: TeamMember[];
   submitComment: (text: string, userIds: string[], commentId?: string) => void;
   isReply?: boolean;
+  isEdition?: boolean;
 };
 
 const parseMentions = (str: string) => {
@@ -42,7 +43,7 @@ const parseMentions = (str: string) => {
 };
 
 const PureInlineCommentForm = (props: IPureCommentForm) => {
-  const { comment, submitComment, user, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true, isReply = false } = props;
+  const { isEdition, comment, submitComment, user, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true, isReply = false } = props;
   const mentionsRef = useRef<any>(null);
   const [id] = useState<string | undefined>(`picf-${uuidv4()}`);
   const [showCommentForm, setShowCommentForm] = useState<boolean>(false);
@@ -125,7 +126,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
 
   return (
     <>
-      {!showCommentForm && !isReply && (
+      {!showCommentForm && !isReply && !isEdition && (
         <>
           <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
             <Tooltip target=".inline-comments-info" autoHide position="bottom" />
@@ -141,7 +142,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
           </div>
         </>
       )}
-      {(showCommentForm || isReply) && (
+      {(showCommentForm || isReply || isEdition) && (
         <form onSubmit={handleSubmit} className="my-2">
           {hasPermissionCreateComment ? (
             <Mention
