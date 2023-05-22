@@ -24,7 +24,7 @@ type IPureComments = {
   hasPermissionCreateComment: boolean;
   hasPermissionDeleteComment: boolean;
   createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
-  updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
+  updateInlineComment: (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteComment: (id: string) => void;
   isLastVersion: boolean;
   showTitle: boolean;
@@ -55,7 +55,7 @@ const PureInlineComments = (props: IPureComments) => {
             File{`'`}s Tasks
             <FontAwesomeIcon
               className="inline-comments-info"
-              data-pr-tooltip="These comments are local to the current file, and will change if you open another file"
+              data-pr-tooltip="These tasks are local to the current file, and will change if you open another file"
               style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
               icon={faCircleInfo}
             />

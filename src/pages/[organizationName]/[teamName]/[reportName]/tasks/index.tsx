@@ -516,7 +516,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
         return;
       }
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(inlineCommentDto.id, inlineCommentDto.text, inlineCommentDto.mentions, status);
+      const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(inlineCommentDto.id, inlineCommentDto.text, inlineCommentDto.mentions, status, inlineCommentDto.orphan);
       const response: NormalizedResponseDTO<InlineCommentDto> = await api.updateInlineComment(id, updateInlineCommentDto);
       const updatedInlineComment: InlineCommentDto = response.data;
       const copyResult: NormalizedResponseDTO<InlineCommentDto[]> = { ...result! };

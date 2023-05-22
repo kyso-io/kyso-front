@@ -27,7 +27,7 @@ interface Props {
   last: boolean;
   inlineComments: InlineCommentDto[];
   createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
-  updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
+  updateInlineComment: (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteInlineComment: (id: string) => void;
   enabledCreateInlineComment: boolean;
   enabledDeleteInlineComment: boolean;

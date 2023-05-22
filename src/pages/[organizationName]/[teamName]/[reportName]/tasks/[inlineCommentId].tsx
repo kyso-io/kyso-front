@@ -391,7 +391,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     } catch (e) {}
   };
 
-  const updateInlineComment = async (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => {
+  const updateInlineComment = async (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => {
     const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
 
     if (!isValid) {
@@ -399,7 +399,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     }
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(result!.data.file_id, text, user_ids, status);
+      const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(result!.data.file_id, text, user_ids, status, originalComment.orphan);
       await api.updateInlineComment(id, updateInlineCommentDto);
       await getInlineComment();
     } catch (e) {}
