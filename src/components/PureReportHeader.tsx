@@ -1,7 +1,7 @@
 import PureShareButton from '@/components/PureShareButton';
 import PureVersionsDropdown from '@/components/PureVersionsDropdown';
-import classNames from '@/helpers/class-names';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
+import classNames from '@/helpers/class-names';
 import type { Version } from '@/hooks/use-versions';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
@@ -183,6 +183,11 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
                 Open in Window
                 <ExternalLinkIcon className="ml-1 h-4 w-4" aria-hidden="true" />
               </button>
+            )}
+            {fileToRender !== null && fileToRender.path.endsWith('.ipynb') && (
+              <a href={`${frontEndUrl}${reportUrl}/diff/${fileToRender.path}`} className="font-medium text-sm text-gray-700 px-3">
+                Compare versions
+              </a>
             )}
             {fileToRender !== null && fileToRender.git_metadata !== null && fileToRender.git_metadata.repository && <GitMetaDataDropdown fileToRender={fileToRender} />}
             {showCloneDropDown && (
