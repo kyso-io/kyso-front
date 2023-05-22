@@ -4,8 +4,9 @@ import { useNavigateToHashOnce } from '@/hooks/use-navigate-to-hash-once';
 import type { CommonData } from '@/types/common-data';
 import { ChatAltIcon, CodeIcon, LinkIcon } from '@heroicons/react/outline';
 import type { InlineCommentDto, InlineCommentStatusEnum, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useHover } from 'usehooks-ts';
+import { Tooltip } from 'primereact/tooltip';
 import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
 import type { Cell as ICell } from '../interfaces/jupyter-notebook';
 import Cell from './cell';
@@ -71,6 +72,15 @@ const CellWrapper = (props: Props) => {
 
   useNavigateToHashOnce({ active: true });
 
+  useEffect(() => {
+    const commentsForCurrentCell = inlineComments.filter((inlineComment: InlineCommentDto) => inlineComment.cell_id === cell.id);
+    if (inlineComments.length > 0 && commentsForCurrentCell && commentsForCurrentCell.length > 0) {
+      setCommentsShown(true);
+    } else {
+      setCommentsShown(false);
+    }
+  }, [inlineComments]);
+
   const showIconComments: boolean = useMemo(() => {
     /* eslint-disable no-prototype-builtins */
     if (!cell.hasOwnProperty('id') || !cell.id) {
@@ -118,38 +128,48 @@ const CellWrapper = (props: Props) => {
       <div className={classNames('w-3/12 p-[1px]')}>
         <div className={classNames('flex flex-row w-fit mx-2 border rounded divide-x divide-x-1', isHover ? 'bg-gray-50' : '')}>
           {cell?.execution_count && (
-            <button className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', 'hover:bg-gray-200')}>In: [{cell.execution_count}]</button>
+            <>
+              <button className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', 'hover:bg-gray-300')}>In: [{cell.execution_count}]</button>
+            </>
           )}
 
           {showIconComments && (
-            <button
-              className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', commentsShown ? 'bg-gray-100 hover:bg-gray-200' : 'hover:bg-gray-50')}
-              onClick={() => setCommentsShown(!commentsShown)}
-            >
-              <ChatAltIcon className="h-4 w-4 mr-1" aria-hidden="true" />
-              {inlineCommentDtos.length > 0 && <span>{inlineCommentDtos.length}</span>}
-            </button>
+            <>
+              <Tooltip target="#showCommentsButton" autoHide position="bottom" content="Toggle tasks" />
+              <button
+                id="showCommentsButton"
+                className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', commentsShown ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-50')}
+                onClick={() => setCommentsShown(!commentsShown)}
+              >
+                <ChatAltIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+                {inlineCommentDtos.length > 0 && <span>{inlineCommentDtos.length}</span>}
+              </button>
+            </>
           )}
 
           {cell?.id && (
-            <a
-              className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', inputShown ? 'bg-gray-100 hover:bg-gray-200' : 'hover:bg-gray-50')}
-              href={`?cell=${cell?.id}`}
-            >
-              <LinkIcon className="h-4 w-4" aria-hidden="true" />
-            </a>
+            <>
+              <Tooltip target="#openLinkButton" autoHide position="bottom" content="Open link to this cell in a new window" />
+              <a id="openLinkButton" className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', 'hover:bg-gray-300')} href={`?cell=${cell?.id}`}>
+                <LinkIcon className="h-4 w-4" aria-hidden="true" />
+              </a>
+            </>
           )}
 
           {showCodeToggle && (
-            <button
-              className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', inputShown ? 'bg-gray-100 hover:bg-gray-200' : 'hover:bg-gray-50')}
-              onClick={() => {
-                setInputShown(!inputShown);
-                setOutputShown(!outputShown);
-              }}
-            >
-              <CodeIcon className="h-4 w-4" aria-hidden="true" />
-            </button>
+            <>
+              <Tooltip target="#showCodeButton" autoHide position="bottom" content="Show code" />
+              <button
+                id="showCodeButton"
+                className={classNames('tooltip-show-code h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', 'hover:bg-gray-300')}
+                onClick={() => {
+                  setInputShown(!inputShown);
+                  setOutputShown(!outputShown);
+                }}
+              >
+                <CodeIcon className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </>
           )}
         </div>
 
@@ -166,7 +186,6 @@ const CellWrapper = (props: Props) => {
             deleteComment={deleteInlineComment}
             isLastVersion={isLastVersion}
             showCreateNewComment={true}
-            showTitle={true}
           />
         )}
       </div>

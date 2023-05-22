@@ -57,7 +57,7 @@ const UnpureReportRender = ({
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (!report || !fileToRender) {
@@ -269,7 +269,6 @@ const UnpureReportRender = ({
                   updateInlineComment={updateInlineComment}
                   deleteComment={deleteInlineComment}
                   isLastVersion={isLastVersion}
-                  showTitle={true}
                   showCreateNewComment={true}
                 />
               </PureSideOverlayCommentsPanel>

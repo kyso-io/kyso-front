@@ -543,7 +543,6 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                         createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(user_ids, text, parent_id)}
                         updateInlineComment={updateInlineComment}
                         deleteComment={deleteInlineComment}
-                        showTitle={false}
                         showCreateNewComment={false}
                         isLastVersion={true}
                       />
