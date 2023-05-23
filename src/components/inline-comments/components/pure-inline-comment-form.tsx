@@ -9,6 +9,9 @@ import type { InlineCommentDto, TeamMember, UserDTO } from '@kyso-io/kyso-model'
 import { Mention } from 'primereact/mention';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Tooltip } from 'primereact/tooltip';
 
 type IPureCommentForm = {
   comment?: InlineCommentDto;
@@ -19,6 +22,7 @@ type IPureCommentForm = {
   channelMembers: TeamMember[];
   submitComment: (text: string, userIds: string[], commentId?: string) => void;
   isReply?: boolean;
+  isEdition?: boolean;
 };
 
 const parseMentions = (str: string) => {
@@ -39,9 +43,10 @@ const parseMentions = (str: string) => {
 };
 
 const PureInlineCommentForm = (props: IPureCommentForm) => {
-  const { comment, submitComment, user, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true, isReply = false } = props;
+  const { isEdition, comment, submitComment, user, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true, isReply = false } = props;
   const mentionsRef = useRef<any>(null);
   const [id] = useState<string | undefined>(`picf-${uuidv4()}`);
+  const [showCommentForm, setShowCommentForm] = useState<boolean>(false);
 
   useEffect(() => {
     function handleDocumentKeyDown(event: any) {
@@ -120,71 +125,85 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="my-2">
-      {hasPermissionCreateComment ? (
-        <Mention
-          ref={mentionsRef}
-          id={id}
-          suggestions={suggestions}
-          className="relative"
-          inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm"
-          panelClassName="w-full absolute bg-white border rounded"
-          autoHighlight
-          autoFocus
-          onSearch={onSearch}
-          name="input"
-          value={value}
-          onChange={(e) => setValue((e.target as HTMLInputElement).value)}
-          field="nameSlug"
-          style={{
-            width: '100%',
-            zIndex: 0,
-          }}
-          placeholder={message}
-          itemTemplate={itemTemplate}
-        />
-      ) : (
-        <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
+    <>
+      {!showCommentForm && !isReply && !isEdition && (
+        <>
+          <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
+            <Tooltip target=".inline-comments-info" autoHide position="bottom" />
+            <button onClick={() => setShowCommentForm(true)} className="ml-1 text-blue-500">
+              Create a new task
+              <FontAwesomeIcon
+                className="inline-comments-info text-xs"
+                data-pr-tooltip="These tasks are local to the current file, and will change if you open another file"
+                style={{ color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
+                icon={faCircleInfo}
+              />
+            </button>
+          </div>
+        </>
       )}
-
-      <div className="flex justify-end pt-4">
-        <div className="flex flex-row space-x-2">
-          {comment && (
-            <button className="hover:underline text-gray-500 text-sm" onClick={onCancel}>
-              Cancel
-            </button>
-          )}
-          {!comment && hasPermissionCreateComment && value !== '' && (
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                setValue('');
-                if (onCancel) {
-                  onCancel();
-                }
+      {(showCommentForm || isReply || isEdition) && (
+        <form onSubmit={handleSubmit} className="my-2">
+          {hasPermissionCreateComment ? (
+            <Mention
+              ref={mentionsRef}
+              id={id}
+              suggestions={suggestions}
+              className="relative"
+              inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm"
+              panelClassName="w-full absolute bg-white border rounded"
+              autoHighlight
+              autoFocus
+              onSearch={onSearch}
+              name="input"
+              value={value}
+              onChange={(e) => setValue((e.target as HTMLInputElement).value)}
+              field="nameSlug"
+              style={{
+                width: '100%',
+                zIndex: 0,
               }}
-              className={classNames(
-                'mr-2 inline-flex items-center px-2.5 py-1.5 border border-gray-500 text-xs font-medium rounded shadow-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white hover:bg-gray-100 focus:ring-gray-100',
-              )}
-            >
-              Cancel
-            </button>
+              placeholder={message}
+              itemTemplate={itemTemplate}
+            />
+          ) : (
+            <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
           )}
-          {hasPermissionCreateComment && (
-            <button
-              type="submit"
-              className={classNames(
-                'inline-flex items-center px-2 py-1 border border-transparent text-sm font-small rounded-md shadow-sm text-white focus:outline-none focus:ring-0',
-                'k-bg-primary focus:ring-kyso-700 focus:ring-offset-2',
+
+          <div className="flex justify-end pt-4">
+            <div className="flex flex-row space-x-2">
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowCommentForm(false);
+                  setValue('');
+                  if (onCancel) {
+                    onCancel();
+                  }
+                }}
+                className={classNames(
+                  'mr-2 inline-flex items-center px-2.5 py-1.5 border border-gray-500 text-xs font-medium rounded shadow-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white hover:bg-gray-100 focus:ring-gray-100',
+                )}
+              >
+                Cancel
+              </button>
+              {hasPermissionCreateComment && (
+                <button
+                  type="submit"
+                  className={classNames(
+                    'inline-flex items-center px-2 py-1 border border-transparent text-sm font-small rounded-md shadow-sm text-white focus:outline-none focus:ring-0',
+                    'k-bg-primary focus:ring-kyso-700 focus:ring-offset-2',
+                  )}
+                >
+                  {isLoading && <PureSpinner size={5} />}
+                  {comment !== null ? 'Save' : 'Post'}
+                </button>
               )}
-            >
-              {isLoading && <PureSpinner size={5} />}
-              {comment !== null ? 'Save' : 'Post'}
-            </button>
-          )}
-        </div>
-      </div>
-    </form>
+            </div>
+          </div>
+        </form>
+      )}
+    </>
   );
 };
 

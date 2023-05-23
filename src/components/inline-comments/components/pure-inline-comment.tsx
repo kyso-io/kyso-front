@@ -32,7 +32,7 @@ type IPureInlineComment = {
   onCancel?: () => void;
   report: ReportDTO;
   createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
-  updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
+  updateInlineComment: (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteComment: (id: string) => void;
   parentInlineComment: InlineCommentDto | null;
   isLastVersion: boolean;
@@ -131,12 +131,13 @@ const PureInlineComment = (props: IPureInlineComment) => {
         <div className={clsx(parentInlineComment ? 'ml-10' : '')}>
           <PureInlineCommentForm
             user={commonData.user!}
-            submitComment={(text: string, userIds: string[], commentId?: string) => updateInlineComment(commentId as string, userIds, text, comment.current_status!)}
+            submitComment={(text: string, userIds: string[], commentId?: string) => updateInlineComment(comment, commentId as string, userIds, text, comment.current_status!)}
             comment={comment}
             channelMembers={channelMembers}
             onSubmitted={() => setIsEditing(!isEditing)}
             onCancel={() => setIsEditing(!isEditing)}
             hasPermissionCreateComment={hasPermissionCreateComment}
+            isEdition={true}
           />
         </div>
       ) : (
@@ -148,8 +149,17 @@ const PureInlineComment = (props: IPureInlineComment) => {
                   type="button"
                   className="hover:underline"
                   onClick={() => {
+                    const { query } = router;
+
+                    if (query.taskId) {
+                      // Exists previous one, remove it
+                      delete query.taskId;
+                    } else {
+                      query.taskId = comment.id;
+                    }
+
                     router.replace({
-                      query: { ...router.query, taskId: comment.id },
+                      query,
                     });
                   }}
                 >
@@ -157,7 +167,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                 </button>
               </React.Fragment>
             )}
-            {isUserAuthor && hasPermissionCreateComment && isLastVersion && (
+            {isUserAuthor && hasPermissionCreateComment && (
               <React.Fragment>
                 {isClosed ? (
                   <React.Fragment>
@@ -202,7 +212,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
               {isUserAuthor ? 'You' : comment?.user_name}
               {comment?.created_at ? ` wrote ${moment(new Date(comment.created_at)).fromNow()}` : ''}
             </div>
-            {canChangeStatus && !replying && !parentInlineComment && isLastVersion ? (
+            {canChangeStatus && !replying && !parentInlineComment ? (
               <Popover className="relative inline-block">
                 <Popover.Button className="focus:outline-none">
                   <div className="flex flex-row items-center cursor-pointer">
@@ -223,7 +233,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                           <div
                             className="relative rounded py-2 px-4 hover:bg-gray-50 cursor-pointer"
                             onClick={() => {
-                              updateInlineComment(comment.id, comment.mentions, comment.text, InlineCommentStatusEnum.OPEN);
+                              updateInlineComment(comment, comment.id, comment.mentions, comment.text, InlineCommentStatusEnum.OPEN);
                               close();
                             }}
                           >
@@ -235,7 +245,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                           <div
                             className="relative rounded py-2 px-4 hover:bg-gray-50 cursor-pointer"
                             onClick={() => {
-                              updateInlineComment(comment.id, comment.mentions, comment.text, InlineCommentStatusEnum.TO_DO);
+                              updateInlineComment(comment, comment.id, comment.mentions, comment.text, InlineCommentStatusEnum.TO_DO);
                               close();
                             }}
                           >
@@ -247,7 +257,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                           <div
                             className="relative rounded py-2 px-4 hover:bg-gray-50 cursor-pointer"
                             onClick={() => {
-                              updateInlineComment(comment.id, comment.mentions, comment.text, InlineCommentStatusEnum.DOING);
+                              updateInlineComment(comment, comment.id, comment.mentions, comment.text, InlineCommentStatusEnum.DOING);
                               close();
                             }}
                           >
@@ -259,7 +269,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                           <div
                             className="relative rounded py-2 px-4 hover:bg-gray-50 cursor-pointer"
                             onClick={() => {
-                              updateInlineComment(comment.id, comment.mentions, comment.text, InlineCommentStatusEnum.CLOSED);
+                              updateInlineComment(comment, comment.id, comment.mentions, comment.text, InlineCommentStatusEnum.CLOSED);
                               close();
                             }}
                           >
@@ -282,7 +292,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                 Cancel
               </span>
             )}
-            {hasPermissionCreateComment && !replying && !parentInlineComment && isLastVersion && (
+            {hasPermissionCreateComment && !replying && !parentInlineComment && (
               <React.Fragment>
                 {isClosed ? (
                   <React.Fragment>

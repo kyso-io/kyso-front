@@ -78,6 +78,8 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
   const users: UserDTO[] = [];
   let organization: ResourcePermissions | null = null;
   let team: ResourcePermissions | null = null;
+  const documentUrl: string = inlineCommentDto.file_path_scs.split('/').slice(6).join('/');
+
   if (report) {
     for (const userId of report.author_ids) {
       const user: UserDTO | null = normalizedResponse.relations!.user[userId] ?? null;
@@ -110,7 +112,7 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
     <a
       key={inlineCommentDto.id}
       className="flex flex-col py-4 border-b"
-      href={`/${report?.organization_sluglified_name}/${report?.team_sluglified_name}/${report?.name}/${queryParams}`}
+      href={`/${report?.organization_sluglified_name}/${report?.team_sluglified_name}/${report?.name}/${documentUrl}${queryParams}`}
       onMouseEnter={() => {
         setHoveredInlineComment(true);
       }}

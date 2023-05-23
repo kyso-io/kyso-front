@@ -1,13 +1,11 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CommonData } from '@/types/common-data';
-import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { InlineCommentDto, InlineCommentStatusEnum, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
-import { Tooltip } from 'primereact/tooltip';
+
 import React from 'react';
 import PureInlineComment from './pure-inline-comment';
 import PureInlineCommentForm from './pure-inline-comment-form';
@@ -24,10 +22,9 @@ type IPureComments = {
   hasPermissionCreateComment: boolean;
   hasPermissionDeleteComment: boolean;
   createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
-  updateInlineComment: (id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
+  updateInlineComment: (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteComment: (id: string) => void;
   isLastVersion: boolean;
-  showTitle: boolean;
   showCreateNewComment: boolean;
 };
 
@@ -43,25 +40,10 @@ const PureInlineComments = (props: IPureComments) => {
     createInlineComment,
     updateInlineComment,
     isLastVersion,
-    showTitle,
     showCreateNewComment,
   } = props;
   return (
     <div className={classNames('w-full flex flex-col')}>
-      {(comments?.length > 0 || commonData.user) && showTitle && (
-        <div className="prose max-w-none ">
-          <Tooltip target=".inline-comments-info" />
-          <h4>
-            File{`'`}s Tasks
-            <FontAwesomeIcon
-              className="inline-comments-info"
-              data-pr-tooltip="These comments are local to the current file, and will change if you open another file"
-              style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
-              icon={faCircleInfo}
-            />
-          </h4>
-        </div>
-      )}
       <div className="flex flex-col">
         {comments &&
           comments.map((inlineComment: InlineCommentDto) => (
