@@ -401,13 +401,13 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         allow_download: allowDownload,
       } as any);
 
-      showToaster('Organization updated successfully', ToasterIcons.INFO);
+      showToaster('Organization updated successfully', ToasterIcons.SUCCESS);
 
       router.reload();
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
-      showToaster("We're sorry! Something happened trying to perform the operation. Please try it again", ToasterIcons.ERROR);
+      showToaster("We're sorry! Something happened trying to perform the operation. Please try it again.", ToasterIcons.ERROR);
     } finally {
       setRequesting(false);
     }
@@ -447,7 +447,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
     } catch (e: any) {
       /* eslint-disable no-console */
-      showToaster("We're sorry! Something happened trying to perform the operation. Please try it again", ToasterIcons.ERROR);
+      showToaster("We're sorry! Something happened trying to perform the operation. Please try it again.", ToasterIcons.ERROR);
     } finally {
       setRequesting(false);
     }
@@ -521,11 +521,10 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, selectedMember!.id!, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
-
-        showToaster('User invited successfully', ToasterIcons.INFO);
+        showToaster('User invited successfully.', ToasterIcons.SUCCESS);
       } catch (e) {
+        showToaster('We are sorry! Something happened inviting the user. Please try again.', ToasterIcons.ERROR);
         Helper.logError('Unexpected error', e);
-        showToaster('We are sorry! Something happened inviting a new user. Please try again.', ToasterIcons.ERROR);
       }
     } else if (!members[index]!.organization_roles.includes(organizationRole)) {
       try {
@@ -533,11 +532,10 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, organizationRole);
         const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
         await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
-
-        showToaster('User invited successfully', ToasterIcons.INFO);
+        showToaster('User invited successfully.', ToasterIcons.SUCCESS);
       } catch (e) {
+        showToaster('We are sorry! Something happened inviting the user. Please try again.', ToasterIcons.ERROR);
         Helper.logError('Unexpected error', e);
-        showToaster('We are sorry! Something happened inviting a new user. Please try again.', ToasterIcons.ERROR);
       }
     }
 
@@ -562,15 +560,14 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       await api.removeUserFromOrganization(commonData!.organization!.id!, selectedMember!.id);
+      showToaster('Member removed successfully.', ToasterIcons.SUCCESS);
       getOrganizationMembers();
       setOpenDeleteMemberModal(false);
       setSelectedMember(null);
       setInputDeleteUser('');
-
-      showToaster('User removed successfully', ToasterIcons.INFO);
     } catch (e) {
+      showToaster("We're sorry! Something happened removing the user. Please try again.", ToasterIcons.ERROR);
       Helper.logError('Unexpected error', e);
-      showToaster("We're sorry! Something happened trying to perform the operation. Please try again", ToasterIcons.ERROR);
     }
     setRequesting(false);
   };
@@ -613,18 +610,16 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
       const inviteUserDto: InviteUserDto = new InviteUserDto(selectedUser?.email!, commonData.organization!.sluglified_name, organizationRole);
       await api.inviteNewUser(inviteUserDto);
+      showToaster('User invited successfully.', ToasterIcons.SUCCESS);
       getOrganizationMembers();
       setOrganizationRole('');
       setQuery('');
       setUsers(users.filter((u: UserDTO) => u.id !== selectedMember?.id));
       setSelectedMember(null);
       setOpenInviteUserModal(false);
-
-      showToaster('User invited successfully', ToasterIcons.INFO);
     } catch (e) {
+      showToaster("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
       Helper.logError('Unexpected error', e);
-
-      showToaster('We are sorry! Something happened inviting a new user. Please try again.', ToasterIcons.ERROR);
     }
     setRequesting(false);
   };
@@ -671,8 +666,8 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       aLink.click();
       document.body.removeChild(aLink);
     } catch (e) {
-      Helper.logError('Unexpected error', e);
       showToaster('Error exporting members to CSV', ToasterIcons.ERROR);
+      Helper.logError('Unexpected error', e);
     }
     setRequesting(false);
   };
@@ -692,8 +687,8 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       window.location.href = `/settings/${commonData.organization!.sluglified_name}?tab=access`;
     } catch (e) {
       setRequesting(false);
-      Helper.logError('Error generating invitation links', e);
       showToaster('Error generating invitation links. Please review that your account is verified', ToasterIcons.ERROR);
+      Helper.logError('Error generating invitation links', e);
     }
   };
 
@@ -715,8 +710,8 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
     } catch (e) {
       setRequesting(false);
       setIsOpenExpirationDateModal(false);
-      Helper.logError('Error generating invitation links', e);
       showToaster('Error generating invitation links. Please review that your account is verified', ToasterIcons.ERROR);
+      Helper.logError('Error generating invitation links', e);
     }
   };
 
@@ -735,7 +730,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
-      showToaster('Error updating access domains. Please try again', ToasterIcons.ERROR);
+      showToaster('Error updating access domains. Please try again.', ToasterIcons.ERROR);
     } finally {
       setRequesting(false);
     }

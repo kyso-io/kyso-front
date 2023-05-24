@@ -376,11 +376,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, selectedMember!.id!, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
-
-        showToaster('User invited successfully', ToasterIcons.SUCCESS);
+        showToaster('User invited successfully.', ToasterIcons.SUCCESS);
       } catch (e) {
-        showToaster("We're sorry! Something happened inviting an user. Please try again", ToasterIcons.ERROR);
-
+        showToaster("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
         Helper.logError('Unexpected error', e);
       }
       if (teamRole) {
@@ -389,10 +387,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, teamRole);
           const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
           await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
-
-          showToaster('User invited successfully', ToasterIcons.SUCCESS);
+          showToaster('User invited successfully.', ToasterIcons.SUCCESS);
         } catch (e) {
-          showToaster("We're sorry! Something happened inviting an user. Please try again", ToasterIcons.ERROR);
+          showToaster("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
           Helper.logError('Unexpected error', e);
         }
       }
@@ -403,10 +400,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, organizationRole);
           const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
           await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
-
-          showToaster('User invited successfully', ToasterIcons.SUCCESS);
+          showToaster('User invited successfully.', ToasterIcons.SUCCESS);
         } catch (e) {
-          showToaster("We're sorry! Something happened inviting an user. Please try again", ToasterIcons.ERROR);
+          showToaster("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
           Helper.logError('Unexpected error', e);
         }
       }
@@ -416,11 +412,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, teamRole);
           const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
           await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
-
-          showToaster('User invited successfully', ToasterIcons.SUCCESS);
+          showToaster('User invited successfully.', ToasterIcons.SUCCESS);
         } catch (e) {
-          showToaster("We're sorry! Something happened inviting an user. Please try again", ToasterIcons.ERROR);
-
+          showToaster("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
           Helper.logError('Unexpected error', e);
         }
       }
@@ -447,15 +441,13 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       await api.deleteUserFromTeam(commonData.team!.id!, selectedMember!.id);
-
-      showToaster('Member removed successfully', ToasterIcons.SUCCESS);
-
+      showToaster('Member removed successfully.', ToasterIcons.SUCCESS);
       getTeamMembers();
       setOpenDeleteMemberModal(false);
       setSelectedMember(null);
       setInputDeleteUser('');
     } catch (e) {
-      showToaster("We're sorry! Something happened removing the user. Please try again", ToasterIcons.ERROR);
+      showToaster("We're sorry! Something happened removing the user. Please try again.", ToasterIcons.ERROR);
       Helper.logError('Unexpected error', e);
     }
     setRequesting(false);
@@ -502,9 +494,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         inviteUserDto.teamRole = teamRole;
       }
       await api.inviteNewUser(inviteUserDto);
-
-      showToaster('User invited successfully', ToasterIcons.SUCCESS);
-
+      showToaster('User invited successfully.', ToasterIcons.SUCCESS);
       getTeamMembers();
       setOrganizationRole('');
       setTeamRole('');
@@ -514,7 +504,6 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       setOpenInviteUserModal(false);
     } catch (e) {
       showToaster("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
-
       Helper.logError('Unexpected error', e);
     }
     setRequesting(true);
