@@ -10,25 +10,25 @@ import { useRouter } from 'next/router';
 import { dirname } from 'path';
 import React, { useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import Loader from '../../../../../components/Loader';
-import ManageUsers from '../../../../../components/ManageUsers';
-import PureReportHeader from '../../../../../components/PureReportHeader';
-import PureSideOverlayPanel from '../../../../../components/PureSideOverlayPanel';
-import PureTree from '../../../../../components/PureTree';
-import TableOfContents from '../../../../../components/TableOfContents';
-import { ToasterIcons } from '../../../../../enums/toaster-icons';
-import { Helper } from '../../../../../helpers/Helper';
-import { HelperPermissions } from '../../../../../helpers/check-permissions';
-import { getReport } from '../../../../../helpers/get-report';
-import { useAppDispatch, useAppSelector } from '../../../../../hooks/redux-hooks';
-import { usePublicSetting } from '../../../../../hooks/use-public-setting';
-import type { Version } from '../../../../../hooks/use-versions';
-import { useVersions } from '../../../../../hooks/use-versions';
-import type { HttpExceptionDto } from '../../../../../interfaces/http-exception.dto';
-import KysoApplicationLayout from '../../../../../layouts/KysoApplicationLayout';
-import type { CommonData } from '../../../../../types/common-data';
-import type { Member } from '../../../../../types/member';
-import type { ReportData } from '../../../../../types/report-data';
+import Loader from '@/components/Loader';
+import ManageUsers from '@/components/ManageUsers';
+import PureReportHeader from '@/components/PureReportHeader';
+import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
+import PureTree from '@/components/PureTree';
+import TableOfContents from '@/components/TableOfContents';
+import { ToasterIcons } from '@/enums/toaster-icons';
+import { Helper } from '@/helpers/Helper';
+import { HelperPermissions } from '@/helpers/check-permissions';
+import { getReport } from '@/helpers/get-report';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux-hooks';
+import { usePublicSetting } from '@/hooks/use-public-setting';
+import type { Version } from '@/hooks/use-versions';
+import { useVersions } from '@/hooks/use-versions';
+import type { HttpExceptionDto } from '@/interfaces/http-exception.dto';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import type { CommonData } from '@/types/common-data';
+import type { Member } from '@/types/member';
+import type { ReportData } from '@/types/report-data';
 
 enum Tab {
   Files = 'files',
@@ -493,8 +493,8 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                       setLoadingIframe(false);
                       setIframeUrl('');
                       setTimeout(() => {
-                        // TODO: change to production url
-                        setIframeUrl(`http://localhost:3003?token=${commonData.token}&reportId=${reportData.report!.id}&sourceFileId=${sourceFileId}&targetFileId=${targetFileId}`);
+                        // RELATIVE URL, requires jupyter-diff component to be properly deployed
+                        setIframeUrl(`/kyjupdiff?token=${commonData.token}&reportId=${reportData.report!.id}&sourceFileId=${sourceFileId}&targetFileId=${targetFileId}`);
                         setShowIframe(true);
                         setLoadingIframe(true);
                       }, 0);
