@@ -38,6 +38,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import type { HttpExceptionDto } from '../../../interfaces/http-exception.dto';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
 
@@ -295,12 +296,12 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
     setError(null);
 
     if (!title || title.trim().length === 0) {
-      setError('Title is required.');
+      showToaster('Title is required.', ToasterIcons.INFO);
       return;
     }
 
     if (!commonData.team) {
-      setError('Please select a channel.');
+      showToaster('Please select a channel.', ToasterIcons.INFO);
       return;
     }
 
@@ -314,14 +315,18 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
       const exists: boolean = await api.reportExists(commonData.team.id as string, Helper.slugify(title));
 
       if (exists) {
-        setError('Report with this name already exists.');
+        showToaster('A report with this name already exists. Please consider to change the title.', ToasterIcons.INFO);
         setBusy(false);
         return;
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (er: any) {
-      setError(er.message);
+      const httpExceptionDto: HttpExceptionDto = er.response.data;
+      if (httpExceptionDto.statusCode === 403) {
+        return;
+      }
+      showToaster(er.response.data.message, ToasterIcons.ERROR);
       setBusy(false);
       return;
     }
@@ -369,25 +374,28 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
       }
     }
     if (numFiles === 0) {
+      showToaster('You need to add at least one file.', ToasterIcons.INFO);
       setBusy(false);
-      setError('You need to add at least one file.');
       return;
     }
     const blobZip: Blob = await zip.generateAsync({ type: 'blob' });
     const formData: FormData = new FormData();
     formData.append('file', blobZip);
     try {
+      showToaster('Updating report. Please wait ...', ToasterIcons.INFO);
       const { data: newReport }: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
       cleanStorage();
       for (const file of files) {
         removeSessionStorageItem(file.id);
       }
       setBusy(false);
+      showToaster('Report uploaded successfully.', ToasterIcons.INFO);
       window.location.href = `/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
+    } catch (er: any) {
+      const httpExceptionDto: HttpExceptionDto = er.response.data;
+      showToaster(httpExceptionDto.message, ToasterIcons.ERROR);
       setBusy(false);
-      setError(err.response.data.message);
     }
   };
 
