@@ -494,7 +494,8 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                       setIframeUrl('');
                       setTimeout(() => {
                         // RELATIVE URL, requires jupyter-diff component to be properly deployed
-                        setIframeUrl(`/kyjupdiff?token=${commonData.token}&reportId=${reportData.report!.id}&sourceFileId=${sourceFileId}&targetFileId=${targetFileId}`);
+                        // NOTE: dont remove the / before the ?, needed for react routing
+                        setIframeUrl(`/kyjupdiff/?token=${commonData.token}&reportId=${reportData.report!.id}&sourceFileId=${sourceFileId}&targetFileId=${targetFileId}`);
                         setShowIframe(true);
                         setLoadingIframe(true);
                       }, 0);
