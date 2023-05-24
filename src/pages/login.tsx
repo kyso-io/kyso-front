@@ -14,6 +14,7 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { KysoDescription } from '../components/KysoDescription';
+import { Helper } from '../helpers/Helper';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
 import { usePublicSettings } from '../hooks/use-public-settings';
 import type { DecodedToken } from '../types/decoded-token';
@@ -141,6 +142,7 @@ const Index = () => {
       // Get user info to check if has completed the captcha challenge
       const jwtToken: DecodedToken = decode<DecodedToken>(token);
       const user: Token = jwtToken.payload;
+      await Helper.getKysoPublicSettings();
 
       setTimeout(() => {
         const showOnboarding = user.show_onboarding ? user.show_onboarding : false;
