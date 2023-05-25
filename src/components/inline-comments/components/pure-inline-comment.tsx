@@ -10,18 +10,18 @@ import { Popover } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
 import type { InlineCommentDto, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, InlineCommentStatusEnum, OrganizationPermissionsEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
+import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
+import { useRouter } from 'next/router';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/router';
-import { Api } from '@kyso-io/kyso-store';
 import { Helper } from '../../../helpers/Helper';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import { useAppSelector } from '../../../hooks/redux-hooks';
 import PureInlineCommentForm from './pure-inline-comment-form';
-import TagInlineComment from './tag-inline-comment';
 import PureInlineCommentStatusHistory from './pure-inline-comment-status-history';
+import TagInlineComment from './tag-inline-comment';
 
 type IPureInlineComment = {
   hasPermissionCreateComment: boolean;
@@ -105,15 +105,13 @@ const PureInlineComment = (props: IPureInlineComment) => {
     if (!theComment || !theComment.status_history) {
       return;
     }
-
     const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
     const result = await api.getUsers({
-      userIds: theComment.status_history.map((x) => x.user_id),
+      userIds: Array.from(new Set(theComment.status_history.map((x) => x.user_id))),
       page: 1,
       per_page: 1000,
       sort: '',
     });
-
     setStatusHistoryUsers(result.data);
   };
 
@@ -324,7 +322,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
           />
         </div>
       )}
-      {(taskId as string) === comment.id ? <PureInlineCommentStatusHistory inlineComment={comment} historyUsers={statusHistoryUsers} /> : <></>}
+      {(taskId as string) === comment.id && <PureInlineCommentStatusHistory inlineComment={comment} historyUsers={statusHistoryUsers} />}
     </div>
   );
 };
