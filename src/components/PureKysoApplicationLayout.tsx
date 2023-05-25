@@ -162,7 +162,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                           <React.Fragment>
                             {
                               <div className="flex items-center pr-5 cursor-pointer">
-                                <a href="/my-tasks" type="button" className="relative inline-flex items-center p-3 text-sm font-medium text-center text-white" title="My tasks">
+                                <a href="/tasks" type="button" className="relative inline-flex items-center p-3 text-sm font-medium text-center text-white" title="My tasks">
                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                     <path
                                       strokeLinecap="round"
