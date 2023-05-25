@@ -1,5 +1,6 @@
 /* eslint no-new: "off" */
 import { KeyValue } from '@/model/key-value.model';
+import type { InlineCommentDto, ReportDTO } from '@kyso-io/kyso-model';
 import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { fetchPublicKysoSettings, store } from '@kyso-io/kyso-store';
 import slugify from 'slugify';
@@ -412,6 +413,16 @@ export class Helper {
       return highlightedParts.join('');
     }
     return wholeText;
+  }
+
+  public static buildTaskDetailPage(inlineCommentDto: InlineCommentDto, report: ReportDTO): string {
+    const documentUrl: string = inlineCommentDto.file_path_scs.split('/').slice(6).join('/');
+
+    const queryParams: string = `?taskId=${inlineCommentDto.id}${inlineCommentDto.cell_id ? `&cell=${inlineCommentDto.cell_id.trim()}` : ''}${
+      inlineCommentDto.orphan ? `&version=${inlineCommentDto.report_version}` : ''
+    }${inlineCommentDto.orphan ? `&orphan=true` : ''}`;
+
+    return `/${report?.organization_sluglified_name}/${report?.team_sluglified_name}/${report?.name}/${documentUrl}${queryParams}`;
   }
 
   public static isKysoFile(path: string): boolean {

@@ -12,6 +12,7 @@ import moment from 'moment';
 import { Calendar } from 'primereact/calendar';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { Tooltip } from 'primereact/tooltip';
+import { Helper } from '@/helpers/Helper';
 import Loader from '../components/Loader';
 import Pagination from '../components/Pagination';
 import PureAvatar from '../components/PureAvatar';
@@ -79,7 +80,6 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
   const users: UserDTO[] = [];
   let organization: ResourcePermissions | null = null;
   let team: ResourcePermissions | null = null;
-  const documentUrl: string = inlineCommentDto.file_path_scs.split('/').slice(6).join('/');
 
   if (report) {
     for (const userId of report.author_ids) {
@@ -106,14 +106,12 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
     participants[reply.user_id] = true;
   }
   const numParticipants: number = Object.keys(participants).length;
-  const queryParams: string = `?taskId=${inlineCommentDto.id}${inlineCommentDto.cell_id ? `&cell=${inlineCommentDto.cell_id.trim()}` : ''}${
-    inlineCommentDto.orphan ? `&version=${inlineCommentDto.report_version}` : ''
-  }${inlineCommentDto.orphan ? `&orphan=true` : ''}`;
+
   return (
     <a
       key={inlineCommentDto.id}
       className="flex flex-col py-4 border-b"
-      href={`/${report?.organization_sluglified_name}/${report?.team_sluglified_name}/${report?.name}/${documentUrl}${queryParams}`}
+      href={Helper.buildTaskDetailPage(inlineCommentDto, report!)}
       onMouseEnter={() => {
         setHoveredInlineComment(true);
       }}

@@ -724,9 +724,10 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                               if (result!.relations!.file[inlineCommentDto.file_id]) {
                                 file = result!.relations!.file[inlineCommentDto.file_id];
                               }
+
                               return (
                                 <li key={inlineCommentDto.id} className="container-inline-comment">
-                                  <a href={`/${router.query.organizationName}/${router.query.teamName}/${router.query.reportName}/tasks/${inlineCommentDto.id}`} className="block hover:bg-gray-50">
+                                  <a href={Helper.buildTaskDetailPage(inlineCommentDto, report)} className="block hover:bg-gray-50">
                                     <div className="p-4 sm:px-6">
                                       <div className="flex items-center justify-between">
                                         <ReadMoreReact text={inlineCommentDto.text} ideal={200} readMoreText="Read more..." className="text-sm font-medium text-indigo-600" />
