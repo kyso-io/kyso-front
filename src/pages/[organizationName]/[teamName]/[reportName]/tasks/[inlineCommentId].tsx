@@ -48,6 +48,7 @@ import { usePublicSetting } from '@/hooks/use-public-setting';
 import type { HttpExceptionDto } from '@/interfaces/http-exception.dto';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import { ToasterIcons } from '@/enums/toaster-icons';
 
 enum Tab {
   Files = 'files',
@@ -388,7 +389,10 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
       const createInlineCommentDto: CreateInlineCommentDto = new CreateInlineCommentDto(result!.data.report_id, result!.data.file_id, result!.data.cell_id, text, user_ids, parent_id);
       await api.createInlineComment(createInlineCommentDto);
       await getInlineComment();
-    } catch (e) {}
+    } catch (e) {
+      showToaster('Error creating. Please try again', ToasterIcons.ERROR);
+      await getInlineComment();
+    }
   };
 
   const updateInlineComment = async (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => {
@@ -401,8 +405,10 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const updateInlineCommentDto: UpdateInlineCommentDto = new UpdateInlineCommentDto(result!.data.file_id, text, user_ids, status, originalComment.orphan);
       await api.updateInlineComment(id, updateInlineCommentDto);
+    } catch (e) {
+      showToaster('Error updating. Please try again', ToasterIcons.ERROR);
       await getInlineComment();
-    } catch (e) {}
+    }
   };
 
   const deleteInlineComment = async (id: string) => {
@@ -419,7 +425,10 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
         return;
       }
       await getInlineComment();
-    } catch (e) {}
+    } catch (e) {
+      showToaster('Error deleting. Please try again', ToasterIcons.ERROR);
+      await getInlineComment();
+    }
   };
 
   const report = reportData?.report;
@@ -545,6 +554,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                         deleteComment={deleteInlineComment}
                         showCreateNewComment={false}
                         isLastVersion={true}
+                        showToaster={showToaster}
                       />
                     </div>
                   </div>

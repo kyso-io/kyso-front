@@ -16,6 +16,8 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useState } from 'react';
+import { ToasterMessages } from '@/helpers/ToasterMessages';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '../../../helpers/Helper';
 import { HelperPermissions } from '../../../helpers/check-permissions';
 import { useAppSelector } from '../../../hooks/redux-hooks';
@@ -36,6 +38,7 @@ type IPureInlineComment = {
   deleteComment: (id: string) => void;
   parentInlineComment: InlineCommentDto | null;
   isLastVersion: boolean;
+  showToaster: (message: string, icon: JSX.Element) => void;
 };
 
 const PureInlineComment = (props: IPureInlineComment) => {
@@ -51,6 +54,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
     parentInlineComment,
     report,
     isLastVersion,
+    showToaster,
   } = props;
 
   const router = useRouter();
@@ -59,6 +63,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
   const userEntities: { [key: string]: UserDTO } = useAppSelector((state) => state.user.entities);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [replying, setReplying] = useState<boolean>(false);
+  const [commentText, setCommentText] = useState<string>(comment.text);
   const [statusHistoryUsers, setStatusHistoryUsers] = useState<UserDTO[]>([]);
   const isOrgAdmin: boolean = useMemo(() => {
     const copyCommonData: CommonData = { ...commonData, team: null };
@@ -82,9 +87,9 @@ const PureInlineComment = (props: IPureInlineComment) => {
     return isUserAuthor || isReportAuthor;
   }, [isUserAuthor, isReportAuthor]);
 
-  const commentText: string = useMemo(() => {
+  useEffect(() => {
     if (!comment || !comment.text) {
-      return '';
+      setCommentText('');
     }
     const mentionedUsers: UserDTO[] = [];
     for (const userId of comment.mentions) {
@@ -92,13 +97,15 @@ const PureInlineComment = (props: IPureInlineComment) => {
         mentionedUsers.push(userEntities[userId]!);
       }
     }
-    return comment.text.replace(/@([a-z0-9_-]+)/gi, (match: string, displayNameSlug: string): string => {
+    const replacedText = comment.text.replace(/@([a-z0-9_-]+)/gi, (match: string, displayNameSlug: string): string => {
       const mentionedUser: UserDTO | undefined = mentionedUsers.find((u: UserDTO) => Helper.slug(u.display_name) === displayNameSlug);
       if (mentionedUser) {
         return `[${match}](/user/${mentionedUser.username})`;
       }
       return match;
     });
+
+    setCommentText(replacedText);
   }, [comment]);
 
   const getUsersFromStatusHistory = async (theComment: InlineCommentDto) => {
@@ -129,7 +136,15 @@ const PureInlineComment = (props: IPureInlineComment) => {
         <div className={clsx(parentInlineComment ? 'ml-10' : '')}>
           <PureInlineCommentForm
             user={commonData.user!}
-            submitComment={(text: string, userIds: string[], commentId?: string) => updateInlineComment(comment, commentId as string, userIds, text, comment.current_status!)}
+            submitComment={(text: string, userIds: string[], commentId?: string) => {
+              // Set comment text (dirty copy) for better UX
+              setCommentText(text);
+              try {
+                updateInlineComment(comment, commentId as string, userIds, text, comment.current_status!);
+              } catch (ex) {
+                showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.ERROR);
+              }
+            }}
             comment={comment}
             channelMembers={channelMembers}
             onSubmitted={() => setIsEditing(!isEditing)}

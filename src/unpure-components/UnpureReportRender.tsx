@@ -16,6 +16,7 @@ import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState } from 'react';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
 import eventBus from '../helpers/event-bus';
 import type { FileToRender } from '../types/file-to-render';
@@ -60,17 +61,19 @@ const UnpureReportRender = ({
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  const getReportInlineComments = async () => {
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const response: NormalizedResponseDTO<InlineCommentDto[]> = await api.getInlineComments(report.id as string, fileToRender.id);
+      setInlineComments(response.data.filter((inlineComment: InlineCommentDto) => inlineComment.current_status !== InlineCommentStatusEnum.CLOSED));
+    } catch (e) {}
+  };
+
   useEffect(() => {
     if (!report || !fileToRender) {
       return;
     }
-    const getReportInlineComments = async () => {
-      try {
-        const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-        const response: NormalizedResponseDTO<InlineCommentDto[]> = await api.getInlineComments(report.id as string, fileToRender.id);
-        setInlineComments(response.data.filter((inlineComment: InlineCommentDto) => inlineComment.current_status !== InlineCommentStatusEnum.CLOSED));
-      } catch (e) {}
-    };
+
     getReportInlineComments();
   }, [report.id, fileToRender.id]);
 
@@ -101,6 +104,14 @@ const UnpureReportRender = ({
       eventBus.dispatch(KysoEventEnum.INLINE_COMMENTS_CREATE, newInlineComment);
     } catch (e) {
       // Helper.logError("Unexpected error", e);;
+      showToaster('Error creating. Please try again', ToasterIcons.ERROR);
+      // Force update
+      const copy = Array.from(inlineComments);
+      setInlineComments([]);
+
+      setTimeout(() => {
+        setInlineComments(copy);
+      }, 100);
     }
   };
 
@@ -127,7 +138,14 @@ const UnpureReportRender = ({
       setInlineComments(copyInlineComments);
       eventBus.dispatch(KysoEventEnum.INLINE_COMMENTS_UPDATE, updatedInlineComment);
     } catch (e) {
-      // Helper.logError("Unexpected error", e);;
+      showToaster('Error updating. Please try again', ToasterIcons.ERROR);
+      // Force update
+      const copy = Array.from(inlineComments);
+      setInlineComments([]);
+
+      setTimeout(() => {
+        setInlineComments(copy);
+      }, 100);
     }
   };
 
@@ -172,6 +190,14 @@ const UnpureReportRender = ({
       eventBus.dispatch(KysoEventEnum.INLINE_COMMENTS_DELETE, deletedInlineComment);
     } catch (e) {
       // Helper.logError("Unexpected error", e);;
+      showToaster('Error deleting. Please try again', ToasterIcons.ERROR);
+      // Force update
+      const copy = Array.from(inlineComments);
+      setInlineComments([]);
+
+      setTimeout(() => {
+        setInlineComments(copy);
+      }, 100);
     }
   };
 
@@ -207,6 +233,7 @@ const UnpureReportRender = ({
             enabledEditInlineComment={enabledEditInlineComment}
             enabledDeleteInlineComment={enabledDeleteInlineComment}
             isLastVersion={isLastVersion}
+            showToaster={showToaster}
           />
         )
       ) : (
@@ -274,6 +301,7 @@ const UnpureReportRender = ({
                   deleteComment={deleteInlineComment}
                   isLastVersion={isLastVersion}
                   showCreateNewComment={true}
+                  showToaster={showToaster}
                 />
               </PureSideOverlayCommentsPanel>
             </div>

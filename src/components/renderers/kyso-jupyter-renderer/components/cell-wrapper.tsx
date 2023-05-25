@@ -35,6 +35,7 @@ interface Props {
   enabledEditInlineComment: boolean;
   onlyVisibleCell?: string;
   isLastVersion: boolean;
+  showToaster: (message: string, icon: JSX.Element) => void;
 }
 
 const CellWrapper = (props: Props) => {
@@ -55,6 +56,7 @@ const CellWrapper = (props: Props) => {
     updateInlineComment,
     deleteInlineComment,
     isLastVersion,
+    showToaster,
   } = props;
 
   const reportContext: ReportContext = {
@@ -186,6 +188,7 @@ const CellWrapper = (props: Props) => {
             deleteComment={deleteInlineComment}
             isLastVersion={isLastVersion}
             showCreateNewComment={true}
+            showToaster={showToaster}
           />
         )}
       </div>

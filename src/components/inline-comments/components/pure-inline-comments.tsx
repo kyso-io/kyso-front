@@ -26,6 +26,7 @@ type IPureComments = {
   deleteComment: (id: string) => void;
   isLastVersion: boolean;
   showCreateNewComment: boolean;
+  showToaster: (message: string, icon: JSX.Element) => void;
 };
 
 const PureInlineComments = (props: IPureComments) => {
@@ -41,6 +42,7 @@ const PureInlineComments = (props: IPureComments) => {
     updateInlineComment,
     isLastVersion,
     showCreateNewComment,
+    showToaster,
   } = props;
   return (
     <div className={classNames('w-full flex flex-col')}>
@@ -60,6 +62,7 @@ const PureInlineComments = (props: IPureComments) => {
                 updateInlineComment={updateInlineComment}
                 parentInlineComment={null}
                 isLastVersion={isLastVersion}
+                showToaster={showToaster}
               />
               {inlineComment.inline_comments.map((childComment: InlineCommentDto) => (
                 <PureInlineComment
@@ -75,6 +78,7 @@ const PureInlineComments = (props: IPureComments) => {
                   updateInlineComment={updateInlineComment}
                   parentInlineComment={inlineComment}
                   isLastVersion={isLastVersion}
+                  showToaster={showToaster}
                 />
               ))}
             </React.Fragment>

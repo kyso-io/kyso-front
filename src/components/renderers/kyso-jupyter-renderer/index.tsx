@@ -21,6 +21,7 @@ interface Props {
   enabledDeleteInlineComment: boolean;
   enabledEditInlineComment: boolean;
   isLastVersion: boolean;
+  showToaster: (message: string, icon: JSX.Element) => void;
 }
 
 export const RenderJupyter = ({
@@ -39,6 +40,7 @@ export const RenderJupyter = ({
   enabledDeleteInlineComment,
   enabledEditInlineComment,
   isLastVersion,
+  showToaster,
 }: Props) => {
   if (!jupyterNotebook || !jupyterNotebook.cells || jupyterNotebook.cells.length === 0) {
     return null;
@@ -70,6 +72,7 @@ export const RenderJupyter = ({
             enabledDeleteInlineComment={enabledDeleteInlineComment}
             enabledEditInlineComment={enabledEditInlineComment}
             isLastVersion={isLastVersion}
+            showToaster={showToaster}
           />
         );
       })}
