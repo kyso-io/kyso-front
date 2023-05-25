@@ -48,8 +48,8 @@ const CalendarOption = ({ onChange }: CalendarProps) => {
 
 const LIMIT = 10;
 const OPTIONS = [
-  { label: 'Report Author', value: 'report_author_id', isFixed: true },
-  { label: 'Task Author', value: 'inline_comment_author_id', isFixed: true },
+  { label: 'Author', value: 'report_author_id', isFixed: true },
+  { label: 'Task creator', value: 'inline_comment_author_id', isFixed: true },
   { label: 'Status', value: 'status', isFixed: true },
   { label: 'Channel', value: 'team_id', isFixed: true },
   { label: 'Text', value: 'text', isFixed: true },

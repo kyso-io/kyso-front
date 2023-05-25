@@ -11,12 +11,13 @@ import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
 import type { InlineCommentDto, NormalizedResponseDTO, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { InlineCommentStatusEnum, CreateInlineCommentDto, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
+import { CreateInlineCommentDto, InlineCommentStatusEnum, KysoEventEnum, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState } from 'react';
 import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
+import eventBus from '../helpers/event-bus';
 import type { FileToRender } from '../types/file-to-render';
 import PureSideOverlayCommentsPanel from './UnpureSideOverlayCommentsPanel';
 
@@ -97,6 +98,7 @@ const UnpureReportRender = ({
         copyInlineComments.push(response.data);
       }
       setInlineComments(copyInlineComments);
+      eventBus.dispatch(KysoEventEnum.INLINE_COMMENTS_CREATE, newInlineComment);
     } catch (e) {
       // Helper.logError("Unexpected error", e);;
     }
@@ -123,6 +125,7 @@ const UnpureReportRender = ({
         copyInlineComments[index] = updatedInlineComment;
       }
       setInlineComments(copyInlineComments);
+      eventBus.dispatch(KysoEventEnum.INLINE_COMMENTS_UPDATE, updatedInlineComment);
     } catch (e) {
       // Helper.logError("Unexpected error", e);;
     }
@@ -166,6 +169,7 @@ const UnpureReportRender = ({
         copyInlineComments.splice(index, 1);
       }
       setInlineComments(copyInlineComments);
+      eventBus.dispatch(KysoEventEnum.INLINE_COMMENTS_DELETE, deletedInlineComment);
     } catch (e) {
       // Helper.logError("Unexpected error", e);;
     }

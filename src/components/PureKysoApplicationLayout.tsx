@@ -1,3 +1,4 @@
+import { SkeletonTemplates } from '@/enums/skeleton-templates';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
@@ -5,19 +6,20 @@ import { Disclosure, Menu, Transition } from '@headlessui/react';
 import { SearchIcon } from '@heroicons/react/outline';
 import { MenuIcon, XIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
+import { KysoEventEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import type { ReactElement } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
-import { SkeletonTemplates } from '@/enums/skeleton-templates';
+import eventBus from '../helpers/event-bus';
 import BreadcrumbNavbar from './BreadcrumbNavbar';
+import DelayedContent from './DelayedContent';
 import { Footer } from './Footer';
 import PureAvatar from './PureAvatar';
 import PureOnboardingDropdown from './PureOnboardingDropdown';
 import PureShareButton from './PureShareButton';
-import DelayedContent from './DelayedContent';
 
 type IPureKysoApplicationLayoutProps = {
   children: ReactElement;
@@ -37,6 +39,26 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
   const [numOpenedInlineComments, setNumOpenedInlineComments] = useState<number>(-1);
 
   const { q } = router.query;
+
+  useEffect(() => {
+    if (!commonData.token) {
+      return undefined;
+    }
+    eventBus.on(KysoEventEnum.INLINE_COMMENTS_CREATE, () => {
+      getNumOpenedInlineComments();
+    });
+    eventBus.on(KysoEventEnum.INLINE_COMMENTS_UPDATE, () => {
+      getNumOpenedInlineComments();
+    });
+    eventBus.on(KysoEventEnum.INLINE_COMMENTS_DELETE, () => {
+      getNumOpenedInlineComments();
+    });
+    return () => {
+      eventBus.remove(KysoEventEnum.INLINE_COMMENTS_CREATE, () => {});
+      eventBus.remove(KysoEventEnum.INLINE_COMMENTS_UPDATE, () => {});
+      eventBus.remove(KysoEventEnum.INLINE_COMMENTS_DELETE, () => {});
+    };
+  }, [commonData.token]);
 
   useEffect(() => {
     if (!commonData.token || !commonData.user) {

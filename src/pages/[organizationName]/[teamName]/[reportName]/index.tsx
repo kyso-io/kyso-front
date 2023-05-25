@@ -804,8 +804,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                                     </div>
                                     <div className="ml-3 flex-1 md:flex md:justify-between">
                                       <p className="text-sm text-blue-700">
-                                        The highlighted task is related to a <b>cell</b> or a <b>file</b> that
-                                        <b>does not exists anymore in the latest version</b> of this report
+                                        The highlighted task is related to a <b>cell</b> or a <b>file</b> that <b>does not exists anymore in the latest version</b> of this report.
                                       </p>
                                     </div>
                                   </div>
