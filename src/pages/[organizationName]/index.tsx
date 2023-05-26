@@ -132,7 +132,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
       // The user is...
       if (!commonData.token) {
         // Unauthorized, redirect to SignUp page
-        window.location.href = `/signup?invitation=/${organizationName}?join=${join as string}`;
+        router.push(`/signup?invitation=/${organizationName}?join=${join as string}`);
         return;
       }
       // Authorized
@@ -145,7 +145,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
         try {
           const api: Api = new Api(commonData.token);
           await api.joinUserToOrganization(organizationName as string, join as string);
-          window.location.href = `/${organizationName}`;
+          router.push(`/${organizationName}`);
         } catch (e: any) {
           const errorData: { statusCode: number; message: string; error: string } = e.response.data;
           Helper.logError('Unexpected error', errorData);
@@ -158,7 +158,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
 
     if (!HelperPermissions.belongsToOrganization(commonData, organizationName as string)) {
       if (commonData.token) {
-        window.location.href = '/';
+        router.push('/');
       } else {
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}`)}`);
       }

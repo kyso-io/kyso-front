@@ -391,7 +391,7 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
       }
       setBusy(false);
       showToaster('Report uploaded successfully.', ToasterIcons.INFO);
-      window.location.href = `/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`;
+      router.push(`/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (er: any) {
       const httpExceptionDto: HttpExceptionDto = er.response.data;

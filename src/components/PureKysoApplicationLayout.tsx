@@ -151,7 +151,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                               <button
                                 className="text-black ml-3 inline-flex justify-center rounded-md border border-transparent bg-white py-2 px-4 text-sm font-medium shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                                 onClick={() => {
-                                  window.location.href = '/login';
+                                  router.push('/login');
                                 }}
                               >
                                 Login

@@ -549,7 +549,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       setRequesting(true);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
       await api.updateTeam(commonData.team?.id!, { slackChannel, teamsIncomingWebhookUrl } as any);
-      window.location.href = `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
+      router.push(`/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`);
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
@@ -576,7 +576,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       setTextTeamModal('');
       setRequesting(false);
     }
-    window.location.href = `/settings/${commonData.organization?.sluglified_name}`;
+    router.push(`/settings/${commonData.organization?.sluglified_name}`);
   };
 
   const exportMembersInCsv = async () => {
@@ -647,7 +647,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                 <button
                   className="rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   onClick={() => {
-                    window.location.href = `/settings/${commonData.organization?.sluglified_name}`;
+                    router.push(`/settings/${commonData.organization?.sluglified_name}`);
                   }}
                 >
                   Back to organization settings
@@ -679,7 +679,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                   value={null}
                   onChange={(resourcePermissions: ResourcePermissions) => {
                     if (resourcePermissions.id !== commonData.team?.id) {
-                      window.location.href = `/settings/${commonData.organization?.sluglified_name}/${resourcePermissions.name}`;
+                      router.push(`/settings/${commonData.organization?.sluglified_name}/${resourcePermissions.name}`);
                     }
                   }}
                 >
@@ -1311,7 +1311,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                     <button
                       disabled={requesting}
                       onClick={() => {
-                        window.location.href = `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
+                        router.push(`/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`);
                       }}
                       type="button"
                       className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

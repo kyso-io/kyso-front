@@ -342,7 +342,7 @@ const CreateEmbeddedReport = ({ commonData, showToaster, hideToaster, isCurrentU
     try {
       const { data: newReport }: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
       cleanStorage();
-      window.location.href = `/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`;
+      router.push(`/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`);
 
       showToaster('Report uploaded successfully', ToasterIcons.INFO);
     } catch (err: any) {

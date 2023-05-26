@@ -445,7 +445,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
           teamsIncomingWebhookUrl,
         },
       } as any);
-      window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
+      router.push(`/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`);
     } catch (e: any) {
       /* eslint-disable no-console */
       showToaster("We're sorry! Something happened trying to perform the operation. Please try it again.", ToasterIcons.ERROR);
@@ -636,7 +636,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       await api.deleteOrganization(commonData.organization!.id!);
-      window.location.href = '/settings';
+      router.push('/settings');
     } catch (error: any) {
       /* eslint-disable no-console */
       console.log(error.response.data.message);
@@ -685,7 +685,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
       const updateJoinCodesDto: UpdateJoinCodesDto = new UpdateJoinCodesDto(result, commonData.organization!.join_codes!.valid_until);
       await api.updateJoinCodes(commonData.organization!.id!, updateJoinCodesDto);
-      window.location.href = `/settings/${commonData.organization!.sluglified_name}?tab=access`;
+      router.push(`/settings/${commonData.organization!.sluglified_name}?tab=access`);
     } catch (e) {
       setRequesting(false);
       showToaster('Error generating invitation links. Please review that your account is verified', ToasterIcons.ERROR);
@@ -707,7 +707,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       } else {
         await api.createJoinCodes(commonData.organization!.id!, updateJoinCodesDto);
       }
-      window.location.href = `/settings/${commonData.organization!.sluglified_name}?tab=access`;
+      router.push(`/settings/${commonData.organization!.sluglified_name}?tab=access`);
     } catch (e) {
       setRequesting(false);
       setIsOpenExpirationDateModal(false);
@@ -727,7 +727,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       setRequesting(true);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
       await api.updateOrganization(commonData.organization!.id!, { allowed_access_domains: updatedAllowedAccessDomains, allow_download: commonData.organization?.allow_download! } as any);
-      window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Access}`;
+      router.push(`/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Access}`);
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
@@ -1688,7 +1688,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                     <button
                       disabled={requesting}
                       onClick={() => {
-                        window.location.href = `/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
+                        router.push(`/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`);
                       }}
                       type="button"
                       className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

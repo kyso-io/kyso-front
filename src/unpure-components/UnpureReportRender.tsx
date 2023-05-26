@@ -17,6 +17,7 @@ import clsx from 'clsx';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState } from 'react';
 import { ToasterIcons } from '@/enums/toaster-icons';
+import Link from 'next/link';
 import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
 import eventBus from '../helpers/event-bus';
 import type { FileToRender } from '../types/file-to-render';
@@ -273,9 +274,9 @@ const UnpureReportRender = ({
               ) : (
                 <div className="prose p-3">
                   Kyso cannot render this type of file. Do you need it? Give us{' '}
-                  <a href="/feedback" className="font-medium text-indigo-600 hover:text-indigo-500">
+                  <Link href="/feedback" className="font-medium text-indigo-600 hover:text-indigo-500">
                     feedback
-                  </a>{' '}
+                  </Link>{' '}
                   and we will consider it! 🤓
                 </div>
               )}

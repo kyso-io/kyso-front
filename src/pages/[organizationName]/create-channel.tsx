@@ -120,7 +120,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         setBusy(false);
         return;
       }
-      window.location.href = `/${commonData.organization!.sluglified_name}/${team.sluglified_name}`;
+      router.push(`/${commonData.organization!.sluglified_name}/${team.sluglified_name}`);
     } catch (er: any) {
       showToaster(er.response.data.message, ToasterIcons.ERROR);
     } finally {
