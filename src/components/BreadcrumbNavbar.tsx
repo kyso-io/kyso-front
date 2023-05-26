@@ -5,6 +5,7 @@ import type { ReportDTO } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import type { ReactNode } from 'react';
 import { useMemo } from 'react';
+import Link from 'next/link';
 import { ChannelSelector } from './ChannelSelector';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -88,7 +89,7 @@ const BreadcrumbNavbar = (props: Props) => {
             breadcrumb.map((page, index) => (
               <div key={page.href} className="flex items-center">
                 <div className="flex items-center">
-                  <a
+                  <Link
                     href={page.href}
                     className={
                       page.current
@@ -104,7 +105,7 @@ const BreadcrumbNavbar = (props: Props) => {
                     aria-current={page.current ? 'page' : undefined}
                   >
                     {page.name}
-                  </a>
+                  </Link>
                 </div>
                 {index !== breadcrumb.length - 1 && (
                   <svg className="hidden lg:inline-block shrink-0 h-5 w-5 text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">

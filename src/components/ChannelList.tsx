@@ -6,6 +6,7 @@ import { PlusCircleIcon, SearchIcon } from '@heroicons/react/outline';
 import type { ResourcePermissions } from '@kyso-io/kyso-model';
 import { TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { TailwindWidthSizeEnum } from '../tailwind/enum/tailwind-width.enum';
 import ChannelVisibility from './ChannelVisibility';
 
@@ -71,12 +72,12 @@ const ChannelList = (props: Props) => {
       <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
         Channels
         {(hasPermissionCreateChannel || hasPermissionCreateChannelFromOrganization) && (
-          <a
+          <Link
             href={`${basePath}/${commonData.organization?.sluglified_name}/create-channel`}
             className={classNames('float-right text-gray-500 hover:bg-gray-100 hover:text-gray-900', 'text-sm rounded-md')}
           >
             <PlusCircleIcon className="w-5 h-5 mr-1" />
-          </a>
+          </Link>
         )}
       </h3>
       <div className="px-4 pb-2">
@@ -99,7 +100,7 @@ const ChannelList = (props: Props) => {
       </div>
       <div className={classNames('flex flex-col justify-start', props.showScroll ? `max-h-[380px] overflow-auto` : '')}>
         {sortedSelectorItems.map((item: BreadcrumbItem) => (
-          <a
+          <Link
             key={item.name}
             href={item.href}
             className={classNames(
@@ -115,7 +116,7 @@ const ChannelList = (props: Props) => {
               imageMarginX={TailwindWidthSizeEnum.W3}
               imageMarginY={TailwindWidthSizeEnum.W1}
             />
-          </a>
+          </Link>
         ))}
       </div>
     </div>

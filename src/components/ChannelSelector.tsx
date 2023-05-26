@@ -2,6 +2,7 @@ import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { SelectorIcon } from '@heroicons/react/outline';
 import { Fragment } from 'react';
+import Link from 'next/link';
 import { TailwindWidthSizeEnum } from '../tailwind/enum/tailwind-width.enum';
 import ChannelList from './ChannelList';
 import ChannelVisibility from './ChannelVisibility';
@@ -21,7 +22,7 @@ const ChannelSelector = (props: IChannelSelectorProps) => {
   return (
     <div className="rounded-md flex items-center">
       {commonData.team && (
-        <a
+        <Link
           href={`/${commonData.organization?.sluglified_name}/${commonData.team.sluglified_name}`}
           className="hover:bg-gray-100 border-y border-l rounded-l p-2 p-x-4 flex items-center w-fit text-xs lg:text-sm text-left font-medium text-gray-700"
         >
@@ -33,7 +34,7 @@ const ChannelSelector = (props: IChannelSelectorProps) => {
             imageMarginX={TailwindWidthSizeEnum.W3}
             imageMarginY={TailwindWidthSizeEnum.W1}
           />
-        </a>
+        </Link>
       )}
       <Menu as="div" className="relative w-fit inline-block text-left">
         <Menu.Button

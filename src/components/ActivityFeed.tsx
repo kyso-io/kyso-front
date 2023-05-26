@@ -5,6 +5,7 @@ import type { ActivityFeed, Comment, Discussion, NormalizedResponseDTO, Organiza
 import { ActionEnum, EntityEnum } from '@kyso-io/kyso-model';
 import moment from 'moment';
 import React, { useMemo } from 'react';
+import Link from 'next/link';
 import PureAvatar from './PureAvatar';
 
 interface ActivityFeedProps {
@@ -81,9 +82,9 @@ const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => 
       <div className="min-w-0 flex-1">
         <div>
           <div className="text-sm">
-            <a href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
+            <Link href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
               {user.display_name}
-            </a>
+            </Link>
           </div>
           <p className="mt-0.5 text-sm text-gray-500">
             Commented
@@ -91,18 +92,18 @@ const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => 
               <span>
                 {' '}
                 on{' '}
-                <a href={`/${activityFeed.organization}/${activityFeed.team}/${report.sluglified_name}`} className="font-medium  text-indigo-600 hover:text-indigo-700">
+                <Link href={`/${activityFeed.organization}/${activityFeed.team}/${report.sluglified_name}`} className="font-medium  text-indigo-600 hover:text-indigo-700">
                   {report.title}
-                </a>
+                </Link>
               </span>
             )}
             {discussion && (
               <span>
                 {' '}
                 on{' '}
-                <a href={`/${activityFeed.organization}/${activityFeed.team}/discussions/${discussion.id}`} className="font-medium  text-indigo-600 hover:text-indigo-700">
+                <Link href={`/${activityFeed.organization}/${activityFeed.team}/discussions/${discussion.id}`} className="font-medium  text-indigo-600 hover:text-indigo-700">
                   {discussion.title}
-                </a>
+                </Link>
               </span>
             )}{' '}
             {moment(comment.created_at).fromNow()}
@@ -133,9 +134,9 @@ const ActivityFeedTag = ({ activityFeed, relations }: ActivityFeedProps) => {
       <div className="min-w-0 flex-1 py-0">
         <div className="text-sm leading-8 text-gray-500">
           <span className="mr-0.5">
-            <a href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
+            <Link href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
               {user.display_name}
-            </a>{' '}
+            </Link>{' '}
             added tag
           </span>{' '}
           <span className="mr-0.5">
@@ -170,9 +171,9 @@ const ActivityFeedReport = ({ activityFeed, relations }: ActivityFeedProps) => {
       </div>
       <div className="min-w-0 flex-1 py-1.5">
         <div className="text-sm text-gray-500">
-          <a href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
+          <Link href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
             {user.display_name}
-          </a>{' '}
+          </Link>{' '}
           {activityFeed.action === ActionEnum.ADD_AUTHOR && 'was added like author in report '}
           {activityFeed.action === ActionEnum.CREATE && 'created the report '}
           {activityFeed.action === ActionEnum.NEW_VERSION && 'uploaded new version of the report '}
@@ -185,9 +186,9 @@ const ActivityFeedReport = ({ activityFeed, relations }: ActivityFeedProps) => {
           {activityFeed.action === ActionEnum.STAR && 'liked the report '}
           {activityFeed.action === ActionEnum.UNSTAR && 'unliked the report '}
           {activityFeed.action !== ActionEnum.DELETE ? (
-            <a href={`/${activityFeed.organization}/${activityFeed.team}/${report.sluglified_name}`} className="font-medium text-indigo-600 hover:text-indigo-700">
+            <Link href={`/${activityFeed.organization}/${activityFeed.team}/${report.sluglified_name}`} className="font-medium text-indigo-600 hover:text-indigo-700">
               {report.title}
-            </a>
+            </Link>
           ) : (
             <span className="font-medium text-gray-900">{report.title}</span>
           )}{' '}
@@ -219,9 +220,9 @@ const ActivityFeedDiscussion = ({ activityFeed, relations }: ActivityFeedProps) 
       </div>
       <div className="min-w-0 flex-1 py-1.5">
         <div className="text-sm text-gray-500">
-          <a href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
+          <Link href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
             {user.display_name}
-          </a>{' '}
+          </Link>{' '}
           {activityFeed.action === ActionEnum.NEW_ASSIGNMENT && 'was added in the discussion '}
           {activityFeed.action === ActionEnum.REMOVE_ASSIGNMENT && 'was removed from the discussion '}
           {activityFeed.action === ActionEnum.NEW_MENTION && 'was mentioned in the discussion '}
@@ -229,9 +230,9 @@ const ActivityFeedDiscussion = ({ activityFeed, relations }: ActivityFeedProps) 
           {activityFeed.action === ActionEnum.DELETE && 'deleted the discussion '}
           {activityFeed.action === ActionEnum.UPDATE && 'updated the discussion '}
           {activityFeed.action !== ActionEnum.DELETE ? (
-            <a href={`/${activityFeed.organization}/${activityFeed.team}/discussions/${discussion.id}`} className="font-medium text-indigo-600 hover:text-indigo-700">
+            <Link href={`/${activityFeed.organization}/${activityFeed.team}/discussions/${discussion.id}`} className="font-medium text-indigo-600 hover:text-indigo-700">
               {discussion.title}
-            </a>
+            </Link>
           ) : (
             <span className="font-medium text-gray-900">{discussion.title}</span>
           )}{' '}
@@ -262,16 +263,16 @@ const ActivityFeedOrganization = ({ activityFeed, relations }: ActivityFeedProps
       </div>
       <div className="min-w-0 flex-1 py-1.5">
         <div className="text-sm text-gray-500">
-          <a href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
+          <Link href={`/user/${user.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
             {user.display_name}
-          </a>{' '}
+          </Link>{' '}
           {activityFeed.action === ActionEnum.ADD_MEMBER && 'was added as a member in the organization '}
           {activityFeed.action === ActionEnum.REMOVE_MEMBER && 'was removed from the organization '}
           {activityFeed.action === ActionEnum.CREATE && 'created the organization '}
           {activityFeed.action === ActionEnum.DELETE && 'deleted the organization '}
-          <a href={`/${activityFeed.organization}`} className="font-medium text-indigo-600 hover:text-indigo-700">
+          <Link href={`/${activityFeed.organization}`} className="font-medium text-indigo-600 hover:text-indigo-700">
             {organization?.display_name || activityFeed.organization}
-          </a>{' '}
+          </Link>{' '}
           <span className="whitespace-nowrap">{moment(activityFeed.created_at).fromNow()}</span>
         </div>
       </div>
@@ -300,16 +301,16 @@ const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
       </div>
       <div className="min-w-0 flex-1 py-1.5">
         <div className="text-sm text-gray-500">
-          <a href={`/user/${user?.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
+          <Link href={`/user/${user?.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
             {user?.display_name}
-          </a>{' '}
+          </Link>{' '}
           {activityFeed.action === ActionEnum.ADD_MEMBER && 'was added as a member in the channel '}
           {activityFeed.action === ActionEnum.REMOVE_MEMBER && 'was removed from the channel '}
           {activityFeed.action === ActionEnum.CREATE && 'created the channel '}
           {activityFeed.action === ActionEnum.DELETE && 'deleted the channel '}
-          <a href={`/${activityFeed.organization}/${activityFeed.team}`} className="font-medium text-indigo-600 hover:text-indigo-700">
+          <Link href={`/${activityFeed.organization}/${activityFeed.team}`} className="font-medium text-indigo-600 hover:text-indigo-700">
             {team?.display_name || activityFeed.team}
-          </a>{' '}
+          </Link>{' '}
           <span className="whitespace-nowrap">{moment(activityFeed.created_at).fromNow()}</span>
         </div>
       </div>
@@ -337,9 +338,9 @@ const ActivityFeedUserItem = ({ activityFeed, relations }: ActivityFeedProps) =>
       <div className="min-w-0 flex-1 py-1.5">
         <div className="text-sm text-gray-500">
           The user&nbsp;
-          <a href={`/user/${user?.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
+          <Link href={`/user/${user?.username}`} className="font-medium  text-gray-900 hover:text-indigo-600">
             {user?.display_name}
-          </a>{' '}
+          </Link>{' '}
           {activityFeed.action === ActionEnum.CREATE && 'was created '}
           {activityFeed.action === ActionEnum.UPDATE && 'was updated '}
           {activityFeed.action === ActionEnum.DELETE && 'was deleted '}

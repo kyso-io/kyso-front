@@ -13,6 +13,7 @@ import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import type { ReactElement } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
+import Link from 'next/link';
 import eventBus from '../helpers/event-bus';
 import BreadcrumbNavbar from './BreadcrumbNavbar';
 import DelayedContent from './DelayedContent';
@@ -162,7 +163,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                           <React.Fragment>
                             {
                               <div className="flex items-center pr-5 cursor-pointer">
-                                <a href="/tasks" type="button" className="relative inline-flex items-center p-3 text-sm font-medium text-center text-white" title="My tasks">
+                                <Link href="/tasks" type="button" className="relative inline-flex items-center p-3 text-sm font-medium text-center text-white" title="Tasks">
                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                     <path
                                       strokeLinecap="round"
@@ -185,7 +186,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                                       <></>
                                     )}
                                   </div>
-                                </a>
+                                </Link>
                               </div>
                             }
                             <Menu as="div" className="relative">
