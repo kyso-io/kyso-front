@@ -63,7 +63,7 @@ const Index = ({ commonData, setUser, showToaster, hideToaster, isCurrentUserVer
   const [requestingReports, setRequestingReports] = useState<boolean>(true);
   // ACTIVITY FEED
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
 
   useEffect(() => {

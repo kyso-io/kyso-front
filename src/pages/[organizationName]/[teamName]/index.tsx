@@ -92,7 +92,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   const [queryParams, setQueryParams] = useState<string>('');
   // ACTIVITY FEED
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   // PERMISSIONS
   const hasPermissionDeleteChannel: boolean = useMemo(

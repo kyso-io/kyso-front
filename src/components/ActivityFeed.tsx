@@ -1,11 +1,12 @@
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { ChatAlt2Icon, ChatAltIcon, ChatIcon, DocumentReportIcon, TagIcon, UserGroupIcon, UserIcon } from '@heroicons/react/solid';
-import type { ActivityFeed, Comment, Discussion, NormalizedResponseDTO, Organization, Relations, Report, Tag, Team } from '@kyso-io/kyso-model';
+import type { ActivityFeed, Comment, Discussion, InlineComment, NormalizedResponseDTO, Organization, Relations, Report, Tag, Team } from '@kyso-io/kyso-model';
 import { ActionEnum, EntityEnum } from '@kyso-io/kyso-model';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import PureAvatar from './PureAvatar';
+import TagInlineComment from './inline-comments/components/tag-inline-comment';
 
 interface ActivityFeedProps {
   activityFeed: ActivityFeed;
@@ -20,7 +21,6 @@ interface ActivityFeedUser {
 
 const extractSecurelyUserFromRelations = (relations: Relations, user_id: string) => {
   let user: ActivityFeedUser = relations.user[user_id];
-
   if (!user) {
     user = {
       display_name: 'User',
@@ -38,24 +38,12 @@ const extractSecurelyUserFromRelations = (relations: Relations, user_id: string)
       user.username = '';
     }
   }
-
   return user;
 };
 
 const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => {
   const comment: Comment = relations.comment[activityFeed.entity_id!];
   const user: ActivityFeedUser = extractSecurelyUserFromRelations(relations, activityFeed.user_id!);
-
-  /* let user: ActivityFeedUser = relations.user[activityFeed.user_id!];
-
-  if(!user) {
-    user = {
-      display_name: "User",
-      avatar_url: "",
-      username: ""
-    }
-  } */
-
   let report: Report | null = null;
   let discussion: Discussion | null = null;
   if (comment.report_id) {
@@ -116,11 +104,83 @@ const ActivityFeedComment = ({ activityFeed, relations }: ActivityFeedProps) => 
   );
 };
 
+const ActivityFeedInlineComment = ({ activityFeed, relations }: ActivityFeedProps) => {
+  const inlineComment: InlineComment = relations.inlineComment[activityFeed.entity_id!];
+  const user: ActivityFeedUser = extractSecurelyUserFromRelations(relations, activityFeed.user_id!);
+  let report: Report | null = null;
+  if (inlineComment.report_id) {
+    report = relations.report[inlineComment.report_id!];
+  }
+  if (!report) {
+    return null;
+  }
+  return (
+    <React.Fragment>
+      <div className="relative">
+        <span className={`inline-flex items-center justify-center h-10 w-10 rounded-full bg-white`}>
+          <div className="flex -space-x-1 overflow-hidden items-end">
+            <PureAvatar src={user?.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
+            <div className={`h-4 w-4 rounded-full -ml-2`}>
+              <ChatIcon className="h-4 w-4 text-orange-400 -ml-2 bg-white rounded-full" />
+            </div>
+          </div>
+        </span>
+        <span className="absolute -bottom-0.5 -right-1 bg-white rounded-tl px-0.5 py-px">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-400">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75"
+            />
+          </svg>
+        </span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <div>
+          <div className="text-sm">
+            <a href={`/user/${user.username}`} className="font-medium text-gray-900 hover:text-indigo-600">
+              {user.display_name}
+            </a>
+          </div>
+          <p className="mt-0.5 text-sm text-gray-500">
+            {activityFeed.action === ActionEnum.CREATE && 'Created the task'}
+            {activityFeed.action === ActionEnum.CHANGE_STATUS && 'Changed the status of the task'}
+            {/* {activityFeed.action === ActionEnum.DELETE && inlineComment.parent_comment_id === null && 'Deleted a task'}
+            {activityFeed.action === ActionEnum.DELETE && inlineComment.parent_comment_id !== null && 'Deleted a reply'} */}
+            {activityFeed.action === ActionEnum.REPLY && 'Reply the task'}
+            {activityFeed.action === ActionEnum.UPDATE && 'Updated the task'}
+            {activityFeed.action === ActionEnum.UPDATE_REPLY && 'Updated the reply of the task'}
+            {report && activityFeed.action !== ActionEnum.DELETE && (
+              <span>
+                {' '}
+                on{' '}
+                <a
+                  href={`/${activityFeed.organization}/${activityFeed.team}/${report.sluglified_name}?taskId=${inlineComment.id}&cell=${inlineComment.cell_id}`}
+                  className="font-medium  text-indigo-600 hover:text-indigo-700"
+                >
+                  {report.title}
+                </a>
+              </span>
+            )}{' '}
+            {activityFeed.action === ActionEnum.CHANGE_STATUS && (
+              <React.Fragment>
+                from <TagInlineComment status={inlineComment.status_history[0]!.from_status} /> to <TagInlineComment status={inlineComment.status_history[0]!.to_status} />
+              </React.Fragment>
+            )}
+            {moment(inlineComment.created_at).fromNow()}
+          </p>
+        </div>
+        <div className="mt-2 text-xs text-gray-700">
+          <p>{inlineComment.text}</p>
+        </div>
+      </div>
+    </React.Fragment>
+  );
+};
+
 const ActivityFeedTag = ({ activityFeed, relations }: ActivityFeedProps) => {
   const tag: Tag = relations.tag[activityFeed.entity_id!];
-  // const user: User = relations.user[activityFeed.user_id!];
   const user: ActivityFeedUser = extractSecurelyUserFromRelations(relations, activityFeed.user_id!);
-
   return (
     <React.Fragment>
       <div>
@@ -152,7 +212,6 @@ const ActivityFeedTag = ({ activityFeed, relations }: ActivityFeedProps) => {
 
 const ActivityFeedReport = ({ activityFeed, relations }: ActivityFeedProps) => {
   const report: Report = relations.report[activityFeed.entity_id!];
-  // const user: User = relations.user[activityFeed.user_id!];
   const user: ActivityFeedUser = extractSecurelyUserFromRelations(relations, activityFeed.user_id!);
   return (
     <React.Fragment>
@@ -201,7 +260,6 @@ const ActivityFeedReport = ({ activityFeed, relations }: ActivityFeedProps) => {
 
 const ActivityFeedDiscussion = ({ activityFeed, relations }: ActivityFeedProps) => {
   const discussion: Discussion = relations.discussion[activityFeed.entity_id!];
-  // const user: User = relations.user[activityFeed.user_id!];
   const user: ActivityFeedUser = extractSecurelyUserFromRelations(relations, activityFeed.user_id!);
   return (
     <React.Fragment>
@@ -244,7 +302,6 @@ const ActivityFeedDiscussion = ({ activityFeed, relations }: ActivityFeedProps) 
 
 const ActivityFeedOrganization = ({ activityFeed, relations }: ActivityFeedProps) => {
   const organization: Organization = relations.organization[activityFeed.entity_id!];
-  // const user: User = relations.user[activityFeed.user_id!];
   const user: ActivityFeedUser = extractSecurelyUserFromRelations(relations, activityFeed.user_id!);
   return (
     <React.Fragment>
@@ -281,9 +338,7 @@ const ActivityFeedOrganization = ({ activityFeed, relations }: ActivityFeedProps
 
 const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
   const team: Team = relations.team[activityFeed.entity_id!];
-  //   const user: User = relations.user[activityFeed.user_id!];
   const user: ActivityFeedUser = extractSecurelyUserFromRelations(relations, activityFeed.user_id!);
-
   return (
     <React.Fragment>
       <div>
@@ -319,7 +374,6 @@ const ActivityFeedTeam = ({ activityFeed, relations }: ActivityFeedProps) => {
 
 const ActivityFeedUserItem = ({ activityFeed, relations }: ActivityFeedProps) => {
   const user: ActivityFeedUser = extractSecurelyUserFromRelations(relations, activityFeed.user_id!);
-
   return (
     <React.Fragment>
       <div>
@@ -381,6 +435,11 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
                   return null;
                 }
                 break;
+              case EntityEnum.INLINE_COMMENT:
+                if (!activityFeed!.relations!.inlineComment[af.entity_id!]) {
+                  return null;
+                }
+                break;
               case EntityEnum.ORGANIZATION:
                 if (af.action !== ActionEnum.ADD_MEMBER && af.action !== ActionEnum.REMOVE_MEMBER && af.action !== ActionEnum.CREATE && af.action !== ActionEnum.DELETE) {
                   return null;
@@ -413,6 +472,7 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
                   <div className="relative flex items-start space-x-3">
                     {af.entity === EntityEnum.COMMENT && <ActivityFeedComment activityFeed={af} relations={activityFeed!.relations!} />}
                     {af.entity === EntityEnum.DISCUSSION && <ActivityFeedDiscussion activityFeed={af} relations={activityFeed!.relations!} />}
+                    {af.entity === EntityEnum.INLINE_COMMENT && <ActivityFeedInlineComment activityFeed={af} relations={activityFeed!.relations!} />}
                     {af.entity === EntityEnum.ORGANIZATION && <ActivityFeedOrganization activityFeed={af} relations={activityFeed!.relations!} />}
                     {af.entity === EntityEnum.REPORT && <ActivityFeedReport activityFeed={af} relations={activityFeed!.relations!} />}
                     {af.entity === EntityEnum.TAG && <ActivityFeedTag activityFeed={af} relations={activityFeed!.relations!} />}
@@ -427,7 +487,6 @@ const ActivityFeedComponent = ({ activityFeed, hasMore, getMore }: Props) => {
       </div>
       {hasMore ? (
         <div className="flex justify-center items-center mt-6">
-          {/* done */}
           <button onClick={getMore} className="text-sm px-2.5 py-1.5 rounded-md text-gray-500 bg-white hover:bg-gray-100 focus:outline-none ">
             Load more
           </button>

@@ -57,7 +57,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     sort: '-created_at',
   });
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
-  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [hasMore, setHasMore] = useState<boolean>(false);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
