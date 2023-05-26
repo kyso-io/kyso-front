@@ -654,9 +654,11 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                 </button>
               </div>
               <div className="">
-                <Link href={commonData.organization?.link!} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
-                  {commonData.organization?.link}
-                </Link>
+                {commonData.organization?.link && (
+                  <Link href={commonData.organization?.link} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+                    {commonData.organization?.link}
+                  </Link>
+                )}
                 {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
                 {Helper.isBrowser() && commonData.organization && <ReadMoreReact text={commonData.organization?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
               </div>
