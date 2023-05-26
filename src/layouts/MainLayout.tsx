@@ -2,6 +2,7 @@
 import { Footer } from '@/components/Footer';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import { Disclosure } from '@headlessui/react';
+import Link from 'next/link';
 
 const MainLayout: LayoutProps = ({ children }: any) => {
   return (
@@ -13,9 +14,9 @@ const MainLayout: LayoutProps = ({ children }: any) => {
               <div className="flex items-center">
                 <div className="shrink-0">
                   {/* This always must redirect to the homepage */}
-                  <a href={'/'}>
+                  <Link href={'/'}>
                     <img className="h-8 w-8" src={`/assets/images/kyso-logo-white.svg`} alt="Kyso" />
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>

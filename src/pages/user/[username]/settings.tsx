@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import Link from 'next/link';
 import PureAvatar from '@/components/PureAvatar';
 import SettingsAside from '@/components/SettingsAside';
 import { ToasterIcons } from '@/enums/toaster-icons';
@@ -123,9 +124,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
               <h3 className="text-lg font-medium leading-6 text-gray-900">Personal Information</h3>
               {commonData.user && (
                 <div className="mt-1 sm:col-span-2 sm:mt-0">
-                  <a href={`/user/${commonData.user.username}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
+                  <Link href={`/user/${commonData.user.username}`} className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
                     /user/{commonData.user.username}
-                  </a>
+                  </Link>
                 </div>
               )}
             </div>
@@ -280,9 +281,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
                 <div className="mt-2 text-sm text-yellow-700">
                   <p>
                     This page is not available. Go to your{' '}
-                    <a href={`/user/${commonData.user?.username}/settings`} className="font-bold">
+                    <Link href={`/user/${commonData.user?.username}/settings`} className="font-bold">
                       profile
-                    </a>
+                    </Link>
                     .
                   </p>
                 </div>

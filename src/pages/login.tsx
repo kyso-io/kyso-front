@@ -13,6 +13,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import Link from 'next/link';
 import { KysoDescription } from '../components/KysoDescription';
 import { Helper } from '../helpers/Helper';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
@@ -317,12 +318,12 @@ const Index = () => {
 
             {error && <div className="text-red-500 text-center text-xs p-2">{error}</div>}
             <div className="pt-5 flex flex-row items-center shown-div ">
-              <a className="text-xs no-underline hover:none text-gray-900 hover:text-indigo-700 mr-5" href="/reset-password">
+              <Link className="text-xs no-underline hover:none text-gray-900 hover:text-indigo-700 mr-5" href="/reset-password">
                 Forgot your password?
-              </a>
-              <a className="text-xs ml-14 no-underline hover:none text-gray-900 hover:text-indigo-700" href={redirect ? `/signup?redirect=${redirect}` : `/signup`}>
+              </Link>
+              <Link className="text-xs ml-14 no-underline hover:none text-gray-900 hover:text-indigo-700" href={redirect ? `/signup?redirect=${redirect}` : `/signup`}>
                 Create an account
-              </a>
+              </Link>
             </div>
           </div>
         </main>

@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import Link from 'next/link';
 import PureNotification from '@/components/PureNotification';
 import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
@@ -395,9 +396,9 @@ const Index = () => {
             {error && <div className="text-red-500 text-center text-xs p-2">{error}</div>}
             <div className="pt-5 flex flex-row items-center shown-div ">
               <p className="text-sm mr-5">Already have an account?</p>
-              <a className="text-sm no-underline hover:none text-indigo-600 hover:text-indigo-700" href={`/login${invitation ? `?invitation=${invitation}` : ''}`}>
+              <Link className="text-sm no-underline hover:none text-indigo-600 hover:text-indigo-700" href={`/login${invitation ? `?invitation=${invitation}` : ''}`}>
                 Log in now
-              </a>
+              </Link>
             </div>
           </div>
         </main>

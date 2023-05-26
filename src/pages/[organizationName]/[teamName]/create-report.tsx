@@ -38,6 +38,7 @@ import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import type { HttpExceptionDto } from '../../../interfaces/http-exception.dto';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
@@ -822,10 +823,13 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
             <div className="mt-2 text-sm text-yellow-700">
               <p>
                 You don&apos;t have permissions to create reports. Come back to
-                <a href={commonData.team ? `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}` : `/${commonData.organization?.sluglified_name}`} className="font-bold">
+                <Link
+                  href={commonData.team ? `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}` : `/${commonData.organization?.sluglified_name}`}
+                  className="font-bold"
+                >
                   {' '}
                   {commonData.team ? commonData.team?.display_name : commonData.organization?.display_name}{' '}
-                </a>
+                </Link>
                 page.
               </p>
             </div>

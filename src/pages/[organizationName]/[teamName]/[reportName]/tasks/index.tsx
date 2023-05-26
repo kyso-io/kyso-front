@@ -30,6 +30,7 @@ import 'react-tooltip/dist/react-tooltip.css';
 import Board from 'react-trello';
 import ReadMoreReact from 'read-more-react';
 import { v4 as uuidv4 } from 'uuid';
+import Link from 'next/link';
 import Pagination from '../../../../../components/Pagination';
 import PureAvatar from '../../../../../components/PureAvatar';
 import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
@@ -727,7 +728,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
 
                               return (
                                 <li key={inlineCommentDto.id} className="container-inline-comment">
-                                  <a href={Helper.buildTaskDetailPage(inlineCommentDto, report)} className="block hover:bg-gray-50">
+                                  <Link href={Helper.buildTaskDetailPage(inlineCommentDto, report)} className="block hover:bg-gray-50">
                                     <div className="p-4 sm:px-6">
                                       <div className="flex items-center justify-between">
                                         <ReadMoreReact text={inlineCommentDto.text} ideal={200} readMoreText="Read more..." className="text-sm font-medium text-indigo-600" />
@@ -792,7 +793,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                                         </div>
                                       </div>
                                     </div>
-                                  </a>
+                                  </Link>
                                 </li>
                               );
                             })}
@@ -836,7 +837,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                       Card: (e: any) => {
                         const inlineCommentDto: InlineCommentDto = e.metadata;
                         return (
-                          <a
+                          <Link
                             href={`/${router.query.organizationName}/${router.query.teamName}/${router.query.reportName}/tasks/${inlineCommentDto.id}`}
                             className="overflow-hidden bg-white sm:rounded-lg sm:shadow cursor-pointer"
                           >
@@ -863,7 +864,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                                 <ReadMoreReact text={inlineCommentDto.text || ''} ideal={100} readMoreText="Read more..." className="text-sm font-medium text-indigo-600" />
                               </div>
                             </div>
-                          </a>
+                          </Link>
                         );
                       },
                     }}

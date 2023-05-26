@@ -7,6 +7,7 @@ import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import { FeedbackDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
@@ -138,9 +139,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
                 <div className="mt-2 text-sm text-yellow-700">
                   <p>
                     Available only for registered users.{' '}
-                    <a href="/login" className="font-bold">
+                    <Link href="/login" className="font-bold">
                       Sign in
-                    </a>{' '}
+                    </Link>{' '}
                     now.
                   </p>
                 </div>

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-case-declarations */
+import Link from 'next/link';
 import { Menu, Transition } from '@headlessui/react';
 import { SearchIcon, SelectorIcon, XIcon } from '@heroicons/react/solid';
 import type { InlineCommentDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
@@ -108,7 +109,7 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
   const numParticipants: number = Object.keys(participants).length;
 
   return (
-    <a
+    <Link
       key={inlineCommentDto.id}
       className="flex flex-col py-4 border-b"
       href={Helper.buildTaskDetailPage(inlineCommentDto, report!)}
@@ -185,7 +186,7 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
           <PureAvatarGroup data={users.slice(0, MAX_USERS_TO_SHOW)} />
         </div>
       </div>
-    </a>
+    </Link>
   );
 };
 

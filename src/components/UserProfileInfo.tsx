@@ -9,6 +9,7 @@ import type { UserDTO } from '@kyso-io/kyso-model';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import { useMemo, useRef } from 'react';
+import Link from 'next/link';
 import type { CommonData } from '../types/common-data';
 import PureAvatar from './PureAvatar';
 
@@ -153,9 +154,9 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
             {userProfile.link && (
               <div className="mt-2 flex items-center text-sm">
                 <p className="text-m font-medium text-gray-600 sm:text-l">
-                  <a href={userProfile.link} target="_blank" rel="noreferrer">
+                  <Link href={userProfile.link} target="_blank" rel="noreferrer">
                     {userProfile.link}
-                  </a>
+                  </Link>
                 </p>
               </div>
             )}

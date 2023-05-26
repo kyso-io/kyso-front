@@ -44,6 +44,7 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
+import Link from 'next/link';
 import { usePublicSetting } from '../../../hooks/use-public-setting';
 
 const OrganizationRoleToLabel: { [role: string]: string } = {
@@ -928,9 +929,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                 </div>
               ) : (
                 <div className="py-3">
-                  <a href={commonData.organization?.link} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+                  <Link href={commonData.organization?.link!} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
                     {commonData.organization?.link}
-                  </a>
+                  </Link>
                   {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
                   {Helper.isBrowser() && <ReadMoreReact text={commonData.organization?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
                 </div>
@@ -973,7 +974,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
             {!editing && selectedTab === OrganizationSettingsTab.Channels && (
               <React.Fragment>
                 {hasPermissionCreateChannel && (
-                  <a
+                  <Link
                     href={`/${organizationName}/create-channel`}
                     className="text-gray-500 hover:bg-gray-50 hover:text-gray-900 flex items-center px-3 py-2 text-xs lg:text-sm rounded-md"
                     role="none"
@@ -983,7 +984,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                       <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" role="none"></path>
                     </svg>
                     Create
-                  </a>
+                  </Link>
                 )}
 
                 <div className="mt-5">
@@ -1152,10 +1153,10 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                           <PureAvatar src={member.avatar_url} title={member.display_name} username={member?.username} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <a href={`/user/${member.username}`} className="focus:outline-none">
+                          <Link href={`/user/${member.username}`} className="focus:outline-none">
                             <p className="text-sm font-medium text-gray-900">{member.display_name}</p>
                             <p className="truncate text-sm text-gray-500">{labelRole}</p>
-                          </a>
+                          </Link>
                         </div>
                         {isOrgAdmin && (
                           <div className="flex flex-row">
@@ -1284,7 +1285,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                               <PureAvatar src={userDto.avatar_url || ''} title={userDto.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <a
+                              <Link
                                 href={userDto.id ? `/user/${userDto.username}` : ''}
                                 onClick={(e) => {
                                   if (!userDto.id) {
@@ -1301,7 +1302,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                                     <p className="truncate text-sm text-red-500 mt-2">Allowed domains are: {commonData.organization?.allowed_access_domains.map((x) => `${x} - `)} </p>
                                   </React.Fragment>
                                 )}
-                              </a>
+                              </Link>
                             </div>
                             <div className="flex flex-row">
                               <button

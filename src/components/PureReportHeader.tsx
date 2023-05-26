@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import PureShareButton from '@/components/PureShareButton';
 import PureVersionsDropdown from '@/components/PureVersionsDropdown';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
@@ -185,9 +186,9 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               </button>
             )}
             {fileToRender !== null && fileToRender.path.endsWith('.ipynb') && (
-              <a href={`${frontEndUrl}${reportUrl}/diff/${fileToRender.path}`} className="font-medium text-sm text-gray-700 px-3">
+              <Link href={`${frontEndUrl}${reportUrl}/diff/${fileToRender.path}`} className="font-medium text-sm text-gray-700 px-3">
                 Compare versions
-              </a>
+              </Link>
             )}
             {fileToRender !== null && fileToRender.git_metadata !== null && fileToRender.git_metadata.repository && <GitMetaDataDropdown fileToRender={fileToRender} />}
             {showCloneDropDown && (

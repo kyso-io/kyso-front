@@ -11,7 +11,7 @@ interface Props {
   tooltip?: boolean;
   avatarAsLink?: boolean;
 }
-// <a href={`/user/${user.username}`}
+
 const PureAvatarGroup = (props: Props) => {
   // Default size
   let size: TailwindHeightSizeEnum = TailwindHeightSizeEnum.H6;

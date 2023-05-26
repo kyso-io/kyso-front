@@ -9,6 +9,7 @@ import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { Api, logoutAction } from '@kyso-io/kyso-store';
 import { useEffect, useState } from 'react';
 import slugify from 'slugify';
+import Link from 'next/link';
 import { useAppDispatch } from '../hooks/redux-hooks';
 import { usePublicSetting } from '../hooks/use-public-setting';
 
@@ -261,9 +262,9 @@ const Index = () => {
                 <div className="mt-2 text-sm text-yellow-700">
                   <p>
                     Available only for registered users.{' '}
-                    <a href="/login" className="font-bold">
+                    <Link href="/login" className="font-bold">
                       Sign in
-                    </a>{' '}
+                    </Link>{' '}
                     now.
                   </p>
                 </div>

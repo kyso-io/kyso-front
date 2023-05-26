@@ -15,6 +15,7 @@ import { AllowDownload, KysoSettingsEnum, Team, TeamPermissionsEnum, TeamVisibil
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { usePublicSetting } from '../../hooks/use-public-setting';
 
 const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
@@ -316,10 +317,10 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                     <div className="mt-2 text-sm text-yellow-700">
                       <p>
                         You don&apos;t have permissions to create channels. Come back to
-                        <a href={`/${commonData.organization?.sluglified_name}`} className="font-bold">
+                        <Link href={`/${commonData.organization?.sluglified_name}`} className="font-bold">
                           {' '}
                           {commonData.organization?.display_name}{' '}
-                        </a>
+                        </Link>
                         page or select a channel.
                       </p>
                     </div>
