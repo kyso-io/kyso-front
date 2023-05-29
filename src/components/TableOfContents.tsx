@@ -1,6 +1,7 @@
 import { ChevronRightIcon } from '@heroicons/react/outline';
 import type { TableOfContentEntryDto } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 interface PropsLineTableOfContents {
@@ -49,14 +50,14 @@ const LineTableOfContents = ({ toc, collapsible, deep, openInNewTab }: PropsLine
                 {collapsed[index] ? <ChevronRightIcon className="h-4 w-4 mr-1" /> : <ChevronRightIcon className="h-4 w-4 mr-1 rotate-90" />}
               </button>
             )}
-            <a
+            <Link
               href={entry.href}
               target={openInNewTab ? '_blank' : '_self'}
               rel="noreferrer"
               className="text-sm w-6 text-gray-500 cursor-pointer grow underline hover:no-underline hover:font-extrabold"
             >
               {entry.title}
-            </a>
+            </Link>
           </div>
           {collapsible && !collapsed[index] && entry.children && entry.children.length > 0 && (
             <LineTableOfContents toc={entry.children} collapsible={collapsible} openInNewTab={openInNewTab} deep={deep + 1} />

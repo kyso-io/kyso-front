@@ -6,6 +6,7 @@ import { Dialog, Menu, Transition } from '@headlessui/react';
 import { DotsVerticalIcon, ExclamationCircleIcon, TrashIcon } from '@heroicons/react/solid';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
+import { useRouter } from 'next/router';
 import React, { Fragment, useState } from 'react';
 
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
 }
 
 const UnpureDeleteChannelDropdown = ({ commonData, showToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified }: Props) => {
+  const router = useRouter();
   const [requesting, setRequesting] = useState<boolean>(false);
   const [open, setOpen] = useState<boolean>(false);
   const [input, setInput] = useState<string>('');
@@ -39,7 +41,7 @@ const UnpureDeleteChannelDropdown = ({ commonData, showToaster, isCurrentUserSol
       setInput('');
       setRequesting(false);
     }
-    window.location.href = `/${commonData.organization?.sluglified_name}`;
+    router.push(`/${commonData.organization?.sluglified_name}`);
   };
 
   return (
@@ -62,7 +64,7 @@ const UnpureDeleteChannelDropdown = ({ commonData, showToaster, isCurrentUserSol
             <div className="py-1 bg-white">
               <Menu.Item>
                 <span
-                  onClick={() => window.open(`../../settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`, '_self')}
+                  onClick={() => router.push(`../../settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`)}
                   className="cursor-pointer text-gray-700 px-4 py-2 text-sm hover:bg-gray-50 group flex items-center"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">

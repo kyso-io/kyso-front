@@ -2,6 +2,7 @@ import type { ResourcePermissions } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import { useMemo, useState } from 'react';
+import Link from 'next/link';
 import type { CommonData } from '../types/common-data';
 
 interface Props {
@@ -52,7 +53,7 @@ const SettingsAside = ({ commonData }: Props) => {
       </h3>
       <div className="flex flex-col justify-start">
         {commonData.user !== null && (
-          <a
+          <Link
             href={`/user/${commonData.user?.username}/settings`}
             className={clsx(
               router.route.startsWith('/user/[username]/settings') ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
@@ -60,10 +61,10 @@ const SettingsAside = ({ commonData }: Props) => {
             )}
           >
             User
-          </a>
+          </Link>
         )}
         {commonData.user !== null && (
-          <a
+          <Link
             href={`/user/${commonData.user?.username}/tokens`}
             className={clsx(
               router.route.startsWith('/user/[username]/tokens') ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
@@ -71,10 +72,10 @@ const SettingsAside = ({ commonData }: Props) => {
             )}
           >
             Tokens
-          </a>
+          </Link>
         )}
         {commonData.user !== null && (
-          <a
+          <Link
             href={`/settings/notifications`}
             className={clsx(
               router.route === '/settings/notifications' ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
@@ -82,7 +83,7 @@ const SettingsAside = ({ commonData }: Props) => {
             )}
           >
             Notifications
-          </a>
+          </Link>
         )}
         {organizations.length > 0 && (
           <div
@@ -93,7 +94,7 @@ const SettingsAside = ({ commonData }: Props) => {
               'flex items-center px-3 py-2 text-sm font-medium rounded-md',
             )}
           >
-            <a href={`/settings`}>Organizations</a>
+            <Link href={`/settings`}>Organizations</Link>
             <span className="mx-2">{'>'}</span>
             <select
               onChange={(e) => {

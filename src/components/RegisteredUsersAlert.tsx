@@ -1,4 +1,5 @@
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
+import Link from 'next/link';
 
 export const RegisteredUsersAlert = () => {
   return (
@@ -13,9 +14,9 @@ export const RegisteredUsersAlert = () => {
             <div className="mt-2 text-sm text-yellow-700">
               <p>
                 This page is only available to registered users.{' '}
-                <a href="/login" className="font-bold">
+                <Link href="/login" className="font-bold">
                   Sign in
-                </a>{' '}
+                </Link>{' '}
                 now.
               </p>
             </div>

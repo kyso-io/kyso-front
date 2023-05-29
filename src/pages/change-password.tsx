@@ -8,6 +8,7 @@ import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { UserChangePasswordDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
@@ -69,9 +70,9 @@ const ChangePassword = () => {
                   <h3 className="text-sm font-medium text-yellow-800">Missing data in url</h3>
                   <p className="mt-2 text-sm text-yellow-700">
                     Please check your email and make sure you have the correct link to change your password or request{' '}
-                    <a href="/reset-password" className="font-bold">
+                    <Link href="/reset-password" className="font-bold">
                       new link
-                    </a>
+                    </Link>
                     .
                   </p>
                 </div>

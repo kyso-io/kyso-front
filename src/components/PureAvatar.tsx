@@ -4,6 +4,7 @@ import type { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enu
 import clsx from 'clsx';
 import React, { useState } from 'react';
 import { Tooltip } from 'primereact/tooltip';
+import Link from 'next/link';
 
 interface Props {
   src: string;
@@ -39,7 +40,7 @@ const PureAvatar = (props: Props) => {
     <>
       {tooltip && <Tooltip target=".avatar-tooltip" />}
       {props.src && !isError && props.username && (
-        <a href={`/user/${props.username}`}>
+        <Link href={`/user/${props.username}`}>
           <img
             key={props.title}
             onError={() => {
@@ -58,7 +59,7 @@ const PureAvatar = (props: Props) => {
             data-pr-tooltip={props.title}
             data-pr-position="bottom"
           />
-        </a>
+        </Link>
       )}
       {props.src && !isError && !props.username && (
         <img
@@ -82,7 +83,7 @@ const PureAvatar = (props: Props) => {
       )}
 
       {props.src && isError && props.username && (
-        <a href={`/user/${props.username}`}>
+        <Link href={`/user/${props.username}`}>
           <div
             className={`avatar-tooltip inline-flex items-center justify-center h-${props.size} w-${props.size} rounded-full bg-gray-200 hover:scale-110 transition duration-100 ${props.className}`}
             style={props.style}
@@ -91,7 +92,7 @@ const PureAvatar = (props: Props) => {
           >
             <span className={`text-${props.textSize} font-medium leading-none text-gray-500`}>{getInitials(props.title)}</span>
           </div>
-        </a>
+        </Link>
       )}
       {props.src && isError && !props.username && (
         <div

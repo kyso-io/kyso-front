@@ -59,7 +59,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
       }
     };
     redirectUserToOrganization();
-  }, [commonData?.permissions, commonData?.user]);
+  }, [commonData?.permissions, commonData?.user, router]);
 
   return (
     <div className="flex flex-row space-x-8">

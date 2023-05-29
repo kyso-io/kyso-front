@@ -13,6 +13,7 @@ import SettingsAside from '@/components/SettingsAside';
 import { checkJwt } from '@/helpers/check-jwt';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
+import Link from 'next/link';
 
 const OrganizationRoleToLabel: { [role: string]: string } = {
   'organization-admin': 'Admin of this organization',
@@ -99,7 +100,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
             <div className="space-y-12">
               <div className="space-y-5 sm:mx-auto sm:max-w-xl sm:space-y-4 lg:max-w-5xl">
                 <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">Organizations</h2>
-                <a
+                <Link
                   href="/create-organization"
                   className="text-gray-500 hover:bg-gray-50 hover:text-gray-900 flex items-center px-3 py-2 text-xs lg:text-sm rounded-md"
                   role="link"
@@ -113,7 +114,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" role="img"></path>
                   </svg>
                   Create
-                </a>
+                </Link>
               </div>
               <ul role="list" className="mx-auto space-y-16 sm:grid sm:grid-cols-2 sm:gap-16 sm:space-y-0 lg:max-w-5xl lg:grid-cols-3">
                 {organizationsInfoDtoExtended.map((organizationInfoExtended: OrganizationInfoDtoExtended) => {

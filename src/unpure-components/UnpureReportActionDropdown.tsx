@@ -9,6 +9,8 @@ import React, { Fragment, useMemo } from 'react';
 import { Helper } from '@/helpers/Helper';
 import { ToasterMessages } from '@/helpers/ToasterMessages';
 import { ToasterIcons } from '@/enums/toaster-icons';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 import type { FileToRender } from '../types/file-to-render';
 
 interface Props {
@@ -25,6 +27,7 @@ interface Props {
 }
 
 const UnpureReportActionDropdown = (props: Props) => {
+  const router = useRouter();
   const { report, fileToRender, commonData, hasPermissionDeleteReport, hasPermissionEditReport, onSetFileAsMainFile, version, isCurrentUserVerified, isCurrentUserSolvedCaptcha, showToaster } = props;
   const dispatch = useAppDispatch();
 
@@ -61,7 +64,7 @@ const UnpureReportActionDropdown = (props: Props) => {
     showToaster('Deleting...', ToasterIcons.INFO);
     await dispatch(deleteReportAction(report.id!));
     showToaster('Report deleted successfully!', ToasterIcons.SUCCESS);
-    window.location.href = `/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`;
+    router.push(`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`);
   };
 
   return (
@@ -83,22 +86,22 @@ const UnpureReportActionDropdown = (props: Props) => {
           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none">
             <div className="py-1">
               <Menu.Item>
-                <a
+                <Link
                   href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}/analytics`}
                   className={classNames('text-gray-700', 'px-4 py-2 text-sm hover:bg-gray-100 group flex items-center')}
                 >
                   <PresentationChartLineIcon className="mr-2 h-5 w-5 text-gray-700" />
                   Analytics
-                </a>
+                </Link>
               </Menu.Item>
               <Menu.Item>
-                <a
+                <Link
                   href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}/tasks`}
                   className={classNames('text-gray-700', 'px-4 py-2 text-sm hover:bg-gray-100 group flex items-center')}
                 >
                   <ChatAltIcon className="mr-2 h-5 w-5 text-gray-700" />
                   Tasks
-                </a>
+                </Link>
               </Menu.Item>
               {hasPermissionEditReport && (
                 <React.Fragment>
@@ -111,7 +114,7 @@ const UnpureReportActionDropdown = (props: Props) => {
                           return;
                         }
 
-                        window.location.assign(`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form?reportId=${report.id}`);
+                        router.push(`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/create-report-form?reportId=${report.id}`);
                       }}
                       className={classNames('text-gray-700 px-4 py-2 text-sm hover:bg-gray-100 group flex items-center cursor-pointer')}
                     >
@@ -137,18 +140,6 @@ const UnpureReportActionDropdown = (props: Props) => {
                   </a>
                 </Menu.Item>
               )}
-              {/* <Menu.Item>
-                <a
-                  href="#"
-                  // onClick={() => }
-                  className={classNames(
-                    'text-gray-700',
-                    'block px-4 py-2 text-sm hover:bg-gray-100'
-                  )}
-                >
-                  Download current file as pdf
-                </a>
-            </Menu.Item> */}
             </div>
           </Menu.Items>
         </Transition>

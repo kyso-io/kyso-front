@@ -379,7 +379,7 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
     try {
       const { data: newReport }: NormalizedResponseDTO<ReportDTO> = await api.createUiReport(formData);
       cleanStorage();
-      window.location.href = `/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`;
+      router.push(`/${newReport.organization_sluglified_name}/${newReport.team_sluglified_name}/${newReport.name}`);
 
       showToaster('Report uploaded successfully.', ToasterIcons.INFO);
     } catch (err: any) {
@@ -480,7 +480,7 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
       hideToaster();
 
       const updatedReport: ReportDTO = responseUpdateReport.data;
-      window.location.href = `/${updatedReport.organization_sluglified_name}/${updatedReport.team_sluglified_name}/${updatedReport.name}`;
+      router.push(`/${updatedReport.organization_sluglified_name}/${updatedReport.team_sluglified_name}/${updatedReport.name}`);
 
       showToaster('Report updated successfully', ToasterIcons.INFO);
     } catch (err: any) {

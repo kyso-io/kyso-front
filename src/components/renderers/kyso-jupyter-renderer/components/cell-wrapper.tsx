@@ -7,6 +7,7 @@ import type { InlineCommentDto, InlineCommentStatusEnum, ReportDTO, TeamMember }
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useHover } from 'usehooks-ts';
 import { Tooltip } from 'primereact/tooltip';
+import { useRouter } from 'next/router';
 import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
 import type { Cell as ICell } from '../interfaces/jupyter-notebook';
 import Cell from './cell';
@@ -58,7 +59,7 @@ const CellWrapper = (props: Props) => {
     isLastVersion,
     showToaster,
   } = props;
-
+  const router = useRouter();
   const reportContext: ReportContext = {
     organizationSlug: commonData.organization?.sluglified_name!,
     teamSlug: commonData.team?.sluglified_name!,
@@ -152,7 +153,14 @@ const CellWrapper = (props: Props) => {
           {cell?.id && (
             <>
               <Tooltip target="#openLinkButton" autoHide position="bottom" content="Open link to this cell in a new window" />
-              <a id="openLinkButton" className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', 'hover:bg-gray-300')} href={`?cell=${cell?.id}`}>
+              <a
+                onClick={() => {
+                  router.query.cell = cell?.id;
+                  router.push(router);
+                }}
+                id="openLinkButton"
+                className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', 'hover:bg-gray-300')}
+              >
                 <LinkIcon className="h-4 w-4" aria-hidden="true" />
               </a>
             </>

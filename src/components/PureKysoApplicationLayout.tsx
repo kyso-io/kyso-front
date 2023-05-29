@@ -13,6 +13,7 @@ import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import type { ReactElement } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
+import Link from 'next/link';
 import eventBus from '../helpers/event-bus';
 import BreadcrumbNavbar from './BreadcrumbNavbar';
 import DelayedContent from './DelayedContent';
@@ -110,9 +111,9 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                   <div className="flex items-center">
                     <div className="shrink-0">
                       {/* This always must redirect to the homepage */}
-                      <a href={commonData.user !== null ? '/' : 'https://about.kyso.io/'}>
+                      <Link href={commonData.user !== null ? '/' : 'https://about.kyso.io/'}>
                         <img className="h-8 w-8" src={`/assets/images/kyso-logo-white.svg`} alt="Kyso" />
-                      </a>
+                      </Link>
                     </div>
                   </div>
                   <div className="flex items-center">
@@ -150,7 +151,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                               <button
                                 className="text-black ml-3 inline-flex justify-center rounded-md border border-transparent bg-white py-2 px-4 text-sm font-medium shadow-sm hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
                                 onClick={() => {
-                                  window.location.href = '/login';
+                                  router.push('/login');
                                 }}
                               >
                                 Login
@@ -162,7 +163,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                           <React.Fragment>
                             {
                               <div className="flex items-center pr-5 cursor-pointer">
-                                <a href="/my-tasks" type="button" className="relative inline-flex items-center p-3 text-sm font-medium text-center text-white" title="My tasks">
+                                <Link href="/tasks" type="button" className="relative inline-flex items-center p-3 text-sm font-medium text-center text-white" title="Tasks">
                                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                                     <path
                                       strokeLinecap="round"
@@ -185,7 +186,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                                       <></>
                                     )}
                                   </div>
-                                </a>
+                                </Link>
                               </div>
                             }
                             <Menu as="div" className="relative">
@@ -218,13 +219,13 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                                           );
                                         }
                                         return (
-                                          <a
-                                            href={item.href}
+                                          <Link
+                                            href={item.href!}
                                             className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
                                             target={classNames(item.newTab ? '_blank' : '')}
                                           >
                                             {item.name}
-                                          </a>
+                                          </Link>
                                         );
                                       }}
                                     </Menu.Item>

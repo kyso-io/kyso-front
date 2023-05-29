@@ -42,6 +42,7 @@ import debounce from 'lodash.debounce';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
+import Link from 'next/link';
 import Pagination from '../../../../components/Pagination';
 import { usePublicSetting } from '../../../../hooks/use-public-setting';
 
@@ -548,7 +549,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       setRequesting(true);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
       await api.updateTeam(commonData.team?.id!, { slackChannel, teamsIncomingWebhookUrl } as any);
-      window.location.href = `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
+      router.push(`/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`);
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
@@ -575,7 +576,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       setTextTeamModal('');
       setRequesting(false);
     }
-    window.location.href = `/settings/${commonData.organization?.sluglified_name}`;
+    router.push(`/settings/${commonData.organization?.sluglified_name}`);
   };
 
   const exportMembersInCsv = async () => {
@@ -646,16 +647,18 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                 <button
                   className="rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                   onClick={() => {
-                    window.location.href = `/settings/${commonData.organization?.sluglified_name}`;
+                    router.push(`/settings/${commonData.organization?.sluglified_name}`);
                   }}
                 >
                   Back to organization settings
                 </button>
               </div>
               <div className="">
-                <a href={commonData.organization?.link} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
-                  {commonData.organization?.link}
-                </a>
+                {commonData.organization?.link && (
+                  <Link href={commonData.organization?.link} className="text-xs font-semibold text-indigo-600 hover:text-indigo-700">
+                    {commonData.organization?.link}
+                  </Link>
+                )}
                 {commonData.organization?.location && <p className="text-sm text-gray-500 py-2">{commonData.organization?.location}</p>}
                 {Helper.isBrowser() && commonData.organization && <ReadMoreReact text={commonData.organization?.bio || ''} ideal={200} readMoreText={'Read more...'} />}
               </div>
@@ -678,7 +681,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                   value={null}
                   onChange={(resourcePermissions: ResourcePermissions) => {
                     if (resourcePermissions.id !== commonData.team?.id) {
-                      window.location.href = `/settings/${commonData.organization?.sluglified_name}/${resourcePermissions.name}`;
+                      router.push(`/settings/${commonData.organization?.sluglified_name}/${resourcePermissions.name}`);
                     }
                   }}
                 >
@@ -736,10 +739,10 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                     </div>
                   )}
                 </Listbox>
-                <a href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`} className="max-w-2xl text-sm text-blue-500 ml-5">
+                <Link href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}`} className="max-w-2xl text-sm text-blue-500 ml-5">
                   View channel
                   <LinkIcon className="inline-block w-4 h-4 ml-1" />
-                </a>
+                </Link>
               </div>
               {hasPermissionDeleteChannel && (
                 <button
@@ -1094,10 +1097,10 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                           <PureAvatar src={member.avatar_url} title={member.display_name} username={member?.username} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <a href={`/user/${member.username}`} className="focus:outline-none">
+                          <Link href={`/user/${member.username}`} className="focus:outline-none">
                             <p className="text-sm font-medium text-gray-900">{member.display_name}</p>
                             <p className="truncate text-sm text-gray-500">{labelRole}</p>
-                          </a>
+                          </Link>
                         </div>
                         {(isOrgAdmin || isTeamAdmin) && (
                           <div className="flex flex-row">
@@ -1221,10 +1224,10 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                               <PureAvatar src={userDto.avatar_url} title={userDto.display_name} username={userDto?.username} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
                             </div>
                             <div className="min-w-0 flex-1">
-                              <a href={`/user/${userDto.username}`} className="focus:outline-none">
+                              <Link href={`/user/${userDto.username}`} className="focus:outline-none">
                                 <p className="text-sm font-medium text-gray-900">{userDto.display_name}</p>
                                 <p className="truncate text-sm text-gray-500">{userDto.email}</p>
-                              </a>
+                              </Link>
                             </div>
                             <div className="flex flex-row">
                               <button
@@ -1310,7 +1313,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                     <button
                       disabled={requesting}
                       onClick={() => {
-                        window.location.href = `/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`;
+                        router.push(`/settings/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}?tab=${OrganizationSettingsTab.Notifications}`);
                       }}
                       type="button"
                       className="rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"

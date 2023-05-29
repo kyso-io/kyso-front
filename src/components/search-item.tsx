@@ -6,6 +6,7 @@ import type { FullTextSearchResult } from '@kyso-io/kyso-model';
 import { ElasticSearchIndex } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import moment from 'moment';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useMemo } from 'react';
 
@@ -58,7 +59,7 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
       <li className="relative bg-white py-5 px-4 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600">
         <div className="flex justify-between space-x-3">
           <div className="min-w-0 flex-1">
-            <a href={finalRedirectUrl} className="block focus:outline-none">
+            <Link href={finalRedirectUrl} className="block focus:outline-none">
               <span className="absolute inset-0" aria-hidden="true"></span>
               {fullTextSearchResult.type !== ElasticSearchIndex.Comment && (
                 <>
@@ -169,7 +170,7 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
                     {tag}
                   </span>
                 ))}
-            </a>
+            </Link>
           </div>
         </div>
         <div className="mt-2 mb-4">

@@ -2,6 +2,7 @@ import type { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { Menu, Transition } from '@headlessui/react';
 import { HomeIcon, PlusCircleIcon, SearchIcon, SelectorIcon, ViewListIcon } from '@heroicons/react/outline';
 import { Fragment, useEffect, useState } from 'react';
+import Link from 'next/link';
 import type { CommonData } from '../types/common-data';
 
 type INavigationSelectorProps = {
@@ -47,14 +48,14 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
   return (
     <div className="rounded-md flex items-center">
       {currentOrg && (
-        <a href={`${currentOrg!.href}`} className="hover:bg-gray-100 border-y border-l rounded-l p-2 p-x-4 flex items-center w-fit text-xs lg:text-sm text-left font-medium text-gray-700">
+        <Link href={`${currentOrg!.href}`} className="hover:bg-gray-100 border-y border-l rounded-l p-2 p-x-4 flex items-center w-fit text-xs lg:text-sm text-left font-medium text-gray-700">
           {selectorLabel === 'organization' ? (
             <HomeIcon className="shrink-0 h-5 w-5 text-gray-700 mr-2 group-hover:text-gray-500" aria-hidden="true" />
           ) : (
             <ViewListIcon className="shrink-0 h-5 w-5 text-gray-700 mr-2 group-hover:text-gray-500" aria-hidden="true" />
           )}
           {currentOrg?.name}
-        </a>
+        </Link>
       )}
       <Menu as="div" className="relative w-fit inline-block text-left">
         <Menu.Button
@@ -80,9 +81,9 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
                 <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
                   Organizations
                   {props.commonData.user !== null && (
-                    <a href="/create-organization" className={classNames('float-right text-gray-500 hover:bg-gray-100 hover:text-gray-900', 'text-sm rounded-md')}>
+                    <Link href="/create-organization" className={classNames('float-right text-gray-500 hover:bg-gray-100 hover:text-gray-900', 'text-sm rounded-md')}>
                       <PlusCircleIcon className="w-5 h-5 mr-1" />
-                    </a>
+                    </Link>
                   )}
                 </h3>
               )}
@@ -109,9 +110,9 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
                   sortedSelectorItems.map((item: BreadcrumbItem) => (
                     <Menu.Item key={item.href}>
                       {({ active }) => (
-                        <a href={item.href} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm', item.current ? 'font-bold' : 'font-normal')}>
+                        <Link href={item.href} className={classNames(active ? 'bg-gray-100 text-gray-900' : 'text-gray-700', 'block px-4 py-2 text-sm', item.current ? 'font-bold' : 'font-normal')}>
                           {item.name}
-                        </a>
+                        </Link>
                       )}
                     </Menu.Item>
                   ))}

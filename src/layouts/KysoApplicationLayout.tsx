@@ -18,6 +18,7 @@ import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTok
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
+import Terminal from '@/components/Terminal';
 import { usePublicSetting } from '../hooks/use-public-setting';
 
 type IUnpureKysoApplicationLayoutProps = {
@@ -251,6 +252,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
         {React.cloneElement(children, { commonData, reportData, setReportData, setUser, showToaster, hideToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified, isUserLogged, isCaptchaEnabled })}
         <ToasterNotification show={toasterVisible} setShow={setToasterVisible} icon={toasterIcon} message={toasterMessage} backgroundColor={TailwindColor.SLATE_50} />
         {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
+        <Terminal />
       </React.Fragment>
     </PureKysoApplicationLayout>
   );

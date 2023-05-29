@@ -83,7 +83,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
       if (file) {
         await api.updateOrganizationImage(organization!.id!, file);
       }
-      window.location.href = `/${organization.sluglified_name}`;
+      router.push(`/${organization.sluglified_name}`);
       setBusy(false);
     } catch (er: any) {
       const httpExceptionDto: HttpExceptionDto = er.response.data;

@@ -39,6 +39,7 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
+import { PureSpinner } from '@/components/PureSpinner';
 import { usePublicSetting } from '../../hooks/use-public-setting';
 
 const DAYS_ACTIVITY_FEED: number = 14;
@@ -49,6 +50,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   const router = useRouter();
   const globalPrivacyShowEmailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
   const { join, organizationName } = router.query;
+  const [requestingReports, setRequestingReports] = useState<boolean>(true);
   const [paginatedResponseDto, setPaginatedResponseDto] = useState<PaginatedResponseDto<ReportDTO> | null>(null);
   const [organizationInfo, setOrganizationInfo] = useState<OrganizationInfoDto | null>(null);
   const [paginationParams, setPaginationParams] = useState<PaginationParams>({
@@ -116,6 +118,11 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     return () => clearInterval(interval);
   }, [commonData.user]);
 
+  // Needed to refresh properly when a channel changes
+  useEffect(() => {
+    setRequestingReports(true);
+  }, [router]);
+
   useEffect(() => {
     if (!commonData.permissions || !commonData.permissions.organizations || !organizationName) {
       return;
@@ -125,7 +132,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
       // The user is...
       if (!commonData.token) {
         // Unauthorized, redirect to SignUp page
-        window.location.href = `/signup?invitation=/${organizationName}?join=${join as string}`;
+        router.push(`/signup?invitation=/${organizationName}?join=${join as string}`);
         return;
       }
       // Authorized
@@ -138,7 +145,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
         try {
           const api: Api = new Api(commonData.token);
           await api.joinUserToOrganization(organizationName as string, join as string);
-          window.location.href = `/${organizationName}`;
+          router.push(`/${organizationName}`);
         } catch (e: any) {
           const errorData: { statusCode: number; message: string; error: string } = e.response.data;
           Helper.logError('Unexpected error', errorData);
@@ -151,7 +158,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
 
     if (!HelperPermissions.belongsToOrganization(commonData, organizationName as string)) {
       if (commonData.token) {
-        window.location.href = '/';
+        router.push('/');
       } else {
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}`)}`);
       }
@@ -226,6 +233,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
 
   const getReports = async () => {
     try {
+      setRequestingReports(true);
       const api: Api = new Api(commonData.token);
       const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getOrganizationReports(
         commonData.organization!.sluglified_name,
@@ -233,8 +241,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
         paginationParams.limit,
         paginationParams.sort,
       );
-      checkReportAuthors(result);
       setPaginatedResponseDto(result.data);
+      checkReportAuthors(result);
+      setRequestingReports(false);
     } catch (e) {}
   };
 
@@ -547,26 +556,39 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
                 </div>
               </div>
             )}
-            <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
-              {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
-              {paginatedResponseDto?.results &&
-                paginatedResponseDto.results.length > 0 &&
-                paginatedResponseDto?.results.map((report: ReportDTO) => (
-                  <ReportBadge
-                    commonData={commonData}
-                    key={report.id}
-                    report={report}
-                    authors={report.authors ? report.authors : []}
-                    toggleUserStarReport={() => toggleUserStarReport(report)}
-                    toggleUserPinReport={() => toggleUserPinReport(report)}
-                    toggleGlobalPinReport={() => toggleGlobalPinReport(report)}
-                  />
-                ))}
-            </div>
-            {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
-              <div className="pt-10">
-                <Pagination page={paginatedResponseDto.currentPage} numPages={paginatedResponseDto.totalPages} onPageChange={(page: number) => setPaginationParams({ ...paginationParams, page })} />
+            {requestingReports && (
+              <div className="text-center">
+                <PureSpinner size={12} />
               </div>
+            )}
+            {!requestingReports && (
+              <>
+                <div className="grid lg:grid-cols-1 sm:grid-cols-1 xs:grid-cols-1 gap-4">
+                  {paginatedResponseDto?.results && paginatedResponseDto.results.length === 0 && <p>There are no reports</p>}
+                  {paginatedResponseDto?.results &&
+                    paginatedResponseDto.results.length > 0 &&
+                    paginatedResponseDto?.results.map((report: ReportDTO) => (
+                      <ReportBadge
+                        commonData={commonData}
+                        key={report.id}
+                        report={report}
+                        authors={report.authors ? report.authors : []}
+                        toggleUserStarReport={() => toggleUserStarReport(report)}
+                        toggleUserPinReport={() => toggleUserPinReport(report)}
+                        toggleGlobalPinReport={() => toggleGlobalPinReport(report)}
+                      />
+                    ))}
+                </div>
+                {paginatedResponseDto && paginatedResponseDto.totalPages > 1 && (
+                  <div className="pt-10">
+                    <Pagination
+                      page={paginatedResponseDto.currentPage}
+                      numPages={paginatedResponseDto.totalPages}
+                      onPageChange={(page: number) => setPaginationParams({ ...paginationParams, page })}
+                    />
+                  </div>
+                )}
+              </>
             )}
           </React.Fragment>
         )}

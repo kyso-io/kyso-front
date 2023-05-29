@@ -154,6 +154,11 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     }
   }, [commonData?.permissions?.organizations, commonData?.permissions?.teams, router.query?.organizationName, router.query?.teamName]);
 
+  // Needed to refresh properly when a channel changes
+  useEffect(() => {
+    setRequestingReports(true);
+  }, [router]);
+
   useEffect(() => {
     if (!commonData.team) {
       return;

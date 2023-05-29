@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable no-case-declarations */
+import Link from 'next/link';
 import { Menu, Transition } from '@headlessui/react';
 import { SearchIcon, SelectorIcon, XIcon } from '@heroicons/react/solid';
 import type { InlineCommentDto, ReportDTO, ResourcePermissions, UserDTO } from '@kyso-io/kyso-model';
@@ -11,6 +12,8 @@ import clsx from 'clsx';
 import moment from 'moment';
 import { Calendar } from 'primereact/calendar';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
+import { Tooltip } from 'primereact/tooltip';
+import { Helper } from '@/helpers/Helper';
 import Loader from '../components/Loader';
 import Pagination from '../components/Pagination';
 import PureAvatar from '../components/PureAvatar';
@@ -78,7 +81,6 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
   const users: UserDTO[] = [];
   let organization: ResourcePermissions | null = null;
   let team: ResourcePermissions | null = null;
-  const documentUrl: string = inlineCommentDto.file_path_scs.split('/').slice(6).join('/');
 
   if (report) {
     for (const userId of report.author_ids) {
@@ -105,14 +107,12 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
     participants[reply.user_id] = true;
   }
   const numParticipants: number = Object.keys(participants).length;
-  const queryParams: string = `?taskId=${inlineCommentDto.id}${inlineCommentDto.cell_id ? `&cell=${inlineCommentDto.cell_id.trim()}` : ''}${
-    inlineCommentDto.orphan ? `&version=${inlineCommentDto.report_version}` : ''
-  }${inlineCommentDto.orphan ? `&orphan=true` : ''}`;
+
   return (
-    <a
+    <Link
       key={inlineCommentDto.id}
       className="flex flex-col py-4 border-b"
-      href={`/${report?.organization_sluglified_name}/${report?.team_sluglified_name}/${report?.name}/${documentUrl}${queryParams}`}
+      href={Helper.buildTaskDetailPage(inlineCommentDto, report!)}
       onMouseEnter={() => {
         setHoveredInlineComment(true);
       }}
@@ -186,7 +186,7 @@ const InlineCommentComponent = ({ commonData, inlineCommentDto, normalizedRespon
           <PureAvatarGroup data={users.slice(0, MAX_USERS_TO_SHOW)} />
         </div>
       </div>
-    </a>
+    </Link>
   );
 };
 
@@ -257,7 +257,7 @@ const CustomMenuItems = ({ options, openedQuery, values, setValues, showSearchIn
           </div>
         </div>
       )}
-      <div className="mt-2" style={{ maxHeight: '230px', overflowY: 'scroll' }}>
+      <div className="mt-2">
         {fileteredOptions.length === 0 && (
           <div className="flex flex-col items-center justify-center py-2">
             <span className="text-sm text-gray-500">No results found</span>
@@ -271,27 +271,31 @@ const CustomMenuItems = ({ options, openedQuery, values, setValues, showSearchIn
                 disabled = true;
               }
               return (
-                <button
-                  onClick={(e) => {
-                    if (disabled) {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      return;
-                    }
-                    setTimeout(() => {
-                      const v: any[] = [...values];
-                      v.push(option);
-                      setValues(v);
-                    }, 200);
-                  }}
-                  className={clsx(
-                    'group flex w-full items-center rounded-md p-2 text-sm text-left',
-                    active && !disabled ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                    disabled ? 'cursor-not-allowed bg-gray-100' : 'cursor-pointer',
-                  )}
-                >
-                  {option.label}
-                </button>
+                <>
+                  {disabled && <Tooltip target={`#${option.label.replaceAll(' ', '-')}`} autoHide position="right" content="Please select an organization to be able to filter by channel" />}
+                  <button
+                    id={option.label.replaceAll(' ', '-')}
+                    onClick={(e) => {
+                      if (disabled) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                      }
+                      setTimeout(() => {
+                        const v: any[] = [...values];
+                        v.push(option);
+                        setValues(v);
+                      }, 200);
+                    }}
+                    className={clsx(
+                      'group flex w-full items-center rounded-md p-2 text-sm text-left',
+                      active && !disabled ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
+                      disabled ? 'cursor-not-allowed bg-gray-50 text-gray-300' : 'cursor-pointer',
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                </>
               );
             }}
           </Menu.Item>
@@ -339,6 +343,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
     }
     return closedNormalizedResponse.data;
   }, [closedNormalizedResponse]);
+
   const options: { label: string; value: string; parent?: string; isFixed?: boolean }[] = useMemo(() => {
     if (values.length === 0) {
       return OPTIONS;
@@ -448,6 +453,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
     if (!commonData.token) {
       return;
     }
+
     getUsersSameOrganizations();
   }, [commonData.token]);
 
@@ -651,7 +657,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
 
   return (
     <div className="relative mx-auto mt-20 w-full max-w-container px-40">
-      <h1 className="mb-10 text-3xl font-extrabold tracking-tight text-slate-900">My Tasks</h1>
+      <h1 className="mb-10 text-3xl font-extrabold tracking-tight text-slate-900">Tasks</h1>
       {/* SEARCH BAR */}
       <div className="flex flex-row mb-6">
         <div className="rounded-md flex items-center">
@@ -925,7 +931,8 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
               <span className="text-xs font-medium text-gray-500 px-2.5 py-0.5 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 cursor-pointer">x</span>
             </span>
           )}
-          {showMainSearchInput && <input type="text" placeholder="Filter results..." className="w-full bg-transparent outline-none cursor-text border-0 p-0 text-sm font-light" />}
+
+          {showMainSearchInput && <input type="text" placeholder={!values ? 'Filter results...' : ''} className="w-full bg-transparent outline-none cursor-text border-0 p-0 text-sm font-light" />}
         </div>
         <select
           className="block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 sm:text-sm sm:leading-6"
@@ -945,6 +952,11 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
           <option value="asc">First created</option>
         </select>
       </div>
+      {values.length === 0 && (
+        <div className="flex flex-row mb-6">
+          <small>No filter selected, showing tasks related to you</small>
+        </div>
+      )}
       {/* TABS */}
       <div className="hidden sm:block" ref={tabsRef}>
         <div className="border-b border-gray-200">
