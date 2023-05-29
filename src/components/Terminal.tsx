@@ -8,13 +8,17 @@ const Terminal = () => {
   const [showTerminal, setShowTerminal] = useState<boolean>(false);
   const [history, setHistory] = useState<string[]>([]);
   const refComments = useRef<any>(null);
-  const pressedKeys: string[] = [];
+  let pressedKeys: string[] = [];
 
   useEffect(() => {
     const keyDownHandler = (e: KeyboardEvent) => {
       pressedKeys.push(e.key);
 
-      if (pressedKeys.filter((x) => x === 'Shift').length >= 3) {
+      setTimeout(() => {
+        pressedKeys = [];
+      }, 500);
+
+      if (pressedKeys.filter((x) => x === 'Control').length >= 3) {
         if (showTerminal) {
           setShowTerminal(false);
         } else {
@@ -35,6 +39,7 @@ const Terminal = () => {
   }, []);
   return (
     <>
+      {/* Change to false to disable it */}
       {true && (
         <>
           <Transition
@@ -50,8 +55,8 @@ const Terminal = () => {
             <div className="terminal-window">
               <header>
                 <div className="button green"></div>
-                <div className="button yellow"></div>
-                <div className="button red"></div>
+                <div className="button yellow" onClick={() => setShowTerminal(false)}></div>
+                <div className="button red" onClick={() => setShowTerminal(false)}></div>
 
                 <span
                   style={{

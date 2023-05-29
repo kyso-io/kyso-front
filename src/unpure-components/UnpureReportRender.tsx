@@ -18,6 +18,7 @@ import { classNames } from 'primereact/utils';
 import React, { useEffect, useState } from 'react';
 import { ToasterIcons } from '@/enums/toaster-icons';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
 import eventBus from '../helpers/event-bus';
 import type { FileToRender } from '../types/file-to-render';
@@ -59,6 +60,8 @@ const UnpureReportRender = ({
 }: Props) => {
   // const [isShownInput, setIsShownInput] = useState(false);
   // const [isShownOutput, setIsShownOutput] = useState(false);
+  const router = useRouter();
+  const { taskId } = router.query;
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
@@ -66,7 +69,18 @@ const UnpureReportRender = ({
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const response: NormalizedResponseDTO<InlineCommentDto[]> = await api.getInlineComments(report.id as string, fileToRender.id);
-      setInlineComments(response.data.filter((inlineComment: InlineCommentDto) => inlineComment.current_status !== InlineCommentStatusEnum.CLOSED));
+
+      setInlineComments(
+        response.data.filter((inlineComment: InlineCommentDto) => {
+          if (taskId) {
+            // We want to show all the inline comments that are not CLOSED, but if we receive
+            // a taskId from the url, that means the user wants to see that specific comment
+            // and we must return it
+            return inlineComment.current_status !== InlineCommentStatusEnum.CLOSED || inlineComment.id === taskId;
+          }
+          return inlineComment.current_status !== InlineCommentStatusEnum.CLOSED;
+        }),
+      );
     } catch (e) {}
   };
 
