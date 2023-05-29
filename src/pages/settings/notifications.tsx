@@ -123,6 +123,49 @@ const options: { title: string; description: string; key: string; disabled_for_c
     key: 'report_comment_removed',
     disabled_for_channel: false,
   },
+  // INLINE COMMENTS
+  {
+    title: 'New task in report',
+    description: 'Receive a notification every time a new task is created.',
+    key: 'new_task',
+    disabled_for_channel: false,
+  },
+  {
+    key: 'new_task_reply',
+    title: 'New task reply in report',
+    description: 'Receive a notification every time a task is replied.',
+    disabled_for_channel: false,
+  },
+  {
+    title: 'Task status changed in report',
+    key: 'task_status_changed',
+    description: 'Receive a notification every time a task status is changed.',
+    disabled_for_channel: false,
+  },
+  {
+    title: 'Task updated in report',
+    key: 'task_updated',
+    description: 'Receive a notification every time a task is updated.',
+    disabled_for_channel: false,
+  },
+  {
+    title: 'Task reply updated in report',
+    key: 'task_reply_updated',
+    description: 'Receive a notification every time a task reply is updated.',
+    disabled_for_channel: false,
+  },
+  {
+    title: 'Task removed in report',
+    key: 'task_removed',
+    description: 'Receive a notification every time a task is removed.',
+    disabled_for_channel: false,
+  },
+  {
+    key: 'task_reply_removed',
+    title: 'Task reply removed in report',
+    description: 'Receive a notification every time a task reply is removed.',
+    disabled_for_channel: false,
+  },
 ];
 
 const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutProps) => {
