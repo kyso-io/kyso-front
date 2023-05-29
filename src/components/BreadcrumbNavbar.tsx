@@ -57,7 +57,7 @@ const BreadcrumbNavbar = (props: Props) => {
       data.push(...crumbs);
     }
     return data;
-  }, [commonData.organization, commonData.team, report, router.query?.path, router.query?.version]);
+  }, [commonData.organization, commonData.team, report, router.query?.path, router.query?.version, router]);
 
   const breadcrumbItems = breadcrumb.length;
   let hideBreadcrumbClassName = '';
