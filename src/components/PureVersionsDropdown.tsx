@@ -4,7 +4,7 @@ import type { Version } from '@/hooks/use-versions';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Popover } from '@headlessui/react';
-import { ViewBoardsIcon } from '@heroicons/react/outline';
+import { FlagIcon } from '@heroicons/react/outline';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { useMemo } from 'react';
@@ -32,7 +32,7 @@ const PureVersionsDropdown = (props: Props) => {
     <>
       <Popover as="div" className="relative inline-block">
         <Popover.Button className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm text-gray-700 flex flex-row items-center focus:ring-0 focus:outline-none">
-          <ViewBoardsIcon className="w-5 h-5 mr-2" />
+          <FlagIcon className="w-5 h-5 mr-2" />
           Version: #{currentVersion}
         </Popover.Button>
         <Popover.Panel className="min-w-[400px] max-h-[320px] overflow-auto origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none z-50 py-2">

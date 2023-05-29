@@ -31,6 +31,7 @@ import Board from 'react-trello';
 import ReadMoreReact from 'read-more-react';
 import { v4 as uuidv4 } from 'uuid';
 import Link from 'next/link';
+import { ViewBoardsIcon, ViewListIcon } from '@heroicons/react/outline';
 import Pagination from '../../../../../components/Pagination';
 import PureAvatar from '../../../../../components/PureAvatar';
 import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
@@ -631,16 +632,18 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
               <div className="py-4 px-8 border-y">
                 <div className="flex flex-row content-center my-3">
                   <h1 className="text-3xl font-bold text-gray-900 my-4 grow">{title}</h1>
-                  <div className="space-y-4 sm:flex sm:items-center sm:space-x-10 sm:space-y-0">
+                  <div className="">
                     {viewTypes.map((element: { name: string; value: ViewType }) => (
-                      <div key={element.value} className="flex items-center">
-                        <input
-                          onChange={() => setViewType(element.value)}
-                          type="radio"
-                          checked={element.value === viewType}
-                          className="h-4 w-4 border-gray-300 text-indigo-600 focus:ring-indigo-600"
-                        />
-                        <label className="ml-3 block text-sm font-medium leading-6 text-gray-900">{element.name}</label>
+                      <div key={element.value} className={clsx('relative inline-block', element.value === viewType ? 'bg-slate-50' : '')}>
+                        <button
+                          type="button"
+                          className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm text-gray-700 flex flex-row items-center focus:ring-0 focus:outline-none"
+                          onClick={() => setViewType(element.value)}
+                        >
+                          {element.value === ViewType.List && <ViewListIcon className="w-5 h-5 mr-2" />}
+                          {element.value === ViewType.Kanban && <ViewBoardsIcon className="w-5 h-5 mr-2" />}
+                          {element.name}
+                        </button>
                       </div>
                     ))}
                   </div>
