@@ -119,6 +119,11 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
   }, [hcaptchEnabledStr]);
 
   useEffect(() => {
+    // Early set report data to null to re-render as soon as possible
+    if (!router.query.reportName) {
+      setReportData(null);
+    }
+
     if (!commonData.permissions) {
       return;
     }
@@ -173,7 +178,10 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
           setReportData(data);
         };
         getReportData();
-      }
+      } /** else {
+        Not needed here as we already set it up at the beginning 
+        setReportData(null)
+      }* */
     };
     getData();
   }, [commonData.permissions, router?.isReady, router.query?.organizationName, router.query?.teamName, router.query?.reportName, router.query?.version]);
