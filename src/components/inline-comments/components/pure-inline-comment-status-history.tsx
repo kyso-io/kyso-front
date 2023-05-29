@@ -21,7 +21,7 @@ const PureInlineCommentStatusHistory = (props: IPureInlineComment) => {
       <div className="flex flex-col content-center my-3">
         <div className="flow-root">
           <ul role="list" className="-mb-8">
-            {inlineComment.status_history.reverse().map((inlineStatusHistory: InlineCommentStatusHistoryDto, index: number) => {
+            {inlineComment.status_history.map((inlineStatusHistory: InlineCommentStatusHistoryDto, index: number) => {
               const historyUserIds: UserDTO[] = historyUsers.filter((x) => x.id === inlineStatusHistory.user_id);
               let user: UserDTO | null = null;
               if (historyUserIds.length > 0) {
@@ -34,7 +34,7 @@ const PureInlineCommentStatusHistory = (props: IPureInlineComment) => {
                 return null;
               }
 
-              if (index === 0) {
+              if (inlineStatusHistory.from_status === null) {
                 return (
                   <React.Fragment key={0}>
                     <li>
@@ -66,7 +66,6 @@ const PureInlineCommentStatusHistory = (props: IPureInlineComment) => {
                     </li>
                     <li>
                       <div className="relative pb-8">
-                        {inlineComment.status_history.length >= 2 && <span className="absolute left-5 top-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true" />}
                         <div className="relative flex items-start space-x-3">
                           <div className="relative">
                             <PureAvatar src={user.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H10} textSize={TailwindFontSizeEnum.XS} />

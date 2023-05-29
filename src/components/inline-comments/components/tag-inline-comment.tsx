@@ -20,7 +20,7 @@ const TagInlineComment = ({ status }: Props) => {
 
   try {
     if (!kysoCommentStatesValues || !status) {
-      return null;
+      return <></>;
     }
 
     return <span className={kysoCommentStatesValues.classes[status] ?? ''}>{kysoCommentStatesValues.labels[status] ?? status}</span>;
