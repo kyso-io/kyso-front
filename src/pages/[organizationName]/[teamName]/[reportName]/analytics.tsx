@@ -20,20 +20,8 @@ import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type {
-  AnalyticsSource,
-  DeviceDetector,
-  GithubFileHash,
-  KysoSetting,
-  NormalizedResponseDTO,
-  OrganizationMember,
-  ReportAnalytics,
-  ReportDTO,
-  TeamMember,
-  TeamMembershipOriginEnum,
-  UserDTO,
-} from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, ReportPermissionsEnum } from '@kyso-io/kyso-model';
+import type { AnalyticsSource, DeviceDetector, GithubFileHash, KysoSetting, OrganizationMember, ReportDTO, TeamMember, TeamMembershipOriginEnum, UserDTO } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, NormalizedResponseDTO, ReportAnalytics, ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
 import { ArcElement, Chart as ChartJS, Colors, Legend, Tooltip } from 'chart.js';
 import clsx from 'clsx';
@@ -311,7 +299,11 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
         const api: Api = new Api(commonData.token);
         const r: NormalizedResponseDTO<ReportAnalytics> = await api.getReportAnalytics(reportData.report!.id!);
         setResult(r);
-      } catch (e) {}
+      } catch (e) {
+        const ra: ReportAnalytics = new ReportAnalytics(reportData.report!.id!);
+        const r: NormalizedResponseDTO<ReportAnalytics> = new NormalizedResponseDTO<ReportAnalytics>(ra);
+        setResult(r);
+      }
       setRequesting(false);
     };
     getReportAnalytics();
