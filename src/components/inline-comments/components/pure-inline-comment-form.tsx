@@ -87,7 +87,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
 
   const message: string = useMemo(() => {
     if (comment) {
-      if (!comment.parent_comment_id) {
+      if (comment.parent_comment_id) {
         return 'Update your reply';
       }
       return 'Update your task';
