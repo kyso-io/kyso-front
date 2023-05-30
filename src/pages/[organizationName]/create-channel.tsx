@@ -6,16 +6,15 @@ import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '@/helpers/Helper';
 import { checkJwt } from '@/helpers/check-jwt';
 import { HelperPermissions } from '@/helpers/check-permissions';
-import classNames from '@/helpers/class-names';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { ArrowRightIcon, ExclamationCircleIcon, LockClosedIcon, LockOpenIcon, ShieldCheckIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
 import { AllowDownload, KysoSettingsEnum, Team, TeamPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import { usePublicSetting } from '../../hooks/use-public-setting';
 
 const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
@@ -279,15 +278,19 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                 <div className="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
                   <div className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"></div>
                   <div className="mt-1 sm:mt-0 sm:col-span-2">
-                    <div className="max-w-lg flex w-full justify-between items-center">
+                    <div className="max-w-lg flex w-full justify-end items-center">
                       <div className="text-red-500 text-sm"></div>
                       <button
                         type="button"
+                        onClick={() => router.back()}
+                        className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
                         onClick={createChannel}
-                        className={classNames(
-                          'focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900',
-                          'ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary ',
-                        )}
+                        className="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-900 ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white k-bg-primary"
                       >
                         {!isBusy && (
                           <React.Fragment>
