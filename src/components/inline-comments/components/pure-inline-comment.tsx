@@ -251,7 +251,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                             }}
                           >
                             <TagInlineComment status={InlineCommentStatusEnum.OPEN} />
-                            <p className="mt-1 text-gray-600">This comment is open for resolution.</p>
+                            <p className="mt-1 text-gray-600">This task is open for resolution.</p>
                           </div>
                         )}
                         {comment.current_status !== InlineCommentStatusEnum.TO_DO && (
