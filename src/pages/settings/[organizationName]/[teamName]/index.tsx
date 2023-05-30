@@ -39,10 +39,10 @@ import {
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import debounce from 'lodash.debounce';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import Link from 'next/link';
 import Pagination from '../../../../components/Pagination';
 import { usePublicSetting } from '../../../../hooks/use-public-setting';
 
@@ -377,9 +377,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, selectedMember!.id!, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
-        showToaster('User invited successfully.', ToasterIcons.SUCCESS);
+        showToaster('User added to the organization successfully', ToasterIcons.SUCCESS);
       } catch (e) {
-        showToaster("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
+        showToaster("We're sorry! Something happened adding the user to the organization. Please try again.", ToasterIcons.ERROR);
         Helper.logError('Unexpected error', e);
       }
       if (teamRole) {
@@ -388,9 +388,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, teamRole);
           const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
           await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
-          showToaster('User invited successfully.', ToasterIcons.SUCCESS);
+          showToaster('User added to the channel successfully', ToasterIcons.SUCCESS);
         } catch (e) {
-          showToaster("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
+          showToaster("We're sorry! Something happened adding the user to the channel. Please try again.", ToasterIcons.ERROR);
           Helper.logError('Unexpected error', e);
         }
       }
@@ -401,9 +401,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, organizationRole);
           const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
           await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
-          showToaster('User invited successfully.', ToasterIcons.SUCCESS);
+          showToaster('The role at the organization was changed successfully', ToasterIcons.SUCCESS);
         } catch (e) {
-          showToaster("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
+          showToaster("We're sorry! Something happened adding the user to the organization. Please try again.", ToasterIcons.ERROR);
           Helper.logError('Unexpected error', e);
         }
       }
@@ -413,9 +413,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
           const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, teamRole);
           const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
           await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
-          showToaster('User invited successfully.', ToasterIcons.SUCCESS);
+          showToaster('The role at the channel was changed successfully', ToasterIcons.SUCCESS);
         } catch (e) {
-          showToaster("We're sorry! Something happened inviting the user. Please try again.", ToasterIcons.ERROR);
+          showToaster("We're sorry! Something happened adding the user to the channel. Please try again.", ToasterIcons.ERROR);
           Helper.logError('Unexpected error', e);
         }
       }

@@ -41,10 +41,10 @@ import clsx from 'clsx';
 import { Tooltip } from 'flowbite-react';
 import debounce from 'lodash.debounce';
 import moment from 'moment';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import Link from 'next/link';
 import { usePublicSetting } from '../../../hooks/use-public-setting';
 
 const OrganizationRoleToLabel: { [role: string]: string } = {
@@ -522,7 +522,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         const api: Api = new Api(commonData.token, commonData!.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, selectedMember!.id!, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
-        showToaster('User invited successfully.', ToasterIcons.SUCCESS);
+        showToaster('User added to the organization successfully', ToasterIcons.SUCCESS);
       } catch (e) {
         showToaster('We are sorry! Something happened inviting the user. Please try again.', ToasterIcons.ERROR);
         Helper.logError('Unexpected error', e);
@@ -533,7 +533,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         const userRoleDTO: UserRoleDTO = new UserRoleDTO(selectedMember!.id!, organizationRole);
         const updateOrganizationMembersDTO: UpdateOrganizationMembersDTO = new UpdateOrganizationMembersDTO([userRoleDTO]);
         await api.updateOrganizationMemberRoles(commonData.organization!.id!, updateOrganizationMembersDTO);
-        showToaster('User invited successfully.', ToasterIcons.SUCCESS);
+        showToaster('The role at the organization was changed successfully', ToasterIcons.SUCCESS);
       } catch (e) {
         showToaster('We are sorry! Something happened inviting the user. Please try again.', ToasterIcons.ERROR);
         Helper.logError('Unexpected error', e);
