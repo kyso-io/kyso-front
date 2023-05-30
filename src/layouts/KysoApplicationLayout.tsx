@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import CaptchaModal from '@/components/CaptchaModal';
 import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
+import Terminal from '@/components/Terminal';
 import ToasterNotification from '@/components/ToasterNotification';
 import { ToasterIcons } from '@/enums/toaster-icons';
 import { checkJwt } from '@/helpers/check-jwt';
@@ -18,7 +19,6 @@ import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTok
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
-import Terminal from '@/components/Terminal';
 import { usePublicSetting } from '../hooks/use-public-setting';
 
 type IUnpureKysoApplicationLayoutProps = {

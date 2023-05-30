@@ -918,7 +918,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                         onClick={submit}
                         type="submit"
                         className={clsx(
-                          'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                          'ml-3 inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 k-bg-primary',
                           requesting && 'opacity-50 cursor-not-allowed',
                         )}
                       >
@@ -1702,7 +1702,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                       onClick={submitNotifications}
                       type="submit"
                       className={clsx(
-                        'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                        'ml-3 inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 k-bg-primary',
                         requesting || !notificationsChanged ? 'opacity-50 cursor-not-allowed' : '',
                       )}
                     >

@@ -91,7 +91,7 @@ const CaptchaModal = ({ user, open, onClose, redirectUrl }: Props) => {
                   <button
                     type="button"
                     className={clsx(
-                      'inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:col-start-2 sm:text-sm',
+                      'inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:col-start-2 sm:text-sm k-bg-primary',
                       !captchaToken || requesting ? 'cursor-not-allowed opacity-50' : '',
                     )}
                     onClick={onSubmit}
