@@ -53,7 +53,7 @@ const Index = ({ commonData, showToaster }: IKysoApplicationLayoutProps) => {
   }, [userIsLogged]);
 
   useEffect(() => {
-    if (!commonData.user) {
+    if (!commonData.user || !kysoSettingValues || kysoSettingValues.length < 2) {
       return;
     }
     const redirectUrl: string | null = sessionStorage.getItem('redirectUrl') || '/';
@@ -61,7 +61,7 @@ const Index = ({ commonData, showToaster }: IKysoApplicationLayoutProps) => {
       setTimeout(() => router.replace(redirectUrl), 500);
       return;
     }
-    const captchaEnabled: boolean = kysoSettingValues[0] === null || kysoSettingValues[0].value === 'true';
+    const captchaEnabled: boolean = kysoSettingValues[0] === null || kysoSettingValues[0] === 'true';
     if (!captchaEnabled) {
       if (commonData.user?.show_onboarding) {
         router.push('/overview');
