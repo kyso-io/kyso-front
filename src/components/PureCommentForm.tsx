@@ -42,6 +42,8 @@ const parseMentions = (str: string) => {
   return tokens;
 };
 
+const MIN_HEIGHT_TEXTAREA = 65;
+
 const PureCommentForm = (props: IPureCommentForm) => {
   const { parentComment, comment, submitComment, user, report, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true, userSelectorHook } = props;
   const mentionsRef = useRef<any>(null);
@@ -103,6 +105,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
 
     setIsLoading(false);
     setValue('');
+    mentionsRef.current.getElement().children[0].style.height = `${MIN_HEIGHT_TEXTAREA}px`;
     onSubmitted();
   };
 
@@ -157,7 +160,12 @@ const PureCommentForm = (props: IPureCommentForm) => {
             onSearch={onSearch}
             name="input"
             value={value}
-            onChange={(e) => setValue((e.target as HTMLInputElement).value)}
+            onChange={(e) => {
+              const text: string = (e.target as HTMLInputElement).value || '';
+              const newHeight: number = text ? Math.max((e.target as any).scrollHeight, MIN_HEIGHT_TEXTAREA) : MIN_HEIGHT_TEXTAREA;
+              (e.target as any).style.height = `${newHeight}px`;
+              setValue(text);
+            }}
             field="nameSlug"
             placeholder={message}
             itemTemplate={itemTemplate}
@@ -183,7 +191,10 @@ const PureCommentForm = (props: IPureCommentForm) => {
             <button
               type="button"
               className="inline-flex items-center px-2 py-1 mr-2 text-sm font-small rounded-md shadow-sm text-gray-500 focus:outline-none focus:ring-0 bg-white hover:bg-gray-100 border border-gray-500"
-              onClick={onCancel}
+              onClick={() => {
+                mentionsRef.current.getElement().children[0].style.height = `${MIN_HEIGHT_TEXTAREA}px`;
+                onCancel();
+              }}
             >
               Cancel
             </button>
@@ -195,6 +206,7 @@ const PureCommentForm = (props: IPureCommentForm) => {
               onClick={(e) => {
                 e.preventDefault();
                 setValue('');
+                mentionsRef.current.getElement().children[0].style.height = `${MIN_HEIGHT_TEXTAREA}px`;
               }}
               className={classNames(
                 'inline-flex items-center px-2 py-1 mr-2 text-sm font-small rounded-md shadow-sm text-gray-500 focus:outline-none focus:ring-0 bg-white hover:bg-gray-100 border border-gray-500',
