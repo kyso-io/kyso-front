@@ -35,10 +35,10 @@ import FormData from 'form-data';
 import JSZip from 'jszip';
 import debounce from 'lodash.debounce';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { ChangeEvent } from 'react';
 import { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
 import type { HttpExceptionDto } from '../../../interfaces/http-exception.dto';
 
 const SimpleMdeReact = dynamic(() => import('react-simplemde-editor'), { ssr: false });
@@ -465,7 +465,7 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
   const [selectedFileValue, setSelectedFileValue] = useState('initial value');
   const handleEditorChange = useCallback((fileId: string, value: string) => {
     setSelectedFileValue(value);
-    setSessionStorageItem(fileId, `data:text/plain;base64,${btoa(value)}`);
+    setSessionStorageItem(fileId, `data:text/plain;base64,${btoa(unescape(encodeURIComponent(value)))}`);
     setHasAnythingCached(true);
     setDraftStatus('saved');
   }, []);
