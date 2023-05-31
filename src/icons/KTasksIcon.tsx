@@ -9,7 +9,7 @@ const KTasksIcon = ({ style, className }: IKTasksIcon) => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="55" height="55" viewBox="0 0 55 55" style={style} className={className}>
       <g transform="translate(-99 -445)">
-        <g transform="translate(99 445)" fill="none" stroke-miterlimit="10">
+        <g transform="translate(99 445)" fill="none" strokeMiterlimit="10">
           <path d="M48.889,0H6.111A6.109,6.109,0,0,0,0,6.111V48.889A6.109,6.109,0,0,0,6.111,55H48.889A6.109,6.109,0,0,0,55,48.889V6.111A6.109,6.109,0,0,0,48.889,0Z" stroke="none" />
           <path
             d="M 6.111114501953125 3 C 4.395641326904297 3 3 4.395641326904297 3 6.111114501953125 L 3 48.88888549804688 C 3 50.6043586730957 4.395641326904297 52 6.111114501953125 52 L 48.88888549804688 52 C 50.6043586730957 52 52 50.6043586730957 52 48.88888549804688 L 52 6.111114501953125 C 52 4.395641326904297 50.6043586730957 3 48.88888549804688 3 L 6.111114501953125 3 M 6.111114501953125 0 L 48.88888549804688 0 C 52.28055572509766 0 55 2.75 55 6.111114501953125 L 55 48.88888549804688 C 55 52.25 52.28055572509766 55 48.88888549804688 55 L 6.111114501953125 55 C 2.719444274902344 55 0 52.25 0 48.88888549804688 L 0 6.111114501953125 C 0 2.75 2.719444274902344 0 6.111114501953125 0 Z"
@@ -17,7 +17,7 @@ const KTasksIcon = ({ style, className }: IKTasksIcon) => {
             fill="currentColor"
           />
         </g>
-        <g transform="translate(107 452)" fill="currentColor" stroke-linejoin="round" stroke-miterlimit="10">
+        <g transform="translate(107 452)" fill="currentColor" strokeLinejoin="round" strokeMiterlimit="10">
           <path
             d="M 4.642859935760498 10.02926731109619 L 4.466080188751221 9.852497100830078 L -0.1767800003290176 5.20963716506958 L -0.353549987077713 5.032857418060303 L -0.1767800003290176 4.856077194213867 L 1.13250994682312 3.546787261962891 L 1.309039950370789 3.370257139205933 L 1.485820055007935 3.546547174453735 L 4.642608642578125 6.6945481300354 L 11.51393032073975 -0.1767827570438385 L 11.69134044647217 -0.3541827499866486 L 11.86810970306396 -0.1761527508497238 L 13.17739963531494 1.142417192459106 L 13.35293006896973 1.31918728351593 L 13.17677974700928 1.495347261428833 L 4.819640159606934 9.852497100830078 L 4.642859935760498 10.02926731109619 Z"
             stroke="none"
@@ -28,11 +28,11 @@ const KTasksIcon = ({ style, className }: IKTasksIcon) => {
             fill="currentColor"
           />
         </g>
-        <g transform="translate(125 456)" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.7">
+        <g transform="translate(125 456)" fill="currentColor" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.7">
           <rect width="22" height="2" stroke="none" />
           <rect x="-0.35" y="-0.35" width="22.7" height="2.7" fill="none" />
         </g>
-        <g transform="translate(107 468)" fill="currentColor" stroke-linejoin="round" stroke-miterlimit="10">
+        <g transform="translate(107 468)" fill="currentColor" strokeLinejoin="round" strokeMiterlimit="10">
           <path
             d="M 4.642859935760498 10.02926731109619 L 4.466080188751221 9.852497100830078 L -0.1767800003290176 5.20963716506958 L -0.353549987077713 5.032857418060303 L -0.1767800003290176 4.856077194213867 L 1.13250994682312 3.546787261962891 L 1.309039950370789 3.370257139205933 L 1.485820055007935 3.546547174453735 L 4.642608642578125 6.6945481300354 L 11.51393032073975 -0.1767827570438385 L 11.69134044647217 -0.3541827499866486 L 11.86810970306396 -0.1761527508497238 L 13.17739963531494 1.142417192459106 L 13.35293006896973 1.31918728351593 L 13.17677974700928 1.495347261428833 L 4.819640159606934 9.852497100830078 L 4.642859935760498 10.02926731109619 Z"
             stroke="none"
@@ -43,11 +43,11 @@ const KTasksIcon = ({ style, className }: IKTasksIcon) => {
             fill="currentColor"
           />
         </g>
-        <g transform="translate(125 471)" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.7">
+        <g transform="translate(125 471)" fill="currentColor" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.7">
           <rect width="22" height="2" stroke="none" />
           <rect x="-0.35" y="-0.35" width="22.7" height="2.7" fill="none" />
         </g>
-        <g transform="translate(107 484)" fill="currentColor" stroke-linejoin="round" stroke-miterlimit="10">
+        <g transform="translate(107 484)" fill="currentColor" strokeLinejoin="round" strokeMiterlimit="10">
           <path
             d="M 4.642859935760498 10.02926731109619 L 4.466080188751221 9.852497100830078 L -0.1767800003290176 5.20963716506958 L -0.353549987077713 5.032857418060303 L -0.1767800003290176 4.856077194213867 L 1.13250994682312 3.546787261962891 L 1.309039950370789 3.370257139205933 L 1.485820055007935 3.546547174453735 L 4.642608642578125 6.6945481300354 L 11.51393032073975 -0.1767827570438385 L 11.69134044647217 -0.3541827499866486 L 11.86810970306396 -0.1761527508497238 L 13.17739963531494 1.142417192459106 L 13.35293006896973 1.31918728351593 L 13.17677974700928 1.495347261428833 L 4.819640159606934 9.852497100830078 L 4.642859935760498 10.02926731109619 Z"
             stroke="none"
@@ -58,7 +58,7 @@ const KTasksIcon = ({ style, className }: IKTasksIcon) => {
             fill="currentColor"
           />
         </g>
-        <g transform="translate(125 487)" fill="currentColor" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="0.7">
+        <g transform="translate(125 487)" fill="currentColor" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="0.7">
           <rect width="22" height="2" stroke="none" />
           <rect x="-0.35" y="-0.35" width="22.7" height="2.7" fill="none" />
         </g>

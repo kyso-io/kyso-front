@@ -309,8 +309,8 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                         title="Close dialog"
                       >
                         <span className="sr-only">Close</span>
-                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-                          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+                        <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
                       </button>
                     </div>
