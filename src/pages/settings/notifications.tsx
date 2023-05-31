@@ -9,8 +9,8 @@ import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayou
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Switch } from '@headlessui/react';
 import { InformationCircleIcon } from '@heroicons/react/solid';
-import type { NormalizedResponseDTO, ResourcePermissions, UserNotificationsSettings } from '@kyso-io/kyso-model';
-import { NotificationsSettings, UpdateUserNotificationsSettings, UserNotificationsSettingsScope } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, ResourcePermissions } from '@kyso-io/kyso-model';
+import { UserNotificationsSettings, NotificationsSettings, UpdateUserNotificationsSettings, UserNotificationsSettingsScope } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
@@ -337,11 +337,12 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
     setNotificationsSettings(finalPermissions);
   }, [userNotificationsSettings, selectedTab, organizationId, teamId]);
 
-  const onUpdateUserNotificationsSettings = async (nss: NotificationsSettings) => {
+  const onUpdateUserNotificationsSettings = async (notificationSettings: NotificationsSettings) => {
     const api: Api = new Api(commonData.token);
+
     if (selectedTab === Tab.GlobalConfiguration) {
       try {
-        const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Global, nss);
+        const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Global, notificationSettings);
         const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsGlobal(updateUserNotificationsSettings);
         setUserNotificationsSettings(result.data);
         showToaster('Global configuration updated', ToasterIcons.INFO);
@@ -350,7 +351,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
       }
     } else if (teamId) {
       try {
-        const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Channel, nss);
+        const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Channel, notificationSettings);
         const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsOrganizationChannel(organizationId, teamId, updateUserNotificationsSettings);
         setUserNotificationsSettings(result.data);
         showToaster('Channel configuration updated', ToasterIcons.INFO);
@@ -359,7 +360,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
       }
     } else {
       try {
-        const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Organization, nss);
+        const updateUserNotificationsSettings: UpdateUserNotificationsSettings = new UpdateUserNotificationsSettings(UserNotificationsSettingsScope.Organization, notificationSettings);
         const result: NormalizedResponseDTO<UserNotificationsSettings> = await api.updateUserNotificationsSettingsOrganization(organizationId, updateUserNotificationsSettings);
         setUserNotificationsSettings(result.data);
         showToaster('Organization configuration updated', ToasterIcons.INFO);
@@ -400,7 +401,11 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                               setOrganizationId('');
                               setTeamId('');
                               refreshData();
+                            } else if (tab === Tab.OrganizationAndChannel) {
+                              setOrganizationId(organizationsResourcePermissions[0]!.id);
+                              setTeamId('');
                             }
+
                             setSelectedTab(tab);
                           }}
                         >
@@ -562,6 +567,32 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                                   delete (newNotificationsSettings as any).organization_removed;
                                   delete (newNotificationsSettings as any).new_channel;
                                 }
+
+                                try {
+                                  if (selectedTab === Tab.GlobalConfiguration) {
+                                    // global setting: Dirty update for fast rendering
+                                    userNotificationsSettings.global_settings = newNotificationsSettings;
+                                  } else if (teamId) {
+                                    // channel setting: Dirty update for fast rendering
+                                    if (userNotificationsSettings.channels_settings[organizationId]) {
+                                      if (userNotificationsSettings.channels_settings[organizationId]![teamId]) {
+                                        userNotificationsSettings.channels_settings[organizationId]![teamId] = newNotificationsSettings;
+                                      }
+                                    }
+                                  } else {
+                                    // organization setting: Dirty update for fast rendering
+                                    userNotificationsSettings.organization_settings[organizationId] = newNotificationsSettings;
+                                  }
+
+                                  const newUserNotificationsSettings: UserNotificationsSettings = new UserNotificationsSettings(commonData.user?.id!);
+                                  Object.assign(newUserNotificationsSettings, userNotificationsSettings);
+                                  setUserNotificationsSettings(newUserNotificationsSettings);
+                                } catch (e) {
+                                  // Failing of the dirty update must not break anything
+                                  Helper.logError('Dirty update error', e);
+                                }
+
+                                // Here we update it fro truth, and if something happens, the UI will come back to the previous state
                                 await onUpdateUserNotificationsSettings(newNotificationsSettings);
                                 hideToaster();
                               }}
