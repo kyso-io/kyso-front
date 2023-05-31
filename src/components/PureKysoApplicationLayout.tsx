@@ -127,7 +127,7 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                         className="text-gray-600 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 px-4 rounded-full"
                         style={{ height: 35, width: focusOnSearchInput || query ? '400px' : 'auto' }}
                         placeholder="Search on Kyso"
-                        value={query}
+                        value={query || ''}
                         onChange={(e) => setQuery(e.target.value)}
                         onFocus={() => setFocusOnSearchInput(true)}
                         onBlur={() => setFocusOnSearchInput(false)}
