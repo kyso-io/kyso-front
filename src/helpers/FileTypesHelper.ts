@@ -185,11 +185,8 @@ export class FileTypesHelper {
       name.toLowerCase().endsWith('.mpeg4') ||
       name.toLowerCase().endsWith('.3gpp') ||
       name.toLowerCase().endsWith('.mov') ||
-      name.toLowerCase().endsWith('.avi') ||
       name.toLowerCase().endsWith('.mpegps') ||
-      name.toLowerCase().endsWith('.wmv') ||
-      name.toLowerCase().endsWith('.mp4') ||
-      name.toLowerCase().endsWith('.flv')
+      name.toLowerCase().endsWith('.mp4')
     );
   };
 
