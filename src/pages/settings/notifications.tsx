@@ -462,7 +462,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                     </>
                   )}
                   {teamId === '' && isGlobalInheritanceBroken && !isOrganizationInheritanceBroken && (
-                    <DelayedContent>
+                    <DelayedContent delay={1}>
                       <div className="rounded-md bg-blue-50 p-4 mb-4">
                         <div className="flex">
                           <div className="shrink-0">
@@ -500,7 +500,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                     </DelayedContent>
                   )}
                   {isOrganizationInheritanceBroken && (
-                    <DelayedContent>
+                    <DelayedContent delay={1}>
                       <div className="rounded-md bg-blue-50 p-4 mb-4">
                         <div className="flex">
                           <div className="shrink-0">
