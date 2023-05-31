@@ -7,6 +7,7 @@ import { RenderAsciidoc } from '@/components/renderers/kyso-asciidoc-renderer';
 import { RenderJupyter } from '@/components/renderers/kyso-jupyter-renderer';
 import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
 import RenderOnlyOffice from '@/components/renderers/kyso-onlyoffice-renderer/RenderOnlyOffice';
+import { ToasterIcons } from '@/enums/toaster-icons';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
@@ -14,11 +15,11 @@ import type { InlineCommentDto, NormalizedResponseDTO, ReportDTO, TeamMember, Us
 import { CreateInlineCommentDto, InlineCommentStatusEnum, KysoEventEnum, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
-import { classNames } from 'primereact/utils';
-import React, { useEffect, useState } from 'react';
-import { ToasterIcons } from '@/enums/toaster-icons';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { classNames } from 'primereact/utils';
+import React, { useEffect, useState } from 'react';
+import ReactPlayer from 'react-player';
 import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
 import eventBus from '../helpers/event-bus';
 import type { FileToRender } from '../types/file-to-render';
@@ -285,6 +286,8 @@ const UnpureReportRender = ({
                 <div></div>
               ) : FileTypesHelper.isMarkdown(fileToRender.path) && !fileToRender.content ? (
                 <div></div>
+              ) : FileTypesHelper.isVideo(fileToRender.path) && frontEndUrl ? (
+                <ReactPlayer url={`${frontEndUrl}/scs${fileToRender.path_scs}`} controls={true} />
               ) : (
                 <div className="prose p-3">
                   Kyso cannot render this type of file. Do you need it? Give us{' '}

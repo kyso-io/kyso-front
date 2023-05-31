@@ -179,6 +179,20 @@ export class FileTypesHelper {
     );
   };
 
+  public static isVideo = (name: string) => {
+    return (
+      name.toLowerCase().endsWith('.webm') ||
+      name.toLowerCase().endsWith('.mpeg4') ||
+      name.toLowerCase().endsWith('.3gpp') ||
+      name.toLowerCase().endsWith('.mov') ||
+      name.toLowerCase().endsWith('.avi') ||
+      name.toLowerCase().endsWith('.mpegps') ||
+      name.toLowerCase().endsWith('.wmv') ||
+      name.toLowerCase().endsWith('.mp4') ||
+      name.toLowerCase().endsWith('.flv')
+    );
+  };
+
   public static isSupported = (name: string) => {
     return (
       (name != null && FileTypesHelper.isImage(name)) ||
