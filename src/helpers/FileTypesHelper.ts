@@ -159,14 +159,8 @@ export class FileTypesHelper {
   public static isGoogleDocs = (name: string) => {
     return (
       name.toLowerCase().endsWith('.rtf') ||
-      name.toLowerCase().endsWith('.webm') ||
-      name.toLowerCase().endsWith('.mpeg4') ||
-      name.toLowerCase().endsWith('.3gpp') ||
-      name.toLowerCase().endsWith('.mov') ||
-      name.toLowerCase().endsWith('.avi') ||
       name.toLowerCase().endsWith('.mpegps') ||
       name.toLowerCase().endsWith('.wmv') ||
-      name.toLowerCase().endsWith('.flv') ||
       name.toLowerCase().endsWith('.pages') ||
       name.toLowerCase().endsWith('.ai') ||
       name.toLowerCase().endsWith('.psd') ||
@@ -186,7 +180,8 @@ export class FileTypesHelper {
       name.toLowerCase().endsWith('.3gpp') ||
       name.toLowerCase().endsWith('.mov') ||
       name.toLowerCase().endsWith('.mpegps') ||
-      name.toLowerCase().endsWith('.mp4')
+      name.toLowerCase().endsWith('.mp4') ||
+      name.toLowerCase().endsWith('.ogg')
     );
   };
 
@@ -197,8 +192,9 @@ export class FileTypesHelper {
       FileTypesHelper.isPlainTextFile(name) ||
       FileTypesHelper.isJupyterNotebook(name) ||
       FileTypesHelper.isOnlyOffice(name) ||
-      FileTypesHelper.isGoogleDocs(name) ||
-      FileTypesHelper.isSVS(name)
+      FileTypesHelper.isVideo(name) ||
+      FileTypesHelper.isSVS(name) ||
+      FileTypesHelper.isGoogleDocs(name)
     );
   };
 }
