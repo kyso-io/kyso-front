@@ -186,7 +186,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               </button>
             )}
             {fileToRender !== null && fileToRender.path.endsWith('.ipynb') && (
-              <Link href={`${frontEndUrl}${reportUrl}/diff/${fileToRender.path}`} className="font-medium text-sm text-gray-700 px-3">
+              <Link style={{ display: 'none' }} href={`${frontEndUrl}${reportUrl}/diff/${fileToRender.path}`} className="font-medium text-sm text-gray-700 px-3">
                 Compare versions
               </Link>
             )}

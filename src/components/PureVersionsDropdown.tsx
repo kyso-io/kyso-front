@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Popover } from '@headlessui/react';
 import { FlagIcon } from '@heroicons/react/outline';
 import { format } from 'date-fns';
-import Link from 'next/link';
 import { useMemo } from 'react';
 
 interface Props {
@@ -38,7 +37,7 @@ const PureVersionsDropdown = (props: Props) => {
         <Popover.Panel className="min-w-[400px] max-h-[320px] overflow-auto origin-top-right absolute right-0 mt-2 rounded-md shadow-lg bg-white border focus:outline-none z-50 py-2">
           <div className="flex flex-col  relative">
             {versions?.map((item: Version) => (
-              <Link key={item.version} className="px-4 py-2 hover:bg-gray-100" href={`${reportUrl}?version=${item.version}`}>
+              <a key={item.version} className="px-4 py-2 hover:bg-gray-100" href={`${reportUrl}?version=${item.version}`}>
                 <div aria-label="open" className={classNames('items-center text-sm', item.version === currentVersion ? 'bg-gray-100' : '')}>
                   <div className="flex flex-row">
                     <div className="text-gray-800 mr-1">Version #{item.version}</div>
@@ -66,7 +65,7 @@ const PureVersionsDropdown = (props: Props) => {
                     </div>
                   </div>
                 )}
-              </Link>
+              </a>
             ))}
           </div>
         </Popover.Panel>
