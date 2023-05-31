@@ -195,8 +195,9 @@ export class FileTypesHelper {
       FileTypesHelper.isPlainTextFile(name) ||
       FileTypesHelper.isJupyterNotebook(name) ||
       FileTypesHelper.isOnlyOffice(name) ||
-      FileTypesHelper.isGoogleDocs(name) ||
-      FileTypesHelper.isSVS(name)
+      FileTypesHelper.isVideo(name) ||
+      FileTypesHelper.isSVS(name) ||
+      FileTypesHelper.isGoogleDocs(name)
     );
   };
 }
