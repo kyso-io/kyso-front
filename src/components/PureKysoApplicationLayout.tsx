@@ -112,9 +112,9 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
                   <div className="flex items-center">
                     <div className="shrink-0">
                       {/* This always must redirect to the homepage */}
-                      <Link href={commonData.user !== null ? '/' : 'https://about.kyso.io/'}>
+                      <a href={commonData.user !== null ? '/' : 'https://about.kyso.io/'}>
                         <img className="h-8 w-8" src={`/assets/images/kyso-logo-white.svg`} alt="Kyso" />
-                      </Link>
+                      </a>
                     </div>
                   </div>
                   <div className="flex items-center">
