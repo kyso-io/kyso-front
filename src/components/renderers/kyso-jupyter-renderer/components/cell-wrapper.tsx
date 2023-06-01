@@ -3,11 +3,11 @@ import { Helper } from '@/helpers/Helper';
 import { useNavigateToHashOnce } from '@/hooks/use-navigate-to-hash-once';
 import type { CommonData } from '@/types/common-data';
 import { ChatAltIcon, CodeIcon, LinkIcon } from '@heroicons/react/outline';
-import type { InlineCommentDto, InlineCommentStatusEnum, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, InlineCommentStatusEnum, Relations, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import { useRouter } from 'next/router';
+import { Tooltip } from 'primereact/tooltip';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useHover } from 'usehooks-ts';
-import { Tooltip } from 'primereact/tooltip';
-import { useRouter } from 'next/router';
 import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
 import type { Cell as ICell } from '../interfaces/jupyter-notebook';
 import Cell from './cell';
@@ -28,6 +28,7 @@ interface Props {
   first: boolean;
   last: boolean;
   inlineComments: InlineCommentDto[];
+  relations: Relations;
   createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
   updateInlineComment: (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteInlineComment: (id: string) => void;
@@ -44,6 +45,7 @@ const CellWrapper = (props: Props) => {
     index,
     cell,
     inlineComments,
+    relations,
     showInputs,
     showOutputs,
     commonData,
@@ -191,6 +193,7 @@ const CellWrapper = (props: Props) => {
             hasPermissionCreateComment={enabledCreateInlineComment}
             hasPermissionDeleteComment={enabledDeleteInlineComment}
             comments={inlineCommentDtos}
+            relations={relations}
             createInlineComment={createInlineComment}
             updateInlineComment={updateInlineComment}
             deleteComment={deleteInlineComment}

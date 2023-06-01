@@ -1,7 +1,7 @@
 /* eslint-disable import/no-cycle */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import type { CommonData } from '@/types/common-data';
-import type { InlineCommentDto, InlineCommentStatusEnum, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, InlineCommentStatusEnum, Relations, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
@@ -19,6 +19,7 @@ type IPureComments = {
   report: ReportDTO;
   channelMembers: TeamMember[];
   comments: InlineCommentDto[];
+  relations: Relations;
   hasPermissionCreateComment: boolean;
   hasPermissionDeleteComment: boolean;
   createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
@@ -32,6 +33,7 @@ type IPureComments = {
 const PureInlineComments = (props: IPureComments) => {
   const {
     comments,
+    relations,
     commonData,
     report,
     channelMembers,
@@ -54,6 +56,7 @@ const PureInlineComments = (props: IPureComments) => {
                 hasPermissionDeleteComment={hasPermissionDeleteComment}
                 channelMembers={channelMembers}
                 comment={inlineComment}
+                relations={relations}
                 report={report}
                 hasPermissionCreateComment={hasPermissionCreateComment}
                 commonData={commonData}
@@ -70,6 +73,7 @@ const PureInlineComments = (props: IPureComments) => {
                   hasPermissionDeleteComment={hasPermissionDeleteComment}
                   channelMembers={channelMembers}
                   comment={childComment}
+                  relations={relations}
                   report={report}
                   hasPermissionCreateComment={hasPermissionCreateComment}
                   commonData={commonData}

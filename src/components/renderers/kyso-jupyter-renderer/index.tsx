@@ -1,6 +1,6 @@
 /* eslint-disable react/self-closing-comp */
 import type { CommonData } from '@/types/common-data';
-import type { InlineCommentDto, InlineCommentStatusEnum, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, InlineCommentStatusEnum, Relations, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import React from 'react';
 import CellWrapper from './components/cell-wrapper';
 import type { Cell as ICell, JupyterNotebook } from './interfaces/jupyter-notebook';
@@ -14,6 +14,7 @@ interface Props {
   showInputs: boolean;
   showOutputs: boolean;
   inlineComments: InlineCommentDto[];
+  relations: Relations;
   createInlineComment: (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => void;
   updateInlineComment: (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteInlineComment: (id: string) => void;
@@ -32,6 +33,7 @@ export const RenderJupyter = ({
   showInputs,
   showOutputs,
   inlineComments,
+  relations,
   createInlineComment,
   deleteInlineComment,
   onlyVisibleCell,
@@ -65,6 +67,7 @@ export const RenderJupyter = ({
             showInputs={showInputs}
             showOutputs={showOutputs}
             inlineComments={inlineComments}
+            relations={relations}
             createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(key, user_ids, text, parent_id)}
             deleteInlineComment={deleteInlineComment}
             updateInlineComment={updateInlineComment}

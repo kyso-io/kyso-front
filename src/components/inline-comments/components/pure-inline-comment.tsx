@@ -3,12 +3,14 @@
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 import PureAvatar from '@/components/PureAvatar';
 import { RenderMarkdown } from '@/components/renderers/kyso-markdown-renderer';
+import { ToasterIcons } from '@/enums/toaster-icons';
+import { ToasterMessages } from '@/helpers/ToasterMessages';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import type { InlineCommentDto, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, Relations, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { GlobalPermissionsEnum, InlineCommentStatusEnum, OrganizationPermissionsEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
@@ -16,11 +18,8 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useState } from 'react';
-import { ToasterMessages } from '@/helpers/ToasterMessages';
-import { ToasterIcons } from '@/enums/toaster-icons';
 import { Helper } from '../../../helpers/Helper';
 import { HelperPermissions } from '../../../helpers/check-permissions';
-import { useAppSelector } from '../../../hooks/redux-hooks';
 import PureInlineCommentForm from './pure-inline-comment-form';
 import PureInlineCommentStatusHistory from './pure-inline-comment-status-history';
 import TagInlineComment from './tag-inline-comment';
@@ -30,6 +29,7 @@ type IPureInlineComment = {
   hasPermissionDeleteComment: boolean;
   commonData: CommonData;
   comment: InlineCommentDto;
+  relations: Relations;
   channelMembers: TeamMember[];
   onCancel?: () => void;
   report: ReportDTO;
@@ -48,6 +48,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
     hasPermissionDeleteComment,
     hasPermissionCreateComment,
     comment,
+    relations,
     deleteComment,
     createInlineComment,
     updateInlineComment,
@@ -60,7 +61,6 @@ const PureInlineComment = (props: IPureInlineComment) => {
   const router = useRouter();
   const { taskId } = router.query;
 
-  const userEntities: { [key: string]: UserDTO } = useAppSelector((state) => state.user.entities);
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [replying, setReplying] = useState<boolean>(false);
   const [commentText, setCommentText] = useState<string>(comment.text);
@@ -93,8 +93,8 @@ const PureInlineComment = (props: IPureInlineComment) => {
     }
     const mentionedUsers: UserDTO[] = [];
     for (const userId of comment.mentions) {
-      if (userEntities[userId]) {
-        mentionedUsers.push(userEntities[userId]!);
+      if (relations && relations.user[userId]) {
+        mentionedUsers.push(relations.user[userId]!);
       }
     }
     const replacedText = comment.text.replace(/@([a-z0-9_-]+)/gi, (match: string, displayNameSlug: string): string => {

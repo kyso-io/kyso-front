@@ -1,3 +1,4 @@
+/* eslint no-prototype-builtins: "off" */
 import PureIframeRenderer from '@/components/PureIframeRenderer';
 import { PureSpinner } from '@/components/PureSpinner';
 import PureInlineComments from '@/components/inline-comments/components/pure-inline-comments';
@@ -11,7 +12,7 @@ import { ToasterIcons } from '@/enums/toaster-icons';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
-import type { InlineCommentDto, NormalizedResponseDTO, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import type { InlineCommentDto, NormalizedResponseDTO, Relations, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { CreateInlineCommentDto, InlineCommentStatusEnum, KysoEventEnum, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
@@ -64,13 +65,13 @@ const UnpureReportRender = ({
   const router = useRouter();
   const { taskId } = router.query;
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
+  const [relations, setRelations] = useState<Relations>({});
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const getReportInlineComments = async () => {
     try {
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
       const response: NormalizedResponseDTO<InlineCommentDto[]> = await api.getInlineComments(report.id as string, fileToRender.id);
-
       setInlineComments(
         response.data.filter((inlineComment: InlineCommentDto) => {
           if (taskId) {
@@ -82,6 +83,7 @@ const UnpureReportRender = ({
           return inlineComment.current_status !== InlineCommentStatusEnum.CLOSED;
         }),
       );
+      setRelations(response.relations!);
     } catch (e) {}
   };
 
@@ -117,6 +119,15 @@ const UnpureReportRender = ({
         copyInlineComments.push(response.data);
       }
       setInlineComments(copyInlineComments);
+      const copyRelations = { ...relations };
+      for (const key in response.relations) {
+        if (response.relations.hasOwnProperty(key)) {
+          copyRelations[key] = { ...copyRelations[key], ...response.relations[key] };
+        } else {
+          copyRelations[key] = response.relations[key];
+        }
+      }
+      setRelations(copyRelations);
       eventBus.dispatch(KysoEventEnum.INLINE_COMMENTS_CREATE, newInlineComment);
     } catch (e) {
       // Helper.logError("Unexpected error", e);;
@@ -152,6 +163,15 @@ const UnpureReportRender = ({
         copyInlineComments[index] = updatedInlineComment;
       }
       setInlineComments(copyInlineComments);
+      const copyRelations = { ...relations };
+      for (const key in response.relations) {
+        if (response.relations.hasOwnProperty(key)) {
+          copyRelations[key] = { ...copyRelations[key], ...response.relations[key] };
+        } else {
+          copyRelations[key] = response.relations[key];
+        }
+      }
+      setRelations(copyRelations);
       eventBus.dispatch(KysoEventEnum.INLINE_COMMENTS_UPDATE, updatedInlineComment);
     } catch (e) {
       showToaster('Error updating. Please try again', ToasterIcons.ERROR);
@@ -242,6 +262,7 @@ const UnpureReportRender = ({
             showInputs={false}
             showOutputs={false}
             inlineComments={inlineComments}
+            relations={relations}
             createInlineComment={createInlineComment}
             updateInlineComment={updateInlineComment}
             deleteInlineComment={deleteInlineComment}
@@ -314,6 +335,7 @@ const UnpureReportRender = ({
                   hasPermissionCreateComment={enabledCreateInlineComment}
                   hasPermissionDeleteComment={enabledDeleteInlineComment}
                   comments={inlineComments}
+                  relations={relations}
                   createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(fileToRender.id, user_ids, text, parent_id)}
                   updateInlineComment={updateInlineComment}
                   deleteComment={deleteInlineComment}
