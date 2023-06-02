@@ -19,6 +19,7 @@ import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTok
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
+import { Helper } from '../helpers/Helper';
 import { usePublicSetting } from '../hooks/use-public-setting';
 
 type IUnpureKysoApplicationLayoutProps = {
@@ -69,6 +70,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
         localStorage.removeItem('shownVerifiedAlert');
         sessionStorage.clear();
         await dispatch(logoutAction());
+        Helper.getKysoPublicSettings();
         router.replace(`/login`);
       },
     },
