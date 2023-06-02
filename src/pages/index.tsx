@@ -20,21 +20,17 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
     if (kysoSettingValues.length === 0) {
       return;
     }
-
     const redirectUserToOrganization = async () => {
       let lastOrganizationDict: { [userId: string]: string } = {};
       const lastOrganizationStr: string | null = getLocalStorageItem('last_organization');
-
       if (lastOrganizationStr) {
         try {
           lastOrganizationDict = JSON.parse(lastOrganizationStr);
         } catch (e) {}
       }
-
       if (commonData?.user !== null) {
         // Logged user with last organization
         const indexOrg: number = commonData.permissions!.organizations!.findIndex((x: ResourcePermissions) => x.name === lastOrganizationDict[commonData.user!.id]);
-
         if (indexOrg !== -1) {
           router.push(`${lastOrganizationDict[commonData.user!.id]}`);
         } else {
@@ -59,7 +55,7 @@ const Index = ({ commonData }: IKysoApplicationLayoutProps) => {
       }
     };
     redirectUserToOrganization();
-  }, [commonData?.permissions, commonData?.user, router]);
+  }, [commonData?.permissions, commonData?.user, router, kysoSettingValues]);
 
   return (
     <div className="flex flex-row space-x-8">
