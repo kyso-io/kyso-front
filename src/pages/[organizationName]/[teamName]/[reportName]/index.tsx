@@ -811,7 +811,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                                 </div>
                               </DelayedContent>
                             )}
-                            {fileToRender && onlyVisibleCell && (
+                            {fileToRender && onlyVisibleCell && fileToRender.path.endsWith('ipynb') && (
                               <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
                                 Showing only this cell.
                                 <button
