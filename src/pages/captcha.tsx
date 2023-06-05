@@ -91,10 +91,6 @@ const Index = ({ commonData, showToaster }: IKysoApplicationLayoutProps) => {
 
     const response: NormalizedResponseDTO<boolean> = await api.verifyCaptcha(captchaToken);
     if (response?.data) {
-      const redirectUrl: string | null = sessionStorage.getItem('redirectUrl') || (redirect as string) || '/';
-
-      const showOnboarding = commonData.user?.show_onboarding ? commonData.user?.show_onboarding : false;
-
       if (isBrowser()) {
         sessionStorage.removeItem('redirectUrl');
       }
@@ -105,13 +101,15 @@ const Index = ({ commonData, showToaster }: IKysoApplicationLayoutProps) => {
           return;
         }
 
-        if (redirectUrl) {
-          router.replace(redirectUrl);
+        const showOnboarding = commonData.user?.show_onboarding ? commonData.user?.show_onboarding : false;
+        if (showOnboarding) {
+          router.replace('/overview');
           return;
         }
 
-        if (showOnboarding) {
-          router.replace('/overview');
+        const redirectUrl: string | null = sessionStorage.getItem('redirectUrl') || (redirect as string) || '/';
+        if (redirectUrl) {
+          router.replace(redirectUrl);
         }
       }, 200);
     } else {
