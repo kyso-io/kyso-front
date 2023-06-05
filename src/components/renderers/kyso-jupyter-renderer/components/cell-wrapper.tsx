@@ -2,7 +2,7 @@ import PureInlineComments from '@/components/inline-comments/components/pure-inl
 import { Helper } from '@/helpers/Helper';
 import { useNavigateToHashOnce } from '@/hooks/use-navigate-to-hash-once';
 import type { CommonData } from '@/types/common-data';
-import { ChatAltIcon, CodeIcon, LinkIcon } from '@heroicons/react/outline';
+import { CodeIcon, LinkIcon } from '@heroicons/react/outline';
 import type { InlineCommentDto, InlineCommentStatusEnum, Relations, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import { useRouter } from 'next/router';
 import { Tooltip } from 'primereact/tooltip';
@@ -11,6 +11,7 @@ import { useHover } from 'usehooks-ts';
 import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
 import type { Cell as ICell } from '../interfaces/jupyter-notebook';
 import Cell from './cell';
+import KTasksIcon from '../../../../icons/KTasksIcon';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -146,7 +147,7 @@ const CellWrapper = (props: Props) => {
                 className={classNames('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', commentsShown ? 'bg-gray-200 hover:bg-gray-300' : 'hover:bg-gray-50')}
                 onClick={() => setCommentsShown(!commentsShown)}
               >
-                <ChatAltIcon className="h-4 w-4 mr-1" aria-hidden="true" />
+                <KTasksIcon className="w-4 h-4 mr-1" />
                 {inlineCommentDtos.length > 0 && <span>{inlineCommentDtos.length}</span>}
               </button>
             </>

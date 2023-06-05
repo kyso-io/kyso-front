@@ -5,13 +5,13 @@ import { PureSpinner } from '@/components/PureSpinner';
 import classNames from '@/helpers/class-names';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import type { InlineCommentDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { Mention } from 'primereact/mention';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import type { InlineCommentDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
+import { Mention } from 'primereact/mention';
 import { Tooltip } from 'primereact/tooltip';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 type IPureCommentForm = {
   comment?: InlineCommentDto;
@@ -132,13 +132,13 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
             <Tooltip target=".inline-comments-info" autoHide position="bottom" />
             <button onClick={() => setShowCommentForm(true)} className="ml-1 text-blue-500">
               Create a new task
-              <FontAwesomeIcon
-                className="inline-comments-info text-xs"
-                data-pr-tooltip="These tasks are local to the current file, and will change if you open another file"
-                style={{ color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
-                icon={faCircleInfo}
-              />
             </button>
+            <FontAwesomeIcon
+              className="inline-comments-info w-4 h-4"
+              data-pr-tooltip="These tasks are local to the current file, and will change if you open another file"
+              style={{ color: '#bbb', paddingLeft: '2px' }}
+              icon={faCircleInfo}
+            />
           </div>
         </>
       )}
