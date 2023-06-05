@@ -67,6 +67,13 @@ const PureKysoApplicationLayout = (props: IPureKysoApplicationLayoutProps): Reac
       return;
     }
     getNumOpenedInlineComments();
+  }, [router]);
+
+  useEffect(() => {
+    if (!commonData.token || !commonData.user) {
+      return;
+    }
+    getNumOpenedInlineComments();
   }, [commonData.user]);
 
   useEffect(() => {
