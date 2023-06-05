@@ -123,12 +123,9 @@ const ActivityFeedInlineComment = ({ activityFeed, relations }: ActivityFeedProp
           <div className="flex -space-x-1 overflow-hidden items-end">
             <PureAvatar src={user?.avatar_url} title={user.display_name} size={TailwindHeightSizeEnum.H8} textSize={TailwindFontSizeEnum.XS} />
             <div className={`h-4 w-4 rounded-full -ml-2`}>
-              <ChatIcon className="h-4 w-4 text-orange-400 -ml-2 bg-white rounded-full" />
+              <KTasksIcon className="w-4 h-4 text-gray-400 -ml-2 bg-white " />
             </div>
           </div>
-        </span>
-        <span className="absolute -bottom-0.5 -right-1 bg-white rounded-tl px-0.5 py-px">
-          <KTasksIcon className="w-5 h-5 text-gray-400"></KTasksIcon>
         </span>
       </div>
       <div className="min-w-0 flex-1">

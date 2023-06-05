@@ -1,12 +1,12 @@
 import classNames from '@/helpers/class-names';
 import { getLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import type { CommonData } from '@/types/common-data';
-import { ChatAltIcon } from '@heroicons/react/outline';
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, MenuIcon } from '@heroicons/react/solid';
 import { Tooltip } from 'primereact/tooltip';
 import type { ReactElement } from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useEventListener } from 'usehooks-ts';
+import KTasksIcon from '../icons/KTasksIcon';
 
 type IPureSideOverlayCommentsPanel = {
   cacheKey?: string;
@@ -74,7 +74,7 @@ const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
           >
             <span className="sr-only">Close panel</span>
             <span className="flex">
-              {!icon && <ChatAltIcon className="h-4 w-4 mt-1" aria-hidden="true" />}
+              {!icon && <KTasksIcon className="h-4 w-4 mt-1" aria-hidden="true" />}
               {icon && <>{icon}</>}
               {open && <ChevronDoubleRightIcon className="pl-2 h-6 w-6" aria-hidden="true" />}
               {!open && !isHover && <MenuIcon className="pl-2 h-6 w-6" aria-hidden="true" />}

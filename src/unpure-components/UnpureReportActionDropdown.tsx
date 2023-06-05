@@ -1,7 +1,7 @@
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
-import { ChatAltIcon, DotsVerticalIcon, PencilIcon, PresentationChartLineIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
+import { DotsVerticalIcon, PencilIcon, PresentationChartLineIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { deleteReportAction } from '@kyso-io/kyso-store';
 import { classNames } from 'primereact/utils';
@@ -12,6 +12,7 @@ import { ToasterIcons } from '@/enums/toaster-icons';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import type { FileToRender } from '../types/file-to-render';
+import KTasksIcon from '../icons/KTasksIcon';
 
 interface Props {
   report: ReportDTO;
@@ -99,7 +100,7 @@ const UnpureReportActionDropdown = (props: Props) => {
                   href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}/tasks`}
                   className={classNames('text-gray-700', 'px-4 py-2 text-sm hover:bg-gray-100 group flex items-center')}
                 >
-                  <ChatAltIcon className="mr-2 h-5 w-5 text-gray-700" />
+                  <KTasksIcon className="h-4 w-4 mr-3" aria-hidden="true" />
                   Tasks
                 </Link>
               </Menu.Item>
