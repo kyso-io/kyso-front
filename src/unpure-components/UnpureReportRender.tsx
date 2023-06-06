@@ -322,7 +322,6 @@ const UnpureReportRender = ({
             <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'hidden lg:block p-2 min-w-fit border-l')}>
               <PureSideOverlayCommentsPanel
                 key={report?.id!}
-                cacheKey={report?.id!}
                 setSidebarOpen={(p) => setSidebarOpen(p)}
                 commonData={commonData}
                 tooltipOpenText="Open file's tasks"
