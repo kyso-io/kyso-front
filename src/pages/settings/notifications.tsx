@@ -508,7 +508,7 @@ const Index = ({ commonData, showToaster, hideToaster }: IKysoApplicationLayoutP
                           </div>
                           <div className="ml-3 flex-1 md:flex md:justify-between">
                             <p className="text-sm text-blue-700">
-                              This channel has it's own configuration and does not follows the Organization Configuration anymore, then the changes done in the Organization Configuration will not be
+                              This channel has its own configuration and does not follows the Organization Configuration anymore, so changes done in the Organization Configuration will not be
                               propagated to this channel, except those which don't apply to the channel.
                               <br />
                               <button
