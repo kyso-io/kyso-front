@@ -961,7 +961,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                         <button
                           type="button"
                           className={clsx(
-                            'rounded border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                            'rounded-md border border-gray-300 bg-white py-2 px-4 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
                           )}
                           onClick={() => router.reload()}
                         >
@@ -971,7 +971,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                           type="button"
                           disabled={requesting || !teamDataHasChanged}
                           className={clsx(
-                            'rounded border border-blue-300 bg-white px-2.5 py-1.5 text-xs font-medium text-blue-700 shadow-sm hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                            'ml-3 inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 k-bg-primary',
                             !teamDataHasChanged ? 'opacity-50 cursor-not-allowed' : '',
                           )}
                           onClick={updateTeam}
@@ -1254,7 +1254,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                                   setOpenInviteUserModal(true);
                                 }}
                                 type="button"
-                                className="inline-flex items-center rounded border border-transparent bg-indigo-600 px-2.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                className="inline-flex items-center rounded border border-transparent px-2.5 py-1.5 text-xs font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 k-bg-primary"
                               >
                                 Invite
                               </button>
@@ -1325,7 +1325,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                       onClick={updateNotifications}
                       type="submit"
                       className={clsx(
-                        'ml-3 inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
+                        'ml-3 inline-flex justify-center rounded-md border border-transparent py-2 px-4 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 k-bg-primary',
                         requesting || !notificationsChanged ? 'opacity-50 cursor-not-allowed' : '',
                       )}
                     >
@@ -1414,7 +1414,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                   <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                     <button
                       type="button"
-                      className="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:col-start-2 sm:text-sm"
+                      className="inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:col-start-2 sm:text-sm k-bg-primary"
                       disabled={organizationRole === ''}
                       onClick={() => {
                         if (selectedUser?.id === selectedUser?.email) {
@@ -1522,7 +1522,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                   <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
                     <button
                       type="button"
-                      className="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:col-start-2 sm:text-sm"
+                      className="inline-flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-base font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 sm:col-start-2 sm:text-sm k-bg-primary"
                       disabled={organizationRole === ''}
                       onClick={updateMemberRole}
                     >
