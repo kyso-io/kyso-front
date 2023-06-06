@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
+import KTasksIcon from '@/icons/KTasksIcon';
 import { ChatIcon, ThumbUpIcon } from '@heroicons/react/outline';
 import type { FullTextSearchResult } from '@kyso-io/kyso-model';
 import { ElasticSearchIndex } from '@kyso-io/kyso-model';
@@ -61,7 +62,7 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
           <div className="min-w-0 flex-1">
             <Link href={finalRedirectUrl} className="block focus:outline-none">
               <span className="absolute inset-0" aria-hidden="true"></span>
-              {fullTextSearchResult.type !== ElasticSearchIndex.Comment && (
+              {fullTextSearchResult.type === ElasticSearchIndex.Report && (
                 <>
                   <div className="text-sm mb-2 font-medium text-gray-900 truncate">
                     {FileTypesHelper.isPowerpoint(fullTextSearchResult.filePath) ? (
@@ -110,7 +111,7 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
                       ''
                     )}
 
-                    {isUnknownFile(fullTextSearchResult.filePath) && !Helper.isKysoFile(fullTextSearchResult.filePath) ? (
+                    {fullTextSearchResult.type === ElasticSearchIndex.Report && isUnknownFile(fullTextSearchResult.filePath) && !Helper.isKysoFile(fullTextSearchResult.filePath) ? (
                       <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/file.svg`} alt="Unknown extension" />
                     ) : (
                       ''
@@ -144,6 +145,16 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
                 <>
                   <p className="text-sm mb-2 font-medium text-gray-900 truncate">
                     {isUnknownFile(fullTextSearchResult.filePath) ? <img className="h-5 w-5 mr-2" style={{ display: 'inline' }} src={`/assets/images/file.svg`} alt="Typescript File" /> : ''}
+
+                    {fullTextSearchResult.link.split('/').pop()?.replaceAll('-', ' ')}
+                  </p>
+                </>
+              )}
+
+              {fullTextSearchResult.type === ElasticSearchIndex.InlineComment && (
+                <>
+                  <p className="text-sm mb-2 font-medium text-gray-900 truncate">
+                    {isUnknownFile(fullTextSearchResult.filePath) ? <KTasksIcon className="h-5 w-5 mr-2" style={{ display: 'inline' }} /> : ''}
 
                     {fullTextSearchResult.link.split('/').pop()?.replaceAll('-', ' ')}
                   </p>
