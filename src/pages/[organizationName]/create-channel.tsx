@@ -119,7 +119,9 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
         setBusy(false);
         return;
       }
-      router.push(`/${commonData.organization!.sluglified_name}/${team.sluglified_name}`);
+
+      // To force reloading of commonData
+      window.location.href = `/${commonData.organization!.sluglified_name}/${team.sluglified_name}`;
     } catch (er: any) {
       showToaster(er.response.data.message, ToasterIcons.ERROR);
     } finally {
