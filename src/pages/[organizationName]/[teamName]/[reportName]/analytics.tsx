@@ -739,88 +739,92 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                     </ul>
                   </div>
                 </div>
-                <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8">
-                  <div className="flex flex-col w-full">
-                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Locations</h2>
-                    <div data-tooltip-id="my-tooltip" data-tooltip-place="top">
-                      <ComposableMap projectionConfig={{ rotate: [-10, 0, 0] }} data-tip="">
-                        <ZoomableGroup>
-                          <Geographies geography="/features.json">
-                            {({ geographies }) =>
-                              geographies.map((geo) => {
+                {/* MAPS */}
+                {false && (
+                  <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8">
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Locations</h2>
+                      <div data-tooltip-id="my-tooltip" data-tooltip-place="top">
+                        <ComposableMap projectionConfig={{ rotate: [-10, 0, 0] }} data-tip="">
+                          <ZoomableGroup>
+                            <Geographies geography="/features.json">
+                              {({ geographies }) =>
+                                geographies.map((geo) => {
+                                  return (
+                                    <Geography
+                                      key={geo.rsmKey}
+                                      geography={geo}
+                                      fill="#244362"
+                                      style={{
+                                        hover: {
+                                          fill: '#839CB7',
+                                          outline: 'none',
+                                        },
+                                        pressed: {
+                                          fill: '#E42',
+                                          outline: 'none',
+                                        },
+                                      }}
+                                    />
+                                  );
+                                })
+                              }
+                            </Geographies>
+                            {locations.map(
+                              (
+                                d: {
+                                  location: string;
+                                  coords: {
+                                    lat: number;
+                                    lng: number;
+                                  } | null;
+                                  count: number;
+                                },
+                                index: number,
+                              ) => {
                                 return (
-                                  <Geography
-                                    key={geo.rsmKey}
-                                    geography={geo}
-                                    fill="#244362"
-                                    style={{
-                                      hover: {
-                                        fill: '#839CB7',
-                                        outline: 'none',
-                                      },
-                                      pressed: {
-                                        fill: '#E42',
-                                        outline: 'none',
-                                      },
+                                  <Marker
+                                    key={index}
+                                    coordinates={[d.coords!.lng, d.coords!.lat]}
+                                    onMouseEnter={(e) => {
+                                      const r: { bottom: number; height: number; left: number; right: number; top: number; width: number; x: number; y: number } = (
+                                        e.target as any
+                                      )?.getBoundingClientRect();
+                                      setTooltipContent(`${d.location}: ${d.count}`);
+                                      setTooltipPosition({
+                                        x: r.x + r.width / 2,
+                                        y: r.y + 3,
+                                      });
                                     }}
-                                  />
+                                    onMouseLeave={() => {
+                                      setTooltipContent('');
+                                      setTooltipPosition(undefined);
+                                    }}
+                                  >
+                                    <circle fill="#F53" stroke="#FFF" r={popScale(d.count)} />
+                                  </Marker>
                                 );
-                              })
-                            }
-                          </Geographies>
-                          {locations.map(
-                            (
-                              d: {
-                                location: string;
-                                coords: {
-                                  lat: number;
-                                  lng: number;
-                                } | null;
-                                count: number;
                               },
-                              index: number,
-                            ) => {
-                              return (
-                                <Marker
-                                  key={index}
-                                  coordinates={[d.coords!.lng, d.coords!.lat]}
-                                  onMouseEnter={(e) => {
-                                    const r: { bottom: number; height: number; left: number; right: number; top: number; width: number; x: number; y: number } = (
-                                      e.target as any
-                                    )?.getBoundingClientRect();
-                                    setTooltipContent(`${d.location}: ${d.count}`);
-                                    setTooltipPosition({
-                                      x: r.x + r.width / 2,
-                                      y: r.y + 3,
-                                    });
-                                  }}
-                                  onMouseLeave={() => {
-                                    setTooltipContent('');
-                                    setTooltipPosition(undefined);
-                                  }}
-                                >
-                                  <circle fill="#F53" stroke="#FFF" r={popScale(d.count)} />
-                                </Marker>
-                              );
-                            },
-                          )}
-                        </ZoomableGroup>
-                      </ComposableMap>
+                            )}
+                          </ZoomableGroup>
+                        </ComposableMap>
+                      </div>
+                      <ReactTooltip id="my-tooltip" position={tooltipPosition}>
+                        {tooltipContent}
+                      </ReactTooltip>
                     </div>
-                    <ReactTooltip id="my-tooltip" position={tooltipPosition}>
-                      {tooltipContent}
-                    </ReactTooltip>
-                  </div>
-                  <div style={{ width: '40%' }}></div>
-                  <div className="flex flex-col w-full">
-                    <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Devices</h2>
-                    <div className="flex flex-col items-center">
-                      <div style={{ height: 400 }}>
-                        <Pie data={deviceChartData} options={optionsPieChart} />
+                    <div style={{ width: '40%' }}></div>
+                    <div className="flex flex-col w-full">
+                      <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Devices</h2>
+                      <div className="flex flex-col items-center">
+                        <div style={{ height: 400 }}>
+                          <Pie data={deviceChartData} options={optionsPieChart} />
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
+                )}
+
                 <div className="flex flex-col items-start space-y-4 xl:flex-row xl:space-y-0 xl:space-x-4 my-8">
                   <div className="flex flex-col w-full">
                     <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Operating Systems</h2>
