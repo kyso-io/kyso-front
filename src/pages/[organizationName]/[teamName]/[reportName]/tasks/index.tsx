@@ -256,6 +256,25 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
       try {
         const api: Api = new Api(commonData.token);
         const response: NormalizedResponseDTO<InlineCommentDto[]> = await api.getInlineComments(reportData.report!.id!);
+
+        // Remove duplicated comments (same text, in same cell_id, with different version)
+        const tasksMap: Map<string, InlineCommentDto> = new Map<string, InlineCommentDto>();
+        for (const t of response.data) {
+          if (tasksMap.has(t.text)) {
+            const savedTask = tasksMap.get(t.text);
+            if (savedTask && savedTask.report_version && t.report_version) {
+              if (savedTask.cell_id === t.cell_id && savedTask.report_version < t.report_version) {
+                // t version is higher than saved version, replace it
+                tasksMap.set(t.text, t);
+              } // else, t version is lower than saved one
+            } // else we dont have enough data... do nothing
+          } else {
+            tasksMap.set(t.text, t);
+          }
+        }
+
+        response.data = Array.from(tasksMap.values());
+
         setResult(response);
       } catch (e) {}
       setRequesting(false);

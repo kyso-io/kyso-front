@@ -415,8 +415,12 @@ export class Helper {
     return wholeText;
   }
 
+  public static fromFilePathSCSToDocumentRelativePath(inlineCommentDto: InlineCommentDto): string {
+    return inlineCommentDto.file_path_scs.split('/').slice(6).join('/');
+  }
+
   public static buildTaskDetailPage(inlineCommentDto: InlineCommentDto, report: ReportDTO): string {
-    const documentUrl: string = inlineCommentDto.file_path_scs.split('/').slice(6).join('/');
+    const documentUrl: string = Helper.fromFilePathSCSToDocumentRelativePath(inlineCommentDto);
 
     const queryParams: string = `?taskId=${inlineCommentDto.id}${inlineCommentDto.cell_id ? `&cell=${inlineCommentDto.cell_id.trim()}` : ''}${
       inlineCommentDto.orphan ? `&version=${inlineCommentDto.report_version}` : ''

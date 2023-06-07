@@ -1,15 +1,13 @@
 import classNames from '@/helpers/class-names';
-import { getLocalStorageItem, setLocalStorageItem } from '@/helpers/isomorphic-local-storage';
 import type { CommonData } from '@/types/common-data';
 import { ChevronDoubleLeftIcon, ChevronDoubleRightIcon, MenuIcon } from '@heroicons/react/solid';
 import { Tooltip } from 'primereact/tooltip';
 import type { ReactElement } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useEventListener } from 'usehooks-ts';
 import KTasksIcon from '../icons/KTasksIcon';
 
 type IPureSideOverlayCommentsPanel = {
-  cacheKey?: string;
   children: ReactElement;
   setSidebarOpen: (p: boolean) => void;
   commonData: CommonData;
@@ -19,7 +17,7 @@ type IPureSideOverlayCommentsPanel = {
 };
 
 const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
-  const { icon, cacheKey = 'overlay-panel-comment-state', children, setSidebarOpen, commonData } = props;
+  const { icon, children, setSidebarOpen } = props;
   let { tooltipCloseText, tooltipOpenText } = props;
   const [open, setOpen] = useState(true);
   const hoverRef = useRef(null);
@@ -33,27 +31,11 @@ const PureSideOverlayCommentsPanel = (props: IPureSideOverlayCommentsPanel) => {
     tooltipCloseText = 'Lock closed';
   }
 
-  useEffect(() => {
-    if (!commonData.user) {
-      // Collapse by default and hide the inline comments section
-      setOpenAndCache(false);
-      setOpen(false);
-
-      return;
-    }
-
-    if (getLocalStorageItem(cacheKey)) {
-      setOpenAndCache(JSON.parse(getLocalStorageItem(cacheKey)!));
-      setOpen(JSON.parse(getLocalStorageItem(cacheKey)!));
-    }
-  }, [commonData.user]);
-
   const [isHover, setIsHover] = useState<boolean>(false);
   useEventListener('mouseenter', () => setIsHover(true), hoverRef);
   useEventListener('mouseleave', () => setIsHover(false), hoverRef);
 
   const setOpenAndCache = (openValue: boolean) => {
-    setLocalStorageItem(cacheKey, openValue);
     setOpen(openValue);
     setSidebarOpen(openValue);
     setIsHover(false);

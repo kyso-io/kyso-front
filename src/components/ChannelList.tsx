@@ -65,7 +65,7 @@ const ChannelList = (props: Props) => {
       setSortedSelectorItems(sorted);
       setOriginalSortedSelectorItems(sorted);
     }
-  }, [commonData?.organization, commonData?.permissions?.teams]);
+  }, [commonData?.organization, commonData?.permissions?.teams, basePath]);
 
   return (
     <div>
