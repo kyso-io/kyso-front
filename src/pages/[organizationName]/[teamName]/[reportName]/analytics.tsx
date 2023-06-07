@@ -20,7 +20,19 @@ import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import { ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { AnalyticsSource, DeviceDetector, GithubFileHash, KysoSetting, OrganizationMember, ReportDTO, TeamMember, TeamMembershipOriginEnum, UserDTO } from '@kyso-io/kyso-model';
+import type {
+  AnalyticsSource,
+  CommentInteraction,
+  DeviceDetector,
+  GithubFileHash,
+  InlineCommentInteraction,
+  KysoSetting,
+  OrganizationMember,
+  ReportDTO,
+  TeamMember,
+  TeamMembershipOriginEnum,
+  UserDTO,
+} from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, NormalizedResponseDTO, ReportAnalytics, ReportPermissionsEnum } from '@kyso-io/kyso-model';
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
 import { ArcElement, Chart as ChartJS, Colors, Legend, Tooltip } from 'chart.js';
@@ -88,12 +100,13 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     user_id: string;
     timestamp: Date;
     action: string;
+    sub_action?: string;
   }[] = useMemo(() => {
     const elements: {
       user_id: string;
       timestamp: Date;
       action: string;
-      source?: string;
+      sub_action?: string;
     }[] = [];
     if (!reportAnalytics) {
       return elements;
@@ -103,7 +116,6 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
         user_id: e.user_id,
         timestamp: e.timestamp,
         action: 'downloaded',
-        source: e.source,
       });
     });
     reportAnalytics.shares.last_items.forEach((e: { timestamp: Date; user_id: string }) => {
@@ -111,7 +123,22 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
         user_id: e.user_id,
         timestamp: e.timestamp,
         action: 'share',
-        source: 'web',
+      });
+    });
+    reportAnalytics.last_comments.forEach((e: CommentInteraction) => {
+      elements.push({
+        user_id: e.user_id,
+        timestamp: e.timestamp,
+        action: 'comment',
+        sub_action: e.action,
+      });
+    });
+    reportAnalytics.last_tasks.forEach((e: InlineCommentInteraction) => {
+      elements.push({
+        user_id: e.user_id,
+        timestamp: e.timestamp,
+        action: 'inline_comment',
+        sub_action: e.action,
       });
     });
     return elements.sort(
@@ -706,10 +733,53 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                   <div className="flex flex-col w-full">
                     <h2 className="text-2xl font-bold leading-7 text-gray-900 sm:truncate sm:text-lg sm:tracking-tight">Last interactions</h2>
                     <ul role="list" className="">
-                      {lastInteractions.slice(0, 5).map((e: { timestamp: Date; user_id: string; action: string }, index: number) => {
+                      {lastInteractions.slice(0, 5).map((e: { timestamp: Date; user_id: string; action: string; sub_action?: string }, index: number) => {
                         const userDto: UserDTO | undefined = relations.user[e.user_id];
                         if (!userDto) {
                           return null;
+                        }
+                        let spanClass = '';
+                        let textAction = '';
+                        switch (e.action) {
+                          case 'downloaded':
+                            spanClass = 'bg-blue-100 text-blue-800';
+                            textAction = 'downloaded';
+                            break;
+                          case 'shared':
+                            spanClass = 'bg-green-100 text-green-800';
+                            textAction = 'shared';
+                            break;
+                          case 'comment':
+                            spanClass = 'bg-purple-50 text-purple-700';
+                            switch (e.sub_action) {
+                              case 'new':
+                                textAction = 'commented';
+                                break;
+                              case 'reply':
+                                textAction = 'replied to a comment';
+                                break;
+                              case 'reply_to_reply':
+                                textAction = 'replied to a reply';
+                                break;
+                              default:
+                                break;
+                            }
+                            break;
+                          case 'inline_comment':
+                            spanClass = 'bg-pink-50 text-pink-700';
+                            switch (e.sub_action) {
+                              case 'new':
+                                textAction = 'created a task';
+                                break;
+                              case 'reply':
+                                textAction = 'replied to a task';
+                                break;
+                              default:
+                                break;
+                            }
+                            break;
+                          default:
+                            break;
                         }
                         return (
                           <li key={index} className="py-3">
@@ -723,14 +793,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                               </div>
                               <div className="text-right">
                                 <p className="truncate text-xs text-gray-500">{moment(e.timestamp).fromNow()}</p>
-                                <span
-                                  className={clsx(
-                                    'inline-flex items-center rounded px-2 py-0.5 text-xs font-medium uppercase',
-                                    e.action === 'downloaded' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800',
-                                  )}
-                                >
-                                  {e.action}
-                                </span>
+                                <span className={clsx('inline-flex items-center rounded px-2 py-0.5 text-xs font-medium uppercase', spanClass)}>{textAction}</span>
                               </div>
                             </div>
                           </li>
