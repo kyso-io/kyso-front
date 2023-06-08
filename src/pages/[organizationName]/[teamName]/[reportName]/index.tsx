@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable tailwindcss/no-contradicting-classname */
+import DelayedContent from '@/components/DelayedContent';
 import ManageUsers from '@/components/ManageUsers';
 import PureComments from '@/components/PureComments';
 import PureReportHeader from '@/components/PureReportHeader';
@@ -7,6 +8,7 @@ import PureSideOverlayPanel from '@/components/PureSideOverlayPanel';
 import PureTree from '@/components/PureTree';
 import SomethingHappenedReport from '@/components/SomethingHappenedReport';
 import TableOfContents from '@/components/TableOfContents';
+import { SkeletonTemplates } from '@/enums/skeleton-templates';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
 import { Helper } from '@/helpers/Helper';
 import { HelperPermissions } from '@/helpers/check-permissions';
@@ -21,7 +23,6 @@ import type { Version } from '@/hooks/use-versions';
 import { useVersions } from '@/hooks/use-versions';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { CommonData } from '@/types/common-data';
 import type { FileToRender } from '@/types/file-to-render';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
@@ -38,7 +39,6 @@ import type {
   KysoSetting,
   NormalizedResponseDTO,
   OrganizationMember,
-  ReportDTO,
   TeamMember,
   TeamMembershipOriginEnum,
   User,
@@ -49,12 +49,9 @@ import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsActio
 import { format } from 'date-fns';
 import moment from 'moment';
 import { useRouter } from 'next/router';
-import { dirname } from 'path';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import DelayedContent from '@/components/DelayedContent';
-import { SkeletonTemplates } from '@/enums/skeleton-templates';
 import { usePublicSetting } from '../../../../hooks/use-public-setting';
 
 enum Tab {
@@ -68,9 +65,10 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
   const { orphan } = router.query;
   const globalPrivacyShowemailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
   const [selfTree, setSelfTree] = useState<GithubFileHash[]>([]);
-  const [parentTree, setParentTree] = useState<GithubFileHash[]>([]);
+  const [reportFiles, setReportFiles] = useState<KysoFile[]>([]);
   const [fileToRender, setFileToRender] = useState<FileToRender | null>(null);
-  const version = router.query.version ? (router.query.version as string) : undefined;
+  const path: string | undefined = router.query.path ? (router.query.path as string) : undefined;
+  const version: string | string[] | undefined = router.query.version ? (router.query.version as string | string[]) : undefined;
   const versions: Version[] = useVersions({
     report: reportData?.report ? reportData.report : null,
     commonData,
@@ -83,7 +81,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
       return null;
     }
     if (version) {
-      const versionNumber: number = parseInt(version, 10);
+      const versionNumber: number = parseInt(version as string, 10);
       const index: number = versions.findIndex((v) => v.version === versionNumber);
       if (index === -1) {
         return null;
@@ -117,7 +115,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
     if (!version) {
       return true;
     }
-    const versionNumber: number = parseInt(version, 10);
+    const versionNumber: number = parseInt(version as string, 10);
     if (Number.isNaN(versionNumber)) {
       return true;
     }
@@ -156,35 +154,28 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
   }, [globalPrivacyShowemailStr]);
 
   useEffect(() => {
-    if (!reportData || !reportData.report) {
+    if (!reportData || !reportData.report || !commonData || !commonData.organization || !commonData.team) {
       return;
     }
-    const getData = async () => {
-      let path = '';
-      if (router.query.path) {
-        if (Array.isArray(router.query.path)) {
-          path = (router.query.path as string[]).join('/') || '';
-        } else {
-          path = (router.query.path as string) || '';
-        }
+    const getReportFiles = async () => {
+      try {
+        const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+        const r: NormalizedResponseDTO<KysoFile[]> = await api.getReportFiles(reportData.report!.id!, version ? parseInt(version as string, 10) : undefined);
+        setReportFiles(r.data);
+      } catch (e) {
+        Helper.logError('Unexpected error getting report files', e);
       }
-      const t: GithubFileHash[] = await getTree({
-        path,
-        version,
-        report: reportData.report,
-        commonData,
-      });
-      setSelfTree(t);
-      const pt: GithubFileHash[] = await getTree({
-        path: dirname(path),
-        version,
-        report: reportData.report,
-        commonData,
-      });
-      setParentTree(pt);
     };
-    getData();
-  }, [reportData?.report?.id, router.query.path]);
+    getReportFiles();
+  }, [reportData?.report?.id, commonData?.organization, commonData?.team]);
+
+  useEffect(() => {
+    if (reportFiles.length === 0) {
+      return;
+    }
+    const st: GithubFileHash[] = Helper.getReportTree(reportFiles, path);
+    setSelfTree(st);
+  }, [path, reportFiles]);
 
   const refreshReport = async () => {
     let versionNum: number = 0;
@@ -215,40 +206,6 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
     } catch (e: unknown) {
       Helper.logError('Unexpected error setting main file', e);
     }
-  };
-
-  const getTree = async (args: { path: string; report: ReportDTO | null | undefined; version?: string; commonData: CommonData }): Promise<GithubFileHash[]> => {
-    const { report, version: v, commonData: cd } = args;
-    let { path } = args;
-    if (!report || !commonData) {
-      return [];
-    }
-    if (path === null) {
-      path = '';
-    } else if (path === '.') {
-      path = '';
-    }
-    interface ArgType {
-      reportId: string;
-      filePath: string;
-      version?: number;
-    }
-    const argsType: ArgType = {
-      reportId: report!.id as string,
-      filePath: (path as string) || '',
-    };
-    if (v && !Number.isNaN(v)) {
-      argsType.version = parseInt(v as string, 10);
-    }
-    const api: Api = new Api(commonData.token, cd.organization?.sluglified_name, cd.team?.sluglified_name);
-    const result: NormalizedResponseDTO<GithubFileHash | GithubFileHash[]> = await api.getReportFileTree(argsType);
-    let tr = [result.data];
-    if (result.data && Array.isArray(result.data)) {
-      tr = [...result.data].sort((ta, tb) => {
-        return Number(ta.type > tb.type);
-      });
-    }
-    return tr as GithubFileHash[];
   };
 
   let currentPath = '';
@@ -343,6 +300,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
             FileTypesHelper.isPlainTextFile(ftr.path) ||
             FileTypesHelper.isAdoc(ftr.path) ||
             FileTypesHelper.isMarkdown(ftr.path) ||
+            FileTypesHelper.isDockerfile(ftr.path) ||
             FileTypesHelper.isCode(ftr.path));
 
         if (ftr && downloadFile) {
@@ -673,12 +631,8 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                                   report={report}
                                   version={router.query.version as string}
                                   selfTree={selfTree}
-                                  parentTree={parentTree}
                                   selectedFile={fileToRender!}
-                                  // onNavigation={(e) => {
-                                  //   e.preventDefault()
-                                  //   router.push(e.currentTarget.href)
-                                  // }}
+                                  reportFiles={reportFiles}
                                 />
                               )}
                             </div>
@@ -706,7 +660,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                               fileToRender={fileToRender}
                               report={report}
                               authors={authors}
-                              version={version}
+                              version={version as string}
                               onUpvoteReport={async () => {
                                 const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
                                   isCurrentUserVerified(),

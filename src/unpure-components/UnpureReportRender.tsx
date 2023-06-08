@@ -295,6 +295,8 @@ const UnpureReportRender = ({
                 <img src={`${frontEndUrl}/scs${fileToRender.path_scs}`} alt={fileToRender.path} />
               ) : FileTypesHelper.isAdoc(fileToRender.path) && fileToRender.content && frontEndUrl ? (
                 <RenderAsciidoc fileUrl={`${frontEndUrl}/scs${fileToRender.path_scs}`} source={fileToRender.content} />
+              ) : FileTypesHelper.isDockerfile(fileToRender.path) && fileToRender.content && frontEndUrl ? (
+                <RenderCode code={fileToRender.content} showFileNumbers={true} />
               ) : FileTypesHelper.isCode(fileToRender.path) && fileToRender.content ? (
                 <RenderCode code={fileToRender.content} showFileNumbers={true} />
               ) : FileTypesHelper.isCsv(fileToRender.path) || FileTypesHelper.isTsv(fileToRender.path) ? (

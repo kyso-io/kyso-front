@@ -13,25 +13,23 @@ import type { Version } from '@/hooks/use-versions';
 import { useVersions } from '@/hooks/use-versions';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
 import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import type { CommonData } from '@/types/common-data';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import { Listbox, Transition } from '@headlessui/react';
+import { ViewBoardsIcon, ViewListIcon } from '@heroicons/react/outline';
 import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/solid';
-import type { GithubFileHash, InlineCommentDto, KysoSetting, NormalizedResponseDTO, OrganizationMember, ReportDTO, TeamMember, TeamMembershipOriginEnum, UserDTO } from '@kyso-io/kyso-model';
+import type { GithubFileHash, InlineCommentDto, File as KysoFile, KysoSetting, NormalizedResponseDTO, OrganizationMember, TeamMember, TeamMembershipOriginEnum, UserDTO } from '@kyso-io/kyso-model';
 import { InlineCommentStatusEnum, KysoSettingsEnum, ReportPermissionsEnum, UpdateInlineCommentDto } from '@kyso-io/kyso-model';
 import { Api, toggleUserStarReportAction } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { dirname } from 'path';
 import React, { Fragment, useEffect, useMemo, useState } from 'react';
 import 'react-tooltip/dist/react-tooltip.css';
 import Board from 'react-trello';
 import ReadMoreReact from 'read-more-react';
 import { v4 as uuidv4 } from 'uuid';
-import Link from 'next/link';
-import { ViewBoardsIcon, ViewListIcon } from '@heroicons/react/outline';
 import Pagination from '../../../../../components/Pagination';
 import PureAvatar from '../../../../../components/PureAvatar';
 import TagInlineComment from '../../../../../components/inline-comments/components/tag-inline-comment';
@@ -79,7 +77,8 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(false);
   const [selectedTab, setSelectedTab] = useState<Tab>(Tab.Toc);
   const [selfTree, setSelfTree] = useState<GithubFileHash[]>([]);
-  const [parentTree, setParentTree] = useState<GithubFileHash[]>([]);
+  const [reportFiles, setReportFiles] = useState<KysoFile[]>([]);
+  const path: string | undefined = router.query.path ? (router.query.path as string) : undefined;
   const version = router.query.version ? (router.query.version as string) : undefined;
   const [users, setUsers] = useState<UserDTO[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
@@ -298,35 +297,28 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   }, [reportData?.report]);
 
   useEffect(() => {
-    if (!reportData || !reportData.report) {
+    if (!reportData || !reportData.report || !commonData || !commonData.organization || !commonData.team) {
       return;
     }
-    const getData = async () => {
-      let path = '';
-      if (router.query.path) {
-        if (Array.isArray(router.query.path)) {
-          path = (router.query.path as string[]).join('/') || '';
-        } else {
-          path = (router.query.path as string) || '';
-        }
+    const getReportFiles = async () => {
+      try {
+        const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
+        const r: NormalizedResponseDTO<KysoFile[]> = await api.getReportFiles(reportData.report!.id!, version ? parseInt(version as string, 10) : undefined);
+        setReportFiles(r.data);
+      } catch (e) {
+        Helper.logError('Unexpected error getting report files', e);
       }
-      const t: GithubFileHash[] = await getTree({
-        path,
-        version: undefined,
-        report: reportData.report,
-        commonData,
-      });
-      setSelfTree(t);
-      const pt: GithubFileHash[] = await getTree({
-        path: dirname(path),
-        version: undefined,
-        report: reportData.report,
-        commonData,
-      });
-      setParentTree(pt);
     };
-    getData();
-  }, [reportData?.report?.id, router.query.path]);
+    getReportFiles();
+  }, [reportData?.report?.id, commonData?.organization, commonData?.team]);
+
+  useEffect(() => {
+    if (reportFiles.length === 0) {
+      return;
+    }
+    const st: GithubFileHash[] = Helper.getReportTree(reportFiles, path);
+    setSelfTree(st);
+  }, [path, reportFiles]);
 
   useEffect(() => {
     if (!commonData.team) {
@@ -350,40 +342,6 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     }
     return data;
   }, [reportData?.report]);
-
-  const getTree = async (args: { path: string; report: ReportDTO | null | undefined; version?: string; commonData: CommonData }): Promise<GithubFileHash[]> => {
-    const { report, version: v, commonData: cd } = args;
-    let { path } = args;
-    if (!report || !commonData) {
-      return [];
-    }
-    if (path === null) {
-      path = '';
-    } else if (path === '.') {
-      path = '';
-    }
-    interface ArgType {
-      reportId: string;
-      filePath: string;
-      version?: number;
-    }
-    const argsType: ArgType = {
-      reportId: report!.id as string,
-      filePath: (path as string) || '',
-    };
-    if (v && !Number.isNaN(v)) {
-      argsType.version = parseInt(v as string, 10);
-    }
-    const api: Api = new Api(commonData.token, cd.organization?.sluglified_name, cd.team?.sluglified_name);
-    const r: NormalizedResponseDTO<GithubFileHash | GithubFileHash[]> = await api.getReportFileTree(argsType);
-    let tr = [r.data];
-    if (r.data && Array.isArray(r.data)) {
-      tr = [...r.data].sort((ta, tb) => {
-        return Number(ta.type > tb.type);
-      });
-    }
-    return tr as GithubFileHash[];
-  };
 
   const refreshReport = async () => {
     let versionNum: number = 0;
@@ -579,7 +537,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                     <div className="py-2">
                       {selectedTab === Tab.Toc && <TableOfContents title="" toc={report.toc} collapsible={true} openInNewTab={false} />}
                       {selectedTab === Tab.Files && (
-                        <PureTree path={''} basePath={router.basePath} commonData={commonData} report={report} version={router.query.version as string} selfTree={selfTree} parentTree={parentTree} />
+                        <PureTree path={''} basePath={router.basePath} commonData={commonData} report={report} version={router.query.version as string} selfTree={selfTree} reportFiles={reportFiles} />
                       )}
                     </div>
                   </React.Fragment>

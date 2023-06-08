@@ -49,6 +49,10 @@ export class FileTypesHelper {
     return name.toLowerCase().endsWith('.js') || name.toLowerCase().endsWith('.jsx');
   };
 
+  public static isDockerfile = (name: string) => {
+    return name.toLowerCase().endsWith('dockerfile');
+  };
+
   public static isTypescript = (name: string) => {
     return name.toLowerCase().endsWith('.ts') || name.toLowerCase().endsWith('.tsx');
   };
@@ -189,6 +193,7 @@ export class FileTypesHelper {
     return (
       (name != null && FileTypesHelper.isImage(name)) ||
       FileTypesHelper.isCode(name) ||
+      FileTypesHelper.isDockerfile(name) ||
       FileTypesHelper.isPlainTextFile(name) ||
       FileTypesHelper.isJupyterNotebook(name) ||
       FileTypesHelper.isOnlyOffice(name) ||

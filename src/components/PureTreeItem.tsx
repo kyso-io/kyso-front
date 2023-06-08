@@ -11,7 +11,7 @@ import TableOfContents from './TableOfContents';
 type IPureTreeItemProps = {
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   treeItem: any;
-  href?: string;
+  href: string;
   isMainFile: boolean;
   selectedFile?: FileToRender;
   onNavigation?: (e: React.MouseEvent<HTMLElement>) => void;
@@ -74,7 +74,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
 
   return (
     <>
-      <Link href={href || `/${treeItem.path}`} className={classNames(thisItemIsTheSelectedFile(selectedFile?.path_scs!, treeItem?.path_scs) ? 'bg-blue' : '')}>
+      <Link href={href} className={classNames(thisItemIsTheSelectedFile(selectedFile?.path_scs!, treeItem?.path_scs) ? 'bg-blue' : '')}>
         <span
           className={classNames('p-2 text-sm group flex items-center justify-between', thisItemIsTheSelectedFile(selectedFile?.path_scs!, treeItem?.path_scs) ? 'bg-gray-200' : 'hover:bg-gray-100')}
           onClick={(e) => {

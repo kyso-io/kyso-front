@@ -1,12 +1,12 @@
 /* eslint no-new: "off" */
-import { KeyValue } from '@/model/key-value.model';
-import type { InlineCommentDto, ReportDTO } from '@kyso-io/kyso-model';
-import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
-import { fetchPublicKysoSettings, store } from '@kyso-io/kyso-store';
-import slugify from 'slugify';
-import _ from 'lodash';
 import { ToasterIcons } from '@/enums/toaster-icons';
+import { KeyValue } from '@/model/key-value.model';
 import type { CommonData } from '@/types/common-data';
+import type { InlineCommentDto, File as KysoFile, ReportDTO } from '@kyso-io/kyso-model';
+import { GithubFileHash, TeamVisibilityEnum } from '@kyso-io/kyso-model';
+import { fetchPublicKysoSettings, store } from '@kyso-io/kyso-store';
+import _ from 'lodash';
+import slugify from 'slugify';
 import { OrganizationSettingsTab } from '../enums/organization-settings-tab';
 import { ToasterMessages } from './ToasterMessages';
 
@@ -471,5 +471,52 @@ export class Helper {
       strict: true,
       trim: true,
     });
+  }
+
+  public static getReportTree(reportFiles: KysoFile[], path: string | string[] | undefined): GithubFileHash[] {
+    let filteredReportFiles: KysoFile[] = [...reportFiles];
+    let kysoFile: KysoFile | undefined;
+    let currentPath: string = '';
+    let j = -1;
+    if (Array.isArray(path) && path.length > 0) {
+      j = path.length - 1;
+      kysoFile = reportFiles.find((f: KysoFile) => f.name === path.join('/'));
+      if (kysoFile) {
+        currentPath = (path as string[]).slice(0, path.length - 1).join('/');
+      } else {
+        currentPath = path.join('/');
+      }
+      filteredReportFiles = reportFiles.filter((f: KysoFile) => f.name.startsWith(currentPath));
+    }
+    const filteredFiles: GithubFileHash[] = [];
+    for (const f of filteredReportFiles) {
+      let fileName = f.name;
+      if (currentPath && f.name.startsWith(currentPath)) {
+        fileName = f.name.replace(currentPath, '');
+      }
+      if (fileName.startsWith('/')) {
+        fileName = fileName.slice(1);
+      }
+      const nameParts: string[] = fileName.split('/');
+      if (nameParts.length > 1) {
+        let id: string = '';
+        let newPath: string = '';
+        if (j !== -1) {
+          id = nameParts.slice(0, j + 1).join('/');
+          newPath = currentPath ? `${currentPath}/${nameParts[0]!}` : nameParts[0]!;
+        } else {
+          id = nameParts[0]!;
+          newPath = currentPath ? `${currentPath}/${nameParts[0]!}` : nameParts[0]!;
+        }
+        const index: number = filteredFiles.findIndex((ff: GithubFileHash) => ff.id === id);
+        if (index === -1) {
+          filteredFiles.push(new GithubFileHash(id, 'folder', newPath, '', '', '', f.version));
+        }
+      } else {
+        // It's a file
+        filteredFiles.push(new GithubFileHash(f.id!, 'file', f.name, f.sha, '', f.path_scs, f.version));
+      }
+    }
+    return filteredFiles.sort((ta: GithubFileHash, tb: GithubFileHash) => Number(ta.type > tb.type));
   }
 }

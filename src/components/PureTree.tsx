@@ -3,8 +3,10 @@ import classNames from '@/helpers/class-names';
 import type { CommonData } from '@/types/common-data';
 import type { FileToRender } from '@/types/file-to-render';
 import { ChevronLeftIcon } from '@heroicons/react/solid';
-import type { GithubFileHash, ReportDTO } from '@kyso-io/kyso-model';
+import type { GithubFileHash, File as KysoFile, ReportDTO } from '@kyso-io/kyso-model';
 import Link from 'next/link';
+import { useMemo } from 'react';
+import { Helper } from '../helpers/Helper';
 
 type IPureTree = {
   path: string;
@@ -13,13 +15,30 @@ type IPureTree = {
   report: ReportDTO;
   version: string;
   selfTree: GithubFileHash[];
-  parentTree: GithubFileHash[];
+  reportFiles: KysoFile[];
   selectedFile?: FileToRender;
   onNavigation?: (e: React.MouseEvent<HTMLElement>) => void;
 };
 
 const PureTree = (props: IPureTree) => {
-  const { path, basePath, version, commonData, report, selfTree = [], parentTree = [], onNavigation, selectedFile } = props;
+  const { path, basePath, version, commonData, report, selfTree, onNavigation, selectedFile, reportFiles } = props;
+
+  const backHref: string = useMemo(() => {
+    const pathParts: string[] = path.split('/');
+    if (pathParts.length === 0) {
+      return '';
+    }
+    if (pathParts.length === 1) {
+      return `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}${version ? `?version=${version}` : ``}`;
+    }
+    const tmpParts: string[] = path.split('/');
+    tmpParts.pop();
+    const st: GithubFileHash[] = Helper.getReportTree(reportFiles, tmpParts);
+    if (st.length >= 1) {
+      return `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}/${tmpParts.join('/')}${version ? `?version=${version}` : ``}`;
+    }
+    return `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}/${version ? `?version=${version}` : ``}`;
+  }, [path, version, reportFiles]);
 
   let currentPath = '';
   if (path) {
@@ -30,13 +49,8 @@ const PureTree = (props: IPureTree) => {
 
   let currentItem: GithubFileHash | null | undefined = null;
 
-  if (selfTree && parentTree) {
-    currentItem = [...selfTree, ...parentTree].find((treeItem) => treeItem.path === lastPathSegment);
-  }
-
-  let tree = selfTree;
-  if (currentItem?.type === 'file') {
-    tree = parentTree;
+  if (selfTree) {
+    currentItem = selfTree.find((treeItem) => treeItem.path === lastPathSegment);
   }
 
   const reportUrl = `${basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}`;
@@ -54,54 +68,6 @@ const PureTree = (props: IPureTree) => {
     });
 
   crumbs = [{ path: report.name, href: reportUrl }, ...crumbs];
-
-  const getNewPath = (item?: GithubFileHash): string => {
-    // if item is undefined it means go up
-    let newUrl = ``;
-    // lets go up
-    const existingPathIsFile = currentItem?.type === 'file';
-    if (!item) {
-      const sliceIndex = existingPathIsFile ? 2 : 1;
-      newUrl = `${reportUrl}/${currentPath.split('/').slice(0, -sliceIndex).join('/')}`;
-    }
-
-    // default case normal folder link
-    const isFile = item?.type === 'file';
-
-    if (item && !isFile) {
-      // its a folder
-      if (existingPathIsFile) {
-        const dirPath = currentPath.split('/').slice(0, -1).join('/');
-        const newPath: string | null = `${dirPath ? `${dirPath}/` : ''}${item?.path}`;
-        newUrl = `${reportUrl}/${newPath}`;
-      } else {
-        const newPath: string | null = `${currentPath ? `${currentPath}/` : ''}${item?.path}`;
-        newUrl = `${reportUrl}/${newPath}`;
-      }
-    }
-
-    if (item && isFile) {
-      if (item?.path === lastPathSegment) {
-        // do nothing since its a re-click
-        newUrl = `#`;
-      } else if (!existingPathIsFile) {
-        // its currently on a folder
-        const newPath: string | null = `${currentItem ? `${currentPath}/` : ''}${item?.path}`;
-        newUrl = `${reportUrl}/${newPath}`;
-      } else {
-        // its currently on a file
-        const dirPath = currentPath.split('/').slice(0, -1).join('/');
-        const newPath: string | null = `${dirPath ? `${dirPath}/` : ''}${item?.path}`;
-        newUrl = `${reportUrl}/${newPath}`;
-      }
-    }
-
-    if (version) {
-      newUrl = `${newUrl}?version=${version}`;
-    }
-
-    return newUrl;
-  };
 
   return (
     <div className="flex flex-col space-y-2 w-full">
@@ -129,7 +95,7 @@ const PureTree = (props: IPureTree) => {
           )
         }
 
-        <Link href={getNewPath()}>
+        <Link href={backHref}>
           <span
             className={classNames('text-sm items-center group flex min-h-[24px]', currentPath ? 'text-gray-400 hover:underline cursor-pointer' : 'text-gray-200 cursor-default')}
             onClick={onNavigation}
@@ -142,8 +108,15 @@ const PureTree = (props: IPureTree) => {
 
       <div className="text-ellipsis overflow-hidden">
         {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-        {tree?.map((item: any) => (
-          <PureTreeItem onNavigation={onNavigation} key={item.path} treeItem={item} isMainFile={item.id === report.main_file_id} href={getNewPath(item)} selectedFile={selectedFile} />
+        {selfTree.map((item: any) => (
+          <PureTreeItem
+            onNavigation={onNavigation}
+            key={item.path}
+            treeItem={item}
+            isMainFile={item.id === report.main_file_id}
+            href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}/${item.path}${version ? `?version=${version}` : ``}`}
+            selectedFile={selectedFile}
+          />
         ))}
       </div>
     </div>
