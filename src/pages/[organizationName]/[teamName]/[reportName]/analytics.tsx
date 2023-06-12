@@ -357,7 +357,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     const getReportFiles = async () => {
       try {
         const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name, commonData.team?.sluglified_name);
-        const r: NormalizedResponseDTO<KysoFile[]> = await api.getReportFiles(reportData.report!.id!, version ? parseInt(version as string, 10) : undefined);
+        const r: NormalizedResponseDTO<KysoFile[]> = await api.getReportFiles(reportData.report!.id!, version ? parseInt(version as string, 10) : reportData.report!.last_version);
         setReportFiles(r.data);
       } catch (e) {
         Helper.logError('Unexpected error getting report files', e);
