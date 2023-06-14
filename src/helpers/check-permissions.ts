@@ -1,5 +1,6 @@
 import type { CommonData } from '@/types/common-data';
-import type { KysoPermissions, ResourcePermissions } from '@kyso-io/kyso-model';
+import type { KysoPermissions, ResourcePermissions, TokenPermissions } from '@kyso-io/kyso-model';
+import { GlobalPermissionsEnum, TeamVisibilityEnum } from '@kyso-io/kyso-model';
 
 export class HelperPermissions {
   /**
@@ -169,4 +170,50 @@ export class HelperPermissions {
 
     return true;
   };
+
+  static hasPermissions(permissions: TokenPermissions, kysoPermissions: KysoPermissions[], organizationId: string, teamId: string): boolean {
+    if (kysoPermissions.length === 0) {
+      return false;
+    }
+
+    const glovalAdminKysoPermissions: KysoPermissions | undefined = permissions.global!.find((x: KysoPermissions) => x === GlobalPermissionsEnum.GLOBAL_ADMIN);
+
+    // triple absurd checking because a GLOBAL ADMIN DESERVES IT
+    if (glovalAdminKysoPermissions) {
+      return true;
+    }
+
+    // Check if user has the required permissions in the team
+    let userPermissionsInThatTeam: ResourcePermissions | undefined;
+    if (teamId) {
+      userPermissionsInThatTeam = permissions.teams!.find((x: ResourcePermissions) => x.id.toLowerCase() === teamId.toLowerCase());
+    }
+
+    // Check if user has the required permissions in the organization
+    let userPermissionsInThatOrganization: ResourcePermissions | undefined;
+
+    // If the team is private we should not take into account the organization permissions
+    if (userPermissionsInThatTeam && userPermissionsInThatTeam.team_visibility !== TeamVisibilityEnum.PRIVATE) {
+      userPermissionsInThatOrganization = permissions.organizations!.find((x: ResourcePermissions) => x.id.toLowerCase() === organizationId);
+    }
+
+    let allUserPermissions: KysoPermissions[] = [];
+
+    if (userPermissionsInThatTeam && userPermissionsInThatTeam?.permissions && userPermissionsInThatTeam.permissions.length > 0) {
+      allUserPermissions = [...userPermissionsInThatTeam.permissions];
+    } else if (userPermissionsInThatOrganization && userPermissionsInThatTeam && userPermissionsInThatTeam.organization_inherited && userPermissionsInThatTeam?.permissions) {
+      allUserPermissions = [...userPermissionsInThatOrganization.permissions!];
+    }
+
+    if (userPermissionsInThatOrganization) {
+      allUserPermissions = [...allUserPermissions, ...userPermissionsInThatOrganization.permissions!];
+    }
+
+    // Finally, check the global permissions
+    if (permissions.global) {
+      allUserPermissions = [...allUserPermissions, ...permissions.global];
+    }
+
+    return kysoPermissions.some((i: KysoPermissions) => allUserPermissions.includes(i));
+  }
 }

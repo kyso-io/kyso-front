@@ -76,6 +76,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
   const [reportFiles, setReportFiles] = useState<KysoFile[]>([]);
   const version: string | string[] | undefined = router.query.version ? (router.query.version as string | string[]) : undefined;
   const random: string = uuidv4();
+  const hasPermissionCreateReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData, random]);
   const hasPermissionEditReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData, random]);
   const hasPermissionDeleteReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.DELETE), [commonData, random]);
   const hasPermissionEditReportOnlyMine: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT_ONLY_MINE), [commonData, random]);
@@ -332,6 +333,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                 await dispatch(toggleUserStarReportAction(report.id as string));
                 refreshReport();
               }}
+              hasPermissionCreateReport={hasPermissionCreateReport}
               hasPermissionEditReport={hasPermissionEditReport || (report.author_ids.includes(commonData.user?.id as string) && hasPermissionEditReportOnlyMine)}
               hasPermissionDeleteReport={hasPermissionDeleteReport}
               commonData={commonData}

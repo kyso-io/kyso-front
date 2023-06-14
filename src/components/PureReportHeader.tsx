@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import PureShareButton from '@/components/PureShareButton';
 import PureVersionsDropdown from '@/components/PureVersionsDropdown';
 import { FileTypesHelper } from '@/helpers/FileTypesHelper';
@@ -12,6 +11,7 @@ import { ExternalLinkIcon, ThumbUpIcon } from '@heroicons/react/solid';
 import type { ReportDTO, UserDTO } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import format from 'date-fns/format';
+import Link from 'next/link';
 import type { ReactElement } from 'react';
 import { useMemo } from 'react';
 import ReadMoreReact from 'read-more-react';
@@ -32,6 +32,7 @@ type IPureReportHeaderProps = {
   versions: Version[];
   onUpvoteReport: () => void;
   commonData: CommonData;
+  hasPermissionCreateReport: boolean;
   hasPermissionEditReport: boolean;
   hasPermissionDeleteReport: boolean;
   children?: ReactElement;
@@ -61,6 +62,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
     reportUrl,
     onUpvoteReport,
     commonData,
+    hasPermissionCreateReport,
     hasPermissionEditReport,
     hasPermissionDeleteReport,
     onSetFileAsMainFile,
@@ -207,6 +209,7 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
               <UnpureReportActionDropdown
                 report={report}
                 commonData={commonData}
+                hasPermissionCreateReport={hasPermissionCreateReport}
                 hasPermissionDeleteReport={hasPermissionDeleteReport}
                 hasPermissionEditReport={hasPermissionEditReport}
                 fileToRender={fileToRender}

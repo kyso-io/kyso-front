@@ -1,23 +1,25 @@
+import { ToasterIcons } from '@/enums/toaster-icons';
+import { Helper } from '@/helpers/Helper';
+import { ToasterMessages } from '@/helpers/ToasterMessages';
 import { useAppDispatch } from '@/hooks/redux-hooks';
 import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
-import { DotsVerticalIcon, PencilIcon, PresentationChartLineIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
+import { ArchiveIcon, DotsVerticalIcon, PencilIcon, PresentationChartLineIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
 import { deleteReportAction } from '@kyso-io/kyso-store';
-import { classNames } from 'primereact/utils';
-import React, { Fragment, useMemo } from 'react';
-import { Helper } from '@/helpers/Helper';
-import { ToasterMessages } from '@/helpers/ToasterMessages';
-import { ToasterIcons } from '@/enums/toaster-icons';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import type { FileToRender } from '../types/file-to-render';
+import { classNames } from 'primereact/utils';
+import React, { Fragment, useMemo, useState } from 'react';
+import MoveReportModal from '../components/MoveReportModal';
 import KTasksIcon from '../icons/KTasksIcon';
+import type { FileToRender } from '../types/file-to-render';
 
 interface Props {
   report: ReportDTO;
   fileToRender: FileToRender | null;
   commonData: CommonData;
+  hasPermissionCreateReport: boolean;
   hasPermissionDeleteReport: boolean;
   hasPermissionEditReport: boolean;
   onSetFileAsMainFile: () => void;
@@ -29,8 +31,21 @@ interface Props {
 
 const UnpureReportActionDropdown = (props: Props) => {
   const router = useRouter();
-  const { report, fileToRender, commonData, hasPermissionDeleteReport, hasPermissionEditReport, onSetFileAsMainFile, version, isCurrentUserVerified, isCurrentUserSolvedCaptcha, showToaster } = props;
+  const {
+    report,
+    fileToRender,
+    commonData,
+    hasPermissionCreateReport,
+    hasPermissionDeleteReport,
+    hasPermissionEditReport,
+    onSetFileAsMainFile,
+    version,
+    isCurrentUserVerified,
+    isCurrentUserSolvedCaptcha,
+    showToaster,
+  } = props;
   const dispatch = useAppDispatch();
+  const [showMoveReportModal, setShowMoveReportModal] = useState<boolean>(false);
 
   const canChangeReportMainFile: boolean = useMemo(() => {
     if (!hasPermissionEditReport || !report || !fileToRender) {
@@ -69,7 +84,7 @@ const UnpureReportActionDropdown = (props: Props) => {
   };
 
   return (
-    <>
+    <React.Fragment>
       <Menu as="div" className="p-1.5 px-2 font-medium hover:bg-gray-100 text-sm relative inline-block" style={{ zIndex: 3 }}>
         <Menu.Button className="rounded-full flex items-center text-gray-400 hover:text-gray-600 focus:outline-none">
           <span className="sr-only">Open options</span>
@@ -86,6 +101,14 @@ const UnpureReportActionDropdown = (props: Props) => {
         >
           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none">
             <div className="py-1">
+              {hasPermissionCreateReport && (
+                <Menu.Item>
+                  <span onClick={() => setShowMoveReportModal(true)} className={classNames('text-gray-700', 'px-4 py-2 text-sm hover:bg-gray-100 group flex items-center cursor-pointer')}>
+                    <ArchiveIcon className="mr-2 h-5 w-5 text-gray-700" />
+                    Move report
+                  </span>
+                </Menu.Item>
+              )}
               <Menu.Item>
                 <Link
                   href={`/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report.name}/analytics`}
@@ -145,7 +168,8 @@ const UnpureReportActionDropdown = (props: Props) => {
           </Menu.Items>
         </Transition>
       </Menu>
-    </>
+      <MoveReportModal show={showMoveReportModal} setShow={setShowMoveReportModal} report={report} commonData={commonData} showToaster={showToaster} />
+    </React.Fragment>
   );
 };
 

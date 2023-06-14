@@ -534,6 +534,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
     () => (commonData.team?.visibility === TeamVisibilityEnum.PUBLIC ? true : HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.READ)),
     [commonData, random],
   );
+  const hasPermissionCreateReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.CREATE), [commonData, random]);
   const hasPermissionDeleteReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.DELETE), [commonData, random]);
   const hasPermissionEditReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData, random]);
   const hasPermissionEditReportOnlyMine: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT_ONLY_MINE), [commonData, random]);
@@ -680,6 +681,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                                 hasPermissionEditReport ||
                                 /* report.user_id === commonData.user?.id || */ (report.author_ids.includes(commonData.user?.id as string) && hasPermissionEditReportOnlyMine)
                               }
+                              hasPermissionCreateReport={hasPermissionCreateReport}
                               hasPermissionDeleteReport={hasPermissionDeleteReport}
                               commonData={commonData}
                               onSetFileAsMainFile={setReportFileAsMainFile}
