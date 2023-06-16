@@ -123,6 +123,12 @@ const options: { title: string; description: string; key: string; disabled_for_c
     key: 'report_comment_removed',
     disabled_for_channel: false,
   },
+  {
+    title: 'Report moved',
+    description: 'Receive a notification every time a report is moved',
+    key: 'report_moved',
+    disabled_for_channel: false,
+  },
   // INLINE COMMENTS
   {
     title: 'New task in report',
