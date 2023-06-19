@@ -137,9 +137,9 @@ const PureCommentForm = (props: IPureCommentForm) => {
 
   const itemTemplate = (suggestion: TeamMember) => {
     return (
-      <div className="flex flex-row items-center space-x-2 text-sm p-2 cursor-pointer hover:bg-blue-200">
+      <div className="flex flex-row items-center space-x-2 text-sm p-2 cursor-pointer hover:bg-blue-200" title={suggestion.nameSlug}>
         <PureAvatar src={suggestion.avatar_url} title={suggestion.nameSlug} size={TailwindHeightSizeEnum.H5} textSize={TailwindFontSizeEnum.XS} />
-        <div>{suggestion.nameSlug}</div>
+        <div title={suggestion.nameSlug}>{suggestion.nameSlug}</div>
       </div>
     );
   };
@@ -160,8 +160,8 @@ const PureCommentForm = (props: IPureCommentForm) => {
             onSearch={onSearch}
             name="input"
             value={value}
-            onChange={(e) => {
-              const text: string = (e.target as HTMLInputElement).value || '';
+            onChange={(e: any) => {
+              const text: string = mentionsRef.current.getInput().value || '';
               const newHeight: number = text ? Math.max((e.target as any).scrollHeight, MIN_HEIGHT_TEXTAREA) : MIN_HEIGHT_TEXTAREA;
               (e.target as any).style.height = `${newHeight}px`;
               setValue(text);

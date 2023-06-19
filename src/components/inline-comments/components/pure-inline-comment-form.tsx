@@ -157,7 +157,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
               onSearch={onSearch}
               name="input"
               value={value}
-              onChange={(e) => setValue((e.target as HTMLInputElement).value)}
+              onChange={() => setValue(mentionsRef.current.getInput().value)}
               field="nameSlug"
               style={{
                 width: '100%',
