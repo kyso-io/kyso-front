@@ -248,12 +248,12 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
 
   const onCloseCaptchaModal = async (refreshUser: boolean) => {
     setShowCaptchaModal(false);
-
     if (refreshUser) {
       const api: Api = new Api(commonData.token);
       const result: NormalizedResponseDTO<UserDTO> = await api.getUserFromToken();
       setUser(result.data);
     }
+    hideToaster();
   };
 
   return (
