@@ -180,7 +180,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                 </button>
               </React.Fragment>
             )}
-            {isUserAuthor && hasPermissionCreateComment && (
+            {isUserAuthor && hasPermissionCreateComment && isLastVersion && (
               <React.Fragment>
                 {isClosed ? (
                   <React.Fragment>
@@ -225,7 +225,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
               {isUserAuthor ? 'You' : comment?.user_name}
               {comment?.created_at ? ` wrote ${moment(new Date(comment.created_at)).fromNow()}` : ''}
             </div>
-            {canChangeStatus && !replying && !parentInlineComment ? (
+            {canChangeStatus && !replying && !parentInlineComment && isLastVersion ? (
               <Popover className="relative inline-block">
                 <Popover.Button className="focus:outline-none">
                   <div className="flex flex-row items-center cursor-pointer">
@@ -305,7 +305,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                 Cancel
               </span>
             )}
-            {hasPermissionCreateComment && !replying && !parentInlineComment && (
+            {hasPermissionCreateComment && !replying && !parentInlineComment && isLastVersion && (
               <React.Fragment>
                 {isClosed ? (
                   <React.Fragment>

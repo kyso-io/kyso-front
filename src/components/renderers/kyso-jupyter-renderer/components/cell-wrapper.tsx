@@ -92,8 +92,8 @@ const CellWrapper = (props: Props) => {
     if (!cell.hasOwnProperty('id') || !cell.id) {
       return false;
     }
-    if (!commonData.user) {
-      // User is not logged, check if there are comments
+    if (!commonData.user || !isLastVersion) {
+      // User is not logged or the current version of the report is not the last one, check if there are comments
       return inlineCommentDtos.length > 0;
     }
     return true;

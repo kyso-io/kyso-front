@@ -36,7 +36,7 @@ const PureInlineCommentStatusHistory = (props: IPureInlineComment) => {
 
               if (inlineStatusHistory.from_status === null) {
                 return (
-                  <React.Fragment key={0}>
+                  <React.Fragment key={index}>
                     <li>
                       <div className="relative pb-8">
                         <span className="absolute left-5 top-5 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
