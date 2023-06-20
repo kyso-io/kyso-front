@@ -18,7 +18,6 @@ import ReadMoreReact from 'read-more-react';
 import { Helper } from '../helpers/Helper';
 import { isReportDownloadable } from '../helpers/is-report-downloadable';
 import type { FileToRender } from '../types/file-to-render';
-import GitMetaDataDropdown from './GitMetaDataDropdown';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureTagGroup from './PureTagGroup';
 
@@ -192,7 +191,15 @@ const PureReportHeader = (props: IPureReportHeaderProps) => {
                 Compare versions
               </Link>
             )}
-            {fileToRender !== null && fileToRender.git_metadata !== null && fileToRender.git_metadata.repository && <GitMetaDataDropdown fileToRender={fileToRender} />}
+            {fileToRender !== null && fileToRender.git_metadata !== null && fileToRender.git_metadata.repository && (
+              <Link
+                href={fileToRender.git_metadata!.repository}
+                target="_blank"
+                className="p-2 font-medium hover:bg-gray-100 text-sm text-gray-700 flex flex-row items-center focus:ring-0 focus:outline-none"
+              >
+                <img src="/assets/images/git.png" width={35} alt="" />
+              </Link>
+            )}
             {showCloneDropDown && (
               <UnpureCloneDropdown
                 reportUrl={`${frontEndUrl}${reportUrl}`}
