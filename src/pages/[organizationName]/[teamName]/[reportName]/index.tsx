@@ -39,12 +39,13 @@ import type {
   KysoSetting,
   NormalizedResponseDTO,
   OrganizationMember,
+  ResourcePermissions,
   TeamMember,
   TeamMembershipOriginEnum,
   User,
   UserDTO,
 } from '@kyso-io/kyso-model';
-import { CommentPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
+import { CommentPermissionsEnum, GlobalPermissionsEnum, InlineCommentPermissionsEnum, KysoSettingsEnum, ReportPermissionsEnum, TeamVisibilityEnum, UpdateReportRequestDTO } from '@kyso-io/kyso-model';
 import { Api, createCommentAction, deleteCommentAction, fetchReportCommentsAction, toggleUserStarReportAction, updateCommentAction } from '@kyso-io/kyso-store';
 import { format } from 'date-fns';
 import moment from 'moment';
@@ -539,8 +540,84 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
   const hasPermissionEditReport: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT), [commonData, random]);
   const hasPermissionEditReportOnlyMine: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, ReportPermissionsEnum.EDIT_ONLY_MINE), [commonData, random]);
   const hasPermissionCreateInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.CREATE), [commonData, random]);
-  const hasPermissionEditInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData, random]);
-  const hasPermissionDeleteInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData, random]);
+  // const hasPermissionEditInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.EDIT), [commonData, random]);
+  // const hasPermissionDeleteInlineComment: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, InlineCommentPermissionsEnum.DELETE), [commonData, random]);
+  const hasPermissionEditDeleteInlineComment: boolean = useMemo(() => {
+    if (!commonData.user || !commonData.organization || !commonData.team || !commonData.permissions || !reportData || !reportData.report) {
+      return false;
+    }
+    if (commonData.permissions.global) {
+      const isGlobalAdmin: boolean = commonData.permissions.global.includes(GlobalPermissionsEnum.GLOBAL_ADMIN);
+      if (isGlobalAdmin) {
+        return true;
+      }
+    }
+    if (commonData.permissions.organizations) {
+      const orgResourcePermissions: ResourcePermissions | undefined = commonData.permissions.organizations.find((x: ResourcePermissions) => x.id === commonData.organization!.id);
+      if (orgResourcePermissions && orgResourcePermissions.role_names) {
+        const isOrgAdmin: boolean = orgResourcePermissions.role_names.includes('organization-admin');
+        if (isOrgAdmin) {
+          return true;
+        }
+        const isTeamAdmin: boolean = orgResourcePermissions.role_names.includes('team-admin');
+        if (isTeamAdmin) {
+          return true;
+        }
+      }
+    }
+    if (commonData.permissions.teams) {
+      const teamResourcePermissions: ResourcePermissions | undefined = commonData.permissions.teams.find((x: ResourcePermissions) => x.id === commonData.team!.id);
+      if (teamResourcePermissions && teamResourcePermissions.role_names) {
+        const isTeamAdmin: boolean = teamResourcePermissions.role_names.includes('team-admin');
+        if (isTeamAdmin) {
+          return true;
+        }
+      }
+    }
+    return reportData.report.author_ids.includes(commonData.user.id);
+  }, [commonData, random, reportData]);
+  const hasPermissionUpdateStatusInlineComment: boolean = useMemo(() => {
+    if (!commonData.user || !commonData.organization || !commonData.team || !commonData.permissions || !reportData || !reportData.report) {
+      return false;
+    }
+    if (commonData.permissions.global) {
+      const isGlobalAdmin: boolean = commonData.permissions.global.includes(GlobalPermissionsEnum.GLOBAL_ADMIN);
+      if (isGlobalAdmin) {
+        return true;
+      }
+    }
+    if (commonData.permissions.organizations) {
+      const orgResourcePermissions: ResourcePermissions | undefined = commonData.permissions.organizations.find((x: ResourcePermissions) => x.id === commonData.organization!.id);
+      if (orgResourcePermissions && orgResourcePermissions.role_names) {
+        const isOrgAdmin: boolean = orgResourcePermissions.role_names.includes('organization-admin');
+        if (isOrgAdmin) {
+          return true;
+        }
+        const isTeamAdmin: boolean = orgResourcePermissions.role_names.includes('team-admin');
+        if (isTeamAdmin) {
+          return true;
+        }
+        const isTeamContributor: boolean = orgResourcePermissions.role_names.includes('team-contributor');
+        if (isTeamContributor) {
+          return true;
+        }
+      }
+    }
+    if (commonData.permissions.teams) {
+      const teamResourcePermissions: ResourcePermissions | undefined = commonData.permissions.teams.find((x: ResourcePermissions) => x.id === commonData.team!.id);
+      if (teamResourcePermissions && teamResourcePermissions.role_names) {
+        const isTeamAdmin: boolean = teamResourcePermissions.role_names.includes('team-admin');
+        if (isTeamAdmin) {
+          return true;
+        }
+        const isTeamContributor: boolean = teamResourcePermissions.role_names.includes('team-contributor');
+        if (isTeamContributor) {
+          return true;
+        }
+      }
+    }
+    return reportData.report.author_ids.includes(commonData.user.id);
+  }, [commonData, random, reportData]);
 
   const report = reportData ? reportData.report : null;
   const authors = reportData ? reportData.authors : [];
@@ -794,9 +871,10 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                                 commonData={commonData}
                                 onlyVisibleCell={onlyVisibleCell}
                                 frontEndUrl={frontEndUrl}
-                                enabledCreateInlineComment={hasPermissionCreateInlineComment}
-                                enabledEditInlineComment={hasPermissionEditInlineComment}
-                                enabledDeleteInlineComment={hasPermissionDeleteInlineComment}
+                                hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
+                                hasPermissionEditInlineComment={hasPermissionEditDeleteInlineComment}
+                                hasPermissionDeleteInlineComment={hasPermissionEditDeleteInlineComment}
+                                hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
                                 isCurrentUserVerified={isCurrentUserVerified}
                                 isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
                                 setUser={setUser}

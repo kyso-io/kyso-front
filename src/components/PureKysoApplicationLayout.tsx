@@ -1,4 +1,5 @@
 import { SkeletonTemplates } from '@/enums/skeleton-templates';
+import KTasksIcon from '@/icons/KTasksIcon';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { CommonData } from '@/types/common-data';
@@ -8,13 +9,12 @@ import { MenuIcon, XIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, ReportDTO } from '@kyso-io/kyso-model';
 import { KysoEventEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
 import type { ReactElement } from 'react';
 import React, { Fragment, useEffect, useState } from 'react';
-import Link from 'next/link';
-import KTasksIcon from '@/icons/KTasksIcon';
 import eventBus from '../helpers/event-bus';
 import BreadcrumbNavbar from './BreadcrumbNavbar';
 import DelayedContent from './DelayedContent';

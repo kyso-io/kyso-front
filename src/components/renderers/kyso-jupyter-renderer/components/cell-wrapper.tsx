@@ -8,10 +8,10 @@ import { useRouter } from 'next/router';
 import { Tooltip } from 'primereact/tooltip';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useHover } from 'usehooks-ts';
+import KTasksIcon from '../../../../icons/KTasksIcon';
 import type { ReportContext } from '../../kyso-markdown-renderer/interfaces/context';
 import type { Cell as ICell } from '../interfaces/jupyter-notebook';
 import Cell from './cell';
-import KTasksIcon from '../../../../icons/KTasksIcon';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
@@ -33,9 +33,10 @@ interface Props {
   createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
   updateInlineComment: (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteInlineComment: (id: string) => void;
-  enabledCreateInlineComment: boolean;
-  enabledDeleteInlineComment: boolean;
-  enabledEditInlineComment: boolean;
+  hasPermissionCreateInlineComment: boolean;
+  hasPermissionEditInlineComment: boolean;
+  hasPermissionDeleteInlineComment: boolean;
+  hasPermissionUpdateStatusInlineComment: boolean;
   onlyVisibleCell?: string;
   isLastVersion: boolean;
   showToaster: (message: string, icon: JSX.Element) => void;
@@ -54,8 +55,10 @@ const CellWrapper = (props: Props) => {
     onlyVisibleCell,
     first,
     channelMembers,
-    enabledCreateInlineComment,
-    enabledDeleteInlineComment,
+    hasPermissionCreateInlineComment,
+    hasPermissionEditInlineComment,
+    hasPermissionDeleteInlineComment,
+    hasPermissionUpdateStatusInlineComment,
     createInlineComment,
     updateInlineComment,
     deleteInlineComment,
@@ -191,8 +194,10 @@ const CellWrapper = (props: Props) => {
             commonData={commonData}
             report={report}
             channelMembers={channelMembers}
-            hasPermissionCreateComment={enabledCreateInlineComment}
-            hasPermissionDeleteComment={enabledDeleteInlineComment}
+            hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
+            hasPermissionEditInlineComment={hasPermissionEditInlineComment}
+            hasPermissionDeleteInlineComment={hasPermissionDeleteInlineComment}
+            hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
             comments={inlineCommentDtos}
             relations={relations}
             createInlineComment={createInlineComment}

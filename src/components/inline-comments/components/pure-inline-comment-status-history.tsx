@@ -1,11 +1,11 @@
 import PureAvatar from '@/components/PureAvatar';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import type { InlineCommentDto, UserDTO, InlineCommentStatusHistoryDto } from '@kyso-io/kyso-model';
+import { TagIcon } from '@heroicons/react/solid';
+import type { InlineCommentDto, InlineCommentStatusHistoryDto, UserDTO } from '@kyso-io/kyso-model';
 import moment from 'moment';
 import Link from 'next/link';
 import React from 'react';
-import { TagIcon } from '@heroicons/react/solid';
 import TagInlineComment from './tag-inline-comment';
 
 type IPureInlineComment = {
@@ -103,7 +103,13 @@ const PureInlineCommentStatusHistory = (props: IPureInlineComment) => {
                             </Link>
                           </div>
                           <p className="mt-0.5 text-sm text-gray-500">
-                            Changed status to <TagInlineComment status={inlineStatusHistory.to_status} /> {moment(inlineStatusHistory.date).fromNow()}
+                            {inlineStatusHistory.edited ? (
+                              <React.Fragment>Edited this task {moment(inlineStatusHistory.date).fromNow()}</React.Fragment>
+                            ) : (
+                              <React.Fragment>
+                                Changed status to <TagInlineComment status={inlineStatusHistory.to_status} /> {moment(inlineStatusHistory.date).fromNow()}
+                              </React.Fragment>
+                            )}
                           </p>
                         </div>
                       </div>

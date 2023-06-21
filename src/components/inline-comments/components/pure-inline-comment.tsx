@@ -11,7 +11,7 @@ import type { CommonData } from '@/types/common-data';
 import { Popover } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
 import type { InlineCommentDto, Relations, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
-import { GlobalPermissionsEnum, InlineCommentStatusEnum, OrganizationPermissionsEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
+import { InlineCommentStatusEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import moment from 'moment';
@@ -19,14 +19,15 @@ import { useRouter } from 'next/router';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Helper } from '../../../helpers/Helper';
-import { HelperPermissions } from '../../../helpers/check-permissions';
 import PureInlineCommentForm from './pure-inline-comment-form';
 import PureInlineCommentStatusHistory from './pure-inline-comment-status-history';
 import TagInlineComment from './tag-inline-comment';
 
 type IPureInlineComment = {
-  hasPermissionCreateComment: boolean;
-  hasPermissionDeleteComment: boolean;
+  hasPermissionCreateInlineComment: boolean;
+  hasPermissionEditInlineComment: boolean;
+  hasPermissionDeleteInlineComment: boolean;
+  hasPermissionUpdateStatusInlineComment: boolean;
   commonData: CommonData;
   comment: InlineCommentDto;
   relations: Relations;
@@ -45,15 +46,16 @@ const PureInlineComment = (props: IPureInlineComment) => {
   const {
     commonData,
     channelMembers,
-    hasPermissionDeleteComment,
-    hasPermissionCreateComment,
+    hasPermissionCreateInlineComment,
+    hasPermissionEditInlineComment,
+    hasPermissionDeleteInlineComment,
+    hasPermissionUpdateStatusInlineComment,
     comment,
     relations,
     deleteComment,
     createInlineComment,
     updateInlineComment,
     parentInlineComment,
-    report,
     isLastVersion,
     showToaster,
   } = props;
@@ -65,11 +67,6 @@ const PureInlineComment = (props: IPureInlineComment) => {
   const [replying, setReplying] = useState<boolean>(false);
   const [commentText, setCommentText] = useState<string>(comment.text);
   const [statusHistoryUsers, setStatusHistoryUsers] = useState<UserDTO[]>([]);
-  const isOrgAdmin: boolean = useMemo(() => {
-    const copyCommonData: CommonData = { ...commonData, team: null };
-    return HelperPermissions.checkPermissions(copyCommonData, GlobalPermissionsEnum.GLOBAL_ADMIN) || HelperPermissions.checkPermissions(copyCommonData, OrganizationPermissionsEnum.ADMIN);
-  }, [commonData]);
-  const isTeamAdmin: boolean = useMemo(() => HelperPermissions.checkPermissions(commonData, TeamPermissionsEnum.ADMIN), [commonData]);
   const isUserAuthor: boolean = useMemo(() => commonData.user !== undefined && commonData.user !== null && comment !== null && commonData.user.id === comment.user_id, [commonData.user, comment]);
   const isClosed: boolean = useMemo(() => {
     if (parentInlineComment) {
@@ -77,15 +74,6 @@ const PureInlineComment = (props: IPureInlineComment) => {
     }
     return comment.current_status === InlineCommentStatusEnum.CLOSED;
   }, [comment, parentInlineComment]);
-  const isReportAuthor: boolean = useMemo(() => {
-    if (!commonData.user || !comment) {
-      return false;
-    }
-    return report.author_ids.includes(commonData.user.id);
-  }, [commonData.user, comment]);
-  const canChangeStatus: boolean = useMemo(() => {
-    return isUserAuthor || isReportAuthor;
-  }, [isUserAuthor, isReportAuthor]);
 
   useEffect(() => {
     if (!comment || !comment.text) {
@@ -149,7 +137,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
             channelMembers={channelMembers}
             onSubmitted={() => setIsEditing(!isEditing)}
             onCancel={() => setIsEditing(!isEditing)}
-            hasPermissionCreateComment={hasPermissionCreateComment}
+            hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
             isEdition={true}
           />
         </div>
@@ -180,7 +168,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                 </button>
               </React.Fragment>
             )}
-            {isUserAuthor && hasPermissionCreateComment && isLastVersion && (
+            {(hasPermissionEditInlineComment || isUserAuthor) && isLastVersion && (
               <React.Fragment>
                 {isClosed ? (
                   <React.Fragment>
@@ -196,7 +184,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
                 )}
               </React.Fragment>
             )}
-            {((isUserAuthor && hasPermissionDeleteComment) || isOrgAdmin || isTeamAdmin) && !isClosed && isLastVersion && (
+            {(hasPermissionDeleteInlineComment || isUserAuthor) && !isClosed && isLastVersion && (
               <button
                 className="hover:underline"
                 onClick={() => {
@@ -225,7 +213,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
               {isUserAuthor ? 'You' : comment?.user_name}
               {comment?.created_at ? ` wrote ${moment(new Date(comment.created_at)).fromNow()}` : ''}
             </div>
-            {canChangeStatus && !replying && !parentInlineComment && isLastVersion ? (
+            {(hasPermissionUpdateStatusInlineComment || isUserAuthor) && !replying && !parentInlineComment && isLastVersion ? (
               <Popover className="relative inline-block">
                 <Popover.Button className="focus:outline-none">
                   <div className="flex flex-row items-center cursor-pointer">
@@ -300,12 +288,12 @@ const PureInlineComment = (props: IPureInlineComment) => {
                 <TagInlineComment status={comment.current_status!} />
               </div>
             ) : null}
-            {hasPermissionCreateComment && replying && (
+            {hasPermissionCreateInlineComment && replying && (
               <span onClick={() => setReplying(false)} className="cursor-pointer">
                 Cancel
               </span>
             )}
-            {hasPermissionCreateComment && !replying && !parentInlineComment && isLastVersion && (
+            {hasPermissionCreateInlineComment && !replying && !parentInlineComment && isLastVersion && (
               <React.Fragment>
                 {isClosed ? (
                   <React.Fragment>
@@ -332,7 +320,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
             channelMembers={channelMembers}
             onSubmitted={() => setReplying(false)}
             onCancel={() => setReplying(false)}
-            hasPermissionCreateComment={hasPermissionCreateComment}
+            hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
             isReply={true}
           />
         </div>

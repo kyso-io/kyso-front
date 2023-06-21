@@ -20,8 +20,10 @@ type IPureComments = {
   channelMembers: TeamMember[];
   comments: InlineCommentDto[];
   relations: Relations;
-  hasPermissionCreateComment: boolean;
-  hasPermissionDeleteComment: boolean;
+  hasPermissionCreateInlineComment: boolean;
+  hasPermissionEditInlineComment: boolean;
+  hasPermissionDeleteInlineComment: boolean;
+  hasPermissionUpdateStatusInlineComment: boolean;
   createInlineComment: (user_ids: string[], text: string, parent_id: string | null) => void;
   updateInlineComment: (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteComment: (id: string) => void;
@@ -37,8 +39,10 @@ const PureInlineComments = (props: IPureComments) => {
     commonData,
     report,
     channelMembers,
-    hasPermissionDeleteComment,
-    hasPermissionCreateComment,
+    hasPermissionCreateInlineComment,
+    hasPermissionEditInlineComment,
+    hasPermissionDeleteInlineComment,
+    hasPermissionUpdateStatusInlineComment,
     deleteComment,
     createInlineComment,
     updateInlineComment,
@@ -53,12 +57,14 @@ const PureInlineComments = (props: IPureComments) => {
           comments.map((inlineComment: InlineCommentDto) => (
             <React.Fragment key={inlineComment.id}>
               <PureInlineComment
-                hasPermissionDeleteComment={hasPermissionDeleteComment}
                 channelMembers={channelMembers}
                 comment={inlineComment}
                 relations={relations}
                 report={report}
-                hasPermissionCreateComment={hasPermissionCreateComment}
+                hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
+                hasPermissionEditInlineComment={hasPermissionEditInlineComment}
+                hasPermissionDeleteInlineComment={hasPermissionDeleteInlineComment}
+                hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
                 commonData={commonData}
                 deleteComment={deleteComment}
                 createInlineComment={createInlineComment}
@@ -70,12 +76,14 @@ const PureInlineComments = (props: IPureComments) => {
               {inlineComment.inline_comments.map((childComment: InlineCommentDto) => (
                 <PureInlineComment
                   key={childComment.id}
-                  hasPermissionDeleteComment={hasPermissionDeleteComment}
                   channelMembers={channelMembers}
                   comment={childComment}
                   relations={relations}
                   report={report}
-                  hasPermissionCreateComment={hasPermissionCreateComment}
+                  hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
+                  hasPermissionEditInlineComment={hasPermissionEditInlineComment}
+                  hasPermissionDeleteInlineComment={hasPermissionDeleteInlineComment}
+                  hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
                   commonData={commonData}
                   deleteComment={deleteComment}
                   createInlineComment={createInlineComment}
@@ -88,7 +96,7 @@ const PureInlineComments = (props: IPureComments) => {
             </React.Fragment>
           ))}
       </div>
-      {commonData.user && hasPermissionCreateComment && isLastVersion && showCreateNewComment && (
+      {commonData.user && hasPermissionCreateInlineComment && isLastVersion && showCreateNewComment && (
         <div className={clsx({ 'mt-20': comments && comments.length > 0 })}>
           <PureInlineCommentForm
             user={commonData.user}

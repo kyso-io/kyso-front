@@ -35,9 +35,10 @@ interface Props {
   frontEndUrl?: string;
   onlyVisibleCell?: string;
   channelMembers: TeamMember[];
-  enabledCreateInlineComment: boolean;
-  enabledEditInlineComment: boolean;
-  enabledDeleteInlineComment: boolean;
+  hasPermissionCreateInlineComment: boolean;
+  hasPermissionEditInlineComment: boolean;
+  hasPermissionDeleteInlineComment: boolean;
+  hasPermissionUpdateStatusInlineComment: boolean;
   setUser: (user: UserDTO) => void;
   isCurrentUserSolvedCaptcha: () => boolean;
   isCurrentUserVerified: () => boolean;
@@ -52,9 +53,10 @@ const UnpureReportRender = ({
   fileToRender,
   commonData,
   channelMembers,
-  enabledCreateInlineComment,
-  enabledEditInlineComment,
-  enabledDeleteInlineComment,
+  hasPermissionCreateInlineComment,
+  hasPermissionEditInlineComment,
+  hasPermissionDeleteInlineComment,
+  hasPermissionUpdateStatusInlineComment,
   isCurrentUserVerified,
   isCurrentUserSolvedCaptcha,
   isLastVersion,
@@ -266,9 +268,10 @@ const UnpureReportRender = ({
             createInlineComment={createInlineComment}
             updateInlineComment={updateInlineComment}
             deleteInlineComment={deleteInlineComment}
-            enabledCreateInlineComment={enabledCreateInlineComment}
-            enabledEditInlineComment={enabledEditInlineComment}
-            enabledDeleteInlineComment={enabledDeleteInlineComment}
+            hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
+            hasPermissionEditInlineComment={hasPermissionEditInlineComment}
+            hasPermissionDeleteInlineComment={hasPermissionDeleteInlineComment}
+            hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
             isLastVersion={isLastVersion}
             showToaster={showToaster}
           />
@@ -333,8 +336,10 @@ const UnpureReportRender = ({
                   commonData={commonData}
                   report={report}
                   channelMembers={channelMembers}
-                  hasPermissionCreateComment={enabledCreateInlineComment}
-                  hasPermissionDeleteComment={enabledDeleteInlineComment}
+                  hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
+                  hasPermissionEditInlineComment={hasPermissionEditInlineComment}
+                  hasPermissionDeleteInlineComment={hasPermissionDeleteInlineComment}
+                  hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
                   comments={inlineComments}
                   relations={relations}
                   createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(fileToRender.id, user_ids, text, parent_id)}

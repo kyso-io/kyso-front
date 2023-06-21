@@ -18,9 +18,10 @@ interface Props {
   createInlineComment: (cell_id: string, user_ids: string[], text: string, parent_id: string | null) => void;
   updateInlineComment: (originalComment: InlineCommentDto, id: string, user_ids: string[], text: string, status: InlineCommentStatusEnum) => void;
   deleteInlineComment: (id: string) => void;
-  enabledCreateInlineComment: boolean;
-  enabledDeleteInlineComment: boolean;
-  enabledEditInlineComment: boolean;
+  hasPermissionCreateInlineComment: boolean;
+  hasPermissionEditInlineComment: boolean;
+  hasPermissionDeleteInlineComment: boolean;
+  hasPermissionUpdateStatusInlineComment: boolean;
   isLastVersion: boolean;
   showToaster: (message: string, icon: JSX.Element) => void;
 }
@@ -38,9 +39,10 @@ export const RenderJupyter = ({
   deleteInlineComment,
   onlyVisibleCell,
   updateInlineComment,
-  enabledCreateInlineComment,
-  enabledDeleteInlineComment,
-  enabledEditInlineComment,
+  hasPermissionCreateInlineComment,
+  hasPermissionEditInlineComment,
+  hasPermissionDeleteInlineComment,
+  hasPermissionUpdateStatusInlineComment,
   isLastVersion,
   showToaster,
 }: Props) => {
@@ -71,9 +73,10 @@ export const RenderJupyter = ({
             createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(key, user_ids, text, parent_id)}
             deleteInlineComment={deleteInlineComment}
             updateInlineComment={updateInlineComment}
-            enabledCreateInlineComment={enabledCreateInlineComment}
-            enabledDeleteInlineComment={enabledDeleteInlineComment}
-            enabledEditInlineComment={enabledEditInlineComment}
+            hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
+            hasPermissionEditInlineComment={hasPermissionEditInlineComment}
+            hasPermissionDeleteInlineComment={hasPermissionDeleteInlineComment}
+            hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
             isLastVersion={isLastVersion}
             showToaster={showToaster}
           />
