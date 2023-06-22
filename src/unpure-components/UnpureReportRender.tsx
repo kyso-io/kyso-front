@@ -18,15 +18,14 @@ import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import { Tooltip } from 'primereact/tooltip';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState } from 'react';
 import ReactPlayer from 'react-player';
 import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
 import eventBus from '../helpers/event-bus';
+import KAddTasksIcon from '../icons/KAddTaskIcon';
 import type { FileToRender } from '../types/file-to-render';
-import PureSideOverlayCommentsPanel from './UnpureSideOverlayCommentsPanel';
-
-// const BASE_64_REGEX = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
 
 interface Props {
   fileToRender: FileToRender;
@@ -62,13 +61,11 @@ const UnpureReportRender = ({
   isLastVersion,
   showToaster,
 }: Props) => {
-  // const [isShownInput, setIsShownInput] = useState(false);
-  // const [isShownOutput, setIsShownOutput] = useState(false);
   const router = useRouter();
   const { taskId } = router.query;
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
   const [relations, setRelations] = useState<Relations>({});
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [showCreateNewComment, setShowCreateNewComment] = useState<boolean>(false);
 
   const getReportInlineComments = async () => {
     try {
@@ -261,8 +258,6 @@ const UnpureReportRender = ({
             onlyVisibleCell={onlyVisibleCell}
             channelMembers={channelMembers}
             jupyterNotebook={JSON.parse(fileToRender.content as string)}
-            showInputs={true}
-            showOutputs={true}
             inlineComments={inlineComments}
             relations={relations}
             createInlineComment={createInlineComment}
@@ -279,7 +274,7 @@ const UnpureReportRender = ({
       ) : (
         <div className="flex flex-col">
           <div className="flex flex-row">
-            <div className={clsx(sidebarOpen ? 'w-9/12' : 'w-11/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>
+            <div className={clsx('w-9/12', !fileToRender.path.endsWith('.html') ? 'p-4' : '')}>
               {fileToRender.path.endsWith('.html') ? (
                 <PureIframeRenderer file={fileToRender} />
               ) : FileTypesHelper.isMarkdown(fileToRender.path) && fileToRender.content ? (
@@ -324,32 +319,40 @@ const UnpureReportRender = ({
                 </div>
               )}
             </div>
-            <div className={classNames(sidebarOpen ? 'w-3/12' : 'w-1/12', 'hidden lg:block p-2 min-w-fit border-l')}>
-              <PureSideOverlayCommentsPanel
-                key={report?.id!}
-                setSidebarOpen={(p) => setSidebarOpen(p)}
+            <div className={classNames('w-3/12', 'hidden lg:block p-2 min-w-fit border-l')}>
+              <div className="relative items-center flex flex-row w-full justify-start">
+                <Tooltip target=".overlay-comments-info" />
+                <button
+                  data-pr-position="bottom"
+                  data-pr-tooltip="Create a new task"
+                  type="button"
+                  className="overlay-comments-info p-1 border h-fit rounded-md text-gray-900 hover:text-gray-700 focus:outline-none focus:ring-0 hover:bg-gray-50"
+                  onClick={() => setShowCreateNewComment(true)}
+                >
+                  <KAddTasksIcon className="h-6 w-6" aria-hidden="true" />
+                </button>
+              </div>
+              <PureInlineComments
                 commonData={commonData}
-                tooltipOpenText="Open file's tasks"
-                tooltipCloseText="Close file's tasks"
-              >
-                <PureInlineComments
-                  commonData={commonData}
-                  report={report}
-                  channelMembers={channelMembers}
-                  hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
-                  hasPermissionEditInlineComment={hasPermissionEditInlineComment}
-                  hasPermissionDeleteInlineComment={hasPermissionDeleteInlineComment}
-                  hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
-                  comments={inlineComments}
-                  relations={relations}
-                  createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => createInlineComment(fileToRender.id, user_ids, text, parent_id)}
-                  updateInlineComment={updateInlineComment}
-                  deleteComment={deleteInlineComment}
-                  isLastVersion={isLastVersion}
-                  showCreateNewComment={true}
-                  showToaster={showToaster}
-                />
-              </PureSideOverlayCommentsPanel>
+                report={report}
+                channelMembers={channelMembers}
+                hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
+                hasPermissionEditInlineComment={hasPermissionEditInlineComment}
+                hasPermissionDeleteInlineComment={hasPermissionDeleteInlineComment}
+                hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
+                comments={inlineComments}
+                relations={relations}
+                createInlineComment={(user_ids: string[], text: string, parent_id: string | null) => {
+                  createInlineComment(fileToRender.id, user_ids, text, parent_id);
+                  setShowCreateNewComment(false);
+                }}
+                updateInlineComment={updateInlineComment}
+                deleteComment={deleteInlineComment}
+                isLastVersion={isLastVersion}
+                showCreateNewComment={showCreateNewComment}
+                setShowCreateNewComment={setShowCreateNewComment}
+                showToaster={showToaster}
+              />
             </div>
           </div>
         </div>

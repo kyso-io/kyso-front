@@ -29,6 +29,7 @@ type IPureComments = {
   deleteComment: (id: string) => void;
   isLastVersion: boolean;
   showCreateNewComment: boolean;
+  setShowCreateNewComment: (show: boolean) => void;
   showToaster: (message: string, icon: JSX.Element) => void;
 };
 
@@ -48,6 +49,7 @@ const PureInlineComments = (props: IPureComments) => {
     updateInlineComment,
     isLastVersion,
     showCreateNewComment,
+    setShowCreateNewComment,
     showToaster,
   } = props;
   return (
@@ -97,12 +99,11 @@ const PureInlineComments = (props: IPureComments) => {
           ))}
       </div>
       {commonData.user && hasPermissionCreateInlineComment && isLastVersion && showCreateNewComment && (
-        <div className={clsx({ 'mt-20': comments && comments.length > 0 })}>
+        <div className={clsx({ 'mt-10': comments && comments.length > 0 })}>
           <PureInlineCommentForm
             user={commonData.user}
-            submitComment={(text: string, userIds: string[]) => {
-              createInlineComment(userIds, text, null);
-            }}
+            submitComment={(text: string, userIds: string[]) => createInlineComment(userIds, text, null)}
+            onCancel={() => setShowCreateNewComment(false)}
             channelMembers={channelMembers}
           />
         </div>
