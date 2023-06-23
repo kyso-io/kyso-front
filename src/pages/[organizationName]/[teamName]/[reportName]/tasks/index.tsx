@@ -819,10 +819,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
                       Card: (e: any) => {
                         const inlineCommentDto: InlineCommentDto = e.metadata;
                         return (
-                          <Link
-                            href={`/${router.query.organizationName}/${router.query.teamName}/${router.query.reportName}/tasks/${inlineCommentDto.id}`}
-                            className="overflow-hidden bg-white sm:rounded-lg sm:shadow cursor-pointer"
-                          >
+                          <Link href={Helper.buildTaskDetailPage(inlineCommentDto, report)} className="overflow-hidden bg-white sm:rounded-lg sm:shadow cursor-pointer">
                             <div className="bg-white px-4 py-5 sm:px-6 my-1">
                               <div className="flex space-x-3">
                                 <div className="shrink-0">
