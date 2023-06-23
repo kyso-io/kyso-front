@@ -61,8 +61,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
   } = props;
 
   const router = useRouter();
-  const { taskId } = router.query;
-
+  const { taskId, scrollCellId } = router.query;
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [replying, setReplying] = useState<boolean>(false);
   const [commentText, setCommentText] = useState<string>(comment.text);
@@ -74,6 +73,19 @@ const PureInlineComment = (props: IPureInlineComment) => {
     }
     return comment.current_status === InlineCommentStatusEnum.CLOSED;
   }, [comment, parentInlineComment]);
+
+  useEffect(() => {
+    if (!scrollCellId) {
+      return;
+    }
+    setTimeout(() => {
+      const element = document.getElementById(`taskId-${scrollCellId as string}`);
+      if (!element) {
+        return;
+      }
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 500);
+  }, [scrollCellId]);
 
   useEffect(() => {
     if (!comment || !comment.text) {
@@ -119,7 +131,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
   }
 
   return (
-    <div className="not-prose">
+    <div className="not-prose" id={`taskId-${comment.cell_id}`}>
       {comment && isEditing ? (
         <div className={clsx(parentInlineComment ? 'ml-10' : '')}>
           <PureInlineCommentForm
@@ -199,7 +211,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
             )}
           </div>
 
-          {(taskId as string) === comment.id ? (
+          {(taskId as string) === comment.id || comment?.cell_id === scrollCellId ? (
             <mark className="mb-2 mt-1 k-highlighted-text">
               <RenderMarkdown source={commentText} />
             </mark>

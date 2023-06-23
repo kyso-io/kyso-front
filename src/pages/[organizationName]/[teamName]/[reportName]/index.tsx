@@ -850,9 +850,10 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                                 <button
                                   onClick={() => {
                                     const qs = { ...router.query };
+                                    const scrollCellId = qs.cell;
                                     delete qs.cell;
                                     return router.push({
-                                      query: { ...qs },
+                                      query: { ...qs, scrollCellId },
                                     });
                                   }}
                                   className="ml-1 text-blue-500"
