@@ -200,7 +200,7 @@ const PureInlineComment = (props: IPureInlineComment) => {
           </div>
 
           {(taskId as string) === comment.id ? (
-            <mark className="mb-2 mt-1">
+            <mark className="mb-2 mt-1 k-highlighted-text">
               <RenderMarkdown source={commentText} />
             </mark>
           ) : (

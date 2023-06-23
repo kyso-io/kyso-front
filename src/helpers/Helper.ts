@@ -405,7 +405,7 @@ export class Helper {
         const fitsInRegex = regex.test(part);
 
         if (fitsInRegex) {
-          return `<mark key="${i}">${part}</mark>`;
+          return `<mark key="${i}" class="k-highlighted-text">${part}</mark>`;
         }
         return part;
       });

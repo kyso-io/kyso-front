@@ -54,6 +54,10 @@ img.k-right-logo {
   display: none;
 }
 
+.k-highlighted-text {
+  background-color: #ffee80;
+}
+
 /* Read more component */
 .read-more-button {
   color: blue;
@@ -208,8 +212,6 @@ img.k-right-logo {
   line-height: 1.25rem;
 }
 
-
-
 /**** Terminal ****/
 .terminal-window {
   text-align: left;
@@ -225,7 +227,7 @@ img.k-right-logo {
 }
 
 .terminal-window header {
-  background: #E0E8F0;
+  background: #e0e8f0;
   height: 30px;
   border-radius: 8px 8px 0 0;
   padding-left: 10px;
@@ -240,22 +242,22 @@ img.k-right-logo {
 }
 
 .terminal-window header .button.green {
-  background: #3BB662;
+  background: #3bb662;
 }
 
 .terminal-window header .button.yellow {
-  background: #E5C30F;
+  background: #e5c30f;
 }
 
 .terminal-window header .button.red {
-  background: #E75448;
+  background: #e75448;
 }
 
 .terminal-window section.terminal {
   color: white;
-  font-family: Menlo, Monaco, "Consolas", "Courier New", "Courier";
+  font-family: Menlo, Monaco, 'Consolas', 'Courier New', 'Courier';
   font-size: 11pt;
-  background: #30353A;
+  background: #30353a;
   padding: 10px;
   box-sizing: border-box;
   position: absolute;
@@ -266,15 +268,19 @@ img.k-right-logo {
 }
 
 .terminal-window section.terminal .typed-cursor {
-    opacity: 1;
-    -webkit-animation: blink 0.7s infinite;
-    -moz-animation: blink 0.7s infinite;
-    animation: blink 0.7s infinite;
+  opacity: 1;
+  -webkit-animation: blink 0.7s infinite;
+  -moz-animation: blink 0.7s infinite;
+  animation: blink 0.7s infinite;
 }
 
-.terminal-data { 
+.terminal-data {
   position: inherit;
   color: greenyellow;
 }
-.terminal-window .gray { color: gray; }
-.terminal-window .green { color: green;}
+.terminal-window .gray {
+  color: gray;
+}
+.terminal-window .green {
+  color: green;
+}
