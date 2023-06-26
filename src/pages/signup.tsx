@@ -191,8 +191,8 @@ const Index = () => {
 
       <div className="w-full min-h-full flex flex-col">
         <div className="border-b p-4 flex flex-row items-center justify-between">
-          <img className="h-8 theme-left-logo" alt="Left logo" />
-          <img className="h-8 theme-right-logo" alt="Right logo" />
+          <img className="h-8 k-left-logo" alt="Left logo" />
+          <img className="h-8 k-right-logo" alt="Right logo" />
         </div>
         <div className="text-right">{notification && <PureNotification message={notification} type={notificationType} />}</div>
         <main className="flex lg:flex-row lg:space-y-0 space-y-4 flex-col mt-20 items-center mx-auto max-w-[1400px] space-x-10">
