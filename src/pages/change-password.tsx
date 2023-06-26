@@ -30,10 +30,29 @@ const ChangePassword = () => {
     }
     setRequesting(true);
     try {
+      const decodedText: string = decodeURIComponent(email!);
+      const replacedEmail: string = decodedText.replace(/[^\w.@/]/g, (match) => {
+        switch (match) {
+          case ' ':
+            return '+';
+          case '%40':
+            return '@';
+          case '%2F':
+            return '/';
+          case '%3F':
+            return '?';
+          case '%3D':
+            return '=';
+          default:
+            return match;
+        }
+      });
       const api: Api = new Api();
-      const userChangePasswordDto: UserChangePasswordDTO = new UserChangePasswordDTO(email!, token!, password);
+      const userChangePasswordDto: UserChangePasswordDTO = new UserChangePasswordDTO(replacedEmail, token!, password);
       const response: NormalizedResponseDTO<boolean> = await api.changePassword(userChangePasswordDto);
       if (response.data) {
+        setNotificationType('success');
+        setNotification(`Password changed successfully. Redirecting to home page...`);
         setTimeout(() => {
           router.replace('/');
         }, 1000);
