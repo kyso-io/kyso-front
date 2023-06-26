@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import CaptchaModal from '@/components/CaptchaModal';
 import PureKysoApplicationLayout from '@/components/PureKysoApplicationLayout';
-import Terminal from '@/components/Terminal';
 import ToasterNotification from '@/components/ToasterNotification';
 import { ToasterIcons } from '@/enums/toaster-icons';
 import { checkJwt } from '@/helpers/check-jwt';
@@ -262,7 +261,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
         {React.cloneElement(children, { commonData, reportData, setReportData, setUser, showToaster, hideToaster, isCurrentUserSolvedCaptcha, isCurrentUserVerified, isUserLogged, isCaptchaEnabled })}
         <ToasterNotification show={toasterVisible} setShow={setToasterVisible} icon={toasterIcon} message={toasterMessage} backgroundColor={TailwindColor.SLATE_50} />
         {commonData.user && <CaptchaModal user={commonData.user!} open={showCaptchaModal} onClose={onCloseCaptchaModal} />}
-        <Terminal />
+        {/* <Terminal /> */}
       </React.Fragment>
     </PureKysoApplicationLayout>
   );
