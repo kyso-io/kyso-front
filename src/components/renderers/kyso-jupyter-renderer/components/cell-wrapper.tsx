@@ -2,7 +2,7 @@ import PureInlineComments from '@/components/inline-comments/components/pure-inl
 import { Helper } from '@/helpers/Helper';
 import { useNavigateToHashOnce } from '@/hooks/use-navigate-to-hash-once';
 import type { CommonData } from '@/types/common-data';
-import { LinkIcon } from '@heroicons/react/outline';
+import { InformationCircleIcon, LinkIcon } from '@heroicons/react/outline';
 import type { InlineCommentDto, InlineCommentStatusEnum, Relations, ReportDTO, TeamMember } from '@kyso-io/kyso-model';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
@@ -73,17 +73,16 @@ const CellWrapper = (props: Props) => {
 
   useNavigateToHashOnce({ active: true });
 
-  const showIconComments: boolean = useMemo(() => {
+  const showCreateInlineComment: boolean = useMemo(() => {
     /* eslint-disable no-prototype-builtins */
     if (!cell.hasOwnProperty('id') || !cell.id) {
       return false;
     }
     if (!commonData.user || !isLastVersion) {
-      // User is not logged or the current version of the report is not the last one, check if there are comments
-      return inlineCommentDtos.length > 0;
+      return false;
     }
     return true;
-  }, [commonData, cell]);
+  }, [commonData, cell, isLastVersion]);
 
   const hoverRef = useRef(null);
   const isHover = useHover(hoverRef);
@@ -106,11 +105,11 @@ const CellWrapper = (props: Props) => {
           <div className={clsx('flex flex-row w-fit rounded divide-x divide-x-1', isHover ? 'border bg-gray-50' : '')} style={{ height: isHover ? 'auto' : '34px' }}>
             {isHover && (
               <React.Fragment>
-                {showIconComments && (
+                {showCreateInlineComment && (
                   <React.Fragment>
-                    <Tooltip target="#showCommentsButton" autoHide position="bottom" content="Create new task" />
+                    <Tooltip target="#showCreateNewTask" autoHide position="bottom" content="Create a new task" />
                     <button
-                      id="showCommentsButton"
+                      id="showCreateNewTask"
                       className={clsx('h-8 max-w-12 flex p-2 items-center justify-center text-xs text-gray-500', 'hover:bg-gray-300')}
                       onClick={() => {
                         if (showCreateNewComment) {
@@ -122,6 +121,19 @@ const CellWrapper = (props: Props) => {
                       <KAddTasksIcon className="w-6 h-6" />
                     </button>
                   </React.Fragment>
+                )}
+                {!showCreateInlineComment && inlineComments.length > 0 && (
+                  <div className="relative items-center flex flex-row w-full justify-start">
+                    <Tooltip target=".overlay-inline-comments-info" />
+                    <button
+                      data-pr-position="bottom"
+                      data-pr-tooltip="You can not create, edit, change the status or delete tasks in lower versions of the report."
+                      type="button"
+                      className="overlay-inline-comments-info p-1 border h-fit rounded-md text-gray-900 hover:text-gray-700 focus:outline-none focus:ring-0 hover:bg-gray-50"
+                    >
+                      <InformationCircleIcon className="h-6 w-6" aria-hidden="true" color="gray" />
+                    </button>
+                  </div>
                 )}
                 {cell?.id && (
                   <React.Fragment>

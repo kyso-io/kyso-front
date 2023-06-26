@@ -20,8 +20,9 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { Tooltip } from 'primereact/tooltip';
 import { classNames } from 'primereact/utils';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import ReactPlayer from 'react-player';
+import { InformationCircleIcon } from '@heroicons/react/outline';
 import RenderCsvTsvInfiniteScroll from '../components/renderers/RenderCsvTsvInfiniteScroll';
 import eventBus from '../helpers/event-bus';
 import KAddTasksIcon from '../icons/KAddTaskIcon';
@@ -66,6 +67,13 @@ const UnpureReportRender = ({
   const [inlineComments, setInlineComments] = useState<InlineCommentDto[] | []>([]);
   const [relations, setRelations] = useState<Relations>({});
   const [showCreateNewComment, setShowCreateNewComment] = useState<boolean>(false);
+
+  const showCreateInlineComment: boolean = useMemo(() => {
+    if (!commonData.user || !isLastVersion) {
+      return false;
+    }
+    return true;
+  }, [commonData, isLastVersion]);
 
   const getReportInlineComments = async () => {
     try {
@@ -320,18 +328,33 @@ const UnpureReportRender = ({
               )}
             </div>
             <div className={classNames('w-3/12', 'hidden lg:block p-2 min-w-fit border-l')}>
-              <div className="relative items-center flex flex-row w-full justify-start">
-                <Tooltip target=".overlay-comments-info" />
-                <button
-                  data-pr-position="bottom"
-                  data-pr-tooltip="Create a new task"
-                  type="button"
-                  className="overlay-comments-info p-1 border h-fit rounded-md text-gray-900 hover:text-gray-700 focus:outline-none focus:ring-0 hover:bg-gray-50"
-                  onClick={() => setShowCreateNewComment(true)}
-                >
-                  <KAddTasksIcon className="h-6 w-6" aria-hidden="true" />
-                </button>
-              </div>
+              {showCreateInlineComment && (
+                <div className="relative items-center flex flex-row w-full justify-start">
+                  <Tooltip target=".overlay-create-inline-comments" />
+                  <button
+                    data-pr-position="bottom"
+                    data-pr-tooltip="Create a new task"
+                    type="button"
+                    className="overlay-create-inline-comments p-1 border h-fit rounded-md text-gray-900 hover:text-gray-700 focus:outline-none focus:ring-0 hover:bg-gray-50"
+                    onClick={() => setShowCreateNewComment(true)}
+                  >
+                    <KAddTasksIcon className="h-6 w-6" aria-hidden="true" />
+                  </button>
+                </div>
+              )}
+              {!showCreateInlineComment && inlineComments.length > 0 && (
+                <div className="relative items-center flex flex-row w-full justify-start">
+                  <Tooltip target=".overlay-inline-comments-info" />
+                  <button
+                    data-pr-position="bottom"
+                    data-pr-tooltip="You can not create, edit, change the status or delete tasks in lower versions of the report."
+                    type="button"
+                    className="overlay-inline-comments-info p-1 border h-fit rounded-md text-gray-900 hover:text-gray-700 focus:outline-none focus:ring-0 hover:bg-gray-50"
+                  >
+                    <InformationCircleIcon className="h-6 w-6" aria-hidden="true" color="gray" />
+                  </button>
+                </div>
+              )}
               <PureInlineComments
                 commonData={commonData}
                 report={report}

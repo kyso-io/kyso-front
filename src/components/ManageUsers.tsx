@@ -259,10 +259,24 @@ const ManageUsers = ({
         const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
         const addUserOrganizationDto: AddUserOrganizationDto = new AddUserOrganizationDto(commonData.organization!.id!, userId, organizationRole);
         await api.addUserToOrganization(addUserOrganizationDto);
-        showToaster('User added to the organization successfully', ToasterIcons.SUCCESS);
+        if (!teamRole) {
+          showToaster('User added to the organization successfully', ToasterIcons.SUCCESS);
+        }
       } catch (e) {
-        showToaster(ToasterMessages.nonSpecificError(), ToasterIcons.ERROR);
+        showToaster("We're sorry! Something happened adding the user to the organization. Please try again.", ToasterIcons.ERROR);
         Helper.logError('Unexpected error', e);
+      }
+      if (teamRole) {
+        try {
+          const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+          const userRoleDTO: UserRoleDTO = new UserRoleDTO(userId, teamRole);
+          const updateTeamMembersDTO: UpdateTeamMembersDTO = new UpdateTeamMembersDTO([userRoleDTO]);
+          await api.updateTeamMemberRoles(commonData.team!.id!, updateTeamMembersDTO);
+          showToaster('User added to the channel successfully', ToasterIcons.SUCCESS);
+        } catch (e) {
+          showToaster("We're sorry! Something happened adding the user to the channel. Please try again.", ToasterIcons.ERROR);
+          Helper.logError('Unexpected error', e);
+        }
       }
     } else {
       if (!members[index]!.organization_roles.includes(organizationRole)) {
