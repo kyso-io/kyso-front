@@ -198,7 +198,7 @@ const Index = () => {
                 <p className="mt-6 text-lg leading-6">{onboardingMessages.welcome_message}</p>
 
                 <PureVideoModal setOpen={setOpen} isOpen={isOpen} demoUrl={onboardingMessages.demo_url} />
-                <div className="my-11 justify-center text-center mx-auto max-w-sm" onClick={() => setOpen(!isOpen)}>
+                <div className="my-11 justify-center text-center mx-auto max-w-sm cursor-pointer" onClick={() => setOpen(!isOpen)}>
                   <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10 hover:opacity-60 hover:cursor-pointer">
                     <img src="/static/demo.png" alt="" className="absolute inset-0 h-full w-full opacity-90" />
                   </div>

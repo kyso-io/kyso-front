@@ -108,9 +108,13 @@ const PureOnboardingDropdown = ({ user }: Props) => {
     if (!onboardingMessagessStr) {
       return;
     }
-    try {
-      setOnboardingMessages(JSON.parse(onboardingMessagessStr));
-    } catch (e) {}
+    if (typeof onboardingMessagessStr === 'string') {
+      try {
+        setOnboardingMessages(JSON.parse(onboardingMessagessStr));
+      } catch (e) {}
+    } else if (typeof onboardingMessagessStr === 'object') {
+      setOnboardingMessages(onboardingMessagessStr);
+    }
   }, [onboardingMessagessStr]);
 
   useEffect(() => {

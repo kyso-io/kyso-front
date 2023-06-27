@@ -75,7 +75,7 @@ const PureCheckListPage = (props: Props) => {
           </div>
           <div className="text-gray-500 pt-2 px-6 w-96">{content.text}</div>
           <UnPureVideoModal setOpen={openModal} isOpen={isModalOpen} demoUrl={content.demoUrl} />
-          <div className="my-11 justify-center text-center mx-auto max-w-sm px-10" onClick={() => openModal(!isModalOpen)}>
+          <div className="my-11 justify-center text-center mx-auto max-w-sm px-10 cursor-pointer" onClick={() => openModal(!isModalOpen)}>
             <div className="relative aspect-[2/1] overflow-hidden rounded-lg bg-gray-100 ring-1 ring-gray-900/10 hover:opacity-60" onClick={() => openModal(!isModalOpen)}>
               <img src={content.demoPreview} alt="" className="absolute inset-0 h-full w-full opacity-90" />
             </div>
