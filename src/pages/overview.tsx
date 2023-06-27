@@ -7,9 +7,9 @@ import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, OnboardingProgress, UserDTO } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { Api, logoutAction } from '@kyso-io/kyso-store';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import slugify from 'slugify';
-import Link from 'next/link';
 import { useAppDispatch } from '../hooks/redux-hooks';
 import { usePublicSetting } from '../hooks/use-public-setting';
 
@@ -158,9 +158,13 @@ const Index = () => {
     if (!onboardingMessagesStr) {
       return;
     }
-    try {
-      setOnboardingMessages(JSON.parse(onboardingMessagesStr));
-    } catch (e) {}
+    if (typeof onboardingMessagesStr === 'string') {
+      try {
+        setOnboardingMessages(JSON.parse(onboardingMessagesStr));
+      } catch (e) {}
+    } else if (typeof onboardingMessagesStr === 'object') {
+      setOnboardingMessages(onboardingMessagesStr);
+    }
   }, [onboardingMessagesStr]);
 
   if (userIsLogged === null) {
