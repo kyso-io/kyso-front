@@ -23,10 +23,10 @@ const KAddTasksIcon = ({ style, className }: IKTasksIcon) => {
         />
         <g id="Rectángulo_705" data-name="Rectángulo 705" transform="translate(1127.513 148.915)" fill="transparent" stroke="transparent" strokeWidth="1">
           <rect width="38.554" height="67.943" stroke="none" />
-          <rect x="0.6" y="0.6" width="37.554" height="66.943" fill="none" />
+          <rect x="0.5" y="0.5" width="37.554" height="66.943" fill="none" />
         </g>
         <path id="Path" d="M66.478,0l-37.8,40.16L8.088,18.343,0,26.936l28.679,30.47L74.566,8.654Z" transform="translate(1091.469 150.19)" fill="#707070" />
-        <path id="_Color" data-name=" ↳Color" d="M31.325,17.9H17.9V31.325H13.425V17.9H0V13.425H13.425V0H17.9V13.425H31.325Z" transform="translate(1140.384 187.229)" fill="#707070" />
+        <path id="_Color" data-name=" ↳Color" d="M31.325,17.9H17.9V31.325H13.425V17.9H0V13.425H13.425V0H17.9V13.425H31.325Z" transform="translate(1155.384 207.229)" fill="#707070" />
       </g>
     </svg>
   );
