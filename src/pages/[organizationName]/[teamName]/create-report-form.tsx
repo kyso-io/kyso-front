@@ -356,6 +356,7 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
     );
     kysoConfigFile.authors = selectedPeople.map((person: TeamMember) => person.email);
     delete (kysoConfigFile as any).team;
+    delete (kysoConfigFile as any).links;
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     const zip = new JSZip();
     zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });
@@ -449,6 +450,7 @@ const CreateReport = ({ commonData, showToaster, hideToaster, isCurrentUserVerif
     );
     kysoConfigFile.authors = selectedPeople.map((person: TeamMember) => person.email);
     delete (kysoConfigFile as any).team;
+    delete (kysoConfigFile as any).links;
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     const zip: JSZip = new JSZip();
     zip.file('kyso.json', blobKysoConfigFile, { createFolders: true });

@@ -328,6 +328,7 @@ const CreateEmbeddedReport = ({ commonData, showToaster, hideToaster, isCurrentU
     kysoConfigFile.authors = selectedPeople.map((person: TeamMember) => person.email);
     kysoConfigFile.url = protocol + url;
     delete (kysoConfigFile as any).team;
+    delete (kysoConfigFile as any).links;
     const zip = new JSZip();
     const blobKysoConfigFile: Blob = new Blob([JSON.stringify(kysoConfigFile, null, 2)], { type: 'plain/text' });
     zip.file('kyso.json', blobKysoConfigFile);
