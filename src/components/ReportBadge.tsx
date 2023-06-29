@@ -10,7 +10,6 @@ import moment from 'moment';
 import { Tooltip } from 'primereact/tooltip';
 import { useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import Link from 'next/link';
 import { HelperPermissions } from '../helpers/check-permissions';
 import PureAvatarGroup from './PureAvatarGroup';
 import PureShareButton from './PureShareButton';
@@ -70,10 +69,10 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
           <PureChangeReportImage commonData={commonData} hasPermissionEditReport={hasPermissionEditReport} reportImage={reportImage} report={report} />
         </div>
         <div className="flex-1 min-w-0 py-3 pr-3 relative">
-          <Link href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
+          <a href={`/${report.organization_sluglified_name}/${report.team_sluglified_name}/${report.name}`} className="focus:outline-none">
             <h3 className="text-sm md:text-lg leading-6 font-medium text-gray-900 break-words">{report.title}</h3>
             <p className="text-xs md:text-sm text-gray-500 pt-3 break-words">{description}</p>
-          </Link>
+          </a>
           <div className="hidden md:block absolute bottom-2 right-0">
             <PureTagGroup tags={report.tags} />
           </div>

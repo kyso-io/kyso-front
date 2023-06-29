@@ -44,7 +44,7 @@ export const RenderJupyter = ({
   isLastVersion,
   showToaster,
 }: Props) => {
-  const [showInputs, setShowInputs] = useState<boolean>(false);
+  const [showInputs, setShowInputs] = useState<boolean>(true);
 
   if (!jupyterNotebook || !jupyterNotebook.cells || jupyterNotebook.cells.length === 0) {
     return null;
@@ -54,7 +54,7 @@ export const RenderJupyter = ({
     <div>
       <div className="w-full flex lg:flex-row flex-col lg:space-y-0 break-words my-2">
         <div className="w-9/12"></div>
-        <div className="w-3/12 flex flex-row items-center">
+        <div className="w-3/12 flex flex-row items-center" style={{ marginLeft: '53%' }}>
           <label className="text-sm font-medium text-gray-700 mr-3">Show inputs</label>
           <Switch
             checked={showInputs}

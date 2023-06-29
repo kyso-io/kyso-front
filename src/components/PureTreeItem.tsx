@@ -89,10 +89,10 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
           }}
           style={{ overflow: 'unset' }}
         >
-          <div className="group font-medium text-slate-500', 'hover:text-gray-900', 'font-normal', 'flex items-center">
+          <div className="group font-medium text-slate-500 hover:text-gray-900 flex items-center">
             <span className="w-6 text-blue-400">
               {extension === 'ipynb' && (
-                <span>
+                <span style={{ float: 'left', marginRight: '6px' }}>
                   <svg width="12" height="12" viewBox="0 0 39 51" xmlns="http://www.w3.org/2000/svg">
                     <g transform="translate(-1638 -2281)">
                       <g className="jp-icon-warn0" fill="#F37726">
