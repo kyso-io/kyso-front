@@ -1,19 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Link from 'next/link';
 import PureNotification from '@/components/PureNotification';
 import NoLayout from '@/layouts/NoLayout';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faBitbucket, faGithub, faGitlab, faGoogle } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NormalizedResponseDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum, Login, LoginProviderEnum, SignUpDto } from '@kyso-io/kyso-model';
+import { EmailInUseDTO, KysoSettingsEnum, Login, LoginProviderEnum, SignUpDto } from '@kyso-io/kyso-model';
 import type { AppDispatch } from '@kyso-io/kyso-store';
 import { Api, setTokenAuthAction, setError as storeSetError } from '@kyso-io/kyso-store';
+import debounce from 'lodash.debounce';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { KysoDescription } from '../components/KysoDescription';
+import { Helper } from '../helpers/Helper';
 import { usePublicSettings } from '../hooks/use-public-settings';
 
 const validateEmail = (email: string) => {
@@ -21,6 +23,10 @@ const validateEmail = (email: string) => {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   return re.test(email);
 };
+
+const debouncedFetchData = debounce((cb: () => void) => {
+  cb();
+}, 750);
 
 const githubScopes = ['read:user', 'user:email'];
 const gitlabScope = 'read_user';
@@ -50,9 +56,9 @@ const Index = () => {
   const [repeatPassword, setRepeatPassword] = useState<string>('');
   const [displayName, setDisplayName] = useState<string>('');
 
-  const [error, setError] = useState<string | null>(null);
   const [notification, setNotification] = useState('');
   const [notificationType, setNotificationType] = useState('');
+  const [errorEmailInUse, setErrorEmailInUse] = useState<boolean>(false);
 
   const dispatch = useDispatch<AppDispatch>();
   const [bitbucketUrl, setBitbucketUrl] = useState('');
@@ -109,53 +115,75 @@ const Index = () => {
 
   useEffect(() => {
     if (router.query.error) {
-      setError(router.query.error as string);
+      setNotificationType('danger');
+      setNotification(router.query.error as string);
     }
   }, [router.query.error]);
+
+  useEffect(() => {
+    if (!email || email.length === 0 || !Helper.isEmail(email)) {
+      return;
+    }
+    debouncedFetchData(() => {
+      isEmailInUse(email);
+    });
+  }, [email]);
+
+  const isEmailInUse = async (_email: string) => {
+    try {
+      const api: Api = new Api();
+      const emailInUseDTO: EmailInUseDTO = new EmailInUseDTO(_email);
+      const normalizedResponseDto: NormalizedResponseDTO<boolean> = await api.emailInUse(emailInUseDTO);
+      const result: boolean = normalizedResponseDto.data;
+      if (result) {
+        setNotificationType('danger');
+        setNotification('Email already in use.');
+      }
+      setErrorEmailInUse(result);
+    } catch (e) {}
+  };
 
   /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
   const handleSubmit = async (event: any) => {
     event.preventDefault();
+    if (errorEmailInUse) {
+      setNotificationType('danger');
+      setNotification('Email already in use.');
+      return;
+    }
     if (!email || email.length === 0) {
       setNotificationType('danger');
       setNotification('Email is required');
-      setError('Email is required.');
       return;
     }
     if (!validateEmail(email)) {
       setNotificationType('danger');
       setNotification('Email not valid.');
-      setError('Email not valid.');
       return;
     }
     if (!password || password.length === 0) {
       setNotificationType('danger');
       setNotification('Password is required');
-      setError('Password is required.');
       return;
     }
     if (!repeatPassword || repeatPassword.length === 0) {
       setNotificationType('danger');
       setNotification('Repeat password is required');
-      setError('Repeat password is required.');
       return;
     }
     if (password !== repeatPassword) {
       setNotificationType('danger');
       setNotification('Passwords do not match');
-      setError('Passwords do not match.');
       return;
     }
     if (!nickname || nickname.length === 0) {
       setNotificationType('danger');
       setNotification('Username is required.');
-      setError('Username is required.');
       return;
     }
     if (!displayName || displayName.length === 0) {
       setNotificationType('danger');
       setNotification('Name is required.');
-      setError('Name is required.');
       return;
     }
     try {
@@ -178,7 +206,6 @@ const Index = () => {
       const errorData: { statusCode: number; message: string; error: string } = e.response.data;
       setNotificationType('danger');
       setNotification(errorData.message);
-      setError(errorData.message);
     }
   };
 
@@ -216,7 +243,7 @@ const Index = () => {
                   <form className="flex flex-col space-y-2 mb-5" method="post" action={`/api/login`} onSubmit={handleSubmit}>
                     <div>
                       <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                        Email
+                        Email *
                       </label>
                       <input
                         className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
@@ -225,7 +252,6 @@ const Index = () => {
                         name="email"
                         value={email}
                         onChange={(e) => {
-                          setError('');
                           setNotification('');
                           dispatch(storeSetError(''));
                           setEmail(e.target.value);
@@ -234,7 +260,7 @@ const Index = () => {
                     </div>
                     <div>
                       <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
-                        Full name
+                        Full name *
                       </label>
                       <input
                         className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
@@ -243,7 +269,6 @@ const Index = () => {
                         name="name"
                         value={displayName}
                         onChange={(e) => {
-                          setError('');
                           setNotification('');
                           dispatch(storeSetError(''));
                           setDisplayName(e.target.value);
@@ -252,7 +277,7 @@ const Index = () => {
                     </div>
                     <div>
                       <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="nickname">
-                        Username
+                        Username *
                       </label>
                       <input
                         className="mb-1 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
@@ -261,7 +286,6 @@ const Index = () => {
                         name="nickname"
                         value={nickname}
                         onChange={(e) => {
-                          setError('');
                           setNotification('');
                           dispatch(storeSetError(''));
                           setNickname(e.target.value.toLowerCase());
@@ -270,7 +294,7 @@ const Index = () => {
                     </div>
                     <div>
                       <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                        Password
+                        Password *
                       </label>
                       <input
                         className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
@@ -279,7 +303,6 @@ const Index = () => {
                         type="password"
                         autoComplete="off"
                         onChange={(e) => {
-                          setError('');
                           setNotification('');
                           dispatch(storeSetError(''));
                           setPassword(e.target.value);
@@ -288,7 +311,7 @@ const Index = () => {
                     </div>
                     <div>
                       <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                        Repeat password
+                        Repeat password *
                       </label>
                       <input
                         className="mb-5 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
@@ -297,7 +320,6 @@ const Index = () => {
                         type="password"
                         autoComplete="off"
                         onChange={(e) => {
-                          setError('');
                           setNotification('');
                           dispatch(storeSetError(''));
                           setRepeatPassword(e.target.value);
@@ -393,7 +415,6 @@ const Index = () => {
                 )}
               </>
             )}
-            {error && <div className="text-red-500 text-center text-xs p-2">{error}</div>}
             <div className="pt-5 flex flex-row items-center shown-div ">
               <p className="text-sm mr-5">Already have an account?</p>
               <Link className="text-sm no-underline hover:none text-indigo-600 hover:text-indigo-700" href={`/login${invitation ? `?invitation=${invitation}` : ''}`}>

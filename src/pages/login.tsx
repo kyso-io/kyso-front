@@ -204,7 +204,7 @@ const Index = () => {
               <form className="flex flex-col space-y-2" method="post" action={`/api/login`} onSubmit={handleSubmit}>
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                    Email
+                    Email *
                   </label>
                   <input
                     className="mb-2 border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:ring-0 focus:outline-none focus:shadow-outline"
@@ -222,7 +222,7 @@ const Index = () => {
 
                 <div>
                   <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-                    Password
+                    Password *
                   </label>
 
                   <input
