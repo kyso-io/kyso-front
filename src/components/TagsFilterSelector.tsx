@@ -36,6 +36,7 @@ const TagsFilterSelector = (props: ITagsFilterSelector) => {
         <div className="relative">
           <Combobox.Input
             className="w-44 rounded-md border border-gray-300 bg-white py-2 pl-3 pr-10 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 sm:text-sm"
+            value={query}
             onChange={(event) => {
               setQuery(event.target.value);
             }}
