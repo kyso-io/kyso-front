@@ -655,7 +655,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
     } else if (reportData.errorReport) {
       setShowError(true);
       setShowErrorMessage(reportData.errorReport);
-      setShowErrorRequestAccessButton(true);
+      setShowErrorRequestAccessButton(reportData.httpStatusCode === 403);
       // return renderSomethingHappened(reportData.errorReport, true, commonData, teamVisibility);
     } else if (report && commonData && !hasPermissionReadReport) {
       setShowError(true);

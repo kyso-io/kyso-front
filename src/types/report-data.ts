@@ -4,4 +4,5 @@ export type ReportData = {
   report: ReportDTO | null | undefined;
   authors: UserDTO[];
   errorReport: string | null;
+  httpStatusCode: number;
 };

@@ -16,7 +16,7 @@ export const getReport = async ({ token, team, reportName, version }: Props): Pr
     const api: Api = new Api(token);
     if (!team) {
       const errorReport = `The report does not exist, or you don't have access.`;
-      return { report: null, authors: [], errorReport };
+      return { report: null, authors: [], errorReport, httpStatusCode: 404 };
     }
     const result: NormalizedResponseDTO<ReportDTO> = await api.getReportByTeamIdAndSlug(team!.id!, reportName, version);
     const authors: UserDTO[] = [];
@@ -25,7 +25,7 @@ export const getReport = async ({ token, team, reportName, version }: Props): Pr
         authors.push(result.relations.user[authorId]);
       }
     });
-    return { report: result.data, authors, errorReport: null };
+    return { report: result.data, authors, errorReport: null, httpStatusCode: 200 };
   } catch (e: any) {
     Helper.logError('errorReport', e);
 
@@ -40,6 +40,6 @@ export const getReport = async ({ token, team, reportName, version }: Props): Pr
     } else {
       errorReport = e.response.data.message;
     }
-    return { report: null, authors: [], errorReport };
+    return { report: null, authors: [], errorReport, httpStatusCode: e.response.data.statusCode };
   }
 };
