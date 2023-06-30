@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Link from 'next/link';
 import PureAvatar from '@/components/PureAvatar';
 import SettingsAside from '@/components/SettingsAside';
 import { ToasterIcons } from '@/enums/toaster-icons';
@@ -13,6 +12,7 @@ import { ExclamationCircleIcon } from '@heroicons/react/solid';
 import { UpdateUserRequestDTO } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useEffect, useRef, useState } from 'react';
 import Loader from '../../../components/Loader';
@@ -24,6 +24,10 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   const username: string = router.query.username as string;
   const ref = useRef<any>(null);
   const [isCurrentUser, setIsCurrentUser] = useState<boolean | null>(null);
+  const [displayName, setDisplayName] = useState<string>('');
+  const [showErrorDisplayName, setShowErrorDisplayName] = useState<boolean>(false);
+  const [fullName, setFullName] = useState<string>('');
+  const [showErrorFullName, setShowErrorFullName] = useState<boolean>(false);
   const [bio, setBio] = useState<string>('');
   const [link, setLink] = useState<string>('');
   const [location, setLocation] = useState<string>('');
@@ -49,6 +53,8 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     if (!commonData.user) {
       return;
     }
+    setDisplayName(commonData.user.display_name);
+    setFullName(commonData.user.name);
     setBio(commonData.user.bio);
     setLink(commonData.user.link);
     setLocation(commonData.user.location);
@@ -68,7 +74,14 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     if (!isValid) {
       return;
     }
-
+    if (!displayName) {
+      setShowErrorDisplayName(true);
+      return;
+    }
+    if (!fullName) {
+      setShowErrorFullName(true);
+      return;
+    }
     try {
       showToaster('Updating profile...', ToasterIcons.INFO);
       const api: Api = new Api(commonData.token);
@@ -76,15 +89,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
         setRequesting(true);
         await api.updateUserProfileImage(commonData.user!.id, file);
       }
-      const updateUserRequestDto: UpdateUserRequestDTO = new UpdateUserRequestDTO(
-        commonData.user!.name,
-        commonData.user!.display_name,
-        location,
-        link,
-        bio,
-        commonData.user!.show_onboarding,
-        commonData.user!.onboarding_progress,
-      );
+      const updateUserRequestDto: UpdateUserRequestDTO = new UpdateUserRequestDTO(fullName, displayName, location, link, bio, commonData.user!.show_onboarding, commonData.user!.onboarding_progress);
       await api.updateUser(commonData.user!.id!, updateUserRequestDto);
       router.reload();
     } catch (e: any) {
@@ -176,6 +181,38 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
                       className="hidden"
                     />
                   </div>
+                </div>
+              </div>
+              <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Full Name:</label>
+                <div className="mt-1 sm:col-span-2 sm:mt-0">
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e: any) => {
+                      setFullName(e.target.value);
+                      setShowErrorFullName(false);
+                    }}
+                    name="displayName"
+                    className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                  />
+                  {showErrorFullName && <p className="mt-2 text-sm text-red-500">This field is mandatory.</p>}
+                </div>
+              </div>
+              <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
+                <label className="block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2">Display Name:</label>
+                <div className="mt-1 sm:col-span-2 sm:mt-0">
+                  <input
+                    type="text"
+                    value={displayName}
+                    onChange={(e: any) => {
+                      setDisplayName(e.target.value);
+                      setShowErrorDisplayName(false);
+                    }}
+                    name="displayName"
+                    className="block w-full max-w-lg rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:max-w-xs sm:text-sm"
+                  />
+                  {showErrorDisplayName && <p className="mt-2 text-sm text-red-500">This field is mandatory.</p>}
                 </div>
               </div>
               <div className="sm:grid sm:grid-cols-3 sm:items-start sm:gap-4 sm:border-t sm:border-gray-200 sm:pt-5">
