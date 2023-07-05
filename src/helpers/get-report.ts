@@ -11,13 +11,12 @@ interface Props {
   version?: number;
 }
 
-export const getReport = async ({ token, team, reportName, version }: Props): Promise<ReportData> => {
+export const getReport = async ({ token, team, reportName, version }: Props): Promise<ReportData | null> => {
+  if (!team || !reportName) {
+    return null;
+  }
   try {
     const api: Api = new Api(token);
-    if (!team) {
-      const errorReport = `The report does not exist, or you don't have access.`;
-      return { report: null, authors: [], errorReport, httpStatusCode: 404 };
-    }
     const result: NormalizedResponseDTO<ReportDTO> = await api.getReportByTeamIdAndSlug(team!.id!, reportName, version);
     const authors: UserDTO[] = [];
     result.data.author_ids.forEach((authorId: string) => {
@@ -25,10 +24,9 @@ export const getReport = async ({ token, team, reportName, version }: Props): Pr
         authors.push(result.relations.user[authorId]);
       }
     });
-    return { report: result.data, authors, errorReport: null, httpStatusCode: 200 };
+    return { report: result.data, authors, errorReport: null, httpCodeReport: 200 };
   } catch (e: any) {
     Helper.logError('errorReport', e);
-
     let errorReport: string | null = null;
     if (!e.response) {
       errorReport = `An unkown error occurred.`;
@@ -40,6 +38,6 @@ export const getReport = async ({ token, team, reportName, version }: Props): Pr
     } else {
       errorReport = e.response.data.message;
     }
-    return { report: null, authors: [], errorReport, httpStatusCode: e.response.data.statusCode };
+    return { report: null, authors: [], errorReport, httpCodeReport: e.response.data.statusCode };
   }
 };

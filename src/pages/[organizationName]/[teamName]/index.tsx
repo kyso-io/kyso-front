@@ -13,6 +13,7 @@ import type {
   TeamMember,
   TeamMembershipOriginEnum,
   TeamsInfoQuery,
+  TeamVisibilityEnum,
   UserDTO,
 } from '@kyso-io/kyso-model';
 import { KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, SearchUserDto, TeamPermissionsEnum } from '@kyso-io/kyso-model';
@@ -27,10 +28,10 @@ import PureNewReportPopover from '@/components/PureNewReportPopover';
 import { PureSpinner } from '@/components/PureSpinner';
 import ReportBadge from '@/components/ReportBadge';
 import ReportsSearchBar from '@/components/ReportsSearchBar';
-import { Helper } from '@/helpers/Helper';
 import { checkJwt } from '@/helpers/check-jwt';
 import { HelperPermissions } from '@/helpers/check-permissions';
 import { checkReportAuthors } from '@/helpers/check-report-authors';
+import { Helper } from '@/helpers/Helper';
 import type { PaginationParams } from '@/interfaces/pagination-params';
 import type { ReportsFilter } from '@/interfaces/reports-filter';
 import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
@@ -43,6 +44,7 @@ import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
+import SomethingHappenedReport from '../../../components/SomethingHappenedReport';
 import { usePublicSetting } from '../../../hooks/use-public-setting';
 
 const DAYS_ACTIVITY_FEED: number = 14;
@@ -76,8 +78,11 @@ const debouncedPaginatedReports = debounce(
 const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const showEmailStr: any | null = usePublicSetting(KysoSettingsEnum.GLOBAL_PRIVACY_SHOW_EMAIL);
-
   const [teamInfo, setTeamInfo] = useState<TeamInfoDto | null>(null);
+  const [teamVisibility, setTeamVisibility] = useState<TeamVisibilityEnum | null>(null);
+  const [showError, setShowError] = useState<boolean>(true);
+  const [showErrorMessage, setShowErrorMessage] = useState<string>('');
+  const [showErrorRequestAccessButton, setShowErrorRequestAccessButton] = useState<boolean>(false);
   // MEMBERS
   const [members, setMembers] = useState<Member[]>([]);
   const [users, setUsers] = useState<UserDTO[]>([]);
@@ -139,7 +144,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
 
     if (!HelperPermissions.belongsToOrganization(commonData, router.query.organizationName as string)) {
       if (commonData.token) {
-        router.replace('/');
+        // If have a token, I want to show a "You have no permission" page. Because if I redirect directly the user
+        // don't know what the hell happened
+        // router.replace('/');
       } else {
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}`)}`);
       }
@@ -147,7 +154,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     }
     if (!HelperPermissions.belongsToTeam(commonData, router.query.organizationName as string, router.query.teamName as string)) {
       if (commonData.token) {
-        router.replace(`/${router.query.organizationName as string}`);
+        // If have a token, I want to show a "You have no permission" page. Because if I redirect directly the user
+        // don't know what the hell happened
+        // router.replace(`/${router.query.organizationName as string}`);
       } else {
         router.replace(`/login?redirect=${encodeURIComponent(`/${router.query.organizationName as string}/${router.query.teamName as string}`)}`);
       }
@@ -184,6 +193,34 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     }
     getActivityFeed();
   }, [commonData?.organization, commonData?.team, datetimeActivityFeed]);
+
+  useEffect(() => {
+    if (!router.query.organizationName || !router.query.teamName) {
+      return;
+    }
+    const getTeamVisibility = async () => {
+      try {
+        const quickApiCall: Api = new Api();
+        const res: NormalizedResponseDTO<any> = await quickApiCall.getTeamVisibility(router.query.organizationName as string, router.query.teamName as string);
+        setTeamVisibility(res.data.visibility);
+      } catch (e) {}
+    };
+    getTeamVisibility();
+  }, [router.query.organizationName, router.query.teamName]);
+
+  useEffect(() => {
+    if (commonData.errorOrganization) {
+      setShowError(true);
+      setShowErrorMessage(commonData.errorOrganization);
+      setShowErrorRequestAccessButton(commonData.httpCodeOrganization === 403);
+    } else if (commonData.errorTeam) {
+      setShowError(true);
+      setShowErrorMessage(commonData.errorTeam);
+      setShowErrorRequestAccessButton(commonData.httpCodeTeam === 403);
+    } else {
+      setShowError(false);
+    }
+  }, [router.query, commonData.errorOrganization, commonData.errorTeam]);
 
   const getReports = async () => {
     setRequestingReports(true);
@@ -504,11 +541,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
 
   // END SEARCH USER
 
-  if (commonData.errorTeam) {
-    return <div className="text-center mt-4">{commonData.errorTeam}</div>;
-  }
-
-  return (
+  return showError ? (
+    <SomethingHappenedReport whatHappened={showErrorMessage} addRequestAccessButton={showErrorRequestAccessButton} commonData={commonData} teamVisibility={teamVisibility} />
+  ) : (
     <div className="flex flex-row space-x-8 p-4">
       <div className="hidden md:block md:w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />

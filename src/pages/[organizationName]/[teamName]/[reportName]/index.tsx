@@ -183,7 +183,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
     if (version && !Number.isNaN(version as any)) {
       versionNum = parseInt(version as string, 10);
     }
-    const rd: ReportData = await getReport({ token: commonData.token, team: commonData.team, reportName: router.query.reportName as string, version: versionNum });
+    const rd: ReportData | null = await getReport({ token: commonData.token, team: commonData.team, reportName: router.query.reportName as string, version: versionNum });
     setReportData(rd);
   };
 
@@ -640,28 +640,23 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
     if (commonData.errorOrganization) {
       setShowError(true);
       setShowErrorMessage(commonData.errorOrganization);
-      setShowErrorRequestAccessButton(true);
-      // renderSomethingHappened(commonData.errorOrganization, true, commonData, teamVisibility);
+      setShowErrorRequestAccessButton(commonData.httpCodeOrganization === 403);
     } else if (commonData.errorTeam) {
       setShowError(true);
       setShowErrorMessage(commonData.errorTeam);
-      setShowErrorRequestAccessButton(true);
-      // return renderSomethingHappened(commonData.errorTeam, true, commonData, teamVisibility);
+      setShowErrorRequestAccessButton(commonData.httpCodeTeam === 403);
     } else if (!reportData) {
       setShowError(true);
       setShowErrorMessage("Can't retrieve report's contents");
       setShowErrorRequestAccessButton(false);
-      // return renderSomethingHappened("Can't retrieve report's contents");
     } else if (reportData.errorReport) {
       setShowError(true);
       setShowErrorMessage(reportData.errorReport);
-      setShowErrorRequestAccessButton(reportData.httpStatusCode === 403);
-      // return renderSomethingHappened(reportData.errorReport, true, commonData, teamVisibility);
+      setShowErrorRequestAccessButton(reportData.httpCodeReport === 403);
     } else if (report && commonData && !hasPermissionReadReport) {
       setShowError(true);
       setShowErrorMessage("You don't have enough permissions to see this report");
       setShowErrorRequestAccessButton(true);
-      // return renderSomethingHappened("You don't have enough permissions to see this report", true, commonData, teamVisibility);
     } else {
       setShowError(false);
     }
@@ -669,321 +664,312 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
 
   const reportUrl = `${router.basePath}/${commonData.organization?.sluglified_name}/${commonData.team?.sluglified_name}/${report?.name}`;
 
-  return (
-    <>
-      {showError && <SomethingHappenedReport whatHappened={showErrorMessage} addRequestAccessButton={showErrorRequestAccessButton} commonData={commonData} teamVisibility={teamVisibility} />}
-      {!showError && (
-        <DelayedContent skeletonTemplate={SkeletonTemplates.REPORT_DETAIL}>
-          <>
-            <div className={classNames('hidden lg:block z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
-              <div>
-                <div className="flex flex-1 flex-col pt-32 mt-2">
-                  <nav className="flex-1 space-y-1">
-                    <PureSideOverlayPanel key={report?.name} cacheKey={report?.name} setSidebarOpen={(p) => setSidebarOpen(p)}>
-                      <>
-                        {report && (
-                          <React.Fragment>
-                            <div className="border-b border-gray-200">
-                              <nav className="pl-1 -mb-px flex space-x-8" aria-label="Tabs">
-                                {tabs.map((element: { title: string; tab: Tab }) => (
-                                  <a
-                                    key={element.tab}
-                                    onClick={() => setSelectedTab(element.tab)}
-                                    className={classNames(
-                                      element.tab === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                                      'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer',
-                                    )}
-                                  >
-                                    {element.title}
-                                  </a>
-                                ))}
-                              </nav>
-                            </div>
-                            <div className="py-2">
-                              {selectedTab === Tab.Toc && <TableOfContents title="" toc={report.toc} collapsible={true} openInNewTab={false} />}
-                              {selectedTab === Tab.Files && (
-                                <PureTree
-                                  path={currentPath}
-                                  basePath={router.basePath}
-                                  commonData={commonData}
-                                  report={report}
-                                  version={router.query.version as string}
-                                  selfTree={selfTree}
-                                  selectedFile={fileToRender!}
-                                  reportFiles={reportFiles}
-                                />
-                              )}
-                            </div>
-                          </React.Fragment>
-                        )}
-                      </>
-                    </PureSideOverlayPanel>
-                  </nav>
-                </div>
-              </div>
-            </div>
-
-            <div className={classNames('flex flex-1 flex-col', sidebarOpen ? 'pl-64' : 'lg:pl-10')}>
-              <main>
-                <div className="w-full px-4 sm:px-6 md:px-10">
-                  <div className="py-4">
+  return showError ? (
+    <SomethingHappenedReport whatHappened={showErrorMessage} addRequestAccessButton={showErrorRequestAccessButton} commonData={commonData} teamVisibility={teamVisibility} />
+  ) : (
+    <DelayedContent skeletonTemplate={SkeletonTemplates.REPORT_DETAIL}>
+      <>
+        <div className={classNames('hidden lg:block z-0 fixed lg:flex lg:flex-col h-full overflow--auto top-0 border-r ', sidebarOpen ? 'bg-gray-50 top-0 ' : 'bg-white')}>
+          <div>
+            <div className="flex flex-1 flex-col pt-32 mt-2">
+              <nav className="flex-1 space-y-1">
+                <PureSideOverlayPanel key={report?.name} cacheKey={report?.name} setSidebarOpen={(p) => setSidebarOpen(p)}>
+                  <>
                     {report && (
-                      <>
-                        <div className="w-full flex lg:flex-col flex-col justify-between rounded">
-                          <div className="w-full p-4">
-                            <PureReportHeader
-                              reportUrl={`${reportUrl}`}
-                              frontEndUrl={frontEndUrl}
-                              versions={versions}
-                              fileToRender={fileToRender}
-                              report={report}
-                              authors={authors}
-                              version={version as string}
-                              onUpvoteReport={async () => {
-                                const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
-                                  isCurrentUserVerified(),
-                                  isCurrentUserSolvedCaptcha(),
-                                  showToaster,
-                                  commonData,
-                                );
-
-                                if (!isValid) {
-                                  return;
-                                }
-
-                                await dispatch(toggleUserStarReportAction(report.id as string));
-                                refreshReport();
-                              }}
-                              hasPermissionEditReport={
-                                hasPermissionEditReport ||
-                                /* report.user_id === commonData.user?.id || */ (report.author_ids.includes(commonData.user?.id as string) && hasPermissionEditReportOnlyMine)
-                              }
-                              hasPermissionCreateReport={hasPermissionCreateReport}
-                              hasPermissionDeleteReport={hasPermissionDeleteReport}
-                              commonData={commonData}
-                              onSetFileAsMainFile={setReportFileAsMainFile}
-                              isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
-                              isCurrentUserVerified={isCurrentUserVerified}
-                              showToaster={showToaster}
-                            >
-                              <ManageUsers
-                                commonData={commonData}
-                                members={members}
-                                onInputChange={(query: string) => searchUsers(query)}
-                                users={users}
-                                showTeamRoles={true}
-                                onUpdateRoleMember={updateMemberRole}
-                                onInviteNewUser={inviteNewUser}
-                                onRemoveUser={removeUser}
-                                showEmails={showEmails}
-                                showToaster={showToaster}
-                                isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
-                                isCurrentUserVerified={isCurrentUserVerified}
-                              />
-                            </PureReportHeader>
-                            {gitCommit && (
-                              <div className="bg-gray-100 text-gray-500 rounded bg-slate-50">
-                                <div className="flex flex-row content-center items-center mt-2 p-4 text-sm text-slate-700">
-                                  <FontAwesomeIcon
-                                    size="xl"
-                                    style={{
-                                      marginRight: 8,
-                                    }}
-                                    icon={faGithub}
-                                  />
-                                  <span className="grow">{gitCommit.message}</span>
-                                  <div className="mt-1 sm:mt-0 sm:col-span-2">
-                                    <div className="max-w-lg flex rounded-md shadow-sm">
-                                      <input
-                                        defaultValue={gitCommit.hash.slice(0, 8)}
-                                        type="text"
-                                        disabled
-                                        className="flex-1 block focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-l-md sm:text-sm border-gray-300"
-                                        style={{ width: 100 }}
-                                      />
-                                      <button
-                                        type="button"
-                                        className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-500 sm:text-sm"
-                                        onClick={async () => {
-                                          navigator.clipboard.writeText(gitCommit.hash);
-                                          setCopiedCommitSha(true);
-                                          if (timeoutId != null) {
-                                            clearTimeout(timeoutId);
-                                          }
-                                          const t: NodeJS.Timeout = setTimeout(() => {
-                                            setCopiedCommitSha(false);
-                                          }, 3000);
-                                          setTimeoutId(t);
-                                        }}
-                                      >
-                                        {!copiedCommitSha && <ClipboardCopyIcon className="w-5 h-5" />}
-                                        {copiedCommitSha && 'Copied!'}
-                                      </button>
-                                    </div>
-                                  </div>
-                                  <span className="ml-1">on {format(new Date(gitCommit.date), 'MMM d, yyyy HH:mm')}</span>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-
-                          <div className="border-y p-0 mx-4">
-                            {orphan && (
-                              <DelayedContent>
-                                <div className="rounded-md bg-blue-50 p-4 mt-2">
-                                  <div className="flex">
-                                    <div className="shrink-0">
-                                      <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
-                                    </div>
-                                    <div className="ml-3 flex-1 md:flex md:justify-between">
-                                      <p className="text-sm text-blue-700">
-                                        The highlighted task is related to a <b>cell</b> or a <b>file</b> that <b>does not exists anymore in the latest version</b> of this report.
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-                              </DelayedContent>
-                            )}
-                            {fileToRender && onlyVisibleCell && fileToRender.path.endsWith('ipynb') && (
-                              <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
-                                Showing only this cell.
-                                <button
-                                  onClick={() => {
-                                    const qs = { ...router.query };
-                                    const scrollCellId = qs.cell;
-                                    delete qs.cell;
-                                    return router.push({
-                                      query: { ...qs, scrollCellId },
-                                    });
-                                  }}
-                                  className="ml-1 text-blue-500"
-                                >
-                                  View entire notebook
-                                </button>
-                              </div>
-                            )}
-
-                            {fileToRender && (
-                              <UnpureReportRender
-                                key={fileToRender.id}
-                                fileToRender={fileToRender}
-                                report={report}
-                                channelMembers={channelMembers}
-                                commonData={commonData}
-                                onlyVisibleCell={onlyVisibleCell}
-                                frontEndUrl={frontEndUrl}
-                                hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
-                                hasPermissionEditInlineComment={hasPermissionEditDeleteInlineComment}
-                                hasPermissionDeleteInlineComment={hasPermissionEditDeleteInlineComment}
-                                hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
-                                isCurrentUserVerified={isCurrentUserVerified}
-                                isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
-                                setUser={setUser}
-                                isLastVersion={isLastVersion}
-                                showToaster={showToaster}
-                              />
-                            )}
-
-                            {!fileToRender && (
-                              <button
-                                type="button"
-                                className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                      <React.Fragment>
+                        <div className="border-b border-gray-200">
+                          <nav className="pl-1 -mb-px flex space-x-8" aria-label="Tabs">
+                            {tabs.map((element: { title: string; tab: Tab }) => (
+                              <a
+                                key={element.tab}
+                                onClick={() => setSelectedTab(element.tab)}
+                                className={classNames(
+                                  element.tab === selectedTab ? 'border-indigo-500 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                                  'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm cursor-pointer',
+                                )}
                               >
-                                <span className="mt-2 block text-sm font-medium text-gray-900">Please choose a file in the filebrowser on the left.</span>
-                              </button>
-                            )}
-                          </div>
-
-                          {hasPermissionReadComment && (
-                            <div ref={refComments} className="block pb-44 w-full p-4 pl-8">
-                              <div className="prose max-w-none ">
-                                <Tooltip target=".comments-info" />
-                                <h4>
-                                  Report{`'`}s Comments{' '}
-                                  <FontAwesomeIcon
-                                    className="comments-info"
-                                    data-pr-tooltip="These comments are global to the report, and are shown in all files"
-                                    style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
-                                    icon={faCircleInfo}
-                                  />
-                                </h4>
-                              </div>
-                              <PureComments
-                                report={report}
-                                commonData={commonData}
-                                hasPermissionCreateComment={hasPermissionCreateComment}
-                                hasPermissionDeleteComment={hasPermissionDeleteComment}
-                                channelMembers={channelMembers}
-                                submitComment={submitComment}
-                                defaultPlaceholderText="Write a new report's global comment"
-                                userSelectorHook={(id?: string): UserDTO | undefined => {
-                                  return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
-                                }}
-                                onDeleteComment={async (id: string) => {
-                                  const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
-                                    isCurrentUserVerified(),
-                                    isCurrentUserSolvedCaptcha(),
-                                    showToaster,
-                                    commonData,
-                                  );
-
-                                  if (!isValid) {
-                                    return;
-                                  }
-                                  await dispatch(deleteCommentAction(id as string));
-                                }}
-                                commentSelectorHook={(parentId: string | null = null) => {
-                                  const values: Comment[] = Object.values(allComments || []);
-                                  if (values.length === 0) {
-                                    return [];
-                                  }
-                                  const filtered: Comment[] = values.filter((comment: Comment) => {
-                                    return comment!.comment_id === parentId;
-                                  });
-                                  // Sort comments by created_at desc
-                                  filtered.sort((a: Comment, b: Comment) => {
-                                    return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
-                                  });
-                                  return filtered;
-                                }}
-                              />
-                            </div>
+                                {element.title}
+                              </a>
+                            ))}
+                          </nav>
+                        </div>
+                        <div className="py-2">
+                          {selectedTab === Tab.Toc && <TableOfContents title="" toc={report.toc} collapsible={true} openInNewTab={false} />}
+                          {selectedTab === Tab.Files && (
+                            <PureTree
+                              path={currentPath}
+                              basePath={router.basePath}
+                              commonData={commonData}
+                              report={report}
+                              version={router.query.version as string}
+                              selfTree={selfTree}
+                              selectedFile={fileToRender!}
+                              reportFiles={reportFiles}
+                            />
                           )}
                         </div>
-                      </>
+                      </React.Fragment>
                     )}
-                  </div>
-                </div>
-              </main>
+                  </>
+                </PureSideOverlayPanel>
+              </nav>
             </div>
-            {scrollDirection === ScrollDirection.Down && !isInViewport && (
-              <div className="sticky bottom-20 text-center">
-                <button
-                  type="button"
-                  onClick={() => refComments.current?.scrollIntoView({ behavior: 'smooth' })}
-                  className="inline-flex items-center rounded-full border border-gray-300 bg-white px-5 py-2.5 text-xs font-medium shadow-sm hover:bg-gray-50 focus:outline-none"
-                  style={{
-                    fontSize: '14px',
-                    color: '#234361',
-                    boxShadow: 'rgb(0 0 0 / 24%) 0px 3px 8px',
-                    border: 'none',
-                  }}
-                >
-                  <ArrowSmDownIcon
-                    className="mr-1 h-6 w-6 text-gray-400"
-                    aria-hidden="true"
-                    style={{
-                      color: '#234361',
-                    }}
-                  />
-                  Go to comments
-                </button>
+          </div>
+        </div>
+
+        <div className={classNames('flex flex-1 flex-col', sidebarOpen ? 'pl-64' : 'lg:pl-10')}>
+          <main>
+            <div className="w-full px-4 sm:px-6 md:px-10">
+              <div className="py-4">
+                {report && (
+                  <>
+                    <div className="w-full flex lg:flex-col flex-col justify-between rounded">
+                      <div className="w-full p-4">
+                        <PureReportHeader
+                          reportUrl={`${reportUrl}`}
+                          frontEndUrl={frontEndUrl}
+                          versions={versions}
+                          fileToRender={fileToRender}
+                          report={report}
+                          authors={authors}
+                          version={version as string}
+                          onUpvoteReport={async () => {
+                            const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
+
+                            if (!isValid) {
+                              return;
+                            }
+
+                            await dispatch(toggleUserStarReportAction(report.id as string));
+                            refreshReport();
+                          }}
+                          hasPermissionEditReport={
+                            hasPermissionEditReport || /* report.user_id === commonData.user?.id || */ (report.author_ids.includes(commonData.user?.id as string) && hasPermissionEditReportOnlyMine)
+                          }
+                          hasPermissionCreateReport={hasPermissionCreateReport}
+                          hasPermissionDeleteReport={hasPermissionDeleteReport}
+                          commonData={commonData}
+                          onSetFileAsMainFile={setReportFileAsMainFile}
+                          isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                          isCurrentUserVerified={isCurrentUserVerified}
+                          showToaster={showToaster}
+                        >
+                          <ManageUsers
+                            commonData={commonData}
+                            members={members}
+                            onInputChange={(query: string) => searchUsers(query)}
+                            users={users}
+                            showTeamRoles={true}
+                            onUpdateRoleMember={updateMemberRole}
+                            onInviteNewUser={inviteNewUser}
+                            onRemoveUser={removeUser}
+                            showEmails={showEmails}
+                            showToaster={showToaster}
+                            isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                            isCurrentUserVerified={isCurrentUserVerified}
+                          />
+                        </PureReportHeader>
+                        {gitCommit && (
+                          <div className="bg-gray-100 text-gray-500 rounded bg-slate-50">
+                            <div className="flex flex-row content-center items-center mt-2 p-4 text-sm text-slate-700">
+                              <FontAwesomeIcon
+                                size="xl"
+                                style={{
+                                  marginRight: 8,
+                                }}
+                                icon={faGithub}
+                              />
+                              <span className="grow">{gitCommit.message}</span>
+                              <div className="mt-1 sm:mt-0 sm:col-span-2">
+                                <div className="max-w-lg flex rounded-md shadow-sm">
+                                  <input
+                                    defaultValue={gitCommit.hash.slice(0, 8)}
+                                    type="text"
+                                    disabled
+                                    className="flex-1 block focus:ring-indigo-500 focus:border-indigo-500 min-w-0 rounded-none rounded-l-md sm:text-sm border-gray-300"
+                                    style={{ width: 100 }}
+                                  />
+                                  <button
+                                    type="button"
+                                    className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 hover:bg-gray-100 text-gray-500 sm:text-sm"
+                                    onClick={async () => {
+                                      navigator.clipboard.writeText(gitCommit.hash);
+                                      setCopiedCommitSha(true);
+                                      if (timeoutId != null) {
+                                        clearTimeout(timeoutId);
+                                      }
+                                      const t: NodeJS.Timeout = setTimeout(() => {
+                                        setCopiedCommitSha(false);
+                                      }, 3000);
+                                      setTimeoutId(t);
+                                    }}
+                                  >
+                                    {!copiedCommitSha && <ClipboardCopyIcon className="w-5 h-5" />}
+                                    {copiedCommitSha && 'Copied!'}
+                                  </button>
+                                </div>
+                              </div>
+                              <span className="ml-1">on {format(new Date(gitCommit.date), 'MMM d, yyyy HH:mm')}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="border-y p-0 mx-4">
+                        {orphan && (
+                          <DelayedContent>
+                            <div className="rounded-md bg-blue-50 p-4 mt-2">
+                              <div className="flex">
+                                <div className="shrink-0">
+                                  <InformationCircleIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
+                                </div>
+                                <div className="ml-3 flex-1 md:flex md:justify-between">
+                                  <p className="text-sm text-blue-700">
+                                    The highlighted task is related to a <b>cell</b> or a <b>file</b> that <b>does not exists anymore in the latest version</b> of this report.
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </DelayedContent>
+                        )}
+                        {fileToRender && onlyVisibleCell && fileToRender.path.endsWith('ipynb') && (
+                          <div className="w-full flex justify-end p-2 prose prose-sm text-xs max-w-none">
+                            Showing only this cell.
+                            <button
+                              onClick={() => {
+                                const qs = { ...router.query };
+                                const scrollCellId = qs.cell;
+                                delete qs.cell;
+                                return router.push({
+                                  query: { ...qs, scrollCellId },
+                                });
+                              }}
+                              className="ml-1 text-blue-500"
+                            >
+                              View entire notebook
+                            </button>
+                          </div>
+                        )}
+
+                        {fileToRender && (
+                          <UnpureReportRender
+                            key={fileToRender.id}
+                            fileToRender={fileToRender}
+                            report={report}
+                            channelMembers={channelMembers}
+                            commonData={commonData}
+                            onlyVisibleCell={onlyVisibleCell}
+                            frontEndUrl={frontEndUrl}
+                            hasPermissionCreateInlineComment={hasPermissionCreateInlineComment}
+                            hasPermissionEditInlineComment={hasPermissionEditDeleteInlineComment}
+                            hasPermissionDeleteInlineComment={hasPermissionEditDeleteInlineComment}
+                            hasPermissionUpdateStatusInlineComment={hasPermissionUpdateStatusInlineComment}
+                            isCurrentUserVerified={isCurrentUserVerified}
+                            isCurrentUserSolvedCaptcha={isCurrentUserSolvedCaptcha}
+                            setUser={setUser}
+                            isLastVersion={isLastVersion}
+                            showToaster={showToaster}
+                          />
+                        )}
+
+                        {!fileToRender && (
+                          <button
+                            type="button"
+                            className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          >
+                            <span className="mt-2 block text-sm font-medium text-gray-900">Please choose a file in the filebrowser on the left.</span>
+                          </button>
+                        )}
+                      </div>
+
+                      {hasPermissionReadComment && (
+                        <div ref={refComments} className="block pb-44 w-full p-4 pl-8">
+                          <div className="prose max-w-none ">
+                            <Tooltip target=".comments-info" />
+                            <h4>
+                              Report{`'`}s Comments{' '}
+                              <FontAwesomeIcon
+                                className="comments-info"
+                                data-pr-tooltip="These comments are global to the report, and are shown in all files"
+                                style={{ height: '15px', color: '#bbb', paddingBottom: '10px', paddingLeft: '2px' }}
+                                icon={faCircleInfo}
+                              />
+                            </h4>
+                          </div>
+                          <PureComments
+                            report={report}
+                            commonData={commonData}
+                            hasPermissionCreateComment={hasPermissionCreateComment}
+                            hasPermissionDeleteComment={hasPermissionDeleteComment}
+                            channelMembers={channelMembers}
+                            submitComment={submitComment}
+                            defaultPlaceholderText="Write a new report's global comment"
+                            userSelectorHook={(id?: string): UserDTO | undefined => {
+                              return id ? (userEntities.find((u) => u.id === id) as UserDTO | undefined) : undefined;
+                            }}
+                            onDeleteComment={async (id: string) => {
+                              const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(
+                                isCurrentUserVerified(),
+                                isCurrentUserSolvedCaptcha(),
+                                showToaster,
+                                commonData,
+                              );
+
+                              if (!isValid) {
+                                return;
+                              }
+                              await dispatch(deleteCommentAction(id as string));
+                            }}
+                            commentSelectorHook={(parentId: string | null = null) => {
+                              const values: Comment[] = Object.values(allComments || []);
+                              if (values.length === 0) {
+                                return [];
+                              }
+                              const filtered: Comment[] = values.filter((comment: Comment) => {
+                                return comment!.comment_id === parentId;
+                              });
+                              // Sort comments by created_at desc
+                              filtered.sort((a: Comment, b: Comment) => {
+                                return moment(a.created_at!).isAfter(moment(b.created_at!)) ? -1 : 1;
+                              });
+                              return filtered;
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
               </div>
-            )}
-          </>
-        </DelayedContent>
-      )}
-    </>
+            </div>
+          </main>
+        </div>
+        {scrollDirection === ScrollDirection.Down && !isInViewport && (
+          <div className="sticky bottom-20 text-center">
+            <button
+              type="button"
+              onClick={() => refComments.current?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center rounded-full border border-gray-300 bg-white px-5 py-2.5 text-xs font-medium shadow-sm hover:bg-gray-50 focus:outline-none"
+              style={{
+                fontSize: '14px',
+                color: '#234361',
+                boxShadow: 'rgb(0 0 0 / 24%) 0px 3px 8px',
+                border: 'none',
+              }}
+            >
+              <ArrowSmDownIcon
+                className="mr-1 h-6 w-6 text-gray-400"
+                aria-hidden="true"
+                style={{
+                  color: '#234361',
+                }}
+              />
+              Go to comments
+            </button>
+          </div>
+        )}
+      </>
+    </DelayedContent>
   );
 };
 

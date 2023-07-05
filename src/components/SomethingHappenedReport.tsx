@@ -1,10 +1,10 @@
 import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import type { CommonData } from '../types/common-data';
-import { SomethingHappened } from './SomethingHappened';
 import DelayedContent from './DelayedContent';
+import { SomethingHappened } from './SomethingHappened';
 
 interface Props {
   whatHappened: string;
@@ -20,13 +20,10 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
   const { organizationName, teamName } = router.query;
 
   return (
-    <>
-      <DelayedContent delay={3000} skeletonTemplate={<></>}>
+    <DelayedContent delay={3000} skeletonTemplate={<></>}>
+      <React.Fragment>
         <SomethingHappened description={whatHappened} />
-      </DelayedContent>
-
-      {addRequestAccessButton && commonData && !requestCreatedSuccessfully && !requestCreatedError && (
-        <>
+        {addRequestAccessButton && commonData && !requestCreatedSuccessfully && !requestCreatedError && (
           <div className="bg-white shadow sm:rounded-lg mx-32">
             <div className="px-4 py-5 sm:p-6">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -43,19 +40,15 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
                     teamVisibility !== TeamVisibilityEnum.PRIVATE && (
                       <button
                         onClick={() => {
-                          try {
-                            const api: Api = new Api(commonData.token);
-                            api
-                              .requestAccessToOrganization(organizationName as string)
-                              .then(() => {
-                                setRequestCreatedSuccessfully(true);
-                              })
-                              .catch(() => {
-                                setRequestCreatedError(true);
-                              });
-                          } catch (e) {
-                            setRequestCreatedError(true);
-                          }
+                          const api: Api = new Api(commonData.token);
+                          api
+                            .requestAccessToOrganization(organizationName as string)
+                            .then(() => {
+                              setRequestCreatedSuccessfully(true);
+                            })
+                            .catch(() => {
+                              setRequestCreatedError(true);
+                            });
                         }}
                         type="button"
                         className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
@@ -64,25 +57,20 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
                       </button>
                     )
                   }
-
                   {
                     /* Team private. Request access to organization */
                     teamVisibility === TeamVisibilityEnum.PRIVATE && (
                       <button
                         onClick={() => {
-                          try {
-                            const api: Api = new Api(commonData.token);
-                            api
-                              .requestAccessToTeam(organizationName as string, teamName as string)
-                              .then(() => {
-                                setRequestCreatedSuccessfully(true);
-                              })
-                              .catch(() => {
-                                setRequestCreatedError(true);
-                              });
-                          } catch (e) {
-                            setRequestCreatedError(true);
-                          }
+                          const api: Api = new Api(commonData.token);
+                          api
+                            .requestAccessToTeam(organizationName as string, teamName as string)
+                            .then(() => {
+                              setRequestCreatedSuccessfully(true);
+                            })
+                            .catch(() => {
+                              setRequestCreatedError(true);
+                            });
                         }}
                         type="button"
                         className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
@@ -95,11 +83,8 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
               </div>
             </div>
           </div>
-        </>
-      )}
-
-      {requestCreatedSuccessfully && (
-        <>
+        )}
+        {requestCreatedSuccessfully && (
           <div className="bg-white shadow sm:rounded-lg mx-32">
             <div className="px-4 py-5 sm:p-6">
               <div className="rounded-md bg-green-50 p-4">
@@ -123,11 +108,8 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
               </div>
             </div>
           </div>
-        </>
-      )}
-
-      {requestCreatedError && (
-        <>
+        )}
+        {requestCreatedError && (
           <div className="bg-white shadow sm:rounded-lg mx-32">
             <div className="px-4 py-5 sm:p-6">
               <div className="rounded-md bg-red-50 p-4">
@@ -164,9 +146,9 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
               </div>
             </div>
           </div>
-        </>
-      )}
-    </>
+        )}
+      </React.Fragment>
+    </DelayedContent>
   );
 };
 

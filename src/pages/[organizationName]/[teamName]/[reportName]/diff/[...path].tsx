@@ -152,7 +152,7 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
 
   const refreshReport = async () => {
     const versionNum: number = 0;
-    const rd: ReportData = await getReport({ token: commonData.token, team: commonData.team, reportName: router.query.reportName as string, version: versionNum });
+    const rd: ReportData | null = await getReport({ token: commonData.token, team: commonData.team, reportName: router.query.reportName as string, version: versionNum });
     setReportData(rd);
   };
 

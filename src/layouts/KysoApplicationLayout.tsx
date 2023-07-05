@@ -31,8 +31,10 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
     permissions: null,
     token: null,
     organization: null,
+    httpCodeOrganization: null,
     errorOrganization: null,
     team: null,
+    httpCodeTeam: null,
     errorTeam: null,
     user: null,
   });
@@ -156,33 +158,29 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
           return;
         }
       }
-      const cd: { organization: Organization | null; team: Team | null; errorOrganization: string | null; errorTeam: string | null } = await getCommonData({
-        token: commonData.token,
-        permissions: commonData.permissions!,
-        user: commonData.user!,
-        organizationName: organizationName as string,
-        teamName: teamName as string,
-      });
+      const cd: { organization: Organization | null; team: Team | null; httpCodeOrganization: number | null; errorOrganization: string | null; httpCodeTeam: number | null; errorTeam: string | null } =
+        await getCommonData({
+          token: commonData.token,
+          permissions: commonData.permissions!,
+          user: commonData.user!,
+          organizationName: organizationName as string,
+          teamName: teamName as string,
+        });
       setCommonData({ ...commonData, ...cd });
       let version: number = 0;
       if (router.query.version && !Number.isNaN(router.query.version as any)) {
         version = parseInt(router.query.version as string, 10);
       }
-      if (router.query.reportName) {
-        const getReportData = async () => {
-          const data: ReportData = await getReport({
-            token: commonData.token,
-            team: cd.team,
-            reportName: router.query.reportName as string,
-            version,
-          });
-          setReportData(data);
-        };
-        getReportData();
-      } /** else {
-        Not needed here as we already set it up at the beginning 
-        setReportData(null)
-      }* */
+      const getReportData = async () => {
+        const data: ReportData | null = await getReport({
+          token: commonData.token,
+          team: cd.team,
+          reportName: router.query.reportName as string,
+          version,
+        });
+        setReportData(data);
+      };
+      getReportData();
     };
     getData();
   }, [commonData.permissions, router?.isReady, router.query?.organizationName, router.query?.teamName, router.query?.reportName, router.query?.version]);
