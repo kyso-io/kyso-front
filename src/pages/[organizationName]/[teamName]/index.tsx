@@ -180,11 +180,12 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     if (!commonData.organization || !commonData.team) {
       return;
     }
-    if (commonData.user) {
-      getSearchUser();
-    } else {
-      getReports();
-    }
+    // if (commonData.user) {
+    //   getSearchUser();
+    // } else {
+    //   getReports();
+    // }
+    getReports();
   }, [commonData?.organization, commonData?.team, commonData?.user, paginationParams, queryParams]);
 
   useEffect(() => {
@@ -510,17 +511,17 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
 
   // START SEARCH USER
 
-  const getSearchUser = async () => {
-    try {
-      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-      const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization!.id!, commonData.team!.id!);
-      if (result.data) {
-        setSearchUser(result.data);
-      } else {
-        getReports();
-      }
-    } catch (e) {}
-  };
+  // const getSearchUser = async () => {
+  //   try {
+  //     const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+  //     const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization!.id!, commonData.team!.id!);
+  //     if (result.data) {
+  //       setSearchUser(result.data);
+  //     } else {
+  //       getReports();
+  //     }
+  //   } catch (e) {}
+  // };
 
   const createSearchUser = async (query: string, payload: ReportsFilter[]) => {
     try {
