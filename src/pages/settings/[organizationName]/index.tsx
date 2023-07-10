@@ -1544,7 +1544,10 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
               <React.Fragment>
                 <div className="space-y-1 mt-8 mb-4 sm:border-b sm:border-gray-200 pb-4">
                   <h3 className="text-lg font-medium leading-6 text-gray-900">Centralized communications</h3>
-                  <p className="max-w-2xl text-sm text-gray-500">Configure a shared email address to centralize Kyso communications</p>
+                  <p className="max-w-2xl text-sm text-gray-500">
+                    Configure a shared email address to centralize Kyso communications. This just means that all Kyso event communications will flow through a specific email address that you specify,
+                    instead of going to all users in the Organisation.
+                  </p>
                 </div>
                 <div className="pt-6 sm:pt-5 my-4">
                   <div role="group" aria-labelledby="label-email">
