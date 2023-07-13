@@ -883,7 +883,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
                       </div>
 
                       {hasPermissionReadComment && (
-                        <div ref={refComments} className="block pb-44 w-full p-4 pl-8">
+                        <div ref={refComments} className="block pb-44 w-full p-4 pl-8 mt-20">
                           <div className="prose max-w-none ">
                             <Tooltip target=".comments-info" />
                             <h4>
