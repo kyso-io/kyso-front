@@ -121,7 +121,7 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
       return true;
     }
     return versionNumber === reportData.report.last_version;
-  }, [reportData]);
+  }, [reportData?.report, version]);
 
   const tabs: { title: string; tab: Tab }[] = useMemo(() => {
     const data: { title: string; tab: Tab }[] = [
