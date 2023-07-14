@@ -6,7 +6,7 @@ import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
 import { Dialog, Switch, Transition } from '@headlessui/react';
 import { PencilIcon, TrashIcon } from '@heroicons/react/outline';
 import { BookOpenIcon, ChatAlt2Icon, DocumentDuplicateIcon, ExclamationCircleIcon, LinkIcon, MailIcon, SearchIcon, UserGroupIcon, XIcon } from '@heroicons/react/solid';
-import type { NormalizedResponseDTO, OrganizationMember, PaginatedResponseDto, ResourcePermissions, Team, TeamInfoDto, TeamsInfoQuery } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, OrganizationMember, PaginatedResponseDto, ResourcePermissions, Team, TeamInfoDto, TeamsInfoQuery, Organization } from '@kyso-io/kyso-model';
 import {
   AddUserOrganizationDto,
   AllowDownload,
@@ -726,8 +726,12 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
     try {
       setRequesting(true);
       const api: Api = new Api(commonData.token, commonData.organization?.sluglified_name);
-      await api.updateOrganization(commonData.organization!.id!, { allowed_access_domains: updatedAllowedAccessDomains, allow_download: commonData.organization?.allow_download! } as any);
-      router.push(`/settings/${commonData.organization?.sluglified_name}?tab=${OrganizationSettingsTab.Access}`);
+      const response: NormalizedResponseDTO<Organization> = await api.updateOrganization(commonData.organization!.id!, {
+        allowed_access_domains: updatedAllowedAccessDomains,
+        allow_download: commonData.organization?.allow_download!,
+      } as any);
+      setAllowedAccessDomains(response.data.allowed_access_domains || []);
+      showToaster('Access domains updated successfully', ToasterIcons.SUCCESS);
     } catch (e: any) {
       /* eslint-disable no-console */
       console.log(e.response.data);
@@ -1493,6 +1497,7 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
                             }
                             const newAllowedAccessDomains: string[] = [...allowedAccessDomains, newDomain];
                             updateAllowedAccessDomains(newAllowedAccessDomains);
+                            setNewDomain('');
                           }}
                           className={clsx(
                             'ml-5 rounded-md border border-gray-300 bg-white py-2 px-3 text-sm font-medium leading-4 text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2',
