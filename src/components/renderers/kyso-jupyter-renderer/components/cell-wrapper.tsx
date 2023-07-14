@@ -122,7 +122,7 @@ const CellWrapper = (props: Props) => {
                     </button>
                   </React.Fragment>
                 )}
-                {!showCreateInlineComment && inlineComments.length > 0 && (
+                {!showCreateInlineComment && commonData.user && inlineComments.length > 0 && (
                   <div className="relative items-center flex flex-row w-full justify-start">
                     <Tooltip target=".overlay-inline-comments-info" />
                     <button
