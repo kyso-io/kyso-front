@@ -4,10 +4,12 @@ import { Helper } from '@/helpers/Helper';
 import type { CommonData } from '@/types/common-data';
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import { DotsVerticalIcon, ExclamationCircleIcon, TrashIcon } from '@heroicons/react/solid';
+import type { ResourcePermissions } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import clsx from 'clsx';
 import { useRouter } from 'next/router';
 import React, { Fragment, useState } from 'react';
+import { getLocalStorageItem, setLocalStorageItem } from '../helpers/isomorphic-local-storage';
 
 interface Props {
   commonData: CommonData;
@@ -34,14 +36,29 @@ const UnpureDeleteOrganizationDropdown = ({ commonData, showToaster, isCurrentUs
       const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
       await api.deleteOrganization(commonData.organization!.id!);
       showToaster(`Organization deleted successfully`, ToasterIcons.INFO);
+      let lastOrganizationDict: { [userId: string]: string } = {};
+      const lastOrganizationStr: string | null = getLocalStorageItem('last_organization');
+      if (lastOrganizationStr) {
+        try {
+          lastOrganizationDict = JSON.parse(lastOrganizationStr);
+        } catch (e) {}
+      }
+      delete lastOrganizationDict[commonData.user!.id];
+      setLocalStorageItem('last_organization', JSON.stringify(lastOrganizationDict));
+      const orgs: ResourcePermissions[] | undefined = commonData.permissions?.organizations;
+      if (orgs && orgs.length > 0) {
+        window.location.href = `/${orgs[0]!.name}`;
+      } else {
+        window.location.href = '/';
+      }
     } catch (error: any) {
       showToaster(`Something happened trying to delete the organization. Please try again. <br /> <br /> ${error.response.data.message}`, ToasterIcons.ERROR);
       Helper.logError(error?.response?.data?.message, error);
+    } finally {
       setOpen(false);
       setInput('');
       setRequesting(false);
     }
-    router.push('/');
   };
 
   return (
