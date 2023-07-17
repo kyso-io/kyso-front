@@ -217,3 +217,15 @@ export class HelperPermissions {
     return kysoPermissions.some((i: KysoPermissions) => allUserPermissions.includes(i));
   }
 }
+
+export const isGlobalAdmin = (tokenPermissions: TokenPermissions): boolean => {
+  if (!tokenPermissions) {
+    return false;
+  }
+
+  if (!tokenPermissions.global || !Array.isArray(tokenPermissions.global)) {
+    return false;
+  }
+
+  return tokenPermissions.global.includes(GlobalPermissionsEnum.GLOBAL_ADMIN);
+};

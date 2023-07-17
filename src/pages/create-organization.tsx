@@ -13,14 +13,17 @@ import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import { ArrowRightIcon } from '@heroicons/react/solid';
 import type { NormalizedResponseDTO, Organization } from '@kyso-io/kyso-model';
-import { AllowDownload, CreateOrganizationDto } from '@kyso-io/kyso-model';
+import { AllowDownload, CreateOrganizationDto, KysoSettingsEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
+import { usePublicSettings } from '../hooks/use-public-settings';
+import { isGlobalAdmin } from '../helpers/check-permissions';
 
 const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha, isUserLogged }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
   const ref = useRef<any>(null);
+  const kysoSettingValues: (any | null)[] = usePublicSettings([KysoSettingsEnum.ONLY_GLOBAL_ADMINS_CAN_CREATE_ORGANIZATIONS]);
   const [isBusy, setBusy] = useState(false);
   const [displayName, setDisplayName] = useState<string>('');
   const [bio, setBio] = useState<string>('');
@@ -54,6 +57,17 @@ const Index = ({ commonData, showToaster, hideToaster, isCurrentUserVerified, is
     }, Helper.CHECK_JWT_TOKEN_MS);
     return () => clearInterval(interval);
   }, [commonData.user]);
+
+  useEffect(() => {
+    if (!commonData.user || !commonData.permissions || kysoSettingValues.length !== 1 || kysoSettingValues[0] === null) {
+      return;
+    }
+    if (kysoSettingValues[0] === 'true' || kysoSettingValues[0] === true) {
+      if (!isGlobalAdmin(commonData.permissions)) {
+        router.replace('/');
+      }
+    }
+  }, [commonData.user, commonData.permissions, kysoSettingValues]);
 
   const createOrganization = async (): Promise<void> => {
     const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);

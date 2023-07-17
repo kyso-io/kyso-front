@@ -1,8 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { BreadcrumbItem } from '@/model/breadcrum-item.model';
 import { Menu, Transition } from '@headlessui/react';
 import { HomeIcon, PlusCircleIcon, SearchIcon, SelectorIcon, ViewListIcon } from '@heroicons/react/outline';
-import { Fragment, useEffect, useState } from 'react';
+import { KysoSettingsEnum } from '@kyso-io/kyso-model';
 import Link from 'next/link';
+import { Fragment, useEffect, useState } from 'react';
+import { isGlobalAdmin } from '../helpers/check-permissions';
+import { usePublicSettings } from '../hooks/use-public-settings';
 import type { CommonData } from '../types/common-data';
 
 type INavigationSelectorProps = {
@@ -17,11 +21,8 @@ function classNames(...classes: string[]) {
 }
 
 const NavigationSelector = (props: INavigationSelectorProps) => {
-  let currentOrg: BreadcrumbItem | null | undefined = null;
-  if (props.selectorItems) {
-    currentOrg = props.selectorItems.find((item) => item.current);
-  }
-
+  const [showCreateOrganizationButton, setShowCreateOrganizationButton] = useState<boolean>(false);
+  const kysoSettingValues: (any | null)[] = usePublicSettings([KysoSettingsEnum.ONLY_GLOBAL_ADMINS_CAN_CREATE_ORGANIZATIONS]);
   const [originalSortedSelectorITems, setOriginalSortedSelectorItems] = useState<BreadcrumbItem[]>([]);
   const [sortedSelectorItems, setSortedSelectorItems] = useState<BreadcrumbItem[]>([]);
 
@@ -44,6 +45,26 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
       setOriginalSortedSelectorItems(sorted);
     }
   }, [props.selectorItems]);
+
+  useEffect(() => {
+    if (!props.commonData.user || !props.commonData.permissions || kysoSettingValues.length !== 1 || kysoSettingValues[0] === null) {
+      return;
+    }
+    if (kysoSettingValues[0] === 'true' || kysoSettingValues[0] === true) {
+      if (isGlobalAdmin(props.commonData.permissions)) {
+        setShowCreateOrganizationButton(true);
+      } else {
+        setShowCreateOrganizationButton(false);
+      }
+    } else {
+      setShowCreateOrganizationButton(true);
+    }
+  }, [props.commonData.user, props.commonData.permissions, kysoSettingValues]);
+
+  let currentOrg: BreadcrumbItem | null | undefined = null;
+  if (props.selectorItems) {
+    currentOrg = props.selectorItems.find((item) => item.current);
+  }
 
   return (
     <div className="rounded-md flex items-center">
@@ -80,7 +101,7 @@ const NavigationSelector = (props: INavigationSelectorProps) => {
               {currentOrg && (
                 <h3 className="p-3 text-xs font-semibold text-gray-500 uppercase tracking-wider" id="projects-headline">
                   Organizations
-                  {props.commonData.user !== null && (
+                  {showCreateOrganizationButton && (
                     <Link href="/create-organization" className={classNames('float-right text-gray-500 hover:bg-gray-100 hover:text-gray-900', 'text-sm rounded-md')}>
                       <PlusCircleIcon className="w-5 h-5 mr-1" />
                     </Link>
