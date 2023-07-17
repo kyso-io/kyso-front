@@ -68,7 +68,25 @@ const MoveReportModal: React.FC<Props> = ({ show, setShow, report, commonData, s
     if (!formData.organizationId || teamsResourcePermissions.length === 0) {
       return [];
     }
-    return teamsResourcePermissions.filter((p: ResourcePermissions) => p.organization_id === formData.organizationId);
+    return teamsResourcePermissions.filter((p: ResourcePermissions) => {
+      if (p.organization_id !== formData.organizationId) {
+        return false;
+      }
+      if (p.organization_inherited) {
+        const orgResourcePermissions: ResourcePermissions | undefined = orgsResourcePermissions.find((o: ResourcePermissions) => o.id === p.organization_id);
+        if (!orgResourcePermissions) {
+          return false;
+        }
+        if (orgResourcePermissions.permissions === undefined || orgResourcePermissions.permissions === null) {
+          return false;
+        }
+        return orgResourcePermissions.permissions.includes(ReportPermissionsEnum.CREATE);
+      }
+      if (p.permissions === undefined || p.permissions === null) {
+        return false;
+      }
+      return p.permissions.includes(ReportPermissionsEnum.CREATE);
+    });
   }, [formData.organizationId, teamsResourcePermissions]);
 
   const moveButtonEnabled: boolean = useMemo(() => {

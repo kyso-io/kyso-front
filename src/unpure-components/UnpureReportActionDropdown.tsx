@@ -6,12 +6,14 @@ import type { CommonData } from '@/types/common-data';
 import { Menu, Transition } from '@headlessui/react';
 import { ArchiveIcon, DotsVerticalIcon, PencilIcon, PresentationChartLineIcon, StarIcon, TrashIcon } from '@heroicons/react/solid';
 import type { ReportDTO } from '@kyso-io/kyso-model';
+import { OrganizationPermissionsEnum, ReportPermissionsEnum, TeamPermissionsEnum } from '@kyso-io/kyso-model';
 import { deleteReportAction } from '@kyso-io/kyso-store';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { classNames } from 'primereact/utils';
 import React, { Fragment, useMemo, useState } from 'react';
 import MoveReportModal from '../components/MoveReportModal';
+import { HelperPermissions } from '../helpers/check-permissions';
 import KTasksIcon from '../icons/KTasksIcon';
 import type { FileToRender } from '../types/file-to-render';
 
@@ -31,19 +33,7 @@ interface Props {
 
 const UnpureReportActionDropdown = (props: Props) => {
   const router = useRouter();
-  const {
-    report,
-    fileToRender,
-    commonData,
-    hasPermissionCreateReport,
-    hasPermissionDeleteReport,
-    hasPermissionEditReport,
-    onSetFileAsMainFile,
-    version,
-    isCurrentUserVerified,
-    isCurrentUserSolvedCaptcha,
-    showToaster,
-  } = props;
+  const { report, fileToRender, commonData, hasPermissionDeleteReport, hasPermissionEditReport, onSetFileAsMainFile, version, isCurrentUserVerified, isCurrentUserSolvedCaptcha, showToaster } = props;
   const dispatch = useAppDispatch();
   const [showMoveReportModal, setShowMoveReportModal] = useState<boolean>(false);
 
@@ -59,6 +49,25 @@ const UnpureReportActionDropdown = (props: Props) => {
     }
     return (versionNumber === null || versionNumber === report.last_version) && report.main_file_id !== fileToRender.id;
   }, [hasPermissionEditReport, report, fileToRender]);
+
+  const hasPermissionMoveReport: boolean = useMemo(() => {
+    if (!commonData?.organization || !commonData?.team || !commonData?.user || !report) {
+      return false;
+    }
+    const orgLevel: boolean = HelperPermissions.checkPermissions(commonData, [OrganizationPermissionsEnum.ADMIN]);
+    if (orgLevel) {
+      return true;
+    }
+    const isTeamAdmin: boolean = HelperPermissions.checkPermissions(commonData, [TeamPermissionsEnum.ADMIN]);
+    if (isTeamAdmin) {
+      return true;
+    }
+    const isReportAuthor: boolean = report.author_ids.includes(commonData.user?.id);
+    if (isReportAuthor && HelperPermissions.checkPermissions(commonData, [ReportPermissionsEnum.ADMIN, ReportPermissionsEnum.CREATE, ReportPermissionsEnum.EDIT])) {
+      return true;
+    }
+    return false;
+  }, [commonData]);
 
   const deleteReport = async () => {
     const isValid: boolean = Helper.validateEmailVerifiedAndCaptchaSolvedAndShowToasterMessages(isCurrentUserVerified(), isCurrentUserSolvedCaptcha(), showToaster, commonData);
@@ -101,7 +110,7 @@ const UnpureReportActionDropdown = (props: Props) => {
         >
           <Menu.Items className="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white border focus:outline-none">
             <div className="py-1">
-              {hasPermissionCreateReport && (
+              {hasPermissionMoveReport && (
                 <Menu.Item>
                   <span onClick={() => setShowMoveReportModal(true)} className={classNames('text-gray-700', 'px-4 py-2 text-sm hover:bg-gray-100 group flex items-center cursor-pointer')}>
                     <ArchiveIcon className="mr-2 h-5 w-5 text-gray-700" />
