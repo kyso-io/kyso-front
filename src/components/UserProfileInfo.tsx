@@ -5,11 +5,14 @@ import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import { faPeriod } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import type { UserDTO } from '@kyso-io/kyso-model';
+import type { NormalizedResponseDTO, UserDTO, TokenPermissions } from '@kyso-io/kyso-model';
+import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
-import { useRouter } from 'next/router';
-import { useMemo, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { isGlobalAdmin } from '../helpers/check-permissions';
+import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
 import type { CommonData } from '../types/common-data';
 import PureAvatar from './PureAvatar';
 
@@ -24,8 +27,12 @@ type IUserProfileInfo = {
   showEmail: boolean;
 };
 
+const token: string | null = getLocalStorageItem('jwt');
+
 const UserProfileInfo = (props: IUserProfileInfo) => {
   const { commonData, onChangeTab, currentTab, userProfile, onChangeBackgroundImage, showEmail } = props;
+  const [showSetUserGlobalAdmin, setShowSetUserGlobalAdmin] = useState<boolean>(false);
+  const [showRemoveUserGlobalAdmin, setShowRemoveUserGlobalAdmin] = useState<boolean>(false);
   const router = useRouter();
   const tabs = [{ name: 'Overview' }, { name: 'Activity' }];
   const imageInputFileRef = useRef<any>(null);
@@ -38,6 +45,46 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
     }
     return showEmail;
   }, [commonData?.user, userProfile, showEmail]);
+
+  useEffect(() => {
+    if (!userProfile || !commonData.permissions) {
+      return;
+    }
+    if (!isGlobalAdmin(commonData.permissions)) {
+      return;
+    }
+    getUserPermissions();
+  }, [commonData.permissions, userProfile]);
+
+  const getUserPermissions = async () => {
+    try {
+      const api: Api = new Api(token);
+      const result: NormalizedResponseDTO<TokenPermissions> = await api.getUserPermissions(userProfile.username);
+      if (isGlobalAdmin(result.data)) {
+        setShowRemoveUserGlobalAdmin(true);
+      } else {
+        setShowSetUserGlobalAdmin(true);
+      }
+    } catch (e) {}
+  };
+
+  const setUserAsGlobalAdmin = async () => {
+    try {
+      const api: Api = new Api(token);
+      await api.setUserAsGlobalAdmin(userProfile.id);
+      setShowSetUserGlobalAdmin(false);
+      setShowRemoveUserGlobalAdmin(true);
+    } catch (e) {}
+  };
+
+  const removeUserAsGlobalAdmin = async () => {
+    try {
+      const api: Api = new Api(token);
+      await api.removeUserAsGlobalAdmin(userProfile.id);
+      setShowSetUserGlobalAdmin(true);
+      setShowRemoveUserGlobalAdmin(false);
+    } catch (e) {}
+  };
 
   let isUserLoggedIn = false;
   if (commonData?.user?.id === userProfile.id) {
@@ -87,8 +134,8 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
               <PureAvatar src={userProfile.avatar_url} title={userProfile.display_name} size={TailwindHeightSizeEnum.H20} textSize={TailwindFontSizeEnum.XXXXL} />
             </div>
           </div>
-          {isUserLoggedIn && (
-            <div className="mt-6 mb-1 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
+          <div className="mt-6 mb-1 flex flex-col justify-stretch space-y-3 sm:flex-row sm:space-y-0 sm:space-x-4">
+            {isUserLoggedIn && (
               <button
                 type="button"
                 className="inline-flex justify-center px-4 py-2 border border-indigo-700 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -102,8 +149,26 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
                   Edit
                 </a>
               </button>
-            </div>
-          )}
+            )}
+            {showSetUserGlobalAdmin && (
+              <button
+                type="button"
+                className="inline-flex justify-center px-4 py-2 border border-indigo-700 shadow-sm text-sm font-medium rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-indigo-700"
+                onClick={setUserAsGlobalAdmin}
+              >
+                Convert to Global Administrator
+              </button>
+            )}
+            {showRemoveUserGlobalAdmin && (
+              <button
+                type="button"
+                className="inline-flex justify-center px-4 py-2 border border-red-500 shadow-sm text-sm font-medium rounded-md bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 text-red-500"
+                onClick={removeUserAsGlobalAdmin}
+              >
+                Remove as Global Administrator
+              </button>
+            )}
+          </div>
         </div>
         <div className="rounded-lg bg-white overflow-hidden">
           <div className="mt-1 flex flex-col sm:flex-row sm:flex-wrap sm:mt-0 sm:space-x-6">
