@@ -109,36 +109,44 @@ const Index = ({ commonData, reportData, setReportData, showToaster, isCurrentUs
     if (!reportAnalytics) {
       return elements;
     }
-    reportAnalytics.downloads.last_items.forEach((e: { timestamp: Date; user_id: string; source: AnalyticsSource }) => {
-      elements.push({
-        user_id: e.user_id,
-        timestamp: e.timestamp,
-        action: 'downloaded',
+    if (reportAnalytics?.downloads && Array.isArray(reportAnalytics.downloads.last_items)) {
+      reportAnalytics.downloads.last_items.forEach((e: { timestamp: Date; user_id: string; source: AnalyticsSource }) => {
+        elements.push({
+          user_id: e.user_id,
+          timestamp: e.timestamp,
+          action: 'downloaded',
+        });
       });
-    });
-    reportAnalytics.shares.last_items.forEach((e: { timestamp: Date; user_id: string }) => {
-      elements.push({
-        user_id: e.user_id,
-        timestamp: e.timestamp,
-        action: 'share',
+    }
+    if (reportAnalytics?.shares && Array.isArray(reportAnalytics.shares.last_items)) {
+      reportAnalytics.shares.last_items.forEach((e: { timestamp: Date; user_id: string }) => {
+        elements.push({
+          user_id: e.user_id,
+          timestamp: e.timestamp,
+          action: 'share',
+        });
       });
-    });
-    reportAnalytics.last_comments.forEach((e: CommentInteraction) => {
-      elements.push({
-        user_id: e.user_id,
-        timestamp: e.timestamp,
-        action: 'comment',
-        sub_action: e.action,
+    }
+    if (Array.isArray(reportAnalytics.last_comments)) {
+      reportAnalytics.last_comments.forEach((e: CommentInteraction) => {
+        elements.push({
+          user_id: e.user_id,
+          timestamp: e.timestamp,
+          action: 'comment',
+          sub_action: e.action,
+        });
       });
-    });
-    reportAnalytics.last_tasks.forEach((e: InlineCommentInteraction) => {
-      elements.push({
-        user_id: e.user_id,
-        timestamp: e.timestamp,
-        action: 'inline_comment',
-        sub_action: e.action,
+    }
+    if (Array.isArray(reportAnalytics.last_tasks)) {
+      reportAnalytics.last_tasks.forEach((e: InlineCommentInteraction) => {
+        elements.push({
+          user_id: e.user_id,
+          timestamp: e.timestamp,
+          action: 'inline_comment',
+          sub_action: e.action,
+        });
       });
-    });
+    }
     return elements.sort(
       (
         a: {
