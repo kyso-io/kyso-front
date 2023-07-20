@@ -71,10 +71,6 @@ img.k-right-logo {
 }
 /* END THEME */
 
-.p-mention {
-  z-index: -1;
-}
-
 #tooltip {
   display: inline-block;
   background: #435b6f;
