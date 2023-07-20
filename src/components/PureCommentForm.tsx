@@ -159,15 +159,12 @@ const PureCommentForm = (props: IPureCommentForm) => {
       return undefined;
     }
     const targetNode = mentionsRef.current.getElement();
-    // Crear un nuevo MutationObserver
     const observer = new MutationObserver((mutationsList) => {
       for (const mutation of mutationsList) {
         if (mutation.type === 'childList') {
           for (const addedNode of mutation.addedNodes) {
-            // Verificar si el nodo agregado es un elemento
             if (addedNode.nodeType === Node.ELEMENT_NODE) {
-              const addedElement = addedNode; // Convertir el nodo a un elemento
-              // Obtener las clases CSS del elemento agregado
+              const addedElement = addedNode;
               const classes: string[] = Array.from((addedElement as any).classList);
               if (classes.includes('p-mention-panel')) {
                 setSearchingUsers(true);
@@ -176,11 +173,8 @@ const PureCommentForm = (props: IPureCommentForm) => {
             }
           }
           for (const removedNode of mutation.removedNodes) {
-            // Verificar si el nodo eliminado es un elemento
             if (removedNode.nodeType === Node.ELEMENT_NODE) {
-              const removedElement = removedNode; // Convertir el nodo a un elemento
-
-              // Obtener las clases CSS del elemento eliminado
+              const removedElement = removedNode;
               const classes: string[] = Array.from((removedElement as any).classList);
               if (classes.includes('p-mention-panel')) {
                 setSearchingUsers(false);
@@ -191,14 +185,11 @@ const PureCommentForm = (props: IPureCommentForm) => {
         }
       }
     });
-    // Configurar las opciones del MutationObserver
     const observerOptions = {
-      childList: true, // Observar cambios en los hijos del targetNode
-      subtree: true, // Observar cambios en todos los niveles del DOM dentro del targetNode
+      childList: true,
+      subtree: true,
     };
-    // Comenzar a observar el targetNode
     observer.observe(targetNode, observerOptions);
-    // Detener el observer cuando el componente se desmonta
     return () => {
       observer.disconnect();
       return undefined;
