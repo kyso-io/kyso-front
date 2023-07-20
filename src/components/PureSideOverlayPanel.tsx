@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import type { MouseEvent, ReactElement } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useEventListener } from 'usehooks-ts';
+import { useEvent } from '../hooks/use-event';
 
 type IPureSideOverlayPanel = {
   cacheKey?: string;
@@ -80,6 +81,7 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
   const hoverRef = useRef(null);
   const tooltipRef = useRef(null);
   const { width, enableResize } = useResize({ minWidth: 300 });
+  const { emitEvent } = useEvent();
 
   useEffect(() => {
     if (getLocalStorageItem(cacheKey)) {
@@ -88,8 +90,22 @@ const PureSideOverlayPanel = (props: IPureSideOverlayPanel) => {
     }
   }, []);
 
-  useEventListener('mouseenter', () => setIsHover(true), hoverRef);
-  useEventListener('mouseleave', () => setIsHover(false), hoverRef);
+  useEventListener(
+    'mouseenter',
+    () => {
+      setIsHover(true);
+      emitEvent({ type: 'sidebar-hover', payload: true });
+    },
+    hoverRef,
+  );
+  useEventListener(
+    'mouseleave',
+    () => {
+      setIsHover(false);
+      emitEvent({ type: 'sidebar-hover', payload: false });
+    },
+    hoverRef,
+  );
   useEventListener('mouseenter', () => setShowTooltip(true), tooltipRef);
   useEventListener('mouseleave', () => setShowTooltip(false), tooltipRef);
 

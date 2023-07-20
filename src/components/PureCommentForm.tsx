@@ -6,8 +6,9 @@ import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { Comment, ReportDTO, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Mention } from 'primereact/mention';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { useEvent } from '../hooks/use-event';
 import PureAvatar from './PureAvatar';
 
 type IPureCommentForm = {
@@ -45,9 +46,18 @@ const parseMentions = (str: string) => {
 const MIN_HEIGHT_TEXTAREA = 65;
 
 const PureCommentForm = (props: IPureCommentForm) => {
+  const { subscribeEvent } = useEvent();
   const { parentComment, comment, submitComment, user, report, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateComment = true, userSelectorHook } = props;
   const mentionsRef = useRef<any>(null);
   const [id] = useState<string | undefined>(`pfc-${uuidv4()}`);
+  const [searchingUsers, setSearchingUsers] = useState<boolean>(false);
+
+  useEffect(() => {
+    subscribeEvent(handleEvent);
+    return () => {
+      subscribeEvent(() => {}); // Pasar una función vacía para desuscribirse.
+    };
+  }, []);
 
   useEffect(() => {
     function handleDocumentKeyDown(event: any) {
@@ -144,8 +154,66 @@ const PureCommentForm = (props: IPureCommentForm) => {
     );
   };
 
+  useEffect(() => {
+    if (!mentionsRef.current) {
+      return undefined;
+    }
+    const targetNode = mentionsRef.current.getElement();
+    // Crear un nuevo MutationObserver
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+          for (const addedNode of mutation.addedNodes) {
+            // Verificar si el nodo agregado es un elemento
+            if (addedNode.nodeType === Node.ELEMENT_NODE) {
+              const addedElement = addedNode; // Convertir el nodo a un elemento
+              // Obtener las clases CSS del elemento agregado
+              const classes: string[] = Array.from((addedElement as any).classList);
+              if (classes.includes('p-mention-panel')) {
+                setSearchingUsers(true);
+                break;
+              }
+            }
+          }
+          for (const removedNode of mutation.removedNodes) {
+            // Verificar si el nodo eliminado es un elemento
+            if (removedNode.nodeType === Node.ELEMENT_NODE) {
+              const removedElement = removedNode; // Convertir el nodo a un elemento
+
+              // Obtener las clases CSS del elemento eliminado
+              const classes: string[] = Array.from((removedElement as any).classList);
+              if (classes.includes('p-mention-panel')) {
+                setSearchingUsers(false);
+                break;
+              }
+            }
+          }
+        }
+      }
+    });
+    // Configurar las opciones del MutationObserver
+    const observerOptions = {
+      childList: true, // Observar cambios en los hijos del targetNode
+      subtree: true, // Observar cambios en todos los niveles del DOM dentro del targetNode
+    };
+    // Comenzar a observar el targetNode
+    observer.observe(targetNode, observerOptions);
+    // Detener el observer cuando el componente se desmonta
+    return () => {
+      observer.disconnect();
+      return undefined;
+    };
+  }, [mentionsRef.current]);
+
+  const handleEvent = useCallback(() => {
+    if (!mentionsRef.current) {
+      return;
+    }
+    mentionsRef.current.hide();
+  }, [mentionsRef.current]);
+
   return (
-    <form onSubmit={handleSubmit} className="my-2 flex flex-col space-y-4 mb-8" style={{ position: 'relative' }}>
+    <form onSubmit={handleSubmit} className="my-2 flex flex-col space-y-4 mb-8">
       {hasPermissionCreateComment ? (
         <React.Fragment>
           <Mention
@@ -153,7 +221,6 @@ const PureCommentForm = (props: IPureCommentForm) => {
             id={id}
             autoFocus={!!parentComment?.id}
             suggestions={suggestions}
-            className="relative"
             inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm "
             panelClassName="bg-white border rounded"
             autoHighlight
@@ -174,6 +241,9 @@ const PureCommentForm = (props: IPureCommentForm) => {
             .p-highlight {
               color: #4338ca;
               background: #eef2ff;
+            }
+            .p-mention {
+              position: ${searchingUsers ? 'relative' : 'static'};
             }
           `}</style>
         </React.Fragment>

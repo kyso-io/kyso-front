@@ -11,6 +11,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import type { PageWithLayoutType } from '../types/pageWithLayout';
+import { EventProvider } from '../hooks/use-event';
 
 type AppLayoutProps = AppProps & {
   Component: PageWithLayoutType;
@@ -41,15 +42,16 @@ function MyApp({ Component, pageProps }: AppLayoutProps) {
   }
 
   return (
-    <ErrorBoundary>
-      <Provider store={store}>
-        <Layout>
-          <Component {...pageProps} />
-        </Layout>
-      </Provider>
-
-      {theme && <link rel="stylesheet" href={`/pub/themes/${theme}/styles.css`}></link>}
-    </ErrorBoundary>
+    <EventProvider>
+      <ErrorBoundary>
+        <Provider store={store}>
+          <Layout>
+            <Component {...pageProps} />
+          </Layout>
+        </Provider>
+        {theme && <link rel="stylesheet" href={`/pub/themes/${theme}/styles.css`}></link>}
+      </ErrorBoundary>
+    </EventProvider>
   );
 }
 export default MyApp;
