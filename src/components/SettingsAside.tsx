@@ -101,13 +101,16 @@ const SettingsAside = ({ commonData }: Props) => {
                 if (e.target.value) {
                   if (e.target.value === ALL_SPECIAL_VALUE) {
                     setOrganizationNameSelectValue(ALL_SPECIAL_VALUE);
-                    router.push(`/settings?all=true`);
+                    // router.push(`/settings?all=true`);
+                    window.location.href = `/settings?all=true`;
                   } else {
                     setOrganizationNameSelectValue(e.target.value);
-                    router.push(`/settings/${e.target.value}`);
+                    // router.push(`/settings/${e.target.value}`);
+                    window.location.href = `/settings/${e.target.value}`;
                   }
                 } else {
-                  router.push(`/settings`);
+                  // router.push(`/settings`);
+                  window.location.href = `/settings`;
                 }
               }}
               value={organizationNameSelectValue ?? ''}
