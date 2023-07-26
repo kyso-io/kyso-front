@@ -22,8 +22,11 @@ const SearchItem = ({ fullTextSearchResult, otherVersionResultsNumber, terms }: 
   const { basePath } = router;
 
   const highlightedTitle: any = useMemo(() => {
+    if (!fullTextSearchResult || !fullTextSearchResult.title) {
+      return '';
+    }
     return fullTextSearchResult.title.replace(new RegExp(terms, 'gi'), (match) => `<span class="font-bold">${match}</span>`);
-  }, [terms]);
+  }, [fullTextSearchResult?.title, terms]);
 
   const isUnknownFile = (name: string) => {
     return (

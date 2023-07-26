@@ -62,6 +62,9 @@ export class Helper {
   }
 
   public static slugify(text: string): string {
+    if (!text) {
+      return '';
+    }
     return slugify(text, {
       replacement: '-',
       lower: true,
