@@ -42,7 +42,7 @@ function MyApp({ Component, pageProps }: AppLayoutProps) {
   useEffect(() => {
     const token: string | null = getLocalStorageItem('jwt');
     if (!token) {
-      return;
+      return () => {};
     }
     websocket.connect(token);
     return () => {

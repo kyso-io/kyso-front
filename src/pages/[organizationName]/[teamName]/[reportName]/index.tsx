@@ -586,35 +586,54 @@ const Index = ({ commonData, reportData, setReportData, setUser, showToaster, is
         return true;
       }
     }
-    if (commonData.permissions.organizations) {
-      const orgResourcePermissions: ResourcePermissions | undefined = commonData.permissions.organizations.find((x: ResourcePermissions) => x.id === commonData.organization!.id);
-      if (orgResourcePermissions && orgResourcePermissions.role_names) {
-        const isOrgAdmin: boolean = orgResourcePermissions.role_names.includes('organization-admin');
-        if (isOrgAdmin) {
-          return true;
-        }
-        const isTeamAdmin: boolean = orgResourcePermissions.role_names.includes('team-admin');
-        if (isTeamAdmin) {
-          return true;
-        }
-        const isTeamContributor: boolean = orgResourcePermissions.role_names.includes('team-contributor');
-        if (isTeamContributor) {
-          return true;
+
+    const checkOrgLevel = () => {
+      if (commonData?.permissions?.organizations) {
+        const orgResourcePermissions: ResourcePermissions | undefined = commonData.permissions.organizations.find((x: ResourcePermissions) => x.id === commonData.organization!.id);
+        if (orgResourcePermissions && orgResourcePermissions.role_names) {
+          const isOrgAdmin: boolean = orgResourcePermissions.role_names.includes('organization-admin');
+          if (isOrgAdmin) {
+            return true;
+          }
+          const isTeamAdmin: boolean = orgResourcePermissions.role_names.includes('team-admin');
+          if (isTeamAdmin) {
+            return true;
+          }
+          const isTeamContributor: boolean = orgResourcePermissions.role_names.includes('team-contributor');
+          if (isTeamContributor) {
+            return true;
+          }
         }
       }
-    }
+      return false;
+    };
+
     if (commonData.permissions.teams) {
       const teamResourcePermissions: ResourcePermissions | undefined = commonData.permissions.teams.find((x: ResourcePermissions) => x.id === commonData.team!.id);
-      if (teamResourcePermissions && teamResourcePermissions.role_names) {
-        const isTeamAdmin: boolean = teamResourcePermissions.role_names.includes('team-admin');
-        if (isTeamAdmin) {
+      if (teamResourcePermissions) {
+        if (!teamResourcePermissions.organization_inherited) {
+          if (teamResourcePermissions && teamResourcePermissions.role_names) {
+            const isOrgAdmin: boolean = teamResourcePermissions.role_names.includes('organization-admin');
+            if (isOrgAdmin) {
+              return true;
+            }
+            const isTeamAdmin: boolean = teamResourcePermissions.role_names.includes('team-admin');
+            if (isTeamAdmin) {
+              return true;
+            }
+            const isTeamContributor: boolean = teamResourcePermissions.role_names.includes('team-contributor');
+            if (isTeamContributor) {
+              return true;
+            }
+          }
+        } else if (checkOrgLevel()) {
           return true;
         }
-        const isTeamContributor: boolean = teamResourcePermissions.role_names.includes('team-contributor');
-        if (isTeamContributor) {
-          return true;
-        }
+      } else if (checkOrgLevel()) {
+        return true;
       }
+    } else if (checkOrgLevel()) {
+      return true;
     }
     return reportData.report.author_ids.includes(commonData.user.id);
   }, [commonData, random, reportData]);

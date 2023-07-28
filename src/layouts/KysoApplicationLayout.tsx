@@ -81,7 +81,7 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
 
   useEffect(() => {
     if (!websocket.isConnected || !commonData.token || !commonData.user) {
-      return;
+      return () => {};
     }
     websocket.on(WebSocketEvent.REFRESH_PERMISSIONS, async () => {
       try {
