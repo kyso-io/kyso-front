@@ -13,12 +13,13 @@ import type { CommonData } from '@/types/common-data';
 import type { LayoutProps } from '@/types/pageWithLayout';
 import type { ReportData } from '@/types/report-data';
 import type { NormalizedResponseDTO, Organization, Team, TokenPermissions, UserDTO } from '@kyso-io/kyso-model';
-import { KysoSettingsEnum } from '@kyso-io/kyso-model';
+import { KysoSettingsEnum, WebSocketEvent } from '@kyso-io/kyso-model';
 import { Api, logoutAction, setOrganizationAuthAction, setTeamAuthAction, setTokenAuthAction } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
 import { Helper } from '../helpers/Helper';
+import { websocket } from '../helpers/websocket';
 import { usePublicSetting } from '../hooks/use-public-setting';
 
 type IUnpureKysoApplicationLayoutProps = {
@@ -72,10 +73,27 @@ const KysoApplicationLayout: LayoutProps = ({ children }: IUnpureKysoApplication
         sessionStorage.clear();
         await dispatch(logoutAction());
         Helper.getKysoPublicSettings();
+        websocket.disconnect();
         router.replace(`/login`);
       },
     },
   ];
+
+  useEffect(() => {
+    if (!websocket.isConnected || !commonData.token || !commonData.user) {
+      return;
+    }
+    websocket.on(WebSocketEvent.REFRESH_PERMISSIONS, async () => {
+      try {
+        const api: Api = new Api(commonData.token);
+        const response: NormalizedResponseDTO<TokenPermissions> = await api.getUserPermissions(commonData.user!.username);
+        setCommonData({ ...commonData, permissions: response.data });
+      } catch (e) {}
+    });
+    return () => {
+      websocket.off(WebSocketEvent.REFRESH_PERMISSIONS);
+    };
+  }, [commonData.token, commonData.user]);
 
   useEffect(() => {
     const result: boolean = checkJwt();

@@ -16,6 +16,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { KysoDescription } from '../components/KysoDescription';
 import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
+import { websocket } from '../helpers/websocket';
 import { usePublicSettings } from '../hooks/use-public-settings';
 import type { DecodedToken } from '../types/decoded-token';
 
@@ -139,6 +140,7 @@ const Index = () => {
       const token: string = response.data;
       dispatch(setTokenAuthAction(token));
       localStorage.setItem('jwt', token);
+      websocket.connect(token);
       // Get user info to check if has completed the captcha challenge
       const jwtToken: DecodedToken = decode<DecodedToken>(token);
       const user: Token = jwtToken.payload;
