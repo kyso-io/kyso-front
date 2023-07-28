@@ -7,7 +7,7 @@ import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { InlineCommentDto, TeamMember, UserDTO } from '@kyso-io/kyso-model';
 import { Mention } from 'primereact/mention';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 type IPureCommentForm = {
@@ -43,6 +43,7 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
   const { comment, submitComment, user, channelMembers, onCancel = () => {}, onSubmitted = () => {}, hasPermissionCreateInlineComment = true, isReply = false } = props;
   const mentionsRef = useRef<any>(null);
   const [id] = useState<string | undefined>(`picf-${uuidv4()}`);
+  const [searchingUsers, setSearchingUsers] = useState<boolean>(false);
 
   useEffect(() => {
     function handleDocumentKeyDown(event: any) {
@@ -57,6 +58,48 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
       document.removeEventListener('keydown', handleDocumentKeyDown);
     };
   }, []);
+
+  useEffect(() => {
+    if (!mentionsRef.current) {
+      return undefined;
+    }
+    const targetNode = mentionsRef.current.getElement();
+    const observer = new MutationObserver((mutationsList) => {
+      for (const mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+          for (const addedNode of mutation.addedNodes) {
+            if (addedNode.nodeType === Node.ELEMENT_NODE) {
+              const addedElement = addedNode;
+              const classes: string[] = Array.from((addedElement as any).classList);
+              if (classes.includes('p-mention-panel')) {
+                setSearchingUsers(true);
+                break;
+              }
+            }
+          }
+          for (const removedNode of mutation.removedNodes) {
+            if (removedNode.nodeType === Node.ELEMENT_NODE) {
+              const removedElement = removedNode;
+              const classes: string[] = Array.from((removedElement as any).classList);
+              if (classes.includes('p-mention-panel')) {
+                setSearchingUsers(false);
+                break;
+              }
+            }
+          }
+        }
+      }
+    });
+    const observerOptions = {
+      childList: true,
+      subtree: true,
+    };
+    observer.observe(targetNode, observerOptions);
+    return () => {
+      observer.disconnect();
+      return undefined;
+    };
+  }, [mentionsRef.current]);
 
   let initialValue = '';
   if (comment) {
@@ -123,27 +166,38 @@ const PureInlineCommentForm = (props: IPureCommentForm) => {
   return (
     <form onSubmit={handleSubmit} className="my-2">
       {hasPermissionCreateInlineComment ? (
-        <Mention
-          ref={mentionsRef}
-          id={id}
-          suggestions={suggestions}
-          className="relative"
-          inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm"
-          panelClassName="w-full absolute bg-white border rounded"
-          autoHighlight
-          autoFocus
-          onSearch={onSearch}
-          name="input"
-          value={value}
-          onChange={() => setValue(mentionsRef.current.getInput().value)}
-          field="nameSlug"
-          style={{
-            width: '100%',
-            zIndex: 0,
-          }}
-          placeholder={message}
-          itemTemplate={itemTemplate}
-        />
+        <React.Fragment>
+          <Mention
+            ref={mentionsRef}
+            id={id}
+            suggestions={suggestions}
+            className="relative"
+            inputClassName="w-full bg-white h-full rounded border-gray-200 hover:border-blue-400 focus:border-blue-400 text-sm"
+            panelClassName="w-full absolute bg-white border rounded"
+            autoHighlight
+            autoFocus
+            onSearch={onSearch}
+            name="input"
+            value={value}
+            onChange={() => setValue(mentionsRef.current.getInput().value)}
+            field="nameSlug"
+            style={{
+              width: '100%',
+              zIndex: 0,
+            }}
+            placeholder={message}
+            itemTemplate={itemTemplate}
+          />
+          <style jsx global>{`
+            .p-highlight {
+              color: #4338ca;
+              background: #eef2ff;
+            }
+            .p-mention {
+              position: ${searchingUsers ? 'relative' : 'static'};
+            }
+          `}</style>
+        </React.Fragment>
       ) : (
         <div>{user ? 'Sorry, but you do not have the permission to write a comment' : 'Please, login to write a comment'}</div>
       )}
