@@ -5,13 +5,20 @@ class Websocket {
   private socket!: Socket;
 
   public connect(token: string): void {
-    let baseUrl: string = window.location.origin;
+    let baseUrl: string = window.location.host;
+    let pathName: string = window.location.pathname;
+    let protocol: string = window.location.protocol === 'https:' ? 'wss' : 'ws';
     if (process.env.KYSO_API) {
-      baseUrl = new URL(process.env.KYSO_API).origin;
+      baseUrl = new URL(process.env.KYSO_API).host;
+      pathName = new URL(process.env.KYSO_API).pathname;
+      protocol = new URL(process.env.KYSO_API).protocol === 'https:' ? 'wss' : 'ws';
     } else if (process.env.NEXT_PUBLIC_API_URL) {
-      baseUrl = new URL(process.env.NEXT_PUBLIC_API_URL).origin;
+      baseUrl = new URL(process.env.NEXT_PUBLIC_API_URL).host;
+      pathName = new URL(process.env.NEXT_PUBLIC_API_URL).pathname;
+      protocol = new URL(process.env.NEXT_PUBLIC_API_URL).protocol === 'https:' ? 'wss' : 'ws';
     }
-    this.socket = io(baseUrl, {
+    this.socket = io(`${protocol}://${baseUrl}`, {
+      path: `${pathName}/ws`,
       transportOptions: {
         polling: {
           extraHeaders: {

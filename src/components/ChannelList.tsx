@@ -5,8 +5,8 @@ import type { CommonData } from '@/types/common-data';
 import { PlusCircleIcon, SearchIcon } from '@heroicons/react/outline';
 import type { ResourcePermissions } from '@kyso-io/kyso-model';
 import { TeamPermissionsEnum } from '@kyso-io/kyso-model';
-import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useEffect, useMemo, useState } from 'react';
 import { TailwindWidthSizeEnum } from '../tailwind/enum/tailwind-width.enum';
 import ChannelVisibility from './ChannelVisibility';
 
@@ -99,9 +99,9 @@ const ChannelList = (props: Props) => {
         </div>
       </div>
       <div className={classNames('flex flex-col justify-start', props.showScroll ? `max-h-[380px] overflow-auto` : '')}>
-        {sortedSelectorItems.map((item: BreadcrumbItem) => (
+        {sortedSelectorItems.map((item: BreadcrumbItem, index: number) => (
           <Link
-            key={item.name}
+            key={`${item.name}-${index}`}
             href={item.href}
             className={classNames(
               item.current ? 'bg-gray-200 text-gray-900' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
