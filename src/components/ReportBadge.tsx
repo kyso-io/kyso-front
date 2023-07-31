@@ -88,16 +88,30 @@ const ReportBadge = ({ commonData, report, authors, toggleUserStarReport, toggle
                 </div>
               )}
               {/* GLOBAL */}
-              {toggleGlobalPinReport && hasPermissionReportGlobalPin && (
-                <div
-                  className="pin-tooltip"
-                  data-pr-tooltip={report.pin ? 'Remove global pin for everyone' : 'Pin globaly for everyone'}
-                  data-pr-position="top"
-                  onClick={() => toggleGlobalPinReport()}
-                >
-                  <BookmarkIconOutline fill={report.pin ? '#f97316' : 'white'} className="cursor-pointer h-7 w-7 text-orange-500 -mt-1 hover:text-orange-500" />
-                </div>
-              )}
+              <div
+                className="pin-tooltip"
+                data-pr-tooltip={
+                  hasPermissionReportGlobalPin
+                    ? report.pin
+                      ? 'Remove global pin for everyone'
+                      : 'Pin globaly for everyone'
+                    : report.pin
+                    ? 'Report pinned globally'
+                    : 'Report does not pinned globally'
+                }
+                data-pr-position="top"
+                onClick={() => {
+                  if (!toggleGlobalPinReport || !hasPermissionReportGlobalPin) {
+                    return;
+                  }
+                  toggleGlobalPinReport();
+                }}
+              >
+                <BookmarkIconOutline
+                  fill={report.pin ? '#f97316' : 'white'}
+                  className={clsx({ 'cursor-pointer': toggleGlobalPinReport && hasPermissionReportGlobalPin }, 'h-7 w-7 text-orange-500 -mt-1 hover:text-orange-500')}
+                />
+              </div>
             </div>
           </div>
         )}
