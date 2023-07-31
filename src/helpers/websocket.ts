@@ -6,7 +6,7 @@ class Websocket {
 
   public connect(token: string): void {
     let baseUrl: string = window.location.host;
-    let pathName: string = window.location.pathname;
+    let pathName: string = '/api/v1';
     let protocol: string = window.location.protocol === 'https:' ? 'wss' : 'ws';
     if (process.env.KYSO_API) {
       baseUrl = new URL(process.env.KYSO_API).host;
