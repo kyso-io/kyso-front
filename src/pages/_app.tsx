@@ -12,8 +12,8 @@ import { useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 import { EventProvider } from '../hooks/use-event';
 import type { PageWithLayoutType } from '../types/pageWithLayout';
-import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
-import { websocket } from '../helpers/websocket';
+// import { getLocalStorageItem } from '../helpers/isomorphic-local-storage';
+// import { websocket } from '../helpers/websocket';
 
 type AppLayoutProps = AppProps & {
   Component: PageWithLayoutType;
@@ -39,6 +39,7 @@ function MyApp({ Component, pageProps }: AppLayoutProps) {
     getTheme();
   }, []);
 
+  /*
   useEffect(() => {
     const token: string | null = getLocalStorageItem('jwt');
     if (!token) {
@@ -49,6 +50,7 @@ function MyApp({ Component, pageProps }: AppLayoutProps) {
       websocket.disconnect();
     };
   }, []);
+  */
 
   if (!mounted) {
     return null;
