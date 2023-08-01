@@ -51,19 +51,12 @@ const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 
 const debouncedPaginatedReports = debounce(
-  async (
-    tkn: string | null,
-    organization: Organization,
-    team: Team,
-    paginationParams: PaginationParams,
-    queryParams: string,
-    cb: (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => void,
-  ) => {
+  async (tkn: string | null, organization: Organization, team: Team, paginationParams: PaginationParams, cb: (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => void) => {
     try {
       const api: Api = new Api(tkn, organization.sluglified_name, team.sluglified_name);
-      let query = `team_id=${team.id}&skip=${(paginationParams.page - 1) * paginationParams.limit}&limit=${paginationParams.limit}`;
-      if (queryParams) {
-        query += `&${queryParams}`;
+      let query = `organization_id=${organization.id}&team_id=${team.id}&skip=${(paginationParams.page - 1) * paginationParams.limit}&limit=${paginationParams.limit}`;
+      if (paginationParams.query) {
+        query += `&${paginationParams.query}`;
       }
       const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getPaginatedReports(query);
       checkReportAuthors(result);
@@ -92,9 +85,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     page: 1,
     limit: 10,
     sort: '-created_at',
+    query: '',
   });
   const [requestingReports, setRequestingReports] = useState<boolean>(true);
-  const [queryParams, setQueryParams] = useState<string>('');
   // ACTIVITY FEED
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
   const [hasMore, setHasMore] = useState<boolean>(false);
@@ -177,16 +170,18 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   }, [commonData?.team, commonData?.user]);
 
   useEffect(() => {
+    if (!commonData.organization || !commonData.team || !commonData.user) {
+      return;
+    }
+    getSearchUser();
+  }, [commonData?.organization, commonData?.team, commonData?.user]);
+
+  useEffect(() => {
     if (!commonData.organization || !commonData.team) {
       return;
     }
-    // if (commonData.user) {
-    //   getSearchUser();
-    // } else {
-    //   getReports();
-    // }
-    getReports();
-  }, [commonData?.organization, commonData?.team, commonData?.user, paginationParams, queryParams]);
+    getReports(paginationParams);
+  }, [commonData?.organization, commonData?.team, paginationParams]);
 
   useEffect(() => {
     if (!commonData.organization || !commonData.team) {
@@ -223,9 +218,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     }
   }, [router.query, commonData.errorOrganization, commonData.errorTeam]);
 
-  const getReports = async () => {
+  const getReports = async (pp: PaginationParams) => {
     setRequestingReports(true);
-    debouncedPaginatedReports(commonData.token, commonData.organization!, commonData.team!, paginationParams, queryParams, (result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
+    debouncedPaginatedReports(commonData.token, commonData.organization!, commonData.team!, pp, (result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
       setPaginatedResponseDto(result?.data ? result.data : null);
       setRequestingReports(false);
     });
@@ -511,17 +506,19 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
 
   // START SEARCH USER
 
-  // const getSearchUser = async () => {
-  //   try {
-  //     const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
-  //     const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization!.id!, commonData.team!.id!);
-  //     if (result.data) {
-  //       setSearchUser(result.data);
-  //     } else {
-  //       getReports();
-  //     }
-  //   } catch (e) {}
-  // };
+  const getSearchUser = async () => {
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name, commonData.team!.sluglified_name);
+      const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization!.id!, commonData.team!.id!);
+      const newPaginationParams: PaginationParams = { ...paginationParams };
+      if (result.data) {
+        setSearchUser(result.data);
+        newPaginationParams.query = result.data.query || '';
+      }
+      setPaginationParams(newPaginationParams);
+      getReports(newPaginationParams);
+    } catch (e) {}
+  };
 
   const createSearchUser = async (query: string, payload: ReportsFilter[]) => {
     try {
@@ -600,10 +597,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
               deleteSearchUser();
             }
           }}
-          onFiltersChange={(query: string) => {
-            setPaginationParams({ ...paginationParams, page: 1 });
-            setQueryParams(query || '');
-          }}
+          onFiltersChange={(query: string) => setPaginationParams({ ...paginationParams, page: 1, query: query || '' })}
           searchUser={searchUser}
           user={commonData.user}
         />

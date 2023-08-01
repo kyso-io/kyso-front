@@ -1,30 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint no-empty: "off" */
+import ActivityFeedComponent from '@/components/ActivityFeed';
 import ChannelList from '@/components/ChannelList';
+import InfoActivity from '@/components/InfoActivity';
+import ManageUsers from '@/components/ManageUsers';
 import Pagination from '@/components/Pagination';
 import PureAvatar from '@/components/PureAvatar';
 import PureNewReportPopover from '@/components/PureNewReportPopover';
-import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
-import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
-import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { XCircleIcon } from '@heroicons/react/solid';
-import type {
-  ActivityFeed,
-  NormalizedResponseDTO,
-  OrganizationInfoDto,
-  OrganizationMember,
-  PaginatedResponseDto,
-  ReportDTO,
-  ResourcePermissions,
-  TeamMembershipOriginEnum,
-  UserDTO,
-} from '@kyso-io/kyso-model';
-import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum } from '@kyso-io/kyso-model';
-// @ts-ignore
-import ActivityFeedComponent from '@/components/ActivityFeed';
-import InfoActivity from '@/components/InfoActivity';
-import ManageUsers from '@/components/ManageUsers';
+import { PureSpinner } from '@/components/PureSpinner';
 import ReportBadge from '@/components/ReportBadge';
 import { Helper } from '@/helpers/Helper';
 import { checkJwt } from '@/helpers/check-jwt';
@@ -32,19 +15,58 @@ import { HelperPermissions } from '@/helpers/check-permissions';
 import { checkReportAuthors } from '@/helpers/check-report-authors';
 import { useInterval } from '@/hooks/use-interval';
 import type { PaginationParams } from '@/interfaces/pagination-params';
+import type { ReportsFilter } from '@/interfaces/reports-filter';
+import type { IKysoApplicationLayoutProps } from '@/layouts/KysoApplicationLayout';
+import KysoApplicationLayout from '@/layouts/KysoApplicationLayout';
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { Member } from '@/types/member';
 import UnpureDeleteOrganizationDropdown from '@/unpure-components/UnpureDeleteOrganizationDropdown';
+import { XCircleIcon } from '@heroicons/react/solid';
+import type {
+  ActivityFeed,
+  NormalizedResponseDTO,
+  Organization,
+  OrganizationInfoDto,
+  OrganizationMember,
+  PaginatedResponseDto,
+  ReportDTO,
+  ResourcePermissions,
+  SearchUser,
+  TeamMembershipOriginEnum,
+  UserDTO,
+} from '@kyso-io/kyso-model';
+import { GlobalPermissionsEnum, KysoSettingsEnum, OrganizationPermissionsEnum, ReportPermissionsEnum, SearchUserDto } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
+import debounce from 'lodash.debounce';
 import moment from 'moment';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import ReadMoreReact from 'read-more-react';
-import { PureSpinner } from '@/components/PureSpinner';
+import ReportsSearchBar from '../../components/ReportsSearchBar';
 import { usePublicSetting } from '../../hooks/use-public-setting';
 
 const DAYS_ACTIVITY_FEED: number = 14;
 const MAX_ACTIVITY_FEED_ITEMS: number = 15;
 const ACTIVITY_FEED_POOLING_MS: number = 30 * 1000; // 30 seconds
+
+const debouncedPaginatedReports = debounce(
+  async (tkn: string | null, organization: Organization, paginationParams: PaginationParams, cb: (data: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => void) => {
+    try {
+      const api: Api = new Api(tkn, organization.sluglified_name);
+      let query = `organization_id=${organization.id}&skip=${(paginationParams.page - 1) * paginationParams.limit}&limit=${paginationParams.limit}`;
+      if (paginationParams.query) {
+        query += `&${paginationParams.query}`;
+      }
+      const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getPaginatedReports(query);
+      checkReportAuthors(result);
+      cb(result);
+    } catch (e) {
+      cb(null);
+    }
+  },
+  500,
+);
 
 const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSolvedCaptcha }: IKysoApplicationLayoutProps) => {
   const router = useRouter();
@@ -57,7 +79,9 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
     page: 1,
     limit: 10,
     sort: '-created_at',
+    query: '',
   });
+  const [searchUser, setSearchUser] = useState<SearchUser | null | undefined>(undefined);
   const [datetimeActivityFeed, setDatetimeActivityFeed] = useState<Date>(new Date());
   const [hasMore, setHasMore] = useState<boolean>(false);
   const [activityFeed, setActivityFeed] = useState<NormalizedResponseDTO<ActivityFeed[]> | null>(null);
@@ -166,11 +190,18 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
   }, [commonData?.permissions?.organizations, organizationName, join]);
 
   useEffect(() => {
+    if (!commonData.organization || !commonData.user) {
+      return;
+    }
+    getSearchUser();
+  }, [commonData?.organization, commonData?.team, commonData?.user]);
+
+  useEffect(() => {
     if (!commonData.organization) {
       return;
     }
-    getReports();
-  }, [commonData.organization, paginationParams]);
+    getReports(paginationParams);
+  }, [commonData?.organization, paginationParams]);
 
   useEffect(() => {
     if (!commonData.organization) {
@@ -231,20 +262,12 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
 
   useInterval(refreshLastActivityFeed, ACTIVITY_FEED_POOLING_MS);
 
-  const getReports = async () => {
-    try {
-      setRequestingReports(true);
-      const api: Api = new Api(commonData.token);
-      const result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> = await api.getOrganizationReports(
-        commonData.organization!.sluglified_name,
-        paginationParams.page,
-        paginationParams.limit,
-        paginationParams.sort,
-      );
-      setPaginatedResponseDto(result.data);
-      checkReportAuthors(result);
+  const getReports = async (pp: PaginationParams) => {
+    setRequestingReports(true);
+    debouncedPaginatedReports(commonData.token, commonData.organization!, pp, (result: NormalizedResponseDTO<PaginatedResponseDto<ReportDTO>> | null) => {
+      setPaginatedResponseDto(result?.data ? result.data : null);
       setRequestingReports(false);
-    } catch (e) {}
+    });
   };
 
   const getOrganizationsInfo = async () => {
@@ -483,6 +506,39 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
 
   // END ORGANIZATION MEMBERS
 
+  const getSearchUser = async () => {
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
+      const result: NormalizedResponseDTO<SearchUser> = await api.getSearchUser(commonData.organization!.id!);
+      const newPaginationParams: PaginationParams = { ...paginationParams };
+      if (result.data) {
+        setSearchUser(result.data);
+        newPaginationParams.query = result.data.query || '';
+      }
+      setPaginationParams(newPaginationParams);
+      getReports(newPaginationParams);
+    } catch (e) {}
+  };
+
+  const createSearchUser = async (query: string, payload: ReportsFilter[]) => {
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
+      const searchUserDto: SearchUserDto = new SearchUserDto(commonData.organization!.id!, null, query, payload);
+      const result: NormalizedResponseDTO<SearchUser> = await api.createSearchUser(searchUserDto);
+      setSearchUser(result.data);
+    } catch (e) {}
+  };
+
+  const deleteSearchUser = async () => {
+    try {
+      const api: Api = new Api(commonData.token, commonData.organization!.sluglified_name);
+      await api.deleteSearchUser(searchUser!.id!);
+      setSearchUser(null);
+    } catch (e) {}
+  };
+
+  // END SEARCH USER
+
   if (commonData.errorOrganization) {
     return <div className="text-center mt-4">{commonData.errorOrganization}</div>;
   }
@@ -492,7 +548,7 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
       <div className="hidden md:block w-1/6">
         <ChannelList basePath={router.basePath} commonData={commonData} />
       </div>
-      <div className="w-4/6">
+      <div className="w-4/6 flex flex-col space-y-4">
         {invitationError ? (
           <div className="rounded-md bg-red-50 p-4">
             <div className="flex">
@@ -549,13 +605,20 @@ const Index = ({ commonData, showToaster, isCurrentUserVerified, isCurrentUserSo
                 )}
               </div>
             </div>
-            {organizationInfo && (
-              <div className="flex items-center justify-between p-2">
-                <div className="mb-10">
-                  <InfoActivity info={organizationInfo} />
-                </div>
-              </div>
-            )}
+            {organizationInfo && <InfoActivity info={organizationInfo} />}
+            <ReportsSearchBar
+              members={members}
+              onSaveSearch={(query: string | null, payload: ReportsFilter[] | null) => {
+                if (query) {
+                  createSearchUser(query, payload!);
+                } else if (searchUser && !query) {
+                  deleteSearchUser();
+                }
+              }}
+              onFiltersChange={(query: string) => setPaginationParams({ ...paginationParams, page: 1, query: query || '' })}
+              searchUser={searchUser}
+              user={commonData.user}
+            />
             {requestingReports && (
               <div className="text-center">
                 <PureSpinner size={12} />

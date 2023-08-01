@@ -1,17 +1,17 @@
 /* eslint @typescript-eslint/no-explicit-any: "off" */
 import { Menu, Transition } from '@headlessui/react';
-import { CheckIcon, XIcon } from '@heroicons/react/solid';
+import { CheckIcon, FilterIcon, XIcon } from '@heroicons/react/solid';
 import clsx from 'clsx';
 import moment from 'moment';
 import { Calendar } from 'primereact/calendar';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
+import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import type { SearchUser, UserDTO } from '@kyso-io/kyso-model';
 import 'primeicons/primeicons.css'; // icons
 import 'primereact/resources/primereact.min.css'; // core css
 import 'primereact/resources/themes/lara-light-indigo/theme.css'; // theme
-import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
-import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { useClickOutside } from '../hooks/use-click-outside';
 import type { ReportsFilter } from '../interfaces/reports-filter';
 import type { Member } from '../types/member';
@@ -271,7 +271,7 @@ interface ReportsSearchBarProps {
   user: UserDTO | null | undefined;
 }
 
-const ReportsSearchBar = ({ members, onFiltersChange, searchUser, user }: ReportsSearchBarProps) => {
+const ReportsSearchBar = ({ members, onFiltersChange, searchUser, user, onSaveSearch }: ReportsSearchBarProps) => {
   const [selectedFilters, setSelectedFilters] = useState<ReportsFilter[]>([]);
   const [selectedComponent, setSelectedComponent] = useState<any | null>(null);
   const [showMenu, setShowMenu] = useState<boolean>(false);
@@ -839,9 +839,11 @@ const ReportsSearchBar = ({ members, onFiltersChange, searchUser, user }: Report
           )}
         </React.Fragment>
       </Menu>
-      {/* {user && (
-        <FilterIcon onClick={() => onSaveSearch(query, selectedFilters)} className={clsx('cursor-pointer w-6 h-6 ml-2')} />
-      )} */}
+      {user && (
+        <div title="Save filter" onClick={() => onSaveSearch(query, selectedFilters)}>
+          <FilterIcon className={clsx('cursor-pointer w-6 h-6 ml-2')} />
+        </div>
+      )}
     </div>
   );
 };
