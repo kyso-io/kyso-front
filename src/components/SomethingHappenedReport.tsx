@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TeamVisibilityEnum } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
+import type { HttpExceptionDto } from '../interfaces/http-exception.dto';
 import type { CommonData } from '../types/common-data';
 import DelayedContent from './DelayedContent';
 import { SomethingHappened } from './SomethingHappened';
@@ -15,7 +17,7 @@ interface Props {
 
 const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonData, teamVisibility }: Props) => {
   const [requestCreatedSuccessfully, setRequestCreatedSuccessfully] = useState<boolean>(false);
-  const [requestCreatedError, setRequestCreatedError] = useState<boolean>(false);
+  const [requestCreatedError, setRequestCreatedError] = useState<HttpExceptionDto | null>(null);
   const router = useRouter();
   const { organizationName, teamName } = router.query;
 
@@ -46,8 +48,9 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
                             .then(() => {
                               setRequestCreatedSuccessfully(true);
                             })
-                            .catch(() => {
-                              setRequestCreatedError(true);
+                            .catch((e: any) => {
+                              const httpExceptionDto: HttpExceptionDto = e.response.data;
+                              setRequestCreatedError(httpExceptionDto);
                             });
                         }}
                         type="button"
@@ -68,8 +71,9 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
                             .then(() => {
                               setRequestCreatedSuccessfully(true);
                             })
-                            .catch(() => {
-                              setRequestCreatedError(true);
+                            .catch((e: any) => {
+                              const httpExceptionDto: HttpExceptionDto = e.response.data;
+                              setRequestCreatedError(httpExceptionDto);
                             });
                         }}
                         type="button"
@@ -124,9 +128,11 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
                     </svg>
                   </div>
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">Error sending request</h3>
+                    <h3 className="text-sm font-medium text-red-800">Error on request</h3>
                     <div className="mt-2 text-sm text-red-700">
-                      <p>We are sorry, but an error occurred when sending your access request. Please </p>
+                      <p>
+                        We are sorry, but an error occurred when sending your access request: <strong>{requestCreatedError.message}</strong>
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -134,9 +140,7 @@ const SomethingHappenedReport = ({ whatHappened, addRequestAccessButton, commonD
                   <div className="-mx-2 -my-1.5 flex">
                     <button
                       type="button"
-                      onClick={() => {
-                        setRequestCreatedError(false);
-                      }}
+                      onClick={() => setRequestCreatedError(null)}
                       className="rounded-md bg-green-50 px-2 py-1.5 text-sm font-medium text-green-800 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-green-600 focus:ring-offset-2 focus:ring-offset-green-50"
                     >
                       Try again
