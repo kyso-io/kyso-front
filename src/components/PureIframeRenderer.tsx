@@ -25,6 +25,9 @@ const PureIframeRenderer = (props: IPureIFrameRendererProps) => {
   const onInitializedIframe = () => {
     try {
       const myIframe: any = document.getElementById('theframe');
+      if (!myIframe) {
+        return;
+      }
       setTimeout(() => {
         setHeight(`${myIframe.contentWindow.document.body.scrollHeight + 20}px`);
       }, 1500);
