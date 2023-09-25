@@ -1,0 +1,40 @@
+name: Publish artifacts
+
+on:
+  push:
+    tags: 
+      - '*'
+
+jobs:  
+  publish-docker-hub:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Docker build and push
+      env:
+        DOCKER_USER: ${{secrets.DOCKER_USER}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+      run: |
+        BUILD_DATE="$(date -R)"
+        
+        if [ "$GITHUB_REF_NAME" ]; then
+          REF_TYPE="Tag"
+          GIT_REF="$GITHUB_REF_NAME"
+        else
+          REF_TYPE="Branch"
+          GIT_REF="$GITHUB_REF_NAME"
+        fi
+
+        test -d public || mkdir public
+        sed \
+          -e "s%__BUILD_DATE__%$BUILD_DATE%g" \
+          -e "s%__GIT_SHA__%$GITHUB_SHA%g" \
+          -e "s%__REF_TYPE__%$REF_TYPE%g" \
+          -e "s%__GIT_REF__%$GIT_REF%g" \
+          tmpl/v.html > public/v.html
+          
+        docker login -u $DOCKER_USER -p $DOCKER_PASSWORD
+        docker build --file Dockerfile --tag kyso/kyso-front:$GITHUB_REF_NAME .
+        docker build --file Dockerfile --tag kyso/kyso-front:latest .
+        docker push kyso/kyso-front:$GITHUB_REF_NAME
+        docker push kyso/kyso-front:latest    
