@@ -3,8 +3,6 @@ import PureTopTabs from '@/components/PureTopTabs';
 import { TailwindFontSizeEnum } from '@/tailwind/enum/tailwind-font-size.enum';
 import { TailwindHeightSizeEnum } from '@/tailwind/enum/tailwind-height.enum';
 import '@fortawesome/fontawesome-svg-core/styles.css';
-import { faPeriod } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { NormalizedResponseDTO, UserDTO, TokenPermissions } from '@kyso-io/kyso-model';
 import { Api } from '@kyso-io/kyso-store';
 import moment from 'moment';
@@ -184,11 +182,7 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
                 <p className="text-base font-bold leading-relaxed text-gray-700">{userProfile.bio}</p>
               </div>
             )}
-            {userProfile.bio && userProfile.created_at && (
-              <div className="sm:flex hidden items-center text-sm text-gray-500">
-                <FontAwesomeIcon icon={faPeriod} />
-              </div>
-            )}
+            {userProfile.bio && userProfile.created_at && <div className="sm:flex hidden items-center text-sm text-gray-500">•</div>}
             {userProfile.created_at && (
               <div className="mt-2 flex items-center text-sm">
                 <p className="text-base font-light leading-relaxed text-gray-800">Member since: {moment(userProfile.created_at).format('MMM DD,YYYY')}</p>
@@ -201,19 +195,13 @@ const UserProfileInfo = (props: IUserProfileInfo) => {
                 <p className="text-m font-medium text-gray-600 sm:text-l">{userProfile.location}</p>
               </div>
             )}
-            {userProfile.location && (
-              <div className="sm:flex hidden items-center text-sm text-gray-500">
-                <FontAwesomeIcon icon={faPeriod} />
-              </div>
-            )}
+            {userProfile.location && <div className="sm:flex hidden items-center text-sm text-gray-500">•</div>}
             {emailIsVisible && (
               <>
                 <div className="mt-2 flex items-center text-sm">
                   <p className="text-m font-medium text-blue-600 sm:text-l">{userProfile.email}</p>
                 </div>
-                <div className="sm:flex hidden items-center text-sm text-gray-500">
-                  <FontAwesomeIcon icon={faPeriod} />
-                </div>
+                <div className="sm:flex hidden items-center text-sm text-gray-500">•</div>
               </>
             )}
             {userProfile.link && (

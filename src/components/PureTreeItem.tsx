@@ -1,8 +1,7 @@
 import type { FileToRender } from '@/types/file-to-render';
 import { faChrome, faJediOrder, faJs, faLinux, faMarkdown, faPython } from '@fortawesome/free-brands-svg-icons';
-import { faFile, faFileCsv, faFileImage, faFilePdf, faText } from '@fortawesome/pro-light-svg-icons';
-import { faFolder } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faFile, faFileCsv, faFileImage, faFilePdf, faFileText, faFolder } from '@fortawesome/free-solid-svg-icons';
 import { StarIcon } from '@heroicons/react/solid';
 import { Asciidoctor } from '@icons-pack/react-simple-icons';
 import Link from 'next/link';
@@ -54,7 +53,7 @@ const PureTreeItem = (props: IPureTreeItemProps) => {
         icon = faFilePdf;
         break;
       case 'txt':
-        icon = faText;
+        icon = faFileText;
         break;
       case 'png':
       case 'jpg':

@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable tailwindcss/no-contradicting-classname */
 import DelayedContent from '@/components/DelayedContent';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { ArrowSmDownIcon, ClipboardCopyIcon, InformationCircleIcon } from '@heroicons/react/solid';
 import ManageUsers from '@/components/ManageUsers';
 import PureComments from '@/components/PureComments';
 import PureReportHeader from '@/components/PureReportHeader';
@@ -27,10 +30,6 @@ import type { FileToRender } from '@/types/file-to-render';
 import type { Member } from '@/types/member';
 import type { ReportData } from '@/types/report-data';
 import UnpureReportRender from '@/unpure-components/UnpureReportRender';
-import { faGithub } from '@fortawesome/free-brands-svg-icons';
-import { faCircleInfo } from '@fortawesome/pro-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ArrowSmDownIcon, ClipboardCopyIcon, InformationCircleIcon } from '@heroicons/react/solid';
 import type {
   Comment,
   GitCommit,
@@ -53,6 +52,7 @@ import { useRouter } from 'next/router';
 import { Tooltip } from 'primereact/tooltip';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import { faCircleInfo } from '@fortawesome/free-solid-svg-icons';
 import { usePublicSetting } from '../../../../hooks/use-public-setting';
 
 enum Tab {

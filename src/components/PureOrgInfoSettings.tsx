@@ -1,6 +1,6 @@
 import classNames from '@/helpers/class-names';
-import { faCircleCamera } from '@fortawesome/pro-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCamera } from '@fortawesome/free-solid-svg-icons';
 import React, { useRef, useState } from 'react';
 import { PureSpinner } from './PureSpinner';
 
@@ -62,7 +62,7 @@ const PureOrgInfoSettings = ({ isBusy, onCreateOrganization, setError, error }: 
             <div className="mt-1">
               <div className="flex items-center">
                 <div className="inline-block h-24 w-24 shrink-0 overflow-hidden rounded-full mr-5" aria-hidden="true">
-                  {urlLocalFile === null && <FontAwesomeIcon style={{ height: '100px', color: '#bbb' }} icon={faCircleCamera} />}
+                  {urlLocalFile === null && <FontAwesomeIcon style={{ height: '100px', color: '#bbb' }} icon={faCamera} />}
                   {urlLocalFile !== null && <img className="h-full w-full rounded-full" src={urlLocalFile} alt="" />}
                 </div>
                 {urlLocalFile !== null && (
