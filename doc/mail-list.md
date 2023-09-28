@@ -12,6 +12,6 @@ Sergio Talens-Oliag - [sto@mixinet.net](mailto:sto@mixinet.net)
 
 Daniel Andújar - [daniandujar@gmail.com](mailto:daniandujar@gmail.com)
 
-Elena Rueda - [elena.rueda.85@gmail.con] (mailto:elena.rueda.85@gmail.con)
+Elena Rueda - [elena.rueda.85@gmail.con](mailto:elena.rueda.85@gmail.con)
 
 Eoin Murray - [me@eoinmurray.eu](mailto:me@eoinmurray.eu)
