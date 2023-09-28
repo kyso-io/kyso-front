@@ -6,9 +6,9 @@ Francisco Javier Barrena Castillo - [fjbarrena@gmail.com](mailto:fjbarrena@gmail
 
 Kyle O’Shea. 
 
-Helena Domo - helenadm89@gmail.com
+Helena Domo - [helenadm89@gmail.com](mailto:helenadm89@gmail.com)
 
-Sergio Talens-Oliag
+Sergio Talens-Oliag - [sto@mixinet.net](mailto:sto@mixinet.net)
 
 Daniel Andújar - [daniandujar@gmail.com](mailto:daniandujar@gmail.com)
 
