@@ -4,9 +4,9 @@ General support - support@kyso.io
 
 Francisco Javier Barrena Castillo - [fjbarrena@gmail.com](mailto:fjbarrena@gmail.com)
 
-Kyle O’Shea. 
+Kyle O’Shea - [kyle@kyso.io](mailto:kyle@kyso.io)
 
-Helena Domo - [helenadm89@gmail.com](mailto:helenadm89@gmail.com)
+Helena Domo - [helena@kyso.io](mailto:helena@kyso.io)
 
 Sergio Talens-Oliag - [sto@mixinet.net](mailto:sto@mixinet.net)
 
