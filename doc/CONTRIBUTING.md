@@ -4,10 +4,10 @@ Welcome to the Kyso open-source project! We're excited that you're interested in
 
 ## Table of Contents
 
-1. Creating Good Issues
-2. Collaborating effectively
-3. External Rources
-4. Community and Behaviour Expectations
+1. [Creating Good Issues](https://github.com/kyso-io/kyso-front/blob/develop/doc/CONTRIBUTING.md#1-creating-good-issues)
+2. [Collaborating effectively](https://github.com/kyso-io/kyso-front/blob/develop/doc/CONTRIBUTING.md#2-collaborating-effectively)
+3. [External Resources](https://github.com/kyso-io/kyso-front/blob/develop/doc/CONTRIBUTING.md#3-external-resources)
+4. [Community and Behaviour Expectations](https://github.com/kyso-io/kyso-front/blob/develop/doc/CONTRIBUTING.md#4-community-and-behavioral-expectations)
 
 ## 1. Creating Good Issues
 
